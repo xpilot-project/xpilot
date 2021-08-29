@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Resources/Components/Toolbar.qml</file>
+        <file>Resources/Controls/ToolbarButton.qml</file>
+        <file>Resources/Controls/WindowControlButton.qml</file>
+        <file>Resources/Fonts/Roboto-Mono.ttf</file>
+        <file>Resources/Fonts/Ubuntu-Regular.ttf</file>
+        <file>Resources/Icons/AppIcon.ico</file>
+        <file>Resources/Icons/AppIcon.png</file>
+        <file>Resources/Icons/CloseIcon.svg</file>
+        <file>Resources/Icons/MaximizeIcon.svg</file>
+        <file>Resources/Icons/MinimizeIcon.svg</file>
+        <file>Resources/Components/RadioStack.qml</file>
+        <file>Resources/Components/NearbyAtc.qml</file>
+        <file>Resources/Controls/TransponderButton.qml</file>
+        <file>Resources/Controls/RadioStackIndicator.qml</file>
+    </qresource>
+</RCC>
