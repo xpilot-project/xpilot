@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>main.qml</file>
         <file>Resources/Components/Toolbar.qml</file>
         <file>Resources/Controls/ToolbarButton.qml</file>
         <file>Resources/Controls/WindowControlButton.qml</file>
@@ -15,5 +14,6 @@
         <file>Resources/Components/NearbyAtc.qml</file>
         <file>Resources/Controls/TransponderButton.qml</file>
         <file>Resources/Controls/RadioStackIndicator.qml</file>
+        <file>Resources/Views/MainWindow.qml</file>
     </qresource>
 </RCC>

@@ -3,7 +3,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Window 2.15
 import QtQuick.Layouts 1.12
 import QtWebSockets 1.1
-import "./Resources/Components"
+import "../Components"
 
 ApplicationWindow {
     property bool isModeC: false
@@ -54,12 +54,12 @@ ApplicationWindow {
 
     FontLoader {
         id: ubuntuRegular
-        source: "./Resources/Fonts/Ubuntu-Regular.ttf"
+        source: "../Fonts/Ubuntu-Regular.ttf"
     }
 
     FontLoader {
         id: robotoMono
-        source: "./Resources/Fonts/Roboto-Mono.ttf"
+        source: "../Fonts/Roboto-Mono.ttf"
     }
 
     Rectangle {
