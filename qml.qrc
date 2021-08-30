@@ -28,5 +28,7 @@
         <file>Resources/Views/ImportIcaoFpl.qml</file>
         <file>Resources/Controls/CustomTextArea.qml</file>
         <file>Resources/Controls/GrayButton.qml</file>
+        <file>Resources/Controls/Tabs.qml</file>
+        <file>Resources/Controls/TextCommandLine.qml</file>
     </qresource>
 </RCC>
