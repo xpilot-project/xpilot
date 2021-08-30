@@ -38,6 +38,7 @@ Button {
         opacity: button.enabled ? 1 : 0.5
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
+        renderType: Text.NativeRendering
     }
 
     TextMetrics {

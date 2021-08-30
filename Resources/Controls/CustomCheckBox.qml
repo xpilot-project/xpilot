@@ -14,5 +14,6 @@ CheckBox {
         color: "#0164AD"
         verticalAlignment: Text.AlignVCenter
         leftPadding: control.indicator.width + control.spacing
+        renderType: Text.NativeRendering
     }
 }
