@@ -66,7 +66,11 @@ GridLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-
+                    var comp = Qt.createComponent("qrc:/Resources/Views/FlightPlanWindow.qml")
+                    if(comp.status === Component.Ready) {
+                        flightPlanWindow = comp.createObject(mainWindow)
+                        flightPlanWindow.show()
+                    }
                 }
             }
         }

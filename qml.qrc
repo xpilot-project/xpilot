@@ -24,5 +24,6 @@
         <file>Resources/Controls/VolumeSlider.qml</file>
         <file>Resources/Controls/CustomComboBox.qml</file>
         <file>Resources/Controls/PeakLevelControl.qml</file>
+        <file>Resources/Views/FlightPlanWindow.qml</file>
     </qresource>
 </RCC>
