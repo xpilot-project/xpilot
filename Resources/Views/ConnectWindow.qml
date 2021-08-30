@@ -181,7 +181,7 @@ Window {
             Layout.column: 2
             Layout.fillWidth: true
 
-            BlueButton {
+            GrayButton {
                 text: qsTr("Cancel")
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom

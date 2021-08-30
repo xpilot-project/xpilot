@@ -27,5 +27,6 @@
         <file>Resources/Views/FlightPlanWindow.qml</file>
         <file>Resources/Views/ImportIcaoFpl.qml</file>
         <file>Resources/Controls/CustomTextArea.qml</file>
+        <file>Resources/Controls/GrayButton.qml</file>
     </qresource>
 </RCC>

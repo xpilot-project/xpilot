@@ -104,7 +104,7 @@ Window {
         }
     }
 
-    BlueButton {
+    GrayButton {
         id: btnImportIcaoFp
         font.pixelSize: 14
         font.family: ubuntuRegular.name
@@ -609,7 +609,7 @@ Window {
             Layout.row: 6
             Layout.preferredHeight: 50
 
-            BlueButton {
+            GrayButton {
                 id: btnFetchFlightPlan
                 height: 35
                 anchors.left: parent.left
@@ -631,7 +631,7 @@ Window {
             Layout.row: 6
             Layout.preferredHeight: 50
 
-            BlueButton {
+            GrayButton {
                 id: btnClearFlightPlan
                 height: 35
                 anchors.left: parent.left
