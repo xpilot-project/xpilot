@@ -5,6 +5,8 @@ import QtQuick.Controls 2.3
 import "../Controls"
 
 Window {
+    property QtObject importIcaoFpl
+
     id: flightPlanWindow
     width: 700
     height: 485
@@ -31,6 +33,13 @@ Window {
     // @disable-check M16
     onClosing: {
         closeWindow()
+    }
+
+    Connections {
+        target: importIcaoFpl
+        function onCloseWindow() {
+            importIcaoFpl.destroy()
+        }
     }
 
     Timer {
@@ -102,6 +111,18 @@ Window {
         text: "Import ICAO FPL"
         anchors.right: parent.right
         anchors.rightMargin: 15
+
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+                var comp = Qt.createComponent("qrc:/Resources/Views/ImportIcaoFpl.qml")
+                if(comp.status === Component.Ready) {
+                    importIcaoFpl = comp.createObject(flightPlanWindow)
+                    importIcaoFpl.show()
+                }
+            }
+        }
     }
 
     GridLayout {

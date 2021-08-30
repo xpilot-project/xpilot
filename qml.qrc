@@ -25,5 +25,7 @@
         <file>Resources/Controls/CustomComboBox.qml</file>
         <file>Resources/Controls/PeakLevelControl.qml</file>
         <file>Resources/Views/FlightPlanWindow.qml</file>
+        <file>Resources/Views/ImportIcaoFpl.qml</file>
+        <file>Resources/Controls/CustomTextArea.qml</file>
     </qresource>
 </RCC>
