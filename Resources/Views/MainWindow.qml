@@ -8,6 +8,8 @@ import "../Controls"
 
 Window {
     property bool isModeC: false
+    property string wsHost: "localhost"
+    property string wsPort: "9000"
     property QtObject connectWindow
     property QtObject settingsWindow
     property QtObject flightPlanWindow
@@ -43,37 +45,56 @@ Window {
         }
     }
 
+    Component.onCompleted: {
+        wsClient.connect(wsHost, wsPort)
+    }
+
+    Timer {
+        id: timer
+        function setTimeout(cb, delayTime) {
+            timer.interval = delayTime;
+            timer.repeat = false;
+            timer.triggered.connect(cb);
+            timer.triggered.connect(function release () {
+                timer.triggered.disconnect(cb);
+                timer.triggered.disconnect(release);
+            });
+            timer.start();
+        }
+    }
+
     WebSocket {
-        id: socket
-        url: "ws://localhost:9000/ws"
-        active: true
-
-        onBinaryMessageReceived: {
-            console.log(message)
-        }
-
-        onTextMessageReceived: {
-            console.log(message)
-        }
+        id: wsClient
 
         onStatusChanged: {
-            switch(socket.status) {
+            switch(wsClient.status) {
             case WebSocket.Connecting:
-                console.log('connecting...')
+                console.log("Connecting")
                 break;
             case WebSocket.Open:
-                console.log('open')
+                console.log("Opened")
                 break;
             case WebSocket.Closing:
-                console.log('closing')
+                console.log("Closing")
                 break;
             case WebSocket.Closed:
-                console.log('closed')
+                console.log("Closed")
+                timer.setTimeout(function(){wsClient.connect(wsHost, wsPort);},5000)
                 break;
             case WebSocket.Error:
-                console.log('Error: ' + errorString)
+                console.log("Error: " + errorString)
                 break;
             }
+        }
+
+        function connect(host, port) {
+            console.log("Attempting connection...")
+            wsClient.active = false
+            wsClient.url = ""
+            var address = "ws://"
+            address = address.concat(host, ":", port)
+            wsClient.url = address
+            wsClient.active = true
         }
     }
 

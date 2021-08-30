@@ -15,8 +15,8 @@ Window {
     minimumWidth: width
     maximumHeight: height
     maximumWidth: width
-    modality: Qt.ApplicationModal
     flags: Qt.Dialog
+    modality: Qt.ApplicationModal
 
     signal closeWindow()
 
