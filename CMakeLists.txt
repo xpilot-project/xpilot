@@ -34,7 +34,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     )
 else()
     add_executable(xPilot
-#      ${GUI_TYPE}
+      ${GUI_TYPE}
       ${PROJECT_SOURCES}
       xpilot.rc
     )

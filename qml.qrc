@@ -15,5 +15,9 @@
         <file>Resources/Controls/TransponderButton.qml</file>
         <file>Resources/Controls/RadioStackIndicator.qml</file>
         <file>Resources/Views/MainWindow.qml</file>
+        <file>Resources/Views/ConnectWindow.qml</file>
+        <file>Resources/Controls/CustomTextField.qml</file>
+        <file>Resources/Controls/CustomCheckBox.qml</file>
+        <file>Resources/Controls/BlueButton.qml</file>
     </qresource>
 </RCC>

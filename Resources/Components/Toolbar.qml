@@ -2,7 +2,6 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
-import QtGraphicalEffects 1.0
 import "../Controls"
 
 GridLayout {
@@ -22,7 +21,11 @@ GridLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-
+                    var comp = Qt.createComponent("qrc:/Resources/Views/ConnectWindow.qml")
+                    if(comp.status === Component.Ready) {
+                        connectWindow = comp.createObject(mainWindow)
+                        connectWindow.show()
+                    }
                 }
             }
         }
@@ -30,6 +33,20 @@ GridLayout {
         TransponderButton {
             id: btnModeC
             text: "Mode C"
+            MouseArea {
+                preventStealing: true
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    isModeC = !isModeC
+                    btnModeC.isActive = isModeC
+                }
+            }
+        }
+
+        TransponderButton {
+            id: btnIdent
+            text: "Ident"
             MouseArea {
                 preventStealing: true
                 anchors.fill: parent
@@ -88,7 +105,7 @@ GridLayout {
                 cursorShape: Qt.PointingHandCursor
                 hoverEnabled: true
                 onClicked: {
-                    window.close()
+                    mainWindow.close()
                 }
             }
         }
@@ -106,7 +123,7 @@ GridLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    window.visibility = "Minimized"
+                    mainWindow.visibility = "Minimized"
                 }
             }
         }

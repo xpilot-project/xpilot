@@ -2,13 +2,14 @@ import QtQuick 2.15
 import QtQuick.Controls 2.12
 import QtQuick.Window 2.15
 import QtQuick.Layouts 1.12
-import QtWebSockets 1.1
+import QtWebSockets 1.2
 import "../Components"
 
-ApplicationWindow {
+Window {
     property bool isModeC: false
+    property QtObject connectWindow
 
-    id: window
+    id: mainWindow
     title: "xPilot"
     visible: true
     flags: Qt.Window | Qt.FramelessWindowHint
@@ -17,6 +18,13 @@ ApplicationWindow {
     minimumHeight: 250
     minimumWidth: 800
     color: "#272C2E"
+
+    Connections {
+        target: connectWindow
+        function onCloseWindow() {
+            connectWindow.destroy()
+        }
+    }
 
     WebSocket {
         id: socket
@@ -158,18 +166,18 @@ ApplicationWindow {
         }
 
         onDoubleClicked: {
-            if (window.visibility == Window.Maximized) {
-                window.showNormal()
+            if (mainWindow.visibility == Window.Maximized) {
+                mainWindow.showNormal()
             } else {
-                window.showMaximized()
+                mainWindow.showMaximized()
             }
             moveable = false
         }
 
         onPressed: {
             if (mouse.button !== Qt.LeftButton
-                    || window.visibility === Window.Maximized
-                    || window.visibility === Window.FullScreen) {
+                    || mainWindow.visibility === Window.Maximized
+                    || mainWindow.visibility === Window.FullScreen) {
                 return
             }
             activeEdges = 0
@@ -177,17 +185,17 @@ ApplicationWindow {
                 activeEdges |= Qt.LeftEdge
             if (mouseY < gutterSize)
                 activeEdges |= Qt.TopEdge
-            if (mouseX > window.width - gutterSize)
+            if (mouseX > mainWindow.width - gutterSize)
                 activeEdges |= Qt.RightEdge
-            if (mouseY > window.height - gutterSize)
+            if (mouseY > mainWindow.height - gutterSize)
                 activeEdges |= Qt.BottomEdge
 
-            if (window.startSystemMove !== undefined
+            if (mainWindow.startSystemMove != undefined
                     && Qt.platform.os !== "osx") {
                 if (activeEdges == 0) {
-                    window.startSystemMove()
+                    mainWindow.startSystemMove()
                 } else {
-                    window.startSystemResize(activeEdges)
+                    mainWindow.startSystemResize(activeEdges)
                 }
             } else {
                 lastMouseX = mouseX
@@ -203,61 +211,61 @@ ApplicationWindow {
 
         onMouseXChanged: {
             // Use system native move & resize on Qt >= 5.15
-            if (window.startSystemMove !== undefined
+            if (mainWindow.startSystemMove != undefined
                     && Qt.platform.os !== "osx") {
                 return
             }
 
-            if (window.visibility == Window.Maximized
-                    || window.visibility == Window.FullScreen || !pressed) {
+            if (mainWindow.visibility == Window.Maximized
+                    || mainWindow.visibility == Window.FullScreen || !pressed) {
                 return
             }
 
             if (activeEdges & Qt.LeftEdge) {
-                window.width -= (mouseX - lastMouseX)
-                if (window.width < window.minimumWidth) {
-                    window.width = window.minimumWidth
+                mainWindow.width -= (mouseX - lastMouseX)
+                if (mainWindow.width < window.minimumWidth) {
+                    mainWindow.width = window.minimumWidth
                 } else {
-                    window.x += (mouseX - lastMouseX)
+                    mainWindow.x += (mouseX - lastMouseX)
                 }
             } else if (activeEdges & Qt.RightEdge) {
-                window.width += (mouseX - lastMouseX)
-                if (window.width < window.minimumWidth) {
-                    window.width = window.minimumWidth
+                mainWindow.width += (mouseX - lastMouseX)
+                if (mainWindow.width < window.minimumWidth) {
+                    mainWindow.width = window.minimumWidth
                 }
                 lastMouseX = mouseX
             } else if (moveable) {
-                window.x += (mouseX - lastMouseX)
+                mainWindow.x += (mouseX - lastMouseX)
             }
         }
 
         onMouseYChanged: {
             // Use system native move & resize on Qt >= 5.15
-            if (window.startSystemMove !== undefined
+            if (mainWindow.startSystemMove != undefined
                     && Qt.platform.os !== "osx") {
                 return
             }
 
-            if (window.visibility == Window.Maximized
-                    || window.visibility == Window.FullScreen || !pressed) {
+            if (mainWindow.visibility == Window.Maximized
+                    || mainWindow.visibility == Window.FullScreen || !pressed) {
                 return
             }
 
             if (activeEdges & Qt.TopEdge) {
-                window.height -= (mouseY - lastMouseY)
-                if (window.height < window.minimumHeight) {
-                    window.height = window.minimumHeight
+                mainWindow.height -= (mouseY - lastMouseY)
+                if (mainWindow.height < window.minimumHeight) {
+                    mainWindow.height = window.minimumHeight
                 } else {
-                    window.y += (mouseY - lastMouseY)
+                    mainWindow.y += (mouseY - lastMouseY)
                 }
             } else if (activeEdges & Qt.BottomEdge) {
-                window.height += (mouseY - lastMouseY)
-                if (window.height < window.minimumHeight) {
-                    window.height = window.minimumHeight
+                mainWindow.height += (mouseY - lastMouseY)
+                if (mainWindow.height < window.minimumHeight) {
+                    mainWindow.height = window.minimumHeight
                 }
                 lastMouseY = mouseY
             } else if (moveable) {
-                window.y += (mouseY - lastMouseY)
+                mainWindow.y += (mouseY - lastMouseY)
             }
         }
     }

@@ -37,7 +37,6 @@ Button {
         opacity: button.enabled ? 1 : 0.5
         font.styleName: Font.Normal
         font.family: robotoMono.name
-        renderType: Text.NativeRendering
     }
 
     TextMetrics {
