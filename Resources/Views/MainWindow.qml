@@ -79,7 +79,7 @@ Window {
                 break;
             case WebSocket.Closed:
                 console.log("Closed")
-                timer.setTimeout(function(){wsClient.connect(wsHost, wsPort);},5000)
+                timer.setTimeout(function(){wsClient.connect(wsHost, wsPort);},1000)
                 break;
             case WebSocket.Error:
                 console.log("Error: " + errorString)
