@@ -4,10 +4,6 @@ import QtQuick.Controls 2.12
 Button {
     id: btn
     height: 35
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.rightMargin: 0
-    anchors.leftMargin: 0
     contentItem: Text {
         color: '#ffffff'
         text: btn.text

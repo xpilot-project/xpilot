@@ -95,6 +95,15 @@ Window {
         }
     }
 
+    BlueButton {
+        id: btnImportIcaoFp
+        font.pixelSize: 14
+        font.family: ubuntuRegular.name
+        text: "Import ICAO FPL"
+        anchors.right: parent.right
+        anchors.rightMargin: 15
+    }
+
     GridLayout {
         id: gridLayout
         anchors.left: parent.left
