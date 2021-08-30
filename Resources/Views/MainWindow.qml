@@ -46,7 +46,7 @@ Window {
     }
 
     Component.onCompleted: {
-        wsClient.connect(wsHost, wsPort)
+//        wsClient.connect(wsHost, wsPort)
     }
 
     Timer {

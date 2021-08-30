@@ -18,7 +18,7 @@ Window {
     modality: Qt.ApplicationModal
     flags: Qt.Dialog
 
-    signal closeWindow()
+    signal importFlightPlan(string flightPlan)
 
     GridLayout {
         anchors.fill: parent
@@ -91,7 +91,7 @@ Window {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        closeWindow()
+                        importFlightPlan(txtFlightPlan.text)
                     }
                 }
             }

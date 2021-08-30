@@ -37,8 +37,27 @@ Window {
 
     Connections {
         target: importIcaoFpl
-        function onCloseWindow() {
+        function onImportFlightPlan(flightPlan) {
+            parseIcaoFpl(flightPlan)
             importIcaoFpl.destroy()
+        }
+    }
+
+    function parseIcaoFpl(fp) {
+        var patt = new RegExp(/\(FPL-([A-Z0-9]{1,7})-([IVYZ])([SNGMX])[\r\n]*-([A-Z0-9]{2,4})\/([JHML])\-([A-Z0-9]+)\/([A-Z0-9]{2,3})[\r\n]*-([A-Z0-9]{4})([0-9]{4})[\r\n]*-([KN])([0-9]{4})F([0-9]{3})((.|\n)*)-([A-Z0-9]{4})([\d]{2})([\d]{2})\s?([A-Z]{4})?[\r\n]*-?((.|\n|\r)*)\)/)
+        var match = fp.match(patt)
+        if(match) {
+            flightRulesCombo.currentIndex = (match[2] === "I" || match[2] === "Y") ? 0 : 1
+            txtDeparture.text = match[8].toUpperCase().trim()
+            txtArrival.text = match[15].toUpperCase().trim()
+            txtAlternate.text = match[18].toUpperCase().trim()
+            txtOffBlock.text = match[9].trim()
+            txtEnrouteHours.text = parseInt(match[16]) > 0 ? parseInt(match[16]).toString() : ""
+            txtEnrouteMinutes.text = parseInt(match[17]) > 0 ? parseInt(match[17]).toString() : ""
+            txtRoute.text = match[13].replace(/\s+/g, ' ').toUpperCase().trim()
+            txtRemarks.text = match[19].replace(/\s+/g, ' ').toUpperCase().trim()
+            txtAirspeed.text = parseInt(match[11]).toString()
+            txtAltitude.text = (parseInt(match[12]) * 100).toString()
         }
     }
 
@@ -159,7 +178,7 @@ Window {
             }
 
             CustomComboBox {
-                id: clientComboBox
+                id: flightRulesCombo
                 y: 20
                 height: 28
                 anchors.left: parent.left
@@ -189,7 +208,7 @@ Window {
             }
 
             CustomTextField {
-                id: clientTextField
+                id: txtDeparture
                 y: 20
                 placeholderText: "EGLL"
                 onTextChanged: {
@@ -220,7 +239,7 @@ Window {
             }
 
             CustomTextField {
-                id: clientTextField1
+                id: txtArrival
                 y: 20
                 placeholderText: "KSFO"
                 onTextChanged: {
@@ -242,7 +261,6 @@ Window {
             Layout.preferredWidth: 50
 
             Text {
-                id: text5
                 color: "#333333"
                 text: qsTr("Alternate")
                 font.pixelSize: 13
@@ -251,7 +269,7 @@ Window {
             }
 
             CustomTextField {
-                id: clientTextField2
+                id: txtAlternate
                 y: 20
                 placeholderText: "KLAX"
                 onTextChanged: {
@@ -273,7 +291,6 @@ Window {
             Layout.preferredWidth: 50
 
             Text {
-                id: text6
                 color: "#333333"
                 text: qsTr("Off Block (UTC)")
                 font.pixelSize: 13
@@ -282,7 +299,7 @@ Window {
             }
 
             CustomTextField {
-                id: clientTextField3
+                id: txtOffBlock
                 y: 20
                 placeholderText: "1650"
                 validator: RegularExpressionValidator {
@@ -301,7 +318,6 @@ Window {
             Layout.preferredWidth: 50
 
             Text {
-                id: text7
                 color: "#333333"
                 text: qsTr("Time Enroute")
                 font.pixelSize: 13
@@ -310,7 +326,7 @@ Window {
             }
 
             CustomTextField {
-                id: clientTextField10
+                id: txtEnrouteHours
                 y: 20
                 width: 105
                 height: 30
@@ -323,7 +339,7 @@ Window {
             }
 
             CustomTextField {
-                id: clientTextField11
+                id: txtEnrouteMinutes
                 y: 20
                 height: 30
                 anchors.left: parent.left
@@ -345,7 +361,6 @@ Window {
             Layout.preferredWidth: 50
 
             Text {
-                id: text8
                 color: "#333333"
                 text: qsTr("Airspeed")
                 font.pixelSize: 13
@@ -354,7 +369,7 @@ Window {
             }
 
             CustomTextField {
-                id: clientTextField6
+                id: txtAirspeed
                 y: 20
                 placeholderText: "494"
                 validator: RegularExpressionValidator {
@@ -373,7 +388,6 @@ Window {
             Layout.preferredWidth: 50
 
             Text {
-                id: text9
                 color: "#333333"
                 text: qsTr("Altitude (ft)")
                 font.pixelSize: 13
@@ -382,7 +396,7 @@ Window {
             }
 
             CustomTextField {
-                id: clientTextField7
+                id: txtAltitude
                 y: 20
                 placeholderText: "38000"
                 validator: RegularExpressionValidator {
@@ -401,7 +415,6 @@ Window {
             Layout.preferredWidth: 50
 
             Text {
-                id: text10
                 color: "#333333"
                 text: qsTr("Fuel Available")
                 font.pixelSize: 13
@@ -410,7 +423,7 @@ Window {
             }
 
             CustomTextField {
-                id: clientTextField8
+                id: txtFuelHours
                 y: 20
                 width: 105
                 height: 30
@@ -423,7 +436,7 @@ Window {
             }
 
             CustomTextField {
-                id: clientTextField9
+                id: txtFuelMinutes
                 y: 20
                 height: 30
                 anchors.left: parent.left
@@ -438,7 +451,7 @@ Window {
         Item {
             id: route
             Text {
-                id: text11
+                id: routeLabel
                 color: "#333333"
                 text: qsTr("Route")
                 renderType: Text.NativeRendering
@@ -447,10 +460,10 @@ Window {
             }
 
             TextArea {
-                id: textArea1
+                id: txtRoute
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.top: text11.bottom
+                anchors.top: routeLabel.bottom
                 anchors.bottom: parent.bottom
                 font.pixelSize: 13
                 font.capitalization: Font.AllUppercase
@@ -461,8 +474,9 @@ Window {
                 padding: 5
                 anchors.topMargin: 5
                 renderType: Text.NativeRendering
+                wrapMode: TextEdit.WordWrap
                 background: Rectangle {
-                    border.color: textArea1.focus ? '#565E64' : '#babfc4'
+                    border.color: txtRoute.focus ? '#565E64' : '#babfc4'
                 }
             }
             Layout.column: 0
@@ -477,7 +491,7 @@ Window {
         Item {
             id: remarks
             Text {
-                id: text12
+                id: remarksLabel
                 color: "#333333"
                 text: qsTr("Remarks")
                 font.pixelSize: 13
@@ -486,10 +500,10 @@ Window {
             }
 
             TextArea {
-                id: textArea
+                id: txtRemarks
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.top: text12.bottom
+                anchors.top: remarksLabel.bottom
                 anchors.bottom: parent.bottom
                 font.pixelSize: 13
                 leftPadding: 5
@@ -500,8 +514,9 @@ Window {
                 selectionColor: "#0164AD"
                 selectedTextColor: "#ffffff"
                 renderType: Text.NativeRendering
+                wrapMode: TextEdit.WordWrap
                 background: Rectangle {
-                    border.color: textArea.focus ? '#565E64' : '#babfc4'
+                    border.color: txtRemarks.focus ? '#565E64' : '#babfc4'
                 }
             }
             Layout.column: 3
@@ -516,7 +531,7 @@ Window {
         Item {
             id: equipment
             Text {
-                id: text13
+                id: equipmentLabel
                 color: "#333333"
                 text: qsTr("Equipment")
                 renderType: Text.NativeRendering
@@ -528,11 +543,32 @@ Window {
                 id: clientComboBox3
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.top: text13.bottom
+                anchors.top: equipmentLabel.bottom
                 anchors.rightMargin: 0
                 anchors.topMargin: 5
                 anchors.leftMargin: 0
-                model: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+                textRole: "text"
+                valueRole: "value"
+                model: [
+                    {value: "X", text: "/X - No Transponder (No DME)"},
+                    {value: "T", text: "/T - Transponder with no Mode C (No DME)"},
+                    {value: "U", text: "/U - Transponder with Mode C (No DME)"},
+                    {value: "D", text: "/D - No Transponder (DME)"},
+                    {value: "B", text: "/B - Transponder with no Mode C (DME)"},
+                    {value: "A", text: "/A - Transponder with Mode C (DME)"},
+                    {value: "M", text: "/M - No Transponder (TACAN)"},
+                    {value: "N", text: "/N - Transponder with no Mode C (TACAN)"},
+                    {value: "P", text: "/P - Transponder with Mode C (TACAN)"},
+                    {value: "Y", text: "/Y - RNAV, No GNSS, No Transponder"},
+                    {value: "C", text: "/C - RNAV, No GNSS, Transponder with No Mode C"},
+                    {value: "I", text: "/I - RNAV, No GNSS, Transponder with Mode C"},
+                    {value: "V", text: "/V - GNSS, No Transponder"},
+                    {value: "S", text: "/S - GNSS, Transponder with No Mode C"},
+                    {value: "G", text: "/G - GNSS, Transponder with Mode C"},
+                    {value: "W", text: "/W - No GNSS, No RNAV, Transponder with Mode C (RVSM)"},
+                    {value: "Z", text: "/Z - RNAV, No GNSS, Transponder with Mode C (RVSM)"},
+                    {value: "L", text: "/L - GNSS, Transponder with Mode C (RVSM)"},
+                ]
             }
             Layout.column: 0
             Layout.columnSpan: 3
