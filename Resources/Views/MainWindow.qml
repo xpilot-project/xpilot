@@ -8,6 +8,7 @@ import "../Components"
 Window {
     property bool isModeC: false
     property QtObject connectWindow
+    property QtObject settingsWindow
 
     id: mainWindow
     title: "xPilot"
@@ -23,6 +24,13 @@ Window {
         target: connectWindow
         function onCloseWindow() {
             connectWindow.destroy()
+        }
+    }
+
+    Connections {
+        target: settingsWindow
+        function onCloseWindow() {
+            settingsWindow.destroy()
         }
     }
 

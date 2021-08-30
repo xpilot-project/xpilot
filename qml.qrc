@@ -19,5 +19,10 @@
         <file>Resources/Controls/CustomTextField.qml</file>
         <file>Resources/Controls/CustomCheckBox.qml</file>
         <file>Resources/Controls/BlueButton.qml</file>
+        <file>Resources/Views/SettingsWindow.qml</file>
+        <file>Resources/Controls/CustomSwitch.qml</file>
+        <file>Resources/Controls/VolumeSlider.qml</file>
+        <file>Resources/Controls/CustomComboBox.qml</file>
+        <file>Resources/Controls/PeakLevelControl.qml</file>
     </qresource>
 </RCC>

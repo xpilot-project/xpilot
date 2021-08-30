@@ -79,7 +79,11 @@ GridLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-
+                    var comp = Qt.createComponent("qrc:/Resources/Views/SettingsWindow.qml")
+                    if(comp.status === Component.Ready) {
+                        settingsWindow = comp.createObject(mainWindow)
+                        settingsWindow.show()
+                    }
                 }
             }
         }
