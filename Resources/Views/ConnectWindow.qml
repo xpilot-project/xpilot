@@ -16,24 +16,16 @@ Window {
     maximumHeight: height
     maximumWidth: width
     modality: Qt.ApplicationModal
-    flags: Qt.FramelessWindowHint
+    flags: Qt.Dialog
 
     signal closeWindow()
-
-    Rectangle {
-        id: windowFrame
-        anchors.fill: parent
-        color: "transparent"
-        border.color: Qt.platform.os === 'osx' ? 'transparent' : '#000000'
-        z: 200
-    }
 
     GridLayout {
         anchors.fill: parent
         anchors.rightMargin: 30
         anchors.leftMargin: 30
         anchors.bottomMargin: 30
-        anchors.topMargin: 30
+        anchors.topMargin: 15
         columns: 3
         rows: 3
 
