@@ -163,8 +163,12 @@ Window {
                 text: qsTr("Connect to VATSIM")
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
                 anchors.bottomMargin: 0
                 anchors.topMargin: 0
+                anchors.rightMargin: 0
+                anchors.leftMargin: 0
                 font.pixelSize: 13
                 MouseArea {
                     anchors.fill: parent
@@ -189,8 +193,12 @@ Window {
                 text: qsTr("Cancel")
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
                 anchors.bottomMargin: 0
                 anchors.topMargin: 0
+                anchors.rightMargin: 0
+                anchors.leftMargin: 0
                 font.pixelSize: 13
                 MouseArea {
                     anchors.fill: parent
