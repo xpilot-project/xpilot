@@ -8,7 +8,7 @@ Window {
     property QtObject importIcaoFpl
 
     id: flightPlanWindow
-    width: 700
+    width: 760
     height: 485
     minimumHeight: height
     minimumWidth: width
@@ -58,6 +58,103 @@ Window {
             txtRemarks.text = match[19].replace(/\s+/g, ' ').toUpperCase().trim()
             txtAirspeed.text = parseInt(match[11]).toString()
             txtAltitude.text = (parseInt(match[12]) * 100).toString()
+
+            var field10a = match[6]
+            var field10b = match[7]
+
+            icaoToFaa(field10a, field10b)
+        }
+    }
+
+    function icaoToFaa(field10a, field10b) {
+        var w = field10a.match('W')
+        var g = field10a.match('G');
+        var rcix = field10a.match('R|C|I|X');
+        var d = field10a.match('D');
+        var t = field10a.match('T');
+        var none = !(w || g || rcix || d || t);
+
+        var cpsehl = field10b.match('C|P|S|E|H|L');
+        var axi = field10b.match('A|X|I');
+        var n = field10b.match('N');
+
+        var idx;
+
+        if (g && w && cpsehl) {
+            idx = equipmentCombo.indexOfValue('L')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (rcix && w && cpsehl) {
+            idx = equipmentCombo.indexOfValue('Z')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (w && cpsehl) {
+            idx = equipmentCombo.indexOfValue('W')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (g && cpsehl) {
+            idx = equipmentCombo.indexOfValue('G')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (g && axi) {
+            idx = equipmentCombo.indexOfValue('S')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (g && n) {
+            idx = equipmentCombo.indexOfValue('V')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (rcix && cpsehl) {
+            idx = equipmentCombo.indexOfValue('I')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (rcix && axi) {
+            idx = equipmentCombo.indexOfValue('C')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (rcix && n) {
+            idx = equipmentCombo.indexOfValue('Y')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (d && cpsehl) {
+            idx = equipmentCombo.indexOfValue('A')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (d && axi) {
+            idx = equipmentCombo.indexOfValue('B')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (d && n) {
+            idx = equipmentCombo.indexOfValue('D')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (t && cpsehl) {
+            idx = equipmentCombo.indexOfValue('P')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (t && axi) {
+            idx = equipmentCombo.indexOfValue('N')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (t && n) {
+            idx = equipmentCombo.indexOfValue('M')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (none && cpsehl) {
+            idx = equipmentCombo.indexOfValue('U')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (none && axi) {
+            idx = equipmentCombo.indexOfValue('T')
+            equipmentCombo.currentIndex = idx
+        }
+        else if (none && n) {
+            idx = equipmentCombo.indexOfValue('X')
+            equipmentCombo.currentIndex = idx
+        }
+        else {
+            idx = equipmentCombo.indexOfValue('X')
+            equipmentCombo.currentIndex = idx
         }
     }
 
@@ -540,7 +637,7 @@ Window {
             }
 
             CustomComboBox {
-                id: clientComboBox3
+                id: equipmentCombo
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: equipmentLabel.bottom

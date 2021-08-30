@@ -31,7 +31,7 @@ ComboBox {
             renderType: Text.NativeRendering
         }
         background: Rectangle {
-            color: delegate.hovered ? '#0164AD' : 'transparent'
+            color: delegate.hovered ? '#6c757d' : 'transparent'
         }
     }
     contentItem: Text {
@@ -57,7 +57,7 @@ ComboBox {
             ScrollBar.vertical: ScrollBar{}
         }
         background: Rectangle {
-            border.color: '#333333'
+            border.color: '#000000'
         }
     }
     Component.onCompleted: currentIndex = indexOfValue(currentIndex)
