@@ -174,39 +174,43 @@ Window {
             Layout.column: 1
             color: "#141618"
 
+            ListModel {
+                id: tabModel
+                ListElement { name: "Messages"; disposable: true }
+                ListElement { name: "Notes"; disposable: false }
+            }
+
             Tabs {
                 id: tabs
-                z: 5
                 anchors.topMargin: 15
-                model: ['Messages', 'Notes']
-                currentIndex: 0
+                model: tabModel
             }
 
-            Item {
-                id: tabMessages
-                visible: tabs.currentIndex == 0
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: tabs.bottom
-                anchors.bottom: parent.bottom
-                anchors.rightMargin: 15
-                anchors.leftMargin: 15
-                anchors.bottomMargin: 15
-                anchors.topMargin: 0
-                clip: true
-                Rectangle {
-                    color: 'transparent'
-                    anchors.fill: parent
-                    anchors.topMargin: -border.width
-                    border.width: 1
-                    border.color: "#5c5c5c"
+//            Item {
+//                id: tabMessages
+//                visible: tabs.currentIndex == 0
+//                anchors.left: parent.left
+//                anchors.right: parent.right
+//                anchors.top: tabs.bottom
+//                anchors.bottom: parent.bottom
+//                anchors.rightMargin: 15
+//                anchors.leftMargin: 15
+//                anchors.bottomMargin: 15
+//                anchors.topMargin: 0
+//                clip: true
+//                Rectangle {
+//                    color: 'transparent'
+//                    anchors.fill: parent
+//                    anchors.topMargin: -border.width
+//                    border.width: 1
+//                    border.color: "#5c5c5c"
 
-                    TextCommandLine {
-                        id: tabMessagesTextCommandLine
-                        anchors.fill: parent
-                    }
-                }
-            }
+//                    TextCommandLine {
+//                        id: tabMessagesTextCommandLine
+//                        anchors.fill: parent
+//                    }
+//                }
+//            }
         }
     }
 

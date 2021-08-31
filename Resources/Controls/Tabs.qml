@@ -2,12 +2,11 @@ import QtQuick 2.12
 
 ListView {
     id: root
-    model: []
     currentIndex: 0
     orientation: ListView.Horizontal
     interactive: false
     clip: true
-    height: 33
+    height: 30
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: parent.top
@@ -17,7 +16,7 @@ ListView {
     spacing: -1
 
     delegate: Item {
-        width: t_metrics.advanceWidth + 25
+        width: disposable ? metrics.advanceWidth + 45 :  metrics.advanceWidth + 25
         height: root.height
         y: root.height - height
 
@@ -35,22 +34,48 @@ ListView {
 
             Text {
                 id: label
-                text: modelData
+                text: name
                 font.pixelSize: 13
                 font.family: robotoMono.name
                 renderType: Text.NativeRendering
-                anchors.centerIn: parent
-                color: currentIndex == index? '#ffffff': '#42494e'
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignLeft
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                rightPadding: disposable ? 15 : 0
+                height: 20
+                color: currentIndex == index ? '#ffffff' : '#42494e'
+            }
+
+            WindowControlButton {
+                id: btnClose
+                visible: disposable
+                anchors.right: parent.right
+                icon.source: "../Icons/CloseIcon.svg"
+                icon.color: "transparent"
+                icon.width: 16
+                icon.height: 16
+                onHoveredChanged: hovered ? icon.color = "white" : icon.color = "transparent"
+
+                MouseArea {
+                    id: btnCloseMouseArea
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    onClicked: {
+
+                    }
+                }
             }
 
             TextMetrics {
-                id: t_metrics
+                id: metrics
                 font: label.font
                 text: label.text
             }
 
             Rectangle {
-                visible: currentIndex == index;
+                visible: currentIndex == index
                 anchors {
                     bottom: parent.bottom
                     right: parent.left
@@ -61,7 +86,7 @@ ListView {
             }
 
             Rectangle {
-                visible: currentIndex == index;
+                visible: currentIndex == index
                 anchors {
                     bottom: parent.bottom
                     left: parent.right
@@ -75,7 +100,7 @@ ListView {
                 id: mouseArea
                 anchors.fill: parent
                 enabled: currentIndex != index
-                onClicked:  currentIndex = index
+                onClicked: currentIndex = index
                 cursorShape: Qt.PointingHandCursor
                 preventStealing: true
             }
