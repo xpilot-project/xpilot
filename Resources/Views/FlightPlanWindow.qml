@@ -43,10 +43,28 @@ Window {
         }
     }
 
+    function clearFlightPlan() {
+        flightRulesCombo.currentIndex = -1
+        txtDeparture.text = ""
+        txtArrival.text = ""
+        txtAlternate.text = ""
+        txtOffBlock.text = ""
+        txtEnrouteHours.text = ""
+        txtEnrouteMinutes.text = ""
+        txtRoute.text = ""
+        txtRemarks.text = ""
+        txtAirspeed.text = ""
+        txtAltitude.text = ""
+        equipmentCombo.currentIndex = -1
+        voiceCapability.currentIndex = -1
+    }
+
     function parseIcaoFpl(fp) {
-        var patt = new RegExp(/\(FPL-([A-Z0-9]{1,7})-([IVYZ])([SNGMX])[\r\n]*-([A-Z0-9]{2,4})\/([JHML])\-([A-Z0-9]+)\/([A-Z0-9]{2,3})[\r\n]*-([A-Z0-9]{4})([0-9]{4})[\r\n]*-([KN])([0-9]{4})F([0-9]{3})((.|\n)*)-([A-Z0-9]{4})([\d]{2})([\d]{2})\s?([A-Z]{4})?[\r\n]*-?((.|\n|\r)*)\)/)
+        var patt = new RegExp(/\(FPL-([A-Z0-9]{1,7})-([IVYZ])([SNGMX])[\r\n]*-([A-Z0-9]{2,4})\/([JHML])\-([A-Z0-9]+)\/([A-Z0-9]{1,3})[\r\n]*-([A-Z0-9]{4})([0-9]{4})[\r\n]*-([KN])([0-9]{4})F([0-9]{3})((.|\n)*)-([A-Z0-9]{4})([\d]{2})([\d]{2})\s?([A-Z]{4})?[\r\n]*-?((.|\n|\r)*)\)/)
         var match = fp.match(patt)
         if(match) {
+            clearFlightPlan();
+
             flightRulesCombo.currentIndex = (match[2] === "I" || match[2] === "Y") ? 0 : 1
             txtDeparture.text = match[8].toUpperCase().trim()
             txtArrival.text = match[15].toUpperCase().trim()
@@ -169,7 +187,7 @@ Window {
         id: header
         x: 0
         y: 0
-        width: 700
+        width: 760
         height: 50
 
         Text {
@@ -429,7 +447,7 @@ Window {
                 height: 30
                 anchors.right: parent.right
                 placeholderText: "hh"
-                anchors.rightMargin: 120
+                anchors.rightMargin: 130
                 validator: RegularExpressionValidator {
                     regularExpression: /[0-9]{2}/
                 }
@@ -441,7 +459,7 @@ Window {
                 height: 30
                 anchors.left: parent.left
                 placeholderText: "mm"
-                anchors.leftMargin: 120
+                anchors.leftMargin: 130
                 validator: RegularExpressionValidator {
                     regularExpression: /[0-9]{2}/
                 }
@@ -526,7 +544,7 @@ Window {
                 height: 30
                 anchors.right: parent.right
                 placeholderText: "hh"
-                anchors.rightMargin: 120
+                anchors.rightMargin: 130
                 validator: RegularExpressionValidator {
                     regularExpression: /[0-9]{2}/
                 }
@@ -538,7 +556,7 @@ Window {
                 height: 30
                 anchors.left: parent.left
                 placeholderText: "mm"
-                anchors.leftMargin: 120
+                anchors.leftMargin: 130
                 validator: RegularExpressionValidator {
                     regularExpression: /[0-9]{2}/
                 }
@@ -676,7 +694,13 @@ Window {
         }
 
         Item {
-            id: voiceCapability
+            Layout.column: 3
+            Layout.columnSpan: 3
+            Layout.fillWidth: true
+            Layout.row: 5
+            Layout.preferredWidth: 50
+            Layout.preferredHeight: 50
+
             Text {
                 id: text14
                 color: "#333333"
@@ -687,7 +711,7 @@ Window {
             }
 
             CustomComboBox {
-                id: clientComboBox2
+                id: voiceCapability
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: text14.bottom
@@ -702,12 +726,6 @@ Window {
                     { value: "T", text: "Text Only" }
                 ]
             }
-            Layout.column: 3
-            Layout.columnSpan: 3
-            Layout.fillWidth: true
-            Layout.row: 5
-            Layout.preferredWidth: 50
-            Layout.preferredHeight: 50
         }
 
         Item {
@@ -756,7 +774,6 @@ Window {
         }
 
         Item {
-            id: clearFlightPlan
             Layout.column: 4
             Layout.columnSpan: 2
             Layout.preferredWidth: 50
@@ -774,6 +791,14 @@ Window {
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
                 text: "Clear Flight Plan"
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        clearFlightPlan()
+                    }
+                }
             }
         }
     }
