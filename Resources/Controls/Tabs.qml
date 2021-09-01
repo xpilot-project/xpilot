@@ -85,7 +85,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.leftMargin: 6
                     text: styleData.title
-                    color: styleData.selected ? "black" : "white"
+                    color: styleData.selected ? "white" : frameColor
                 }
 
                 WindowControlButton {
