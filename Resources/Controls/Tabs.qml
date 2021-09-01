@@ -33,14 +33,14 @@ Item {
 
             tab: Rectangle {
                 id: tabRect
-                implicitWidth: Math.max(text.width + 24, 80)
+                implicitWidth: text.width + 50
                 implicitHeight: 30
                 color: "transparent"
 
                 Rectangle {
                     id: topRect
                     anchors.fill: parent
-                    radius: 8
+                    radius: 7
                     color: fillColor
                     border.width: 1
                     border.color: frameColor
@@ -83,9 +83,10 @@ Item {
                     id: text
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: 6
+                    anchors.leftMargin: 10
                     text: styleData.title
                     color: styleData.selected ? "white" : frameColor
+                    font.family: robotoMono.name
                 }
 
                 WindowControlButton {
