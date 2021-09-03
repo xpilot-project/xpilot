@@ -48,20 +48,21 @@ Window {
     }
 
     Component.onCompleted: {
+
         //        wsClient.connect(wsHost, wsPort)
     }
 
     Timer {
         id: timer
         function setTimeout(cb, delayTime) {
-            timer.interval = delayTime;
-            timer.repeat = false;
-            timer.triggered.connect(cb);
-            timer.triggered.connect(function release () {
-                timer.triggered.disconnect(cb);
-                timer.triggered.disconnect(release);
-            });
-            timer.start();
+            timer.interval = delayTime
+            timer.repeat = false
+            timer.triggered.connect(cb)
+            timer.triggered.connect(function release() {
+                timer.triggered.disconnect(cb)
+                timer.triggered.disconnect(release)
+            })
+            timer.start()
         }
     }
 
@@ -69,23 +70,25 @@ Window {
         id: wsClient
 
         onStatusChanged: {
-            switch(wsClient.status) {
+            switch (wsClient.status) {
             case WebSocket.Connecting:
                 console.log("Connecting")
-                break;
+                break
             case WebSocket.Open:
                 console.log("Opened")
-                break;
+                break
             case WebSocket.Closing:
                 console.log("Closing")
-                break;
+                break
             case WebSocket.Closed:
                 console.log("Closed")
-                timer.setTimeout(function(){wsClient.connect(wsHost, wsPort);},1000)
-                break;
+                timer.setTimeout(function () {
+                    wsClient.connect(wsHost, wsPort)
+                }, 1000)
+                break
             case WebSocket.Error:
                 console.log("Error: " + errorString)
-                break;
+                break
             }
         }
 
@@ -150,9 +153,7 @@ Window {
             Layout.preferredHeight: 75
             Layout.fillWidth: true
 
-            Toolbar {
-
-            }
+            Toolbar {}
         }
 
         Rectangle {
@@ -178,28 +179,44 @@ Window {
 
             ListModel {
                 id: tabModel
-                ListElement { title: "Messages" }
-                ListElement { title: "Notes" }
-                ListElement { title: "MSP_56_CTR"; disposable: true }
-                ListElement { title: "LAX_04_CTR"; disposable: true }
-                ListElement { title: "AAL556A"; disposable: true }
+                ListElement {
+                    title: "Messages"
+                }
+                ListElement {
+                    title: "Notes"
+                }
+                ListElement {
+                    title: "MSP_56_CTR"
+                    disposable: true
+                }
+                ListElement {
+                    title: "LAX_04_CTR"
+                    disposable: true
+                }
+                ListElement {
+                    title: "AAL556A"
+                    disposable: true
+                }
             }
 
-            Component{
-
+            Component {
                 id: tabDelegate
-
                 Item {
+                    id: tab
+
                     property color frameColor: "#5C5C5C"
                     property color fillColor: "#141618"
 
-                    implicitWidth: text.width + 50
+                    property var view: ListView.view
+                    property int itemIndex: index
+
+                    implicitWidth: disposable ? text.width + 45 : text.width + 20
                     implicitHeight: 30
 
                     Rectangle {
                         id: topRect
                         anchors.fill: parent
-                        radius: 7
+                        radius: 8
                         color: fillColor
                         border.width: 1
                         border.color: frameColor
@@ -216,6 +233,7 @@ Window {
                         border.color: frameColor
                     }
 
+                    // remove weird line that runs through the middle of the tab
                     Rectangle {
                         anchors {
                             fill: bottomRect
@@ -226,13 +244,24 @@ Window {
                         color: fillColor
                     }
 
+                    // hides bottom border on active tab
+                    Rectangle {
+                        visible: itemIndex === view.currentIndex
+                        width: tab.width - 2
+                        height: 2
+                        color: fillColor
+                        y: parent.height - 2
+                        x: (tab.width - tab.width) + 1
+                        z: 100
+                    }
+
                     Text {
                         id: text
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.leftMargin: 10
                         text: title
-                        color: "white"
+                        color: itemIndex === view.currentIndex ? "white" : frameColor
                         font.family: robotoMono.name
                         font.pixelSize: 13
                     }
@@ -247,12 +276,20 @@ Window {
                         icon.color: "transparent"
                         icon.width: 18
                         icon.height: 18
-                        onHoveredChanged: hovered ? icon.color = "white" : icon.color = "transparent"
+                        onHoveredChanged: hovered ? icon.color = "white" : icon.color
+                                                    = "transparent"
 
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
                         }
+                    }
+
+                    MouseArea {
+                        id: mouseArea
+                        anchors.fill: parent
+                        onClicked: view.currentIndex = itemIndex
+                        cursorShape: Qt.PointingHandCursor
                     }
                 }
             }
@@ -265,100 +302,82 @@ Window {
                 orientation: ListView.Horizontal
                 spacing: -1
                 clip: true
-            }
-        }
-    }
-
-    Component {
-        id: tabViewStyle
-        TabViewStyle {
-            property color frameColor: "#5C5C5C"
-            property color fillColor: "#141618"
-            frameOverlap: 1
-
-            frame: Rectangle {
-                color: "transparent"
-                border.color: "#5c5c5c"
-                border.width: 1
-                anchors.fill: parent
+                z: 20
             }
 
-            tab: Rectangle {
-                id: tabRect
-                implicitWidth: text.width + 45
-                implicitHeight: 30
-                color: "transparent"
+            // Text Command Line
+            ListModel {
+                id: cliModel
+                ListElement {
+                    tabId: 0
+                    messages: [
+                        ListElement{timestamp:"00:15:23"; message: "X-Plane connection established"},
+                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
+                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
+                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
+                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
+                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
+                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
+                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
+                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
+                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
+                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
+                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."}
+                    ]
+                }
+            }
+
+            Component {
+                id: cliDelegate
 
                 Rectangle {
-                    id: topRect
+                    property color frameColor: "#5C5C5C"
+
+                    color: 'transparent'
                     anchors.fill: parent
-                    radius: 7
-                    color: fillColor
+                    anchors.margins: 10
+                    anchors.topMargin: 39
                     border.width: 1
                     border.color: frameColor
-                }
+                    z: 10
 
-                Rectangle {
-                    id: bottomRect
-                    anchors.bottom: parent.bottom
-                    anchors.left: topRect.left
-                    anchors.right: topRect.right
-                    height: 1 / 2 * parent.height
-                    color: fillColor
-                    border.width: 1
-                    border.color: frameColor
-                }
+                    ScrollView
+                    {
+                        id: scroll
+                        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                        Layout.fillHeight: true
+                        Layout.fillWidth: true
+                        leftPadding: 10
+                        topPadding: 5
+                        rightPadding: 10
+                        bottomPadding: 5
 
-                // cleans up tab, otherwise there's a weird line that runs
-                // through the middle of the tab
-                Rectangle {
-                    anchors {
-                        fill: bottomRect
-                        leftMargin: bottomRect.border.width
-                        bottomMargin: bottomRect.border.width
-                        rightMargin: bottomRect.border.width
-                    }
-                    color: fillColor
-                }
+                        Repeater {
+                            model: messages
 
-                // hides bottom border on active tab
-                Rectangle {
-                    visible: styleData.selected
-                    width: tabRect.width - 2
-                    height: 2
-                    color: fillColor
-                    y: parent.height - 2
-                    x: (tabRect.width - tabRect.width) + 1
-                }
-
-                Text {
-                    id: text
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: 10
-                    text: styleData.title
-                    color: styleData.selected ? "white" : frameColor
-                    font.family: robotoMono.name
-                    font.pixelSize: 13
-                }
-
-                WindowControlButton {
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.rightMargin: 0
-
-                    icon.source: "../Icons/CloseIcon.svg"
-                    icon.color: "transparent"
-                    icon.width: 18
-                    icon.height: 18
-                    onHoveredChanged: hovered ? icon.color = "white" : icon.color = "transparent"
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: tabView.removeTab(styleData.index)
+                            Text {
+                                id: msg
+                                text: "[" + timestamp + "]: " + message
+                                width: parent.width
+                                wrapMode: Text.WordWrap
+                                renderType: Text.NativeRendering
+                                font.family: robotoMono.name
+                                font.pixelSize: 13
+                                color: '#ffffff'
+                                y: (15 * index)
+                            }
+                        }
                     }
                 }
+            }
+
+            Repeater {
+                model: cliModel
+                delegate: cliDelegate
+                anchors.fill: parent
+                anchors.margins: 10
+                clip: true
+                z: 20
             }
         }
     }

@@ -3,10 +3,12 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
 Rectangle {
-    id: control
     property variant internalModel
+
+    id: control
     color: 'transparent'
     border.color: '#5C5C5C'
+
     GridLayout {
         anchors.fill: parent
         rows: 2
@@ -41,7 +43,7 @@ Rectangle {
                         color: 'transparent'
                         Text {
                             id: text
-                            text: modelData
+                            text: modelData.message
                             width: parent.width
                             wrapMode: Text.WordWrap
                             renderType: Text.NativeRendering
