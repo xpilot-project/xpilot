@@ -24,5 +24,6 @@ Rectangle {
         verticalAlignment: Text.AlignVCenter
         opacity: isEnabled ? 1 : 0.2
         color: "#ffffff"
+        renderType: Text.NativeRendering
     }
 }

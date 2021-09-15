@@ -34,9 +34,9 @@ ColumnLayout {
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
             font.pixelSize: 16
-            font.weight: Font.DemiBold
-            font.bold: false
+            font.bold: true
             font.family: robotoMono.name
+            renderType: Text.NativeRendering
         }
         Text {
             id: com1FreqLabel
@@ -45,9 +45,9 @@ ColumnLayout {
             color: "white"
             leftPadding: 5
             font.pixelSize: 16
-            font.weight: Font.DemiBold
-            font.bold: false
+            font.bold: true
             font.family: robotoMono.name
+            renderType: Text.NativeRendering
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
@@ -85,9 +85,9 @@ ColumnLayout {
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
             font.pixelSize: 16
-            font.weight: Font.DemiBold
-            font.bold: false
+            font.bold: true
             font.family: robotoMono.name
+            renderType: Text.NativeRendering
         }
         Text {
             id: com2FreqLabel
@@ -96,9 +96,9 @@ ColumnLayout {
             color: "white"
             leftPadding: 5
             font.pixelSize: 16
-            font.weight: Font.DemiBold
-            font.bold: false
+            font.bold: true
             font.family: robotoMono.name
+            renderType: Text.NativeRendering
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
