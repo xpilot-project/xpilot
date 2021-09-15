@@ -15,6 +15,7 @@ Window {
     property QtObject connectWindow
     property QtObject settingsWindow
     property QtObject flightPlanWindow
+    property int currentTab
 
     id: mainWindow
     title: "xPilot"
@@ -48,7 +49,6 @@ Window {
     }
 
     Component.onCompleted: {
-
         //        wsClient.connect(wsHost, wsPort)
     }
 
@@ -181,21 +181,11 @@ Window {
                 id: tabModel
                 ListElement {
                     title: "Messages"
+                    disposable: false
                 }
                 ListElement {
                     title: "Notes"
-                }
-                ListElement {
-                    title: "MSP_56_CTR"
-                    disposable: true
-                }
-                ListElement {
-                    title: "LAX_04_CTR"
-                    disposable: true
-                }
-                ListElement {
-                    title: "AAL556A"
-                    disposable: true
+                    disposable: false
                 }
             }
 
@@ -252,7 +242,7 @@ Window {
                         color: fillColor
                         y: parent.height - 2
                         x: (tab.width - tab.width) + 1
-                        z: 100
+                        z: 500
                     }
 
                     Text {
@@ -267,28 +257,33 @@ Window {
                     }
 
                     WindowControlButton {
+                        id: btnClose
                         visible: disposable
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.rightMargin: 0
+                        z: 100
 
                         icon.source: "../Icons/CloseIcon.svg"
                         icon.color: "transparent"
                         icon.width: 18
                         icon.height: 18
-                        onHoveredChanged: hovered ? icon.color = "white" : icon.color
-                                                    = "transparent"
+                        onHoveredChanged: hovered ? icon.color = "white" : icon.color = "transparent"
 
                         MouseArea {
-                            anchors.fill: parent
+                            anchors.fill: btnClose
                             cursorShape: Qt.PointingHandCursor
+                            onClicked: tabModel.remove(itemIndex)
                         }
                     }
 
                     MouseArea {
                         id: mouseArea
                         anchors.fill: parent
-                        onClicked: view.currentIndex = itemIndex
+                        onClicked: {
+                            currentTab = itemIndex
+                            view.currentIndex = itemIndex
+                        }
                         cursorShape: Qt.PointingHandCursor
                     }
                 }
@@ -302,27 +297,18 @@ Window {
                 orientation: ListView.Horizontal
                 spacing: -1
                 clip: true
-                z: 20
+                z: 50
             }
 
-            // Text Command Line
             ListModel {
                 id: cliModel
                 ListElement {
                     tabId: 0
-                    messages: [
-                        ListElement{timestamp:"00:15:23"; message: "X-Plane connection established"},
-                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
-                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
-                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
-                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
-                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
-                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
-                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
-                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
-                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
-                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."},
-                        ListElement{timestamp:"00:15:24"; message: "Checking for new version..."}
+                    attributes: [
+                        ListElement { timestamp: "00:15:24"; message: "xPilot 2.0.0-beta.1" },
+                        ListElement { timestamp: "00:15:24"; message: "Version check complete. You are running the latest version" },
+                        ListElement { timestamp: "00:15:25"; message: "Waiting for X-Plane connection..." },
+                        ListElement { timestamp: "00:15:27"; message: "X-Plane connection established" }
                     ]
                 }
             }
@@ -331,40 +317,94 @@ Window {
                 id: cliDelegate
 
                 Rectangle {
-                    property color frameColor: "#5C5C5C"
-
+                    id: messages
                     color: 'transparent'
                     anchors.fill: parent
                     anchors.margins: 10
                     anchors.topMargin: 39
                     border.width: 1
-                    border.color: frameColor
-                    z: 10
+                    border.color: "#5C5C5C"
 
-                    ScrollView
-                    {
-                        id: scroll
-                        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-                        leftPadding: 10
-                        topPadding: 5
-                        rightPadding: 10
-                        bottomPadding: 5
+                    GridLayout {
+                        anchors.fill: parent
+                        rows: 2
+                        columns: 1
 
-                        Repeater {
-                            model: messages
+                        RowLayout {
+                            id: rowMessages
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.preferredHeight: 300
+                            Layout.column: 0
+                            Layout.row: 0
 
-                            Text {
-                                id: msg
-                                text: "[" + timestamp + "]: " + message
-                                width: parent.width
-                                wrapMode: Text.WordWrap
-                                renderType: Text.NativeRendering
-                                font.family: robotoMono.name
+                            ScrollView
+                            {
+                                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                                Layout.fillHeight: true
+                                Layout.fillWidth: true
+                                clip: true
+                                leftPadding: 10
+                                topPadding: 5
+                                rightPadding: 10
+                                bottomPadding: 5
+
+                                ListView {
+                                    id: listView
+                                    model: attributes
+                                    delegate: Rectangle {
+                                        anchors.left: listView.contentItem.left
+                                        anchors.right: listView.contentItem.right
+                                        height: text.contentHeight
+                                        color: 'transparent'
+                                        visible: tabId === currentTab
+                                        Text {
+                                            id: text
+                                            text: "[" + timestamp + "]: " + message
+                                            width: parent.width
+                                            wrapMode: Text.WordWrap
+                                            font.family: robotoMono.name
+                                            font.pixelSize: 13
+                                            color: '#ffffff'
+                                        }
+                                    }
+                                    onCountChanged: {
+                                        var newIndex = count - 1
+                                        positionViewAtEnd()
+                                        currentIndex = newIndex
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            id: commandLine
+                            Layout.fillWidth: true
+                            clip: true
+                            Layout.column: 0
+                            Layout.row: 1
+                            Layout.maximumHeight: 30
+                            Layout.minimumHeight: 30
+
+                            TextField {
+                                id: cliTextField
                                 font.pixelSize: 13
+                                font.family: robotoMono.name
+                                renderType: Text.NativeRendering
                                 color: '#ffffff'
-                                y: (15 * index)
+                                selectionColor: "#0164AD"
+                                selectedTextColor: "#ffffff"
+                                topPadding: 0
+                                padding: 6
+                                Layout.bottomMargin: -5
+                                Layout.rightMargin: -5
+                                Layout.leftMargin: -5
+                                Layout.fillHeight: true
+                                Layout.fillWidth: true
+                                background: Rectangle {
+                                    color: 'transparent'
+                                    border.color: '#5C5C5C'
+                                }
                             }
                         }
                     }
@@ -376,7 +416,6 @@ Window {
                 delegate: cliDelegate
                 anchors.fill: parent
                 anchors.margins: 10
-                clip: true
                 z: 20
             }
         }
