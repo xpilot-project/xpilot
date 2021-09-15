@@ -412,6 +412,11 @@ Window {
                                     color: 'transparent'
                                     border.color: '#5C5C5C'
                                 }
+                                Keys.onPressed: {
+                                    if(event.key === Qt.Key_Escape) {
+                                        cliTextField.clear()
+                                    }
+                                }
                             }
                         }
                     }

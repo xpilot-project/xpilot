@@ -22,9 +22,10 @@ Rectangle {
         anchors.rightMargin: 0
         anchors.leftMargin: 0
         anchors.topMargin: 0
-        font.pixelSize: 14
+        font.pixelSize: 15
         font.bold: true
         font.family: robotoMono.name
+        renderType: Text.NativeRendering
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         padding: 5
