@@ -170,12 +170,21 @@ Window {
         }
 
         Rectangle {
-            id: messages
+            id: msgControl
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.row: 1
             Layout.column: 1
             color: "#141618"
+
+            Rectangle {
+                anchors.fill: parent
+                anchors.margins: 10
+                anchors.topMargin: 39
+                border.color: "#5c5c5c"
+                border.width: 1
+                color: "transparent"
+            }
 
             ListModel {
                 id: tabModel
@@ -242,7 +251,6 @@ Window {
                         color: fillColor
                         y: parent.height - 2
                         x: (tab.width - tab.width) + 1
-                        z: 500
                     }
 
                     Text {
@@ -297,7 +305,6 @@ Window {
                 orientation: ListView.Horizontal
                 spacing: -1
                 clip: true
-                z: 50
             }
 
             ListModel {
@@ -322,8 +329,6 @@ Window {
                     anchors.fill: parent
                     anchors.margins: 10
                     anchors.topMargin: 39
-                    border.width: 1
-                    border.color: "#5C5C5C"
 
                     GridLayout {
                         anchors.fill: parent
@@ -364,6 +369,7 @@ Window {
                                             width: parent.width
                                             wrapMode: Text.WordWrap
                                             font.family: robotoMono.name
+                                            renderType: Text.NativeRendering
                                             font.pixelSize: 13
                                             color: '#ffffff'
                                         }
@@ -401,6 +407,7 @@ Window {
                                 Layout.leftMargin: -5
                                 Layout.fillHeight: true
                                 Layout.fillWidth: true
+                                selectByMouse: true
                                 background: Rectangle {
                                     color: 'transparent'
                                     border.color: '#5C5C5C'
@@ -416,7 +423,7 @@ Window {
                 delegate: cliDelegate
                 anchors.fill: parent
                 anchors.margins: 10
-                z: 20
+                z: 1000
             }
         }
     }
