@@ -428,7 +428,6 @@ Window {
                 delegate: cliDelegate
                 anchors.fill: parent
                 anchors.margins: 10
-                z: 1000
             }
         }
     }
