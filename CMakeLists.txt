@@ -31,11 +31,13 @@ ENDIF (APPLE)
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(xPilot
         ${PROJECT_SOURCES}
+        ${HEADERS}
     )
 else()
     add_executable(xPilot
       ${GUI_TYPE}
       ${PROJECT_SOURCES}
+      ${HEADERS}
       xpilot.rc
     )
 endif()

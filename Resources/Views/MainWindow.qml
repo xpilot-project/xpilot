@@ -48,8 +48,56 @@ Window {
         }
     }
 
+    function currentTimestamp() {
+        var dt = new Date();
+        const h = dt.getUTCHours() < 10 ? "0" + dt.getUTCHours() : dt.getUTCHours();
+        const m = dt.getUTCMinutes() < 10 ? "0" + dt.getUTCMinutes() : dt.getUTCMinutes();
+        const s = dt.getUTCSeconds() < 10 ? "0" + dt.getUTCSeconds() : dt.getUTCSeconds();
+        return h + ":" + m + ":" + s;
+    }
+
+    //    function appendMessage(tabId, message) {
+    //        var element = cliModel.get(tabId + 1);
+    //        if(element) {
+    //            element.attributes.append({timestamp:currentTimestamp(),message:message});
+    //        } else {
+    //            cliModel.append({tabId: tabId, attributes: []});
+    //            appendMessage(tabId, message);
+    //        }
+    //    }
+
+    function appendMessage(message) {
+        var model = cliModel.get(0)
+        model.attributes.append({message:`[${currentTimestamp()}] ${message}`})
+    }
+
+    function appendNote(message) {
+        var model = cliModel.get(1)
+        model.attributes.append({message:`[${currentTimestamp()}] ${message}`})
+    }
+
+    function clearNotes() {
+        var model = cliModel.get(1)
+        model.attributes.clear()
+    }
+
+    function clearMessages() {
+        var model = cliModel.get(0)
+        model.attributes.clear()
+    }
+
     Component.onCompleted: {
         //        wsClient.connect(wsHost, wsPort)
+        //        cliModel.append({tabId:0,attributes:[]});
+
+        //        var m = cliModel.get(1);
+        //        if(m !== null) {
+        //            m.attributes.append({timestamp:"00:00:00",message:"testing"})
+        //        }
+
+        //        appendMessage(0, "Welcome to xPilot v2.0.0")
+
+        //        appendMessage("Welcome to xPilot v2.0.0")
     }
 
     Timer {
@@ -310,13 +358,12 @@ Window {
             ListModel {
                 id: cliModel
                 ListElement {
-                    tabId: 0
-                    attributes: [
-                        ListElement { timestamp: "00:15:24"; message: "xPilot 2.0.0-beta.1" },
-                        ListElement { timestamp: "00:15:24"; message: "Version check complete. You are running the latest version" },
-                        ListElement { timestamp: "00:15:25"; message: "Waiting for X-Plane connection..." },
-                        ListElement { timestamp: "00:15:27"; message: "X-Plane connection established" }
-                    ]
+                    tabId: 0 // messages
+                    attributes: []
+                }
+                ListElement {
+                    tabId: 1 // notes
+                    attributes: []
                 }
             }
 
@@ -353,6 +400,7 @@ Window {
                                 topPadding: 5
                                 rightPadding: 10
                                 bottomPadding: 5
+                                visible: tabId === currentTab
 
                                 ListView {
                                     id: listView
@@ -362,10 +410,10 @@ Window {
                                         anchors.right: listView.contentItem.right
                                         height: text.contentHeight
                                         color: 'transparent'
-                                        visible: tabId === currentTab
+
                                         Text {
                                             id: text
-                                            text: "[" + timestamp + "]: " + message
+                                            text: message
                                             width: parent.width
                                             wrapMode: Text.WordWrap
                                             font.family: robotoMono.name
@@ -415,6 +463,68 @@ Window {
                                 Keys.onPressed: {
                                     if(event.key === Qt.Key_Escape) {
                                         cliTextField.clear()
+                                    }
+                                    if(event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
+                                        var cmd = cliTextField.text.split(" ");
+
+                                        switch(currentTab) {
+                                        case 0:
+                                            // radio messages
+                                            switch(cmd[0].toLowerCase())
+                                            {
+                                            case ".clear":
+                                                clearMessages()
+                                                cliTextField.clear()
+                                                break;
+                                            case ".msg":
+                                            case ".chat":
+                                                break;
+                                            case ".wallop":
+                                                break;
+                                            case ".wx":
+                                            case ".metar":
+                                                break;
+                                            case ".atis":
+                                                break;
+                                            case ".com1":
+                                                break;
+                                            case ".com2":
+                                                break;
+                                            case ".tx":
+                                                break;
+                                            case ".rx":
+                                                break;
+                                            case ".x":
+                                            case ".xpndr":
+                                            case ".xpdr":
+                                            case ".squawk":
+                                                break;
+                                            case ".towerview":
+                                                break;
+                                            default:
+                                                appendMessage(cliTextField.text)
+                                                cliTextField.clear()
+                                                break;
+                                            }
+                                            break;
+                                        case 1:
+                                            // notes
+                                            switch(cmd[0].toLowerCase())
+                                            {
+                                            case ".clear":
+                                                clearNotes()
+                                                cliTextField.clear()
+                                                break;
+                                            default:
+                                                appendNote(cliTextField.text)
+                                                cliTextField.clear()
+                                                break;
+                                            }
+                                            break;
+                                        default:
+                                            // private message
+                                            break;
+                                        }
                                     }
                                 }
                             }
