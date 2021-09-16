@@ -17,6 +17,8 @@ Window {
     property QtObject flightPlanWindow
     property int currentTab
 
+    signal wsStateChanged(bool connected)
+
     id: mainWindow
     title: "xPilot"
     visible: true
@@ -71,6 +73,21 @@ Window {
         model.attributes.append({message:`[${currentTimestamp()}] ${message}`})
     }
 
+    function appendInfoMessage(message) {
+        var model = cliModel.get(0)
+        model.attributes.append({message:`[${currentTimestamp()}] ${message}`, msgColor:"#F1C40F"}) // yellow
+    }
+
+    function appendErrorMessage(message) {
+        var model = cliModel.get(0)
+        model.attributes.append({message:`[${currentTimestamp()}] ${message}`, msgColor:"#EB2F06"}) // red
+    }
+
+    function appendWarningMessage(message) {
+        var model = cliModel.get(0)
+        model.attributes.append({message:`[${currentTimestamp()}] ${message}`, msgColor:"#E67E22"}) // orange
+    }
+
     function appendNote(message) {
         var model = cliModel.get(1)
         model.attributes.append({message:`[${currentTimestamp()}] ${message}`})
@@ -87,17 +104,8 @@ Window {
     }
 
     Component.onCompleted: {
-        //        wsClient.connect(wsHost, wsPort)
-        //        cliModel.append({tabId:0,attributes:[]});
-
-        //        var m = cliModel.get(1);
-        //        if(m !== null) {
-        //            m.attributes.append({timestamp:"00:00:00",message:"testing"})
-        //        }
-
-        //        appendMessage(0, "Welcome to xPilot v2.0.0")
-
-        //        appendMessage("Welcome to xPilot v2.0.0")
+        wsClient.connect(wsHost, wsPort)
+        appendInfoMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.");
     }
 
     Timer {
@@ -119,33 +127,47 @@ Window {
 
         onStatusChanged: {
             switch (wsClient.status) {
-            case WebSocket.Connecting:
-                console.log("Connecting")
-                break
             case WebSocket.Open:
-                console.log("Opened")
-                break
-            case WebSocket.Closing:
-                console.log("Closing")
+                wsStateChanged(true)
+                appendInfoMessage("X-Plane connection established.")
                 break
             case WebSocket.Closed:
-                console.log("Closed")
+                wsStateChanged(false)
+                appendErrorMessage("X-Plane connection lost.")
                 timer.setTimeout(function () {
                     wsClient.connect(wsHost, wsPort)
                 }, 1000)
                 break
             case WebSocket.Error:
-                console.log("Error: " + errorString)
+                appendErrorMessage(`WebSocket Error: ${errorString}`)
                 break
             }
         }
 
+        onTextMessageReceived: {
+            var msg = JSON.parse(message)
+            switch(msg.Topic) {
+            case "NotificationPosted":
+                switch(msg.Args.Type) {
+                case "Info":
+                    appendInfoMessage(msg.Args.Message)
+                    break;
+                case "Error":
+                    appendErrorMessage(msg.Args.Message)
+                    break;
+                case "Warn":
+                    appendWarningMessage(msg.Args.Message)
+                    break;
+                }
+                break;
+            }
+        }
+
         function connect(host, port) {
-            console.log("Attempting connection...")
             wsClient.active = false
             wsClient.url = ""
             var address = "ws://"
-            address = address.concat(host, ":", port)
+            address = address.concat(host, ":", port, "/ws")
             wsClient.url = address
             wsClient.active = true
         }
@@ -194,14 +216,22 @@ Window {
         }
 
         Rectangle {
-            id: toolbar
+            id: toolbarContainer
             Layout.row: 0
             Layout.column: 1
             color: "transparent"
             Layout.preferredHeight: 75
             Layout.fillWidth: true
 
-            Toolbar {}
+            Toolbar {
+                id: toolbar
+                Connections {
+                    target: mainWindow
+                    function onWsStateChanged(connected) {
+                        toolbar.wsConnected = connected
+                    }
+                }
+            }
         }
 
         Rectangle {
@@ -419,7 +449,7 @@ Window {
                                             font.family: robotoMono.name
                                             renderType: Text.NativeRendering
                                             font.pixelSize: 13
-                                            color: '#ffffff'
+                                            color: msgColor || '#ffffff'
                                         }
                                     }
                                     onCountChanged: {

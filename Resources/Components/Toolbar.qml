@@ -8,6 +8,7 @@ GridLayout {
     id: toolbar
     columns: 2
     anchors.fill: parent
+    property bool wsConnected: false
 
     Row {
         leftPadding: 15
@@ -33,6 +34,7 @@ GridLayout {
         TransponderButton {
             id: btnModeC
             text: "Mode C"
+            enabled: wsConnected
             MouseArea {
                 preventStealing: true
                 anchors.fill: parent
@@ -47,6 +49,7 @@ GridLayout {
         TransponderButton {
             id: btnIdent
             text: "Ident"
+            enabled: wsConnected
             MouseArea {
                 preventStealing: true
                 anchors.fill: parent
@@ -61,6 +64,7 @@ GridLayout {
         ToolbarButton {
             id: btnFlightPlan
             text: "Flight Plan"
+            enabled: wsConnected
             MouseArea {
                 id: btnFlightPlanMouseArea
                 anchors.fill: parent
