@@ -16,6 +16,7 @@ Window {
     property QtObject settingsWindow
     property QtObject flightPlanWindow
     property int currentTab
+    property bool wsConnected
 
     signal wsStateChanged(bool connected)
 
@@ -103,6 +104,28 @@ Window {
         model.attributes.clear()
     }
 
+    function mergeObjects() {
+        var res = {};
+        for (var i = 0; i < arguments.length; i++) {
+            for (var x in arguments[i]) {
+                res[x] = arguments[i][x];
+            }
+        }
+        return res;
+    }
+
+    function addTypeProperty (type, command) {
+        return {
+            "$type": `Vatsim.Xpilot.XplaneBridge.Commands.${type}Command, XplaneBridge`
+        }
+    }
+
+    function sendCommand(type, command) {
+        var json = JSON.stringify(mergeObjects(addTypeProperty(type), command))
+        console.log(json)
+        wsClient.sendTextMessage(json)
+    }
+
     Component.onCompleted: {
         wsClient.connect(wsHost, wsPort)
         appendInfoMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.");
@@ -129,17 +152,21 @@ Window {
             switch (wsClient.status) {
             case WebSocket.Open:
                 wsStateChanged(true)
+                wsConnected = true
                 appendInfoMessage("X-Plane connection established.")
                 break
             case WebSocket.Closed:
                 wsStateChanged(false)
-                appendErrorMessage("X-Plane connection lost.")
+                if(wsConnected) {
+                    appendErrorMessage("X-Plane connection lost.")
+                }
+                wsConnected = false
                 timer.setTimeout(function () {
                     wsClient.connect(wsHost, wsPort)
                 }, 1000)
                 break
             case WebSocket.Error:
-                appendErrorMessage(`WebSocket Error: ${errorString}`)
+                //appendErrorMessage(`WebSocket Error: ${errorString}`)
                 break
             }
         }
@@ -230,6 +257,14 @@ Window {
                     function onWsStateChanged(connected) {
                         toolbar.wsConnected = connected
                     }
+                }
+
+                onToggleModeC: {
+                    sendCommand("ToggleModeC", {"Active": active})
+                }
+
+                onSquawkIdent: {
+                    sendCommand("SquawkIdent")
                 }
             }
         }
@@ -497,63 +532,74 @@ Window {
                                     if(event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
                                         var cmd = cliTextField.text.split(" ");
 
-                                        switch(currentTab) {
-                                        case 0:
-                                            // radio messages
-                                            switch(cmd[0].toLowerCase())
-                                            {
-                                            case ".clear":
-                                                clearMessages()
-                                                cliTextField.clear()
+                                        try {
+                                            switch(currentTab) {
+                                            case 0:
+                                                // radio messages
+                                                switch(cmd[0].toLowerCase())
+                                                {
+                                                case ".clear":
+                                                    clearMessages()
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".msg":
+                                                case ".chat":
+                                                    break;
+                                                case ".wallop":
+                                                    break;
+                                                case ".wx":
+                                                case ".metar":
+                                                    break;
+                                                case ".atis":
+                                                    break;
+                                                case ".com1":
+                                                    break;
+                                                case ".com2":
+                                                    break;
+                                                case ".tx":
+                                                    break;
+                                                case ".rx":
+                                                    break;
+                                                case ".x":
+                                                case ".xpndr":
+                                                case ".xpdr":
+                                                case ".squawk":
+                                                    if (!/^[0-7]{4}$/.test(cmd[1])) {
+                                                        throw "Invalid transponder code format.";
+                                                    }
+                                                    var code = parseInt(cmd[1])
+                                                    sendCommand("SetTransponderCode", {"Code":code})
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".towerview":
+                                                    break;
+                                                default:
+                                                    appendMessage(cliTextField.text)
+                                                    cliTextField.clear()
+                                                    break;
+                                                }
                                                 break;
-                                            case ".msg":
-                                            case ".chat":
-                                                break;
-                                            case ".wallop":
-                                                break;
-                                            case ".wx":
-                                            case ".metar":
-                                                break;
-                                            case ".atis":
-                                                break;
-                                            case ".com1":
-                                                break;
-                                            case ".com2":
-                                                break;
-                                            case ".tx":
-                                                break;
-                                            case ".rx":
-                                                break;
-                                            case ".x":
-                                            case ".xpndr":
-                                            case ".xpdr":
-                                            case ".squawk":
-                                                break;
-                                            case ".towerview":
+                                            case 1:
+                                                // notes
+                                                switch(cmd[0].toLowerCase())
+                                                {
+                                                case ".clear":
+                                                    clearNotes()
+                                                    cliTextField.clear()
+                                                    break;
+                                                default:
+                                                    appendNote(cliTextField.text)
+                                                    cliTextField.clear()
+                                                    break;
+                                                }
                                                 break;
                                             default:
-                                                appendMessage(cliTextField.text)
-                                                cliTextField.clear()
+                                                // private message
                                                 break;
                                             }
-                                            break;
-                                        case 1:
-                                            // notes
-                                            switch(cmd[0].toLowerCase())
-                                            {
-                                            case ".clear":
-                                                clearNotes()
-                                                cliTextField.clear()
-                                                break;
-                                            default:
-                                                appendNote(cliTextField.text)
-                                                cliTextField.clear()
-                                                break;
-                                            }
-                                            break;
-                                        default:
-                                            // private message
-                                            break;
+                                        }
+                                        catch(err) {
+                                            appendErrorMessage(err)
                                         }
                                     }
                                 }

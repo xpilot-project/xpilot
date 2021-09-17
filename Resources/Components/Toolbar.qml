@@ -10,6 +10,9 @@ GridLayout {
     anchors.fill: parent
     property bool wsConnected: false
 
+    signal toggleModeC(bool active)
+    signal squawkIdent()
+
     Row {
         leftPadding: 15
         spacing: 5
@@ -42,6 +45,7 @@ GridLayout {
                 onClicked: {
                     isModeC = !isModeC
                     btnModeC.isActive = isModeC
+                    toggleModeC(isModeC)
                 }
             }
         }
@@ -55,8 +59,7 @@ GridLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    isModeC = !isModeC
-                    btnModeC.isActive = isModeC
+                    squawkIdent()
                 }
             }
         }
