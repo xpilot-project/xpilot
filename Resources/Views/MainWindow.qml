@@ -126,6 +126,43 @@ Window {
         wsClient.sendTextMessage(json)
     }
 
+    function checkFrequencyValid(frequency) {
+        let num = frequency % 100000;
+        if (frequency < 108000000 || frequency > 136975000) {
+            throw "Invalid frequency range.";
+        }
+        if (num !== 0 && num !== 25000 && num !== 50000 && num !== 75000) {
+            throw "Invalid frequency format. 8.33kHz frequencies not currently supported.";
+        }
+        return frequency;
+    }
+
+    function normalize25KhzFrequency(freq) {
+        if (!isNaN(freq)) {
+            if (freq < 100000000) {
+                return freq;
+            }
+            if (freq % 100000 == 20000 || freq % 100000 == 70000) {
+                return freq + 5000;
+            }
+        } else {
+            if (String(freq).indexOf(".") < 3) {
+                return freq;
+            }
+            let freq2 =
+                parseInt(String(freq).replace(".", "")) *
+                Math.pow(10.0, 9 - (String(freq).length - 1));
+            let text = normalize25KhzFrequency(freq2).toString();
+            freq = text.substring(0, 3) + "." + text.substring(3);
+        }
+        return checkFrequencyValid(freq);
+    }
+
+    function frequencyToInt(freq: string) {
+        let num = Math.round(parseFloat(freq.trim()) * 1000000.0);
+        return normalize25KhzFrequency(num);
+    }
+
     Component.onCompleted: {
         wsClient.connect(wsHost, wsPort)
         appendInfoMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.");
@@ -533,6 +570,11 @@ Window {
                                         var cmd = cliTextField.text.split(" ");
 
                                         try {
+
+                                            if(!wsConnected) {
+                                                throw "X-Plane connection not established."
+                                            }
+
                                             switch(currentTab) {
                                             case 0:
                                                 // radio messages
@@ -553,8 +595,13 @@ Window {
                                                 case ".atis":
                                                     break;
                                                 case ".com1":
-                                                    break;
                                                 case ".com2":
+                                                    if (!/^1\d\d[\.\,]\d{1,3}$/.test(cmd[1])) {
+                                                        throw "Invalid frequency format.";
+                                                    }
+                                                    var freq = frequencyToInt(cmd[1])
+                                                    var radio = cmd[0].toLowerCase() === "com1" ? 1 : 2
+                                                    sendCommand("SetComRadioFrequency", {"ComRadio": radio, "Frequency": freq})
                                                     break;
                                                 case ".tx":
                                                     break;
