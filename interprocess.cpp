@@ -1,10 +1,11 @@
-#include "interprocess.h"
 #include <QTimer>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QByteArray>
 #include <QTimer>
 #include <QQuickWindow>
+
+#include "interprocess.h"
 #include "base64.hpp"
 #include "protobuf/Envelope.pb.h"
 
@@ -27,14 +28,6 @@ InterProcess::~InterProcess()
     process.kill();
 }
 
-void InterProcess::restartProcess()
-{
-    if(process.state() == QProcess::NotRunning)
-    {
-        process.start();
-    }
-}
-
 void InterProcess::sendEnvelope(const xpilot::Envelope& envelope)
 {
     std::string data;
@@ -42,6 +35,31 @@ void InterProcess::sendEnvelope(const xpilot::Envelope& envelope)
 
     process.write(base64::base64_encode(data).c_str());
     process.write("\n");
+}
+
+void InterProcess::Tick()
+{
+    const QByteArray data = QByteArray::fromBase64(process.readAllStandardOutput());
+
+    xpilot::Envelope envelope;
+    envelope.ParseFromArray(data, data.length());
+
+    if(envelope.has_simulator_connection_state())
+    {
+        emit simulatorConnected(envelope.simulator_connection_state().connected());
+    }
+
+    if(envelope.has_radio_stack())
+    {
+        RadioStack stack{};
+        stack.avionicsPowerOn = envelope.radio_stack().avionics_power_on();
+        stack.com1Frequency = envelope.radio_stack().com1_frequency();
+        stack.com1ReceiveEnabled = envelope.radio_stack().com1_receive_enabled();
+        stack.com2Frequency = envelope.radio_stack().com2_frequency();
+        stack.com2ReceiveEnabled = envelope.radio_stack().com2_receive_enabled();
+        stack.transmitComSelection = envelope.radio_stack().transmit_com_selection();
+        emit radioStackReceived(stack);
+    }
 }
 
 void InterProcess::onHandleSetTransponderCode(int code)
@@ -81,46 +99,10 @@ void InterProcess::onHandleTransponderIdent()
     sendEnvelope(envelope);
 }
 
-void InterProcess::Tick()
+void InterProcess::restartProcess()
 {
-    const QByteArray data = QByteArray::fromBase64(process.readAllStandardOutput());
-
-    xpilot::Envelope envelope;
-    envelope.ParseFromArray(data, data.length());
-
-    if(envelope.has_simulator_connection_state())
+    if(process.state() == QProcess::NotRunning)
     {
-        emit simulatorConnected(envelope.simulator_connection_state().connected());
+        process.start();
     }
-
-    if(envelope.has_radio_stack())
-    {
-        RadioStack stack{};
-        stack.avionicsPowerOn = envelope.radio_stack().avionics_power_on();
-        stack.com1Frequency = envelope.radio_stack().com1_frequency();
-        stack.com1ReceiveEnabled = envelope.radio_stack().com1_receive_enabled();
-        stack.com2Frequency = envelope.radio_stack().com2_frequency();
-        stack.com2ReceiveEnabled = envelope.radio_stack().com2_receive_enabled();
-        stack.transmitComSelection = envelope.radio_stack().transmit_com_selection();
-        emit radioStackReceived(stack);
-    }
-
-    //    qDebug() << jsonParts;
-
-    //    QJsonParseError jsonError;
-    //    QJsonDocument jsonDoc(QJsonDocument::fromJson(jsonParts.toUtf8(), &jsonError));
-
-    //    if(!jsonParts.isEmpty()) {
-    //        if(jsonError.error == QJsonParseError::NoError) {
-    //            QJsonObject jsonObject = jsonDoc.object();
-
-    //            if(jsonObject.contains("Topic")) {
-    //                QString topic = jsonObject["Topic"].toString();
-
-    //                if(topic == "NotificationPosted") {
-    //                    emit notificationPosted(NotificationType::Info, jsonObject["Message"].toString());
-    //                }
-    //            }
-    //        }
-    //    }
 }
