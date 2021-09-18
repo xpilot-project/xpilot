@@ -18,6 +18,8 @@ Window {
     property bool simConnected: false
 
     signal setTransponderCode(int code);
+    signal setTransponderModeC(bool active);
+    signal setTransponderIdent();
     signal setRadioStack(int radio, int frequency);
 
     id: mainWindow
@@ -97,6 +99,17 @@ Window {
 
             toolbar.simConnected = isConnected
         }
+
+        function onRadioStackReceived(stack)
+        {
+            radioStack.avionicsPower = stack.avionicsPowerOn;
+            radioStack.com1Frequency = FrequencyUtils.printFrequency(stack.com1Frequency);
+            radioStack.com2Frequency = FrequencyUtils.printFrequency(stack.com2Frequency);
+            radioStack.isCom1RxEnabled = stack.com1ReceiveEnabled;
+            radioStack.isCom2RxEnabled = stack.com2ReceiveEnabled;
+            radioStack.isCom1TxEnabled = stack.transmitComSelection === 6;
+            radioStack.isCom2TxEnabled = stack.transmitComSelection === 7;
+        }
     }
 
     //    function appendMessage(tabId, message) {
@@ -161,7 +174,7 @@ Window {
         z: 100
 
         Rectangle {
-            id: radioStack
+            id: radioStackContainer
             Layout.preferredWidth: 250
             Layout.preferredHeight: 75
             Layout.row: 0
@@ -169,8 +182,9 @@ Window {
             color: "#0164AD"
 
             RadioStack {
-                anchors.verticalCenter: parent.verticalCenter
+                id: radioStack
                 anchors.top: parent.top
+                anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 0
             }
@@ -188,11 +202,11 @@ Window {
                 id: toolbar
 
                 onToggleModeC: {
-                    sendCommand("ToggleModeC", {"Active": active})
+                    setTransponderModeC(active)
                 }
 
                 onSquawkIdent: {
-                    sendCommand("SquawkIdent")
+                    setTransponderIdent()
                 }
             }
         }

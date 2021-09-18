@@ -32,7 +32,11 @@ function normalize25KhzFrequency(freq) {
     return checkFrequencyValid(freq);
 }
 
-function frequencyToInt(string) {
+function frequencyToInt(freq) {
     let num = Math.round(parseFloat(freq.trim()) * 1000000.0);
     return normalize25KhzFrequency(num);
+}
+
+function printFrequency(frequency) {
+    return (frequency / 1000000.0).toFixed(3);
 }

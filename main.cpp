@@ -34,8 +34,10 @@ int main(int argc, char *argv[])
     engine.load(url);
 
     QObject *root = engine.rootObjects().first();
-    QObject::connect(root, SIGNAL(setTransponderCode(int)), &ipc, SLOT(onSetTransponderCode(int)));
-    QObject::connect(root, SIGNAL(setRadioStack(int, int)), &ipc, SLOT(onSetRadioStack(int, int)));
+    QObject::connect(root, SIGNAL(setTransponderCode(int)), &ipc, SLOT(onHandleSetTransponderCode(int)));
+    QObject::connect(root, SIGNAL(setTransponderModeC(bool)), &ipc, SLOT(onHandleTransponderModeC(bool)));
+    QObject::connect(root, SIGNAL(setTransponderIdent()), &ipc, SLOT(onHandleTransponderIdent()));
+    QObject::connect(root, SIGNAL(setRadioStack(int, int)), &ipc, SLOT(onHandleSetRadioStack(int, int)));
 
     return app.exec();
 }

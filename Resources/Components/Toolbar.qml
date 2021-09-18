@@ -9,6 +9,8 @@ GridLayout {
     columns: 2
     anchors.fill: parent
     property bool simConnected: false
+    property bool isModeC: false
+    property bool isIdenting: false
 
     signal toggleModeC(bool active)
     signal squawkIdent()
@@ -39,7 +41,6 @@ GridLayout {
             text: "Mode C"
             enabled: simConnected
             MouseArea {
-                preventStealing: true
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
@@ -55,10 +56,11 @@ GridLayout {
             text: "Ident"
             enabled: simConnected
             MouseArea {
-                preventStealing: true
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
+                    isIdenting = !isIdenting;
+                    btnIdent.isActive = isIdenting;
                     squawkIdent()
                 }
             }

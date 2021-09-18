@@ -5,6 +5,8 @@ import QtQuick.Controls.Material 2.12
 import "../Controls"
 
 ColumnLayout {
+    property bool avionicsPower: false
+
     property var com1Frequency: "---.---"
     property var com2Frequency: "---.---"
 
@@ -40,12 +42,11 @@ ColumnLayout {
         }
         Text {
             id: com1FreqLabel
-            text: com1Frequency
+            text: avionicsPower ? com1Frequency : "---.---"
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
             leftPadding: 5
             font.pixelSize: 16
-            font.bold: true
             font.family: robotoMono.name
             renderType: Text.NativeRendering
         }
@@ -55,8 +56,8 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com1Tx
-            isEnabled: isCom1TxEnabled
-            isActive: isCom1Tx
+            isEnabled: avionicsPower && isCom1RxEnabled
+            isActive: avionicsPower && isCom1Tx
             label: "TX"
         }
         Text {
@@ -64,8 +65,8 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com1Rx
-            isEnabled: isCom1RxEnabled
-            isActive: isCom1Rx
+            isEnabled: avionicsPower && isCom1RxEnabled
+            isActive: avionicsPower && isCom1Rx
             label: "RX"
         }
     }
@@ -91,12 +92,11 @@ ColumnLayout {
         }
         Text {
             id: com2FreqLabel
-            text: com2Frequency
+            text: avionicsPower ? com2Frequency : "---.---"
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
             leftPadding: 5
             font.pixelSize: 16
-            font.bold: true
             font.family: robotoMono.name
             renderType: Text.NativeRendering
         }
@@ -106,8 +106,8 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com2Tx
-            isEnabled: isCom2TxEnabled
-            isActive: isCom2Tx
+            isEnabled: avionicsPower && isCom2TxEnabled
+            isActive: avionicsPower && isCom2Tx
             label: "TX"
         }
         Text {
@@ -115,8 +115,8 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com2Rx
-            isEnabled: isCom2TxEnabled
-            isActive: isCom2Rx
+            isEnabled: avionicsPower && isCom2RxEnabled
+            isActive: avionicsPower && isCom2Rx
             label: "RX"
         }
     }
