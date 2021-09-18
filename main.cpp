@@ -7,6 +7,7 @@
 #include <QQmlContext>
 #include <qicon.h>
 #include <QObject>
+#include <QQuickWindow>
 #include "interprocess.h"
 
 int main(int argc, char *argv[])
@@ -31,6 +32,10 @@ int main(int argc, char *argv[])
         }
     }, Qt::QueuedConnection);
     engine.load(url);
+
+    QObject *root = engine.rootObjects().first();
+    QObject::connect(root, SIGNAL(setTransponderCode(int)), &ipc, SLOT(onSetTransponderCode(int)));
+    QObject::connect(root, SIGNAL(setRadioStack(int, int)), &ipc, SLOT(onSetRadioStack(int, int)));
 
     return app.exec();
 }

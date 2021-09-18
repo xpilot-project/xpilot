@@ -30,5 +30,7 @@
         <file>Resources/Controls/GrayButton.qml</file>
         <file>Resources/Controls/Tabs.qml</file>
         <file>Resources/Controls/TextCommandLine.qml</file>
+        <file>Resources/Scripts/FrequencyUtils.js</file>
+        <file>Resources/Scripts/TimestampUtils.js</file>
     </qresource>
 </RCC>

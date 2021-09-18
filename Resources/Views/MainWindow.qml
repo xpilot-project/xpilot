@@ -5,20 +5,20 @@ import QtQuick.Controls 2.12
 import QtQuick.Window 2.15
 import QtQuick.Layouts 1.12
 import QtWebSockets 1.2
+import "../Scripts/FrequencyUtils.js" as FrequencyUtils
+import "../Scripts/TimestampUtils.js" as TimestampUtils
 import "../Components"
 import "../Controls"
 
 Window {
-    property bool isModeC: false
-    property string wsHost: "localhost"
-    property string wsPort: "9000"
     property QtObject connectWindow
     property QtObject settingsWindow
     property QtObject flightPlanWindow
     property int currentTab
-    property bool wsConnected
+    property bool simConnected: false
 
-    signal wsStateChanged(bool connected)
+    signal setTransponderCode(int code);
+    signal setRadioStack(int radio, int frequency);
 
     id: mainWindow
     title: "xPilot"
@@ -29,6 +29,20 @@ Window {
     minimumHeight: 250
     minimumWidth: 800
     color: "#272C2E"
+
+    FontLoader {
+        id: ubuntuRegular
+        source: "../Fonts/Ubuntu-Regular.ttf"
+    }
+
+    FontLoader {
+        id: robotoMono
+        source: "../Fonts/Roboto-Mono.ttf"
+    }
+
+    Component.onCompleted: {
+        appendInfoMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.");
+    }
 
     Connections {
         target: connectWindow
@@ -51,12 +65,38 @@ Window {
         }
     }
 
-    function currentTimestamp() {
-        var dt = new Date();
-        const h = dt.getUTCHours() < 10 ? "0" + dt.getUTCHours() : dt.getUTCHours();
-        const m = dt.getUTCMinutes() < 10 ? "0" + dt.getUTCMinutes() : dt.getUTCMinutes();
-        const s = dt.getUTCSeconds() < 10 ? "0" + dt.getUTCSeconds() : dt.getUTCSeconds();
-        return h + ":" + m + ":" + s;
+    Connections {
+        target: ipc
+
+        function onNotificationPosted(type, message) {
+            switch(type) {
+            case 0: // info
+                appendInfoMessage(message)
+                break;
+            case 1: // warning
+                appendWarningMessage(message)
+                break;
+            case 2: // error
+                appendErrorMessage(message)
+                break;
+            }
+        }
+
+        function onSimulatorConnected(isConnected) {
+            if(isConnected) {
+                if(!simConnected) {
+                    appendInfoMessage("X-Plane connection established.")
+                }
+                simConnected = true
+            } else {
+                if(simConnected) {
+                    appendErrorMessage("X-Plane connection lost.")
+                }
+                simConnected = false
+            }
+
+            toolbar.simConnected = isConnected
+        }
     }
 
     //    function appendMessage(tabId, message) {
@@ -71,27 +111,27 @@ Window {
 
     function appendMessage(message) {
         var model = cliModel.get(0)
-        model.attributes.append({message:`[${currentTimestamp()}] ${message}`})
+        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`})
     }
 
     function appendInfoMessage(message) {
         var model = cliModel.get(0)
-        model.attributes.append({message:`[${currentTimestamp()}] ${message}`, msgColor:"#F1C40F"}) // yellow
+        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor:"#F1C40F"}) // yellow
     }
 
     function appendErrorMessage(message) {
         var model = cliModel.get(0)
-        model.attributes.append({message:`[${currentTimestamp()}] ${message}`, msgColor:"#EB2F06"}) // red
+        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor:"#EB2F06"}) // red
     }
 
     function appendWarningMessage(message) {
         var model = cliModel.get(0)
-        model.attributes.append({message:`[${currentTimestamp()}] ${message}`, msgColor:"#E67E22"}) // orange
+        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor:"#E67E22"}) // orange
     }
 
     function appendNote(message) {
         var model = cliModel.get(1)
-        model.attributes.append({message:`[${currentTimestamp()}] ${message}`})
+        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`})
     }
 
     function clearNotes() {
@@ -102,149 +142,6 @@ Window {
     function clearMessages() {
         var model = cliModel.get(0)
         model.attributes.clear()
-    }
-
-    function mergeObjects() {
-        var res = {};
-        for (var i = 0; i < arguments.length; i++) {
-            for (var x in arguments[i]) {
-                res[x] = arguments[i][x];
-            }
-        }
-        return res;
-    }
-
-    function addTypeProperty (type, command) {
-        return {
-            "$type": `Vatsim.Xpilot.XplaneBridge.Commands.${type}Command, XplaneBridge`
-        }
-    }
-
-    function sendCommand(type, command) {
-        var json = JSON.stringify(mergeObjects(addTypeProperty(type), command))
-        console.log(json)
-        wsClient.sendTextMessage(json)
-    }
-
-    function checkFrequencyValid(frequency) {
-        let num = frequency % 100000;
-        if (frequency < 108000000 || frequency > 136975000) {
-            throw "Invalid frequency range.";
-        }
-        if (num !== 0 && num !== 25000 && num !== 50000 && num !== 75000) {
-            throw "Invalid frequency format. 8.33kHz frequencies not currently supported.";
-        }
-        return frequency;
-    }
-
-    function normalize25KhzFrequency(freq) {
-        if (!isNaN(freq)) {
-            if (freq < 100000000) {
-                return freq;
-            }
-            if (freq % 100000 == 20000 || freq % 100000 == 70000) {
-                return freq + 5000;
-            }
-        } else {
-            if (String(freq).indexOf(".") < 3) {
-                return freq;
-            }
-            let freq2 =
-                parseInt(String(freq).replace(".", "")) *
-                Math.pow(10.0, 9 - (String(freq).length - 1));
-            let text = normalize25KhzFrequency(freq2).toString();
-            freq = text.substring(0, 3) + "." + text.substring(3);
-        }
-        return checkFrequencyValid(freq);
-    }
-
-    function frequencyToInt(freq: string) {
-        let num = Math.round(parseFloat(freq.trim()) * 1000000.0);
-        return normalize25KhzFrequency(num);
-    }
-
-    Component.onCompleted: {
-        wsClient.connect(wsHost, wsPort)
-        appendInfoMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.");
-    }
-
-    Timer {
-        id: timer
-        function setTimeout(cb, delayTime) {
-            timer.interval = delayTime
-            timer.repeat = false
-            timer.triggered.connect(cb)
-            timer.triggered.connect(function release() {
-                timer.triggered.disconnect(cb)
-                timer.triggered.disconnect(release)
-            })
-            timer.start()
-        }
-    }
-
-    WebSocket {
-        id: wsClient
-
-        onStatusChanged: {
-            switch (wsClient.status) {
-            case WebSocket.Open:
-                wsStateChanged(true)
-                wsConnected = true
-                appendInfoMessage("X-Plane connection established.")
-                break
-            case WebSocket.Closed:
-                wsStateChanged(false)
-                if(wsConnected) {
-                    appendErrorMessage("X-Plane connection lost.")
-                }
-                wsConnected = false
-                timer.setTimeout(function () {
-                    wsClient.connect(wsHost, wsPort)
-                }, 1000)
-                break
-            case WebSocket.Error:
-                //appendErrorMessage(`WebSocket Error: ${errorString}`)
-                break
-            }
-        }
-
-        onTextMessageReceived: {
-            var msg = JSON.parse(message)
-            switch(msg.Topic) {
-            case "NotificationPosted":
-                switch(msg.Args.Type) {
-                case "Info":
-                    appendInfoMessage(msg.Args.Message)
-                    break;
-                case "Error":
-                    appendErrorMessage(msg.Args.Message)
-                    break;
-                case "Warn":
-                    appendWarningMessage(msg.Args.Message)
-                    break;
-                }
-                break;
-            }
-        }
-
-        function connect(host, port) {
-            wsClient.active = false
-            wsClient.url = ""
-            var address = "ws://"
-            address = address.concat(host, ":", port, "/ws")
-            wsClient.url = address
-            wsClient.active = true
-        }
-    }
-
-    FontLoader {
-        id: ubuntuRegular
-        source: "../Fonts/Ubuntu-Regular.ttf"
-    }
-
-    FontLoader {
-        id: robotoMono
-        source: "../Fonts/Roboto-Mono.ttf"
     }
 
     Rectangle {
@@ -289,12 +186,6 @@ Window {
 
             Toolbar {
                 id: toolbar
-                Connections {
-                    target: mainWindow
-                    function onWsStateChanged(connected) {
-                        toolbar.wsConnected = connected
-                    }
-                }
 
                 onToggleModeC: {
                     sendCommand("ToggleModeC", {"Active": active})
@@ -504,6 +395,7 @@ Window {
                                 bottomPadding: 5
                                 visible: tabId === currentTab
 
+
                                 ListView {
                                     id: listView
                                     model: attributes
@@ -513,11 +405,15 @@ Window {
                                         height: text.contentHeight
                                         color: 'transparent'
 
-                                        Text {
+                                        TextEdit {
                                             id: text
                                             text: message
+                                            readOnly: true
+                                            selectByMouse: true
+                                            selectionColor: '#0164AD'
+                                            selectedTextColor: '#ffffff'
                                             width: parent.width
-                                            wrapMode: Text.WordWrap
+                                            wrapMode: Text.Wrap
                                             font.family: robotoMono.name
                                             renderType: Text.NativeRendering
                                             font.pixelSize: 13
@@ -571,7 +467,7 @@ Window {
 
                                         try {
 
-                                            if(!wsConnected) {
+                                            if(!simConnected) {
                                                 throw "X-Plane connection not established."
                                             }
 
@@ -599,9 +495,10 @@ Window {
                                                     if (!/^1\d\d[\.\,]\d{1,3}$/.test(cmd[1])) {
                                                         throw "Invalid frequency format.";
                                                     }
-                                                    var freq = frequencyToInt(cmd[1])
-                                                    var radio = cmd[0].toLowerCase() === "com1" ? 1 : 2
-                                                    sendCommand("SetComRadioFrequency", {"ComRadio": radio, "Frequency": freq})
+                                                    var freq = FrequencyUtils.frequencyToInt(cmd[1])
+                                                    var radio = cmd[0].toLowerCase() === ".com1" ? 1 : 2
+                                                    setRadioStack(radio, freq);
+                                                    cliTextField.clear()
                                                     break;
                                                 case ".tx":
                                                     break;
@@ -615,7 +512,7 @@ Window {
                                                         throw "Invalid transponder code format.";
                                                     }
                                                     var code = parseInt(cmd[1])
-                                                    sendCommand("SetTransponderCode", {"Code":code})
+                                                    setTransponderCode(code)
                                                     cliTextField.clear()
                                                     break;
                                                 case ".towerview":

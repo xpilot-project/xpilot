@@ -8,7 +8,7 @@ GridLayout {
     id: toolbar
     columns: 2
     anchors.fill: parent
-    property bool wsConnected: false
+    property bool simConnected: false
 
     signal toggleModeC(bool active)
     signal squawkIdent()
@@ -37,7 +37,7 @@ GridLayout {
         TransponderButton {
             id: btnModeC
             text: "Mode C"
-            enabled: wsConnected
+            enabled: simConnected
             MouseArea {
                 preventStealing: true
                 anchors.fill: parent
@@ -53,7 +53,7 @@ GridLayout {
         TransponderButton {
             id: btnIdent
             text: "Ident"
-            enabled: wsConnected
+            enabled: simConnected
             MouseArea {
                 preventStealing: true
                 anchors.fill: parent
@@ -67,7 +67,7 @@ GridLayout {
         ToolbarButton {
             id: btnFlightPlan
             text: "Flight Plan"
-            enabled: wsConnected
+            enabled: simConnected
             MouseArea {
                 id: btnFlightPlanMouseArea
                 anchors.fill: parent
