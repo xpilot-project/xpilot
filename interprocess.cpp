@@ -3,6 +3,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QByteArray>
+#include <QTimer>
 #include <QQuickWindow>
 #include "base64.hpp"
 #include "protobuf/Envelope.pb.h"
@@ -13,6 +14,10 @@ InterProcess::InterProcess(QObject* parent) : QObject(parent)
     process.setProcessChannelMode(QProcess::ForwardedErrorChannel);
     process.start();
 
+    QTimer* timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &InterProcess::restartProcess);
+    timer->start(5000);
+
     QObject::connect(&process, &QProcess::readyReadStandardOutput, this, &InterProcess::Tick);
 }
 
@@ -20,6 +25,14 @@ InterProcess::~InterProcess()
 {
     qDebug("Terminating IPC process");
     process.kill();
+}
+
+void InterProcess::restartProcess()
+{
+    if(process.state() == QProcess::NotRunning)
+    {
+        process.start();
+    }
 }
 
 void InterProcess::sendEnvelope(const xpilot::Envelope& envelope)

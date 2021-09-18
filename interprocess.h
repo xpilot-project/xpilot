@@ -48,6 +48,7 @@ public slots:
 private:
     QProcess process;
     void sendEnvelope(const xpilot::Envelope& envelope);
+    void restartProcess();
 
 signals:
     void simulatorConnected(bool isConnected);
