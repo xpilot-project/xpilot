@@ -173,12 +173,31 @@ class NetworkConnectionRequest final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kCallsignFieldNumber = 1,
-    kTypeCodeFieldNumber = 2,
-    kSelcalCodeFieldNumber = 3,
-    kObserverModeFieldNumber = 4,
+    kGuidFieldNumber = 1,
+    kCallsignFieldNumber = 2,
+    kTypeCodeFieldNumber = 3,
+    kSelcalCodeFieldNumber = 4,
+    kObserverModeFieldNumber = 5,
   };
-  // optional string callsign = 1;
+  // optional string guid = 1;
+  bool has_guid() const;
+  private:
+  bool _internal_has_guid() const;
+  public:
+  void clear_guid();
+  const std::string& guid() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_guid(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_guid();
+  PROTOBUF_FUTURE_MUST_USE_RESULT std::string* release_guid();
+  void set_allocated_guid(std::string* guid);
+  private:
+  const std::string& _internal_guid() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_guid(const std::string& value);
+  std::string* _internal_mutable_guid();
+  public:
+
+  // optional string callsign = 2;
   bool has_callsign() const;
   private:
   bool _internal_has_callsign() const;
@@ -196,7 +215,7 @@ class NetworkConnectionRequest final :
   std::string* _internal_mutable_callsign();
   public:
 
-  // optional string type_code = 2;
+  // optional string type_code = 3;
   bool has_type_code() const;
   private:
   bool _internal_has_type_code() const;
@@ -214,7 +233,7 @@ class NetworkConnectionRequest final :
   std::string* _internal_mutable_type_code();
   public:
 
-  // optional string selcal_code = 3;
+  // optional string selcal_code = 4;
   bool has_selcal_code() const;
   private:
   bool _internal_has_selcal_code() const;
@@ -232,7 +251,7 @@ class NetworkConnectionRequest final :
   std::string* _internal_mutable_selcal_code();
   public:
 
-  // optional bool observer_mode = 4;
+  // optional bool observer_mode = 5;
   bool has_observer_mode() const;
   private:
   bool _internal_has_observer_mode() const;
@@ -254,6 +273,7 @@ class NetworkConnectionRequest final :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr guid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr callsign_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr type_code_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr selcal_code_;
@@ -271,9 +291,66 @@ class NetworkConnectionRequest final :
 #endif  // __GNUC__
 // NetworkConnectionRequest
 
-// optional string callsign = 1;
-inline bool NetworkConnectionRequest::_internal_has_callsign() const {
+// optional string guid = 1;
+inline bool NetworkConnectionRequest::_internal_has_guid() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool NetworkConnectionRequest::has_guid() const {
+  return _internal_has_guid();
+}
+inline void NetworkConnectionRequest::clear_guid() {
+  guid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& NetworkConnectionRequest::guid() const {
+  // @@protoc_insertion_point(field_get:xpilot.NetworkConnectionRequest.guid)
+  return _internal_guid();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void NetworkConnectionRequest::set_guid(ArgT0&& arg0, ArgT... args) {
+ _has_bits_[0] |= 0x00000001u;
+ guid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:xpilot.NetworkConnectionRequest.guid)
+}
+inline std::string* NetworkConnectionRequest::mutable_guid() {
+  // @@protoc_insertion_point(field_mutable:xpilot.NetworkConnectionRequest.guid)
+  return _internal_mutable_guid();
+}
+inline const std::string& NetworkConnectionRequest::_internal_guid() const {
+  return guid_.Get();
+}
+inline void NetworkConnectionRequest::_internal_set_guid(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  guid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* NetworkConnectionRequest::_internal_mutable_guid() {
+  _has_bits_[0] |= 0x00000001u;
+  return guid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* NetworkConnectionRequest::release_guid() {
+  // @@protoc_insertion_point(field_release:xpilot.NetworkConnectionRequest.guid)
+  if (!_internal_has_guid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return guid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void NetworkConnectionRequest::set_allocated_guid(std::string* guid) {
+  if (guid != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  guid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), guid,
+      GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set_allocated:xpilot.NetworkConnectionRequest.guid)
+}
+
+// optional string callsign = 2;
+inline bool NetworkConnectionRequest::_internal_has_callsign() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool NetworkConnectionRequest::has_callsign() const {
@@ -281,7 +358,7 @@ inline bool NetworkConnectionRequest::has_callsign() const {
 }
 inline void NetworkConnectionRequest::clear_callsign() {
   callsign_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline const std::string& NetworkConnectionRequest::callsign() const {
   // @@protoc_insertion_point(field_get:xpilot.NetworkConnectionRequest.callsign)
@@ -290,7 +367,7 @@ inline const std::string& NetworkConnectionRequest::callsign() const {
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
 void NetworkConnectionRequest::set_callsign(ArgT0&& arg0, ArgT... args) {
- _has_bits_[0] |= 0x00000001u;
+ _has_bits_[0] |= 0x00000002u;
  callsign_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
   // @@protoc_insertion_point(field_set:xpilot.NetworkConnectionRequest.callsign)
 }
@@ -302,11 +379,11 @@ inline const std::string& NetworkConnectionRequest::_internal_callsign() const {
   return callsign_.Get();
 }
 inline void NetworkConnectionRequest::_internal_set_callsign(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   callsign_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
 }
 inline std::string* NetworkConnectionRequest::_internal_mutable_callsign() {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   return callsign_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* NetworkConnectionRequest::release_callsign() {
@@ -314,23 +391,23 @@ inline std::string* NetworkConnectionRequest::release_callsign() {
   if (!_internal_has_callsign()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
   return callsign_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void NetworkConnectionRequest::set_allocated_callsign(std::string* callsign) {
   if (callsign != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
+    _has_bits_[0] |= 0x00000002u;
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    _has_bits_[0] &= ~0x00000002u;
   }
   callsign_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), callsign,
       GetArenaForAllocation());
   // @@protoc_insertion_point(field_set_allocated:xpilot.NetworkConnectionRequest.callsign)
 }
 
-// optional string type_code = 2;
+// optional string type_code = 3;
 inline bool NetworkConnectionRequest::_internal_has_type_code() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
 inline bool NetworkConnectionRequest::has_type_code() const {
@@ -338,7 +415,7 @@ inline bool NetworkConnectionRequest::has_type_code() const {
 }
 inline void NetworkConnectionRequest::clear_type_code() {
   type_code_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline const std::string& NetworkConnectionRequest::type_code() const {
   // @@protoc_insertion_point(field_get:xpilot.NetworkConnectionRequest.type_code)
@@ -347,7 +424,7 @@ inline const std::string& NetworkConnectionRequest::type_code() const {
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
 void NetworkConnectionRequest::set_type_code(ArgT0&& arg0, ArgT... args) {
- _has_bits_[0] |= 0x00000002u;
+ _has_bits_[0] |= 0x00000004u;
  type_code_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
   // @@protoc_insertion_point(field_set:xpilot.NetworkConnectionRequest.type_code)
 }
@@ -359,11 +436,11 @@ inline const std::string& NetworkConnectionRequest::_internal_type_code() const 
   return type_code_.Get();
 }
 inline void NetworkConnectionRequest::_internal_set_type_code(const std::string& value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
   type_code_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
 }
 inline std::string* NetworkConnectionRequest::_internal_mutable_type_code() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
   return type_code_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* NetworkConnectionRequest::release_type_code() {
@@ -371,23 +448,23 @@ inline std::string* NetworkConnectionRequest::release_type_code() {
   if (!_internal_has_type_code()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
   return type_code_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void NetworkConnectionRequest::set_allocated_type_code(std::string* type_code) {
   if (type_code != nullptr) {
-    _has_bits_[0] |= 0x00000002u;
+    _has_bits_[0] |= 0x00000004u;
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    _has_bits_[0] &= ~0x00000004u;
   }
   type_code_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), type_code,
       GetArenaForAllocation());
   // @@protoc_insertion_point(field_set_allocated:xpilot.NetworkConnectionRequest.type_code)
 }
 
-// optional string selcal_code = 3;
+// optional string selcal_code = 4;
 inline bool NetworkConnectionRequest::_internal_has_selcal_code() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool NetworkConnectionRequest::has_selcal_code() const {
@@ -395,7 +472,7 @@ inline bool NetworkConnectionRequest::has_selcal_code() const {
 }
 inline void NetworkConnectionRequest::clear_selcal_code() {
   selcal_code_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline const std::string& NetworkConnectionRequest::selcal_code() const {
   // @@protoc_insertion_point(field_get:xpilot.NetworkConnectionRequest.selcal_code)
@@ -404,7 +481,7 @@ inline const std::string& NetworkConnectionRequest::selcal_code() const {
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
 void NetworkConnectionRequest::set_selcal_code(ArgT0&& arg0, ArgT... args) {
- _has_bits_[0] |= 0x00000004u;
+ _has_bits_[0] |= 0x00000008u;
  selcal_code_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
   // @@protoc_insertion_point(field_set:xpilot.NetworkConnectionRequest.selcal_code)
 }
@@ -416,11 +493,11 @@ inline const std::string& NetworkConnectionRequest::_internal_selcal_code() cons
   return selcal_code_.Get();
 }
 inline void NetworkConnectionRequest::_internal_set_selcal_code(const std::string& value) {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
   selcal_code_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
 }
 inline std::string* NetworkConnectionRequest::_internal_mutable_selcal_code() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
   return selcal_code_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* NetworkConnectionRequest::release_selcal_code() {
@@ -428,23 +505,23 @@ inline std::string* NetworkConnectionRequest::release_selcal_code() {
   if (!_internal_has_selcal_code()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
   return selcal_code_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void NetworkConnectionRequest::set_allocated_selcal_code(std::string* selcal_code) {
   if (selcal_code != nullptr) {
-    _has_bits_[0] |= 0x00000004u;
+    _has_bits_[0] |= 0x00000008u;
   } else {
-    _has_bits_[0] &= ~0x00000004u;
+    _has_bits_[0] &= ~0x00000008u;
   }
   selcal_code_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), selcal_code,
       GetArenaForAllocation());
   // @@protoc_insertion_point(field_set_allocated:xpilot.NetworkConnectionRequest.selcal_code)
 }
 
-// optional bool observer_mode = 4;
+// optional bool observer_mode = 5;
 inline bool NetworkConnectionRequest::_internal_has_observer_mode() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
 inline bool NetworkConnectionRequest::has_observer_mode() const {
@@ -452,7 +529,7 @@ inline bool NetworkConnectionRequest::has_observer_mode() const {
 }
 inline void NetworkConnectionRequest::clear_observer_mode() {
   observer_mode_ = false;
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline bool NetworkConnectionRequest::_internal_observer_mode() const {
   return observer_mode_;
@@ -462,7 +539,7 @@ inline bool NetworkConnectionRequest::observer_mode() const {
   return _internal_observer_mode();
 }
 inline void NetworkConnectionRequest::_internal_set_observer_mode(bool value) {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
   observer_mode_ = value;
 }
 inline void NetworkConnectionRequest::set_observer_mode(bool value) {

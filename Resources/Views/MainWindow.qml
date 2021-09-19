@@ -11,6 +11,16 @@ import "../Components"
 import "../Controls"
 
 Window {
+    id: mainWindow
+    title: "xPilot"
+    visible: true
+    flags: Qt.Window | Qt.FramelessWindowHint
+    width: 800
+    height: 250
+    minimumHeight: 250
+    minimumWidth: 800
+    color: "#272C2E"
+
     property QtObject connectWindow
     property QtObject settingsWindow
     property QtObject flightPlanWindow
@@ -21,16 +31,8 @@ Window {
     signal setTransponderModeC(bool active);
     signal setTransponderIdent();
     signal setRadioStack(int radio, int frequency);
-
-    id: mainWindow
-    title: "xPilot"
-    visible: true
-    flags: Qt.Window | Qt.FramelessWindowHint
-    width: 800
-    height: 250
-    minimumHeight: 250
-    minimumWidth: 800
-    color: "#272C2E"
+    signal requestConfig();
+    signal updateConfig(var config);
 
     FontLoader {
         id: ubuntuRegular
@@ -64,6 +66,12 @@ Window {
         target: settingsWindow
         function onCloseWindow() {
             settingsWindow.destroy()
+        }
+        function onRequestConfig() {
+            requestConfig()
+        }
+        function onUpdateConfig(config) {
+            updateConfig(config)
         }
     }
 

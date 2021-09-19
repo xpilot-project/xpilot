@@ -94,8 +94,8 @@ GridLayout {
                 onClicked: {
                     var comp = Qt.createComponent("qrc:/Resources/Views/SettingsWindow.qml")
                     if(comp.status === Component.Ready) {
-                        settingsWindow = comp.createObject(mainWindow)
-                        settingsWindow.show()
+                        mainWindow.settingsWindow = comp.createObject(mainWindow)
+                        mainWindow.settingsWindow.show()
                     }
                 }
             }

@@ -19,7 +19,8 @@ PROTOBUF_PRAGMA_INIT_SEG
 namespace xpilot {
 constexpr PostNote::PostNote(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : message_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+  : message_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , timestamp_(nullptr){}
 struct PostNoteDefaultTypeInternal {
   constexpr PostNoteDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -40,11 +41,13 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_PostNote_2eproto::offsets[] PR
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::xpilot::PostNote, timestamp_),
   PROTOBUF_FIELD_OFFSET(::xpilot::PostNote, message_),
+  ~0u,
   0,
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 6, sizeof(::xpilot::PostNote)},
+  { 0, 7, sizeof(::xpilot::PostNote)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -52,14 +55,19 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_PostNote_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\016PostNote.proto\022\006xpilot\",\n\010PostNote\022\024\n\007"
-  "message\030\001 \001(\tH\000\210\001\001B\n\n\010_messageB\031\252\002\026Vatsi"
+  "\n\016PostNote.proto\022\006xpilot\032\037google/protobu"
+  "f/timestamp.proto\"[\n\010PostNote\022-\n\ttimesta"
+  "mp\030\001 \001(\0132\032.google.protobuf.Timestamp\022\024\n\007"
+  "message\030\002 \001(\tH\000\210\001\001B\n\n\010_messageB\031\252\002\026Vatsi"
   "m.Xpilot.Protobufb\006proto3"
   ;
+static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_PostNote_2eproto_deps[1] = {
+  &::descriptor_table_google_2fprotobuf_2ftimestamp_2eproto,
+};
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_PostNote_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_PostNote_2eproto = {
-  false, false, 105, descriptor_table_protodef_PostNote_2eproto, "PostNote.proto", 
-  &descriptor_table_PostNote_2eproto_once, nullptr, 0, 1,
+  false, false, 185, descriptor_table_protodef_PostNote_2eproto, "PostNote.proto", 
+  &descriptor_table_PostNote_2eproto_once, descriptor_table_PostNote_2eproto_deps, 1, 1,
   schemas, file_default_instances, TableStruct_PostNote_2eproto::offsets,
   file_level_metadata_PostNote_2eproto, file_level_enum_descriptors_PostNote_2eproto, file_level_service_descriptors_PostNote_2eproto,
 };
@@ -76,11 +84,22 @@ namespace xpilot {
 class PostNote::_Internal {
  public:
   using HasBits = decltype(std::declval<PostNote>()._has_bits_);
+  static const PROTOBUF_NAMESPACE_ID::Timestamp& timestamp(const PostNote* msg);
   static void set_has_message(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
 };
 
+const PROTOBUF_NAMESPACE_ID::Timestamp&
+PostNote::_Internal::timestamp(const PostNote* msg) {
+  return *msg->timestamp_;
+}
+void PostNote::clear_timestamp() {
+  if (GetArenaForAllocation() == nullptr && timestamp_ != nullptr) {
+    delete timestamp_;
+  }
+  timestamp_ = nullptr;
+}
 PostNote::PostNote(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
@@ -96,11 +115,17 @@ PostNote::PostNote(const PostNote& from)
     message_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_message(), 
       GetArenaForAllocation());
   }
+  if (from._internal_has_timestamp()) {
+    timestamp_ = new PROTOBUF_NAMESPACE_ID::Timestamp(*from.timestamp_);
+  } else {
+    timestamp_ = nullptr;
+  }
   // @@protoc_insertion_point(copy_constructor:xpilot.PostNote)
 }
 
 void PostNote::SharedCtor() {
 message_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+timestamp_ = nullptr;
 }
 
 PostNote::~PostNote() {
@@ -112,6 +137,7 @@ PostNote::~PostNote() {
 void PostNote::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   message_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete timestamp_;
 }
 
 void PostNote::ArenaDtor(void* object) {
@@ -134,6 +160,10 @@ void PostNote::Clear() {
   if (cached_has_bits & 0x00000001u) {
     message_.ClearNonDefaultToEmpty();
   }
+  if (GetArenaForAllocation() == nullptr && timestamp_ != nullptr) {
+    delete timestamp_;
+  }
+  timestamp_ = nullptr;
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -145,9 +175,16 @@ const char* PostNote::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::i
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // optional string message = 1;
+      // .google.protobuf.Timestamp timestamp = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_timestamp(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string message = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           auto str = _internal_mutable_message();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "xpilot.PostNote.message"));
@@ -184,14 +221,22 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // optional string message = 1;
+  // .google.protobuf.Timestamp timestamp = 1;
+  if (this->has_timestamp()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::timestamp(this), target, stream);
+  }
+
+  // optional string message = 2;
   if (_internal_has_message()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_message().data(), static_cast<int>(this->_internal_message().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "xpilot.PostNote.message");
     target = stream->WriteStringMaybeAliased(
-        1, this->_internal_message(), target);
+        2, this->_internal_message(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -210,12 +255,19 @@ size_t PostNote::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // optional string message = 1;
+  // optional string message = 2;
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x00000001u) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_message());
+  }
+
+  // .google.protobuf.Timestamp timestamp = 1;
+  if (this->has_timestamp()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *timestamp_);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -252,6 +304,9 @@ void PostNote::MergeFrom(const PostNote& from) {
   if (from._internal_has_message()) {
     _internal_set_message(from._internal_message());
   }
+  if (from.has_timestamp()) {
+    _internal_mutable_timestamp()->PROTOBUF_NAMESPACE_ID::Timestamp::MergeFrom(from._internal_timestamp());
+  }
 }
 
 void PostNote::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -281,6 +336,7 @@ void PostNote::InternalSwap(PostNote* other) {
       &message_, GetArenaForAllocation(),
       &other->message_, other->GetArenaForAllocation()
   );
+  swap(timestamp_, other->timestamp_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata PostNote::GetMetadata() const {

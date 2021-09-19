@@ -72,6 +72,13 @@
 #include "NoteReceived.pb.h"
 #include "ClearNoteHistory.pb.h"
 #include "StationInfoReceived.pb.h"
+#include "RadioStatus.pb.h"
+#include "SetAudioDevice.pb.h"
+#include "RefreshDeviceList.pb.h"
+#include "CloseMessageTab.pb.h"
+#include "MarkAsRead.pb.h"
+#include "SelcalAlertReceived.pb.h"
+#include "RequestConfig.pb.h"
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
 #define PROTOBUF_INTERNAL_EXPORT_Envelope_2eproto
@@ -187,6 +194,13 @@ class Envelope final :
     kNoteReceived = 41,
     kClearNoteHistory = 42,
     kStationInfoReceived = 43,
+    kRadioStatus = 44,
+    kSetAudioDevice = 45,
+    kRefreshDeviceList = 46,
+    kCloseMessageTab = 47,
+    kMarkAsRead = 48,
+    kSelcalAlertReceived = 49,
+    kRequestConfig = 50,
     EVENT_NOT_SET = 0,
   };
 
@@ -300,6 +314,13 @@ class Envelope final :
     kNoteReceivedFieldNumber = 41,
     kClearNoteHistoryFieldNumber = 42,
     kStationInfoReceivedFieldNumber = 43,
+    kRadioStatusFieldNumber = 44,
+    kSetAudioDeviceFieldNumber = 45,
+    kRefreshDeviceListFieldNumber = 46,
+    kCloseMessageTabFieldNumber = 47,
+    kMarkAsReadFieldNumber = 48,
+    kSelcalAlertReceivedFieldNumber = 49,
+    kRequestConfigFieldNumber = 50,
   };
   // .xpilot.PositionUpdate position_update = 1;
   bool has_position_update() const;
@@ -1039,6 +1060,132 @@ class Envelope final :
       ::xpilot::StationInfoReceived* station_info_received);
   ::xpilot::StationInfoReceived* unsafe_arena_release_station_info_received();
 
+  // .xpilot.RadioStatus radio_status = 44;
+  bool has_radio_status() const;
+  private:
+  bool _internal_has_radio_status() const;
+  public:
+  void clear_radio_status();
+  const ::xpilot::RadioStatus& radio_status() const;
+  PROTOBUF_FUTURE_MUST_USE_RESULT ::xpilot::RadioStatus* release_radio_status();
+  ::xpilot::RadioStatus* mutable_radio_status();
+  void set_allocated_radio_status(::xpilot::RadioStatus* radio_status);
+  private:
+  const ::xpilot::RadioStatus& _internal_radio_status() const;
+  ::xpilot::RadioStatus* _internal_mutable_radio_status();
+  public:
+  void unsafe_arena_set_allocated_radio_status(
+      ::xpilot::RadioStatus* radio_status);
+  ::xpilot::RadioStatus* unsafe_arena_release_radio_status();
+
+  // .xpilot.SetAudioDevice set_audio_device = 45;
+  bool has_set_audio_device() const;
+  private:
+  bool _internal_has_set_audio_device() const;
+  public:
+  void clear_set_audio_device();
+  const ::xpilot::SetAudioDevice& set_audio_device() const;
+  PROTOBUF_FUTURE_MUST_USE_RESULT ::xpilot::SetAudioDevice* release_set_audio_device();
+  ::xpilot::SetAudioDevice* mutable_set_audio_device();
+  void set_allocated_set_audio_device(::xpilot::SetAudioDevice* set_audio_device);
+  private:
+  const ::xpilot::SetAudioDevice& _internal_set_audio_device() const;
+  ::xpilot::SetAudioDevice* _internal_mutable_set_audio_device();
+  public:
+  void unsafe_arena_set_allocated_set_audio_device(
+      ::xpilot::SetAudioDevice* set_audio_device);
+  ::xpilot::SetAudioDevice* unsafe_arena_release_set_audio_device();
+
+  // .xpilot.RefreshDeviceList refresh_device_list = 46;
+  bool has_refresh_device_list() const;
+  private:
+  bool _internal_has_refresh_device_list() const;
+  public:
+  void clear_refresh_device_list();
+  const ::xpilot::RefreshDeviceList& refresh_device_list() const;
+  PROTOBUF_FUTURE_MUST_USE_RESULT ::xpilot::RefreshDeviceList* release_refresh_device_list();
+  ::xpilot::RefreshDeviceList* mutable_refresh_device_list();
+  void set_allocated_refresh_device_list(::xpilot::RefreshDeviceList* refresh_device_list);
+  private:
+  const ::xpilot::RefreshDeviceList& _internal_refresh_device_list() const;
+  ::xpilot::RefreshDeviceList* _internal_mutable_refresh_device_list();
+  public:
+  void unsafe_arena_set_allocated_refresh_device_list(
+      ::xpilot::RefreshDeviceList* refresh_device_list);
+  ::xpilot::RefreshDeviceList* unsafe_arena_release_refresh_device_list();
+
+  // .xpilot.CloseMessageTab close_message_tab = 47;
+  bool has_close_message_tab() const;
+  private:
+  bool _internal_has_close_message_tab() const;
+  public:
+  void clear_close_message_tab();
+  const ::xpilot::CloseMessageTab& close_message_tab() const;
+  PROTOBUF_FUTURE_MUST_USE_RESULT ::xpilot::CloseMessageTab* release_close_message_tab();
+  ::xpilot::CloseMessageTab* mutable_close_message_tab();
+  void set_allocated_close_message_tab(::xpilot::CloseMessageTab* close_message_tab);
+  private:
+  const ::xpilot::CloseMessageTab& _internal_close_message_tab() const;
+  ::xpilot::CloseMessageTab* _internal_mutable_close_message_tab();
+  public:
+  void unsafe_arena_set_allocated_close_message_tab(
+      ::xpilot::CloseMessageTab* close_message_tab);
+  ::xpilot::CloseMessageTab* unsafe_arena_release_close_message_tab();
+
+  // .xpilot.MarkAsRead mark_as_read = 48;
+  bool has_mark_as_read() const;
+  private:
+  bool _internal_has_mark_as_read() const;
+  public:
+  void clear_mark_as_read();
+  const ::xpilot::MarkAsRead& mark_as_read() const;
+  PROTOBUF_FUTURE_MUST_USE_RESULT ::xpilot::MarkAsRead* release_mark_as_read();
+  ::xpilot::MarkAsRead* mutable_mark_as_read();
+  void set_allocated_mark_as_read(::xpilot::MarkAsRead* mark_as_read);
+  private:
+  const ::xpilot::MarkAsRead& _internal_mark_as_read() const;
+  ::xpilot::MarkAsRead* _internal_mutable_mark_as_read();
+  public:
+  void unsafe_arena_set_allocated_mark_as_read(
+      ::xpilot::MarkAsRead* mark_as_read);
+  ::xpilot::MarkAsRead* unsafe_arena_release_mark_as_read();
+
+  // .xpilot.SelcalAlertReceived selcal_alert_received = 49;
+  bool has_selcal_alert_received() const;
+  private:
+  bool _internal_has_selcal_alert_received() const;
+  public:
+  void clear_selcal_alert_received();
+  const ::xpilot::SelcalAlertReceived& selcal_alert_received() const;
+  PROTOBUF_FUTURE_MUST_USE_RESULT ::xpilot::SelcalAlertReceived* release_selcal_alert_received();
+  ::xpilot::SelcalAlertReceived* mutable_selcal_alert_received();
+  void set_allocated_selcal_alert_received(::xpilot::SelcalAlertReceived* selcal_alert_received);
+  private:
+  const ::xpilot::SelcalAlertReceived& _internal_selcal_alert_received() const;
+  ::xpilot::SelcalAlertReceived* _internal_mutable_selcal_alert_received();
+  public:
+  void unsafe_arena_set_allocated_selcal_alert_received(
+      ::xpilot::SelcalAlertReceived* selcal_alert_received);
+  ::xpilot::SelcalAlertReceived* unsafe_arena_release_selcal_alert_received();
+
+  // .xpilot.RequestConfig request_config = 50;
+  bool has_request_config() const;
+  private:
+  bool _internal_has_request_config() const;
+  public:
+  void clear_request_config();
+  const ::xpilot::RequestConfig& request_config() const;
+  PROTOBUF_FUTURE_MUST_USE_RESULT ::xpilot::RequestConfig* release_request_config();
+  ::xpilot::RequestConfig* mutable_request_config();
+  void set_allocated_request_config(::xpilot::RequestConfig* request_config);
+  private:
+  const ::xpilot::RequestConfig& _internal_request_config() const;
+  ::xpilot::RequestConfig* _internal_mutable_request_config();
+  public:
+  void unsafe_arena_set_allocated_request_config(
+      ::xpilot::RequestConfig* request_config);
+  ::xpilot::RequestConfig* unsafe_arena_release_request_config();
+
   void clear_event();
   EventCase event_case() const;
   // @@protoc_insertion_point(class_scope:xpilot.Envelope)
@@ -1085,6 +1232,13 @@ class Envelope final :
   void set_has_note_received();
   void set_has_clear_note_history();
   void set_has_station_info_received();
+  void set_has_radio_status();
+  void set_has_set_audio_device();
+  void set_has_refresh_device_list();
+  void set_has_close_message_tab();
+  void set_has_mark_as_read();
+  void set_has_selcal_alert_received();
+  void set_has_request_config();
 
   inline bool has_event() const;
   inline void clear_has_event();
@@ -1136,6 +1290,13 @@ class Envelope final :
     ::xpilot::NoteReceived* note_received_;
     ::xpilot::ClearNoteHistory* clear_note_history_;
     ::xpilot::StationInfoReceived* station_info_received_;
+    ::xpilot::RadioStatus* radio_status_;
+    ::xpilot::SetAudioDevice* set_audio_device_;
+    ::xpilot::RefreshDeviceList* refresh_device_list_;
+    ::xpilot::CloseMessageTab* close_message_tab_;
+    ::xpilot::MarkAsRead* mark_as_read_;
+    ::xpilot::SelcalAlertReceived* selcal_alert_received_;
+    ::xpilot::RequestConfig* request_config_;
   } event_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::uint32 _oneof_case_[1];
@@ -3816,6 +3977,461 @@ inline ::xpilot::StationInfoReceived* Envelope::_internal_mutable_station_info_r
 inline ::xpilot::StationInfoReceived* Envelope::mutable_station_info_received() {
   // @@protoc_insertion_point(field_mutable:xpilot.Envelope.station_info_received)
   return _internal_mutable_station_info_received();
+}
+
+// .xpilot.RadioStatus radio_status = 44;
+inline bool Envelope::_internal_has_radio_status() const {
+  return event_case() == kRadioStatus;
+}
+inline bool Envelope::has_radio_status() const {
+  return _internal_has_radio_status();
+}
+inline void Envelope::set_has_radio_status() {
+  _oneof_case_[0] = kRadioStatus;
+}
+inline ::xpilot::RadioStatus* Envelope::release_radio_status() {
+  // @@protoc_insertion_point(field_release:xpilot.Envelope.radio_status)
+  if (_internal_has_radio_status()) {
+    clear_has_event();
+      ::xpilot::RadioStatus* temp = event_.radio_status_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    event_.radio_status_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::xpilot::RadioStatus& Envelope::_internal_radio_status() const {
+  return _internal_has_radio_status()
+      ? *event_.radio_status_
+      : reinterpret_cast< ::xpilot::RadioStatus&>(::xpilot::_RadioStatus_default_instance_);
+}
+inline const ::xpilot::RadioStatus& Envelope::radio_status() const {
+  // @@protoc_insertion_point(field_get:xpilot.Envelope.radio_status)
+  return _internal_radio_status();
+}
+inline ::xpilot::RadioStatus* Envelope::unsafe_arena_release_radio_status() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:xpilot.Envelope.radio_status)
+  if (_internal_has_radio_status()) {
+    clear_has_event();
+    ::xpilot::RadioStatus* temp = event_.radio_status_;
+    event_.radio_status_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Envelope::unsafe_arena_set_allocated_radio_status(::xpilot::RadioStatus* radio_status) {
+  clear_event();
+  if (radio_status) {
+    set_has_radio_status();
+    event_.radio_status_ = radio_status;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:xpilot.Envelope.radio_status)
+}
+inline ::xpilot::RadioStatus* Envelope::_internal_mutable_radio_status() {
+  if (!_internal_has_radio_status()) {
+    clear_event();
+    set_has_radio_status();
+    event_.radio_status_ = CreateMaybeMessage< ::xpilot::RadioStatus >(GetArenaForAllocation());
+  }
+  return event_.radio_status_;
+}
+inline ::xpilot::RadioStatus* Envelope::mutable_radio_status() {
+  // @@protoc_insertion_point(field_mutable:xpilot.Envelope.radio_status)
+  return _internal_mutable_radio_status();
+}
+
+// .xpilot.SetAudioDevice set_audio_device = 45;
+inline bool Envelope::_internal_has_set_audio_device() const {
+  return event_case() == kSetAudioDevice;
+}
+inline bool Envelope::has_set_audio_device() const {
+  return _internal_has_set_audio_device();
+}
+inline void Envelope::set_has_set_audio_device() {
+  _oneof_case_[0] = kSetAudioDevice;
+}
+inline ::xpilot::SetAudioDevice* Envelope::release_set_audio_device() {
+  // @@protoc_insertion_point(field_release:xpilot.Envelope.set_audio_device)
+  if (_internal_has_set_audio_device()) {
+    clear_has_event();
+      ::xpilot::SetAudioDevice* temp = event_.set_audio_device_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    event_.set_audio_device_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::xpilot::SetAudioDevice& Envelope::_internal_set_audio_device() const {
+  return _internal_has_set_audio_device()
+      ? *event_.set_audio_device_
+      : reinterpret_cast< ::xpilot::SetAudioDevice&>(::xpilot::_SetAudioDevice_default_instance_);
+}
+inline const ::xpilot::SetAudioDevice& Envelope::set_audio_device() const {
+  // @@protoc_insertion_point(field_get:xpilot.Envelope.set_audio_device)
+  return _internal_set_audio_device();
+}
+inline ::xpilot::SetAudioDevice* Envelope::unsafe_arena_release_set_audio_device() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:xpilot.Envelope.set_audio_device)
+  if (_internal_has_set_audio_device()) {
+    clear_has_event();
+    ::xpilot::SetAudioDevice* temp = event_.set_audio_device_;
+    event_.set_audio_device_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Envelope::unsafe_arena_set_allocated_set_audio_device(::xpilot::SetAudioDevice* set_audio_device) {
+  clear_event();
+  if (set_audio_device) {
+    set_has_set_audio_device();
+    event_.set_audio_device_ = set_audio_device;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:xpilot.Envelope.set_audio_device)
+}
+inline ::xpilot::SetAudioDevice* Envelope::_internal_mutable_set_audio_device() {
+  if (!_internal_has_set_audio_device()) {
+    clear_event();
+    set_has_set_audio_device();
+    event_.set_audio_device_ = CreateMaybeMessage< ::xpilot::SetAudioDevice >(GetArenaForAllocation());
+  }
+  return event_.set_audio_device_;
+}
+inline ::xpilot::SetAudioDevice* Envelope::mutable_set_audio_device() {
+  // @@protoc_insertion_point(field_mutable:xpilot.Envelope.set_audio_device)
+  return _internal_mutable_set_audio_device();
+}
+
+// .xpilot.RefreshDeviceList refresh_device_list = 46;
+inline bool Envelope::_internal_has_refresh_device_list() const {
+  return event_case() == kRefreshDeviceList;
+}
+inline bool Envelope::has_refresh_device_list() const {
+  return _internal_has_refresh_device_list();
+}
+inline void Envelope::set_has_refresh_device_list() {
+  _oneof_case_[0] = kRefreshDeviceList;
+}
+inline ::xpilot::RefreshDeviceList* Envelope::release_refresh_device_list() {
+  // @@protoc_insertion_point(field_release:xpilot.Envelope.refresh_device_list)
+  if (_internal_has_refresh_device_list()) {
+    clear_has_event();
+      ::xpilot::RefreshDeviceList* temp = event_.refresh_device_list_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    event_.refresh_device_list_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::xpilot::RefreshDeviceList& Envelope::_internal_refresh_device_list() const {
+  return _internal_has_refresh_device_list()
+      ? *event_.refresh_device_list_
+      : reinterpret_cast< ::xpilot::RefreshDeviceList&>(::xpilot::_RefreshDeviceList_default_instance_);
+}
+inline const ::xpilot::RefreshDeviceList& Envelope::refresh_device_list() const {
+  // @@protoc_insertion_point(field_get:xpilot.Envelope.refresh_device_list)
+  return _internal_refresh_device_list();
+}
+inline ::xpilot::RefreshDeviceList* Envelope::unsafe_arena_release_refresh_device_list() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:xpilot.Envelope.refresh_device_list)
+  if (_internal_has_refresh_device_list()) {
+    clear_has_event();
+    ::xpilot::RefreshDeviceList* temp = event_.refresh_device_list_;
+    event_.refresh_device_list_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Envelope::unsafe_arena_set_allocated_refresh_device_list(::xpilot::RefreshDeviceList* refresh_device_list) {
+  clear_event();
+  if (refresh_device_list) {
+    set_has_refresh_device_list();
+    event_.refresh_device_list_ = refresh_device_list;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:xpilot.Envelope.refresh_device_list)
+}
+inline ::xpilot::RefreshDeviceList* Envelope::_internal_mutable_refresh_device_list() {
+  if (!_internal_has_refresh_device_list()) {
+    clear_event();
+    set_has_refresh_device_list();
+    event_.refresh_device_list_ = CreateMaybeMessage< ::xpilot::RefreshDeviceList >(GetArenaForAllocation());
+  }
+  return event_.refresh_device_list_;
+}
+inline ::xpilot::RefreshDeviceList* Envelope::mutable_refresh_device_list() {
+  // @@protoc_insertion_point(field_mutable:xpilot.Envelope.refresh_device_list)
+  return _internal_mutable_refresh_device_list();
+}
+
+// .xpilot.CloseMessageTab close_message_tab = 47;
+inline bool Envelope::_internal_has_close_message_tab() const {
+  return event_case() == kCloseMessageTab;
+}
+inline bool Envelope::has_close_message_tab() const {
+  return _internal_has_close_message_tab();
+}
+inline void Envelope::set_has_close_message_tab() {
+  _oneof_case_[0] = kCloseMessageTab;
+}
+inline ::xpilot::CloseMessageTab* Envelope::release_close_message_tab() {
+  // @@protoc_insertion_point(field_release:xpilot.Envelope.close_message_tab)
+  if (_internal_has_close_message_tab()) {
+    clear_has_event();
+      ::xpilot::CloseMessageTab* temp = event_.close_message_tab_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    event_.close_message_tab_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::xpilot::CloseMessageTab& Envelope::_internal_close_message_tab() const {
+  return _internal_has_close_message_tab()
+      ? *event_.close_message_tab_
+      : reinterpret_cast< ::xpilot::CloseMessageTab&>(::xpilot::_CloseMessageTab_default_instance_);
+}
+inline const ::xpilot::CloseMessageTab& Envelope::close_message_tab() const {
+  // @@protoc_insertion_point(field_get:xpilot.Envelope.close_message_tab)
+  return _internal_close_message_tab();
+}
+inline ::xpilot::CloseMessageTab* Envelope::unsafe_arena_release_close_message_tab() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:xpilot.Envelope.close_message_tab)
+  if (_internal_has_close_message_tab()) {
+    clear_has_event();
+    ::xpilot::CloseMessageTab* temp = event_.close_message_tab_;
+    event_.close_message_tab_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Envelope::unsafe_arena_set_allocated_close_message_tab(::xpilot::CloseMessageTab* close_message_tab) {
+  clear_event();
+  if (close_message_tab) {
+    set_has_close_message_tab();
+    event_.close_message_tab_ = close_message_tab;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:xpilot.Envelope.close_message_tab)
+}
+inline ::xpilot::CloseMessageTab* Envelope::_internal_mutable_close_message_tab() {
+  if (!_internal_has_close_message_tab()) {
+    clear_event();
+    set_has_close_message_tab();
+    event_.close_message_tab_ = CreateMaybeMessage< ::xpilot::CloseMessageTab >(GetArenaForAllocation());
+  }
+  return event_.close_message_tab_;
+}
+inline ::xpilot::CloseMessageTab* Envelope::mutable_close_message_tab() {
+  // @@protoc_insertion_point(field_mutable:xpilot.Envelope.close_message_tab)
+  return _internal_mutable_close_message_tab();
+}
+
+// .xpilot.MarkAsRead mark_as_read = 48;
+inline bool Envelope::_internal_has_mark_as_read() const {
+  return event_case() == kMarkAsRead;
+}
+inline bool Envelope::has_mark_as_read() const {
+  return _internal_has_mark_as_read();
+}
+inline void Envelope::set_has_mark_as_read() {
+  _oneof_case_[0] = kMarkAsRead;
+}
+inline ::xpilot::MarkAsRead* Envelope::release_mark_as_read() {
+  // @@protoc_insertion_point(field_release:xpilot.Envelope.mark_as_read)
+  if (_internal_has_mark_as_read()) {
+    clear_has_event();
+      ::xpilot::MarkAsRead* temp = event_.mark_as_read_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    event_.mark_as_read_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::xpilot::MarkAsRead& Envelope::_internal_mark_as_read() const {
+  return _internal_has_mark_as_read()
+      ? *event_.mark_as_read_
+      : reinterpret_cast< ::xpilot::MarkAsRead&>(::xpilot::_MarkAsRead_default_instance_);
+}
+inline const ::xpilot::MarkAsRead& Envelope::mark_as_read() const {
+  // @@protoc_insertion_point(field_get:xpilot.Envelope.mark_as_read)
+  return _internal_mark_as_read();
+}
+inline ::xpilot::MarkAsRead* Envelope::unsafe_arena_release_mark_as_read() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:xpilot.Envelope.mark_as_read)
+  if (_internal_has_mark_as_read()) {
+    clear_has_event();
+    ::xpilot::MarkAsRead* temp = event_.mark_as_read_;
+    event_.mark_as_read_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Envelope::unsafe_arena_set_allocated_mark_as_read(::xpilot::MarkAsRead* mark_as_read) {
+  clear_event();
+  if (mark_as_read) {
+    set_has_mark_as_read();
+    event_.mark_as_read_ = mark_as_read;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:xpilot.Envelope.mark_as_read)
+}
+inline ::xpilot::MarkAsRead* Envelope::_internal_mutable_mark_as_read() {
+  if (!_internal_has_mark_as_read()) {
+    clear_event();
+    set_has_mark_as_read();
+    event_.mark_as_read_ = CreateMaybeMessage< ::xpilot::MarkAsRead >(GetArenaForAllocation());
+  }
+  return event_.mark_as_read_;
+}
+inline ::xpilot::MarkAsRead* Envelope::mutable_mark_as_read() {
+  // @@protoc_insertion_point(field_mutable:xpilot.Envelope.mark_as_read)
+  return _internal_mutable_mark_as_read();
+}
+
+// .xpilot.SelcalAlertReceived selcal_alert_received = 49;
+inline bool Envelope::_internal_has_selcal_alert_received() const {
+  return event_case() == kSelcalAlertReceived;
+}
+inline bool Envelope::has_selcal_alert_received() const {
+  return _internal_has_selcal_alert_received();
+}
+inline void Envelope::set_has_selcal_alert_received() {
+  _oneof_case_[0] = kSelcalAlertReceived;
+}
+inline ::xpilot::SelcalAlertReceived* Envelope::release_selcal_alert_received() {
+  // @@protoc_insertion_point(field_release:xpilot.Envelope.selcal_alert_received)
+  if (_internal_has_selcal_alert_received()) {
+    clear_has_event();
+      ::xpilot::SelcalAlertReceived* temp = event_.selcal_alert_received_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    event_.selcal_alert_received_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::xpilot::SelcalAlertReceived& Envelope::_internal_selcal_alert_received() const {
+  return _internal_has_selcal_alert_received()
+      ? *event_.selcal_alert_received_
+      : reinterpret_cast< ::xpilot::SelcalAlertReceived&>(::xpilot::_SelcalAlertReceived_default_instance_);
+}
+inline const ::xpilot::SelcalAlertReceived& Envelope::selcal_alert_received() const {
+  // @@protoc_insertion_point(field_get:xpilot.Envelope.selcal_alert_received)
+  return _internal_selcal_alert_received();
+}
+inline ::xpilot::SelcalAlertReceived* Envelope::unsafe_arena_release_selcal_alert_received() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:xpilot.Envelope.selcal_alert_received)
+  if (_internal_has_selcal_alert_received()) {
+    clear_has_event();
+    ::xpilot::SelcalAlertReceived* temp = event_.selcal_alert_received_;
+    event_.selcal_alert_received_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Envelope::unsafe_arena_set_allocated_selcal_alert_received(::xpilot::SelcalAlertReceived* selcal_alert_received) {
+  clear_event();
+  if (selcal_alert_received) {
+    set_has_selcal_alert_received();
+    event_.selcal_alert_received_ = selcal_alert_received;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:xpilot.Envelope.selcal_alert_received)
+}
+inline ::xpilot::SelcalAlertReceived* Envelope::_internal_mutable_selcal_alert_received() {
+  if (!_internal_has_selcal_alert_received()) {
+    clear_event();
+    set_has_selcal_alert_received();
+    event_.selcal_alert_received_ = CreateMaybeMessage< ::xpilot::SelcalAlertReceived >(GetArenaForAllocation());
+  }
+  return event_.selcal_alert_received_;
+}
+inline ::xpilot::SelcalAlertReceived* Envelope::mutable_selcal_alert_received() {
+  // @@protoc_insertion_point(field_mutable:xpilot.Envelope.selcal_alert_received)
+  return _internal_mutable_selcal_alert_received();
+}
+
+// .xpilot.RequestConfig request_config = 50;
+inline bool Envelope::_internal_has_request_config() const {
+  return event_case() == kRequestConfig;
+}
+inline bool Envelope::has_request_config() const {
+  return _internal_has_request_config();
+}
+inline void Envelope::set_has_request_config() {
+  _oneof_case_[0] = kRequestConfig;
+}
+inline ::xpilot::RequestConfig* Envelope::release_request_config() {
+  // @@protoc_insertion_point(field_release:xpilot.Envelope.request_config)
+  if (_internal_has_request_config()) {
+    clear_has_event();
+      ::xpilot::RequestConfig* temp = event_.request_config_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    event_.request_config_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::xpilot::RequestConfig& Envelope::_internal_request_config() const {
+  return _internal_has_request_config()
+      ? *event_.request_config_
+      : reinterpret_cast< ::xpilot::RequestConfig&>(::xpilot::_RequestConfig_default_instance_);
+}
+inline const ::xpilot::RequestConfig& Envelope::request_config() const {
+  // @@protoc_insertion_point(field_get:xpilot.Envelope.request_config)
+  return _internal_request_config();
+}
+inline ::xpilot::RequestConfig* Envelope::unsafe_arena_release_request_config() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:xpilot.Envelope.request_config)
+  if (_internal_has_request_config()) {
+    clear_has_event();
+    ::xpilot::RequestConfig* temp = event_.request_config_;
+    event_.request_config_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Envelope::unsafe_arena_set_allocated_request_config(::xpilot::RequestConfig* request_config) {
+  clear_event();
+  if (request_config) {
+    set_has_request_config();
+    event_.request_config_ = request_config;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:xpilot.Envelope.request_config)
+}
+inline ::xpilot::RequestConfig* Envelope::_internal_mutable_request_config() {
+  if (!_internal_has_request_config()) {
+    clear_event();
+    set_has_request_config();
+    event_.request_config_ = CreateMaybeMessage< ::xpilot::RequestConfig >(GetArenaForAllocation());
+  }
+  return event_.request_config_;
+}
+inline ::xpilot::RequestConfig* Envelope::mutable_request_config() {
+  // @@protoc_insertion_point(field_mutable:xpilot.Envelope.request_config)
+  return _internal_mutable_request_config();
 }
 
 inline bool Envelope::has_event() const {

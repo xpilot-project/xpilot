@@ -81,6 +81,13 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_Envelope_2eproto::offsets[] PR
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   PROTOBUF_FIELD_OFFSET(::xpilot::Envelope, event_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
@@ -117,67 +124,80 @@ const char descriptor_table_protodef_Envelope_2eproto[] PROTOBUF_SECTION_VARIABL
   "to\032\025FetchFlightPlan.proto\032\030FlightPlanRec"
   "eived.proto\032\022NoteReceived.proto\032\026ClearNo"
   "teHistory.proto\032\031StationInfoReceived.pro"
-  "to\"\353\021\n\010Envelope\0221\n\017position_update\030\001 \001(\013"
-  "2\026.xpilot.PositionUpdateH\000\022:\n\024fast_posit"
-  "ion_update\030\002 \001(\0132\032.xpilot.FastPositionUp"
-  "dateH\000\0221\n\017airplane_config\030\003 \001(\0132\026.xpilot"
-  ".AirplaneConfigH\000\022%\n\tadd_plane\030\004 \001(\0132\020.x"
-  "pilot.AddPlaneH\000\0225\n\022plane_added_to_sim\030\005"
-  " \001(\0132\027.xpilot.PlaneAddedToSimH\000\0226\n\022chang"
-  "e_plane_model\030\006 \001(\0132\030.xpilot.ChangePlane"
-  "ModelH\000\022+\n\014delete_plane\030\007 \001(\0132\023.xpilot.D"
-  "eletePlaneH\000\022B\n\030private_message_received"
-  "\030\010 \001(\0132\036.xpilot.PrivateMessageReceivedH\000"
-  "\022:\n\024private_message_sent\030\t \001(\0132\032.xpilot."
-  "PrivateMessageSentH\000\022>\n\026radio_message_re"
-  "ceived\030\n \001(\0132\034.xpilot.RadioMessageReceiv"
-  "edH\000\0226\n\022radio_message_sent\030\013 \001(\0132\030.xpilo"
-  "t.RadioMessageSentH\000\0225\n\021network_connecte"
-  "d\030\014 \001(\0132\030.xpilot.NetworkConnectedH\000\022;\n\024n"
-  "etwork_disconnected\030\r \001(\0132\033.xpilot.Netwo"
-  "rkDisconnectedH\000\0227\n\022nearby_controllers\030\016"
-  " \001(\0132\031.xpilot.NearbyControllersH\000\022/\n\016set"
-  "_radiostack\030\017 \001(\0132\025.xpilot.SetRadioStack"
-  "H\000\022*\n\013app_metdata\030\020 \001(\0132\023.xpilot.AppMeta"
-  "dataH\000\022/\n\016csl_validation\030\021 \001(\0132\025.xpilot."
-  "CslValidationH\000\022:\n\024request_station_info\030"
-  "\022 \001(\0132\032.xpilot.RequestStationInfoH\000\0227\n\022t"
-  "rigger_disconnect\030\023 \001(\0132\031.xpilot.Trigger"
-  "DisconnectH\000\022=\n\026plane_removed_from_sim\030\024"
-  " \001(\0132\033.xpilot.PlaneRemovedFromSimH\000\022@\n\027s"
-  "erver_message_received\030\025 \001(\0132\035.xpilot.Se"
-  "rverMessageReceivedH\000\022-\n\rrequest_metar\030\026"
-  " \001(\0132\024.xpilot.RequestMetarH\000\022/\n\016metar_re"
-  "ceived\030\027 \001(\0132\025.xpilot.MetarReceivedH\000\022)\n"
-  "\013wallop_sent\030\030 \001(\0132\022.xpilot.WallopSentH\000"
-  "\022F\n\032broadcast_message_received\030\031 \001(\0132 .x"
-  "pilot.BroadcastMessageReceivedH\000\022%\n\tpost"
-  "_note\030\034 \001(\0132\020.xpilot.PostNoteH\000\022F\n\032simul"
-  "ator_connection_state\030\035 \001(\0132 .xpilot.Sim"
-  "ulatorConnectionStateH\000\022.\n\016app_config_dt"
-  "o\030\036 \001(\0132\024.xpilot.AppConfigDtoH\000\022)\n\013radio"
-  "_stack\030\037 \001(\0132\022.xpilot.RadioStackH\000\0223\n\020tr"
-  "ansponder_mode\030  \001(\0132\027.xpilot.Transponde"
-  "rModeH\000\0223\n\020transponder_code\030! \001(\0132\027.xpil"
-  "ot.TransponderCodeH\000\0225\n\021transponder_iden"
-  "t\030\" \001(\0132\030.xpilot.TransponderIdentH\000\022E\n\031n"
-  "etwork_connect_requested\030# \001(\0132 .xpilot."
-  "NetworkConnectionRequestH\000\022<\n\025clear_mess"
-  "age_history\030$ \001(\0132\033.xpilot.ClearMessageH"
-  "istoryH\000\022:\n\024post_console_message\030% \001(\0132\032"
-  ".xpilot.PostConsoleMessageH\000\0222\n\020send_fli"
-  "ght_plan\030& \001(\0132\026.xpilot.SendFlightPlanH\000"
-  "\0224\n\021fetch_flight_plan\030\' \001(\0132\027.xpilot.Fet"
-  "chFlightPlanH\000\022:\n\024flight_plan_received\030("
-  " \001(\0132\032.xpilot.FlightPlanReceivedH\000\022-\n\rno"
-  "te_received\030) \001(\0132\024.xpilot.NoteReceivedH"
-  "\000\0226\n\022clear_note_history\030* \001(\0132\030.xpilot.C"
-  "learNoteHistoryH\000\022<\n\025station_info_receiv"
-  "ed\030+ \001(\0132\033.xpilot.StationInfoReceivedH\000B"
-  "\007\n\005eventB\031\252\002\026Vatsim.Xpilot.Protobufb\006pro"
-  "to3"
+  "to\032\021RadioStatus.proto\032\024SetAudioDevice.pr"
+  "oto\032\027RefreshDeviceList.proto\032\025CloseMessa"
+  "geTab.proto\032\020MarkAsRead.proto\032\031SelcalAle"
+  "rtReceived.proto\032\023RequestConfig.proto\"\327\024"
+  "\n\010Envelope\0221\n\017position_update\030\001 \001(\0132\026.xp"
+  "ilot.PositionUpdateH\000\022:\n\024fast_position_u"
+  "pdate\030\002 \001(\0132\032.xpilot.FastPositionUpdateH"
+  "\000\0221\n\017airplane_config\030\003 \001(\0132\026.xpilot.Airp"
+  "laneConfigH\000\022%\n\tadd_plane\030\004 \001(\0132\020.xpilot"
+  ".AddPlaneH\000\0225\n\022plane_added_to_sim\030\005 \001(\0132"
+  "\027.xpilot.PlaneAddedToSimH\000\0226\n\022change_pla"
+  "ne_model\030\006 \001(\0132\030.xpilot.ChangePlaneModel"
+  "H\000\022+\n\014delete_plane\030\007 \001(\0132\023.xpilot.Delete"
+  "PlaneH\000\022B\n\030private_message_received\030\010 \001("
+  "\0132\036.xpilot.PrivateMessageReceivedH\000\022:\n\024p"
+  "rivate_message_sent\030\t \001(\0132\032.xpilot.Priva"
+  "teMessageSentH\000\022>\n\026radio_message_receive"
+  "d\030\n \001(\0132\034.xpilot.RadioMessageReceivedH\000\022"
+  "6\n\022radio_message_sent\030\013 \001(\0132\030.xpilot.Rad"
+  "ioMessageSentH\000\0225\n\021network_connected\030\014 \001"
+  "(\0132\030.xpilot.NetworkConnectedH\000\022;\n\024networ"
+  "k_disconnected\030\r \001(\0132\033.xpilot.NetworkDis"
+  "connectedH\000\0227\n\022nearby_controllers\030\016 \001(\0132"
+  "\031.xpilot.NearbyControllersH\000\022/\n\016set_radi"
+  "ostack\030\017 \001(\0132\025.xpilot.SetRadioStackH\000\022*\n"
+  "\013app_metdata\030\020 \001(\0132\023.xpilot.AppMetadataH"
+  "\000\022/\n\016csl_validation\030\021 \001(\0132\025.xpilot.CslVa"
+  "lidationH\000\022:\n\024request_station_info\030\022 \001(\013"
+  "2\032.xpilot.RequestStationInfoH\000\0227\n\022trigge"
+  "r_disconnect\030\023 \001(\0132\031.xpilot.TriggerDisco"
+  "nnectH\000\022=\n\026plane_removed_from_sim\030\024 \001(\0132"
+  "\033.xpilot.PlaneRemovedFromSimH\000\022@\n\027server"
+  "_message_received\030\025 \001(\0132\035.xpilot.ServerM"
+  "essageReceivedH\000\022-\n\rrequest_metar\030\026 \001(\0132"
+  "\024.xpilot.RequestMetarH\000\022/\n\016metar_receive"
+  "d\030\027 \001(\0132\025.xpilot.MetarReceivedH\000\022)\n\013wall"
+  "op_sent\030\030 \001(\0132\022.xpilot.WallopSentH\000\022F\n\032b"
+  "roadcast_message_received\030\031 \001(\0132 .xpilot"
+  ".BroadcastMessageReceivedH\000\022%\n\tpost_note"
+  "\030\034 \001(\0132\020.xpilot.PostNoteH\000\022F\n\032simulator_"
+  "connection_state\030\035 \001(\0132 .xpilot.Simulato"
+  "rConnectionStateH\000\022.\n\016app_config_dto\030\036 \001"
+  "(\0132\024.xpilot.AppConfigDtoH\000\022)\n\013radio_stac"
+  "k\030\037 \001(\0132\022.xpilot.RadioStackH\000\0223\n\020transpo"
+  "nder_mode\030  \001(\0132\027.xpilot.TransponderMode"
+  "H\000\0223\n\020transponder_code\030! \001(\0132\027.xpilot.Tr"
+  "ansponderCodeH\000\0225\n\021transponder_ident\030\" \001"
+  "(\0132\030.xpilot.TransponderIdentH\000\022E\n\031networ"
+  "k_connect_requested\030# \001(\0132 .xpilot.Netwo"
+  "rkConnectionRequestH\000\022<\n\025clear_message_h"
+  "istory\030$ \001(\0132\033.xpilot.ClearMessageHistor"
+  "yH\000\022:\n\024post_console_message\030% \001(\0132\032.xpil"
+  "ot.PostConsoleMessageH\000\0222\n\020send_flight_p"
+  "lan\030& \001(\0132\026.xpilot.SendFlightPlanH\000\0224\n\021f"
+  "etch_flight_plan\030\' \001(\0132\027.xpilot.FetchFli"
+  "ghtPlanH\000\022:\n\024flight_plan_received\030( \001(\0132"
+  "\032.xpilot.FlightPlanReceivedH\000\022-\n\rnote_re"
+  "ceived\030) \001(\0132\024.xpilot.NoteReceivedH\000\0226\n\022"
+  "clear_note_history\030* \001(\0132\030.xpilot.ClearN"
+  "oteHistoryH\000\022<\n\025station_info_received\030+ "
+  "\001(\0132\033.xpilot.StationInfoReceivedH\000\022+\n\014ra"
+  "dio_status\030, \001(\0132\023.xpilot.RadioStatusH\000\022"
+  "2\n\020set_audio_device\030- \001(\0132\026.xpilot.SetAu"
+  "dioDeviceH\000\0228\n\023refresh_device_list\030. \001(\013"
+  "2\031.xpilot.RefreshDeviceListH\000\0224\n\021close_m"
+  "essage_tab\030/ \001(\0132\027.xpilot.CloseMessageTa"
+  "bH\000\022*\n\014mark_as_read\0300 \001(\0132\022.xpilot.MarkA"
+  "sReadH\000\022<\n\025selcal_alert_received\0301 \001(\0132\033"
+  ".xpilot.SelcalAlertReceivedH\000\022/\n\016request"
+  "_config\0302 \001(\0132\025.xpilot.RequestConfigH\000B\007"
+  "\n\005eventB\031\252\002\026Vatsim.Xpilot.Protobufb\006prot"
+  "o3"
   ;
-static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_Envelope_2eproto_deps[41] = {
+static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_Envelope_2eproto_deps[48] = {
   &::descriptor_table_AddPlane_2eproto,
   &::descriptor_table_AirplaneConfig_2eproto,
   &::descriptor_table_AppConfigDto_2eproto,
@@ -186,11 +206,13 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor
   &::descriptor_table_ChangePlaneModel_2eproto,
   &::descriptor_table_ClearMessageHistory_2eproto,
   &::descriptor_table_ClearNoteHistory_2eproto,
+  &::descriptor_table_CloseMessageTab_2eproto,
   &::descriptor_table_CslValidation_2eproto,
   &::descriptor_table_DeletePlane_2eproto,
   &::descriptor_table_FastPositionUpdate_2eproto,
   &::descriptor_table_FetchFlightPlan_2eproto,
   &::descriptor_table_FlightPlanReceived_2eproto,
+  &::descriptor_table_MarkAsRead_2eproto,
   &::descriptor_table_MetarReceived_2eproto,
   &::descriptor_table_NearbyControllers_2eproto,
   &::descriptor_table_NetworkConnected_2eproto,
@@ -207,10 +229,15 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor
   &::descriptor_table_RadioMessageReceived_2eproto,
   &::descriptor_table_RadioMessageSent_2eproto,
   &::descriptor_table_RadioStack_2eproto,
+  &::descriptor_table_RadioStatus_2eproto,
+  &::descriptor_table_RefreshDeviceList_2eproto,
+  &::descriptor_table_RequestConfig_2eproto,
   &::descriptor_table_RequestMetar_2eproto,
   &::descriptor_table_RequestStationInfo_2eproto,
+  &::descriptor_table_SelcalAlertReceived_2eproto,
   &::descriptor_table_SendFlightPlan_2eproto,
   &::descriptor_table_ServerMessageReceived_2eproto,
+  &::descriptor_table_SetAudioDevice_2eproto,
   &::descriptor_table_SetRadioStack_2eproto,
   &::descriptor_table_SimulatorConnectionState_2eproto,
   &::descriptor_table_StationInfoReceived_2eproto,
@@ -222,8 +249,8 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_Envelope_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_Envelope_2eproto = {
-  false, false, 3323, descriptor_table_protodef_Envelope_2eproto, "Envelope.proto", 
-  &descriptor_table_Envelope_2eproto_once, descriptor_table_Envelope_2eproto_deps, 41, 1,
+  false, false, 3842, descriptor_table_protodef_Envelope_2eproto, "Envelope.proto", 
+  &descriptor_table_Envelope_2eproto_once, descriptor_table_Envelope_2eproto_deps, 48, 1,
   schemas, file_default_instances, TableStruct_Envelope_2eproto::offsets,
   file_level_metadata_Envelope_2eproto, file_level_enum_descriptors_Envelope_2eproto, file_level_service_descriptors_Envelope_2eproto,
 };
@@ -280,6 +307,13 @@ class Envelope::_Internal {
   static const ::xpilot::NoteReceived& note_received(const Envelope* msg);
   static const ::xpilot::ClearNoteHistory& clear_note_history(const Envelope* msg);
   static const ::xpilot::StationInfoReceived& station_info_received(const Envelope* msg);
+  static const ::xpilot::RadioStatus& radio_status(const Envelope* msg);
+  static const ::xpilot::SetAudioDevice& set_audio_device(const Envelope* msg);
+  static const ::xpilot::RefreshDeviceList& refresh_device_list(const Envelope* msg);
+  static const ::xpilot::CloseMessageTab& close_message_tab(const Envelope* msg);
+  static const ::xpilot::MarkAsRead& mark_as_read(const Envelope* msg);
+  static const ::xpilot::SelcalAlertReceived& selcal_alert_received(const Envelope* msg);
+  static const ::xpilot::RequestConfig& request_config(const Envelope* msg);
 };
 
 const ::xpilot::PositionUpdate&
@@ -445,6 +479,34 @@ Envelope::_Internal::clear_note_history(const Envelope* msg) {
 const ::xpilot::StationInfoReceived&
 Envelope::_Internal::station_info_received(const Envelope* msg) {
   return *msg->event_.station_info_received_;
+}
+const ::xpilot::RadioStatus&
+Envelope::_Internal::radio_status(const Envelope* msg) {
+  return *msg->event_.radio_status_;
+}
+const ::xpilot::SetAudioDevice&
+Envelope::_Internal::set_audio_device(const Envelope* msg) {
+  return *msg->event_.set_audio_device_;
+}
+const ::xpilot::RefreshDeviceList&
+Envelope::_Internal::refresh_device_list(const Envelope* msg) {
+  return *msg->event_.refresh_device_list_;
+}
+const ::xpilot::CloseMessageTab&
+Envelope::_Internal::close_message_tab(const Envelope* msg) {
+  return *msg->event_.close_message_tab_;
+}
+const ::xpilot::MarkAsRead&
+Envelope::_Internal::mark_as_read(const Envelope* msg) {
+  return *msg->event_.mark_as_read_;
+}
+const ::xpilot::SelcalAlertReceived&
+Envelope::_Internal::selcal_alert_received(const Envelope* msg) {
+  return *msg->event_.selcal_alert_received_;
+}
+const ::xpilot::RequestConfig&
+Envelope::_Internal::request_config(const Envelope* msg) {
+  return *msg->event_.request_config_;
 }
 void Envelope::set_allocated_position_update(::xpilot::PositionUpdate* position_update) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -1471,6 +1533,181 @@ void Envelope::clear_station_info_received() {
     clear_has_event();
   }
 }
+void Envelope::set_allocated_radio_status(::xpilot::RadioStatus* radio_status) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_event();
+  if (radio_status) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<
+            ::PROTOBUF_NAMESPACE_ID::MessageLite>::GetOwningArena(
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(radio_status));
+    if (message_arena != submessage_arena) {
+      radio_status = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, radio_status, submessage_arena);
+    }
+    set_has_radio_status();
+    event_.radio_status_ = radio_status;
+  }
+  // @@protoc_insertion_point(field_set_allocated:xpilot.Envelope.radio_status)
+}
+void Envelope::clear_radio_status() {
+  if (_internal_has_radio_status()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete event_.radio_status_;
+    }
+    clear_has_event();
+  }
+}
+void Envelope::set_allocated_set_audio_device(::xpilot::SetAudioDevice* set_audio_device) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_event();
+  if (set_audio_device) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<
+            ::PROTOBUF_NAMESPACE_ID::MessageLite>::GetOwningArena(
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(set_audio_device));
+    if (message_arena != submessage_arena) {
+      set_audio_device = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, set_audio_device, submessage_arena);
+    }
+    set_has_set_audio_device();
+    event_.set_audio_device_ = set_audio_device;
+  }
+  // @@protoc_insertion_point(field_set_allocated:xpilot.Envelope.set_audio_device)
+}
+void Envelope::clear_set_audio_device() {
+  if (_internal_has_set_audio_device()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete event_.set_audio_device_;
+    }
+    clear_has_event();
+  }
+}
+void Envelope::set_allocated_refresh_device_list(::xpilot::RefreshDeviceList* refresh_device_list) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_event();
+  if (refresh_device_list) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<
+            ::PROTOBUF_NAMESPACE_ID::MessageLite>::GetOwningArena(
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(refresh_device_list));
+    if (message_arena != submessage_arena) {
+      refresh_device_list = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, refresh_device_list, submessage_arena);
+    }
+    set_has_refresh_device_list();
+    event_.refresh_device_list_ = refresh_device_list;
+  }
+  // @@protoc_insertion_point(field_set_allocated:xpilot.Envelope.refresh_device_list)
+}
+void Envelope::clear_refresh_device_list() {
+  if (_internal_has_refresh_device_list()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete event_.refresh_device_list_;
+    }
+    clear_has_event();
+  }
+}
+void Envelope::set_allocated_close_message_tab(::xpilot::CloseMessageTab* close_message_tab) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_event();
+  if (close_message_tab) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<
+            ::PROTOBUF_NAMESPACE_ID::MessageLite>::GetOwningArena(
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(close_message_tab));
+    if (message_arena != submessage_arena) {
+      close_message_tab = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, close_message_tab, submessage_arena);
+    }
+    set_has_close_message_tab();
+    event_.close_message_tab_ = close_message_tab;
+  }
+  // @@protoc_insertion_point(field_set_allocated:xpilot.Envelope.close_message_tab)
+}
+void Envelope::clear_close_message_tab() {
+  if (_internal_has_close_message_tab()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete event_.close_message_tab_;
+    }
+    clear_has_event();
+  }
+}
+void Envelope::set_allocated_mark_as_read(::xpilot::MarkAsRead* mark_as_read) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_event();
+  if (mark_as_read) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<
+            ::PROTOBUF_NAMESPACE_ID::MessageLite>::GetOwningArena(
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(mark_as_read));
+    if (message_arena != submessage_arena) {
+      mark_as_read = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, mark_as_read, submessage_arena);
+    }
+    set_has_mark_as_read();
+    event_.mark_as_read_ = mark_as_read;
+  }
+  // @@protoc_insertion_point(field_set_allocated:xpilot.Envelope.mark_as_read)
+}
+void Envelope::clear_mark_as_read() {
+  if (_internal_has_mark_as_read()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete event_.mark_as_read_;
+    }
+    clear_has_event();
+  }
+}
+void Envelope::set_allocated_selcal_alert_received(::xpilot::SelcalAlertReceived* selcal_alert_received) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_event();
+  if (selcal_alert_received) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<
+            ::PROTOBUF_NAMESPACE_ID::MessageLite>::GetOwningArena(
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(selcal_alert_received));
+    if (message_arena != submessage_arena) {
+      selcal_alert_received = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, selcal_alert_received, submessage_arena);
+    }
+    set_has_selcal_alert_received();
+    event_.selcal_alert_received_ = selcal_alert_received;
+  }
+  // @@protoc_insertion_point(field_set_allocated:xpilot.Envelope.selcal_alert_received)
+}
+void Envelope::clear_selcal_alert_received() {
+  if (_internal_has_selcal_alert_received()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete event_.selcal_alert_received_;
+    }
+    clear_has_event();
+  }
+}
+void Envelope::set_allocated_request_config(::xpilot::RequestConfig* request_config) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_event();
+  if (request_config) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<
+            ::PROTOBUF_NAMESPACE_ID::MessageLite>::GetOwningArena(
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(request_config));
+    if (message_arena != submessage_arena) {
+      request_config = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, request_config, submessage_arena);
+    }
+    set_has_request_config();
+    event_.request_config_ = request_config;
+  }
+  // @@protoc_insertion_point(field_set_allocated:xpilot.Envelope.request_config)
+}
+void Envelope::clear_request_config() {
+  if (_internal_has_request_config()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete event_.request_config_;
+    }
+    clear_has_event();
+  }
+}
 Envelope::Envelope(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
@@ -1644,6 +1881,34 @@ Envelope::Envelope(const Envelope& from)
     }
     case kStationInfoReceived: {
       _internal_mutable_station_info_received()->::xpilot::StationInfoReceived::MergeFrom(from._internal_station_info_received());
+      break;
+    }
+    case kRadioStatus: {
+      _internal_mutable_radio_status()->::xpilot::RadioStatus::MergeFrom(from._internal_radio_status());
+      break;
+    }
+    case kSetAudioDevice: {
+      _internal_mutable_set_audio_device()->::xpilot::SetAudioDevice::MergeFrom(from._internal_set_audio_device());
+      break;
+    }
+    case kRefreshDeviceList: {
+      _internal_mutable_refresh_device_list()->::xpilot::RefreshDeviceList::MergeFrom(from._internal_refresh_device_list());
+      break;
+    }
+    case kCloseMessageTab: {
+      _internal_mutable_close_message_tab()->::xpilot::CloseMessageTab::MergeFrom(from._internal_close_message_tab());
+      break;
+    }
+    case kMarkAsRead: {
+      _internal_mutable_mark_as_read()->::xpilot::MarkAsRead::MergeFrom(from._internal_mark_as_read());
+      break;
+    }
+    case kSelcalAlertReceived: {
+      _internal_mutable_selcal_alert_received()->::xpilot::SelcalAlertReceived::MergeFrom(from._internal_selcal_alert_received());
+      break;
+    }
+    case kRequestConfig: {
+      _internal_mutable_request_config()->::xpilot::RequestConfig::MergeFrom(from._internal_request_config());
       break;
     }
     case EVENT_NOT_SET: {
@@ -1926,6 +2191,48 @@ void Envelope::clear_event() {
     case kStationInfoReceived: {
       if (GetArenaForAllocation() == nullptr) {
         delete event_.station_info_received_;
+      }
+      break;
+    }
+    case kRadioStatus: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete event_.radio_status_;
+      }
+      break;
+    }
+    case kSetAudioDevice: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete event_.set_audio_device_;
+      }
+      break;
+    }
+    case kRefreshDeviceList: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete event_.refresh_device_list_;
+      }
+      break;
+    }
+    case kCloseMessageTab: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete event_.close_message_tab_;
+      }
+      break;
+    }
+    case kMarkAsRead: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete event_.mark_as_read_;
+      }
+      break;
+    }
+    case kSelcalAlertReceived: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete event_.selcal_alert_received_;
+      }
+      break;
+    }
+    case kRequestConfig: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete event_.request_config_;
       }
       break;
     }
@@ -2237,6 +2544,55 @@ const char* Envelope::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::i
       case 43:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 90)) {
           ptr = ctx->ParseMessage(_internal_mutable_station_info_received(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .xpilot.RadioStatus radio_status = 44;
+      case 44:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 98)) {
+          ptr = ctx->ParseMessage(_internal_mutable_radio_status(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .xpilot.SetAudioDevice set_audio_device = 45;
+      case 45:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 106)) {
+          ptr = ctx->ParseMessage(_internal_mutable_set_audio_device(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .xpilot.RefreshDeviceList refresh_device_list = 46;
+      case 46:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 114)) {
+          ptr = ctx->ParseMessage(_internal_mutable_refresh_device_list(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .xpilot.CloseMessageTab close_message_tab = 47;
+      case 47:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 122)) {
+          ptr = ctx->ParseMessage(_internal_mutable_close_message_tab(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .xpilot.MarkAsRead mark_as_read = 48;
+      case 48:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 130)) {
+          ptr = ctx->ParseMessage(_internal_mutable_mark_as_read(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .xpilot.SelcalAlertReceived selcal_alert_received = 49;
+      case 49:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 138)) {
+          ptr = ctx->ParseMessage(_internal_mutable_selcal_alert_received(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .xpilot.RequestConfig request_config = 50;
+      case 50:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 146)) {
+          ptr = ctx->ParseMessage(_internal_mutable_request_config(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -2597,6 +2953,62 @@ failure:
         43, _Internal::station_info_received(this), target, stream);
   }
 
+  // .xpilot.RadioStatus radio_status = 44;
+  if (_internal_has_radio_status()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        44, _Internal::radio_status(this), target, stream);
+  }
+
+  // .xpilot.SetAudioDevice set_audio_device = 45;
+  if (_internal_has_set_audio_device()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        45, _Internal::set_audio_device(this), target, stream);
+  }
+
+  // .xpilot.RefreshDeviceList refresh_device_list = 46;
+  if (_internal_has_refresh_device_list()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        46, _Internal::refresh_device_list(this), target, stream);
+  }
+
+  // .xpilot.CloseMessageTab close_message_tab = 47;
+  if (_internal_has_close_message_tab()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        47, _Internal::close_message_tab(this), target, stream);
+  }
+
+  // .xpilot.MarkAsRead mark_as_read = 48;
+  if (_internal_has_mark_as_read()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        48, _Internal::mark_as_read(this), target, stream);
+  }
+
+  // .xpilot.SelcalAlertReceived selcal_alert_received = 49;
+  if (_internal_has_selcal_alert_received()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        49, _Internal::selcal_alert_received(this), target, stream);
+  }
+
+  // .xpilot.RequestConfig request_config = 50;
+  if (_internal_has_request_config()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        50, _Internal::request_config(this), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -2901,6 +3313,55 @@ size_t Envelope::ByteSizeLong() const {
           *event_.station_info_received_);
       break;
     }
+    // .xpilot.RadioStatus radio_status = 44;
+    case kRadioStatus: {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *event_.radio_status_);
+      break;
+    }
+    // .xpilot.SetAudioDevice set_audio_device = 45;
+    case kSetAudioDevice: {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *event_.set_audio_device_);
+      break;
+    }
+    // .xpilot.RefreshDeviceList refresh_device_list = 46;
+    case kRefreshDeviceList: {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *event_.refresh_device_list_);
+      break;
+    }
+    // .xpilot.CloseMessageTab close_message_tab = 47;
+    case kCloseMessageTab: {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *event_.close_message_tab_);
+      break;
+    }
+    // .xpilot.MarkAsRead mark_as_read = 48;
+    case kMarkAsRead: {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *event_.mark_as_read_);
+      break;
+    }
+    // .xpilot.SelcalAlertReceived selcal_alert_received = 49;
+    case kSelcalAlertReceived: {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *event_.selcal_alert_received_);
+      break;
+    }
+    // .xpilot.RequestConfig request_config = 50;
+    case kRequestConfig: {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *event_.request_config_);
+      break;
+    }
     case EVENT_NOT_SET: {
       break;
     }
@@ -3099,6 +3560,34 @@ void Envelope::MergeFrom(const Envelope& from) {
     }
     case kStationInfoReceived: {
       _internal_mutable_station_info_received()->::xpilot::StationInfoReceived::MergeFrom(from._internal_station_info_received());
+      break;
+    }
+    case kRadioStatus: {
+      _internal_mutable_radio_status()->::xpilot::RadioStatus::MergeFrom(from._internal_radio_status());
+      break;
+    }
+    case kSetAudioDevice: {
+      _internal_mutable_set_audio_device()->::xpilot::SetAudioDevice::MergeFrom(from._internal_set_audio_device());
+      break;
+    }
+    case kRefreshDeviceList: {
+      _internal_mutable_refresh_device_list()->::xpilot::RefreshDeviceList::MergeFrom(from._internal_refresh_device_list());
+      break;
+    }
+    case kCloseMessageTab: {
+      _internal_mutable_close_message_tab()->::xpilot::CloseMessageTab::MergeFrom(from._internal_close_message_tab());
+      break;
+    }
+    case kMarkAsRead: {
+      _internal_mutable_mark_as_read()->::xpilot::MarkAsRead::MergeFrom(from._internal_mark_as_read());
+      break;
+    }
+    case kSelcalAlertReceived: {
+      _internal_mutable_selcal_alert_received()->::xpilot::SelcalAlertReceived::MergeFrom(from._internal_selcal_alert_received());
+      break;
+    }
+    case kRequestConfig: {
+      _internal_mutable_request_config()->::xpilot::RequestConfig::MergeFrom(from._internal_request_config());
       break;
     }
     case EVENT_NOT_SET: {

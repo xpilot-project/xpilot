@@ -38,6 +38,8 @@ int main(int argc, char *argv[])
     QObject::connect(root, SIGNAL(setTransponderModeC(bool)), &ipc, SLOT(onHandleTransponderModeC(bool)));
     QObject::connect(root, SIGNAL(setTransponderIdent()), &ipc, SLOT(onHandleTransponderIdent()));
     QObject::connect(root, SIGNAL(setRadioStack(int, int)), &ipc, SLOT(onHandleSetRadioStack(int, int)));
+    QObject::connect(root, SIGNAL(requestConfig()), &ipc, SLOT(onHandleRequestConfig()));
+    QObject::connect(root, SIGNAL(updateConfig(QVariant)), &ipc, SLOT(onHandleUpdateConfig(QVariant)));
 
     return app.exec();
 }

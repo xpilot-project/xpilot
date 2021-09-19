@@ -31,6 +31,7 @@
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: export
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
 #include <google/protobuf/unknown_field_set.h>
+#include <google/protobuf/timestamp.pb.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
 #define PROTOBUF_INTERNAL_EXPORT_PostNote_2eproto
@@ -173,9 +174,10 @@ class PostNote final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kMessageFieldNumber = 1,
+    kMessageFieldNumber = 2,
+    kTimestampFieldNumber = 1,
   };
-  // optional string message = 1;
+  // optional string message = 2;
   bool has_message() const;
   private:
   bool _internal_has_message() const;
@@ -193,6 +195,24 @@ class PostNote final :
   std::string* _internal_mutable_message();
   public:
 
+  // .google.protobuf.Timestamp timestamp = 1;
+  bool has_timestamp() const;
+  private:
+  bool _internal_has_timestamp() const;
+  public:
+  void clear_timestamp();
+  const PROTOBUF_NAMESPACE_ID::Timestamp& timestamp() const;
+  PROTOBUF_FUTURE_MUST_USE_RESULT PROTOBUF_NAMESPACE_ID::Timestamp* release_timestamp();
+  PROTOBUF_NAMESPACE_ID::Timestamp* mutable_timestamp();
+  void set_allocated_timestamp(PROTOBUF_NAMESPACE_ID::Timestamp* timestamp);
+  private:
+  const PROTOBUF_NAMESPACE_ID::Timestamp& _internal_timestamp() const;
+  PROTOBUF_NAMESPACE_ID::Timestamp* _internal_mutable_timestamp();
+  public:
+  void unsafe_arena_set_allocated_timestamp(
+      PROTOBUF_NAMESPACE_ID::Timestamp* timestamp);
+  PROTOBUF_NAMESPACE_ID::Timestamp* unsafe_arena_release_timestamp();
+
   // @@protoc_insertion_point(class_scope:xpilot.PostNote)
  private:
   class _Internal;
@@ -203,6 +223,7 @@ class PostNote final :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr message_;
+  PROTOBUF_NAMESPACE_ID::Timestamp* timestamp_;
   friend struct ::TableStruct_PostNote_2eproto;
 };
 // ===================================================================
@@ -216,7 +237,86 @@ class PostNote final :
 #endif  // __GNUC__
 // PostNote
 
-// optional string message = 1;
+// .google.protobuf.Timestamp timestamp = 1;
+inline bool PostNote::_internal_has_timestamp() const {
+  return this != internal_default_instance() && timestamp_ != nullptr;
+}
+inline bool PostNote::has_timestamp() const {
+  return _internal_has_timestamp();
+}
+inline const PROTOBUF_NAMESPACE_ID::Timestamp& PostNote::_internal_timestamp() const {
+  const PROTOBUF_NAMESPACE_ID::Timestamp* p = timestamp_;
+  return p != nullptr ? *p : reinterpret_cast<const PROTOBUF_NAMESPACE_ID::Timestamp&>(
+      PROTOBUF_NAMESPACE_ID::_Timestamp_default_instance_);
+}
+inline const PROTOBUF_NAMESPACE_ID::Timestamp& PostNote::timestamp() const {
+  // @@protoc_insertion_point(field_get:xpilot.PostNote.timestamp)
+  return _internal_timestamp();
+}
+inline void PostNote::unsafe_arena_set_allocated_timestamp(
+    PROTOBUF_NAMESPACE_ID::Timestamp* timestamp) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(timestamp_);
+  }
+  timestamp_ = timestamp;
+  if (timestamp) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:xpilot.PostNote.timestamp)
+}
+inline PROTOBUF_NAMESPACE_ID::Timestamp* PostNote::release_timestamp() {
+  
+  PROTOBUF_NAMESPACE_ID::Timestamp* temp = timestamp_;
+  timestamp_ = nullptr;
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline PROTOBUF_NAMESPACE_ID::Timestamp* PostNote::unsafe_arena_release_timestamp() {
+  // @@protoc_insertion_point(field_release:xpilot.PostNote.timestamp)
+  
+  PROTOBUF_NAMESPACE_ID::Timestamp* temp = timestamp_;
+  timestamp_ = nullptr;
+  return temp;
+}
+inline PROTOBUF_NAMESPACE_ID::Timestamp* PostNote::_internal_mutable_timestamp() {
+  
+  if (timestamp_ == nullptr) {
+    auto* p = CreateMaybeMessage<PROTOBUF_NAMESPACE_ID::Timestamp>(GetArenaForAllocation());
+    timestamp_ = p;
+  }
+  return timestamp_;
+}
+inline PROTOBUF_NAMESPACE_ID::Timestamp* PostNote::mutable_timestamp() {
+  // @@protoc_insertion_point(field_mutable:xpilot.PostNote.timestamp)
+  return _internal_mutable_timestamp();
+}
+inline void PostNote::set_allocated_timestamp(PROTOBUF_NAMESPACE_ID::Timestamp* timestamp) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(timestamp_);
+  }
+  if (timestamp) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<
+            ::PROTOBUF_NAMESPACE_ID::MessageLite>::GetOwningArena(
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(timestamp));
+    if (message_arena != submessage_arena) {
+      timestamp = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, timestamp, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  timestamp_ = timestamp;
+  // @@protoc_insertion_point(field_set_allocated:xpilot.PostNote.timestamp)
+}
+
+// optional string message = 2;
 inline bool PostNote::_internal_has_message() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;

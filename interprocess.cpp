@@ -11,21 +11,22 @@
 
 InterProcess::InterProcess(QObject* parent) : QObject(parent)
 {
-    process.setProgram("XplaneBridge/XplaneBridge.exe");
-    process.setProcessChannelMode(QProcess::ForwardedErrorChannel);
-    process.start();
+    process = new QProcess(this);
+    process->setProgram("XplaneBridge/XplaneBridge.exe");
+    process->setProcessChannelMode(QProcess::ForwardedErrorChannel);
+    process->start();
 
     QTimer* timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &InterProcess::restartProcess);
-    timer->start(5000);
+    timer->start(1000);
 
-    QObject::connect(&process, &QProcess::readyReadStandardOutput, this, &InterProcess::Tick);
+    QObject::connect(process, &QProcess::readyReadStandardOutput, this, &InterProcess::Tick);
 }
 
 InterProcess::~InterProcess()
 {
     qDebug("Terminating IPC process");
-    process.kill();
+    process->kill();
 }
 
 void InterProcess::sendEnvelope(const xpilot::Envelope& envelope)
@@ -33,13 +34,13 @@ void InterProcess::sendEnvelope(const xpilot::Envelope& envelope)
     std::string data;
     envelope.SerializeToString(&data);
 
-    process.write(base64::base64_encode(data).c_str());
-    process.write("\n");
+    process->write(base64::base64_encode(data).c_str());
+    process->write("\n");
 }
 
 void InterProcess::Tick()
 {
-    const QByteArray data = QByteArray::fromBase64(process.readAllStandardOutput());
+    const QByteArray data = QByteArray::fromBase64(process->readAllStandardOutput());
 
     xpilot::Envelope envelope;
     envelope.ParseFromArray(data, data.length());
@@ -59,6 +60,16 @@ void InterProcess::Tick()
         stack.com2ReceiveEnabled = envelope.radio_stack().com2_receive_enabled();
         stack.transmitComSelection = envelope.radio_stack().transmit_com_selection();
         emit radioStackReceived(stack);
+    }
+
+    if(envelope.has_app_config_dto())
+    {
+        AppConfig config{};
+        config.vatsimId = QString(envelope.app_config_dto().vatsim_id().c_str());
+        config.vatsimPassword = QString(envelope.app_config_dto().vatsim_password().c_str());
+        config.homeAirport = QString(envelope.app_config_dto().home_airport().c_str());
+        config.name = QString(envelope.app_config_dto().name().c_str());
+        emit appConfigReceived(config);
     }
 }
 
@@ -99,10 +110,36 @@ void InterProcess::onHandleTransponderIdent()
     sendEnvelope(envelope);
 }
 
+void InterProcess::onHandleRequestConfig()
+{
+    xpilot::Envelope envelope;
+    xpilot::RequestConfig * msg = new xpilot::RequestConfig();
+    envelope.set_allocated_request_config(msg);
+    sendEnvelope(envelope);
+}
+
+void InterProcess::onHandleUpdateConfig(QVariant cfg)
+{
+    AppConfig config = cfg.value<AppConfig>();
+    xpilot::Envelope envelope;
+    xpilot::AppConfigDto * msg = new xpilot::AppConfigDto();
+    envelope.set_allocated_app_config_dto(msg);
+    msg->set_vatsim_id(config.vatsimId.toStdString().c_str());
+    msg->set_vatsim_password(config.vatsimPassword.toStdString().c_str());
+    msg->set_name(config.name.toStdString().c_str());
+    msg->set_home_airport(config.homeAirport.toStdString().c_str());
+    sendEnvelope(envelope);
+}
+
 void InterProcess::restartProcess()
 {
-    if(process.state() == QProcess::NotRunning)
+    if(process->state() == QProcess::NotRunning)
     {
-        process.start();
+        delete process;
+
+        process = new QProcess(this);
+        process->setProgram("XplaneBridge/XplaneBridge.exe");
+        process->setProcessChannelMode(QProcess::ForwardedErrorChannel);
+        process->start();
     }
 }

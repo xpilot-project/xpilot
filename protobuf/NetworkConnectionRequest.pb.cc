@@ -19,7 +19,8 @@ PROTOBUF_PRAGMA_INIT_SEG
 namespace xpilot {
 constexpr NetworkConnectionRequest::NetworkConnectionRequest(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : callsign_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  : guid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , callsign_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , type_code_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , selcal_code_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , observer_mode_(false){}
@@ -43,6 +44,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_NetworkConnectionRequest_2epro
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::xpilot::NetworkConnectionRequest, guid_),
   PROTOBUF_FIELD_OFFSET(::xpilot::NetworkConnectionRequest, callsign_),
   PROTOBUF_FIELD_OFFSET(::xpilot::NetworkConnectionRequest, type_code_),
   PROTOBUF_FIELD_OFFSET(::xpilot::NetworkConnectionRequest, selcal_code_),
@@ -51,9 +53,10 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_NetworkConnectionRequest_2epro
   1,
   2,
   3,
+  4,
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 9, sizeof(::xpilot::NetworkConnectionRequest)},
+  { 0, 10, sizeof(::xpilot::NetworkConnectionRequest)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -62,16 +65,17 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_NetworkConnectionRequest_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\036NetworkConnectionRequest.proto\022\006xpilot"
-  "\"\274\001\n\030NetworkConnectionRequest\022\025\n\010callsig"
-  "n\030\001 \001(\tH\000\210\001\001\022\026\n\ttype_code\030\002 \001(\tH\001\210\001\001\022\030\n\013"
-  "selcal_code\030\003 \001(\tH\002\210\001\001\022\032\n\robserver_mode\030"
-  "\004 \001(\010H\003\210\001\001B\013\n\t_callsignB\014\n\n_type_codeB\016\n"
-  "\014_selcal_codeB\020\n\016_observer_modeB\031\252\002\026Vats"
-  "im.Xpilot.Protobufb\006proto3"
+  "\"\330\001\n\030NetworkConnectionRequest\022\021\n\004guid\030\001 "
+  "\001(\tH\000\210\001\001\022\025\n\010callsign\030\002 \001(\tH\001\210\001\001\022\026\n\ttype_"
+  "code\030\003 \001(\tH\002\210\001\001\022\030\n\013selcal_code\030\004 \001(\tH\003\210\001"
+  "\001\022\032\n\robserver_mode\030\005 \001(\010H\004\210\001\001B\007\n\005_guidB\013"
+  "\n\t_callsignB\014\n\n_type_codeB\016\n\014_selcal_cod"
+  "eB\020\n\016_observer_modeB\031\252\002\026Vatsim.Xpilot.Pr"
+  "otobufb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_NetworkConnectionRequest_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_NetworkConnectionRequest_2eproto = {
-  false, false, 266, descriptor_table_protodef_NetworkConnectionRequest_2eproto, "NetworkConnectionRequest.proto", 
+  false, false, 294, descriptor_table_protodef_NetworkConnectionRequest_2eproto, "NetworkConnectionRequest.proto", 
   &descriptor_table_NetworkConnectionRequest_2eproto_once, nullptr, 0, 1,
   schemas, file_default_instances, TableStruct_NetworkConnectionRequest_2eproto::offsets,
   file_level_metadata_NetworkConnectionRequest_2eproto, file_level_enum_descriptors_NetworkConnectionRequest_2eproto, file_level_service_descriptors_NetworkConnectionRequest_2eproto,
@@ -89,17 +93,20 @@ namespace xpilot {
 class NetworkConnectionRequest::_Internal {
  public:
   using HasBits = decltype(std::declval<NetworkConnectionRequest>()._has_bits_);
-  static void set_has_callsign(HasBits* has_bits) {
+  static void set_has_guid(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
-  static void set_has_type_code(HasBits* has_bits) {
+  static void set_has_callsign(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
-  static void set_has_selcal_code(HasBits* has_bits) {
+  static void set_has_type_code(HasBits* has_bits) {
     (*has_bits)[0] |= 4u;
   }
-  static void set_has_observer_mode(HasBits* has_bits) {
+  static void set_has_selcal_code(HasBits* has_bits) {
     (*has_bits)[0] |= 8u;
+  }
+  static void set_has_observer_mode(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
   }
 };
 
@@ -113,6 +120,11 @@ NetworkConnectionRequest::NetworkConnectionRequest(const NetworkConnectionReques
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  guid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_guid()) {
+    guid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_guid(), 
+      GetArenaForAllocation());
+  }
   callsign_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (from._internal_has_callsign()) {
     callsign_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_callsign(), 
@@ -133,6 +145,7 @@ NetworkConnectionRequest::NetworkConnectionRequest(const NetworkConnectionReques
 }
 
 void NetworkConnectionRequest::SharedCtor() {
+guid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 callsign_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 type_code_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 selcal_code_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -147,6 +160,7 @@ NetworkConnectionRequest::~NetworkConnectionRequest() {
 
 void NetworkConnectionRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  guid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   callsign_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   type_code_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   selcal_code_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -169,14 +183,17 @@ void NetworkConnectionRequest::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x00000007u) {
+  if (cached_has_bits & 0x0000000fu) {
     if (cached_has_bits & 0x00000001u) {
-      callsign_.ClearNonDefaultToEmpty();
+      guid_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000002u) {
-      type_code_.ClearNonDefaultToEmpty();
+      callsign_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000004u) {
+      type_code_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000008u) {
       selcal_code_.ClearNonDefaultToEmpty();
     }
   }
@@ -192,36 +209,45 @@ const char* NetworkConnectionRequest::_InternalParse(const char* ptr, ::PROTOBUF
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // optional string callsign = 1;
+      // optional string guid = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_guid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "xpilot.NetworkConnectionRequest.guid"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string callsign = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           auto str = _internal_mutable_callsign();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "xpilot.NetworkConnectionRequest.callsign"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional string type_code = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+      // optional string type_code = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
           auto str = _internal_mutable_type_code();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "xpilot.NetworkConnectionRequest.type_code"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional string selcal_code = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+      // optional string selcal_code = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
           auto str = _internal_mutable_selcal_code();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "xpilot.NetworkConnectionRequest.selcal_code"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional bool observer_mode = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+      // optional bool observer_mode = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
           _Internal::set_has_observer_mode(&has_bits);
           observer_mode_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
@@ -257,40 +283,50 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // optional string callsign = 1;
+  // optional string guid = 1;
+  if (_internal_has_guid()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_guid().data(), static_cast<int>(this->_internal_guid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "xpilot.NetworkConnectionRequest.guid");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_guid(), target);
+  }
+
+  // optional string callsign = 2;
   if (_internal_has_callsign()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_callsign().data(), static_cast<int>(this->_internal_callsign().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "xpilot.NetworkConnectionRequest.callsign");
     target = stream->WriteStringMaybeAliased(
-        1, this->_internal_callsign(), target);
+        2, this->_internal_callsign(), target);
   }
 
-  // optional string type_code = 2;
+  // optional string type_code = 3;
   if (_internal_has_type_code()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_type_code().data(), static_cast<int>(this->_internal_type_code().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "xpilot.NetworkConnectionRequest.type_code");
     target = stream->WriteStringMaybeAliased(
-        2, this->_internal_type_code(), target);
+        3, this->_internal_type_code(), target);
   }
 
-  // optional string selcal_code = 3;
+  // optional string selcal_code = 4;
   if (_internal_has_selcal_code()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_selcal_code().data(), static_cast<int>(this->_internal_selcal_code().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "xpilot.NetworkConnectionRequest.selcal_code");
     target = stream->WriteStringMaybeAliased(
-        3, this->_internal_selcal_code(), target);
+        4, this->_internal_selcal_code(), target);
   }
 
-  // optional bool observer_mode = 4;
+  // optional bool observer_mode = 5;
   if (_internal_has_observer_mode()) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(4, this->_internal_observer_mode(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(5, this->_internal_observer_mode(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -310,30 +346,37 @@ size_t NetworkConnectionRequest::ByteSizeLong() const {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
-    // optional string callsign = 1;
+  if (cached_has_bits & 0x0000001fu) {
+    // optional string guid = 1;
     if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_guid());
+    }
+
+    // optional string callsign = 2;
+    if (cached_has_bits & 0x00000002u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_callsign());
     }
 
-    // optional string type_code = 2;
-    if (cached_has_bits & 0x00000002u) {
+    // optional string type_code = 3;
+    if (cached_has_bits & 0x00000004u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_type_code());
     }
 
-    // optional string selcal_code = 3;
-    if (cached_has_bits & 0x00000004u) {
+    // optional string selcal_code = 4;
+    if (cached_has_bits & 0x00000008u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_selcal_code());
     }
 
-    // optional bool observer_mode = 4;
-    if (cached_has_bits & 0x00000008u) {
+    // optional bool observer_mode = 5;
+    if (cached_has_bits & 0x00000010u) {
       total_size += 1 + 1;
     }
 
@@ -370,17 +413,20 @@ void NetworkConnectionRequest::MergeFrom(const NetworkConnectionRequest& from) {
   (void) cached_has_bits;
 
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x0000001fu) {
     if (cached_has_bits & 0x00000001u) {
-      _internal_set_callsign(from._internal_callsign());
+      _internal_set_guid(from._internal_guid());
     }
     if (cached_has_bits & 0x00000002u) {
-      _internal_set_type_code(from._internal_type_code());
+      _internal_set_callsign(from._internal_callsign());
     }
     if (cached_has_bits & 0x00000004u) {
-      _internal_set_selcal_code(from._internal_selcal_code());
+      _internal_set_type_code(from._internal_type_code());
     }
     if (cached_has_bits & 0x00000008u) {
+      _internal_set_selcal_code(from._internal_selcal_code());
+    }
+    if (cached_has_bits & 0x00000010u) {
       observer_mode_ = from.observer_mode_;
     }
     _has_bits_[0] |= cached_has_bits;
@@ -409,6 +455,11 @@ void NetworkConnectionRequest::InternalSwap(NetworkConnectionRequest* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &guid_, GetArenaForAllocation(),
+      &other->guid_, other->GetArenaForAllocation()
+  );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &callsign_, GetArenaForAllocation(),

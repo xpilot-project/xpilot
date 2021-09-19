@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QProcess>
 #include <QString>
+#include <QVariant>
 #include "protobuf/Envelope.pb.h"
 
 struct RadioStack {
@@ -23,6 +24,21 @@ public:
     int transmitComSelection;
 };
 Q_DECLARE_METATYPE(RadioStack)
+
+struct AppConfig
+{
+    Q_GADGET
+    Q_PROPERTY(QString vatsimId MEMBER vatsimId)
+    Q_PROPERTY(QString vatsimPassword MEMBER vatsimPassword)
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(QString homeAirport MEMBER homeAirport)
+public:
+    QString vatsimId;
+    QString vatsimPassword;
+    QString name;
+    QString homeAirport;
+};
+Q_DECLARE_METATYPE(AppConfig)
 
 class InterProcess : public QObject
 {
@@ -44,15 +60,18 @@ public slots:
     void onHandleSetRadioStack(int radio, int frequency);
     void onHandleTransponderModeC(bool active);
     void onHandleTransponderIdent();
+    void onHandleRequestConfig();
+    void onHandleUpdateConfig(QVariant config);
 
 private:
-    QProcess process;
+    QProcess* process;
     void sendEnvelope(const xpilot::Envelope& envelope);
     void restartProcess();
 
 signals:
     void simulatorConnected(bool isConnected);
     void radioStackReceived(RadioStack stack);
+    void appConfigReceived(AppConfig config);
     void notificationPosted(NotificationType type, QString message);
 };
 

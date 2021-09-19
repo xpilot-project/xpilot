@@ -7,18 +7,43 @@ import "../Components"
 import "../Controls"
 
 Window {
-    id: settingsWindow
+    id: formSettings
     title: "Settings"
     width: 650
-    height: 600
+    height: 560
     minimumHeight: height
     minimumWidth: width
     maximumHeight: height
     maximumWidth: width
-    modality: Qt.ApplicationModal
     flags: Qt.Dialog
+    modality: Qt.ApplicationModal
+
+    property variant appConfig;
 
     signal closeWindow()
+    signal requestConfig()
+    signal updateConfig(var config)
+
+    onVisibilityChanged: requestConfig()
+
+    // @disable-check M16
+    onClosing: {
+        closeWindow()
+        updateConfig(appConfig)
+    }
+
+    Connections {
+        target: ipc
+
+        function onAppConfigReceived(config)
+        {
+            appConfig = config;
+            txtVatsimId.text = appConfig.vatsimId;
+            txtVatsimPassword.text = appConfig.vatsimPassword;
+            txtYourName.text = appConfig.name;
+            txtHomeAirport.text = appConfig.homeAirport;
+        }
+    }
 
     GridLayout {
         id: gridLayout
@@ -49,6 +74,9 @@ Window {
             }
             CustomTextField {
                 id: txtVatsimId
+                onTextChanged: {
+                    appConfig.vatsimId = txtVatsimId.text;
+                }
                 validator: RegularExpressionValidator {
                     regularExpression: /[0-9]+/
                 }
@@ -75,6 +103,9 @@ Window {
                 id: txtVatsimPassword
                 echoMode: TextInput.Password
                 y: 20
+                onTextChanged: {
+                    appConfig.vatsimPassword = txtVatsimPassword.text;
+                }
             }
         }
 
@@ -97,6 +128,9 @@ Window {
             CustomTextField {
                 id: txtYourName
                 y: 20
+                onTextChanged: {
+                    appConfig.name = txtYourName.text;
+                }
             }
         }
 
@@ -120,15 +154,14 @@ Window {
                 id: txtHomeAirport
                 y: 20
                 onTextChanged: {
-                    text = text.toUpperCase()
+                    txtHomeAirport.text = txtHomeAirport.text.toUpperCase()
+                    appConfig.homeAirport = txtHomeAirport.text;
                 }
                 validator: RegularExpressionValidator {
                     regularExpression: /[a-zA-Z0-9]{4}/
                 }
             }
         }
-
-
 
         Item {
             id: networkServer
@@ -156,11 +189,11 @@ Window {
                 anchors.rightMargin: 0
                 textRole: "name"
                 valueRole: "name"
-//                Component.onCompleted: {
-//                    if(config.appConfig.serverName) {
-//                        currentIndex = indexOfValue(config.appConfig.serverName)
-//                    }
-//                }
+                //                Component.onCompleted: {
+                //                    if(config.appConfig.serverName) {
+                //                        currentIndex = indexOfValue(config.appConfig.serverName)
+                //                    }
+                //                }
             }
         }
 
@@ -243,40 +276,6 @@ Window {
                 }
             }
         }
-
-
-        Item {
-            id: audioDriver
-            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-            Layout.column: 0
-            Layout.row: 5
-            Layout.columnSpan: 2
-            Layout.preferredWidth: 50
-            Layout.fillWidth: true
-            Layout.preferredHeight: 50
-            Text {
-                id: text6
-                color: "#333333"
-                text: qsTr("Audio Driver")
-                renderType: Text.NativeRendering
-                font.pixelSize: 13
-                font.family: ubuntuRegular.name
-            }
-
-            CustomComboBox {
-                id: audioDriverCombobox
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: text6.bottom
-                anchors.topMargin: 5
-                anchors.rightMargin: 0
-                anchors.leftMargin: 0
-                //                model: Net.toVariantList(config.audioApis)
-                //                Component.onCompleted: currentIndex = indexOfValue(config.appConfig.audioApi)
-                //                onActivated: config.setAudioApi(currentValue)
-            }
-        }
-
 
         Item {
             id: microphoneDevice
