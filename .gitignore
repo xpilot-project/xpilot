@@ -1,73 +1,54 @@
-# This file is used to ignore files which are generated
-# ----------------------------------------------------------------------------
-
-*~
-*.autosave
-*.a
-*.core
-*.moc
+# C++ objects and libs
+*.slo
+*.lo
 *.o
-*.obj
-*.orig
-*.rej
+*.a
+*.la
+*.lai
 *.so
 *.so.*
-*_pch.h.cpp
-*_resource.rc
-*.qm
-.#*
-*.*#
-core
-!core/
-tags
-.DS_Store
-.directory
-*.debug
-Makefile*
-*.prl
-*.app
-moc_*.cpp
-ui_*.h
-qrc_*.cpp
-Thumbs.db
-*.res
-*.rc
+*.dll
+*.dylib
+
+# Qt-es
+object_script.*.Release
+object_script.*.Debug
+*_plugin_import.cpp
 /.qmake.cache
 /.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.qmlc
+*.jsc
+Makefile*
+*build-*
+*.qm
+*.prl
 
-# qtcreator generated files
-*.pro.user*
+# Qt unit tests
+target_wrapper.*
 
-# xemacs temporary files
-*.flc
+# QtCreator
+*.autosave
 
-# Vim temporary files
-.*.swp
+# QtCreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
 
-# Visual Studio generated files
-*.ib_pdb_index
-*.idb
-*.ilk
-*.pdb
-*.sln
-*.suo
-*.vcproj
-*vcproj.*.*.user
-*.ncb
-*.sdf
-*.opensdf
-*.vcxproj
-*vcxproj.*
+# QtCreator CMake
+CMakeLists.txt.user*
 
-# MinGW generated files
-*.Debug
-*.Release
+# QtCreator 4.8< compilation database
+compile_commands.json
 
-# Python byte code
-*.pyc
+# QtCreator local machine specific files for imported projects
+*creator.user*
 
-# Binaries
-# --------
-*.dll
-*.exe
-
+*_qmlcache.qrc
