@@ -31,8 +31,8 @@ Window {
     signal setTransponderModeC(bool active);
     signal setTransponderIdent();
     signal setRadioStack(int radio, int frequency);
-    signal requestConfig();
     signal updateConfig(var config);
+    signal requestConfig();
 
     FontLoader {
         id: ubuntuRegular
@@ -103,6 +103,7 @@ Window {
                     appendErrorMessage("X-Plane connection lost.")
                 }
                 simConnected = false
+                radioStack.avionicsPower = false
             }
 
             toolbar.simConnected = isConnected

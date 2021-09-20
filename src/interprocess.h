@@ -10,6 +10,12 @@
 #include "appconfig.h"
 #include "nearbyatc.h"
 
+enum NotificationType {
+    Info = 0,
+    Warning = 1,
+    Error = 2
+};
+
 class InterProcess : public QObject
 {
     Q_OBJECT
@@ -17,13 +23,6 @@ class InterProcess : public QObject
 public:
     explicit InterProcess(QObject *parent = nullptr);
     ~InterProcess();
-    void Tick();
-
-    enum NotificationType {
-        Info = 0,
-        Warning = 1,
-        Error = 2
-    };
 
 public slots:
     void onHandleSetTransponderCode(int code);
@@ -35,8 +34,9 @@ public slots:
 
 private:
     QProcess* process;
+    void tick();
     void sendEnvelope(const xpilot::Envelope& envelope);
-    void restartProcess();
+    void checkProcessStatus();
 
 signals:
     void simulatorConnected(bool isConnected);

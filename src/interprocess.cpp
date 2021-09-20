@@ -14,13 +14,14 @@ InterProcess::InterProcess(QObject* parent) : QObject(parent)
     process = new QProcess(this);
     process->setProgram("XplaneBridge/XplaneBridge.exe");
     process->setProcessChannelMode(QProcess::ForwardedErrorChannel);
+
+    QObject::connect(process, &QProcess::readyReadStandardOutput, this, &InterProcess::tick);
+
     process->start();
 
     QTimer* timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &InterProcess::restartProcess);
+    connect(timer, &QTimer::timeout, this, &InterProcess::checkProcessStatus);
     timer->start(1000);
-
-    QObject::connect(process, &QProcess::readyReadStandardOutput, this, &InterProcess::Tick);
 }
 
 InterProcess::~InterProcess()
@@ -38,12 +39,7 @@ void InterProcess::sendEnvelope(const xpilot::Envelope& envelope)
     process->write("\n");
 }
 
-static bool endsWith(const std::string& str, const std::string& suffix)
-{
-    return str.size() >= suffix.size() && 0 == str.compare(str.size()-suffix.size(), suffix.size(), suffix);
-}
-
-void InterProcess::Tick()
+void InterProcess::tick()
 {
     const QByteArray data = QByteArray::fromBase64(process->readAllStandardOutput());
 
@@ -155,7 +151,7 @@ void InterProcess::onHandleUpdateConfig(QVariant cfg)
     sendEnvelope(envelope);
 }
 
-void InterProcess::restartProcess()
+void InterProcess::checkProcessStatus()
 {
     if(process->state() == QProcess::NotRunning)
     {
@@ -164,6 +160,9 @@ void InterProcess::restartProcess()
         process = new QProcess(this);
         process->setProgram("XplaneBridge/XplaneBridge.exe");
         process->setProcessChannelMode(QProcess::ForwardedErrorChannel);
+
+        QObject::connect(process, &QProcess::readyReadStandardOutput, this, &InterProcess::tick);
+
         process->start();
     }
 }
