@@ -19,12 +19,15 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 AUX_SOURCE_DIRECTORY("${CMAKE_SOURCE_DIR}/protobuf" PROTOBUF_SRC)
 
 set(PROJECT_SOURCES
-        main.cpp
-        interprocess.cpp
-        interprocess.h
-        base64.hpp
-        qml.qrc
-        ${PROTOBUF_SRC}
+    src/main.cpp
+    src/interprocess.cpp
+    src/interprocess.h
+    src/radiostack.h
+    src/appconfig.h
+    src/nearbyatc.h
+    src/base64.hpp
+    qml.qrc
+    ${PROTOBUF_SRC}
 )
 
 # Set some Win32 Specific Settings

@@ -118,6 +118,32 @@ Window {
             radioStack.isCom1TxEnabled = stack.transmitComSelection === 6;
             radioStack.isCom2TxEnabled = stack.transmitComSelection === 7;
         }
+
+        function onNearbyAtcReceived(stations) {
+            stations.forEach(function(station) {
+                if(station.callsign.endsWith("_CTR") || station.callsign.endsWith("_FSS")) {
+                    nearbyEnroute.append(station)
+                }
+                else if(station.callsign.endsWith("_APP") || station.callsign.endsWith("_DEP")) {
+                    nearbyApproach.append(station)
+                }
+                else if(station.callsign.endsWith("_TWR")) {
+                    nearbyTower.append(station)
+                }
+                else if(station.callsign.endsWith("_GND")) {
+                    nearbyGround.append(station)
+                }
+                else if(station.callsign.endsWith("_DEL")) {
+                    nearbyDelivery.append(station)
+                }
+                else if(station.callsign.endsWith("_ATIS")) {
+                    nearbyAtis.append(station)
+                }
+                else {
+                    nearbyObservers.append(station)
+                }
+            })
+        }
     }
 
     //    function appendMessage(tabId, message) {
@@ -220,15 +246,51 @@ Window {
         }
 
         Rectangle {
-            id: nearbyAtc
+            id: nearbyAtcContainer
             Layout.row: 1
             Layout.column: 0
             Layout.preferredWidth: 250
             Layout.fillHeight: true
             color: "transparent"
 
+            ListModel {
+                id: nearbyEnroute
+            }
+
+            ListModel {
+                id: nearbyApproach
+            }
+
+            ListModel {
+                id: nearbyTower
+            }
+
+            ListModel {
+                id: nearbyGround
+            }
+
+            ListModel {
+                id: nearbyDelivery
+            }
+
+            ListModel {
+                id: nearbyAtis
+            }
+
+            ListModel {
+                id: nearbyObservers
+            }
+
             NearbyAtc {
+                id: nearbyAtc
                 anchors.fill: parent
+                enroute: nearbyEnroute
+                approach: nearbyApproach
+                tower: nearbyTower
+                ground: nearbyGround
+                delivery: nearbyDelivery
+                atis: nearbyAtis
+                observers: nearbyObservers
             }
         }
 

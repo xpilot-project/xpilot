@@ -12,6 +12,14 @@ Rectangle {
     color: "#272c2e"
     Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
 
+    property variant enroute;
+    property variant approach;
+    property variant tower;
+    property variant ground;
+    property variant delivery;
+    property variant atis;
+    property variant observers;
+
     Text {
         id: title
         color: "#ffffff"
@@ -19,53 +27,32 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
+        font.family: robotoMono.name
         font.pixelSize: 14
+        font.bold: true
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        font.bold: true
         padding: 5
         anchors.rightMargin: 0
         anchors.leftMargin: 0
         anchors.topMargin: 0
-        font.family: robotoMono.name
     }
 
     ScrollView {
         id: scrollView
+        clip: true
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: title.bottom
         anchors.bottom: parent.bottom
-        clip: true
         anchors.rightMargin: 10
         anchors.leftMargin: 10
         anchors.bottomMargin: 10
         anchors.topMargin: 0
 
         ColumnLayout {
-            id: columnLayout
             width: 100
             height: 100
-
-            ListModel {
-                id: modelCenter
-                ListElement {
-                    sector: "LAX_CTR"
-                    freq: "125.800"
-                }
-                ListElement {
-                    sector: "OAK_CTR"
-                    freq: "132.200"
-                }
-            }
-
-            ListModel {
-                id: modelTower
-                ListElement {
-                    sector: "LAX_TWR"
-                    freq: "120.950"
-                }
-            }
 
             Label {
                 id: titleCenter
@@ -79,13 +66,12 @@ Rectangle {
             Column {
                 id: centerControllers
                 Repeater {
-                    model: modelCenter
+                    model: enroute
                     Text {
-                        text: sector + " - " + freq
+                        text: `${callsign} - ${frequency}`
                         font.pixelSize: 14
-                        leftPadding: 15
-                        padding: 1
                         font.family: robotoMono.name
+                        leftPadding: 15
                         color: "#ffffff"
                         renderType: Text.NativeRendering
 
@@ -115,7 +101,7 @@ Rectangle {
                                     hoverEnabled: false
                                     enabled: false
                                     contentItem: Text {
-                                        text: sector
+                                        text: callsign
                                         font.pixelSize: 14
                                         font.family: robotoMono.name
                                         font.bold: true
@@ -212,7 +198,7 @@ Rectangle {
             Column {
                 id: towerControllers
                 Repeater {
-                    model: modelTower
+                    model: tower
                     Text {
                         text: sector + " - " + freq
                         font.pixelSize: 14
@@ -346,6 +332,15 @@ Rectangle {
                 id: titleAtis
                 color: "#6c757d"
                 text: qsTr("ATIS")
+                font.pixelSize: 14
+                font.family: robotoMono.name
+                renderType: Text.NativeRendering
+            }
+
+            Label {
+                id: titleObservers
+                color: "#6c757d"
+                text: qsTr("Observers")
                 font.pixelSize: 14
                 font.family: robotoMono.name
                 renderType: Text.NativeRendering

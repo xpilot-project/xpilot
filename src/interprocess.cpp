@@ -38,6 +38,11 @@ void InterProcess::sendEnvelope(const xpilot::Envelope& envelope)
     process->write("\n");
 }
 
+static bool endsWith(const std::string& str, const std::string& suffix)
+{
+    return str.size() >= suffix.size() && 0 == str.compare(str.size()-suffix.size(), suffix.size(), suffix);
+}
+
 void InterProcess::Tick()
 {
     const QByteArray data = QByteArray::fromBase64(process->readAllStandardOutput());
@@ -70,6 +75,25 @@ void InterProcess::Tick()
         config.homeAirport = QString(envelope.app_config_dto().home_airport().c_str());
         config.name = QString(envelope.app_config_dto().name().c_str());
         emit appConfigReceived(config);
+    }
+
+    if(envelope.has_nearby_controllers())
+    {
+        QList<NearbyAtc> nearby = QList<NearbyAtc>();
+
+        for(int i = 0; i < envelope.nearby_controllers().list().size(); i++) {
+            auto controller = envelope.nearby_controllers().list().at(i);
+
+            NearbyAtc station{};
+            station.callsign = controller.callsign().c_str();
+            station.realname = controller.realname().c_str();
+            station.frequency = controller.frequency().c_str();
+            station.sim_frequency = controller.sim_frequency();
+
+            nearby.append(station);
+        }
+
+        emit nearbyAtcReceived(nearby);
     }
 }
 

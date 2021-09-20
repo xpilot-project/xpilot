@@ -179,8 +179,8 @@ class NearbyControllers_Controller final :
   enum : int {
     kCallsignFieldNumber = 1,
     kFrequencyFieldNumber = 3,
-    kRealNameFieldNumber = 4,
-    kXplaneFrequencyFieldNumber = 2,
+    kRealnameFieldNumber = 4,
+    kSimFrequencyFieldNumber = 2,
   };
   // optional string callsign = 1;
   bool has_callsign() const;
@@ -218,35 +218,35 @@ class NearbyControllers_Controller final :
   std::string* _internal_mutable_frequency();
   public:
 
-  // optional string real_name = 4;
-  bool has_real_name() const;
+  // optional string realname = 4;
+  bool has_realname() const;
   private:
-  bool _internal_has_real_name() const;
+  bool _internal_has_realname() const;
   public:
-  void clear_real_name();
-  const std::string& real_name() const;
+  void clear_realname();
+  const std::string& realname() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_real_name(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_real_name();
-  PROTOBUF_FUTURE_MUST_USE_RESULT std::string* release_real_name();
-  void set_allocated_real_name(std::string* real_name);
+  void set_realname(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_realname();
+  PROTOBUF_FUTURE_MUST_USE_RESULT std::string* release_realname();
+  void set_allocated_realname(std::string* realname);
   private:
-  const std::string& _internal_real_name() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_real_name(const std::string& value);
-  std::string* _internal_mutable_real_name();
+  const std::string& _internal_realname() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_realname(const std::string& value);
+  std::string* _internal_mutable_realname();
   public:
 
-  // optional int32 xplane_frequency = 2;
-  bool has_xplane_frequency() const;
+  // optional int32 sim_frequency = 2;
+  bool has_sim_frequency() const;
   private:
-  bool _internal_has_xplane_frequency() const;
+  bool _internal_has_sim_frequency() const;
   public:
-  void clear_xplane_frequency();
-  ::PROTOBUF_NAMESPACE_ID::int32 xplane_frequency() const;
-  void set_xplane_frequency(::PROTOBUF_NAMESPACE_ID::int32 value);
+  void clear_sim_frequency();
+  ::PROTOBUF_NAMESPACE_ID::int32 sim_frequency() const;
+  void set_sim_frequency(::PROTOBUF_NAMESPACE_ID::int32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_xplane_frequency() const;
-  void _internal_set_xplane_frequency(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_sim_frequency() const;
+  void _internal_set_sim_frequency(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:xpilot.NearbyControllers.Controller)
@@ -260,8 +260,8 @@ class NearbyControllers_Controller final :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr callsign_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr frequency_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr real_name_;
-  ::PROTOBUF_NAMESPACE_ID::int32 xplane_frequency_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr realname_;
+  ::PROTOBUF_NAMESPACE_ID::int32 sim_frequency_;
   friend struct ::TableStruct_NearbyControllers_2eproto;
 };
 // -------------------------------------------------------------------
@@ -475,32 +475,32 @@ inline void NearbyControllers_Controller::set_allocated_callsign(std::string* ca
   // @@protoc_insertion_point(field_set_allocated:xpilot.NearbyControllers.Controller.callsign)
 }
 
-// optional int32 xplane_frequency = 2;
-inline bool NearbyControllers_Controller::_internal_has_xplane_frequency() const {
+// optional int32 sim_frequency = 2;
+inline bool NearbyControllers_Controller::_internal_has_sim_frequency() const {
   bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
-inline bool NearbyControllers_Controller::has_xplane_frequency() const {
-  return _internal_has_xplane_frequency();
+inline bool NearbyControllers_Controller::has_sim_frequency() const {
+  return _internal_has_sim_frequency();
 }
-inline void NearbyControllers_Controller::clear_xplane_frequency() {
-  xplane_frequency_ = 0;
+inline void NearbyControllers_Controller::clear_sim_frequency() {
+  sim_frequency_ = 0;
   _has_bits_[0] &= ~0x00000008u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 NearbyControllers_Controller::_internal_xplane_frequency() const {
-  return xplane_frequency_;
+inline ::PROTOBUF_NAMESPACE_ID::int32 NearbyControllers_Controller::_internal_sim_frequency() const {
+  return sim_frequency_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 NearbyControllers_Controller::xplane_frequency() const {
-  // @@protoc_insertion_point(field_get:xpilot.NearbyControllers.Controller.xplane_frequency)
-  return _internal_xplane_frequency();
+inline ::PROTOBUF_NAMESPACE_ID::int32 NearbyControllers_Controller::sim_frequency() const {
+  // @@protoc_insertion_point(field_get:xpilot.NearbyControllers.Controller.sim_frequency)
+  return _internal_sim_frequency();
 }
-inline void NearbyControllers_Controller::_internal_set_xplane_frequency(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void NearbyControllers_Controller::_internal_set_sim_frequency(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000008u;
-  xplane_frequency_ = value;
+  sim_frequency_ = value;
 }
-inline void NearbyControllers_Controller::set_xplane_frequency(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_xplane_frequency(value);
-  // @@protoc_insertion_point(field_set:xpilot.NearbyControllers.Controller.xplane_frequency)
+inline void NearbyControllers_Controller::set_sim_frequency(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_sim_frequency(value);
+  // @@protoc_insertion_point(field_set:xpilot.NearbyControllers.Controller.sim_frequency)
 }
 
 // optional string frequency = 3;
@@ -560,61 +560,61 @@ inline void NearbyControllers_Controller::set_allocated_frequency(std::string* f
   // @@protoc_insertion_point(field_set_allocated:xpilot.NearbyControllers.Controller.frequency)
 }
 
-// optional string real_name = 4;
-inline bool NearbyControllers_Controller::_internal_has_real_name() const {
+// optional string realname = 4;
+inline bool NearbyControllers_Controller::_internal_has_realname() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
-inline bool NearbyControllers_Controller::has_real_name() const {
-  return _internal_has_real_name();
+inline bool NearbyControllers_Controller::has_realname() const {
+  return _internal_has_realname();
 }
-inline void NearbyControllers_Controller::clear_real_name() {
-  real_name_.ClearToEmpty();
+inline void NearbyControllers_Controller::clear_realname() {
+  realname_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000004u;
 }
-inline const std::string& NearbyControllers_Controller::real_name() const {
-  // @@protoc_insertion_point(field_get:xpilot.NearbyControllers.Controller.real_name)
-  return _internal_real_name();
+inline const std::string& NearbyControllers_Controller::realname() const {
+  // @@protoc_insertion_point(field_get:xpilot.NearbyControllers.Controller.realname)
+  return _internal_realname();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void NearbyControllers_Controller::set_real_name(ArgT0&& arg0, ArgT... args) {
+void NearbyControllers_Controller::set_realname(ArgT0&& arg0, ArgT... args) {
  _has_bits_[0] |= 0x00000004u;
- real_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:xpilot.NearbyControllers.Controller.real_name)
+ realname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:xpilot.NearbyControllers.Controller.realname)
 }
-inline std::string* NearbyControllers_Controller::mutable_real_name() {
-  // @@protoc_insertion_point(field_mutable:xpilot.NearbyControllers.Controller.real_name)
-  return _internal_mutable_real_name();
+inline std::string* NearbyControllers_Controller::mutable_realname() {
+  // @@protoc_insertion_point(field_mutable:xpilot.NearbyControllers.Controller.realname)
+  return _internal_mutable_realname();
 }
-inline const std::string& NearbyControllers_Controller::_internal_real_name() const {
-  return real_name_.Get();
+inline const std::string& NearbyControllers_Controller::_internal_realname() const {
+  return realname_.Get();
 }
-inline void NearbyControllers_Controller::_internal_set_real_name(const std::string& value) {
+inline void NearbyControllers_Controller::_internal_set_realname(const std::string& value) {
   _has_bits_[0] |= 0x00000004u;
-  real_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+  realname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
 }
-inline std::string* NearbyControllers_Controller::_internal_mutable_real_name() {
+inline std::string* NearbyControllers_Controller::_internal_mutable_realname() {
   _has_bits_[0] |= 0x00000004u;
-  return real_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+  return realname_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
-inline std::string* NearbyControllers_Controller::release_real_name() {
-  // @@protoc_insertion_point(field_release:xpilot.NearbyControllers.Controller.real_name)
-  if (!_internal_has_real_name()) {
+inline std::string* NearbyControllers_Controller::release_realname() {
+  // @@protoc_insertion_point(field_release:xpilot.NearbyControllers.Controller.realname)
+  if (!_internal_has_realname()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000004u;
-  return real_name_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+  return realname_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
-inline void NearbyControllers_Controller::set_allocated_real_name(std::string* real_name) {
-  if (real_name != nullptr) {
+inline void NearbyControllers_Controller::set_allocated_realname(std::string* realname) {
+  if (realname != nullptr) {
     _has_bits_[0] |= 0x00000004u;
   } else {
     _has_bits_[0] &= ~0x00000004u;
   }
-  real_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), real_name,
+  realname_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), realname,
       GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set_allocated:xpilot.NearbyControllers.Controller.real_name)
+  // @@protoc_insertion_point(field_set_allocated:xpilot.NearbyControllers.Controller.realname)
 }
 
 // -------------------------------------------------------------------
