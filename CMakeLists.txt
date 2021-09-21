@@ -15,6 +15,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
+find_package(Qt5QuickCompiler)
+
+qtquick_compiler_add_resources(RESOURCES qml.qrc)
 
 AUX_SOURCE_DIRECTORY("${CMAKE_SOURCE_DIR}/protobuf" PROTOBUF_SRC)
 
@@ -26,7 +29,6 @@ set(PROJECT_SOURCES
     src/appconfig.h
     src/nearbyatc.h
     src/base64.hpp
-    qml.qrc
     ${PROTOBUF_SRC}
 )
 
@@ -43,6 +45,7 @@ add_executable(xPilot
   ${GUI_TYPE}
   ${PROJECT_SOURCES}
   ${HEADERS}
+  ${RESOURCES}
   xpilot.rc
 )
 
