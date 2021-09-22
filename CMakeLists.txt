@@ -21,7 +21,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
@@ -30,17 +30,23 @@ find_package(Qt5QuickCompiler)
 
 qtquick_compiler_add_resources(RESOURCES qml.qrc)
 
-AUX_SOURCE_DIRECTORY("${CMAKE_SOURCE_DIR}/protobuf" PROTOBUF_SRC)
+#AUX_SOURCE_DIRECTORY("${CMAKE_SOURCE_DIR}/protobuf" PROTOBUF_SRC)
 
 set(PROJECT_SOURCES
     src/main.cpp
-    src/interprocess.cpp
-    src/interprocess.h
-    src/radiostack.h
-    src/appconfig.h
-    src/nearbyatc.h
-    src/base64.hpp
-    ${PROTOBUF_SRC}
+#    src/interprocess.cpp
+#    src/interprocess.h
+#    src/radiostack.h
+#    src/appconfig.h
+#    src/nearbyatc.h
+#    src/base64.hpp
+    src/afv.cpp
+    src/afv.h
+    src/core/Worker.cpp
+    src/core/Worker.h
+    src/fsd/FsdSession.cpp
+    src/fsd/FsdSession.h
+#    ${PROTOBUF_SRC}
 )
 
 set(AFV_NATIVE_HEADERS
@@ -236,13 +242,17 @@ target_compile_definitions(xPilot
 target_link_libraries(xPilot
   PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
 
-find_package(Protobuf REQUIRED)
-if(Protobuf_FOUND)
-        message("Found Protobuf library")
-        message(${Protobuf_INCLUDE_DIRS})
-        include_directories(${Protobuf_INCLUDE_DIRS})
-        target_link_libraries(xPilot PRIVATE ${Protobuf_LIBRARIES})
-endif(Protobuf_FOUND)
+#find_package(Protobuf REQUIRED)
+#if(Protobuf_FOUND)
+#        message("Found Protobuf library")
+#        message(${Protobuf_INCLUDE_DIRS})
+#        include_directories(${Protobuf_INCLUDE_DIRS})
+#        target_link_libraries(xPilot PRIVATE ${Protobuf_LIBRARIES})
+#endif(Protobuf_FOUND)
+
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32.lib)
+endif()
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
