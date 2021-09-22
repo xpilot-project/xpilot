@@ -1,0 +1,3 @@
+[submodule "afv-native"]
+	path = afv-native
+	url = git@github.com:xpilot-project/AFV-Native.git
