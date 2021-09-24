@@ -43,6 +43,8 @@ set(PROJECT_SOURCES
     src/afv.cpp
     src/afv.h
     src/core/threadutils.h
+    src/core/worker.h
+    src/core/worker.cpp
     src/fsd/FsdSession.cpp
     src/fsd/FsdSession.h
     src/fsd/pdu/PDUBase.cpp

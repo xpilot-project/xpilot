@@ -1,94 +1,59 @@
 #include "FsdSession.h"
 #include "../core/threadutils.h"
 
+using namespace xpilot::core;
+
 namespace xpilot
 {
-    FsdSession::FsdSession(QObject * parent) : QObject(parent)
+    FsdSession::FsdSession(QObject * parent) : ContinuousWorker(parent, "FsdSession")
     {
-        init();
-
-        connect(m_socket, &QTcpSocket::readyRead, this, &FsdSession::readDataFromSocket);
-        connect(m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::errorOccurred), this, &FsdSession::handleSocketError);
-        connect(m_socket, &QTcpSocket::connected, this, [=]() {
+        connect(&m_socket, &QTcpSocket::readyRead, this, &FsdSession::readDataFromSocket);
+        connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::errorOccurred), this, &FsdSession::handleSocketError);
+        connect(&m_socket, &QTcpSocket::connected, this, [=]() {
             m_connectFlag = true;
         });
-        connect(m_socket, &QTcpSocket::disconnected, this, [=]() {
+        connect(&m_socket, &QTcpSocket::disconnected, this, [=]() {
             m_connectFlag = false;
         });
 
         m_fsdTextCodec = QTextCodec::codecForName("ISO-8859-1");
     }
 
-    FsdSession::~FsdSession()
-    {
-//        if(m_thread)
-//        {
-//            m_thread->quit();
-//            m_thread->wait();
-//            delete m_thread;
-//            m_thread = nullptr;
-//        }
-
-        if(m_socket)
-        {
-            delete m_socket;
-            m_socket = nullptr;
-        }
-    }
-
-    void FsdSession::init()
-    {
-//        if(!m_thread)
-//        {
-//            m_thread = new QThread;
-//            this->moveToThread(m_thread);
-//            m_thread->start();
-//        }
-
-        if(!m_socket)
-        {
-            m_socket = new QTcpSocket;
-        }
-    }
-
     void FsdSession::ConnectToServer(QString address, quint16 port, bool challengeServer)
     {
-//        if(!ThreadUtils::isInThisThread(this))
-//        {
-//            QMetaObject::invokeMethod(this, [=]
-//            {
-//                ConnectToServer(address, port, challengeServer);
-//            });
-//            return;
-//        }
+        if(!ThreadUtils::isInThisThread(this))
+        {
+            QMetaObject::invokeMethod(this, [=]
+            {
+                ConnectToServer(address, port, challengeServer);
+            });
+            return;
+        }
 
-        if(m_socket->isOpen()) return;
+        if(m_socket.isOpen()) return;
         m_challengeServer = challengeServer;
-        m_socket->connectToHost(address, port);
+        m_socket.connectToHost(address, port);
     }
 
     void FsdSession::DisconnectFromServer()
     {
-//        if(!ThreadUtils::isInThisThread(this))
-//        {
-//            QMetaObject::invokeMethod(this, [=]
-//            {
-//                DisconnectFromServer();
-//            });
-//            return;
-//        }
-
-        if(m_socket)
+        if(!ThreadUtils::isInThisThread(this))
         {
-            m_socket->close();
+            QMetaObject::invokeMethod(this, [=]
+            {
+                DisconnectFromServer();
+            });
+            return;
         }
+
+        m_socket.close();
     }
 
     void FsdSession::readDataFromSocket()
     {
-        if(m_socket->bytesAvailable() < 1) return;
+        if(m_socket.bytesAvailable() < 1) return;
 
-        const QByteArray dataEncoded = m_socket->readAll();
+        const QByteArray dataEncoded = m_socket.readAll();
         if(dataEncoded.isEmpty()) return;
 
         const QString data = m_fsdTextCodec->toUnicode(dataEncoded);
@@ -283,7 +248,7 @@ namespace xpilot
 
         qDebug() << ">> " << bufferEncoded;
 
-        m_socket->write(bufferEncoded);
+        m_socket.write(bufferEncoded);
     }
 
     void FsdSession::handleSocketError(QAbstractSocket::SocketError socketError)
@@ -308,9 +273,9 @@ namespace xpilot
     QString FsdSession::socketErrorString(QAbstractSocket::SocketError error) const
     {
         QString e = socketErrorToQString(error);
-        if(!m_socket->errorString().isEmpty())
+        if(!m_socket.errorString().isEmpty())
         {
-            e += QStringLiteral(": ") % m_socket->errorString();
+            e += QStringLiteral(": ") % m_socket.errorString();
         }
         return e;
     }

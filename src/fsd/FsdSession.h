@@ -11,19 +11,19 @@
 #include <QTextCodec>
 #include <QMetaEnum>
 
+#include "../core/worker.h"
 #include "pdu/PDUBase.h"
 #include "pdu/PDUServerIdentification.h"
 #include "pdu/PDUClientIdentification.h"
 
 namespace xpilot
 {
-    class FsdSession : public QObject
+    class FsdSession : public xpilot::core::ContinuousWorker
     {
         Q_OBJECT
 
     public:
         explicit FsdSession(QObject *parent = nullptr);
-        virtual ~FsdSession();
 
         void init();
         bool getConnectStatus() const { return m_connectFlag; }
@@ -61,8 +61,7 @@ namespace xpilot
     private:
         QTextCodec* m_fsdTextCodec = nullptr;
 
-        QThread* m_thread { nullptr };
-        QTcpSocket* m_socket { nullptr };
+        QTcpSocket m_socket { this };
         bool m_connectFlag { false };
 
         bool m_challengeServer;
