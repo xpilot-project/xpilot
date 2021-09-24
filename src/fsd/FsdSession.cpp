@@ -5,8 +5,10 @@ using namespace xpilot::core;
 
 namespace xpilot
 {
-    FsdSession::FsdSession(QObject * parent) : ContinuousWorker(parent, "FsdSession")
+    FsdSession::FsdSession(QObject * parent) : QObject(parent)
     {
+        m_socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
+
         connect(&m_socket, &QTcpSocket::readyRead, this, &FsdSession::readDataFromSocket);
         connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::errorOccurred), this, &FsdSession::handleSocketError);
         connect(&m_socket, &QTcpSocket::connected, this, [=]() {
@@ -251,6 +253,11 @@ namespace xpilot
         m_socket.write(bufferEncoded);
     }
 
+    void FsdSession::handleAuthChallenge(QString &data)
+    {
+
+    }
+
     void FsdSession::handleSocketError(QAbstractSocket::SocketError socketError)
     {
         const QString error = this->socketErrorString(socketError);
@@ -278,5 +285,14 @@ namespace xpilot
             e += QStringLiteral(": ") % m_socket.errorString();
         }
         return e;
+    }
+
+    void FsdSession::initializeMessageTypes()
+    {
+        m_messageTypeMapping["$DI"] = MessageType::ServerIdentification;
+        m_messageTypeMapping["$ID"] = MessageType::ClientIdentification;
+        m_messageTypeMapping["#AA"] = MessageType::AddAtc;
+        m_messageTypeMapping["#DA"] = MessageType::DeleteAtc;
+        m_messageTypeMapping["#AP"] = MessageType::AddPilot;
     }
 }

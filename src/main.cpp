@@ -31,9 +31,8 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     QQmlContext *context = engine.rootContext();
 
-    xpilot::FsdSession* fsd = new xpilot::FsdSession(context);
-    fsd->start();
-    fsd->ConnectToServer("192.168.56.101", 6809);
+    xpilot::FsdSession fsd;
+    fsd.ConnectToServer("192.168.56.101", 6809);
 
 //    #ifdef WIN32
 //    WORD wVersionRequested;

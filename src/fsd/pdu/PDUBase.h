@@ -6,6 +6,32 @@
 #include <QStringBuilder>
 #include <QDebug>
 
+enum class MessageType
+{
+    Unknown,
+    AddAtc,
+    AddPilot,
+    AtcDataUpdate,
+    AuthChallenge,
+    AuthResponse,
+    ClientIdentification,
+    ClientQuery,
+    ClientResponse,
+    DeleteATC,
+    DeletePilot,
+    FlightPlan,
+    ProController,
+    FsdIdentification,
+    KillRequest,
+    PilotDataUpdate,
+    Ping,
+    Pong,
+    ServerError,
+    ServerHeartbeat,
+    TextMessage,
+    PilotClient
+};
+
 class PDUBase
 {
 public:

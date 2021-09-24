@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QTextCodec>
 #include <QMetaEnum>
+#include <QHash>
 
 #include "../core/worker.h"
 #include "pdu/PDUBase.h"
@@ -18,7 +19,7 @@
 
 namespace xpilot
 {
-    class FsdSession : public xpilot::core::ContinuousWorker
+    class FsdSession : public QObject
     {
         Q_OBJECT
 
@@ -50,10 +51,13 @@ namespace xpilot
         void RaiseServerIdentificationReceived(PDUServerIdentification pdu);
 
     private:
+        void initializeMessageTypes();
         void handleSocketError(QAbstractSocket::SocketError socketError);
         void readDataFromSocket();
         void processData(QString data);
         void sendData(QString data);
+
+        void handleAuthChallenge(QString& data);
 
         QString socketErrorString(QAbstractSocket::SocketError error) const;
         static QString socketErrorToQString(QAbstractSocket::SocketError error);
@@ -66,6 +70,8 @@ namespace xpilot
 
         bool m_challengeServer;
         QString m_partialPacket = "";
+
+        QHash<QString, MessageType> m_messageTypeMapping;
 
         static int constexpr m_serverAuthChallengeInterval = 60000;
         static int constexpr m_serverAuthChallengeResponseWindow = 30000;
