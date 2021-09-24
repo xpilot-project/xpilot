@@ -17,6 +17,7 @@
 
 #include "interprocess.h"
 #include "afv.h"
+#include "fsd/FsdSession.h"
 
 int main(int argc, char *argv[])
 {
@@ -30,17 +31,20 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     QQmlContext *context = engine.rootContext();
 
-    #ifdef WIN32
-    WORD wVersionRequested;
-    WSADATA wsaData;
-    wVersionRequested = MAKEWORD(2, 2);
-    WSAStartup(wVersionRequested, &wsaData);
-    #endif
+    xpilot::FsdSession fsd;
+    fsd.ConnectToServer("192.168.56.101", 6809);
 
-    struct event_base* ev_base = nullptr;
-    ev_base = event_base_new();
+//    #ifdef WIN32
+//    WORD wVersionRequested;
+//    WSADATA wsaData;
+//    wVersionRequested = MAKEWORD(2, 2);
+//    WSAStartup(wVersionRequested, &wsaData);
+//    #endif
 
-    AudioForVatsim audio(ev_base);
+//    struct event_base* ev_base = nullptr;
+//    ev_base = event_base_new();
+
+//    AudioForVatsim audio(ev_base);
 
 //    InterProcess ipc;
 //    context->setContextProperty("ipc", &ipc);

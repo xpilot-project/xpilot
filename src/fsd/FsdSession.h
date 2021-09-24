@@ -1,24 +1,72 @@
 #ifndef FsdSession_h
 #define FsdSession_h
 
+#include <QtGlobal>
+#include <QPointer>
 #include <QObject>
+#include <QThread>
+#include <QAbstractSocket>
 #include <QTcpSocket>
+#include <QTimer>
+#include <QTextCodec>
+#include <QMetaEnum>
 
-namespace Xpilot::Fsd
+#include "pdu/PDUBase.h"
+#include "pdu/PDUServerIdentification.h"
+#include "pdu/PDUClientIdentification.h"
+
+namespace xpilot
 {
-    class FsdSession
+    class FsdSession : public QObject
     {
         Q_OBJECT
 
     public:
-        FsdSession(QObject* owner = nullptr);
+        explicit FsdSession(QObject *parent = nullptr);
+        virtual ~FsdSession();
+
+        void init();
+        bool getConnectStatus() const { return m_connectFlag; }
+
+        void ConnectToServer(QString address, quint16 port, bool challengeServer = true);
+        void DisconnectFromServer();
+
+        template <class T>
+        void SendPDU(const T& message)
+        {
+            if(m_challengeServer)
+            {
+
+            }
+
+            sendData(message + PDUBase::PacketDelimeter);
+        }
 
     signals:
         void networkConnected();
         void networkDisconnected();
+        void sendDataError();
+
+        void RaiseServerIdentificationReceived(PDUServerIdentification pdu);
 
     private:
-        QTcpSocket m_socket {this};
+        void handleSocketError(QAbstractSocket::SocketError socketError);
+        void readDataFromSocket();
+        void processData(QString data);
+        void sendData(QString data);
+
+        QString socketErrorString(QAbstractSocket::SocketError error) const;
+        static QString socketErrorToQString(QAbstractSocket::SocketError error);
+
+    private:
+        QTextCodec* m_fsdTextCodec = nullptr;
+
+        QThread* m_thread { nullptr };
+        QTcpSocket* m_socket { nullptr };
+        bool m_connectFlag { false };
+
+        bool m_challengeServer;
+        QString m_partialPacket = "";
 
         static int constexpr m_serverAuthChallengeInterval = 60000;
         static int constexpr m_serverAuthChallengeResponseWindow = 30000;

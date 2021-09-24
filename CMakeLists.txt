@@ -42,10 +42,15 @@ set(PROJECT_SOURCES
 #    src/base64.hpp
     src/afv.cpp
     src/afv.h
-    src/core/Worker.cpp
-    src/core/Worker.h
+    src/core/threadutils.h
     src/fsd/FsdSession.cpp
     src/fsd/FsdSession.h
+    src/fsd/pdu/PDUBase.cpp
+    src/fsd/pdu/PDUBase.h
+    src/fsd/pdu/PDUServerIdentification.cpp
+    src/fsd/pdu/PDUServerIdentification.h
+    src/fsd/pdu/PDUClientIdentification.cpp
+    src/fsd/pdu/PDUClientIdentification.h
 #    ${PROTOBUF_SRC}
 )
 
