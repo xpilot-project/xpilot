@@ -84,6 +84,16 @@ set(PROJECT_SOURCES
     src/fsd/pdu/pdu_metar_request.cpp
     src/fsd/pdu/pdu_metar_response.h
     src/fsd/pdu/pdu_metar_response.cpp
+    src/fsd/pdu/pdu_pilot_position.h
+    src/fsd/pdu/pdu_pilot_position.cpp
+    src/fsd/pdu/pdu_ping.h
+    src/fsd/pdu/pdu_ping.cpp
+    src/fsd/pdu/pdu_plane_info_request.h
+    src/fsd/pdu/pdu_plane_info_request.cpp
+    src/fsd/pdu/pdu_plane_info_response.h
+    src/fsd/pdu/pdu_plane_info_response.cpp
+    src/fsd/pdu/pdu_pong.h
+    src/fsd/pdu/pdu_pong.cpp
     #    ${PROTOBUF_SRC}
     )
 
