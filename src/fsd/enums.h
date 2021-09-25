@@ -89,4 +89,25 @@ enum class FlightRules
     SVFR
 };
 
+enum class NetworkError
+{
+    Ok,
+    CallsignInUse,
+    CallsignInvalid,
+    AlreadyRegistered,
+    SyntaxError,
+    PDUSourceInvalid,
+    InvalidLogon,
+    NoSuchCallsign,
+    NoFlightPlan,
+    NoWeatherProfile,
+    InvalidProtocolRevision,
+    RequestedLevelTooHigh,
+    ServerFull,
+    CertificateSuspended,
+    InvalidControl,
+    InvalidPositionForRating,
+    UnauthorizedSoftware
+};
+
 #endif
