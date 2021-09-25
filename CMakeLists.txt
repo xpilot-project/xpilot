@@ -8,10 +8,10 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 if(MSVC)
     if(NOT DEFINED CONAN_LINK_RUNTIME AND DEFINED CONAN_SETTINGS_COMPILER_RUNTIME)
-            message(WARNING "Forcing MSVC runtime based on conan profile")
-            # this means Conan is not running the build, so we need to fix our linker flags ourself.... although we can probably cheat...
-            set(CONAN_LINK_RUNTIME "/${CONAN_SETTINGS_COMPILER_RUNTIME}")
-            conan_set_vs_runtime()
+        message(WARNING "Forcing MSVC runtime based on conan profile")
+        # this means Conan is not running the build, so we need to fix our linker flags ourself.... although we can probably cheat...
+        set(CONAN_LINK_RUNTIME "/${CONAN_SETTINGS_COMPILER_RUNTIME}")
+        conan_set_vs_runtime()
     endif()
 endif(MSVC)
 
@@ -34,27 +34,54 @@ qtquick_compiler_add_resources(RESOURCES qml.qrc)
 
 set(PROJECT_SOURCES
     src/main.cpp
-#    src/interprocess.cpp
-#    src/interprocess.h
-#    src/radiostack.h
-#    src/appconfig.h
-#    src/nearbyatc.h
-#    src/base64.hpp
+    #    src/interprocess.cpp
+    #    src/interprocess.h
+    #    src/radiostack.h
+    #    src/appconfig.h
+    #    src/nearbyatc.h
+    #    src/base64.hpp
     src/afv.cpp
     src/afv.h
     src/core/threadutils.h
-    src/core/worker.h
-    src/core/worker.cpp
-    src/fsd/FsdSession.cpp
-    src/fsd/FsdSession.h
-    src/fsd/pdu/PDUBase.cpp
-    src/fsd/pdu/PDUBase.h
-    src/fsd/pdu/PDUServerIdentification.cpp
-    src/fsd/pdu/PDUServerIdentification.h
-    src/fsd/pdu/PDUClientIdentification.cpp
-    src/fsd/pdu/PDUClientIdentification.h
-#    ${PROTOBUF_SRC}
-)
+    src/fsd/enums.h
+    src/fsd/fsd_client.cpp
+    src/fsd/fsd_client.h
+    src/fsd/serializer.h
+    src/fsd/serializer.cpp
+    src/fsd/pdu/pdu_base.cpp
+    src/fsd/pdu/pdu_base.h
+    src/fsd/pdu/pdu_server_identification.cpp
+    src/fsd/pdu/pdu_server_identification.h
+    src/fsd/pdu/pdu_client_identification.cpp
+    src/fsd/pdu/pdu_client_identification.h
+    src/fsd/pdu/pdu_atc_position.h
+    src/fsd/pdu/pdu_atc_position.cpp
+    src/fsd/pdu/pdu_add_atc.h
+    src/fsd/pdu/pdu_add_atc.cpp
+    src/fsd/pdu/pdu_add_pilot.h
+    src/fsd/pdu/pdu_add_pilot.cpp
+    src/fsd/pdu/pdu_auth_challenge.h
+    src/fsd/pdu/pdu_auth_challenge.cpp
+    src/fsd/pdu/pdu_auth_response.h
+    src/fsd/pdu/pdu_auth_response.cpp
+    src/fsd/pdu/pdu_broadcast_message.h
+    src/fsd/pdu/pdu_broadcast_message.cpp
+    src/fsd/pdu/pdu_client_query.h
+    src/fsd/pdu/pdu_client_query.cpp
+    src/fsd/pdu/pdu_client_query_response.h
+    src/fsd/pdu/pdu_client_query_response.cpp
+    src/fsd/pdu/pdu_delete_atc.h
+    src/fsd/pdu/pdu_delete_atc.cpp
+    src/fsd/pdu/pdu_delete_pilot.h
+    src/fsd/pdu/pdu_delete_pilot.cpp
+    src/fsd/pdu/pdu_fast_pilot_position.h
+    src/fsd/pdu/pdu_fast_pilot_position.cpp
+    src/fsd/pdu/pdu_flight_plan.h
+    src/fsd/pdu/pdu_flight_plan.cpp
+    src/fsd/pdu/pdu_kill_request.h
+    src/fsd/pdu/pdu_kill_request.cpp
+    #    ${PROTOBUF_SRC}
+    )
 
 set(AFV_NATIVE_HEADERS
     afv-native/include/afv-native/Client.h
@@ -188,30 +215,30 @@ SET(GUI_TYPE MACOSX_BUNDLE)
 ENDIF (APPLE)
 
 add_executable(xPilot
-  ${GUI_TYPE}
-  ${PROJECT_SOURCES}
-  ${HEADERS}
-  ${AFV_NATIVE_HEADERS}
-  ${AFV_NATIVE_SOURCES}
-  ${AFV_API_SOURCES}
-  ${AFV_NATIVE_THIRDPARTY_SOURCES}
-  ${RESOURCES}
-  xpilot.rc
-)
+    ${GUI_TYPE}
+    ${PROJECT_SOURCES}
+    ${HEADERS}
+    ${AFV_NATIVE_HEADERS}
+    ${AFV_NATIVE_SOURCES}
+    ${AFV_API_SOURCES}
+    ${AFV_NATIVE_THIRDPARTY_SOURCES}
+    ${RESOURCES}
+    xpilot.rc
+    )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/afv-native/src PREFIX "AFV Sources" FILES ${AFV_NATIVE_SOURCES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/afv-native/include PREFIX "AFV Headers" FILES ${AFV_NATIVE_HEADERS})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/afv-native/extern PREFIX "Third Party" FILES ${AFV_NATIVE_THIRDPARTY_SOURCES})
 
 if(WIN32)
-        set(OPUS_URL https://github.com/xpilot-project/opus/releases/download/xpilot/windows-opus.lib)
-        set(OPUS_LIBARY_PATH ${CMAKE_BINARY_DIR}/import/windows-opus.lib)
+    set(OPUS_URL https://github.com/xpilot-project/opus/releases/download/xpilot/windows-opus.lib)
+    set(OPUS_LIBARY_PATH ${CMAKE_BINARY_DIR}/import/windows-opus.lib)
 
-        set(PORTAUDIO_URL https://github.com/xpilot-project/portaudio/releases/download/xpilot/windows-portaudio.lib)
-        set(PORTAUDIO_LIBRARY_PATH ${CMAKE_BINARY_DIR}/import/windows-portaudio.lib)
+    set(PORTAUDIO_URL https://github.com/xpilot-project/portaudio/releases/download/xpilot/windows-portaudio.lib)
+    set(PORTAUDIO_LIBRARY_PATH ${CMAKE_BINARY_DIR}/import/windows-portaudio.lib)
 
-        set(SPEEXDSP_URL https://github.com/xpilot-project/speexdsp/releases/download/xpilot/windows-speexdsp.lib)
-        set(SPEEXDSP_LIBRARY_PATH ${CMAKE_BINARY_DIR}/import/windows-speexdsp.lib)
+    set(SPEEXDSP_URL https://github.com/xpilot-project/speexdsp/releases/download/xpilot/windows-speexdsp.lib)
+    set(SPEEXDSP_LIBRARY_PATH ${CMAKE_BINARY_DIR}/import/windows-speexdsp.lib)
 elseif(UNIX)
     set(OPUS_URL https://github.com/xpilot-project/opus/releases/download/xpilot/linux-opus.lib)
     set(OPUS_LIBARY_PATH ${CMAKE_BINARY_DIR}/import/linux-opus.lib)
@@ -245,9 +272,9 @@ target_include_directories(${PROJECT_NAME}
     ${CMAKE_SOURCE_DIR}/afv-native/include)
 
 target_compile_definitions(xPilot
-  PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
+    PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(xPilot
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
+    PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
 
 #find_package(Protobuf REQUIRED)
 #if(Protobuf_FOUND)

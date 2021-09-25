@@ -1,33 +1,30 @@
-#include "FsdSession.h"
+#include "fsd_client.h"
 #include "../core/threadutils.h"
-
-using namespace xpilot::core;
 
 namespace xpilot
 {
-    FsdSession::FsdSession(QObject * parent) : QObject(parent)
+    FsdClient::FsdClient(QObject * parent) : QObject(parent)
     {
+        m_fsdTextCodec = QTextCodec::codecForName("ISO-8859-1");
+
         m_socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
-        connect(&m_socket, &QTcpSocket::readyRead, this, &FsdSession::readDataFromSocket);
-        connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::errorOccurred), this, &FsdSession::handleSocketError);
-        connect(&m_socket, &QTcpSocket::connected, this, [=]() {
-            m_connectFlag = true;
-        });
-        connect(&m_socket, &QTcpSocket::disconnected, this, [=]() {
-            m_connectFlag = false;
-        });
+        connect(&m_socket, &QTcpSocket::readyRead, this, &FsdClient::handleDataReceived);
+        connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::errorOccurred), this, &FsdClient::handleSocketError);
+        connect(&m_socket, &QTcpSocket::connected, this, &FsdClient::handleSocketConnected);
+        connect(&m_socket, &QTcpSocket::disconnected, this, &FsdClient::handleSocketDisconnected);
 
-        m_fsdTextCodec = QTextCodec::codecForName("ISO-8859-1");
+        m_slowPositionUpdateTimer.setObjectName(this->objectName().append(":m_slowPositionUpdateTimer"));
+        connect(&m_slowPositionUpdateTimer, &QTimer::timeout, this, &FsdClient::sendSlowPositionUpdate);
     }
 
-    void FsdSession::ConnectToServer(QString address, quint16 port, bool challengeServer)
+    void FsdClient::Connect(QString address, quint32 port, bool challengeServer)
     {
         if(!ThreadUtils::isInThisThread(this))
         {
             QMetaObject::invokeMethod(this, [=]
             {
-                ConnectToServer(address, port, challengeServer);
+                Connect(address, port, challengeServer);
             });
             return;
         }
@@ -35,23 +32,25 @@ namespace xpilot
         if(m_socket.isOpen()) return;
         m_challengeServer = challengeServer;
         m_socket.connectToHost(address, port);
+        m_slowPositionUpdateTimer.start(m_slowPositionTimerInterval);
     }
 
-    void FsdSession::DisconnectFromServer()
+    void FsdClient::Disconnect()
     {
         if(!ThreadUtils::isInThisThread(this))
         {
             QMetaObject::invokeMethod(this, [=]
             {
-                DisconnectFromServer();
+                Disconnect();
             });
             return;
         }
 
+        m_slowPositionUpdateTimer.stop();
         m_socket.close();
     }
 
-    void FsdSession::readDataFromSocket()
+    void FsdClient::handleDataReceived()
     {
         if(m_socket.bytesAvailable() < 1) return;
 
@@ -62,7 +61,7 @@ namespace xpilot
         processData(data);
     }
 
-    void FsdSession::processData(QString data)
+    void FsdClient::processData(QString data)
     {
         if(data.length() == 0) return;
 
@@ -77,7 +76,7 @@ namespace xpilot
 
         qDebug() << "<< " << data;
 
-        QStringList packets = data.split(QLatin1String("\r\n"));
+        QStringList packets = data.split(PDUBase::PacketDelimeter);
 
         // If he last packet has content, it's an incomplete packet.
         int topIndex = packets.length() - 1;
@@ -91,30 +90,26 @@ namespace xpilot
         {
             if(packet.length() == 0) continue;
 
-            QStringList fields = packet.split(QLatin1String(":"));
+            QStringList fields = packet.split(PDUBase::Delimeter);
             const QCharRef prefixChar = fields[0][0];
 
             if(prefixChar == '@')
             {
-
+                fields[0] = fields[0].mid(1);
             }
             else if(prefixChar == '^')
             {
-
+                fields[0] = fields[0].mid(1);
             }
             else if(prefixChar == '%')
             {
-
-            }
-            else if(prefixChar == '\\')
-            {
-
+                fields[0] = fields[0].mid(1);
             }
             else if(prefixChar == '#' || prefixChar == '$')
             {
                 if(fields[0].length() < 3)
                 {
-                    qDebug() << "Invalid PDU type %1" << packet;
+                    qDebug() << "Invalid PDU type: " << packet;
                 }
 
                 QString pduTypeId = fields[0].mid(0, 3);
@@ -148,31 +143,7 @@ namespace xpilot
                 }
                 else if(pduTypeId == "#TM")
                 {
-
-                }
-                else if(pduTypeId == "#WX")
-                {
-
-                }
-                else if(pduTypeId == "#WD")
-                {
-
-                }
-                else if(pduTypeId == "#DL")
-                {
-
-                }
-                else if(pduTypeId == "#TD")
-                {
-
-                }
-                else if(pduTypeId == "#CD")
-                {
-
-                }
-                else if(pduTypeId == "#PC")
-                {
-
+                    processTM(fields);
                 }
                 else if(pduTypeId == "#SB")
                 {
@@ -182,31 +153,11 @@ namespace xpilot
                 {
 
                 }
-                else if(pduTypeId == "$AM")
-                {
-
-                }
                 else if(pduTypeId == "$PI")
                 {
 
                 }
                 else if(pduTypeId == "$PO")
-                {
-
-                }
-                else if(pduTypeId == "$HO")
-                {
-
-                }
-                else if(pduTypeId == "$HA")
-                {
-
-                }
-                else if(pduTypeId == "$AX")
-                {
-
-                }
-                else if(pduTypeId == "$AR")
                 {
 
                 }
@@ -230,10 +181,6 @@ namespace xpilot
                 {
 
                 }
-                else
-                {
-                    qDebug() << "Unknown PDU type: %1" << packet;
-                }
             }
             else
             {
@@ -242,9 +189,9 @@ namespace xpilot
         }
     }
 
-    void FsdSession::sendData(QString data)
+    void FsdClient::sendData(QString data)
     {
-        if(!m_connectFlag || data.isEmpty()) return;
+        if(!m_connected || data.isEmpty()) return;
 
         const QByteArray bufferEncoded = data.toUtf8();
 
@@ -253,31 +200,83 @@ namespace xpilot
         m_socket.write(bufferEncoded);
     }
 
-    void FsdSession::handleAuthChallenge(QString &data)
+    void FsdClient::handleAuthChallenge(QString &data)
     {
 
     }
 
-    void FsdSession::handleSocketError(QAbstractSocket::SocketError socketError)
+    void FsdClient::processTM(QStringList &fields)
+    {
+        if(fields.length() < 3)
+        {
+            qDebug() << "Invalid field count." << PDUBase::Reassemble(fields);
+        }
+
+        // #TMs are allowed to have colons in the message field, so here we need
+        // to rejoin the fields then resplit with a limit of 3 substrings.
+        QString raw = PDUBase::Reassemble(fields);
+        fields = raw.split(PDUBase::Delimeter).mid(0, 3);
+
+        if(fields[1] == "*")
+        {
+
+        }
+        else if(fields[1] == "*s")
+        {
+
+        }
+        else if(fields[1] == "@49999")
+        {
+
+        }
+        else
+        {
+            if(fields[1].mid(0, 1) == "@")
+            {
+
+            }
+            else
+            {
+
+            }
+        }
+    }
+
+    void FsdClient::sendSlowPositionUpdate()
+    {
+
+    }
+
+    void FsdClient::handleSocketError(QAbstractSocket::SocketError socketError)
     {
         const QString error = this->socketErrorString(socketError);
         qDebug() << "FSD socket error: " << error;
 
         switch(socketError)
         {
-            case QAbstractSocket::RemoteHostClosedError:
-            this->networkDisconnected();
+        case QAbstractSocket::RemoteHostClosedError:
+            this->Disconnect();
             break;
         }
     }
 
-    QString FsdSession::socketErrorToQString(QAbstractSocket::SocketError error)
+    void FsdClient::handleSocketConnected()
+    {
+        m_connected = true;
+    }
+
+    void FsdClient::handleSocketDisconnected()
+    {
+        m_connected = false;
+    }
+
+    QString FsdClient::socketErrorToQString(QAbstractSocket::SocketError error)
     {
         static const QMetaEnum metaEnum = QMetaEnum::fromType<QAbstractSocket::SocketError>();
         return metaEnum.valueToKey(error);
     }
 
-    QString FsdSession::socketErrorString(QAbstractSocket::SocketError error) const
+    QString FsdClient::socketErrorString(QAbstractSocket::SocketError error) const
     {
         QString e = socketErrorToQString(error);
         if(!m_socket.errorString().isEmpty())
@@ -285,14 +284,5 @@ namespace xpilot
             e += QStringLiteral(": ") % m_socket.errorString();
         }
         return e;
-    }
-
-    void FsdSession::initializeMessageTypes()
-    {
-        m_messageTypeMapping["$DI"] = MessageType::ServerIdentification;
-        m_messageTypeMapping["$ID"] = MessageType::ClientIdentification;
-        m_messageTypeMapping["#AA"] = MessageType::AddAtc;
-        m_messageTypeMapping["#DA"] = MessageType::DeleteAtc;
-        m_messageTypeMapping["#AP"] = MessageType::AddPilot;
     }
 }

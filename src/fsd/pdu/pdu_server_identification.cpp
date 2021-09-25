@@ -1,4 +1,4 @@
-#include "PDUServerIdentification.h"
+#include "pdu_server_identification.h"
 
 PDUServerIdentification::PDUServerIdentification(QString from, QString to, QString version, QString initialChallengeKey)
     : PDUBase(from, to)

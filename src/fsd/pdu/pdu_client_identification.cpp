@@ -1,4 +1,4 @@
-#include "PDUClientIdentification.h"
+#include "pdu_client_identification.h"
 
 PDUClientIdentification::PDUClientIdentification(QString from, ushort clientID, QString clientName, int majorVersion, int minorVersion, QString cid, QString sysUID, QString initialChallenge) : PDUBase(from, ServerCallsign)
 {

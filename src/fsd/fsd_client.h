@@ -12,36 +12,29 @@
 #include <QMetaEnum>
 #include <QHash>
 
-#include "../core/worker.h"
-#include "pdu/PDUBase.h"
-#include "pdu/PDUServerIdentification.h"
-#include "pdu/PDUClientIdentification.h"
+#include "pdu/pdu_base.h"
+#include "pdu/pdu_server_identification.h"
+#include "pdu/pdu_client_identification.h"
 
 namespace xpilot
 {
-    class FsdSession : public QObject
+    class FsdClient : public QObject
     {
         Q_OBJECT
 
     public:
-        explicit FsdSession(QObject *parent = nullptr);
+        explicit FsdClient(QObject *parent = nullptr);
 
-        void init();
-        bool getConnectStatus() const { return m_connectFlag; }
-
-        void ConnectToServer(QString address, quint16 port, bool challengeServer = true);
-        void DisconnectFromServer();
+        void Connect(QString address, quint32 port, bool challengeServer = true);
+        void Disconnect();
 
         template <class T>
         void SendPDU(const T& message)
         {
-            if(m_challengeServer)
-            {
-
-            }
-
             sendData(message + PDUBase::PacketDelimeter);
         }
+
+        bool getConnectionStatus() const { return m_connected; }
 
     signals:
         void networkConnected();
@@ -51,13 +44,17 @@ namespace xpilot
         void RaiseServerIdentificationReceived(PDUServerIdentification pdu);
 
     private:
-        void initializeMessageTypes();
         void handleSocketError(QAbstractSocket::SocketError socketError);
-        void readDataFromSocket();
+        void handleSocketConnected();
+        void handleSocketDisconnected();
+        void handleDataReceived();
         void processData(QString data);
         void sendData(QString data);
 
         void handleAuthChallenge(QString& data);
+        void processTM(QStringList& fields);
+
+        void sendSlowPositionUpdate();
 
         QString socketErrorString(QAbstractSocket::SocketError error) const;
         static QString socketErrorToQString(QAbstractSocket::SocketError error);
@@ -66,15 +63,19 @@ namespace xpilot
         QTextCodec* m_fsdTextCodec = nullptr;
 
         QTcpSocket m_socket { this };
-        bool m_connectFlag { false };
+        bool m_connected { false };
+
+        QTimer m_slowPositionUpdateTimer { this };
+        QTimer m_fastPositionUpdateTimer { this };
 
         bool m_challengeServer;
         QString m_partialPacket = "";
 
-        QHash<QString, MessageType> m_messageTypeMapping;
-
         static int constexpr m_serverAuthChallengeInterval = 60000;
         static int constexpr m_serverAuthChallengeResponseWindow = 30000;
+
+        static int constexpr m_slowPositionTimerInterval = 5000;
+        static int constexpr m_fastPositionTimerInterval = 200;
     };
 }
 
