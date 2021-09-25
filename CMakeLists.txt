@@ -80,6 +80,10 @@ set(PROJECT_SOURCES
     src/fsd/pdu/pdu_flight_plan.cpp
     src/fsd/pdu/pdu_kill_request.h
     src/fsd/pdu/pdu_kill_request.cpp
+    src/fsd/pdu/pdu_metar_request.h
+    src/fsd/pdu/pdu_metar_request.cpp
+    src/fsd/pdu/pdu_metar_response.h
+    src/fsd/pdu/pdu_metar_response.cpp
     #    ${PROTOBUF_SRC}
     )
 
