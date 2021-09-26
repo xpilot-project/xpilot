@@ -12,10 +12,12 @@ QString PDUPlaneInfoRequest::Serialize()
 
     tokens.append("#SB");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append("PIR");
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUPlaneInfoRequest PDUPlaneInfoRequest::Parse(QStringList fields)

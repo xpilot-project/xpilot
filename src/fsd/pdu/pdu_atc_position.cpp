@@ -18,15 +18,22 @@ QString PDUATCPosition::Serialize()
 
     tokens.append("%");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(QString::number(Frequency));
+    tokens.append(Delimeter);
     tokens.append(toQString(Facility));
+    tokens.append(Delimeter);
     tokens.append(QString::number(VisibilityRange));
+    tokens.append(Delimeter);
     tokens.append(toQString(Rating));
+    tokens.append(Delimeter);
     tokens.append(QString::number(Lat, 'f', 5));
+    tokens.append(Delimeter);
     tokens.append(QString::number(Lon, 'f', 5));
+    tokens.append(Delimeter);
     tokens.append(QString::number(0));
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUATCPosition PDUATCPosition::Parse(QStringList fields)

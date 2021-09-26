@@ -13,11 +13,14 @@ QString PDUServerIdentification::Serialize()
 
     tokens.append("$DI");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append(Version);
+    tokens.append(Delimeter);
     tokens.append(InitialChallengeKey);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUServerIdentification PDUServerIdentification::Parse(QStringList fields)

@@ -31,17 +31,26 @@ QString PDUPilotPosition::Serialize()
 
     tokens.append("@");
     tokens.append(IsIdenting ? "Y" : (IsSquawkingModeC ? "N" : "S"));
+    tokens.append(Delimeter);
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(QString::number(SquawkCode));
+    tokens.append(Delimeter);
     tokens.append(toQString(Rating));
+    tokens.append(Delimeter);
     tokens.append(QString::number(Lat, 'f', 6));
+    tokens.append(Delimeter);
     tokens.append(QString::number(Lon, 'f', 6));
+    tokens.append(Delimeter);
     tokens.append(QString::number(TrueAltitude));
+    tokens.append(Delimeter);
     tokens.append(QString::number(GroundSpeed));
+    tokens.append(Delimeter);
     tokens.append(QString::number(PackPitchBankHeading(Pitch, Bank, Heading)));
+    tokens.append(Delimeter);
     tokens.append(QString::number(PressureAltitude - TrueAltitude));
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUPilotPosition PDUPilotPosition::Parse(QStringList fields)

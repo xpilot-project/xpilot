@@ -12,10 +12,12 @@ QString PDUMetarResponse::Serialize()
 
     tokens.append("$AR");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append(Metar);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUMetarResponse PDUMetarResponse::Parse(QStringList fields)

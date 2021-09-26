@@ -12,10 +12,12 @@ QString PDUAuthResponse::Serialize()
 
     tokens.append("$ZR");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append(Response);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUAuthResponse PDUAuthResponse::Parse(QStringList fields)

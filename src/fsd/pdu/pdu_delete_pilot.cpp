@@ -12,9 +12,10 @@ QString PDUDeletePilot::Serialize()
 
     tokens.append("#DP");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(CID);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUDeletePilot PDUDeletePilot::Parse(QStringList fields)

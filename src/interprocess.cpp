@@ -17,11 +17,11 @@ InterProcess::InterProcess(QObject* parent) : QObject(parent)
 
     QObject::connect(process, &QProcess::readyReadStandardOutput, this, &InterProcess::tick);
 
-    process->start();
+//    process->start();
 
     QTimer* timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &InterProcess::checkProcessStatus);
-    timer->start(1000);
+//    timer->start(1000);
 }
 
 InterProcess::~InterProcess()
@@ -160,9 +160,6 @@ void InterProcess::checkProcessStatus()
         process = new QProcess(this);
         process->setProgram("XplaneBridge/XplaneBridge.exe");
         process->setProcessChannelMode(QProcess::ForwardedErrorChannel);
-
-        QObject::connect(process, &QProcess::readyReadStandardOutput, this, &InterProcess::tick);
-
         process->start();
     }
 }

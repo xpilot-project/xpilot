@@ -12,10 +12,12 @@ QString PDUPing::Serialize()
 
     tokens.append("$PI");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append(Timestamp);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUPing PDUPing::Parse(QStringList fields)

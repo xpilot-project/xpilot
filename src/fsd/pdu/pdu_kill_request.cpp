@@ -12,10 +12,12 @@ QString PDUKillRequest::Serialize()
 
     tokens.append("$!!");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append(Reason);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUKillRequest PDUKillRequest::Parse(QStringList fields)

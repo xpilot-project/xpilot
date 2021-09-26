@@ -15,8 +15,7 @@
 
 #include <event2/event.h>
 
-#include "afv.h"
-#include "fsd/fsd_client.h"
+#include "app.h"
 
 int main(int argc, char *argv[])
 {
@@ -30,8 +29,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     QQmlContext *context = engine.rootContext();
 
-    xpilot::FsdClient fsd;
-    fsd.Connect("192.168.56.101", 6809);
+    xpilot::App appContext;
 
 //    #ifdef WIN32
 //    WORD wVersionRequested;

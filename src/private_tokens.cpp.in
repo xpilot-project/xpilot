@@ -1,0 +1,20 @@
+#include \"private_tokens.h\"
+#include <QString>
+
+int Xpilot::PrivateTokens::VatsimClientId()
+{
+    static const int id { $$VATSIM_CLIENT_ID };
+    return id;
+}
+
+const QString &Xpilot::PrivateTokens::VatsimPrivateKey()
+{
+    static const auto pk = QString { \"$$VATSIM_PRIVATE_KEY\" };
+    return pk;
+}
+
+const QString &Xpilot::PrivateTokens::SentryToken()
+{
+    static const auto pk = QString { \"$$SENTRY_TOKEN\" };
+    return pk;
+}

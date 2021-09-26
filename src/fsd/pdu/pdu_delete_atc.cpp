@@ -11,9 +11,10 @@ QString PDUDeleteATC::Serialize()
 
     tokens.append("#DA");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(CID);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUDeleteATC PDUDeleteATC::Parse(QStringList fields)

@@ -12,10 +12,12 @@ QString PDUAuthChallenge::Serialize()
 
     tokens.append("$ZC");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append(Challenge);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUAuthChallenge PDUAuthChallenge::Parse(QStringList fields)

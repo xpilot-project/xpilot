@@ -17,15 +17,22 @@ QString PDUAddPilot::Serialize()
 
     tokens.append("#AP");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(PDUBase::ServerCallsign);
+    tokens.append(Delimeter);
     tokens.append(CID);
+    tokens.append(Delimeter);
     tokens.append(Password);
+    tokens.append(Delimeter);
     tokens.append(toQString(Rating));
+    tokens.append(Delimeter);
     tokens.append(toQString(Protocol));
+    tokens.append(Delimeter);
     tokens.append(toQString(SimType));
+    tokens.append(Delimeter);
     tokens.append(RealName);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUAddPilot PDUAddPilot::Parse(QStringList fields)

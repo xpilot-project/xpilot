@@ -25,24 +25,40 @@ QString PDUFlightPlan::Serialize()
 
     tokens.append("$FP");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append(toQString(Rules).mid(0, 1));
+    tokens.append(Delimeter);
     tokens.append(Equipment);
+    tokens.append(Delimeter);
     tokens.append(TAS);
+    tokens.append(Delimeter);
     tokens.append(DepAirport);
+    tokens.append(Delimeter);
     tokens.append(EstimatedDepTime);
+    tokens.append(Delimeter);
     tokens.append(ActualDepTime);
+    tokens.append(Delimeter);
     tokens.append(CruiseAlt);
+    tokens.append(Delimeter);
     tokens.append(DestAirport);
+    tokens.append(Delimeter);
     tokens.append(HoursEnroute);
+    tokens.append(Delimeter);
     tokens.append(MinutesEnroute);
+    tokens.append(Delimeter);
     tokens.append(FuelAvailHours);
+    tokens.append(Delimeter);
     tokens.append(FuelAvailMinutes);
+    tokens.append(Delimeter);
     tokens.append(AltAirport);
+    tokens.append(Delimeter);
     tokens.append(Remarks);
+    tokens.append(Delimeter);
     tokens.append(Route);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUFlightPlan PDUFlightPlan::Parse(QStringList fields)

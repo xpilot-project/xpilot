@@ -12,10 +12,12 @@ QString PDUTextMessage::Serialize()
 
     tokens.append("#TM");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append(Message);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUTextMessage PDUTextMessage::Parse(QStringList fields)

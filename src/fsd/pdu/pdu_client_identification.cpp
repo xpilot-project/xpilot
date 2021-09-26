@@ -17,18 +17,26 @@ QString PDUClientIdentification::Serialize()
 
     tokens.append("$ID");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append(QString::number(ClientID, 16).toLower());
+    tokens.append(Delimeter);
     tokens.append(ClientName);
-    tokens.append(QString(MajorVersion));
-    tokens.append(QString(MinorVersion));
+    tokens.append(Delimeter);
+    tokens.append(QString::number(MajorVersion));
+    tokens.append(Delimeter);
+    tokens.append(QString::number(MinorVersion));
+    tokens.append(Delimeter);
     tokens.append(CID);
+    tokens.append(Delimeter);
     tokens.append(SysUID);
     if(!InitialChallenge.isEmpty()) {
+        tokens.append(Delimeter);
         tokens.append(InitialChallenge);
     }
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUClientIdentification PDUClientIdentification::Parse(QStringList fields)

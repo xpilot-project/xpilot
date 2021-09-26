@@ -13,13 +13,15 @@ QString PDUClientQueryResponse::Serialize()
 
     tokens.append("$CR");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
     tokens.append(toQString(QueryType));
     for(const auto& payloadItem : Payload) {
+        tokens.append(Delimeter);
         tokens.append(payloadItem);
     }
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUClientQueryResponse PDUClientQueryResponse::Parse(QStringList fields)

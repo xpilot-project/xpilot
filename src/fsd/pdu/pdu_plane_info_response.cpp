@@ -15,21 +15,28 @@ QString PDUPlaneInfoResponse::Serialize()
 
     tokens.append("#SB");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append("PI");
+    tokens.append(Delimeter);
     tokens.append("GEN");
+    tokens.append(Delimeter);
     tokens.append("EQUIPMENT=" + Equipment);
     if(!Airline.isEmpty()) {
+        tokens.append(Delimeter);
         tokens.append("AIRLINE=" + Airline);
     }
     if(!Livery.isEmpty()) {
+        tokens.append(Delimeter);
         tokens.append("LIVERY=" + Livery);
     }
     if(!CSL.isEmpty()) {
+        tokens.append(Delimeter);
         tokens.append("CSL=" + CSL);
     }
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUPlaneInfoResponse PDUPlaneInfoResponse::Parse(QStringList fields)

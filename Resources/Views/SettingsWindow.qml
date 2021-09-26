@@ -18,7 +18,7 @@ Window {
     flags: Qt.Dialog
     modality: Qt.ApplicationModal
 
-    property variant appConfig;
+    property var appConfig;
 
     signal closeWindow()
     signal requestConfig()

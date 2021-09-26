@@ -12,11 +12,14 @@ QString PDUMetarRequest::Serialize()
 
     tokens.append("$AX");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append("METAR");
+    tokens.append(Delimeter);
     tokens.append(Station);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUMetarRequest PDUMetarRequest::Parse(QStringList fields)

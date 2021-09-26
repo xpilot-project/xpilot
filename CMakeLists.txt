@@ -40,10 +40,16 @@ set(PROJECT_SOURCES
     #    src/appconfig.h
     #    src/nearbyatc.h
     #    src/base64.hpp
+    src/app.h
+    src/app.cpp
     src/afv.cpp
     src/afv.h
+    src/vatsim_auth.h
+    src/private_tokens.h
+    src/private_tokens.cpp.in
     src/core/threadutils.h
     src/fsd/enums.h
+    src/fsd/client_properties.h
     src/fsd/fsd_client.cpp
     src/fsd/fsd_client.h
     src/fsd/serializer.h
@@ -306,9 +312,12 @@ target_link_libraries(xPilot
 #        target_link_libraries(xPilot PRIVATE ${Protobuf_LIBRARIES})
 #endif(Protobuf_FOUND)
 
+
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32.lib)
 endif()
+
+set(VATSIM_AUTH ${CMAKE_SOURCE_DIR}/vatsimauth.lib)
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
@@ -319,7 +328,8 @@ target_link_libraries(${PROJECT_NAME}
     CONAN_PKG::libevent
     ${OPUS_LIBARY_PATH}
     ${PORTAUDIO_LIBRARY_PATH}
-    ${SPEEXDSP_LIBRARY_PATH})
+    ${SPEEXDSP_LIBRARY_PATH}
+    ${VATSIM_AUTH})
 
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PUBLIC _USE_MATH_DEFINES)

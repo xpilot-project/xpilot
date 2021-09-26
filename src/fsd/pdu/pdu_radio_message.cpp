@@ -21,10 +21,12 @@ QString PDURadioMessage::Serialize()
 
     tokens.append("#TM");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(freqs);
+    tokens.append(Delimeter);
     tokens.append(Message);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDURadioMessage PDURadioMessage::Parse(QStringList fields)

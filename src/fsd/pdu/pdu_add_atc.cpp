@@ -16,14 +16,20 @@ QString PDUAddATC::Serialize()
 
     tokens.append("#AA");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(PDUBase::ServerCallsign);
+    tokens.append(Delimeter);
     tokens.append(RealName);
+    tokens.append(Delimeter);
     tokens.append(CID);
+    tokens.append(Delimeter);
     tokens.append(Password);
+    tokens.append(Delimeter);
     tokens.append(toQString(Rating));
+    tokens.append(Delimeter);
     tokens.append(toQString(Protocol));
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUAddATC PDUAddATC::Parse(QStringList fields)

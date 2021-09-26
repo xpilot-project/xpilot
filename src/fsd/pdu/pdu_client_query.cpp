@@ -19,15 +19,18 @@ QString PDUClientQuery::Serialize()
 
     tokens.append("$CQ");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append(toQString(QueryType));
     if(!Payload.isEmpty()) {
         for(const auto& payloadItem : Payload) {
+            tokens.append(Delimeter);
             tokens.append(payloadItem);
         }
     }
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUClientQuery PDUClientQuery::Parse(QStringList fields)

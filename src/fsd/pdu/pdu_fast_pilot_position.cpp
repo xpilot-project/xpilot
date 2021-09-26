@@ -31,18 +31,28 @@ QString PDUFastPilotPosition::Serialize()
 
     tokens.append("^");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(QString::number(Lat, 'f', 6));
+    tokens.append(Delimeter);
     tokens.append(QString::number(Lon, 'f', 6));
+    tokens.append(Delimeter);
     tokens.append(QString::number(Altitude, 'f', 2));
+    tokens.append(Delimeter);
     tokens.append(QString::number(PackPitchBankHeading(Pitch, Bank, Heading)));
+    tokens.append(Delimeter);
     tokens.append(QString::number(VelocityLongitude, 'f', 4));
+    tokens.append(Delimeter);
     tokens.append(QString::number(VelocityAltitude, 'f', 4));
+    tokens.append(Delimeter);
     tokens.append(QString::number(VelocityLatitude, 'f', 4));
+    tokens.append(Delimeter);
     tokens.append(QString::number(VelocityPitch, 'f', 4));
+    tokens.append(Delimeter);
     tokens.append(QString::number(VelocityHeading, 'f', 4));
+    tokens.append(Delimeter);
     tokens.append(QString::number(VelocityBank, 'f', 4));
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUFastPilotPosition PDUFastPilotPosition::Parse(QStringList fields)

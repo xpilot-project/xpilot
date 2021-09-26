@@ -15,12 +15,16 @@ QString PDUProtocolError::Serialize()
 
     tokens.append("$ER");
     tokens.append(From);
+    tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append(QString::number(static_cast<int>(ErrorType)));
+    tokens.append(Delimeter);
     tokens.append(Param);
+    tokens.append(Delimeter);
     tokens.append(Message);
 
-    return tokens.join(Delimeter);
+    return tokens.join("");
 }
 
 PDUProtocolError PDUProtocolError::Parse(QStringList fields)
