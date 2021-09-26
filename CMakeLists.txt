@@ -40,6 +40,10 @@ set(PROJECT_SOURCES
     #    src/appconfig.h
     #    src/nearbyatc.h
     #    src/base64.hpp
+    src/common/simplecrypt.h
+    src/common/simplecrypt.cpp
+    src/appconfig.h
+    src/appconfig.cpp
     src/appcore.h
     src/appcore.cpp
     src/afv.cpp

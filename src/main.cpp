@@ -31,6 +31,8 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     QQmlContext *context = engine.rootContext();
 
+    QObject::connect(&app, SIGNAL(aboutToQuit()), &appCore, SLOT(SaveConfig()));
+
     context->setContextProperty("appCore", &appCore);
     context->setContextProperty("networkManager", &networkManager);
 

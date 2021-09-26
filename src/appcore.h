@@ -2,7 +2,11 @@
 #define APP_CORE_H
 
 #include <QObject>
+#include <QDir>
+#include <QFile>
+
 #include "network/networkmanager.h"
+#include "appconfig.h"
 
 namespace xpilot
 {
@@ -17,8 +21,12 @@ namespace xpilot
     {
         Q_OBJECT
 
+    public slots:
+        void SaveConfig();
+
     public:
         AppCore(QObject *owner = nullptr);
+        AppConfig config;
 
     private:
         NetworkManager m_networkManager { this };
