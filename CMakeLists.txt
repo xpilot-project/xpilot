@@ -94,6 +94,14 @@ set(PROJECT_SOURCES
     src/fsd/pdu/pdu_plane_info_response.cpp
     src/fsd/pdu/pdu_pong.h
     src/fsd/pdu/pdu_pong.cpp
+    src/fsd/pdu/pdu_protocol_error.h
+    src/fsd/pdu/pdu_protocol_error.cpp
+    src/fsd/pdu/pdu_radio_message.h
+    src/fsd/pdu/pdu_radio_message.cpp
+    src/fsd/pdu/pdu_text_message.h
+    src/fsd/pdu/pdu_text_message.cpp
+    src/fsd/pdu/pdu_wallop.h
+    src/fsd/pdu/pdu_wallop.cpp
     #    ${PROTOBUF_SRC}
     )
 
