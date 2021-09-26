@@ -6,11 +6,7 @@
 #include <QDebug>
 #include <QJsonDocument>
 #include <QJsonObject>
-
-#include <nlohmann/json.hpp>
 #include "common/simplecrypt.h"
-
-using json = nlohmann::json;
 
 namespace xpilot
 {
@@ -36,7 +32,6 @@ namespace xpilot
 
     private:
         SimpleCrypt crypto;
-
         QString VatsimPassword;
     };
 }

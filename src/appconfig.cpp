@@ -1,8 +1,6 @@
-#include <nlohmann/json.hpp>
 #include "appconfig.h"
 
 using namespace xpilot;
-using json = nlohmann::json;
 
 AppConfig& AppConfig::Instance()
 {
