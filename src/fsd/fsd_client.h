@@ -14,7 +14,6 @@
 #include <QCryptographicHash>
 
 #include "../vatsim_auth.h"
-#include "../private_tokens.h"
 #include "client_properties.h"
 #include "pdu/pdu_base.h"
 #include "pdu/pdu_add_atc.h"
@@ -38,6 +37,8 @@
 #include "pdu/pdu_protocol_error.h"
 #include "pdu/pdu_auth_challenge.h"
 #include "pdu/pdu_auth_response.h"
+#include "pdu/pdu_fast_pilot_position.h"
+#include "pdu/pdu_pilot_position.h"
 
 namespace xpilot
 {
@@ -56,8 +57,8 @@ namespace xpilot
         bool getConnectionStatus() const { return m_connected; }
 
     signals:
-        void networkConnected();
-        void networkDisconnected();
+        void RaiseNetworkConnected();
+        void RaiseNetworkDisconnected();
         void sendDataError();
 
         void RaiseServerIdentificationReceived(PDUServerIdentification pdu);
@@ -87,8 +88,6 @@ namespace xpilot
         void handleDataReceived();
         void processData(QString data);
         void sendData(QString data);
-
-        void handleAuthChallenge(QString& data);
         void processTM(QStringList& fields);
 
         void sendSlowPositionUpdate();
@@ -98,39 +97,20 @@ namespace xpilot
 
         QString toMd5(QString value);
 
-        void CheckServerAuthChallengeResponse(QString response);
-        void CheckServerAuth();
-        void ChallengeServer();
-        void ResetServerAuthSession();
-
     private:
         QTextCodec* m_fsdTextCodec = nullptr;
 
         QTcpSocket m_socket { this };
         bool m_connected { false };
 
-        QTimer m_slowPositionUpdateTimer { this };
-        QTimer m_fastPositionUpdateTimer { this };
-
-        QString m_currentCallsign;
-
         bool m_challengeServer;
         QString m_partialPacket = "";
 
-        ushort m_clientId;
-        const char* m_privateKey;
-
-        QString m_serverAuthSessionKey;
-        QString m_serverAuthChallengeKey;
-        QString m_lastServerAuthChallenge;
         QString m_clientAuthSessionKey;
         QString m_clientAuthChallengeKey;
 
         static int constexpr m_slowPositionTimerInterval = 5000;
         static int constexpr m_fastPositionTimerInterval = 200;
-
-        static int constexpr m_serverAuthChallengeInterval = 60000;
-        static int constexpr m_serverAuthChallengeResponseWindow = 30000;
     };
 }
 

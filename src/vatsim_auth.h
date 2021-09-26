@@ -5,9 +5,10 @@
 extern "C" {
 #endif
 
-char* GenerateAuthResponse(const char* challenge, const char* key, unsigned short clientId);
+char* GenerateAuthResponse(const char* challenge, const char* key);
 char* GenerateAuthChallenge();
-char* GetMd5Digest(const char* value);
+unsigned short GetClientId();
+char* GetSystemUid();
 
 #ifdef __cplusplus
 }

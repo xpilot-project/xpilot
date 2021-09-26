@@ -9,11 +9,24 @@ GridLayout {
     columns: 2
     anchors.fill: parent
     property bool simConnected: false
+    property bool networkConnected: false
     property bool isModeC: false
     property bool isIdenting: false
 
     signal toggleModeC(bool active)
     signal squawkIdent()
+
+    Connections {
+        target: networkManager
+
+        function onNetworkConnected() {
+            networkConnected = true;
+        }
+
+        function onNetworkDisconnected() {
+            networkConnected = false
+        }
+    }
 
     Row {
         leftPadding: 15
@@ -21,16 +34,22 @@ GridLayout {
 
         ToolbarButton {
             id: btnConnect
-            text: "Connect"
+            text: networkConnected ? "Disconnect" : "Connect"
+            active: networkConnected
             MouseArea {
                 id: btnConnectMouseArea
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    var comp = Qt.createComponent("qrc:/Resources/Views/ConnectWindow.qml")
-                    if(comp.status === Component.Ready) {
-                        connectWindow = comp.createObject(mainWindow)
-                        connectWindow.show()
+                    if(networkConnected) {
+                        networkManager.disconnectFromNetwork();
+                    }
+                    else {
+                        var comp = Qt.createComponent("qrc:/Resources/Views/ConnectWindow.qml")
+                        if(comp.status === Component.Ready) {
+                            connectWindow = comp.createObject(mainWindow)
+                            connectWindow.show()
+                        }
                     }
                 }
             }

@@ -13,6 +13,8 @@ Button {
     width: textMetrics.advanceWidth + 20
     height: 30
 
+    property bool active: false
+
     MouseArea {
         id: btnMouseArea
         hoverEnabled: true
@@ -21,14 +23,14 @@ Button {
     }
 
     background: Rectangle {
-        color: btnMouseArea.pressed ? "#a7acb1" : btnMouseArea.containsMouse ? "#565e64" : "transparent"
+        color: active ? "#0164AD" : (btnMouseArea.pressed ? "#a7acb1" : btnMouseArea.containsMouse ? "#565e64" : "transparent")
         opacity: button.enabled ? 1 : 0.5
         border.color: btnMouseArea.pressed ? "#a7acb1" : "#6c757d"
     }
 
     contentItem: Text {
         id: label
-        color: btnMouseArea.pressed || btnMouseArea.containsMouse ? "#ffffff" : "#6c757d"
+        color: active ? "#ffffff" : btnMouseArea.pressed || btnMouseArea.containsMouse ? "#ffffff" : "#6c757d"
         text: button.text.toUpperCase()
         font.pixelSize: button.font.pixelSize
         horizontalAlignment: Text.AlignHCenter

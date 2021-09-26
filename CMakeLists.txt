@@ -40,14 +40,14 @@ set(PROJECT_SOURCES
     #    src/appconfig.h
     #    src/nearbyatc.h
     #    src/base64.hpp
-    src/app.h
-    src/app.cpp
+    src/appcore.h
+    src/appcore.cpp
     src/afv.cpp
     src/afv.h
     src/vatsim_auth.h
-    src/private_tokens.h
-    src/private_tokens.cpp.in
-    src/core/threadutils.h
+    src/network/networkmanager.h
+    src/network/networkmanager.cpp
+    src/network/connectinfo.h
     src/fsd/enums.h
     src/fsd/client_properties.h
     src/fsd/fsd_client.cpp
@@ -250,8 +250,8 @@ add_executable(xPilot
     ${AFV_NATIVE_SOURCES}
     ${AFV_API_SOURCES}
     ${AFV_NATIVE_THIRDPARTY_SOURCES}
-    ${RESOURCES}
     xpilot.rc
+    qml.qrc
     )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/afv-native/src PREFIX "AFV Sources" FILES ${AFV_NATIVE_SOURCES})

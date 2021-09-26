@@ -20,6 +20,10 @@ Window {
 
     signal closeWindow()
 
+    Connections {
+        target: networkManager
+    }
+
     GridLayout {
         anchors.fill: parent
         anchors.rightMargin: 30
@@ -166,6 +170,7 @@ Window {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
+                        networkManager.connectToNetwork(txtCallsign.text, txtTypeCode.text, txtSelcal.text, observerMode.checked);
                         closeWindow()
                     }
                 }
