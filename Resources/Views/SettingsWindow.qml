@@ -6,6 +6,8 @@ import QtQuick.Dialogs 1.2
 import "../Components"
 import "../Controls"
 
+import AppConfig 1.0
+
 Window {
     id: formSettings
     title: "Settings"
@@ -18,31 +20,22 @@ Window {
     flags: Qt.Dialog
     modality: Qt.ApplicationModal
 
-    property var appConfig;
+    property var serverListLoaded: false
 
     signal closeWindow()
-    signal requestConfig()
-    signal updateConfig(var config)
-
-    onVisibilityChanged: requestConfig()
 
     // @disable-check M16
     onClosing: {
+        AppConfig.saveConfig();
         closeWindow()
-        updateConfig(appConfig)
     }
 
-    Connections {
-        target: ipc
-
-        function onAppConfigReceived(config)
-        {
-            appConfig = config;
-            txtVatsimId.text = appConfig.vatsimId;
-            txtVatsimPassword.text = appConfig.vatsimPassword;
-            txtYourName.text = appConfig.name;
-            txtHomeAirport.text = appConfig.homeAirport;
-        }
+    Component.onCompleted: {
+        txtVatsimId.text = AppConfig.VatsimId;
+        txtVatsimPassword.text = AppConfig.VatsimPasswordDecrypted;
+        txtYourName.text = AppConfig.Name;
+        txtHomeAirport.text = AppConfig.HomeAirport;
+        networkServerCombobox.model = AppConfig.CachedServers;
     }
 
     GridLayout {
@@ -75,7 +68,7 @@ Window {
             CustomTextField {
                 id: txtVatsimId
                 onTextChanged: {
-                    appConfig.vatsimId = txtVatsimId.text;
+                    AppConfig.VatsimId = txtVatsimId.text;
                 }
                 validator: RegularExpressionValidator {
                     regularExpression: /[0-9]+/
@@ -104,7 +97,7 @@ Window {
                 echoMode: TextInput.Password
                 y: 20
                 onTextChanged: {
-                    appConfig.vatsimPassword = txtVatsimPassword.text;
+                    AppConfig.VatsimPasswordDecrypted = txtVatsimPassword.text;
                 }
             }
         }
@@ -129,7 +122,7 @@ Window {
                 id: txtYourName
                 y: 20
                 onTextChanged: {
-                    appConfig.name = txtYourName.text;
+                    AppConfig.Name = txtYourName.text;
                 }
             }
         }
@@ -155,7 +148,7 @@ Window {
                 y: 20
                 onTextChanged: {
                     txtHomeAirport.text = txtHomeAirport.text.toUpperCase()
-                    appConfig.homeAirport = txtHomeAirport.text;
+                    AppConfig.HomeAirport = txtHomeAirport.text;
                 }
                 validator: RegularExpressionValidator {
                     regularExpression: /[a-zA-Z0-9]{4}/
@@ -188,12 +181,16 @@ Window {
                 anchors.leftMargin: 0
                 anchors.rightMargin: 0
                 textRole: "name"
-                valueRole: "name"
-                //                Component.onCompleted: {
-                //                    if(config.appConfig.serverName) {
-                //                        currentIndex = indexOfValue(config.appConfig.serverName)
-                //                    }
-                //                }
+                valueRole: "address"
+                onModelChanged: {
+                    currentIndex = find(AppConfig.ServerName);
+                    serverListLoaded = true;
+                }
+                onCurrentIndexChanged: {
+                    if(serverListLoaded) {
+                        AppConfig.ServerName = networkServerCombobox.textAt(currentIndex)
+                    }
+                }
             }
         }
 

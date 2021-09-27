@@ -2,18 +2,28 @@
 
 using namespace xpilot;
 
-AppConfig& AppConfig::Instance()
+AppConfig* AppConfig::instance = 0;
+
+AppConfig::AppConfig(QObject* parent) :
+    QObject(parent)
 {
-    static auto&& config = AppConfig();
-    return config;
+    loadConfig();
 }
 
-void AppConfig::LoadConfig()
+AppConfig *AppConfig::getInstance()
+{
+    if(instance == 0) {
+        instance = new AppConfig;
+    }
+    return instance;
+}
+
+void AppConfig::loadConfig()
 {
     QFile configFile("AppConfig.json");
     if(!configFile.open(QIODevice::ReadOnly)) {
-        SaveConfig();
-        LoadConfig();
+        saveConfig();
+        loadConfig();
         return;
     }
 
@@ -48,7 +58,7 @@ void AppConfig::LoadConfig()
     }
 }
 
-void AppConfig::SaveConfig()
+void AppConfig::saveConfig()
 {
     QJsonObject jsonObj;
     jsonObj["VatsimId"] = VatsimId;
@@ -81,7 +91,7 @@ void AppConfig::SaveConfig()
     configFile.close();
 }
 
-bool AppConfig::ConfigRequired()
+bool AppConfig::configRequired()
 {
     return VatsimId.isEmpty() || VatsimPasswordDecrypted.isEmpty() || Name.isEmpty();
 }

@@ -60,5 +60,5 @@ ComboBox {
             border.color: '#000000'
         }
     }
-    Component.onCompleted: currentIndex = indexOfValue(currentIndex)
+    Component.onCompleted: currentIndex = find(currentText)
 }

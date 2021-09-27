@@ -26,10 +26,6 @@ namespace xpilot
 
     public:
         AppCore(QObject *owner = nullptr);
-        AppConfig config;
-
-    private:
-        NetworkManager m_networkManager { this };
     };
 }
 

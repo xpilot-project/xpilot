@@ -1,17 +1,16 @@
 #include "appcore.h"
-#include "network/networkinfo.h"
+#include "network/networkserverlist.h"
 
 namespace xpilot
 {
     AppCore::AppCore(QObject *owner) : QObject(owner)
     {
-        AppConfig::Instance().LoadConfig();
-
-        auto serverList = NetworkInfo::GetServerList("http://data.vatsim.net/vatsim-servers.json");
+        NetworkServerList networkServerList;
+        auto serverList = networkServerList.DownloadServerList("http://data.vatsim.net/vatsim-servers.json");
         if(serverList.size() > 0) {
-            AppConfig::Instance().CachedServers.clear();
+            AppConfig::getInstance()->CachedServers.clear();
             for(auto & server: serverList) {
-                AppConfig::Instance().CachedServers.append(server);
+                AppConfig::getInstance()->CachedServers.append(server);
             }
             SaveConfig();
         }
@@ -19,6 +18,6 @@ namespace xpilot
 
     void AppCore::SaveConfig()
     {
-        AppConfig::Instance().SaveConfig();
+        AppConfig::getInstance()->saveConfig();
     }
 }

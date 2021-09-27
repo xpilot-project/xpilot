@@ -52,8 +52,8 @@ set(PROJECT_SOURCES
     src/network/networkmanager.h
     src/network/networkmanager.cpp
     src/network/connectinfo.h
-    src/network/networkinfo.h
-    src/network/networkinfo.cpp
+    src/network/networkserverlist.h
+    src/network/networkserverlist.cpp
     src/fsd/enums.h
     src/fsd/client_properties.h
     src/fsd/fsd_client.cpp

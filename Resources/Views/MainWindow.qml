@@ -31,8 +31,6 @@ Window {
     signal setTransponderModeC(bool active);
     signal setTransponderIdent();
     signal setRadioStack(int radio, int frequency);
-    signal updateConfig(var config);
-    signal requestConfig();
 
     FontLoader {
         id: ubuntuRegular
@@ -66,12 +64,6 @@ Window {
         target: settingsWindow
         function onCloseWindow() {
             settingsWindow.destroy()
-        }
-        function onRequestConfig() {
-            requestConfig()
-        }
-        function onUpdateConfig(config) {
-            updateConfig(config)
         }
     }
 

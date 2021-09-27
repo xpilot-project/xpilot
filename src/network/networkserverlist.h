@@ -13,23 +13,28 @@ namespace xpilot
 {
     struct NetworkServerInfo
     {
+        Q_GADGET
+    public:
         QString Name;
         QString Address;
         QString Location;
         QString Description;
+        Q_PROPERTY(QString Name MEMBER Name)
+        Q_PROPERTY(QString Address MEMBER Address)
     };
 
-    class NetworkInfo : public QObject
+    class NetworkServerList : public QObject
     {
         Q_OBJECT
-
     public:
-        NetworkInfo(QObject * parent = nullptr);
-        static QVector<NetworkServerInfo> GetServerList(const QString& url);
+        NetworkServerList(QObject * parent = nullptr);
+        QVector<NetworkServerInfo> DownloadServerList(const QString& url);
 
     signals:
-        void serverListDownloaded();
+        void serverListDownloaded(QVector<NetworkServerInfo>& servers);
     };
 }
+
+Q_DECLARE_METATYPE(xpilot::NetworkServerInfo)
 
 #endif

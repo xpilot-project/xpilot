@@ -1,4 +1,4 @@
-#include "networkinfo.h"
+#include "networkserverlist.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -6,12 +6,12 @@
 
 namespace xpilot
 {
-    NetworkInfo::NetworkInfo(QObject *parent) : QObject(parent)
+    NetworkServerList::NetworkServerList(QObject *parent) : QObject(parent)
     {
 
     }
 
-    QVector<NetworkServerInfo> NetworkInfo::GetServerList(const QString &url)
+    QVector<NetworkServerInfo> NetworkServerList::DownloadServerList(const QString &url)
     {
         QNetworkAccessManager manager;
         QByteArray response;
@@ -41,6 +41,8 @@ namespace xpilot
             serverInfo.Location = server["location"].toString();
             serverList.append(serverInfo);
         }
+
+        emit serverListDownloaded(serverList);
 
         return serverList;
     }
