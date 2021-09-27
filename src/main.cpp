@@ -12,6 +12,7 @@
 #include <qicon.h>
 #include <QObject>
 #include <QQuickWindow>
+#include <QSslSocket>
 #include "appcore.h"
 #include "network/networkmanager.h"
 
@@ -25,16 +26,16 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));
 
-    AppCore appCore;
-    NetworkManager networkManager;
-
     QQmlApplicationEngine engine;
     QQmlContext *context = engine.rootContext();
+
+    AppCore appCore;
+//    NetworkManager networkManager;
 
     QObject::connect(&app, SIGNAL(aboutToQuit()), &appCore, SLOT(SaveConfig()));
 
     context->setContextProperty("appCore", &appCore);
-    context->setContextProperty("networkManager", &networkManager);
+//    context->setContextProperty("networkManager", &networkManager);
 
     const QUrl url(QStringLiteral("qrc:/Resources/Views/MainWindow.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app, [url](QObject *obj, const QUrl &objUrl) {

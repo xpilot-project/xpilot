@@ -4,9 +4,12 @@
 #include <QString>
 #include <QFile>
 #include <QDebug>
+#include <QVector>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include "common/simplecrypt.h"
+#include "network/networkinfo.h"
 
 namespace xpilot
 {
@@ -23,12 +26,14 @@ namespace xpilot
 
         void LoadConfig();
         void SaveConfig();
+        bool ConfigRequired();
 
         QString VatsimId;
         QString VatsimPasswordDecrypted;
         QString Name;
         QString HomeAirport;
         QString ServerName;
+        QVector<NetworkServerInfo> CachedServers;
 
     private:
         SimpleCrypt crypto;

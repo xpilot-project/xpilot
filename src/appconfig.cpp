@@ -31,6 +31,17 @@ void AppConfig::LoadConfig()
     VatsimId = jsonMap["VatsimId"].toString();
     VatsimPassword = jsonMap["VatsimPassword"].toString();
     Name = jsonMap["Name"].toString();
+    HomeAirport = jsonMap["HomeAirport"].toString();
+    ServerName = jsonMap["ServerName"].toString();
+
+    QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
+    for(const auto & value : cachedServers) {
+        QJsonObject item = value.toObject();
+        NetworkServerInfo server;
+        server.Name = item["name"].toString();
+        server.Address = item["address"].toString();
+        CachedServers.append(server);
+    }
 
     if(!VatsimPassword.isEmpty()) {
         VatsimPasswordDecrypted = crypto.decryptToString(VatsimPassword);
@@ -47,6 +58,17 @@ void AppConfig::SaveConfig()
         jsonObj["VatsimPassword"] = "";
     }
     jsonObj["Name"] = Name;
+    jsonObj["HomeAirport"] = HomeAirport;
+    jsonObj["ServerName"] = ServerName;
+
+    QJsonArray cachedServers;
+    for(auto & server : CachedServers) {
+        QJsonObject item;
+        item["name"] = server.Name;
+        item["address"] = server.Address;
+        cachedServers.append(item);
+    }
+    jsonObj["CachedServers"] = cachedServers;
 
     QJsonDocument jsonDoc(jsonObj);
     QFile configFile("AppConfig.json");
@@ -57,4 +79,9 @@ void AppConfig::SaveConfig()
 
     configFile.write(jsonDoc.toJson());
     configFile.close();
+}
+
+bool AppConfig::ConfigRequired()
+{
+    return VatsimId.isEmpty() || VatsimPasswordDecrypted.isEmpty() || Name.isEmpty();
 }

@@ -32,6 +32,8 @@ namespace xpilot
         void HandleNetworkConnected();
         void HandleNetworkDisconnected();
         void HandleServerIdentificationReceived(PDUServerIdentification pdu);
+
+        void HandleServerListDownloaded();
     };
 }
 

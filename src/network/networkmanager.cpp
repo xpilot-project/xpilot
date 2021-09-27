@@ -1,5 +1,7 @@
-#include "../appcore.h"
 #include "networkmanager.h"
+#include "networkinfo.h"
+#include "../appcore.h"
+#include "../appconfig.h"
 
 namespace xpilot
 {
@@ -12,6 +14,10 @@ namespace xpilot
 
     void NetworkManager::connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer)
     {
+        if(AppConfig::Instance().ConfigRequired()) {
+            emit notificationPosted((int)NotificationType::Error, "It looks like this may be the first time you've run xPilot on this computer. Some configuration items are required before you can connect to the network. Open Settings and verify your network credentials are saved.");
+            return;
+        }
         if(!callsign.isEmpty() && !typeCode.isEmpty()) {
             ConnectInfo connectInfo;
             connectInfo.Callsign = callsign;
@@ -48,7 +54,13 @@ namespace xpilot
 
     void NetworkManager::HandleServerIdentificationReceived(PDUServerIdentification pdu)
     {
-        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, GetClientId(), "xPilot", 1, 0, "1215759", GetSystemUid(), ""));
-        m_fsd.SendPDU(PDUAddPilot(m_connectInfo.Callsign, "1215759", "3rBaF46EQ3tRNWe", NetworkRating::OBS, ProtocolRevision::VatsimAuth, SimulatorType::XPlane, "Justin"));
+        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, GetClientId(), "xPilot", 1, 0, AppConfig::Instance().VatsimId, GetSystemUid(), ""));
+        m_fsd.SendPDU(PDUAddPilot(m_connectInfo.Callsign, AppConfig::Instance().VatsimId, AppConfig::Instance().VatsimPasswordDecrypted, NetworkRating::OBS,
+                                  ProtocolRevision::VatsimAuth, SimulatorType::XPlane, AppConfig::Instance().Name));
+    }
+
+    void NetworkManager::HandleServerListDownloaded()
+    {
+        qDebug() << "Downloaded";
     }
 }
