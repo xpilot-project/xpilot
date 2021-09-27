@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
     context->setContextProperty("networkManager", &networkManager);
     context->setContextProperty("serverList", &serverList);
     qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", singletonTypeProvider);
+    qRegisterMetaType<ConnectInfo>("ConnectInfo");
 
     const QUrl url(QStringLiteral("qrc:/Resources/Views/MainWindow.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app, [url](QObject *obj, const QUrl &objUrl) {

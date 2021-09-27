@@ -36,6 +36,8 @@ Window {
         txtYourName.text = AppConfig.Name;
         txtHomeAirport.text = AppConfig.HomeAirport;
         networkServerCombobox.model = AppConfig.CachedServers;
+
+        var test = AppConfig.RecentConnection.Callsign;
     }
 
     GridLayout {

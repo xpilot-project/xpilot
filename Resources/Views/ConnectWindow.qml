@@ -3,6 +3,7 @@ import QtQuick.Window 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Controls 2.12
 import QtQuick.Dialogs 1.2
+import AppConfig 1.0
 import "../Components"
 import "../Controls"
 
@@ -19,6 +20,12 @@ Window {
     modality: Qt.ApplicationModal
 
     signal closeWindow()
+
+    Component.onCompleted: {
+        txtCallsign.text = AppConfig.RecentConnection.Callsign;
+        txtTypeCode.text = AppConfig.RecentConnection.TypeCode;
+        txtSelcal.text = AppConfig.RecentConnection.SelcalCode;
+    }
 
     Connections {
         target: networkManager
@@ -171,6 +178,10 @@ Window {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         networkManager.connectToNetwork(txtCallsign.text, txtTypeCode.text, txtSelcal.text, observerMode.checked);
+                        AppConfig.RecentConnection.Callsign = txtCallsign.text;
+                        AppConfig.RecentConnection.TypeCode = txtTypeCode.text;
+                        AppConfig.RecentConnection.SelcalCode = txtSelcal.text;
+                        AppConfig.saveConfig();
                         closeWindow()
                     }
                 }

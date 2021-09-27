@@ -19,7 +19,7 @@ namespace xpilot
             return;
         }
         if(!callsign.isEmpty() && !typeCode.isEmpty()) {
-            ConnectInfo connectInfo;
+            ConnectInfo connectInfo{};
             connectInfo.Callsign = callsign;
             connectInfo.TypeCode = typeCode;
             connectInfo.SelcalCode = selcal;

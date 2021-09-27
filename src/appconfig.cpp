@@ -53,6 +53,11 @@ void AppConfig::loadConfig()
         CachedServers.append(server);
     }
 
+    QJsonObject recent = jsonMap["RecentConnection"].toJsonObject();
+    RecentConnection.Callsign = recent["Callsign"].toString();
+    RecentConnection.TypeCode = recent["TypeCode"].toString();
+    RecentConnection.SelcalCode = recent["SelcalCode"].toString();
+
     if(!VatsimPassword.isEmpty()) {
         VatsimPasswordDecrypted = crypto.decryptToString(VatsimPassword);
     }
@@ -79,6 +84,12 @@ void AppConfig::saveConfig()
         cachedServers.append(item);
     }
     jsonObj["CachedServers"] = cachedServers;
+
+    QJsonObject recentConnection;
+    recentConnection["Callsign"] = RecentConnection.Callsign;
+    recentConnection["TypeCode"] = RecentConnection.TypeCode;
+    recentConnection["SelcalCode"] = RecentConnection.SelcalCode;
+    jsonObj["RecentConnection"] = recentConnection;
 
     QJsonDocument jsonDoc(jsonObj);
     QFile configFile("AppConfig.json");
