@@ -23,7 +23,6 @@ Window {
 
     property QtObject connectWindow
     property QtObject settingsWindow
-    property QtObject flightPlanWindow
     property int currentTab
     property bool simConnected: false
 
@@ -50,13 +49,6 @@ Window {
         target: connectWindow
         function onCloseWindow() {
             connectWindow.destroy()
-        }
-    }
-
-    Connections {
-        target: flightPlanWindow
-        function onCloseWindow() {
-            flightPlanWindow.destroy()
         }
     }
 
