@@ -32,28 +32,7 @@ qtquick_compiler_add_resources(RESOURCES qml.qrc)
 
 #AUX_SOURCE_DIRECTORY("${CMAKE_SOURCE_DIR}/protobuf" PROTOBUF_SRC)
 
-set(PROJECT_SOURCES
-    src/main.cpp
-    #    src/interprocess.cpp
-    #    src/interprocess.h
-    #    src/radiostack.h
-    #    src/appconfig.h
-    #    src/nearbyatc.h
-    #    src/base64.hpp
-    src/common/simplecrypt.h
-    src/common/simplecrypt.cpp
-    src/appconfig.h
-    src/appconfig.cpp
-    src/appcore.h
-    src/appcore.cpp
-    src/afv.cpp
-    src/afv.h
-    src/vatsim_auth.h
-    src/network/networkmanager.h
-    src/network/networkmanager.cpp
-    src/network/connectinfo.h
-    src/network/networkserverlist.h
-    src/network/networkserverlist.cpp
+set(FSD_SOURCES
     src/fsd/enums.h
     src/fsd/client_properties.h
     src/fsd/fsd_client.cpp
@@ -113,11 +92,29 @@ set(PROJECT_SOURCES
     src/fsd/pdu/pdu_text_message.h
     src/fsd/pdu/pdu_text_message.cpp
     src/fsd/pdu/pdu_wallop.h
-    src/fsd/pdu/pdu_wallop.cpp
+    src/fsd/pdu/pdu_wallop.cpp)
+
+set(PROJECT_SOURCES
+    src/main.cpp
+    src/common/simplecrypt.h
+    src/common/simplecrypt.cpp
+    src/appconfig.h
+    src/appconfig.cpp
+    src/appcore.h
+    src/appcore.cpp
+    src/afv.cpp
+    src/afv.h
+    src/vatsim_auth.h
+    src/network/networkmanager.h
+    src/network/networkmanager.cpp
+    src/network/connectinfo.h
+    src/network/networkserverlist.h
+    src/network/networkserverlist.cpp
     src/simulator/udpclient.h
     src/simulator/udpclient.cpp
-    #    ${PROTOBUF_SRC}
-    )
+    src/aircrafts/aircraft.h
+    src/aircrafts/aircraft_configuration.h
+    src/aircrafts/aircraft_configuration.cpp)
 
 set(AFV_NATIVE_HEADERS
     afv-native/include/afv-native/Client.h
@@ -254,6 +251,7 @@ add_executable(xPilot
     ${GUI_TYPE}
     ${PROJECT_SOURCES}
     ${HEADERS}
+    ${FSD_SOURCES}
     ${AFV_NATIVE_HEADERS}
     ${AFV_NATIVE_SOURCES}
     ${AFV_API_SOURCES}
