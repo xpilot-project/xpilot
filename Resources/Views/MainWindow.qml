@@ -55,6 +55,19 @@ Window {
     }
 
     Connections {
+        target: udpClient
+        function onSimConnectionStateChanged(state) {
+            if(!simConnected && state) {
+                appendInfoMessage("X-Plane connection established.")
+            }
+            else if(simConnected && !state) {
+                appendErrorMessage("X-Plane connection lost. Please make sure X-Plane is running and a flight is loaded.")
+            }
+            simConnected = state;
+        }
+    }
+
+    Connections {
         target: networkManager
 
         function onNotificationPosted(type, message) {
@@ -549,9 +562,9 @@ Window {
 
                                         try {
 
-                                            //                                            if(!simConnected) {
-                                            //                                                throw "X-Plane connection not established."
-                                            //                                            }
+                                            if(!simConnected) {
+                                                throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
+                                            }
 
                                             switch(currentTab) {
                                             case 0:

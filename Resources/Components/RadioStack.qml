@@ -7,6 +7,7 @@ import "../Scripts/FrequencyUtils.js" as FrequencyUtils
 
 ColumnLayout {
     property bool avionicsPower: false
+    property bool simConnected: false
 
     property var com1Frequency: "---.---"
     property var com2Frequency: "---.---"
@@ -24,6 +25,10 @@ ColumnLayout {
 
     Connections {
         target: udpClient
+
+        function onSimConnectionStateChanged(state) {
+            simConnected = state;
+        }
 
         function onAvionicsPowerOnChanged(power) {
             avionicsPower = power;
@@ -72,7 +77,7 @@ ColumnLayout {
         }
         Text {
             id: com1FreqLabel
-            text: avionicsPower ? com1Frequency : "---.---"
+            text: simConnected && avionicsPower ? com1Frequency : "---.---"
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
             leftPadding: 5
@@ -86,8 +91,8 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com1Tx
-            isEnabled: avionicsPower && isCom1TxEnabled
-            isActive: avionicsPower && isCom1Tx
+            isEnabled: simConnected && avionicsPower && isCom1TxEnabled
+            isActive: simConnected && avionicsPower && isCom1Tx
             label: "TX"
         }
         Text {
@@ -95,8 +100,8 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com1Rx
-            isEnabled: avionicsPower && isCom1RxEnabled
-            isActive: avionicsPower && isCom1Rx
+            isEnabled: simConnected && avionicsPower && isCom1RxEnabled
+            isActive: simConnected && avionicsPower && isCom1Rx
             label: "RX"
         }
     }
@@ -122,7 +127,7 @@ ColumnLayout {
         }
         Text {
             id: com2FreqLabel
-            text: avionicsPower ? com2Frequency : "---.---"
+            text: simConnected && avionicsPower ? com2Frequency : "---.---"
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
             leftPadding: 5
@@ -136,8 +141,8 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com2Tx
-            isEnabled: avionicsPower && isCom2TxEnabled
-            isActive: avionicsPower && isCom2Tx
+            isEnabled: simConnected && avionicsPower && isCom2TxEnabled
+            isActive: simConnected && avionicsPower && isCom2Tx
             label: "TX"
         }
         Text {
@@ -145,8 +150,8 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com2Rx
-            isEnabled: avionicsPower && isCom2RxEnabled
-            isActive: avionicsPower && isCom2Rx
+            isEnabled: simConnected && avionicsPower && isCom2RxEnabled
+            isActive: simConnected && avionicsPower && isCom2Rx
             label: "RX"
         }
     }

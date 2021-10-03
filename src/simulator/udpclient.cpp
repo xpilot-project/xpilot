@@ -2,6 +2,7 @@
 
 #include <QTimer>
 #include <QtEndian>
+#include <QDateTime>
 
 enum DataRef
 {
@@ -24,6 +25,21 @@ UdpClient::UdpClient(QObject* parent) : QObject(parent)
 {
     socket = new QUdpSocket(this);
     connect(socket, &QUdpSocket::readyRead, this, &UdpClient::OnDataReceived);
+
+    QTimer *heartbeatTimer = new QTimer(this);
+    connect(heartbeatTimer, &QTimer::timeout, this, [=] {
+        qint64 now = QDateTime::currentSecsSinceEpoch();
+        if((now - m_lastUdpTimestamp) > 15) {
+            emit simConnectionStateChanged(false);
+            m_simConnected = false;
+        } else {
+            if(!m_simConnected) {
+                emit simConnectionStateChanged(true);
+                m_simConnected = true;
+            }
+        }
+    });
+    heartbeatTimer->start(1000);
 
     subscribeDataRef("sim/cockpit2/switches/avionics_power_on", DataRef::AvionicsPower, 5);
     subscribeDataRef("sim/cockpit2/radios/actuators/audio_com_selection", DataRef::AudioComSelection, 5);
@@ -95,6 +111,8 @@ void UdpClient::OnDataReceived()
         QString header = QString::fromUtf8(buffer.mid(pos, 4));
         pos += 5;
 
+        m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch();
+
         if(header == "RREF")
         {
             while(pos < buffer.length())
@@ -141,6 +159,8 @@ void UdpClient::OnDataReceived()
                         emit com2FrequencyChanged(value * 1000);
                         m_com2Frequency = value * 1000;
                     }
+                    break;
+                case DataRef::Latitude:
                     break;
                 }
             }

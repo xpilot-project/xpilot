@@ -31,6 +31,7 @@ public slots:
     void OnDataReceived();
 
 signals:
+    void simConnectionStateChanged(bool connected);
     void avionicsPowerOnChanged(bool power);
     void audioComSelectionChanged(int radio);
     void com1AudioSelectionChanged(bool active);
@@ -40,6 +41,8 @@ signals:
 
 private:
     QUdpSocket* socket;
+    qint64 m_lastUdpTimestamp;
+    bool m_simConnected = false;
 
     bool m_avionicsPower;
     int m_audioComSelection;
