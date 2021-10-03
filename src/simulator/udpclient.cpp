@@ -142,10 +142,10 @@ void UdpClient::OnDataReceived()
         QString header = QString::fromUtf8(buffer.mid(pos, 4));
         pos += 5;
 
-        m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch();
-
         if(header == "RREF")
         {
+            m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch();
+
             while(pos < buffer.length())
             {
                 qint32 id = qFromLittleEndian<qint32>(buffer.mid(pos, 4).data());
