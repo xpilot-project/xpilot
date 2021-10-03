@@ -4,8 +4,6 @@
 #include <QObject>
 #include "connectinfo.h"
 #include "../fsd/fsd_client.h"
-#include "../fsd/pdu/pdu_base.h"
-#include "../fsd/pdu/pdu_add_pilot.h"
 
 namespace xpilot
 {
@@ -29,9 +27,25 @@ namespace xpilot
         FsdClient m_fsd { this };
         ConnectInfo m_connectInfo{};
 
-        void HandleNetworkConnected();
-        void HandleNetworkDisconnected();
-        void HandleServerIdentificationReceived(PDUServerIdentification pdu);
+        void OnNetworkConnected();
+        void OnNetworkDisconnected();
+        void OnServerIdentificationReceived(PDUServerIdentification pdu);
+        void OnClientQueryReceived(PDUClientQuery pdu);
+        void OnClientQueryResponseReceived(PDUClientQueryResponse pdu);
+        void OnPilotPositionReceived(PDUPilotPosition pdu);
+        void OnFastPilotPositionReceived(PDUFastPilotPosition pdu);
+        void OnATCPositionReceived(PDUATCPosition pdu);
+        void OnMetarResponseReceived(PDUMetarResponse pdu);
+        void OnMetarRequestReceived(PDUMetarRequest pdu);
+        void OnDeletePilotReceived(PDUDeletePilot pdu);
+        void OnDeleteATCReceived(PDUDeleteATC pdu);
+        void OnPingReceived(PDUPing pdu);
+        void OnTextMessageReceived(PDUTextMessage pdu);
+        void OnBroadcastMessageReceived(PDUBroadcastMessage pdu);
+        void OnRadioMessageReceived(PDURadioMessage pdu);
+        void OnPlaneInfoRequestReceived(PDUPlaneInfoRequest pdu);
+        void OnPlaneInfoResponseReceived(PDUPlaneInfoResponse pdu);
+        void OnKillRequestReceived(PDUKillRequest pdu);
 
         void HandleServerListDownloaded();
     };

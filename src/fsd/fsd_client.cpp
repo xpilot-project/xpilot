@@ -75,14 +75,17 @@ namespace xpilot
             if(prefixChar == '@')
             {
                 fields[0] = fields[0].mid(1);
+                emit RaisePilotPositionReceived(PDUPilotPosition::Parse(fields));
             }
             else if(prefixChar == '^')
             {
                 fields[0] = fields[0].mid(1);
+                emit RaiseFastPilotPositionReceived(PDUFastPilotPosition::Parse(fields));
             }
             else if(prefixChar == '%')
             {
                 fields[0] = fields[0].mid(1);
+                emit RaiseATCPositionReceived(PDUATCPosition::Parse(fields));
             }
             else if(prefixChar == '#' || prefixChar == '$')
             {

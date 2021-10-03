@@ -19,6 +19,7 @@
 #include "pdu/pdu_add_atc.h"
 #include "pdu/pdu_server_identification.h"
 #include "pdu/pdu_client_identification.h"
+#include "pdu/pdu_atc_position.h"
 #include "pdu/pdu_delete_atc.h"
 #include "pdu/pdu_add_pilot.h"
 #include "pdu/pdu_delete_pilot.h"
@@ -39,6 +40,8 @@
 #include "pdu/pdu_auth_response.h"
 #include "pdu/pdu_fast_pilot_position.h"
 #include "pdu/pdu_pilot_position.h"
+#include "pdu/pdu_metar_response.h"
+#include "pdu/pdu_metar_request.h"
 
 namespace xpilot
 {
@@ -63,6 +66,9 @@ namespace xpilot
 
         void RaiseServerIdentificationReceived(PDUServerIdentification pdu);
         void RaiseClientIdentificationReceived(PDUClientIdentification pdu);
+        void RaisePilotPositionReceived(PDUPilotPosition pdu);
+        void RaiseFastPilotPositionReceived(PDUFastPilotPosition pdu);
+        void RaiseATCPositionReceived(PDUATCPosition pdu);
         void RaiseAddATCReceived(PDUAddATC pdu);
         void RaiseDeleteATCReceived(PDUDeleteATC pdu);
         void RaiseAddPilotReceived(PDUAddPilot pdu);
@@ -71,6 +77,8 @@ namespace xpilot
         void RaiseWallopReceived(PDUWallop pdu);
         void RaiseRadioMessageReceived(PDURadioMessage pdu);
         void RaiseTextMessageReceived(PDUTextMessage pdu);
+        void RaiseMetarResponseReceived(PDUMetarResponse pdu);
+        void RaiseMetarRequestReceived(PDUMetarRequest pdu);
         void RaisePlaneInfoRequestReceived(PDUPlaneInfoRequest pdu);
         void RaisePlaneInfoResponseReceived(PDUPlaneInfoResponse pdu);
         void RaiseFlightPlanReceived(PDUFlightPlan pdu);

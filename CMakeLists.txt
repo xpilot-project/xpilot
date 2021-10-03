@@ -114,6 +114,8 @@ set(PROJECT_SOURCES
     src/fsd/pdu/pdu_text_message.cpp
     src/fsd/pdu/pdu_wallop.h
     src/fsd/pdu/pdu_wallop.cpp
+    src/simulator/udpclient.h
+    src/simulator/udpclient.cpp
     #    ${PROTOBUF_SRC}
     )
 

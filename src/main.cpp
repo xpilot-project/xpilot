@@ -17,6 +17,7 @@
 #include "appcore.h"
 #include "network/networkmanager.h"
 #include "network/networkserverlist.h"
+#include "simulator/udpclient.h"
 
 using namespace xpilot;
 
@@ -39,11 +40,13 @@ int main(int argc, char *argv[])
     AppCore appCore;
     NetworkManager networkManager;
     NetworkServerList serverList;
+    UdpClient udpClient;
 
     QObject::connect(&app, SIGNAL(aboutToQuit()), &appCore, SLOT(SaveConfig()));
 
     context->setContextProperty("appCore", &appCore);
     context->setContextProperty("networkManager", &networkManager);
+    context->setContextProperty("udpClient", &udpClient);
     context->setContextProperty("serverList", &serverList);
     qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", singletonTypeProvider);
     qRegisterMetaType<ConnectInfo>("ConnectInfo");

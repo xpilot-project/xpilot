@@ -38,5 +38,8 @@ function frequencyToInt(freq) {
 }
 
 function printFrequency(frequency) {
-    return (frequency / 1000000.0).toFixed(3);
+    if(frequency > 0) {
+        return (frequency / 1000000.0).toFixed(3);
+    }
+    return "---.---";
 }

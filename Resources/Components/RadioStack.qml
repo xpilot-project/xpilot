@@ -3,6 +3,7 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 import QtQuick.Controls.Material 2.12
 import "../Controls"
+import "../Scripts/FrequencyUtils.js" as FrequencyUtils
 
 ColumnLayout {
     property bool avionicsPower: false
@@ -20,6 +21,35 @@ ColumnLayout {
 
     property var isCom1Tx: false
     property var isCom2Tx: false
+
+    Connections {
+        target: udpClient
+
+        function onAvionicsPowerOnChanged(power) {
+            avionicsPower = power;
+        }
+
+        function onAudioComSelectionChanged(radio) {
+            isCom1TxEnabled = radio === 6;
+            isCom2TxEnabled = radio === 7;
+        }
+
+        function onCom1AudioSelectionChanged(active) {
+            isCom1RxEnabled = active;
+        }
+
+        function onCom2AudioSelectionChanged(active) {
+            isCom2RxEnabled = active;
+        }
+
+        function onCom1FrequencyChanged(freq) {
+            com1Frequency = FrequencyUtils.printFrequency(freq);
+        }
+
+        function onCom2FrequencyChanged(freq) {
+            com2Frequency = FrequencyUtils.printFrequency(freq);
+        }
+    }
 
     Row {
         id: com1
@@ -56,7 +86,7 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com1Tx
-            isEnabled: avionicsPower && isCom1RxEnabled
+            isEnabled: avionicsPower && isCom1TxEnabled
             isActive: avionicsPower && isCom1Tx
             label: "TX"
         }
