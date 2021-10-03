@@ -10,11 +10,29 @@ GridLayout {
     anchors.fill: parent
     property bool simConnected: false
     property bool networkConnected: false
-    property bool isModeC: false
-    property bool isIdenting: false
 
     signal toggleModeC(bool active)
     signal squawkIdent()
+
+    Connections {
+        target: udpClient
+
+        function onSimConnectionStateChanged(state) {
+            simConnected = state;
+            if(!state) {
+                btnIdent.isActive = false;
+                btnModeC.isActive = false;
+            }
+        }
+
+        function onTransponderIdentChanged(active) {
+            btnIdent.isActive = active;
+        }
+
+        function onTransponderModeChanged(mode) {
+            btnModeC.isActive = mode >= 2;
+        }
+    }
 
     Connections {
         target: networkManager
@@ -63,9 +81,7 @@ GridLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    isModeC = !isModeC
-                    btnModeC.isActive = isModeC
-                    toggleModeC(isModeC)
+                    udpClient.transponderModeToggle();
                 }
             }
         }
@@ -78,9 +94,7 @@ GridLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    isIdenting = !isIdenting;
-                    btnIdent.isActive = isIdenting;
-                    squawkIdent()
+                    udpClient.transponderIdent();
                 }
             }
         }

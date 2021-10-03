@@ -12,6 +12,8 @@ enum DataRef
     Com2AudioSelection,
     Com1Frequency,
     Com2Frequency,
+    TransponderMode,
+    TransponderIdent,
     Latitude,
     Longitude,
     Elevation,
@@ -32,6 +34,7 @@ UdpClient::UdpClient(QObject* parent) : QObject(parent)
         if((now - m_lastUdpTimestamp) > 15) {
             emit simConnectionStateChanged(false);
             m_simConnected = false;
+            resetValues();
         } else {
             if(!m_simConnected) {
                 emit simConnectionStateChanged(true);
@@ -47,6 +50,8 @@ UdpClient::UdpClient(QObject* parent) : QObject(parent)
     subscribeDataRef("sim/cockpit2/radios/actuators/audio_selection_com2", DataRef::Com2AudioSelection, 5);
     subscribeDataRef("sim/cockpit2/radios/actuators/com1_frequency_hz_833", DataRef::Com1Frequency, 5);
     subscribeDataRef("sim/cockpit2/radios/actuators/com2_frequency_hz_833", DataRef::Com2Frequency, 5);
+    subscribeDataRef("sim/cockpit/radios/transponder_mode", DataRef::TransponderMode, 5);
+    subscribeDataRef("sim/cockpit/radios/transponder_id", DataRef::TransponderIdent, 5);
     subscribeDataRef("sim/flightmodel/position/latitude", DataRef::Latitude, 5);
     subscribeDataRef("sim/flightmodel/position/longitude", DataRef::Longitude, 5);
     subscribeDataRef("sim/flightmodel/position/elevation", DataRef::Elevation, 5);
@@ -83,6 +88,18 @@ void UdpClient::setDataRefValue(std::string dataRef, float value)
     socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, 49000);
 }
 
+void UdpClient::sendCommand(std::string command)
+{
+    QByteArray data;
+
+    data.fill(0, command.length() + 6);
+    data.insert(0, "CMND");
+    data.insert(5, command.c_str());
+    data.resize(command.length() + 6);
+
+    socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, 49000);
+}
+
 void UdpClient::setTransponderCode(int code)
 {
     setDataRefValue("sim/cockpit2/radios/actuators/transponder_code", code);
@@ -96,6 +113,20 @@ void UdpClient::setCom1Frequency(float freq)
 void UdpClient::setCom2Frequency(float freq)
 {
     setDataRefValue("sim/cockpit2/radios/actuators/com2_frequency_hz_833", freq);
+}
+
+void UdpClient::transponderIdent()
+{
+    sendCommand("sim/transponder/transponder_ident");
+}
+
+void UdpClient::transponderModeToggle()
+{
+    if(m_transponderMode >= 2) {
+        setDataRefValue("sim/cockpit/radios/transponder_mode", 0);
+    } else {
+        setDataRefValue("sim/cockpit/radios/transponder_mode", 2);
+    }
 }
 
 void UdpClient::OnDataReceived()
@@ -158,6 +189,18 @@ void UdpClient::OnDataReceived()
                     if(m_com1Frequency != value) {
                         emit com2FrequencyChanged(value * 1000);
                         m_com2Frequency = value * 1000;
+                    }
+                    break;
+                case DataRef::TransponderIdent:
+                    if(m_transponderIdent != value) {
+                        emit transponderIdentChanged(value);
+                        m_transponderIdent = value;
+                    }
+                    break;
+                case DataRef::TransponderMode:
+                    if(m_transponderMode != value) {
+                        emit transponderModeChanged(value);
+                        m_transponderMode = value;
                     }
                     break;
                 case DataRef::Latitude:

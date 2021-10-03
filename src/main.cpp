@@ -15,6 +15,7 @@
 #include <QSslSocket>
 
 #include "appcore.h"
+#include "afv.h"
 #include "network/networkmanager.h"
 #include "network/networkserverlist.h"
 #include "simulator/udpclient.h"
@@ -41,6 +42,17 @@ int main(int argc, char *argv[])
     NetworkManager networkManager;
     NetworkServerList serverList;
     UdpClient udpClient;
+
+#ifdef WIN32
+    WORD wVersionRequested;
+    WSADATA wsaData;
+    wVersionRequested = MAKEWORD(2, 2);
+    WSAStartup(wVersionRequested, &wsaData);
+#endif
+
+    struct event_base* ev_base = nullptr;
+    ev_base = event_base_new();
+    AudioForVatsim audio(ev_base);
 
     QObject::connect(&app, SIGNAL(aboutToQuit()), &appCore, SLOT(SaveConfig()));
 

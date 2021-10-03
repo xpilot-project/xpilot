@@ -81,6 +81,9 @@ Window {
             case 2: // error
                 appendErrorMessage(message)
                 break;
+            case 3: // text message
+                appendMessage(message);
+                break;
             }
         }
     }

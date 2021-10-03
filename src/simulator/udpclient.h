@@ -20,12 +20,17 @@ class UdpClient : public QObject
 
 public:
     UdpClient(QObject* parent = nullptr);
-    void subscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency);
-    void setDataRefValue(std::string dataRef, float value);
 
     Q_INVOKABLE void setTransponderCode(int code);
     Q_INVOKABLE void setCom1Frequency(float freq);
     Q_INVOKABLE void setCom2Frequency(float freq);
+    Q_INVOKABLE void transponderIdent();
+    Q_INVOKABLE void transponderModeToggle();
+
+private:
+    void subscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency);
+    void setDataRefValue(std::string dataRef, float value);
+    void sendCommand(std::string command);
 
 public slots:
     void OnDataReceived();
@@ -38,6 +43,8 @@ signals:
     void com2AudioSelectionChanged(bool active);
     void com1FrequencyChanged(float freq);
     void com2FrequencyChanged(float freq);
+    void transponderIdentChanged(bool active);
+    void transponderModeChanged(int mode);
 
 private:
     QUdpSocket* socket;
@@ -50,6 +57,21 @@ private:
     bool m_com2AudioSelection;
     float m_com1Frequency;
     float m_com2Frequency;
+    bool m_transponderIdent;
+    int m_transponderMode;
+
+    void resetValues()
+    {
+        // reset cached values so that if the connection is re-established, new values are forced
+        m_avionicsPower = 0;
+        m_audioComSelection = 0;
+        m_com1AudioSelection = 0;
+        m_com2AudioSelection = 0;
+        m_com1Frequency = 0;
+        m_com2Frequency = 0;
+        m_transponderIdent = 0;
+        m_transponderMode = 0;
+    }
 };
 
 #endif

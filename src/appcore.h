@@ -14,7 +14,10 @@ namespace xpilot
     {
         Info,
         Warning,
-        Error
+        Error,
+        TextMessage,
+        RadioMessageSent,
+        RadioMessageReceived
     };
 
     class AppCore : public QObject

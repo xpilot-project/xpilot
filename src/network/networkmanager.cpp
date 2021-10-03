@@ -122,12 +122,12 @@ namespace xpilot
 
     void NetworkManager::OnPingReceived(PDUPing pdu)
     {
-
+        m_fsd.SendPDU(PDUPong(pdu.To, pdu.From, pdu.Timestamp));
     }
 
     void NetworkManager::OnTextMessageReceived(PDUTextMessage pdu)
     {
-
+        emit notificationPosted((int)NotificationType::TextMessage, pdu.Message);
     }
 
     void NetworkManager::OnBroadcastMessageReceived(PDUBroadcastMessage pdu)
