@@ -114,7 +114,8 @@ set(PROJECT_SOURCES
     src/simulator/udpclient.cpp
     src/aircrafts/aircraft.h
     src/aircrafts/aircraft_configuration.h
-    src/aircrafts/aircraft_configuration.cpp)
+    src/aircrafts/aircraft_configuration.cpp
+    src/aircrafts/user_aircraft_config_data.h)
 
 set(AFV_NATIVE_HEADERS
     afv-native/include/afv-native/Client.h
