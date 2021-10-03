@@ -10,7 +10,14 @@ enum DataRef
     Com1AudioSelection,
     Com2AudioSelection,
     Com1Frequency,
-    Com2Frequency
+    Com2Frequency,
+    Latitude,
+    Longitude,
+    Elevation,
+    Heading,
+    Pitch,
+    Bank,
+    PushToTalk
 };
 
 UdpClient::UdpClient(QObject* parent) : QObject(parent)
@@ -24,6 +31,13 @@ UdpClient::UdpClient(QObject* parent) : QObject(parent)
     subscribeDataRef("sim/cockpit2/radios/actuators/audio_selection_com2", DataRef::Com2AudioSelection, 5);
     subscribeDataRef("sim/cockpit2/radios/actuators/com1_frequency_hz_833", DataRef::Com1Frequency, 5);
     subscribeDataRef("sim/cockpit2/radios/actuators/com2_frequency_hz_833", DataRef::Com2Frequency, 5);
+    subscribeDataRef("sim/flightmodel/position/latitude", DataRef::Latitude, 5);
+    subscribeDataRef("sim/flightmodel/position/longitude", DataRef::Longitude, 5);
+    subscribeDataRef("sim/flightmodel/position/elevation", DataRef::Elevation, 5);
+    subscribeDataRef("sim/flightmodel/position/psi", DataRef::Heading, 5);
+    subscribeDataRef("sim/flightmodel/position/theta", DataRef::Pitch, 5);
+    subscribeDataRef("sim/flightmodel/position/phi", DataRef::Bank, 5);
+    subscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 5);
 }
 
 void UdpClient::subscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
@@ -38,6 +52,34 @@ void UdpClient::subscribeDataRef(std::string dataRef, uint32_t id, uint32_t freq
     data.resize(413);
 
     socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, 49000);
+}
+
+void UdpClient::setDataRefValue(std::string dataRef, float value)
+{
+    QByteArray data;
+
+    data.fill(0, 509);
+    data.insert(0, "DREF");
+    data.insert(5, QByteArray::fromRawData(reinterpret_cast<char*>(&value), sizeof(float)));
+    data.insert(9, dataRef.c_str());
+    data.resize(509);
+
+    socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, 49000);
+}
+
+void UdpClient::setTransponderCode(int code)
+{
+    setDataRefValue("sim/cockpit2/radios/actuators/transponder_code", code);
+}
+
+void UdpClient::setCom1Frequency(float freq)
+{
+    setDataRefValue("sim/cockpit2/radios/actuators/com1_frequency_hz_833", freq);
+}
+
+void UdpClient::setCom2Frequency(float freq)
+{
+    setDataRefValue("sim/cockpit2/radios/actuators/com2_frequency_hz_833", freq);
 }
 
 void UdpClient::OnDataReceived()

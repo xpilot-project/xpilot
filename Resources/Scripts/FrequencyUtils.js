@@ -34,7 +34,15 @@ function normalize25KhzFrequency(freq) {
 
 function frequencyToInt(freq) {
     let num = Math.round(parseFloat(freq.trim()) * 1000000.0);
-    return normalize25KhzFrequency(num);
+    num = checkFrequencyValid(num);
+    return toXplaneFormat(normalize25KhzFrequency(num));
+}
+
+function toXplaneFormat(freq) {
+    if(freq < 1000000) {
+        return freq;
+    }
+    return freq / 1000;
 }
 
 function printFrequency(frequency) {

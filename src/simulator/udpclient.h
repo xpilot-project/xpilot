@@ -21,6 +21,11 @@ class UdpClient : public QObject
 public:
     UdpClient(QObject* parent = nullptr);
     void subscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency);
+    void setDataRefValue(std::string dataRef, float value);
+
+    Q_INVOKABLE void setTransponderCode(int code);
+    Q_INVOKABLE void setCom1Frequency(float freq);
+    Q_INVOKABLE void setCom2Frequency(float freq);
 
 public slots:
     void OnDataReceived();

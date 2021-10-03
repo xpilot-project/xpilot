@@ -26,11 +26,6 @@ Window {
     property int currentTab
     property bool simConnected: false
 
-    signal setTransponderCode(int code);
-    signal setTransponderModeC(bool active);
-    signal setTransponderIdent();
-    signal setRadioStack(int radio, int frequency);
-
     FontLoader {
         id: ubuntuRegular
         source: "../Fonts/Ubuntu-Regular.ttf"
@@ -77,77 +72,77 @@ Window {
         }
     }
 
-//    Connections {
-//        target: ipc
+    //    Connections {
+    //        target: ipc
 
-//        function onNotificationPosted(type, message) {
-//            switch(type) {
-//            case 0: // info
-//                appendInfoMessage(message)
-//                break;
-//            case 1: // warning
-//                appendWarningMessage(message)
-//                break;
-//            case 2: // error
-//                appendErrorMessage(message)
-//                break;
-//            }
-//        }
+    //        function onNotificationPosted(type, message) {
+    //            switch(type) {
+    //            case 0: // info
+    //                appendInfoMessage(message)
+    //                break;
+    //            case 1: // warning
+    //                appendWarningMessage(message)
+    //                break;
+    //            case 2: // error
+    //                appendErrorMessage(message)
+    //                break;
+    //            }
+    //        }
 
-//        function onSimulatorConnected(isConnected) {
-//            if(isConnected) {
-//                if(!simConnected) {
-//                    appendInfoMessage("X-Plane connection established.")
-//                }
-//                simConnected = true
-//            } else {
-//                if(simConnected) {
-//                    appendErrorMessage("X-Plane connection lost.")
-//                }
-//                simConnected = false
-//                radioStack.avionicsPower = false
-//            }
+    //        function onSimulatorConnected(isConnected) {
+    //            if(isConnected) {
+    //                if(!simConnected) {
+    //                    appendInfoMessage("X-Plane connection established.")
+    //                }
+    //                simConnected = true
+    //            } else {
+    //                if(simConnected) {
+    //                    appendErrorMessage("X-Plane connection lost.")
+    //                }
+    //                simConnected = false
+    //                radioStack.avionicsPower = false
+    //            }
 
-//            toolbar.simConnected = isConnected
-//        }
+    //            toolbar.simConnected = isConnected
+    //        }
 
-//        function onRadioStackReceived(stack)
-//        {
-//            radioStack.avionicsPower = stack.avionicsPowerOn;
-//            radioStack.com1Frequency = FrequencyUtils.printFrequency(stack.com1Frequency);
-//            radioStack.com2Frequency = FrequencyUtils.printFrequency(stack.com2Frequency);
-//            radioStack.isCom1RxEnabled = stack.com1ReceiveEnabled;
-//            radioStack.isCom2RxEnabled = stack.com2ReceiveEnabled;
-//            radioStack.isCom1TxEnabled = stack.transmitComSelection === 6;
-//            radioStack.isCom2TxEnabled = stack.transmitComSelection === 7;
-//        }
+    //        function onRadioStackReceived(stack)
+    //        {
+    //            radioStack.avionicsPower = stack.avionicsPowerOn;
+    //            radioStack.com1Frequency = FrequencyUtils.printFrequency(stack.com1Frequency);
+    //            radioStack.com2Frequency = FrequencyUtils.printFrequency(stack.com2Frequency);
+    //            radioStack.isCom1RxEnabled = stack.com1ReceiveEnabled;
+    //            radioStack.isCom2RxEnabled = stack.com2ReceiveEnabled;
+    //            radioStack.isCom1TxEnabled = stack.transmitComSelection === 6;
+    //            radioStack.isCom2TxEnabled = stack.transmitComSelection === 7;
+    //        }
 
-//        function onNearbyAtcReceived(stations) {
-//            stations.forEach(function(station) {
-//                if(station.callsign.endsWith("_CTR") || station.callsign.endsWith("_FSS")) {
-//                    nearbyEnroute.append(station)
-//                }
-//                else if(station.callsign.endsWith("_APP") || station.callsign.endsWith("_DEP")) {
-//                    nearbyApproach.append(station)
-//                }
-//                else if(station.callsign.endsWith("_TWR")) {
-//                    nearbyTower.append(station)
-//                }
-//                else if(station.callsign.endsWith("_GND")) {
-//                    nearbyGround.append(station)
-//                }
-//                else if(station.callsign.endsWith("_DEL")) {
-//                    nearbyDelivery.append(station)
-//                }
-//                else if(station.callsign.endsWith("_ATIS")) {
-//                    nearbyAtis.append(station)
-//                }
-//                else {
-//                    nearbyObservers.append(station)
-//                }
-//            })
-//        }
-//    }
+    //        function onNearbyAtcReceived(stations) {
+    //            stations.forEach(function(station) {
+    //                if(station.callsign.endsWith("_CTR") || station.callsign.endsWith("_FSS")) {
+    //                    nearbyEnroute.append(station)
+    //                }
+    //                else if(station.callsign.endsWith("_APP") || station.callsign.endsWith("_DEP")) {
+    //                    nearbyApproach.append(station)
+    //                }
+    //                else if(station.callsign.endsWith("_TWR")) {
+    //                    nearbyTower.append(station)
+    //                }
+    //                else if(station.callsign.endsWith("_GND")) {
+    //                    nearbyGround.append(station)
+    //                }
+    //                else if(station.callsign.endsWith("_DEL")) {
+    //                    nearbyDelivery.append(station)
+    //                }
+    //                else if(station.callsign.endsWith("_ATIS")) {
+    //                    nearbyAtis.append(station)
+    //                }
+    //                else {
+    //                    nearbyObservers.append(station)
+    //                }
+    //            })
+    //        }
+    //    }
 
     //    function appendMessage(tabId, message) {
     //        var element = cliModel.get(tabId + 1);
@@ -554,9 +549,9 @@ Window {
 
                                         try {
 
-                                            if(!simConnected) {
-                                                throw "X-Plane connection not established."
-                                            }
+                                            //                                            if(!simConnected) {
+                                            //                                                throw "X-Plane connection not established."
+                                            //                                            }
 
                                             switch(currentTab) {
                                             case 0:
@@ -584,7 +579,12 @@ Window {
                                                     }
                                                     var freq = FrequencyUtils.frequencyToInt(cmd[1])
                                                     var radio = cmd[0].toLowerCase() === ".com1" ? 1 : 2
-                                                    setRadioStack(radio, freq);
+                                                    if(radio === 1) {
+                                                        udpClient.setCom1Frequency(freq);
+                                                    }
+                                                    else {
+                                                        udpClient.setCom2Frequency(freq);
+                                                    }
                                                     cliTextField.clear()
                                                     break;
                                                 case ".tx":
@@ -599,7 +599,7 @@ Window {
                                                         throw "Invalid transponder code format.";
                                                     }
                                                     var code = parseInt(cmd[1])
-                                                    setTransponderCode(code)
+                                                    udpClient.setTransponderCode(code)
                                                     cliTextField.clear()
                                                     break;
                                                 case ".towerview":
