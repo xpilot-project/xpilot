@@ -7,8 +7,8 @@ namespace xpilot
         m_fsdTextCodec = QTextCodec::codecForName("ISO-8859-1");
 
         connect(&m_socket, &QTcpSocket::readyRead, this, &FsdClient::handleDataReceived);
-        connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::errorOccurred), this, &FsdClient::handleSocketError);
         connect(&m_socket, &QTcpSocket::connected, this, &FsdClient::handleSocketConnected);
+        connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::errorOccurred), this, &FsdClient::handleSocketError);
     }
 
     void FsdClient::Connect(QString address, quint32 port, bool challengeServer)
@@ -67,7 +67,7 @@ namespace xpilot
         {
             if(packet.length() == 0) continue;
 
-            qDebug() << "<< " << packet;
+            RaiseRawDataReceived(packet + PDUBase::PacketDelimeter);
 
             QStringList fields = packet.split(PDUBase::Delimeter);
             const QCharRef prefixChar = fields[0][0];
@@ -89,10 +89,7 @@ namespace xpilot
             }
             else if(prefixChar == '#' || prefixChar == '$')
             {
-                if(fields[0].length() < 3)
-                {
-                    qDebug() << "Invalid PDU type: " << packet;
-                }
+                if(fields[0].length() < 3) break;
 
                 QString pduTypeId = fields[0].mid(0, 3);
                 fields[0] = fields[0].mid(3);
@@ -178,10 +175,6 @@ namespace xpilot
                     emit RaiseProtocolErrorReceived(PDUProtocolError::Parse(fields));
                 }
             }
-            else
-            {
-                qDebug() << "Unknown PDU prefix: %1" << prefixChar;
-            }
         }
     }
 
@@ -191,17 +184,14 @@ namespace xpilot
 
         const QByteArray bufferEncoded = m_fsdTextCodec->fromUnicode(data);
 
-        qDebug() << ">> " << bufferEncoded;
+        RaiseRawDataSent(bufferEncoded);
 
         m_socket.write(bufferEncoded);
     }
 
     void FsdClient::processTM(QStringList &fields)
     {
-        if(fields.length() < 3)
-        {
-            qDebug() << "Invalid field count." << PDUBase::Reassemble(fields);
-        }
+        if(fields.length() < 3) return;
 
         // #TMs are allowed to have colons in the message field, so here we need
         // to rejoin the fields then resplit with a limit of 3 substrings.
@@ -232,12 +222,14 @@ namespace xpilot
     void FsdClient::handleSocketError(QAbstractSocket::SocketError socketError)
     {
         const QString error = this->socketErrorString(socketError);
-        qDebug() << "FSD socket error: " << error;
 
         switch(socketError)
         {
         case QAbstractSocket::RemoteHostClosedError:
             this->Disconnect();
+            break;
+        default:
+            emit RaiseNetworkError(error);
             break;
         }
     }

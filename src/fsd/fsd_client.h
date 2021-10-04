@@ -64,6 +64,8 @@ namespace xpilot
         void RaiseNetworkDisconnected();
         void sendDataError();
 
+        void RaiseNetworkError(QString error);
+
         void RaiseServerIdentificationReceived(PDUServerIdentification pdu);
         void RaiseClientIdentificationReceived(PDUClientIdentification pdu);
         void RaisePilotPositionReceived(PDUPilotPosition pdu);
@@ -88,6 +90,8 @@ namespace xpilot
         void RaiseClientQueryResponseReceived(PDUClientQueryResponse pdu);
         void RaiseKillRequestReceived(PDUKillRequest pdu);
         void RaiseProtocolErrorReceived(PDUProtocolError pdu);
+        void RaiseRawDataSent(QString data);
+        void RaiseRawDataReceived(QString data);
 
     private:
         void handleSocketError(QAbstractSocket::SocketError socketError);

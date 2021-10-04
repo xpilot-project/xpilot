@@ -8,6 +8,7 @@ namespace xpilot
 {
     NetworkManager::NetworkManager(UdpClient &udpClient, QObject *owner) : QObject(owner)
     {
+        connect(&m_fsd, &FsdClient::RaiseNetworkError, this, &NetworkManager::OnNetworkError);
         connect(&m_fsd, &FsdClient::RaiseNetworkConnected, this, &NetworkManager::OnNetworkConnected);
         connect(&m_fsd, &FsdClient::RaiseNetworkDisconnected, this, &NetworkManager::OnNetworkDisconnected);
         connect(&m_fsd, &FsdClient::RaiseServerIdentificationReceived, this, &NetworkManager::OnServerIdentificationReceived);
@@ -360,5 +361,10 @@ namespace xpilot
         m_intentionalDisconnect = true;
         m_fsd.SendPDU(PDUDeletePilot(m_connectInfo.Callsign, AppConfig::getInstance()->VatsimId));
         m_fsd.Disconnect();
+    }
+
+    void NetworkManager::OnNetworkError(QString error)
+    {
+        emit notificationPosted((int)NotificationType::Error, error);
     }
 }

@@ -48,6 +48,7 @@ namespace xpilot
         QString m_forcedDisconnectReason = "";
         bool m_velocityEnabled = false;
 
+        void OnNetworkError(QString error);
         void OnNetworkConnected();
         void OnNetworkDisconnected();
         void OnServerIdentificationReceived(PDUServerIdentification pdu);
