@@ -124,18 +124,6 @@ QJsonObject AircraftConfiguration::ToJson() const
     return obj;
 }
 
-void AircraftConfiguration::EnsurePopulated()
-{
-    Lights = AircraftConfigurationLights();
-    Lights->EnsurePopuplated();
-    Engines = AircraftConfigurationEngines();
-    Engines->EnsurePopuplated();
-    if(!GearDown.has_value()) GearDown = true;
-    if(!FlapsPercent.has_value()) FlapsPercent = 0;
-    if(!SpoilersDeployed.has_value()) SpoilersDeployed = false;
-    if(!OnGround.has_value()) OnGround = true;
-}
-
 AircraftConfiguration AircraftConfiguration::Clone()
 {
     AircraftConfiguration clone;
@@ -169,11 +157,9 @@ void AircraftConfiguration::ApplyIncremental(AircraftConfiguration &inc)
 
 AircraftConfiguration AircraftConfiguration::CreateIncremental(AircraftConfiguration &cfg)
 {
-    EnsurePopulated();
-    cfg.EnsurePopulated();
-    AircraftConfiguration inc;
-    inc.Lights = Lights.value().CreateIncremental(cfg.Lights.value());
-    inc.Engines = Engines.value().CreateIncremental(cfg.Engines.value());
+    AircraftConfiguration inc{};
+    inc.Lights = Lights->CreateIncremental(cfg.Lights.value());
+    inc.Engines = Engines->CreateIncremental(cfg.Engines.value());
     if(cfg.GearDown != GearDown) inc.GearDown = cfg.GearDown;
     if(cfg.FlapsPercent != FlapsPercent) inc.FlapsPercent = cfg.FlapsPercent;
     if(cfg.SpoilersDeployed != SpoilersDeployed) inc.SpoilersDeployed = cfg.SpoilersDeployed;
@@ -181,14 +167,14 @@ AircraftConfiguration AircraftConfiguration::CreateIncremental(AircraftConfigura
     return inc;
 }
 
-AircraftConfiguration AircraftConfiguration::FromUserAircraftData(UserAircraftConfigData &uac)
+AircraftConfiguration AircraftConfiguration::FromUserAircraftData(UserAircraftData &uac)
 {
     AircraftConfiguration cfg{};
     cfg.Lights = AircraftConfigurationLights::FromUserAircraftData(uac);
     cfg.Engines = AircraftConfigurationEngines::FromUserAircraftData(uac);
     cfg.GearDown = uac.GearDown;
-    cfg.FlapsPercent = RoundUpToNearest5(uac.FlapsRatio);
-    cfg.SpoilersDeployed = uac.SpoilersRatio != 0;
+    cfg.FlapsPercent = RoundUpToNearest5(uac.FlapsPercent);
+    cfg.SpoilersDeployed = uac.SpeedBrakesDeployed;
     cfg.OnGround = uac.OnGround;
     return cfg;
 }
@@ -219,15 +205,6 @@ QJsonObject AircraftConfigurationLights::toJson() const
     return obj;
 }
 
-void AircraftConfigurationLights::EnsurePopuplated()
-{
-    if(!StrobesOn.has_value()) StrobesOn = true;
-    if(!LandingOn.has_value()) LandingOn = true;
-    if(!TaxiOn.has_value()) TaxiOn = true;
-    if(!BeaconOn.has_value()) BeaconOn = true;
-    if(!NavOn.has_value()) NavOn = true;
-}
-
 AircraftConfigurationLights AircraftConfigurationLights::Clone()
 {
     AircraftConfigurationLights clone{};
@@ -248,11 +225,9 @@ void AircraftConfigurationLights::ApplyIncremental(AircraftConfigurationLights &
     if(inc.NavOn.has_value()) NavOn = inc.NavOn.value();
 }
 
-AircraftConfigurationLights AircraftConfigurationLights::CreateIncremental(AircraftConfigurationLights &cfg)
+AircraftConfigurationLights AircraftConfigurationLights::CreateIncremental(AircraftConfigurationLights& cfg)
 {
-    EnsurePopuplated();
-    cfg.EnsurePopuplated();
-    if(this->operator==(cfg)) return {};
+    if(this == &cfg) return {};
     AircraftConfigurationLights inc{};
     if(cfg.StrobesOn != StrobesOn) inc.StrobesOn = cfg.StrobesOn;
     if(cfg.LandingOn != LandingOn) inc.LandingOn = cfg.LandingOn;
@@ -262,14 +237,14 @@ AircraftConfigurationLights AircraftConfigurationLights::CreateIncremental(Aircr
     return inc;
 }
 
-AircraftConfigurationLights AircraftConfigurationLights::FromUserAircraftData(UserAircraftConfigData &uac)
+AircraftConfigurationLights AircraftConfigurationLights::FromUserAircraftData(UserAircraftData &uac)
 {
     AircraftConfigurationLights acl{};
-    acl.StrobesOn = uac.StrobesOn;
+    acl.StrobesOn = uac.StrobeLightsOn;
     acl.LandingOn = uac.LandingLightsOn;
     acl.TaxiOn = uac.TaxiLightsOn;
-    acl.BeaconOn = uac.BeaconOn;
-    acl.NavOn = uac.NavLightOn;
+    acl.BeaconOn = uac.BeaconLightsOn;
+    acl.NavOn = uac.NavLightsOn;
     return acl;
 }
 
@@ -280,11 +255,6 @@ QJsonObject AircraftConfigurationEngine::toJson() const
         obj["on"] = Running.value();
     }
     return obj;
-}
-
-void AircraftConfigurationEngine::EnsurePopuplated()
-{
-    if(!Running.has_value()) Running = true;
 }
 
 AircraftConfigurationEngine AircraftConfigurationEngine::Clone()
@@ -301,15 +271,13 @@ void AircraftConfigurationEngine::ApplyIncremental(AircraftConfigurationEngine& 
 
 AircraftConfigurationEngine AircraftConfigurationEngine::CreateIncremental(AircraftConfigurationEngine &cfg)
 {
-    EnsurePopuplated();
-    cfg.EnsurePopuplated();
-    if(this->operator==(cfg)) return {};
+    if(this == &cfg) return {};
     AircraftConfigurationEngine inc{};
     if(cfg.Running != Running) inc.Running = cfg.Running;
     return inc;
 }
 
-AircraftConfigurationEngine AircraftConfigurationEngine::FromUserAircraftData(UserAircraftConfigData &uac, int engineNum)
+AircraftConfigurationEngine AircraftConfigurationEngine::FromUserAircraftData(UserAircraftData &uac, int engineNum)
 {
     AircraftConfigurationEngine ace{};
     switch(engineNum) {
@@ -347,14 +315,6 @@ QJsonObject AircraftConfigurationEngines::toJson() const
     return obj;
 }
 
-void AircraftConfigurationEngines::EnsurePopuplated()
-{
-    if(HasEngine1Object()) Engine1->EnsurePopuplated();
-    if(HasEngine2Object()) Engine2->EnsurePopuplated();
-    if(HasEngine3Object()) Engine3->EnsurePopuplated();
-    if(HasEngine4Object()) Engine4->EnsurePopuplated();
-}
-
 AircraftConfigurationEngines AircraftConfigurationEngines::Clone()
 {
     AircraftConfigurationEngines clone{};
@@ -375,10 +335,8 @@ void AircraftConfigurationEngines::ApplyIncremental(AircraftConfigurationEngines
 
 AircraftConfigurationEngines AircraftConfigurationEngines::CreateIncremental(AircraftConfigurationEngines &cfg)
 {
-    EnsurePopuplated();
-    cfg.EnsurePopuplated();
-    if(this->operator==(cfg)) return {};
-    AircraftConfigurationEngines inc = AircraftConfigurationEngines{};
+    if(this == &cfg) return {};
+    AircraftConfigurationEngines inc{};
     if(HasEngine1Object() && cfg.HasEngine1Object()) inc.Engine1 = Engine1->CreateIncremental(cfg.Engine1.value());
     if(HasEngine2Object() && cfg.HasEngine2Object()) inc.Engine2 = Engine2->CreateIncremental(cfg.Engine2.value());
     if(HasEngine3Object() && cfg.HasEngine3Object()) inc.Engine3 = Engine3->CreateIncremental(cfg.Engine3.value());
@@ -386,7 +344,7 @@ AircraftConfigurationEngines AircraftConfigurationEngines::CreateIncremental(Air
     return inc;
 }
 
-AircraftConfigurationEngines AircraftConfigurationEngines::FromUserAircraftData(UserAircraftConfigData &uac)
+AircraftConfigurationEngines AircraftConfigurationEngines::FromUserAircraftData(UserAircraftData &uac)
 {
     AircraftConfigurationEngines ace{};
     if(uac.EngineCount >= 1) ace.Engine1 = AircraftConfigurationEngine::FromUserAircraftData(uac, 1);

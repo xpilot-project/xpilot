@@ -6,22 +6,15 @@ import "../Controls"
 import "../Scripts/FrequencyUtils.js" as FrequencyUtils
 
 ColumnLayout {
-    property bool avionicsPower: false
     property bool simConnected: false
-
-    property var com1Frequency: "---.---"
-    property var com2Frequency: "---.---"
-
-    property var isCom1TxEnabled: false
-    property var isCom2TxEnabled: false
-    property var isCom1RxEnabled: false
-    property var isCom2RxEnabled: false
 
     property var isCom1Rx: false
     property var isCom2Rx: false
 
     property var isCom1Tx: false
     property var isCom2Tx: false
+
+    property var radioStackState;
 
     Connections {
         target: udpClient
@@ -30,29 +23,10 @@ ColumnLayout {
             simConnected = state;
         }
 
-        function onAvionicsPowerOnChanged(power) {
-            avionicsPower = power;
-        }
-
-        function onAudioComSelectionChanged(radio) {
-            isCom1TxEnabled = radio === 6;
-            isCom2TxEnabled = radio === 7;
-        }
-
-        function onCom1AudioSelectionChanged(active) {
-            isCom1RxEnabled = active;
-        }
-
-        function onCom2AudioSelectionChanged(active) {
-            isCom2RxEnabled = active;
-        }
-
-        function onCom1FrequencyChanged(freq) {
-            com1Frequency = FrequencyUtils.printFrequency(freq);
-        }
-
-        function onCom2FrequencyChanged(freq) {
-            com2Frequency = FrequencyUtils.printFrequency(freq);
+        function onRadioStackStateChanged(stack) {
+            if(radioStackState !== stack) {
+                radioStackState = stack;
+            }
         }
     }
 
@@ -77,7 +51,7 @@ ColumnLayout {
         }
         Text {
             id: com1FreqLabel
-            text: simConnected && avionicsPower ? com1Frequency : "---.---"
+            text: simConnected && radioStackState.AvionicsPowerOn ? FrequencyUtils.printFrequency(radioStackState.Com1Frequency) : "---.---"
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
             leftPadding: 5
@@ -91,8 +65,8 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com1Tx
-            isEnabled: simConnected && avionicsPower && isCom1TxEnabled
-            isActive: simConnected && avionicsPower && isCom1Tx
+            isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com1TransmitEnabled
+            isActive: false
             label: "TX"
         }
         Text {
@@ -100,8 +74,8 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com1Rx
-            isEnabled: simConnected && avionicsPower && isCom1RxEnabled
-            isActive: simConnected && avionicsPower && isCom1Rx
+            isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com1ReceiveEnabled
+            isActive: false
             label: "RX"
         }
     }
@@ -127,7 +101,7 @@ ColumnLayout {
         }
         Text {
             id: com2FreqLabel
-            text: simConnected && avionicsPower ? com2Frequency : "---.---"
+            text: simConnected && radioStackState.AvionicsPowerOn ? FrequencyUtils.printFrequency(radioStackState.Com2Frequency) : "---.---"
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
             leftPadding: 5
@@ -141,8 +115,8 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com2Tx
-            isEnabled: simConnected && avionicsPower && isCom2TxEnabled
-            isActive: simConnected && avionicsPower && isCom2Tx
+            isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com2TransmitEnabled
+            isActive: false
             label: "TX"
         }
         Text {
@@ -150,8 +124,8 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com2Rx
-            isEnabled: simConnected && avionicsPower && isCom2RxEnabled
-            isActive: simConnected && avionicsPower && isCom2Rx
+            isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com2ReceiveEnabled
+            isActive: false
             label: "RX"
         }
     }

@@ -2,8 +2,12 @@
 #define NETWORK_MANAGER_H
 
 #include <QObject>
+#include <QTimer>
 #include "connectinfo.h"
-#include "../fsd/fsd_client.h"
+#include "src/fsd/fsd_client.h"
+#include "src/simulator/udpclient.h"
+#include "src/aircrafts/user_aircraft_data.h"
+#include "src/aircrafts/aircraft_configuration.h"
 
 namespace xpilot
 {
@@ -12,12 +16,17 @@ namespace xpilot
         Q_OBJECT
 
     public:
-        NetworkManager(QObject *owner = nullptr);
+        NetworkManager(UdpClient& udpClient, QObject *owner = nullptr);
+
+        void SendAircraftConfigurationUpdate(QString to, AircraftConfiguration config);
+        void SendAircraftConfigurationUpdate(AircraftConfiguration config);
+        void SendCapabilities(QString to);
 
     signals:
         void networkConnected();
         void networkDisconnected();
         void notificationPosted(int type, QString message);
+        void AircraftConfigurationInfoReceived(QString from, QString json);
 
     public slots:
         void connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer);
@@ -25,6 +34,9 @@ namespace xpilot
 
     private:
         FsdClient m_fsd { this };
+        QTimer* m_slowPositionTimer;
+        QTimer* m_fastPositionTimer;
+        UserAircraftData m_userAircraftData;
         ConnectInfo m_connectInfo{};
 
         void OnNetworkConnected();
@@ -46,6 +58,16 @@ namespace xpilot
         void OnPlaneInfoRequestReceived(PDUPlaneInfoRequest pdu);
         void OnPlaneInfoResponseReceived(PDUPlaneInfoResponse pdu);
         void OnKillRequestReceived(PDUKillRequest pdu);
+
+        void OnUserAircraftDataUpdated(UserAircraftData data);
+        void OnRadioStackStateChanged(RadioStackState radioStack);
+
+        void SendSlowPositionPacket();
+        void SendFastPositionPacket();
+        void SendEmptyFastPositionPacket();
+
+        void OnSlowPositionTimerElapsed();
+        void OnFastPositionTimerElapsed();
 
         void HandleServerListDownloaded();
     };

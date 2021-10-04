@@ -9,10 +9,7 @@ GridLayout {
     columns: 2
     anchors.fill: parent
     property bool simConnected: false
-    property bool networkConnected: false
-
-    signal toggleModeC(bool active)
-    signal squawkIdent()
+    property bool networkConnected: false    
 
     Connections {
         target: udpClient
@@ -25,12 +22,9 @@ GridLayout {
             }
         }
 
-        function onTransponderIdentChanged(active) {
-            btnIdent.isActive = active;
-        }
-
-        function onTransponderModeChanged(mode) {
-            btnModeC.isActive = mode >= 2;
+        function onRadioStackStateChanged(stack) {
+            btnIdent.isActive = stack.SquawkingIdent;
+            btnModeC.isActive = stack.SquawkingModeC;
         }
     }
 
@@ -53,6 +47,7 @@ GridLayout {
         ToolbarButton {
             id: btnConnect
             text: networkConnected ? "Disconnect" : "Connect"
+            enabled: simConnected
             active: networkConnected
             MouseArea {
                 id: btnConnectMouseArea

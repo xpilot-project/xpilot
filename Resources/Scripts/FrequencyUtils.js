@@ -47,7 +47,7 @@ function toXplaneFormat(freq) {
 
 function printFrequency(frequency) {
     if(frequency > 0) {
-        return (frequency / 1000000.0).toFixed(3);
+        return (frequency / 1000.0).toFixed(3);
     }
     return "---.---";
 }

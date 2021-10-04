@@ -19,6 +19,9 @@
 #include "network/networkmanager.h"
 #include "network/networkserverlist.h"
 #include "simulator/udpclient.h"
+#include "aircrafts/user_aircraft_manager.h"
+#include "aircrafts/radio_stack_state.h"
+#include "version.h"
 
 using namespace xpilot;
 
@@ -31,6 +34,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QCoreApplication::setApplicationVersion(QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
 
     QGuiApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));
@@ -39,9 +43,10 @@ int main(int argc, char *argv[])
     QQmlContext *context = engine.rootContext();
 
     AppCore appCore;
-    NetworkManager networkManager;
-    NetworkServerList serverList;
     UdpClient udpClient;
+    NetworkManager networkManager(udpClient);
+    NetworkServerList serverList;
+    UserAircraftManager aircraftManager(udpClient, networkManager);
 
 #ifdef WIN32
     WORD wVersionRequested;
@@ -62,6 +67,7 @@ int main(int argc, char *argv[])
     context->setContextProperty("serverList", &serverList);
     qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", singletonTypeProvider);
     qRegisterMetaType<ConnectInfo>("ConnectInfo");
+    qRegisterMetaType<RadioStackState>("RadioStackState");
 
     const QUrl url(QStringLiteral("qrc:/Resources/Views/MainWindow.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app, [url](QObject *obj, const QUrl &objUrl) {

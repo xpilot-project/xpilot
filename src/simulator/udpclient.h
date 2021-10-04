@@ -14,6 +14,9 @@
 #include <QUdpSocket>
 #include <QDataStream>
 
+#include "src/aircrafts/user_aircraft_data.h"
+#include "src/aircrafts/radio_stack_state.h"
+
 class UdpClient : public QObject
 {
     Q_OBJECT
@@ -28,7 +31,8 @@ public:
     Q_INVOKABLE void transponderModeToggle();
 
 private:
-    void subscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency);
+    void Subscribe();
+    void SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency);
     void setDataRefValue(std::string dataRef, float value);
     void sendCommand(std::string command);
 
@@ -37,41 +41,16 @@ public slots:
 
 signals:
     void simConnectionStateChanged(bool connected);
-    void avionicsPowerOnChanged(bool power);
-    void audioComSelectionChanged(int radio);
-    void com1AudioSelectionChanged(bool active);
-    void com2AudioSelectionChanged(bool active);
-    void com1FrequencyChanged(float freq);
-    void com2FrequencyChanged(float freq);
-    void transponderIdentChanged(bool active);
-    void transponderModeChanged(int mode);
+    void userAircraftDataChanged(UserAircraftData data);
+    void radioStackStateChanged(RadioStackState radioStack);
 
 private:
     QUdpSocket* socket;
     qint64 m_lastUdpTimestamp;
     bool m_simConnected = false;
 
-    bool m_avionicsPower;
-    int m_audioComSelection;
-    bool m_com1AudioSelection;
-    bool m_com2AudioSelection;
-    float m_com1Frequency;
-    float m_com2Frequency;
-    bool m_transponderIdent;
-    int m_transponderMode;
-
-    void resetValues()
-    {
-        // reset cached values so that if the connection is re-established, new values are forced
-        m_avionicsPower = 0;
-        m_audioComSelection = 0;
-        m_com1AudioSelection = 0;
-        m_com2AudioSelection = 0;
-        m_com1Frequency = 0;
-        m_com2Frequency = 0;
-        m_transponderIdent = 0;
-        m_transponderMode = 0;
-    }
+    UserAircraftData m_userAircraftData;
+    RadioStackState m_radioStackState;
 };
 
 #endif

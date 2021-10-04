@@ -96,6 +96,7 @@ set(FSD_SOURCES
 
 set(PROJECT_SOURCES
     src/main.cpp
+    src/version.h
     src/common/simplecrypt.h
     src/common/simplecrypt.cpp
     src/appconfig.h
@@ -115,7 +116,10 @@ set(PROJECT_SOURCES
     src/aircrafts/aircraft.h
     src/aircrafts/aircraft_configuration.h
     src/aircrafts/aircraft_configuration.cpp
-    src/aircrafts/user_aircraft_config_data.h)
+    src/aircrafts/user_aircraft_data.h
+    src/aircrafts/radio_stack_state.h
+    src/aircrafts/user_aircraft_manager.h
+    src/aircrafts/user_aircraft_manager.cpp)
 
 set(AFV_NATIVE_HEADERS
     afv-native/include/afv-native/Client.h

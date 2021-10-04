@@ -14,12 +14,18 @@ enum DataRef
     Com2Frequency,
     TransponderMode,
     TransponderIdent,
+    TransponderCode,
     Latitude,
     Longitude,
     Elevation,
     Heading,
     Pitch,
     Bank,
+    BeaconLights,
+    LandingLights,
+    TaxiLights,
+    NavLights,
+    StrobeLights,
     PushToTalk
 };
 
@@ -34,7 +40,9 @@ UdpClient::UdpClient(QObject* parent) : QObject(parent)
         if((now - m_lastUdpTimestamp) > 15) {
             emit simConnectionStateChanged(false);
             m_simConnected = false;
-            resetValues();
+            m_radioStackState = {};
+            m_userAircraftData = {};
+            Subscribe();
         } else {
             if(!m_simConnected) {
                 emit simConnectionStateChanged(true);
@@ -44,24 +52,42 @@ UdpClient::UdpClient(QObject* parent) : QObject(parent)
     });
     heartbeatTimer->start(1000);
 
-    subscribeDataRef("sim/cockpit2/switches/avionics_power_on", DataRef::AvionicsPower, 5);
-    subscribeDataRef("sim/cockpit2/radios/actuators/audio_com_selection", DataRef::AudioComSelection, 5);
-    subscribeDataRef("sim/cockpit2/radios/actuators/audio_selection_com1", DataRef::Com1AudioSelection, 5);
-    subscribeDataRef("sim/cockpit2/radios/actuators/audio_selection_com2", DataRef::Com2AudioSelection, 5);
-    subscribeDataRef("sim/cockpit2/radios/actuators/com1_frequency_hz_833", DataRef::Com1Frequency, 5);
-    subscribeDataRef("sim/cockpit2/radios/actuators/com2_frequency_hz_833", DataRef::Com2Frequency, 5);
-    subscribeDataRef("sim/cockpit/radios/transponder_mode", DataRef::TransponderMode, 5);
-    subscribeDataRef("sim/cockpit/radios/transponder_id", DataRef::TransponderIdent, 5);
-    subscribeDataRef("sim/flightmodel/position/latitude", DataRef::Latitude, 5);
-    subscribeDataRef("sim/flightmodel/position/longitude", DataRef::Longitude, 5);
-    subscribeDataRef("sim/flightmodel/position/elevation", DataRef::Elevation, 5);
-    subscribeDataRef("sim/flightmodel/position/psi", DataRef::Heading, 5);
-    subscribeDataRef("sim/flightmodel/position/theta", DataRef::Pitch, 5);
-    subscribeDataRef("sim/flightmodel/position/phi", DataRef::Bank, 5);
-    subscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 5);
+    QTimer *xplaneDataTimer = new QTimer(this);
+    connect(xplaneDataTimer, &QTimer::timeout, this, [=]{
+        emit userAircraftDataChanged(m_userAircraftData);
+        emit radioStackStateChanged(m_radioStackState);
+    });
+    xplaneDataTimer->start(50);
+
+    Subscribe();
 }
 
-void UdpClient::subscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
+void UdpClient::Subscribe()
+{
+    SubscribeDataRef("sim/cockpit2/switches/avionics_power_on", DataRef::AvionicsPower, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_com_selection", DataRef::AudioComSelection, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_selection_com1", DataRef::Com1AudioSelection, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_selection_com2", DataRef::Com2AudioSelection, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/com1_frequency_hz_833", DataRef::Com1Frequency, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/com2_frequency_hz_833", DataRef::Com2Frequency, 5);
+    SubscribeDataRef("sim/cockpit/radios/transponder_mode", DataRef::TransponderMode, 5);
+    SubscribeDataRef("sim/cockpit/radios/transponder_id", DataRef::TransponderIdent, 5);
+    SubscribeDataRef("sim/cockpit/radios/transponder_code", DataRef::TransponderCode, 5);
+    SubscribeDataRef("sim/flightmodel/position/latitude", DataRef::Latitude, 5);
+    SubscribeDataRef("sim/flightmodel/position/longitude", DataRef::Longitude, 5);
+    SubscribeDataRef("sim/flightmodel/position/elevation", DataRef::Elevation, 5);
+    SubscribeDataRef("sim/flightmodel/position/psi", DataRef::Heading, 5);
+    SubscribeDataRef("sim/flightmodel/position/theta", DataRef::Pitch, 5);
+    SubscribeDataRef("sim/flightmodel/position/phi", DataRef::Bank, 5);
+    SubscribeDataRef("sim/cockpit2/switches/beacon_on", DataRef::BeaconLights, 5);
+    SubscribeDataRef("sim/cockpit2/switches/landing_lights_on", DataRef::LandingLights, 5);
+    SubscribeDataRef("sim/cockpit2/switches/taxi_light_on", DataRef::TaxiLights, 5);
+    SubscribeDataRef("sim/cockpit2/switches/navigation_lights_on", DataRef::NavLights, 5);
+    SubscribeDataRef("sim/cockpit2/switches/strobe_lights_on", DataRef::StrobeLights, 5);
+    SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 5);
+}
+
+void UdpClient::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
 {
     QByteArray data;
 
@@ -122,7 +148,7 @@ void UdpClient::transponderIdent()
 
 void UdpClient::transponderModeToggle()
 {
-    if(m_transponderMode >= 2) {
+    if(m_radioStackState.SquawkingModeC) {
         setDataRefValue("sim/cockpit/radios/transponder_mode", 0);
     } else {
         setDataRefValue("sim/cockpit/radios/transponder_mode", 2);
@@ -148,62 +174,66 @@ void UdpClient::OnDataReceived()
 
             while(pos < buffer.length())
             {
-                qint32 id = qFromLittleEndian<qint32>(buffer.mid(pos, 4).data());
+                int id = *(reinterpret_cast<const int*>(buffer.mid(pos, 4).constData()));
                 pos += 4;
 
-                float value = qFromLittleEndian<float>(buffer.mid(pos, 4).data());
+                float value = *(reinterpret_cast<const float*>(buffer.mid(pos, 4).constData()));
                 pos += 4;
 
                 switch(id) {
                 case DataRef::AvionicsPower:
-                    if(m_avionicsPower != value) {
-                        emit avionicsPowerOnChanged(value);
-                        m_avionicsPower = value;
-                    }
+                    m_radioStackState.AvionicsPowerOn = value;
                     break;
                 case DataRef::AudioComSelection:
-                    if(m_audioComSelection != value) {
-                        emit audioComSelectionChanged(value);
-                        m_audioComSelection = value;
+                    if(value == 6) {
+                        m_radioStackState.Com1TransmitEnabled = true;
+                        m_radioStackState.Com2TransmitEnabled = false;
+                    } else if(value == 7) {
+                        m_radioStackState.Com1TransmitEnabled = false;
+                        m_radioStackState.Com2TransmitEnabled = true;
                     }
                     break;
                 case DataRef::Com1AudioSelection:
-                    if(m_com1AudioSelection != value) {
-                        emit com1AudioSelectionChanged(value);
-                        m_com1AudioSelection = value;
-                    }
+                    m_radioStackState.Com1ReceiveEnabled = value;
                     break;
                 case DataRef::Com2AudioSelection:
-                    if(m_com2AudioSelection != value) {
-                        emit com2AudioSelectionChanged(value);
-                        m_com2AudioSelection = value;
-                    }
+                    m_radioStackState.Com2ReceiveEnabled = value;
                     break;
                 case DataRef::Com1Frequency:
-                    if(m_com1Frequency != value) {
-                        emit com1FrequencyChanged(value * 1000);
-                        m_com1Frequency = value * 1000;
-                    }
+                    m_radioStackState.Com1Frequency = value;
                     break;
                 case DataRef::Com2Frequency:
-                    if(m_com1Frequency != value) {
-                        emit com2FrequencyChanged(value * 1000);
-                        m_com2Frequency = value * 1000;
-                    }
+                    m_radioStackState.Com2Frequency = value;
                     break;
                 case DataRef::TransponderIdent:
-                    if(m_transponderIdent != value) {
-                        emit transponderIdentChanged(value);
-                        m_transponderIdent = value;
-                    }
+                    m_radioStackState.SquawkingIdent = value;
                     break;
                 case DataRef::TransponderMode:
-                    if(m_transponderMode != value) {
-                        emit transponderModeChanged(value);
-                        m_transponderMode = value;
-                    }
+                    m_radioStackState.SquawkingModeC = value >= 2;
+                    break;
+                case DataRef::TransponderCode:
+                    m_radioStackState.TransponderCode = value;
                     break;
                 case DataRef::Latitude:
+                    m_userAircraftData.Latitude = value;
+                    break;
+                case DataRef::Longitude:
+                    m_userAircraftData.Longitude = value;
+                    break;
+                case DataRef::BeaconLights:
+                    m_userAircraftData.BeaconLightsOn = value;
+                    break;
+                case DataRef::LandingLights:
+                    m_userAircraftData.LandingLightsOn = value;
+                    break;
+                case DataRef::TaxiLights:
+                    m_userAircraftData.TaxiLightsOn = value;
+                    break;
+                case DataRef::NavLights:
+                    m_userAircraftData.NavLightsOn = value;
+                    break;
+                case DataRef::StrobeLights:
+                    m_userAircraftData.StrobeLightsOn = value;
                     break;
                 }
             }

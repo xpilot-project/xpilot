@@ -248,14 +248,6 @@ Window {
 
             Toolbar {
                 id: toolbar
-
-                onToggleModeC: {
-                    setTransponderModeC(active)
-                }
-
-                onSquawkIdent: {
-                    setTransponderIdent()
-                }
             }
         }
 
