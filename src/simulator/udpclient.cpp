@@ -17,7 +17,8 @@ enum DataRef
     TransponderCode,
     Latitude,
     Longitude,
-    Elevation,
+    AltitudeMsl,
+    AltitudeAgl,
     Heading,
     Pitch,
     Bank,
@@ -75,7 +76,8 @@ void UdpClient::Subscribe()
     SubscribeDataRef("sim/cockpit/radios/transponder_code", DataRef::TransponderCode, 5);
     SubscribeDataRef("sim/flightmodel/position/latitude", DataRef::Latitude, 5);
     SubscribeDataRef("sim/flightmodel/position/longitude", DataRef::Longitude, 5);
-    SubscribeDataRef("sim/flightmodel/position/elevation", DataRef::Elevation, 5);
+    SubscribeDataRef("sim/flightmodel/position/elevation", DataRef::AltitudeMsl, 5);
+    SubscribeDataRef("sim/flightmodel/position/y_agl", DataRef::AltitudeAgl, 5);
     SubscribeDataRef("sim/flightmodel/position/psi", DataRef::Heading, 5);
     SubscribeDataRef("sim/flightmodel/position/theta", DataRef::Pitch, 5);
     SubscribeDataRef("sim/flightmodel/position/phi", DataRef::Bank, 5);
@@ -219,6 +221,12 @@ void UdpClient::OnDataReceived()
                     break;
                 case DataRef::Longitude:
                     m_userAircraftData.Longitude = value;
+                    break;
+                case DataRef::AltitudeMsl:
+                    m_userAircraftData.AltitudeMslM = value;
+                    break;
+                case DataRef::AltitudeAgl:
+                    m_userAircraftData.AltitudeAglM = value;
                     break;
                 case DataRef::BeaconLights:
                     m_userAircraftData.BeaconLightsOn = value;

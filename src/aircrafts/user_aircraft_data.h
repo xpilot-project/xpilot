@@ -13,8 +13,8 @@ public:
     double Heading;
     double Bank;
     double Pitch;
-    double AltitudeMsl;
-    double PressureAltitude;
+    double AltitudeMslM;
+    double AltitudeAglM;
     double GroundSpeed;
     bool OnGround;
     float FlapsPercent;
@@ -39,8 +39,8 @@ public:
             Heading != other.Heading ||
             Bank != other.Bank ||
             Pitch != other.Pitch ||
-            AltitudeMsl != other.AltitudeMsl ||
-            PressureAltitude != other.PressureAltitude ||
+            AltitudeMslM != other.AltitudeMslM ||
+            AltitudeAglM != other.AltitudeAglM ||
             GroundSpeed != other.GroundSpeed ||
             OnGround != other.OnGround ||
             FlapsPercent != other.FlapsPercent ||
@@ -66,8 +66,8 @@ public:
             Heading == other.Heading &&
             Bank == other.Bank &&
             Pitch == other.Pitch &&
-            AltitudeMsl == other.AltitudeMsl &&
-            PressureAltitude == other.PressureAltitude &&
+            AltitudeMslM == other.AltitudeMslM &&
+            AltitudeAglM == other.AltitudeAglM &&
             GroundSpeed == other.GroundSpeed &&
             OnGround == other.OnGround &&
             FlapsPercent == other.FlapsPercent &&

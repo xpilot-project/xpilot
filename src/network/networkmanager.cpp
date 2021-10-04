@@ -73,7 +73,7 @@ namespace xpilot
         SendEmptyFastPositionPacket();
         m_slowPositionTimer->setInterval(m_connectInfo.ObserverMode ? 15000 : 5000);
         m_slowPositionTimer->start();
-        if(!m_connectInfo.ObserverMode)
+        if(m_velocityEnabled && !m_connectInfo.ObserverMode)
         {
             m_fastPositionTimer->start();
         }
@@ -90,6 +90,12 @@ namespace xpilot
             SendCapabilities(pdu.From);
             break;
         case ClientQueryType::COM1Freq:
+        {
+            QStringList payload;
+            QString freq = QString::number(m_radioStackState.Com1Frequency / 1000.0, 'f', 3);
+            payload.append(freq);
+            m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, pdu.From, ClientQueryType::COM1Freq, payload));
+        }
             break;
         case ClientQueryType::RealName:
         {
@@ -105,11 +111,11 @@ namespace xpilot
                     .arg(QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH),
                          AppConfig::getInstance()->VatsimId,
                          AppConfig::getInstance()->Name,
-                         "",
-                         "",
+                         m_publicIp,
+                         GetSystemUid(),
                          QString::number(m_userAircraftData.Latitude),
                          QString::number(m_userAircraftData.Longitude),
-                         QString::number(m_userAircraftData.AltitudeMsl * 3.28084));
+                         QString::number(m_userAircraftData.AltitudeMslM * 3.28084));
             m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, pdu.From, inf));
             break;
         }
@@ -117,7 +123,12 @@ namespace xpilot
 
     void NetworkManager::OnClientQueryResponseReceived(PDUClientQueryResponse pdu)
     {
-
+        switch(pdu.QueryType)
+        {
+        case ClientQueryType::PublicIP:
+            m_publicIp = pdu.Payload.size() > 0 ? pdu.Payload[0] : "";
+            break;
+        }
     }
 
     void NetworkManager::OnPilotPositionReceived(PDUPilotPosition pdu)
@@ -200,32 +211,41 @@ namespace xpilot
 
     void NetworkManager::OnRadioStackStateChanged(RadioStackState radioStack)
     {
-
+        if(m_radioStackState != radioStack)
+        {
+            m_radioStackState = radioStack;
+        }
     }
 
     void NetworkManager::SendSlowPositionPacket()
     {
         if(m_connectInfo.ObserverMode) {
-            m_fsd.SendPDU(PDUATCPosition(m_connectInfo.Callsign, 99998, NetworkFacility::OBS, 40,
-                                         NetworkRating::OBS, m_userAircraftData.Latitude, m_userAircraftData.Longitude));
+            m_fsd.SendPDU(PDUATCPosition(m_connectInfo.Callsign,99998, NetworkFacility::OBS, 40, NetworkRating::OBS,
+                                         m_userAircraftData.Latitude, m_userAircraftData.Longitude));
         }
         else {
-            m_fsd.SendPDU(PDUPilotPosition(m_connectInfo.Callsign, 0, false, false, NetworkRating::OBS,
-                                           m_userAircraftData.Latitude, m_userAircraftData.Longitude, 0, 0, 0, 0, 0, 0));
+            m_fsd.SendPDU(PDUPilotPosition(m_connectInfo.Callsign, m_radioStackState.TransponderCode, m_radioStackState.SquawkingModeC,
+                                           m_radioStackState.SquawkingIdent, NetworkRating::OBS, m_userAircraftData.Latitude,
+                                           m_userAircraftData.Longitude, m_userAircraftData.AltitudeMslM * 3.28084,
+                                           m_userAircraftData.AltitudeAglM * 3.28084, m_userAircraftData.GroundSpeed,
+                                           m_userAircraftData.Pitch, m_userAircraftData.Heading, m_userAircraftData.Bank));
         }
     }
 
     void NetworkManager::SendFastPositionPacket()
     {
-        m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign, m_userAircraftData.Latitude, m_userAircraftData.Longitude, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        if(m_velocityEnabled)
+        {
+            m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign, m_userAircraftData.Latitude, m_userAircraftData.Longitude, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        }
     }
 
     void NetworkManager::SendEmptyFastPositionPacket()
     {
-        if(!m_connectInfo.ObserverMode)
+        if(!m_connectInfo.ObserverMode && m_velocityEnabled)
         {
             m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign, m_userAircraftData.Latitude, m_userAircraftData.Longitude,
-                                               m_userAircraftData.AltitudeMsl * 3.28084, m_userAircraftData.Pitch, m_userAircraftData.Heading,
+                                               m_userAircraftData.AltitudeMslM * 3.28084, m_userAircraftData.Pitch, m_userAircraftData.Heading,
                                                m_userAircraftData.Bank, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
         }
     }

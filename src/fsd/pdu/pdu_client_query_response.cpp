@@ -15,6 +15,7 @@ QString PDUClientQueryResponse::Serialize()
     tokens.append(From);
     tokens.append(Delimeter);
     tokens.append(To);
+    tokens.append(Delimeter);
     tokens.append(toQString(QueryType));
     for(const auto& payloadItem : Payload) {
         tokens.append(Delimeter);

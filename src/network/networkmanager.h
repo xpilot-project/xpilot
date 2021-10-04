@@ -37,7 +37,10 @@ namespace xpilot
         QTimer* m_slowPositionTimer;
         QTimer* m_fastPositionTimer;
         UserAircraftData m_userAircraftData;
+        RadioStackState m_radioStackState;
         ConnectInfo m_connectInfo{};
+        QString m_publicIp;
+        bool m_velocityEnabled = false;
 
         void OnNetworkConnected();
         void OnNetworkDisconnected();

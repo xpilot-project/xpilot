@@ -53,8 +53,6 @@ namespace xpilot
         data = m_partialPacket + data;
         m_partialPacket = "";
 
-        qDebug() << "<< " << data;
-
         QStringList packets = data.split(PDUBase::PacketDelimeter);
 
         // If he last packet has content, it's an incomplete packet.
@@ -68,6 +66,8 @@ namespace xpilot
         for(const auto& packet : packets)
         {
             if(packet.length() == 0) continue;
+
+            qDebug() << "<< " << packet;
 
             QStringList fields = packet.split(PDUBase::Delimeter);
             const QCharRef prefixChar = fields[0][0];
