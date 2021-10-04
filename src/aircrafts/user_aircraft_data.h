@@ -1,5 +1,4 @@
-#ifndef USER_AIRCRAFT_DATA_H
-#define USER_AIRCRAFT_DATA_H
+#pragma once
 
 #include <QObject>
 
@@ -10,81 +9,52 @@ struct UserAircraftData
 public:
     double Latitude;
     double Longitude;
-    double Heading;
-    double Bank;
-    double Pitch;
     double AltitudeMslM;
     double AltitudeAglM;
     double GroundSpeed;
-    bool OnGround;
-    float FlapsPercent;
-    bool SpeedBrakesDeployed;
-    bool GearDown;
-    bool StrobeLightsOn;
-    bool BeaconLightsOn;
-    bool TaxiLightsOn;
-    bool LandingLightsOn;
-    bool NavLightsOn;
-    int EngineCount;
-    bool Engine1Running;
-    bool Engine2Running;
-    bool Engine3Running;
-    bool Engine4Running;
-    bool ReplayModeEnabled;
+    double Pitch;
+    double Heading;
+    double Bank;
+    double LatitudeVelocity;
+    double AltitudeVelocity;
+    double LongitudeVelocity;
+    double PitchVelocity;
+    double HeadingVelocity;
+    double BankVelocity;
 
     bool operator!=(const UserAircraftData& other) const
     {
         return Latitude != other.Latitude ||
-            Longitude != other.Longitude ||
-            Heading != other.Heading ||
-            Bank != other.Bank ||
-            Pitch != other.Pitch ||
-            AltitudeMslM != other.AltitudeMslM ||
-            AltitudeAglM != other.AltitudeAglM ||
-            GroundSpeed != other.GroundSpeed ||
-            OnGround != other.OnGround ||
-            FlapsPercent != other.FlapsPercent ||
-            SpeedBrakesDeployed != other.SpeedBrakesDeployed ||
-            GearDown != other.GearDown ||
-            StrobeLightsOn != other.StrobeLightsOn ||
-            BeaconLightsOn != other.BeaconLightsOn ||
-            TaxiLightsOn != other.TaxiLightsOn ||
-            LandingLightsOn != other.LandingLightsOn ||
-            NavLightsOn != other.NavLightsOn ||
-            EngineCount != other.EngineCount ||
-            Engine1Running != other.Engine1Running ||
-            Engine2Running != other.Engine2Running ||
-            Engine3Running != other.Engine3Running ||
-            Engine4Running != other.Engine4Running ||
-            ReplayModeEnabled != other.ReplayModeEnabled;
+                Longitude != other.Longitude ||
+                AltitudeMslM != other.AltitudeMslM ||
+                AltitudeAglM != other.AltitudeAglM ||
+                GroundSpeed != other.GroundSpeed ||
+                Pitch != other.Pitch ||
+                Heading != other.Heading ||
+                Bank != other.Bank ||
+                LatitudeVelocity != other.LatitudeVelocity ||
+                AltitudeVelocity != other.AltitudeVelocity ||
+                LongitudeVelocity != other.LongitudeVelocity ||
+                PitchVelocity != other.PitchVelocity ||
+                HeadingVelocity != other.HeadingVelocity ||
+                BankVelocity != other.BankVelocity;
     }
 
     bool operator==(const UserAircraftData& other) const
     {
         return Latitude == other.Latitude &&
-            Longitude == other.Longitude &&
-            Heading == other.Heading &&
-            Bank == other.Bank &&
-            Pitch == other.Pitch &&
-            AltitudeMslM == other.AltitudeMslM &&
-            AltitudeAglM == other.AltitudeAglM &&
-            GroundSpeed == other.GroundSpeed &&
-            OnGround == other.OnGround &&
-            FlapsPercent == other.FlapsPercent &&
-            SpeedBrakesDeployed == other.SpeedBrakesDeployed &&
-            GearDown == other.GearDown &&
-            StrobeLightsOn == other.StrobeLightsOn &&
-            BeaconLightsOn == other.BeaconLightsOn &&
-            TaxiLightsOn == other.TaxiLightsOn &&
-            LandingLightsOn == other.LandingLightsOn &&
-            NavLightsOn == other.NavLightsOn &&
-            EngineCount == other.EngineCount &&
-            Engine1Running == other.Engine1Running &&
-            Engine2Running == other.Engine2Running &&
-            Engine3Running == other.Engine3Running &&
-            Engine4Running == other.Engine4Running &&
-            ReplayModeEnabled == other.ReplayModeEnabled;
+                Longitude == other.Longitude &&
+                AltitudeMslM == other.AltitudeMslM &&
+                AltitudeAglM == other.AltitudeAglM &&
+                GroundSpeed == other.GroundSpeed &&
+                Pitch == other.Pitch &&
+                Heading == other.Heading &&
+                Bank == other.Bank &&
+                LatitudeVelocity == other.LatitudeVelocity &&
+                AltitudeVelocity == other.AltitudeVelocity &&
+                LongitudeVelocity == other.LongitudeVelocity &&
+                PitchVelocity == other.PitchVelocity &&
+                HeadingVelocity == other.HeadingVelocity &&
+                BankVelocity == other.BankVelocity;
     }
 };
-
-#endif

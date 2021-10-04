@@ -15,6 +15,7 @@
 #include <QDataStream>
 
 #include "src/aircrafts/user_aircraft_data.h"
+#include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/radio_stack_state.h"
 
 class UdpClient : public QObject
@@ -42,6 +43,7 @@ public slots:
 signals:
     void simConnectionStateChanged(bool connected);
     void userAircraftDataChanged(UserAircraftData data);
+    void userAircraftConfigDataChanged(UserAircraftConfigData data);
     void radioStackStateChanged(RadioStackState radioStack);
 
 private:
@@ -50,6 +52,7 @@ private:
     bool m_simConnected = false;
 
     UserAircraftData m_userAircraftData;
+    UserAircraftConfigData m_userAircraftConfigData;
     RadioStackState m_radioStackState;
 };
 

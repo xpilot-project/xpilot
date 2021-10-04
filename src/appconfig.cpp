@@ -106,3 +106,15 @@ bool AppConfig::configRequired()
 {
     return VatsimId.isEmpty() || VatsimPasswordDecrypted.isEmpty() || Name.isEmpty();
 }
+
+QString AppConfig::getNetworkServer()
+{
+    if(ServerName.isEmpty() || CachedServers.isEmpty()) return "";
+    for(auto & server : CachedServers)
+    {
+        if(server.Name == ServerName)
+        {
+            return server.Address;
+        }
+    }
+}

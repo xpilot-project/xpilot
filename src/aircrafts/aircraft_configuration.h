@@ -5,7 +5,7 @@
 #include <QString>
 #include <QJsonObject>
 #include <QJsonDocument>
-#include "user_aircraft_data.h"
+#include "user_aircraft_config_data.h"
 
 class AircraftConfigurationLights
 {
@@ -20,7 +20,7 @@ public:
     AircraftConfigurationLights Clone();
     void ApplyIncremental(AircraftConfigurationLights& inc);
     AircraftConfigurationLights CreateIncremental(AircraftConfigurationLights& cfg);
-    static AircraftConfigurationLights FromUserAircraftData(UserAircraftData& uac);
+    static AircraftConfigurationLights FromUserAircraftData(UserAircraftConfigData& uac);
 
     bool operator!=(const AircraftConfigurationLights& b) const
     {
@@ -42,7 +42,7 @@ public:
     AircraftConfigurationEngine Clone();
     void ApplyIncremental(AircraftConfigurationEngine& inc);
     AircraftConfigurationEngine CreateIncremental(AircraftConfigurationEngine& cfg);
-    static AircraftConfigurationEngine FromUserAircraftData(UserAircraftData& uac, int engineNum);
+    static AircraftConfigurationEngine FromUserAircraftData(UserAircraftConfigData& uac, int engineNum);
 
     bool operator!=(const AircraftConfigurationEngine& b) const
     {
@@ -76,7 +76,7 @@ public:
     AircraftConfigurationEngines Clone();
     void ApplyIncremental(AircraftConfigurationEngines& inc);
     AircraftConfigurationEngines CreateIncremental(AircraftConfigurationEngines& cfg);
-    static AircraftConfigurationEngines FromUserAircraftData(UserAircraftData& uac);
+    static AircraftConfigurationEngines FromUserAircraftData(UserAircraftConfigData& uac);
 
     bool operator!=(const AircraftConfigurationEngines& b) const
     {
@@ -104,7 +104,7 @@ public:
     AircraftConfiguration Clone();
     void ApplyIncremental(AircraftConfiguration& inc);
     AircraftConfiguration CreateIncremental(AircraftConfiguration& cfg);
-    static AircraftConfiguration FromUserAircraftData(UserAircraftData& uac);
+    static AircraftConfiguration FromUserAircraftData(UserAircraftConfigData& uac);
 
     bool operator!=(const AircraftConfiguration& b) const
     {

@@ -117,6 +117,7 @@ set(PROJECT_SOURCES
     src/aircrafts/aircraft_configuration.h
     src/aircrafts/aircraft_configuration.cpp
     src/aircrafts/user_aircraft_data.h
+    src/aircrafts/user_aircraft_config_data.h
     src/aircrafts/radio_stack_state.h
     src/aircrafts/user_aircraft_manager.h
     src/aircrafts/user_aircraft_manager.cpp)

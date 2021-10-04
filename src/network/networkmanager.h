@@ -7,6 +7,7 @@
 #include "src/fsd/fsd_client.h"
 #include "src/simulator/udpclient.h"
 #include "src/aircrafts/user_aircraft_data.h"
+#include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/aircraft_configuration.h"
 
 namespace xpilot
@@ -26,7 +27,8 @@ namespace xpilot
         void networkConnected();
         void networkDisconnected();
         void notificationPosted(int type, QString message);
-        void AircraftConfigurationInfoReceived(QString from, QString json);
+        void privateMessageReceived(QString from, QString message);
+        void aircraftConfigurationInfoReceived(QString from, QString json);
 
     public slots:
         void connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer);
@@ -37,9 +39,13 @@ namespace xpilot
         QTimer* m_slowPositionTimer;
         QTimer* m_fastPositionTimer;
         UserAircraftData m_userAircraftData;
+        UserAircraftConfigData m_userAircraftConfigData;
         RadioStackState m_radioStackState;
         ConnectInfo m_connectInfo{};
         QString m_publicIp;
+        bool m_intentionalDisconnect =  false;
+        bool m_forcedDisconnect = false;
+        QString m_forcedDisconnectReason = "";
         bool m_velocityEnabled = false;
 
         void OnNetworkConnected();
@@ -63,6 +69,7 @@ namespace xpilot
         void OnKillRequestReceived(PDUKillRequest pdu);
 
         void OnUserAircraftDataUpdated(UserAircraftData data);
+        void OnUserAircraftConfigDataUpdated(UserAircraftConfigData data);
         void OnRadioStackStateChanged(RadioStackState radioStack);
 
         void SendSlowPositionPacket();
@@ -71,8 +78,6 @@ namespace xpilot
 
         void OnSlowPositionTimerElapsed();
         void OnFastPositionTimerElapsed();
-
-        void HandleServerListDownloaded();
     };
 }
 

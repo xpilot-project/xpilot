@@ -29,6 +29,7 @@ namespace xpilot
         connect(&m_fsd, &FsdClient::RaiseKillRequestReceived, this, &NetworkManager::OnKillRequestReceived);
 
         connect(&udpClient, &UdpClient::userAircraftDataChanged, this, &NetworkManager::OnUserAircraftDataUpdated);
+        connect(&udpClient, &UdpClient::userAircraftConfigDataChanged, this, &NetworkManager::OnUserAircraftConfigDataUpdated);
         connect(&udpClient, &UdpClient::radioStackStateChanged, this, &NetworkManager::OnRadioStackStateChanged);
 
         m_slowPositionTimer = new QTimer(this);
@@ -51,13 +52,31 @@ namespace xpilot
 
     void NetworkManager::OnNetworkDisconnected()
     {
-        emit notificationPosted((int)NotificationType::Info, "Disconnected from network.");
+        m_fastPositionTimer->stop();
+        m_slowPositionTimer->stop();
+
+        if(m_forcedDisconnect) {
+            if(!m_forcedDisconnectReason.isEmpty()) {
+                emit notificationPosted((int)NotificationType::Error, "Forcibly disconnected from network: " + m_forcedDisconnectReason);
+            }
+            else {
+                emit notificationPosted((int)NotificationType::Error, "Forcibly disconnected from network.");
+            }
+        }
+        else {
+            emit notificationPosted((int)NotificationType::Info, "Disconnected from network.");
+        }
+
+        m_intentionalDisconnect = false;
+        m_forcedDisconnect = false;
+        m_forcedDisconnectReason = "";
+
         emit networkDisconnected();
     }
 
     void NetworkManager::OnServerIdentificationReceived(PDUServerIdentification pdu)
     {
-        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, GetClientId(), "xPilot", 1, 0, AppConfig::getInstance()->VatsimId, GetSystemUid(), ""));
+        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, GetClientId(), "xPilot", 1, 2, AppConfig::getInstance()->VatsimId, GetSystemUid(), ""));
 
         if(m_connectInfo.ObserverMode) {
             m_fsd.SendPDU(PDUAddATC(m_connectInfo.Callsign, AppConfig::getInstance()->Name, AppConfig::getInstance()->VatsimId,
@@ -84,7 +103,7 @@ namespace xpilot
         switch(pdu.QueryType)
         {
         case ClientQueryType::AircraftConfiguration:
-            emit AircraftConfigurationInfoReceived(pdu.From, pdu.Payload.join(":"));
+            emit aircraftConfigurationInfoReceived(pdu.From, pdu.Payload.join(":"));
             break;
         case ClientQueryType::Capabilities:
             SendCapabilities(pdu.From);
@@ -173,7 +192,14 @@ namespace xpilot
 
     void NetworkManager::OnTextMessageReceived(PDUTextMessage pdu)
     {
-        emit notificationPosted((int)NotificationType::TextMessage, pdu.Message);
+        if(pdu.From.toUpper() == "SERVER")
+        {
+            emit notificationPosted((int)NotificationType::ServerMessage, pdu.Message);
+        }
+        else
+        {
+            emit privateMessageReceived(pdu.From, pdu.Message);
+        }
     }
 
     void NetworkManager::OnBroadcastMessageReceived(PDUBroadcastMessage pdu)
@@ -198,7 +224,8 @@ namespace xpilot
 
     void NetworkManager::OnKillRequestReceived(PDUKillRequest pdu)
     {
-
+        m_forcedDisconnect = true;
+        m_forcedDisconnectReason = pdu.Reason;
     }
 
     void NetworkManager::OnUserAircraftDataUpdated(UserAircraftData data)
@@ -206,6 +233,14 @@ namespace xpilot
         if(m_userAircraftData != data)
         {
             m_userAircraftData = data;
+        }
+    }
+
+    void NetworkManager::OnUserAircraftConfigDataUpdated(UserAircraftConfigData data)
+    {
+        if(m_userAircraftConfigData != data)
+        {
+            m_userAircraftConfigData = data;
         }
     }
 
@@ -234,9 +269,13 @@ namespace xpilot
 
     void NetworkManager::SendFastPositionPacket()
     {
-        if(m_velocityEnabled)
+        if(m_velocityEnabled && !m_connectInfo.ObserverMode)
         {
-            m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign, m_userAircraftData.Latitude, m_userAircraftData.Longitude, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+            m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign, m_userAircraftData.Latitude, m_userAircraftData.Longitude,
+                                               m_userAircraftData.AltitudeMslM * 3.28084, m_userAircraftData.Pitch, m_userAircraftData.Heading,
+                                               m_userAircraftData.Bank, m_userAircraftData.LongitudeVelocity, m_userAircraftData.AltitudeVelocity,
+                                               m_userAircraftData.LatitudeVelocity, m_userAircraftData.PitchVelocity, m_userAircraftData.HeadingVelocity,
+                                               m_userAircraftData.BankVelocity));
         }
     }
 
@@ -257,7 +296,6 @@ namespace xpilot
 
     void NetworkManager::OnFastPositionTimerElapsed()
     {
-        if(m_connectInfo.ObserverMode) return;
         SendFastPositionPacket();
     }
 
@@ -296,7 +334,8 @@ namespace xpilot
     void NetworkManager::connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer)
     {
         if(AppConfig::getInstance()->configRequired()) {
-            emit notificationPosted((int)NotificationType::Error, "It looks like this may be the first time you've run xPilot on this computer. Some configuration items are required before you can connect to the network. Open Settings and verify your network credentials are saved.");
+            emit notificationPosted((int)NotificationType::Error, "It looks like this may be the first time you've run xPilot on this computer. "
+"Some configuration items are required before you can connect to the network. Open Settings and verify your network credentials are saved.");
             return;
         }
         if(!callsign.isEmpty() && !typeCode.isEmpty()) {
@@ -308,7 +347,7 @@ namespace xpilot
             m_connectInfo = connectInfo;
 
             emit notificationPosted((int)NotificationType::Info, "Connecting to network...");
-            m_fsd.Connect("192.168.50.56", 6809);
+            m_fsd.Connect(AppConfig::getInstance()->getNetworkServer(), 6809);
         }
         else
         {
@@ -318,11 +357,8 @@ namespace xpilot
 
     void NetworkManager::disconnectFromNetwork()
     {
+        m_intentionalDisconnect = true;
+        m_fsd.SendPDU(PDUDeletePilot(m_connectInfo.Callsign, AppConfig::getInstance()->VatsimId));
         m_fsd.Disconnect();
-    }
-
-    void NetworkManager::HandleServerListDownloaded()
-    {
-        qDebug() << "Downloaded";
     }
 }

@@ -7,6 +7,7 @@
 #include "src/network/networkmanager.h"
 #include "src/simulator/udpclient.h"
 #include "src/aircrafts/user_aircraft_data.h"
+#include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/aircraft_configuration.h"
 
 using namespace xpilot;
@@ -29,6 +30,7 @@ private:
     int m_tokensAvailable = AcconfigMaxTokens;
 
     UserAircraftData m_userAircraftData;
+    UserAircraftConfigData m_userAircraftConfigData;
     std::optional<AircraftConfiguration> m_lastBroadcastConfig;
     bool m_airborne;
 };

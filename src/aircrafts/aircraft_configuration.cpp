@@ -167,14 +167,14 @@ AircraftConfiguration AircraftConfiguration::CreateIncremental(AircraftConfigura
     return inc;
 }
 
-AircraftConfiguration AircraftConfiguration::FromUserAircraftData(UserAircraftData &uac)
+AircraftConfiguration AircraftConfiguration::FromUserAircraftData(UserAircraftConfigData &uac)
 {
     AircraftConfiguration cfg{};
     cfg.Lights = AircraftConfigurationLights::FromUserAircraftData(uac);
     cfg.Engines = AircraftConfigurationEngines::FromUserAircraftData(uac);
     cfg.GearDown = uac.GearDown;
-    cfg.FlapsPercent = RoundUpToNearest5(uac.FlapsPercent);
-    cfg.SpoilersDeployed = uac.SpeedBrakesDeployed;
+    cfg.FlapsPercent = RoundUpToNearest5(uac.FlapsRatio);
+    cfg.SpoilersDeployed = uac.SpeedbrakeRatio != 0;
     cfg.OnGround = uac.OnGround;
     return cfg;
 }
@@ -237,13 +237,13 @@ AircraftConfigurationLights AircraftConfigurationLights::CreateIncremental(Aircr
     return inc;
 }
 
-AircraftConfigurationLights AircraftConfigurationLights::FromUserAircraftData(UserAircraftData &uac)
+AircraftConfigurationLights AircraftConfigurationLights::FromUserAircraftData(UserAircraftConfigData &uac)
 {
     AircraftConfigurationLights acl{};
-    acl.StrobesOn = uac.StrobeLightsOn;
+    acl.StrobesOn = uac.StrobesOn;
     acl.LandingOn = uac.LandingLightsOn;
     acl.TaxiOn = uac.TaxiLightsOn;
-    acl.BeaconOn = uac.BeaconLightsOn;
+    acl.BeaconOn = uac.BeaconOn;
     acl.NavOn = uac.NavLightsOn;
     return acl;
 }
@@ -277,7 +277,7 @@ AircraftConfigurationEngine AircraftConfigurationEngine::CreateIncremental(Aircr
     return inc;
 }
 
-AircraftConfigurationEngine AircraftConfigurationEngine::FromUserAircraftData(UserAircraftData &uac, int engineNum)
+AircraftConfigurationEngine AircraftConfigurationEngine::FromUserAircraftData(UserAircraftConfigData &uac, int engineNum)
 {
     AircraftConfigurationEngine ace{};
     switch(engineNum) {
@@ -344,7 +344,7 @@ AircraftConfigurationEngines AircraftConfigurationEngines::CreateIncremental(Air
     return inc;
 }
 
-AircraftConfigurationEngines AircraftConfigurationEngines::FromUserAircraftData(UserAircraftData &uac)
+AircraftConfigurationEngines AircraftConfigurationEngines::FromUserAircraftData(UserAircraftConfigData &uac)
 {
     AircraftConfigurationEngines ace{};
     if(uac.EngineCount >= 1) ace.Engine1 = AircraftConfigurationEngine::FromUserAircraftData(uac, 1);

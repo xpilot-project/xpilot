@@ -16,6 +16,7 @@ namespace xpilot
         Warning,
         Error,
         TextMessage,
+        ServerMessage,
         RadioMessageSent,
         RadioMessageReceived
     };

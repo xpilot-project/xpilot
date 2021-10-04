@@ -25,7 +25,7 @@ Button {
     background: Rectangle {
         color: active ? "#0164AD" : (btnMouseArea.pressed ? "#a7acb1" : btnMouseArea.containsMouse ? "#565e64" : "transparent")
         opacity: button.enabled ? 1 : 0.5
-        border.color: btnMouseArea.pressed ? "#a7acb1" : "#6c757d"
+        border.color: active ? '#0078CE' : '#6c757d'
     }
 
     contentItem: Text {

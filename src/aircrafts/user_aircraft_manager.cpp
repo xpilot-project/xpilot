@@ -8,7 +8,7 @@ UserAircraftManager::UserAircraftManager(UdpClient& udpClient, NetworkManager& n
     m_networkManager(networkManager)
 {
     connect(&udpClient, &UdpClient::userAircraftDataChanged, this, &UserAircraftManager::OnUserAircraftDataUpdated);
-    connect(&m_networkManager, &NetworkManager::AircraftConfigurationInfoReceived, this, &UserAircraftManager::OnAircraftConfigurationInfoReceived);
+    connect(&m_networkManager, &NetworkManager::aircraftConfigurationInfoReceived, this, &UserAircraftManager::OnAircraftConfigurationInfoReceived);
 
     QTimer* tokenRefreshTimer = new QTimer(this);
     connect(tokenRefreshTimer, &QTimer::timeout, this, [=] {
@@ -26,11 +26,11 @@ void UserAircraftManager::OnUserAircraftDataUpdated(UserAircraftData data)
         m_userAircraftData = data;
         if(!m_lastBroadcastConfig.has_value())
         {
-            m_lastBroadcastConfig = AircraftConfiguration::FromUserAircraftData(m_userAircraftData);
+            m_lastBroadcastConfig = AircraftConfiguration::FromUserAircraftData(m_userAircraftConfigData);
         }
         else if(m_tokensAvailable > 0)
         {
-            AircraftConfiguration newCfg = AircraftConfiguration::FromUserAircraftData(m_userAircraftData);
+            AircraftConfiguration newCfg = AircraftConfiguration::FromUserAircraftData(m_userAircraftConfigData);
             if(newCfg != m_lastBroadcastConfig.value()) {
                 AircraftConfiguration incremental = m_lastBroadcastConfig->CreateIncremental(newCfg);
                 m_networkManager.SendAircraftConfigurationUpdate(incremental);
@@ -39,7 +39,7 @@ void UserAircraftManager::OnUserAircraftDataUpdated(UserAircraftData data)
             }
         }
         bool wasAirborne = m_airborne;
-        m_airborne = !m_userAircraftData.OnGround;
+        m_airborne = !m_userAircraftConfigData.OnGround;
     }
 }
 
@@ -50,7 +50,7 @@ void UserAircraftManager::OnAircraftConfigurationInfoReceived(QString from, QStr
 
     if(info.IsFullRequest)
     {
-        AircraftConfiguration cfg = AircraftConfiguration::FromUserAircraftData(m_userAircraftData);
+        AircraftConfiguration cfg = AircraftConfiguration::FromUserAircraftData(m_userAircraftConfigData);
         cfg.IsFullData = true;
         m_networkManager.SendAircraftConfigurationUpdate(from, cfg);
     }

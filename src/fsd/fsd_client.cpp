@@ -9,7 +9,6 @@ namespace xpilot
         connect(&m_socket, &QTcpSocket::readyRead, this, &FsdClient::handleDataReceived);
         connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::errorOccurred), this, &FsdClient::handleSocketError);
         connect(&m_socket, &QTcpSocket::connected, this, &FsdClient::handleSocketConnected);
-        connect(&m_socket, &QTcpSocket::disconnected, this, &FsdClient::handleSocketDisconnected);
     }
 
     void FsdClient::Connect(QString address, quint32 port, bool challengeServer)
@@ -21,6 +20,7 @@ namespace xpilot
 
     void FsdClient::Disconnect()
     {
+        emit RaiseNetworkDisconnected();
         m_socket.close();
     }
 
@@ -246,12 +246,6 @@ namespace xpilot
     {
         m_connected = true;
         emit RaiseNetworkConnected();
-    }
-
-    void FsdClient::handleSocketDisconnected()
-    {
-        m_connected = false;
-        emit RaiseNetworkDisconnected();
     }
 
     QString FsdClient::socketErrorToQString(QAbstractSocket::SocketError error)

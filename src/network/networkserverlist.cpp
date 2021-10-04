@@ -42,6 +42,12 @@ namespace xpilot
             serverList.append(serverInfo);
         }
 
+        NetworkServerInfo serverInfo;
+        serverInfo.Name = "Dev";
+        serverInfo.Address = "192.168.50.56";
+        serverInfo.Location = "";
+        serverList.append(serverInfo);
+
         emit serverListDownloaded(serverList);
 
         return serverList;

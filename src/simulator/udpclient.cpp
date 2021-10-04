@@ -15,18 +15,29 @@ enum DataRef
     TransponderMode,
     TransponderIdent,
     TransponderCode,
-    Latitude,
-    Longitude,
-    AltitudeMsl,
-    AltitudeAgl,
-    Heading,
-    Pitch,
-    Bank,
     BeaconLights,
     LandingLights,
     TaxiLights,
     NavLights,
     StrobeLights,
+    Latitude,
+    Longitude,
+    AltitudeMsl,
+    AltitudeAgl,
+    Pitch,
+    Heading,
+    Bank,
+    LatitudeVelocity,
+    AltitudeVelocity,
+    LongitudeVelocity,
+    PitchVelocity,
+    HeadingVelocity,
+    BankVelocity,
+    EngineCount,
+    OnGround,
+    GearDown,
+    FlapRatio,
+    SpeedbrakeRatio,
     PushToTalk
 };
 
@@ -43,6 +54,7 @@ UdpClient::UdpClient(QObject* parent) : QObject(parent)
             m_simConnected = false;
             m_radioStackState = {};
             m_userAircraftData = {};
+            m_userAircraftConfigData = {};
             Subscribe();
         } else {
             if(!m_simConnected) {
@@ -56,6 +68,7 @@ UdpClient::UdpClient(QObject* parent) : QObject(parent)
     QTimer *xplaneDataTimer = new QTimer(this);
     connect(xplaneDataTimer, &QTimer::timeout, this, [=]{
         emit userAircraftDataChanged(m_userAircraftData);
+        emit userAircraftConfigDataChanged(m_userAircraftConfigData);
         emit radioStackStateChanged(m_radioStackState);
     });
     xplaneDataTimer->start(50);
@@ -74,18 +87,29 @@ void UdpClient::Subscribe()
     SubscribeDataRef("sim/cockpit/radios/transponder_mode", DataRef::TransponderMode, 5);
     SubscribeDataRef("sim/cockpit/radios/transponder_id", DataRef::TransponderIdent, 5);
     SubscribeDataRef("sim/cockpit/radios/transponder_code", DataRef::TransponderCode, 5);
-    SubscribeDataRef("sim/flightmodel/position/latitude", DataRef::Latitude, 5);
-    SubscribeDataRef("sim/flightmodel/position/longitude", DataRef::Longitude, 5);
-    SubscribeDataRef("sim/flightmodel/position/elevation", DataRef::AltitudeMsl, 5);
-    SubscribeDataRef("sim/flightmodel/position/y_agl", DataRef::AltitudeAgl, 5);
-    SubscribeDataRef("sim/flightmodel/position/psi", DataRef::Heading, 5);
-    SubscribeDataRef("sim/flightmodel/position/theta", DataRef::Pitch, 5);
-    SubscribeDataRef("sim/flightmodel/position/phi", DataRef::Bank, 5);
     SubscribeDataRef("sim/cockpit2/switches/beacon_on", DataRef::BeaconLights, 5);
     SubscribeDataRef("sim/cockpit2/switches/landing_lights_on", DataRef::LandingLights, 5);
     SubscribeDataRef("sim/cockpit2/switches/taxi_light_on", DataRef::TaxiLights, 5);
     SubscribeDataRef("sim/cockpit2/switches/navigation_lights_on", DataRef::NavLights, 5);
     SubscribeDataRef("sim/cockpit2/switches/strobe_lights_on", DataRef::StrobeLights, 5);
+    SubscribeDataRef("sim/flightmodel/position/latitude", DataRef::Latitude, 5);
+    SubscribeDataRef("sim/flightmodel/position/longitude", DataRef::Longitude, 5);
+    SubscribeDataRef("sim/flightmodel/position/elevation", DataRef::AltitudeMsl, 5);
+    SubscribeDataRef("sim/flightmodel/position/y_agl", DataRef::AltitudeAgl, 5);
+    SubscribeDataRef("sim/flightmodel/position/theta", DataRef::Pitch, 5);
+    SubscribeDataRef("sim/flightmodel/position/psi", DataRef::Heading, 5);
+    SubscribeDataRef("sim/flightmodel/position/phi", DataRef::Bank, 5);
+    SubscribeDataRef("sim/flightmodel/position/local_vx", DataRef::LatitudeVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/local_vy", DataRef::AltitudeVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/local_vz", DataRef::LongitudeVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/Qrad", DataRef::PitchVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/Rrad", DataRef::HeadingVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/Prad", DataRef::BankVelocity, 5);
+    SubscribeDataRef("sim/aircraft/engine/acf_num_engines", DataRef::EngineCount, 5);
+    SubscribeDataRef("sim/flightmodel/failures/onground_any", DataRef::OnGround, 5);
+    SubscribeDataRef("sim/cockpit/switches/gear_handle_status", DataRef::GearDown, 5);
+    SubscribeDataRef("sim/flightmodel/controls/flaprat", DataRef::FlapRatio, 5);
+    SubscribeDataRef("sim/cockpit2/controls/speedbrake_ratio", DataRef::SpeedbrakeRatio, 5);
     SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 5);
 }
 
@@ -228,20 +252,53 @@ void UdpClient::OnDataReceived()
                 case DataRef::AltitudeAgl:
                     m_userAircraftData.AltitudeAglM = value;
                     break;
+                case DataRef::LatitudeVelocity:
+                    m_userAircraftData.LatitudeVelocity = value;
+                    break;
+                case DataRef::AltitudeVelocity:
+                    m_userAircraftData.AltitudeVelocity = value;
+                    break;
+                case DataRef::LongitudeVelocity:
+                    m_userAircraftData.LongitudeVelocity = value;
+                    break;
+                case DataRef::PitchVelocity:
+                    m_userAircraftData.PitchVelocity = value;
+                    break;
+                case DataRef::HeadingVelocity:
+                    m_userAircraftData.HeadingVelocity = value;
+                    break;
+                case DataRef::BankVelocity:
+                    m_userAircraftData.BankVelocity = value;
+                    break;
                 case DataRef::BeaconLights:
-                    m_userAircraftData.BeaconLightsOn = value;
+                    m_userAircraftConfigData.BeaconOn = value;
                     break;
                 case DataRef::LandingLights:
-                    m_userAircraftData.LandingLightsOn = value;
+                    m_userAircraftConfigData.LandingLightsOn = value;
                     break;
                 case DataRef::TaxiLights:
-                    m_userAircraftData.TaxiLightsOn = value;
+                    m_userAircraftConfigData.TaxiLightsOn = value;
                     break;
                 case DataRef::NavLights:
-                    m_userAircraftData.NavLightsOn = value;
+                    m_userAircraftConfigData.NavLightsOn = value;
                     break;
                 case DataRef::StrobeLights:
-                    m_userAircraftData.StrobeLightsOn = value;
+                    m_userAircraftConfigData.StrobesOn = value;
+                    break;
+                case DataRef::EngineCount:
+                    m_userAircraftConfigData.EngineCount = value;
+                    break;
+                case DataRef::OnGround:
+                    m_userAircraftConfigData.OnGround = value;
+                    break;
+                case DataRef::GearDown:
+                    m_userAircraftConfigData.GearDown = value;
+                    break;
+                case DataRef::FlapRatio:
+                    m_userAircraftConfigData.FlapsRatio = value;
+                    break;
+                case DataRef::SpeedbrakeRatio:
+                    m_userAircraftConfigData.SpeedbrakeRatio = value;
                     break;
                 }
             }

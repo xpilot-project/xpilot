@@ -92,7 +92,6 @@ namespace xpilot
     private:
         void handleSocketError(QAbstractSocket::SocketError socketError);
         void handleSocketConnected();
-        void handleSocketDisconnected();
         void handleDataReceived();
         void processData(QString data);
         void sendData(QString data);
