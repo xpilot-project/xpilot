@@ -1,17 +1,17 @@
-#ifndef VATSIMAUTH_H
-#define VATSIMAUTH_H
+#ifndef VatsimAuth_h
+#define VatsimAuth_h
 
 #ifdef __cplusplus
-extern "C" {
-#endif
+extern "C"
+{
+#endif // __cplusplus
 
-char* GenerateAuthResponse(const char* challenge, const char* key);
+char* GenerateAuthResponse(const char* challenge, const unsigned short public_key, const char* private_key);
 char* GenerateAuthChallenge();
-unsigned short GetClientId();
 char* GetSystemUid();
 
 #ifdef __cplusplus
 }
-#endif
+#endif // __cplusplus
 
-#endif
+#endif // !VatsimAuth_h

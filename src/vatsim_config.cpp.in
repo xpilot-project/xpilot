@@ -1,0 +1,12 @@
+#include "src/vatsim_config.h"
+#include <QString>
+
+const ushort VatsimClientId()
+{
+	return @VATSIM_CLIENT_ID@;
+}
+
+const QString VatsimClientKey()
+{
+	return "@VATSIM_CLIENT_KEY@";
+}

@@ -3,6 +3,7 @@
 #include "src/appcore.h"
 #include "src/appconfig.h"
 #include "src/version.h"
+#include "src/vatsim_config.h"
 
 namespace xpilot
 {
@@ -77,7 +78,7 @@ namespace xpilot
 
     void NetworkManager::OnServerIdentificationReceived(PDUServerIdentification pdu)
     {
-        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, GetClientId(), "xPilot", 1, 2, AppConfig::getInstance()->VatsimId, GetSystemUid(), ""));
+        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, VatsimClientId(), "xPilot", 1, 2, AppConfig::getInstance()->VatsimId, GetSystemUid(), ""));
 
         if(m_connectInfo.ObserverMode) {
             m_fsd.SendPDU(PDUAddATC(m_connectInfo.Callsign, AppConfig::getInstance()->Name, AppConfig::getInstance()->VatsimId,

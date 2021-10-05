@@ -1,4 +1,5 @@
 #include "fsd_client.h"
+#include "src/vatsim_config.h"
 
 namespace xpilot
 {
@@ -97,7 +98,7 @@ namespace xpilot
                 if(pduTypeId == "$DI")
                 {
                     auto pdu = PDUServerIdentification::Parse(fields);
-                    m_clientAuthSessionKey = GenerateAuthResponse(pdu.InitialChallengeKey.toStdString().c_str(), NULL);
+                    m_clientAuthSessionKey = GenerateAuthResponse(pdu.InitialChallengeKey.toStdString().c_str(), VatsimClientId(), VatsimClientKey().toStdString().c_str());
                     m_clientAuthChallengeKey = m_clientAuthSessionKey;
                     emit RaiseServerIdentificationReceived(pdu);
                 }
@@ -161,7 +162,7 @@ namespace xpilot
                 else if(pduTypeId == "$ZC")
                 {
                     auto pdu = PDUAuthChallenge::Parse(fields);
-                    QString response = GenerateAuthResponse(pdu.Challenge.toStdString().c_str(), m_clientAuthChallengeKey.toStdString().c_str());
+                    QString response = GenerateAuthResponse(pdu.Challenge.toStdString().c_str(), VatsimClientId(), m_clientAuthChallengeKey.toStdString().c_str());
                     std::string combined = m_clientAuthSessionKey.toStdString() + response.toStdString();
                     m_clientAuthChallengeKey = toMd5(combined.c_str());
                     SendPDU(PDUAuthResponse(pdu.To, pdu.From, response));

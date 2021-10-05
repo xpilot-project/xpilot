@@ -24,6 +24,13 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(NOT VATSIM_CLIENT_ID)
+set(VATSIM_CLIENT_ID 0)
+endif()
+
+configure_file(src/vatsim_config.cpp.in ${CMAKE_BINARY_DIR}/generated/vatsim_config.cpp)
+include_directories(${CMAKE_BINARY_DIR}/generated)
+
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick Network REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick Network REQUIRED)
 find_package(Qt5QuickCompiler)
@@ -97,6 +104,8 @@ set(FSD_SOURCES
 set(PROJECT_SOURCES
     src/main.cpp
     src/version.h
+    src/vatsim_config.h
+    ${CMAKE_BINARY_DIR}/generated/vatsim_config.cpp
     src/common/simplecrypt.h
     src/common/simplecrypt.cpp
     src/appconfig.h
