@@ -5,8 +5,8 @@
 #include <QDir>
 #include <QFile>
 
-#include "network/networkmanager.h"
-#include "appconfig.h"
+#include "src/network/networkmanager.h"
+#include "src/config/appconfig.h"
 
 namespace xpilot
 {

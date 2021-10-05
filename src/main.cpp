@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
     context->setContextProperty("serverList", &serverList);
     qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", singletonTypeProvider);
     qRegisterMetaType<ConnectInfo>("ConnectInfo");
+    qRegisterMetaType<ClientWindowConfig>("ClientWindowConfig");
     qRegisterMetaType<RadioStackState>("RadioStackState");
 
     const QUrl url(QStringLiteral("qrc:/Resources/Views/MainWindow.qml"));

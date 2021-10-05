@@ -1,7 +1,7 @@
 #include "networkmanager.h"
 #include "networkserverlist.h"
 #include "src/appcore.h"
-#include "src/appconfig.h"
+#include "src/config/appconfig.h"
 #include "src/version.h"
 #include "src/vatsim_config.h"
 

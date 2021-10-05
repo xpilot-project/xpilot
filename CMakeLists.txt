@@ -108,8 +108,9 @@ set(PROJECT_SOURCES
     ${CMAKE_BINARY_DIR}/generated/vatsim_config.cpp
     src/common/simplecrypt.h
     src/common/simplecrypt.cpp
-    src/appconfig.h
-    src/appconfig.cpp
+    src/config/appconfig.h
+    src/config/appconfig.cpp
+    src/config/windowconfig.h
     src/appcore.h
     src/appcore.cpp
     src/afv.cpp

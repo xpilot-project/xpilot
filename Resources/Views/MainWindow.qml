@@ -5,6 +5,8 @@ import QtQuick.Controls 2.12
 import QtQuick.Window 2.15
 import QtQuick.Layouts 1.12
 import QtWebSockets 1.2
+
+import AppConfig 1.0
 import "../Scripts/FrequencyUtils.js" as FrequencyUtils
 import "../Scripts/TimestampUtils.js" as TimestampUtils
 import "../Components"
@@ -38,6 +40,26 @@ Window {
 
     Component.onCompleted: {
         appendInfoMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.");
+        width = AppConfig.WindowConfig.Width;
+        height = AppConfig.WindowConfig.Width;
+        x = AppConfig.WindowConfig.X;
+        y = AppConfig.WindowConfig.Y;
+    }
+
+    onXChanged: {
+        AppConfig.WindowConfig.X = x;
+    }
+
+    onYChanged: {
+        AppConfig.WindowConfig.Y = y;
+    }
+
+    onHeightChanged: {
+        AppConfig.WindowConfig.Height = height;
+    }
+
+    onWidthChanged: {
+        AppConfig.WindowConfig.Width = width;
     }
 
     Connections {

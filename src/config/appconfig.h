@@ -11,9 +11,11 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include "common/simplecrypt.h"
-#include "network/networkserverlist.h"
-#include "network/connectinfo.h"
+
+#include "windowconfig.h"
+#include "src/common/simplecrypt.h"
+#include "src/network/networkserverlist.h"
+#include "src/network/connectinfo.h"
 
 namespace xpilot
 {
@@ -37,6 +39,7 @@ namespace xpilot
         QString ServerName;
         QVector<NetworkServerInfo> CachedServers;
         ConnectInfo RecentConnection;
+        ClientWindowConfig WindowConfig;
 
         QVariant VariantCachedServers() const
         {
@@ -60,6 +63,7 @@ namespace xpilot
         Q_PROPERTY(QString ServerName MEMBER ServerName)
         Q_PROPERTY(QVariant CachedServers READ VariantCachedServers)
         Q_PROPERTY(ConnectInfo RecentConnection MEMBER RecentConnection)
+        Q_PROPERTY(ClientWindowConfig WindowConfig MEMBER WindowConfig)
 
     private:
         static AppConfig* instance;

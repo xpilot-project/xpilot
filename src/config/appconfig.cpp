@@ -58,6 +58,12 @@ void AppConfig::loadConfig()
     RecentConnection.TypeCode = recent["TypeCode"].toString();
     RecentConnection.SelcalCode = recent["SelcalCode"].toString();
 
+    QJsonObject window = jsonMap["WindowConfig"].toJsonObject();
+    WindowConfig.X = window["X"].toInt();
+    WindowConfig.Y = window["Y"].toInt();
+    WindowConfig.Width = window["Width"].toInt();
+    WindowConfig.Height = window["Height"].toInt();
+
     if(!VatsimPassword.isEmpty()) {
         VatsimPasswordDecrypted = crypto.decryptToString(VatsimPassword);
     }
@@ -90,6 +96,13 @@ void AppConfig::saveConfig()
     recentConnection["TypeCode"] = RecentConnection.TypeCode;
     recentConnection["SelcalCode"] = RecentConnection.SelcalCode;
     jsonObj["RecentConnection"] = recentConnection;
+
+    QJsonObject window;
+    window["X"] = WindowConfig.X;
+    window["Y"] = WindowConfig.Y;
+    window["Width"] = WindowConfig.Width;
+    window["Height"] = WindowConfig.Height;
+    jsonObj["WindowConfig"] = window;
 
     QJsonDocument jsonDoc(jsonObj);
     QFile configFile("AppConfig.json");
