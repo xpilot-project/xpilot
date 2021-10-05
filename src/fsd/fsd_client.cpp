@@ -68,7 +68,7 @@ namespace xpilot
         {
             if(packet.length() == 0) continue;
 
-            RaiseRawDataReceived(packet + PDUBase::PacketDelimeter);
+            emit RaiseRawDataReceived(packet + PDUBase::PacketDelimeter);
 
             QStringList fields = packet.split(PDUBase::Delimeter);
             const QCharRef prefixChar = fields[0][0];
@@ -185,7 +185,7 @@ namespace xpilot
 
         const QByteArray bufferEncoded = m_fsdTextCodec->fromUnicode(data);
 
-        RaiseRawDataSent(bufferEncoded);
+        emit RaiseRawDataSent(bufferEncoded);
 
         m_socket.write(bufferEncoded);
     }
