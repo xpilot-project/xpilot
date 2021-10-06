@@ -51,3 +51,7 @@ function printFrequency(frequency) {
     }
     return "---.---";
 }
+
+function formatFromFsd(freq) {
+    return (freq / 1000.0 + 100.0).toFixed(3);
+}

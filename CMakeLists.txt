@@ -122,6 +122,7 @@ set(PROJECT_SOURCES
     src/network/connectinfo.h
     src/network/networkserverlist.h
     src/network/networkserverlist.cpp
+    src/network/events/radio_message_received.h
     src/simulator/udpclient.h
     src/simulator/udpclient.cpp
     src/aircrafts/aircraft.h

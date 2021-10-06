@@ -11,6 +11,7 @@
 #include "src/aircrafts/user_aircraft_data.h"
 #include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/aircraft_configuration.h"
+#include "src/network/events/radio_message_received.h"
 
 namespace xpilot
 {
@@ -34,9 +35,10 @@ namespace xpilot
         void metarReceived(QString from, QString metar);
         void deleteControlerReceived(QString from);
         void deletePilotReceived(QString from);
+        void serverMessageReceived(QString message);
         void privateMessageReceived(QString from, QString message);
         void broadcastMessageReceived(QString from, QString message);
-        void radioMessageReceived(QString from, QList<uint> frequencies, QString message, bool isDirect);
+        void radioMessageReceived(RadioMessageReceived args);
         void selcalAlertReceived(QString from, QList<uint> frequencies);
         void aircraftConfigurationInfoReceived(QString from, QString json);
 

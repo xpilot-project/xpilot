@@ -122,8 +122,26 @@ Window {
             }
         }
 
-        function onRadioMessageReceived(from, frequencies, message, isDirect) {
-            console.log(from + ": " + message + "," + frequencies.join(","));
+        function onServerMessageReceived(message) {
+            appendServerMessage(message);
+        }
+
+        function onRadioMessageReceived(args) {
+            var message = "";
+            if(args.DualReceiver) {
+                var freqString = "";
+                if(args.Frequencies.length > 1) {
+                    freqString = `${FrequencyUtils.formatFromFsd(args.Frequencies[0])} & ${FrequencyUtils.formatFromFsd(args.Frequencies[1])}`;
+                }
+                else {
+                    freqString = FrequencyUtils.formatFromFsd(args.Frequencies[0]);
+                }
+                message = `${args.From} on ${freqString}: ${args.Message}`;
+            }
+            else {
+                message = `${args.From}: ${args.Message}`;
+            }
+            console.log(message);
         }
     }
 
@@ -212,6 +230,11 @@ Window {
     function appendMessage(message) {
         var model = cliModel.get(0)
         model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`})
+    }
+
+    function appendServerMessage(message) {
+        var model = cliModel.get(0)
+        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: "#85A664"})
     }
 
     function appendInfoMessage(message) {

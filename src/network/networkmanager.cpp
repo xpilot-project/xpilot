@@ -220,7 +220,7 @@ namespace xpilot
     {
         if(pdu.From.toUpper() == "SERVER")
         {
-            emit notificationPosted((int)NotificationType::ServerMessage, pdu.Message);
+            emit serverMessageReceived(pdu.Message);
         }
         else
         {
@@ -272,7 +272,15 @@ namespace xpilot
         else
         {
             bool direct = pdu.Message.toUpper().startsWith(m_connectInfo.Callsign.toUpper());
-            emit radioMessageReceived(pdu.From.toUpper(), frequencies, pdu.Message, direct);
+
+            RadioMessageReceived args{};
+            args.Frequencies = QVariant::fromValue(frequencies);
+            args.From = pdu.From.toUpper();
+            args.Message = pdu.Message;
+            args.IsDirect = direct;
+            args.DualReceiver = m_radioStackState.Com1ReceiveEnabled && m_radioStackState.Com2ReceiveEnabled;
+
+            emit radioMessageReceived(args);
         }
     }
 
