@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QVector>
+
 #include "connectinfo.h"
 #include "src/fsd/fsd_client.h"
 #include "src/simulator/udpclient.h"
@@ -23,11 +25,19 @@ namespace xpilot
         void SendAircraftConfigurationUpdate(AircraftConfiguration config);
         void SendCapabilities(QString to);
 
+        Q_INVOKABLE void RequestMetar(QString station);
+
     signals:
         void networkConnected();
         void networkDisconnected();
         void notificationPosted(int type, QString message);
+        void metarReceived(QString from, QString metar);
+        void deleteControlerReceived(QString from);
+        void deletePilotReceived(QString from);
         void privateMessageReceived(QString from, QString message);
+        void broadcastMessageReceived(QString from, QString message);
+        void radioMessageReceived(QString from, QList<uint> frequencies, QString message, bool isDirect);
+        void selcalAlertReceived(QString from, QList<uint> frequencies);
         void aircraftConfigurationInfoReceived(QString from, QString json);
 
     public slots:
@@ -58,7 +68,6 @@ namespace xpilot
         void OnFastPilotPositionReceived(PDUFastPilotPosition pdu);
         void OnATCPositionReceived(PDUATCPosition pdu);
         void OnMetarResponseReceived(PDUMetarResponse pdu);
-        void OnMetarRequestReceived(PDUMetarRequest pdu);
         void OnDeletePilotReceived(PDUDeletePilot pdu);
         void OnDeleteATCReceived(PDUDeleteATC pdu);
         void OnPingReceived(PDUPing pdu);

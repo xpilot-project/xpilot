@@ -108,6 +108,7 @@ set(PROJECT_SOURCES
     ${CMAKE_BINARY_DIR}/generated/vatsim_config.cpp
     src/common/simplecrypt.h
     src/common/simplecrypt.cpp
+    src/common/frequency_utils.h
     src/config/appconfig.h
     src/config/appconfig.cpp
     src/config/windowconfig.h
@@ -124,6 +125,8 @@ set(PROJECT_SOURCES
     src/simulator/udpclient.h
     src/simulator/udpclient.cpp
     src/aircrafts/aircraft.h
+    src/aircrafts/aircraft_visual_state.h
+    src/aircrafts/velocity_vector.h
     src/aircrafts/aircraft_configuration.h
     src/aircrafts/aircraft_configuration.cpp
     src/aircrafts/user_aircraft_data.h

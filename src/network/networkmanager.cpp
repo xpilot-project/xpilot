@@ -4,6 +4,9 @@
 #include "src/config/appconfig.h"
 #include "src/version.h"
 #include "src/vatsim_config.h"
+#include "src/common/frequency_utils.h"
+#include "src/aircrafts/aircraft_visual_state.h"
+#include "src/aircrafts/velocity_vector.h"
 
 namespace xpilot
 {
@@ -24,7 +27,6 @@ namespace xpilot
         connect(&m_fsd, &FsdClient::RaiseTextMessageReceived, this, &NetworkManager::OnTextMessageReceived);
         connect(&m_fsd, &FsdClient::RaiseRadioMessageReceived, this, &NetworkManager::OnRadioMessageReceived);
         connect(&m_fsd, &FsdClient::RaiseBroadcastMessageReceived, this, &NetworkManager::OnBroadcastMessageReceived);
-        connect(&m_fsd, &FsdClient::RaiseMetarRequestReceived, this, &NetworkManager::OnMetarRequestReceived);
         connect(&m_fsd, &FsdClient::RaiseMetarResponseReceived, this, &NetworkManager::OnMetarResponseReceived);
         connect(&m_fsd, &FsdClient::RaisePlaneInfoRequestReceived, this, &NetworkManager::OnPlaneInfoRequestReceived);
         connect(&m_fsd, &FsdClient::RaisePlaneInfoResponseReceived, this, &NetworkManager::OnPlaneInfoResponseReceived);
@@ -123,7 +125,7 @@ namespace xpilot
             QStringList realName;
             realName.append(AppConfig::getInstance()->Name);
             realName.append("");
-            realName.append("1");
+            realName.append(QString::number((int)NetworkRating::OBS));
             m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, pdu.From, ClientQueryType::RealName, realName));
         }
             break;
@@ -154,12 +156,39 @@ namespace xpilot
 
     void NetworkManager::OnPilotPositionReceived(PDUPilotPosition pdu)
     {
+        QRegularExpression re("^"+ QRegularExpression::escape(pdu.From) +"[A-Z]$");
 
+        if(m_connectInfo.ObserverMode || re.match(m_connectInfo.Callsign).hasMatch())
+        {
+            AircraftVisualState visualState {};
+            visualState.Latitude = pdu.Lat;
+            visualState.Longitude = pdu.Lon;
+            visualState.Altitude = pdu.TrueAltitude;
+            visualState.Pitch = pdu.Pitch;
+            visualState.Heading = pdu.Heading;
+            visualState.Bank = pdu.Bank;
+        }
     }
 
     void NetworkManager::OnFastPilotPositionReceived(PDUFastPilotPosition pdu)
     {
+        AircraftVisualState visualState {};
+        visualState.Latitude = pdu.Lat;
+        visualState.Longitude = pdu.Lon;
+        visualState.Altitude = pdu.Altitude;
+        visualState.Pitch = pdu.Pitch;
+        visualState.Heading = pdu.Heading;
+        visualState.Bank = pdu.Bank;
 
+        VelocityVector positionalVelocityVector {};
+        positionalVelocityVector.X = pdu.VelocityLongitude;
+        positionalVelocityVector.Y = pdu.VelocityAltitude;
+        positionalVelocityVector.Z = pdu.VelocityLatitude;
+
+        VelocityVector rotationalVelocityVector {};
+        rotationalVelocityVector.X = pdu.VelocityPitch;
+        rotationalVelocityVector.Y = pdu.VelocityHeading;
+        rotationalVelocityVector.Z = pdu.VelocityBank;
     }
 
     void NetworkManager::OnATCPositionReceived(PDUATCPosition pdu)
@@ -169,22 +198,17 @@ namespace xpilot
 
     void NetworkManager::OnMetarResponseReceived(PDUMetarResponse pdu)
     {
-
-    }
-
-    void NetworkManager::OnMetarRequestReceived(PDUMetarRequest pdu)
-    {
-
+        emit metarReceived(pdu.From.toUpper(), pdu.Metar);
     }
 
     void NetworkManager::OnDeletePilotReceived(PDUDeletePilot pdu)
     {
-
+        emit deletePilotReceived(pdu.From.toUpper());
     }
 
     void NetworkManager::OnDeleteATCReceived(PDUDeleteATC pdu)
     {
-
+        emit deleteControlerReceived(pdu.From.toUpper());
     }
 
     void NetworkManager::OnPingReceived(PDUPing pdu)
@@ -206,12 +230,50 @@ namespace xpilot
 
     void NetworkManager::OnBroadcastMessageReceived(PDUBroadcastMessage pdu)
     {
-
+        emit broadcastMessageReceived(pdu.From.toUpper(), pdu.Message);
     }
 
     void NetworkManager::OnRadioMessageReceived(PDURadioMessage pdu)
     {
+        QList<uint> frequencies;
 
+        for(int i = 0; i < pdu.Frequencies.size(); i++) {
+            uint frequency = (uint)pdu.Frequencies[i];
+
+            if(m_radioStackState.Com1ReceiveEnabled && Normalize25KhzFsdFrequency(frequency) == MatchFsdFormat(m_radioStackState.Com1Frequency))
+            {
+                if(!frequencies.contains(frequency))
+                {
+                    frequencies.push_back(frequency);
+                }
+            }
+            else if(m_radioStackState.Com2ReceiveEnabled && Normalize25KhzFsdFrequency(frequency) == MatchFsdFormat(m_radioStackState.Com2Frequency))
+            {
+                if(!frequencies.contains(frequency))
+                {
+                    frequencies.push_back(frequency);
+                }
+            }
+        }
+
+        if(frequencies.size() == 0) return;
+
+        QRegularExpression re("^SELCAL ([A-Z][A-Z]\\-[A-Z][A-Z])$");
+        QRegularExpressionMatch match = re.match(pdu.Message);
+
+        if(match.hasMatch())
+        {
+            QString selcal = QString("SELCAL %1").arg(match.captured(0).replace("-",""));
+            if(!m_connectInfo.SelcalCode.isEmpty() && selcal == m_connectInfo.SelcalCode.replace("-",""))
+            {
+                emit selcalAlertReceived(pdu.From.toUpper(), frequencies);
+            }
+        }
+        else
+        {
+            bool direct = pdu.Message.toUpper().startsWith(m_connectInfo.Callsign.toUpper());
+            emit radioMessageReceived(pdu.From.toUpper(), frequencies, pdu.Message, direct);
+        }
     }
 
     void NetworkManager::OnPlaneInfoRequestReceived(PDUPlaneInfoRequest pdu)
@@ -331,6 +393,11 @@ namespace xpilot
         caps.append("ACCONFIG=1");
         caps.append("VISUPDATE=1");
         m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, to, ClientQueryType::Capabilities, caps));
+    }
+
+    void NetworkManager::RequestMetar(QString station)
+    {
+        m_fsd.SendPDU(PDUMetarRequest(m_connectInfo.Callsign, station));
     }
 
     void NetworkManager::connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer)

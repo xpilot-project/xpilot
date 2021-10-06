@@ -80,7 +80,6 @@ namespace xpilot
         void RaiseRadioMessageReceived(PDURadioMessage pdu);
         void RaiseTextMessageReceived(PDUTextMessage pdu);
         void RaiseMetarResponseReceived(PDUMetarResponse pdu);
-        void RaiseMetarRequestReceived(PDUMetarRequest pdu);
         void RaisePlaneInfoRequestReceived(PDUPlaneInfoRequest pdu);
         void RaisePlaneInfoResponseReceived(PDUPlaneInfoResponse pdu);
         void RaiseFlightPlanReceived(PDUFlightPlan pdu);
@@ -111,7 +110,7 @@ namespace xpilot
     private:
         QTextCodec* m_fsdTextCodec = nullptr;
 
-        QTcpSocket m_socket { this };
+        QTcpSocket* m_socket;
         bool m_connected { false };
 
         bool m_challengeServer;

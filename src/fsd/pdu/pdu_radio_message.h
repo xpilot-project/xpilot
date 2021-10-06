@@ -3,18 +3,19 @@
 
 #include <QString>
 #include <QVector>
+#include <QList>
 #include "pdu_base.h"
 
 class PDURadioMessage: public PDUBase
 {
 public:
-    PDURadioMessage(QString from, QVector<int> freqs, QString message);
+    PDURadioMessage(QString from, QList<uint> freqs, QString message);
 
     QString Serialize() override;
 
     static PDURadioMessage Parse(QStringList fields);
 
-    QVector<int> Frequencies;
+    QList<uint> Frequencies;
     QString Message;
 };
 

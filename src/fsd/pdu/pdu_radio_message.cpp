@@ -1,6 +1,6 @@
 #include "pdu_radio_message.h"
 
-PDURadioMessage::PDURadioMessage(QString from, QVector<int> freqs, QString message) :
+PDURadioMessage::PDURadioMessage(QString from, QList<uint> freqs, QString message) :
     PDUBase(from, "")
 {
     Frequencies = freqs;
@@ -36,9 +36,10 @@ PDURadioMessage PDURadioMessage::Parse(QStringList fields)
     }
 
     QStringList freqs = fields[1].split("&");
-    QVector<int> freqInts;
-    for(int i = 0; i < freqs.length(); i++) {
-        freqInts[i] = freqs[i].left(1).toInt();
+
+    QList<uint> freqInts;
+    for(int i = 0; i < freqs.size(); i++) {
+        freqInts.push_back(freqs[i].midRef(1, freqs[i].length() - 1).toUInt());
     }
 
     QStringList msg;

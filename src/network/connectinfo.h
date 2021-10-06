@@ -23,13 +23,16 @@ namespace xpilot
         bool ObserverMode;
         bool TowerViewMode;
 
-        bool operator==(const ConnectInfo& b) const
+        bool operator==(ConnectInfo& rhs) const
         {
-            return Callsign == b.Callsign && TypeCode == b.TypeCode && SelcalCode == b.SelcalCode && ObserverMode == b.ObserverMode && TowerViewMode == b.TowerViewMode;
+            return Callsign == rhs.Callsign && TypeCode == rhs.TypeCode && SelcalCode == rhs.SelcalCode
+                    && ObserverMode == rhs.ObserverMode && TowerViewMode == rhs.TowerViewMode;
         }
-        bool operator!=(const ConnectInfo& b) const
+
+        bool operator!=(ConnectInfo& rhs) const
         {
-            return !(*this == b);
+            return Callsign != rhs.Callsign || TypeCode != rhs.TypeCode || SelcalCode != rhs.SelcalCode
+                    || ObserverMode != rhs.ObserverMode || TowerViewMode != rhs.TowerViewMode;
         }
     };
 }

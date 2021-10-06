@@ -5,24 +5,30 @@ namespace xpilot
 {
     FsdClient::FsdClient(QObject * parent) : QObject(parent)
     {
+        m_socket = new QTcpSocket(this);
+
         m_fsdTextCodec = QTextCodec::codecForName("ISO-8859-1");
 
-        connect(&m_socket, &QTcpSocket::readyRead, this, &FsdClient::handleDataReceived);
-        connect(&m_socket, &QTcpSocket::connected, this, &FsdClient::handleSocketConnected);
-        connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::errorOccurred), this, &FsdClient::handleSocketError);
+        connect(m_socket, &QTcpSocket::readyRead, this, &FsdClient::handleDataReceived);
+        connect(m_socket, &QTcpSocket::connected, this, &FsdClient::handleSocketConnected);
+        connect(m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::errorOccurred), this, &FsdClient::handleSocketError);
     }
 
     void FsdClient::Connect(QString address, quint32 port, bool challengeServer)
     {
-        if(m_socket.isOpen()) return;
+        if(VatsimClientId() == 0 || VatsimClientKey().isEmpty()) {
+            emit RaiseNetworkError("Invalid client build. Please download a new copy from the xPilot website.");
+            return;
+        }
+        if(m_socket->isOpen()) return;
         m_challengeServer = challengeServer;
-        m_socket.connectToHost(address, port);
+        m_socket->connectToHost(address, port);
     }
 
     void FsdClient::Disconnect()
     {
         emit RaiseNetworkDisconnected();
-        m_socket.close();
+        m_socket->close();
     }
 
     void FsdClient::SendPDU(PDUBase&& message)
@@ -32,9 +38,9 @@ namespace xpilot
 
     void FsdClient::handleDataReceived()
     {
-        if(m_socket.bytesAvailable() < 1) return;
+        if(m_socket->bytesAvailable() < 1) return;
 
-        const QByteArray dataEncoded = m_socket.readAll();
+        const QByteArray dataEncoded = m_socket->readAll();
         if(dataEncoded.isEmpty()) return;
 
         const QString data = m_fsdTextCodec->toUnicode(dataEncoded);
@@ -187,7 +193,7 @@ namespace xpilot
 
         emit RaiseRawDataSent(bufferEncoded);
 
-        m_socket.write(bufferEncoded);
+        m_socket->write(bufferEncoded);
     }
 
     void FsdClient::processTM(QStringList &fields)
@@ -255,9 +261,9 @@ namespace xpilot
     QString FsdClient::socketErrorString(QAbstractSocket::SocketError error) const
     {
         QString e = socketErrorToQString(error);
-        if(!m_socket.errorString().isEmpty())
+        if(!m_socket->errorString().isEmpty())
         {
-            e += QStringLiteral(": ") % m_socket.errorString();
+            e += QStringLiteral(": ") % m_socket->errorString();
         }
         return e;
     }

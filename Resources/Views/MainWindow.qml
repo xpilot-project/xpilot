@@ -116,7 +116,14 @@ Window {
             case 3: // text message
                 appendMessage(message);
                 break;
+            default:
+                appendInfoMessage(message);
+                break;
             }
+        }
+
+        function onRadioMessageReceived(from, frequencies, message, isDirect) {
+            console.log(from + ": " + message + "," + frequencies.join(","));
         }
     }
 
