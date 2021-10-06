@@ -26,6 +26,7 @@ Window {
     property QtObject connectWindow
     property QtObject settingsWindow
     property int currentTab
+    property bool initialized: false
     property bool simConnected: false
 
     FontLoader {
@@ -41,25 +42,34 @@ Window {
     Component.onCompleted: {
         appendInfoMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.");
         width = AppConfig.WindowConfig.Width;
-        height = AppConfig.WindowConfig.Width;
+        height = AppConfig.WindowConfig.Height;
         x = AppConfig.WindowConfig.X;
         y = AppConfig.WindowConfig.Y;
+        initialized = true;
     }
 
     onXChanged: {
-        AppConfig.WindowConfig.X = x;
+        if(initialized) {
+            AppConfig.WindowConfig.X = x;
+        }
     }
 
     onYChanged: {
-        AppConfig.WindowConfig.Y = y;
+        if(initialized) {
+            AppConfig.WindowConfig.Y = y;
+        }
     }
 
     onHeightChanged: {
-        AppConfig.WindowConfig.Height = height;
+        if(initialized) {
+            AppConfig.WindowConfig.Height = height;
+        }
     }
 
     onWidthChanged: {
-        AppConfig.WindowConfig.Width = width;
+        if(initialized) {
+            AppConfig.WindowConfig.Width = width;
+        }
     }
 
     Connections {

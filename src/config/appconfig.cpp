@@ -1,4 +1,6 @@
+#include <QtGlobal>
 #include "appconfig.h"
+
 
 using namespace xpilot;
 
@@ -61,8 +63,8 @@ void AppConfig::loadConfig()
     QJsonObject window = jsonMap["WindowConfig"].toJsonObject();
     WindowConfig.X = window["X"].toInt();
     WindowConfig.Y = window["Y"].toInt();
-    WindowConfig.Width = window["Width"].toInt();
-    WindowConfig.Height = window["Height"].toInt();
+    WindowConfig.Width = qMax(window["Width"].toInt(), 800);
+    WindowConfig.Height = qMax(window["Height"].toInt(), 250);
 
     if(!VatsimPassword.isEmpty()) {
         VatsimPasswordDecrypted = crypto.decryptToString(VatsimPassword);
@@ -100,8 +102,8 @@ void AppConfig::saveConfig()
     QJsonObject window;
     window["X"] = WindowConfig.X;
     window["Y"] = WindowConfig.Y;
-    window["Width"] = WindowConfig.Width;
-    window["Height"] = WindowConfig.Height;
+    window["Width"] = qMax(WindowConfig.Width, 800);
+    window["Height"] = qMax(WindowConfig.Height, 250);
     jsonObj["WindowConfig"] = window;
 
     QJsonDocument jsonDoc(jsonObj);
