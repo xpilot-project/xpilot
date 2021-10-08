@@ -1,4 +1,4 @@
-#include "src/vatsim_config.h"
+#include "src/network/vatsim_config.h"
 #include <QString>
 
 const ushort VatsimClientId()

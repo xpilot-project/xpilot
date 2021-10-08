@@ -25,10 +25,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(NOT VATSIM_CLIENT_ID)
-set(VATSIM_CLIENT_ID 0)
+    set(VATSIM_CLIENT_ID 0)
 endif()
 
-configure_file(src/vatsim_config.cpp.in ${CMAKE_BINARY_DIR}/generated/vatsim_config.cpp)
+configure_file(src/network/vatsim_config.cpp.in ${CMAKE_BINARY_DIR}/generated/vatsim_config.cpp)
 include_directories(${CMAKE_BINARY_DIR}/generated)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick Network REQUIRED)
@@ -104,7 +104,8 @@ set(FSD_SOURCES
 set(PROJECT_SOURCES
     src/main.cpp
     src/version.h
-    src/vatsim_config.h
+    src/network/vatsim_auth.h
+    src/network/vatsim_config.h
     ${CMAKE_BINARY_DIR}/generated/vatsim_config.cpp
     src/common/simplecrypt.h
     src/common/simplecrypt.cpp
@@ -114,9 +115,8 @@ set(PROJECT_SOURCES
     src/config/windowconfig.h
     src/appcore.h
     src/appcore.cpp
-    src/afv.cpp
-    src/afv.h
-    src/vatsim_auth.h
+    src/audio/afv.cpp
+    src/audio/afv.h
     src/controllers/controller.h
     src/controllers/controller_manager.h
     src/controllers/controller_manager.cpp
@@ -125,6 +125,7 @@ set(PROJECT_SOURCES
     src/network/connectinfo.h
     src/network/networkserverlist.h
     src/network/networkserverlist.cpp
+    src/network/nearbyatc.h
     src/network/events/radio_message_received.h
     src/simulator/udpclient.h
     src/simulator/udpclient.cpp

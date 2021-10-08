@@ -15,7 +15,7 @@
 #include <QSslSocket>
 
 #include "appcore.h"
-#include "afv.h"
+#include "audio/afv.h"
 #include "controllers/controller_manager.h"
 #include "network/networkmanager.h"
 #include "network/networkserverlist.h"

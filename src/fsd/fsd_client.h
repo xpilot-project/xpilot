@@ -13,7 +13,7 @@
 #include <QHash>
 #include <QCryptographicHash>
 
-#include "../vatsim_auth.h"
+#include "src/network/vatsim_auth.h"
 #include "client_properties.h"
 #include "pdu/pdu_base.h"
 #include "pdu/pdu_add_atc.h"

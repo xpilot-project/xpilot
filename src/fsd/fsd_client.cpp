@@ -1,5 +1,5 @@
 #include "fsd_client.h"
-#include "src/vatsim_config.h"
+#include "src/network/vatsim_config.h"
 
 namespace xpilot
 {

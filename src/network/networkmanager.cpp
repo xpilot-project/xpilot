@@ -3,7 +3,7 @@
 #include "src/appcore.h"
 #include "src/config/appconfig.h"
 #include "src/version.h"
-#include "src/vatsim_config.h"
+#include "src/network/vatsim_config.h"
 #include "src/common/frequency_utils.h"
 #include "src/aircrafts/aircraft_visual_state.h"
 #include "src/aircrafts/velocity_vector.h"
