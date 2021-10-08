@@ -30,5 +30,13 @@
         <file>Resources/Controls/Tabs.qml</file>
         <file>Resources/Scripts/FrequencyUtils.js</file>
         <file>Resources/Scripts/TimestampUtils.js</file>
+        <file>Resources/Sounds/Alert.wav</file>
+        <file>Resources/Sounds/Broadcast.wav</file>
+        <file>Resources/Sounds/DirectRadioMessage.wav</file>
+        <file>Resources/Sounds/Error.wav</file>
+        <file>Resources/Sounds/NewMessage.wav</file>
+        <file>Resources/Sounds/PrivateMessage.wav</file>
+        <file>Resources/Sounds/RadioMessage.wav</file>
+        <file>Resources/Sounds/SelCal.wav</file>
     </qresource>
 </RCC>

@@ -26,7 +26,6 @@ namespace xpilot
         QJsonDocument json = QJsonDocument::fromJson(response);
 
         if(!json.isArray()) {
-            qDebug() << "Error parsing server list";
             return {};
         }
 

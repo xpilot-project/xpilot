@@ -16,6 +16,7 @@
 
 #include "appcore.h"
 #include "afv.h"
+#include "controllers/controller_manager.h"
 #include "network/networkmanager.h"
 #include "network/networkserverlist.h"
 #include "simulator/udpclient.h"
@@ -45,6 +46,7 @@ int main(int argc, char *argv[])
     AppCore appCore;
     UdpClient udpClient;
     NetworkManager networkManager(udpClient);
+    ControllerManager controllerManager(networkManager);
     NetworkServerList serverList;
     UserAircraftManager aircraftManager(udpClient, networkManager);
 

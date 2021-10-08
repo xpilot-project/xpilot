@@ -22,29 +22,31 @@ namespace xpilot
     public:
         NetworkManager(UdpClient& udpClient, QObject *owner = nullptr);
 
+        Q_INVOKABLE void connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer);
+        Q_INVOKABLE void disconnectFromNetwork();
+
+        void RequestMetar(QString station);
+        void RequestRealName(QString callsign);
+        void RequestIsValidATC(QString callsign);
+        void RequestCapabilities(QString callsign);
         void SendAircraftConfigurationUpdate(QString to, AircraftConfiguration config);
         void SendAircraftConfigurationUpdate(AircraftConfiguration config);
         void SendCapabilities(QString to);
-
-        Q_INVOKABLE void RequestMetar(QString station);
 
     signals:
         void networkConnected();
         void networkDisconnected();
         void notificationPosted(int type, QString message);
         void metarReceived(QString from, QString metar);
-        void deleteControlerReceived(QString from);
-        void deletePilotReceived(QString from);
+        void controllerDeleted(QString from);
+        void pilotDeleted(QString from);
         void serverMessageReceived(QString message);
         void privateMessageReceived(QString from, QString message);
         void broadcastMessageReceived(QString from, QString message);
         void radioMessageReceived(RadioMessageReceived args);
         void selcalAlertReceived(QString from, QList<uint> frequencies);
         void aircraftConfigurationInfoReceived(QString from, QString json);
-
-    public slots:
-        void connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer);
-        void disconnectFromNetwork();
+        void controllerUpdateReceived(QString from, uint frequency, double lat, double lon);
 
     private:
         FsdClient m_fsd { this };

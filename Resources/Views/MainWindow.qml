@@ -2,9 +2,11 @@ import QtQuick 2.15
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls 2.12
-import QtQuick.Window 2.15
+import QtQuick.Window 2.12
 import QtQuick.Layouts 1.12
 import QtWebSockets 1.2
+import QtMultimedia 5.12
+import QtQuick.Dialogs 1.2
 
 import AppConfig 1.0
 import "../Scripts/FrequencyUtils.js" as FrequencyUtils
@@ -26,8 +28,17 @@ Window {
     property QtObject connectWindow
     property QtObject settingsWindow
     property int currentTab
+    property bool closing: false
+    property bool networkConnected: false
     property bool initialized: false
     property bool simConnected: false
+
+    property string colorGreen: "#85a664"
+    property string colorOrange: "#ffa500"
+    property string colorWhite: "#ffffff"
+    property string colorGray: "#c0c0c0"
+    property string colorYellow: "#ffff00"
+    property string colorRed: "#eb2f06"
 
     FontLoader {
         id: ubuntuRegular
@@ -39,6 +50,61 @@ Window {
         source: "../Fonts/Roboto-Mono.ttf"
     }
 
+    SoundEffect {
+        id: alertSound
+        source: "../Sounds/Alert.wav"
+    }
+
+    SoundEffect {
+        id: broadcastSound
+        source: "../Sounds/Broadcast.wav"
+    }
+
+    SoundEffect {
+        id: directRadioMessageSound
+        source: "../Sounds/DirectRadioMessage.wav"
+    }
+
+    SoundEffect {
+        id: errorSound
+        source: "../Sounds/Error.wav"
+    }
+
+
+    SoundEffect {
+        id: newMessageSound
+        source: "../Sounds/NewMessage.wav"
+    }
+
+
+    SoundEffect {
+        id: privateMessageSound
+        source: "../Sounds/PrivateMessage.wav"
+    }
+
+
+    SoundEffect {
+        id: radioMessageSound
+        source: "../Sounds/RadioMessage.wav"
+    }
+
+
+    SoundEffect {
+        id: selcalSound
+        source: "../Sounds/SelCal.wav"
+    }
+
+    MessageDialog {
+        id: confirmClose
+        title: "Confirm Close"
+        text: "You are still connected to the network. Are you sure you want to close xPilot?"
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            closing = true
+            mainWindow.close()
+        }
+    }
+
     Component.onCompleted: {
         appendInfoMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.");
         width = AppConfig.WindowConfig.Width;
@@ -46,6 +112,12 @@ Window {
         x = AppConfig.WindowConfig.X;
         y = AppConfig.WindowConfig.Y;
         initialized = true;
+    }
+
+    // @disable-check M16
+    onClosing: {
+        close.accepted = !networkConnected || closing
+        onTriggered: if(!closing && networkConnected) confirmClose.open()
     }
 
     onXChanged: {
@@ -87,6 +159,18 @@ Window {
     }
 
     Connections {
+        target: appCore
+
+        function onServerListDownloaded(count) {
+            appendInfoMessage(`Server list download succeeded. ${count} servers found.`)
+        }
+
+        function onServerListDownloadError(count) {
+            appendErrorMessage("Server list download failed. Using previously-cached server list.")
+        }
+    }
+
+    Connections {
         target: udpClient
         function onSimConnectionStateChanged(state) {
             if(!simConnected && state) {
@@ -101,6 +185,14 @@ Window {
 
     Connections {
         target: networkManager
+
+        function onNetworkConnected() {
+            networkConnected = true;
+        }
+
+        function onNetworkDisconnected() {
+            networkConnected = false;
+        }
 
         function onNotificationPosted(type, message) {
             switch(type) {
@@ -123,7 +215,19 @@ Window {
         }
 
         function onServerMessageReceived(message) {
-            appendServerMessage(message);
+            cliModel.get(0).attributes.append({message:`[${TimestampUtils.currentTimestamp()}] SERVER: ${message}`, msgColor: colorGreen})
+        }
+
+        function onBroadcastMessageReceived(from, message) {
+            cliModel.get(0).attributes.append({message:`[${TimestampUtils.currentTimestamp()}] [BROADCAST] ${from}: ${message}`, msgColor: colorOrange})
+            broadcastSound.play()
+            mainWindow.alert(0)
+        }
+
+        function onSelcalAlertReceived(from, frequencies) {
+            appendInfoMessage(`SELCAL alert received on ${FrequencyUtils.formatFromFsd(frequencies[0])}`)
+            selcalSound.play()
+            mainWindow.alert(0)
         }
 
         function onRadioMessageReceived(args) {
@@ -141,7 +245,24 @@ Window {
             else {
                 message = `${args.From}: ${args.Message}`;
             }
-            console.log(message);
+
+            cliModel.get(0).attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: args.IsDirect ? colorWhite : colorGray})
+
+            if(args.IsDirect) {
+                directRadioMessageSound.play();
+                mainWindow.alert(0);
+            }
+            else {
+                radioMessageSound.play();
+            }
+        }
+
+        function onControllerAdded(controller) {
+            console.log("Add: " + controller);
+        }
+
+        function onControllerDeleted(controller) {
+            console.log("Delete: " + controller);
         }
     }
 
@@ -234,22 +355,23 @@ Window {
 
     function appendServerMessage(message) {
         var model = cliModel.get(0)
-        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: "#85A664"})
+        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: colorGreen})
     }
 
     function appendInfoMessage(message) {
         var model = cliModel.get(0)
-        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor:"#F1C40F"}) // yellow
+        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: colorYellow}) // yellow
     }
 
     function appendErrorMessage(message) {
         var model = cliModel.get(0)
-        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor:"#EB2F06"}) // red
+        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: colorRed}) // red
+        errorSound.play();
     }
 
     function appendWarningMessage(message) {
         var model = cliModel.get(0)
-        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor:"#E67E22"}) // orange
+        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: colorOrange}) // orange
     }
 
     function appendNote(message) {

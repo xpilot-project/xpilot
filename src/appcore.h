@@ -25,11 +25,16 @@ namespace xpilot
     {
         Q_OBJECT
 
+    signals:
+        void serverListDownloaded(int count);
+        void serverListDownloadError();
+
     public slots:
         void SaveConfig();
 
     public:
         AppCore(QObject *owner = nullptr);
+        void DownloadServerList();
     };
 }
 

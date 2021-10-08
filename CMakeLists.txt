@@ -117,6 +117,9 @@ set(PROJECT_SOURCES
     src/afv.cpp
     src/afv.h
     src/vatsim_auth.h
+    src/controllers/controller.h
+    src/controllers/controller_manager.h
+    src/controllers/controller_manager.cpp
     src/network/networkmanager.h
     src/network/networkmanager.cpp
     src/network/connectinfo.h

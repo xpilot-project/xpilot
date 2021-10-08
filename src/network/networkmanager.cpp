@@ -31,6 +31,12 @@ namespace xpilot
         connect(&m_fsd, &FsdClient::RaisePlaneInfoRequestReceived, this, &NetworkManager::OnPlaneInfoRequestReceived);
         connect(&m_fsd, &FsdClient::RaisePlaneInfoResponseReceived, this, &NetworkManager::OnPlaneInfoResponseReceived);
         connect(&m_fsd, &FsdClient::RaiseKillRequestReceived, this, &NetworkManager::OnKillRequestReceived);
+        connect(&m_fsd, &FsdClient::RaiseRawDataSent, this, [](QString data){
+            qDebug() << ">> " << data;
+        });
+        connect(&m_fsd, &FsdClient::RaiseRawDataReceived, this, [](QString data){
+            qDebug() << "<< " << data;
+        });
 
         connect(&udpClient, &UdpClient::userAircraftDataChanged, this, &NetworkManager::OnUserAircraftDataUpdated);
         connect(&udpClient, &UdpClient::userAircraftConfigDataChanged, this, &NetworkManager::OnUserAircraftConfigDataUpdated);
@@ -193,7 +199,7 @@ namespace xpilot
 
     void NetworkManager::OnATCPositionReceived(PDUATCPosition pdu)
     {
-
+        emit controllerUpdateReceived(pdu.From, pdu.Frequency, pdu.Lat, pdu.Lon);
     }
 
     void NetworkManager::OnMetarResponseReceived(PDUMetarResponse pdu)
@@ -203,12 +209,12 @@ namespace xpilot
 
     void NetworkManager::OnDeletePilotReceived(PDUDeletePilot pdu)
     {
-        emit deletePilotReceived(pdu.From.toUpper());
+        emit pilotDeleted(pdu.From.toUpper());
     }
 
     void NetworkManager::OnDeleteATCReceived(PDUDeleteATC pdu)
     {
-        emit deleteControlerReceived(pdu.From.toUpper());
+        emit controllerDeleted(pdu.From.toUpper());
     }
 
     void NetworkManager::OnPingReceived(PDUPing pdu)
@@ -263,8 +269,8 @@ namespace xpilot
 
         if(match.hasMatch())
         {
-            QString selcal = QString("SELCAL %1").arg(match.captured(0).replace("-",""));
-            if(!m_connectInfo.SelcalCode.isEmpty() && selcal == m_connectInfo.SelcalCode.replace("-",""))
+            QString selcal = QString("SELCAL %1").arg(match.captured(1).replace("-",""));
+            if(!m_connectInfo.SelcalCode.isEmpty() && selcal == "SELCAL " + m_connectInfo.SelcalCode.replace("-",""))
             {
                 emit selcalAlertReceived(pdu.From.toUpper(), frequencies);
             }
@@ -406,6 +412,21 @@ namespace xpilot
     void NetworkManager::RequestMetar(QString station)
     {
         m_fsd.SendPDU(PDUMetarRequest(m_connectInfo.Callsign, station));
+    }
+
+    void NetworkManager::RequestRealName(QString callsign)
+    {
+        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, callsign, ClientQueryType::RealName));
+    }
+
+    void NetworkManager::RequestIsValidATC(QString callsign)
+    {
+        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, "SERVER", ClientQueryType::IsValidATC, QString(callsign).split("")));
+    }
+
+    void NetworkManager::RequestCapabilities(QString callsign)
+    {
+        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, callsign, ClientQueryType::Capabilities));
     }
 
     void NetworkManager::connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer)
