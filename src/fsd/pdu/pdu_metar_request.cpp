@@ -1,32 +1,28 @@
 #include "pdu_metar_request.h"
 
+PDUMetarRequest::PDUMetarRequest() : PDUBase() {}
+
 PDUMetarRequest::PDUMetarRequest(QString from, QString station) :
     PDUBase(from, PDUBase::ServerCallsign)
 {
     Station = station;
 }
 
-QString PDUMetarRequest::Serialize()
+QStringList PDUMetarRequest::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("$AX");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append("METAR");
-    tokens.append(Delimeter);
     tokens.append(Station);
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUMetarRequest PDUMetarRequest::Parse(QStringList fields)
+PDUMetarRequest PDUMetarRequest::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 4) {
-
+    if(tokens.length() < 4) {
+        return {};
     }
 
-    return PDUMetarRequest(fields[0], fields[3]);
+    return PDUMetarRequest(tokens[0], tokens[3]);
 }

@@ -9,11 +9,16 @@ class PDUAuthResponse : public PDUBase
 public:
     PDUAuthResponse(QString from, QString to, QString response);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUAuthResponse Parse(QStringList fields);
+    static PDUAuthResponse fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "$ZR"; }
 
     QString Response;
+
+private:
+    PDUAuthResponse();
 };
 
 #endif

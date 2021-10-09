@@ -1,30 +1,27 @@
 #include "pdu_auth_response.h"
 
+PDUAuthResponse::PDUAuthResponse() : PDUBase() {}
+
 PDUAuthResponse::PDUAuthResponse(QString from, QString to, QString response) :
     PDUBase(from, to)
 {
     Response = response;
 }
 
-QString PDUAuthResponse::Serialize()
+QStringList PDUAuthResponse::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("$ZR");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append(Response);
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUAuthResponse PDUAuthResponse::Parse(QStringList fields)
+PDUAuthResponse PDUAuthResponse::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 3) {
-
+    if(tokens.length() < 3) {
+        return {};
     }
 
-    return PDUAuthResponse(fields[0], fields[1], fields[2]);
+    return PDUAuthResponse(tokens[0], tokens[1], tokens[2]);
 }

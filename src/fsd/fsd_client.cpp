@@ -17,7 +17,7 @@ namespace xpilot
     void FsdClient::Connect(QString address, quint32 port, bool challengeServer)
     {
         if(VatsimClientId() == 0 || VatsimClientKey().isEmpty()) {
-            emit RaiseNetworkError("Invalid client build. Please download a new copy from the xPilot website.");
+            emit RaiseNetworkError("Invalid pilot client build. Please download a new copy from the xPilot website.");
             return;
         }
         if(m_socket->isOpen()) return;
@@ -27,13 +27,9 @@ namespace xpilot
 
     void FsdClient::Disconnect()
     {
+        m_connected = false;
         emit RaiseNetworkDisconnected();
         m_socket->close();
-    }
-
-    void FsdClient::SendPDU(PDUBase&& message)
-    {
-        sendData(message.Serialize() + PDUBase::PacketDelimeter);
     }
 
     void FsdClient::handleDataReceived()
@@ -82,17 +78,17 @@ namespace xpilot
             if(prefixChar == '@')
             {
                 fields[0] = fields[0].mid(1);
-                emit RaisePilotPositionReceived(PDUPilotPosition::Parse(fields));
+                emit RaisePilotPositionReceived(PDUPilotPosition::fromTokens(fields));
             }
             else if(prefixChar == '^')
             {
                 fields[0] = fields[0].mid(1);
-                emit RaiseFastPilotPositionReceived(PDUFastPilotPosition::Parse(fields));
+                emit RaiseFastPilotPositionReceived(PDUFastPilotPosition::fromTokens(fields));
             }
             else if(prefixChar == '%')
             {
                 fields[0] = fields[0].mid(1);
-                emit RaiseATCPositionReceived(PDUATCPosition::Parse(fields));
+                emit RaiseATCPositionReceived(PDUATCPosition::fromTokens(fields));
             }
             else if(prefixChar == '#' || prefixChar == '$')
             {
@@ -103,30 +99,30 @@ namespace xpilot
 
                 if(pduTypeId == "$DI")
                 {
-                    auto pdu = PDUServerIdentification::Parse(fields);
+                    auto pdu = PDUServerIdentification::fromTokens(fields);
                     m_clientAuthSessionKey = GenerateAuthResponse(pdu.InitialChallengeKey.toStdString().c_str(), VatsimClientId(), VatsimClientKey().toStdString().c_str());
                     m_clientAuthChallengeKey = m_clientAuthSessionKey;
                     emit RaiseServerIdentificationReceived(pdu);
                 }
                 else if(pduTypeId == "$ID")
                 {
-                    emit RaiseClientIdentificationReceived(PDUClientIdentification::Parse(fields));
+                    emit RaiseClientIdentificationReceived(PDUClientIdentification::fromTokens(fields));
                 }
                 else if(pduTypeId == "#AA")
                 {
-                    emit RaiseAddATCReceived(PDUAddATC::Parse(fields));
+                    emit RaiseAddATCReceived(PDUAddATC::fromTokens(fields));
                 }
                 else if(pduTypeId == "#DA")
                 {
-                    emit RaiseDeleteATCReceived(PDUDeleteATC::Parse(fields));
+                    emit RaiseDeleteATCReceived(PDUDeleteATC::fromTokens(fields));
                 }
                 else if(pduTypeId == "#AP")
                 {
-                    emit RaiseAddPilotReceived(PDUAddPilot::Parse(fields));
+                    emit RaiseAddPilotReceived(PDUAddPilot::fromTokens(fields));
                 }
                 else if(pduTypeId == "#DP")
                 {
-                    emit RaiseDeletePilotReceived(PDUDeletePilot::Parse(fields));
+                    emit RaiseDeletePilotReceived(PDUDeletePilot::fromTokens(fields));
                 }
                 else if(pduTypeId == "#TM")
                 {
@@ -136,50 +132,46 @@ namespace xpilot
                 {
                     if(fields.length() >= 3) {
                         if(fields[2] == "PIR") {
-                            emit RaisePlaneInfoRequestReceived(PDUPlaneInfoRequest::Parse(fields));
+                            emit RaisePlaneInfoRequestReceived(PDUPlaneInfoRequest::fromTokens(fields));
                         }
                         else if(fields[2] == "PI" && fields.length() >= 4) {
                             if(fields[3] == "GEN") {
-                                emit RaisePlaneInfoResponseReceived(PDUPlaneInfoResponse::Parse(fields));
+                                emit RaisePlaneInfoResponseReceived(PDUPlaneInfoResponse::fromTokens(fields));
                             }
                         }
                     }
                 }
-                else if(pduTypeId == "$FP")
-                {
-                    emit RaiseFlightPlanReceived(PDUFlightPlan::Parse(fields));
-                }
                 else if(pduTypeId == "$PI")
                 {
-                    emit RaisePingReceived(PDUPing::Parse(fields));
+                    emit RaisePingReceived(PDUPing::fromTokens(fields));
                 }
                 else if(pduTypeId == "$PO")
                 {
-                    emit RaisePongReceived(PDUPong::Parse(fields));
+                    emit RaisePongReceived(PDUPong::fromTokens(fields));
                 }
                 else if(pduTypeId == "$CQ")
                 {
-                    emit RaiseClientQueryReceived(PDUClientQuery::Parse(fields));
+                    emit RaiseClientQueryReceived(PDUClientQuery::fromTokens(fields));
                 }
                 else if(pduTypeId == "$CR")
                 {
-                    emit RaiseClientQueryResponseReceived(PDUClientQueryResponse::Parse(fields));
+                    emit RaiseClientQueryResponseReceived(PDUClientQueryResponse::fromTokens(fields));
                 }
                 else if(pduTypeId == "$ZC")
                 {
-                    auto pdu = PDUAuthChallenge::Parse(fields);
-                    QString response = GenerateAuthResponse(pdu.Challenge.toStdString().c_str(), VatsimClientId(), m_clientAuthChallengeKey.toStdString().c_str());
+                    auto pdu = PDUAuthChallenge::fromTokens(fields);
+                    QString response = GenerateAuthResponse(pdu.ChallengeKey.toStdString().c_str(), VatsimClientId(), m_clientAuthChallengeKey.toStdString().c_str());
                     std::string combined = m_clientAuthSessionKey.toStdString() + response.toStdString();
                     m_clientAuthChallengeKey = toMd5(combined.c_str());
                     SendPDU(PDUAuthResponse(pdu.To, pdu.From, response));
                 }
                 else if(pduTypeId == "$!!")
                 {
-                    emit RaiseKillRequestReceived(PDUKillRequest::Parse(fields));
+                    emit RaiseKillRequestReceived(PDUKillRequest::fromTokens(fields));
                 }
                 else if(pduTypeId == "$ER")
                 {
-                    emit RaiseProtocolErrorReceived(PDUProtocolError::Parse(fields));
+                    emit RaiseProtocolErrorReceived(PDUProtocolError::fromTokens(fields));
                 }
             }
         }
@@ -200,28 +192,23 @@ namespace xpilot
     {
         if(fields.length() < 3) return;
 
-        // #TMs are allowed to have colons in the message field, so here we need
-        // to rejoin the fields then resplit with a limit of 3 substrings.
-        QString raw = PDUBase::Reassemble(fields);
-        fields = raw.split(PDUBase::Delimeter).mid(0, 3);
-
         if(fields[1] == "*")
         {
-            emit RaiseBroadcastMessageReceived(PDUBroadcastMessage::Parse(fields));
+            emit RaiseBroadcastMessageReceived(PDUBroadcastMessage::fromTokens(fields));
         }
         else if(fields[1] == "*s")
         {
-            emit RaiseWallopReceived(PDUWallop::Parse(fields));
+            emit RaiseWallopReceived(PDUWallop::fromTokens(fields));
         }
         else
         {
             if(fields[1].mid(0, 1) == "@")
             {
-                emit RaiseRadioMessageReceived(PDURadioMessage::Parse(fields));
+                emit RaiseRadioMessageReceived(PDURadioMessage::fromTokens(fields));
             }
             else
             {
-                emit RaiseTextMessageReceived(PDUTextMessage::Parse(fields));
+                emit RaiseTextMessageReceived(PDUTextMessage::fromTokens(fields));
             }
         }
     }

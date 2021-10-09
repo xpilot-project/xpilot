@@ -1,36 +1,29 @@
 #include "pdu_text_message.h"
 
+PDUTextMessage::PDUTextMessage() : PDUBase() {}
+
 PDUTextMessage::PDUTextMessage(QString from, QString to, QString message) :
-    PDUBase(from, to)
+    PDUBase(from, to),
+    Message(message)
 {
-    Message = message;
+
 }
 
-QString PDUTextMessage::Serialize()
+QStringList PDUTextMessage::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("#TM");
-    tokens.append(From);
-    tokens.append(Delimeter);
-    tokens.append(To);
-    tokens.append(Delimeter);
-    tokens.append(Message);
-
-    return tokens.join("");
+    tokens.push_back(From);
+    tokens.push_back(To);
+    tokens.push_back(Message);
+    return tokens;
 }
 
-PDUTextMessage PDUTextMessage::Parse(QStringList fields)
+PDUTextMessage PDUTextMessage::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 3) {
-
+    if(tokens.size() < 3) {
+        return {};
     }
 
-    QStringList msg;
-    msg.append(fields[2]);
-    for(int i = 3; i < fields.length(); i++) {
-        msg.append(":" + fields[i]);
-    }
-
-    return PDUTextMessage(fields[0], fields[1], msg.join(""));
+    QStringList msgTokens = tokens.mid(2);
+    return PDUTextMessage(tokens[0], tokens[1], msgTokens.join(":"));
 }

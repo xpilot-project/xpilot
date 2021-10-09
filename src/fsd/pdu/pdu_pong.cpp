@@ -1,30 +1,27 @@
 #include "pdu_pong.h"
 
+PDUPong::PDUPong() : PDUBase() {}
+
 PDUPong::PDUPong(QString from, QString to, QString timeStamp) :
     PDUBase(from, to)
 {
     Timestamp = timeStamp;
 }
 
-QString PDUPong::Serialize()
+QStringList PDUPong::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("$PO");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append(Timestamp);
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUPong PDUPong::Parse(QStringList fields)
+PDUPong PDUPong::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 3) {
-
+    if(tokens.length() < 3) {
+        return {};
     }
 
-    return PDUPong(fields[0], fields[1], fields[2]);
+    return PDUPong(tokens[0], tokens[1], tokens[2]);
 }

@@ -1,36 +1,28 @@
 #include "pdu_broadcast_message.h"
 
+PDUBroadcastMessage::PDUBroadcastMessage() : PDUBase() {}
+
 PDUBroadcastMessage::PDUBroadcastMessage(QString from, QString message) :
     PDUBase(from, "*")
 {
     Message = message;
 }
 
-QString PDUBroadcastMessage::Serialize()
+QStringList PDUBroadcastMessage::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("#TM");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append(Message);
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUBroadcastMessage PDUBroadcastMessage::Parse(QStringList fields)
+PDUBroadcastMessage PDUBroadcastMessage::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 3) {
-        qDebug() << u"Invalid field count: " << Reassemble(fields);
+    if(tokens.length() < 3) {
+        return {};
     }
 
-    QStringList msg;
-    msg.append(fields[2]);
-    for(int i = 3; i < fields.length(); i++) {
-        msg.append(":" + fields[i]);
-    }
-
-    return PDUBroadcastMessage(fields[0], msg.join(""));
+    QStringList messageTokens = tokens.mid(2);
+    return PDUBroadcastMessage(tokens[0], messageTokens.join(":"));
 }

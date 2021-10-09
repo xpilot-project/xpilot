@@ -1,30 +1,28 @@
 #include "pdu_ping.h"
 
+PDUPing::PDUPing() : PDUBase() {}
+
 PDUPing::PDUPing(QString from, QString to, QString timeStamp) :
     PDUBase(from, to)
 {
     Timestamp = timeStamp;
 }
 
-QString PDUPing::Serialize()
+QStringList PDUPing::toTokens() const
 {
     QStringList tokens;
-
     tokens.append("$PI");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append(Timestamp);
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUPing PDUPing::Parse(QStringList fields)
+PDUPing PDUPing::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 3) {
-
+    if(tokens.length() < 3) {
+        return {};
     }
 
-    return PDUPing(fields[0], fields[1], fields[2]);
+    return PDUPing(tokens[0], tokens[1], tokens[2]);
 }

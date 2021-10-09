@@ -9,12 +9,17 @@ class PDUServerIdentification: public PDUBase
 public:
     PDUServerIdentification(QString from, QString to, QString version, QString initialChallengeKey);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUServerIdentification Parse(QStringList fields);
+    static PDUServerIdentification fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "#DI"; }
 
     QString Version;
     QString InitialChallengeKey;
+
+private:
+    PDUServerIdentification();
 };
 
 #endif

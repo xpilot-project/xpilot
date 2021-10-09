@@ -3,6 +3,8 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 import QtQuick.Controls.Material 2.12
 
+import "../Scripts/FrequencyUtils.js" as FrequencyUtils
+
 Rectangle {
     id: nearbyAtc
     Layout.preferredWidth: 250
@@ -68,7 +70,7 @@ Rectangle {
                 Repeater {
                     model: enroute
                     Text {
-                        text: `${callsign} - ${frequency}`
+                        text: `${Callsign} - ${FrequencyUtils.formatNetwork(Frequency)}`
                         font.pixelSize: 14
                         font.family: robotoMono.name
                         leftPadding: 15
@@ -200,7 +202,7 @@ Rectangle {
                 Repeater {
                     model: tower
                     Text {
-                        text: sector + " - " + freq
+                        text: `${Callsign} - ${FrequencyUtils.formatNetwork(Frequency)}`
                         font.pixelSize: 14
                         leftPadding: 15
                         padding: 1
@@ -234,7 +236,7 @@ Rectangle {
                                     hoverEnabled: false
                                     enabled: false
                                     contentItem: Text {
-                                        text: sector
+                                        text: Callsign
                                         font.pixelSize: 14
                                         font.family: robotoMono.name
                                         font.bold: true

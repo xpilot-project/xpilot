@@ -9,11 +9,16 @@ class PDUAuthChallenge : public PDUBase
 public:
     PDUAuthChallenge(QString from, QString to, QString challenge);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUAuthChallenge Parse(QStringList fields);
+    static PDUAuthChallenge fromTokens(const QStringList& fields);
 
-    QString Challenge;
+    static QString pdu() { return "$ZC"; }
+
+    QString ChallengeKey;
+
+private:
+    PDUAuthChallenge();
 };
 
 #endif

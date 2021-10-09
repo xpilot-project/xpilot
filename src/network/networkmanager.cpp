@@ -57,7 +57,7 @@ namespace xpilot
         } else {
             emit notificationPosted((int)NotificationType::Info, "Connected to network.");
         }
-        emit networkConnected();
+        emit networkConnected(m_connectInfo.Callsign);
     }
 
     void NetworkManager::OnNetworkDisconnected()
@@ -157,6 +157,14 @@ namespace xpilot
         case ClientQueryType::PublicIP:
             m_publicIp = pdu.Payload.size() > 0 ? pdu.Payload[0] : "";
             break;
+        case ClientQueryType::IsValidATC:
+            if(pdu.Payload.at(0).toUpper() == "Y") {
+                emit isValidAtcReceived(pdu.Payload.at(1).toUpper());
+            }
+            break;
+        case ClientQueryType::RealName:
+            emit realNameReceived(pdu.From, pdu.Payload.at(0));
+            break;
         }
     }
 
@@ -187,7 +195,7 @@ namespace xpilot
         visualState.Bank = pdu.Bank;
 
         VelocityVector positionalVelocityVector {};
-        positionalVelocityVector.X = pdu.VelocityLongitude;
+        positionalVelocityVector.X = pdu.Bank;
         positionalVelocityVector.Y = pdu.VelocityAltitude;
         positionalVelocityVector.Z = pdu.VelocityLatitude;
 
@@ -230,6 +238,7 @@ namespace xpilot
         }
         else
         {
+            qDebug() << pdu.Message;
             emit privateMessageReceived(pdu.From, pdu.Message);
         }
     }
@@ -265,7 +274,7 @@ namespace xpilot
         if(frequencies.size() == 0) return;
 
         QRegularExpression re("^SELCAL ([A-Z][A-Z]\\-[A-Z][A-Z])$");
-        QRegularExpressionMatch match = re.match(pdu.Message);
+        QRegularExpressionMatch match = re.match(pdu.Messages);
 
         if(match.hasMatch())
         {
@@ -277,12 +286,12 @@ namespace xpilot
         }
         else
         {
-            bool direct = pdu.Message.toUpper().startsWith(m_connectInfo.Callsign.toUpper());
+            bool direct = pdu.Messages.toUpper().startsWith(m_connectInfo.Callsign.toUpper());
 
             RadioMessageReceived args{};
             args.Frequencies = QVariant::fromValue(frequencies);
             args.From = pdu.From.toUpper();
-            args.Message = pdu.Message;
+            args.Message = pdu.Messages;
             args.IsDirect = direct;
             args.DualReceiver = m_radioStackState.Com1ReceiveEnabled && m_radioStackState.Com2ReceiveEnabled;
 
@@ -327,6 +336,16 @@ namespace xpilot
         if(m_radioStackState != radioStack)
         {
             m_radioStackState = radioStack;
+
+            m_transmitFreqs.clear();
+            if(m_radioStackState.Com1TransmitEnabled)
+            {
+                m_transmitFreqs.append(MatchFsdFormat(m_radioStackState.Com1Frequency));
+            }
+            else if(m_radioStackState.Com2TransmitEnabled)
+            {
+                m_transmitFreqs.append(MatchFsdFormat(m_radioStackState.Com2Frequency));
+            }
         }
     }
 
@@ -414,14 +433,16 @@ namespace xpilot
         m_fsd.SendPDU(PDUMetarRequest(m_connectInfo.Callsign, station));
     }
 
-    void NetworkManager::RequestRealName(QString callsign)
+    void NetworkManager::requestRealName(QString callsign)
     {
         m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, callsign, ClientQueryType::RealName));
     }
 
     void NetworkManager::RequestIsValidATC(QString callsign)
     {
-        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, "SERVER", ClientQueryType::IsValidATC, QString(callsign).split("")));
+        QStringList args;
+        args.append(callsign);
+        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, "SERVER", ClientQueryType::IsValidATC, args));
     }
 
     void NetworkManager::RequestCapabilities(QString callsign)
@@ -458,6 +479,16 @@ namespace xpilot
         m_intentionalDisconnect = true;
         m_fsd.SendPDU(PDUDeletePilot(m_connectInfo.Callsign, AppConfig::getInstance()->VatsimId));
         m_fsd.Disconnect();
+    }
+
+    void NetworkManager::sendRadioMessage(QString message)
+    {
+        m_fsd.SendPDU(PDURadioMessage(m_connectInfo.Callsign, m_transmitFreqs, message));
+    }
+
+    void NetworkManager::sendPrivateMessage(QString to, QString message)
+    {
+        m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, to, message));
     }
 
     void NetworkManager::OnNetworkError(QString error)

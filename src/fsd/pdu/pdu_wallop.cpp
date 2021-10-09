@@ -1,36 +1,29 @@
 #include "pdu_wallop.h"
 
+PDUWallop::PDUWallop() : PDUBase() {}
+
 PDUWallop::PDUWallop(QString from, QString message) :
     PDUBase(from, "*S")
 {
     Message = message;
 }
 
-QString PDUWallop::Serialize()
+QStringList PDUWallop::toTokens() const
 {
     QStringList tokens;
-
     tokens.append("#TM");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append(Message);
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUWallop PDUWallop::Parse(QStringList fields)
+PDUWallop PDUWallop::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() > 3) {
-
+    if(tokens.length() > 3) {
+        return {};
     }
 
-    QStringList msg;
-    msg.append(fields[2]);
-    for(int i = 3; i < fields.length(); i++) {
-        msg.append(":" + fields[i]);
-    }
-
-    return PDUWallop(fields[0], msg.join(""));
+    QStringList msgTokens = tokens.mid(2);
+    return PDUWallop(tokens[0], msgTokens.join(":"));
 }

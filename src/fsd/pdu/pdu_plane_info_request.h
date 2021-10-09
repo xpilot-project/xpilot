@@ -9,9 +9,14 @@ class PDUPlaneInfoRequest: public PDUBase
 public:
     PDUPlaneInfoRequest(QString from, QString to);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUPlaneInfoRequest Parse(QStringList fields);
+    static PDUPlaneInfoRequest fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "#SB"; }
+
+private:
+    PDUPlaneInfoRequest();
 };
 
 #endif

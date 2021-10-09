@@ -1,5 +1,7 @@
 #include "pdu_atc_position.h"
 
+PDUATCPosition::PDUATCPosition() : PDUBase() {}
+
 PDUATCPosition::PDUATCPosition(QString from, qint32 freq, NetworkFacility facility, qint32 visRange, NetworkRating rating, double lat, double lon)
     : PDUBase(from, "")
 {
@@ -12,36 +14,26 @@ PDUATCPosition::PDUATCPosition(QString from, qint32 freq, NetworkFacility facili
     Lon = lon;
 }
 
-QString PDUATCPosition::Serialize()
+QStringList PDUATCPosition::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("%");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(QString::number(Frequency));
-    tokens.append(Delimeter);
     tokens.append(toQString(Facility));
-    tokens.append(Delimeter);
     tokens.append(QString::number(VisibilityRange));
-    tokens.append(Delimeter);
     tokens.append(toQString(Rating));
-    tokens.append(Delimeter);
     tokens.append(QString::number(Lat, 'f', 5));
-    tokens.append(Delimeter);
     tokens.append(QString::number(Lon, 'f', 5));
-    tokens.append(Delimeter);
     tokens.append(QString::number(0));
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUATCPosition PDUATCPosition::Parse(QStringList fields)
+PDUATCPosition PDUATCPosition::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 7) {
-        qDebug() << u"Invalid field count: " << Reassemble(fields);
+    if(tokens.length() < 7) {
+        return {};
     }
 
-    return PDUATCPosition(fields[0], fields[1].toInt() + 100000, fromQString<NetworkFacility>(fields[2]),
-            fields[3].toInt(), fromQString<NetworkRating>(fields[4]), fields[5].toDouble(), fields[6].toDouble());
+    return PDUATCPosition(tokens[0], tokens[1].toInt() + 100000, fromQString<NetworkFacility>(tokens[2]),
+            tokens[3].toInt(), fromQString<NetworkRating>(tokens[4]), tokens[5].toDouble(), tokens[6].toDouble());
 }

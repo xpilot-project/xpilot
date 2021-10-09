@@ -9,13 +9,15 @@ class PDUPilotPosition: public PDUBase
 public:
     PDUPilotPosition(QString from, int txCode, bool squawkingModeC, bool identing, NetworkRating rating, double lat, double lon, int trueAlt, int pressureAlt, int gs, double pitch, double heading, double bank);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUPilotPosition Parse(QStringList fields);
+    static PDUPilotPosition fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "@"; }
 
     int SquawkCode;
-    bool IsSquawkingModeC;
-    bool IsIdenting;
+    bool SquawkingModeC;
+    bool Identing;
     NetworkRating Rating;
     double Lat;
     double Lon;
@@ -25,6 +27,9 @@ public:
     double Pitch;
     double Heading;
     double Bank;
+
+private:
+    PDUPilotPosition();
 };
 
 #endif

@@ -9,11 +9,16 @@ class PDUMetarRequest: public PDUBase
 public:
     PDUMetarRequest(QString from, QString station);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUMetarRequest Parse(QStringList fields);
+    static PDUMetarRequest fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "$AX"; }
 
     QString Station;
+
+private:
+    PDUMetarRequest();
 };
 
 #endif

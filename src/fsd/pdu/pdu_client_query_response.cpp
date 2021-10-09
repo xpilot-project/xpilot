@@ -1,5 +1,7 @@
 #include "pdu_client_query_response.h"
 
+PDUClientQueryResponse::PDUClientQueryResponse() : PDUBase() {}
+
 PDUClientQueryResponse::PDUClientQueryResponse(QString from, QString to, ClientQueryType queryType, QStringList payload) :
     PDUBase(from, to)
 {
@@ -7,36 +9,23 @@ PDUClientQueryResponse::PDUClientQueryResponse(QString from, QString to, ClientQ
     Payload = payload;
 }
 
-QString PDUClientQueryResponse::Serialize()
+QStringList PDUClientQueryResponse::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("$CR");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append(toQString(QueryType));
-    for(const auto& payloadItem : Payload) {
-        tokens.append(Delimeter);
-        tokens.append(payloadItem);
-    }
-
-    return tokens.join("");
+    tokens.append(Payload);
+    return tokens;
 }
 
-PDUClientQueryResponse PDUClientQueryResponse::Parse(QStringList fields)
+PDUClientQueryResponse PDUClientQueryResponse::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 3) {
-
+    if(tokens.length() < 3) {
+        return {};
     }
 
-    QStringList payload;
-    if(fields.length() > 3) {
-        for(int i = 3; i < fields.length(); i++) {
-            payload.append(fields[i]);
-        }
-    }
-
-    return PDUClientQueryResponse(fields[0], fields[1], fromQString<ClientQueryType>(fields[2]), payload);
+    QStringList responseData;
+    if (tokens.size() > 3) { responseData = tokens.mid(3); }
+    return PDUClientQueryResponse(tokens[0], tokens[1], fromQString<ClientQueryType>(tokens[2]), responseData);
 }

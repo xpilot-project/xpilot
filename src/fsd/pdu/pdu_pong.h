@@ -9,11 +9,16 @@ class PDUPong: public PDUBase
 public:
     PDUPong(QString from, QString to, QString timeStamp);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUPong Parse(QStringList fields);
+    static PDUPong fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "$PO"; }
 
     QString Timestamp;
+
+private:
+    PDUPong();
 };
 
 #endif

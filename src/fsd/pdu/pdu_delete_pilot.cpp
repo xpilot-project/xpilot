@@ -1,28 +1,26 @@
 #include "pdu_delete_pilot.h"
 
+PDUDeletePilot::PDUDeletePilot() : PDUBase() {}
+
 PDUDeletePilot::PDUDeletePilot(QString from, QString cid) :
     PDUBase(from, "")
 {
     CID = cid;
 }
 
-QString PDUDeletePilot::Serialize()
+QStringList PDUDeletePilot::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("#DP");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(CID);
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUDeletePilot PDUDeletePilot::Parse(QStringList fields)
+PDUDeletePilot PDUDeletePilot::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 1) {
-
+    if(tokens.length() < 1) {
+        return {};
     }
 
-    return PDUDeletePilot(fields[0], fields.length() >= 2 ? fields[1] : "");
+    return PDUDeletePilot(tokens[0], tokens.length() >= 2 ? tokens[1] : "");
 }

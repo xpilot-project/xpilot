@@ -1,5 +1,7 @@
 #include "pdu_plane_info_response.h"
 
+PDUPlaneInfoResponse::PDUPlaneInfoResponse() : PDUBase() {}
+
 PDUPlaneInfoResponse::PDUPlaneInfoResponse(QString from, QString to, QString equipment, QString airline, QString livery, QString csl) :
     PDUBase(from, to)
 {
@@ -9,41 +11,31 @@ PDUPlaneInfoResponse::PDUPlaneInfoResponse(QString from, QString to, QString equ
     CSL = csl;
 }
 
-QString PDUPlaneInfoResponse::Serialize()
+QStringList PDUPlaneInfoResponse::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("#SB");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append("PI");
-    tokens.append(Delimeter);
     tokens.append("GEN");
-    tokens.append(Delimeter);
     tokens.append("EQUIPMENT=" + Equipment);
     if(!Airline.isEmpty()) {
-        tokens.append(Delimeter);
         tokens.append("AIRLINE=" + Airline);
     }
     if(!Livery.isEmpty()) {
-        tokens.append(Delimeter);
         tokens.append("LIVERY=" + Livery);
     }
     if(!CSL.isEmpty()) {
-        tokens.append(Delimeter);
         tokens.append("CSL=" + CSL);
     }
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUPlaneInfoResponse PDUPlaneInfoResponse::Parse(QStringList fields)
+PDUPlaneInfoResponse PDUPlaneInfoResponse::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 5) {
-
+    if(tokens.length() < 5) {
+        return {};
     }
 
-    return PDUPlaneInfoResponse(fields[0], fields[1], FindValue(fields, "EQUIPMENT"), FindValue(fields, "AIRLINE"), FindValue(fields, "LIVERY"), FindValue(fields, "CSL"));
+    return PDUPlaneInfoResponse(tokens[0], tokens[1], FindValue(tokens, "EQUIPMENT"), FindValue(tokens, "AIRLINE"), FindValue(tokens, "LIVERY"), FindValue(tokens, "CSL"));
 }

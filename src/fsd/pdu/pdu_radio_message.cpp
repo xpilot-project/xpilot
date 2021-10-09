@@ -1,13 +1,15 @@
 #include "pdu_radio_message.h"
 
+PDURadioMessage::PDURadioMessage() : PDUBase() {}
+
 PDURadioMessage::PDURadioMessage(QString from, QList<uint> freqs, QString message) :
     PDUBase(from, "")
 {
     Frequencies = freqs;
-    Message = message;
+    Messages = message;
 }
 
-QString PDURadioMessage::Serialize()
+QStringList PDURadioMessage::toTokens() const
 {
     QStringList freqs;
     for(auto & freq : Frequencies) {
@@ -18,35 +20,24 @@ QString PDURadioMessage::Serialize()
     }
 
     QStringList tokens;
-
-    tokens.append("#TM");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(freqs);
-    tokens.append(Delimeter);
-    tokens.append(Message);
-
-    return tokens.join("");
+    tokens.append(Messages);
+    return tokens;
 }
 
-PDURadioMessage PDURadioMessage::Parse(QStringList fields)
+PDURadioMessage PDURadioMessage::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 3) {
-
+    if(tokens.length() < 3) {
+        return {};
     }
 
-    QStringList freqs = fields[1].split("&");
-
+    QStringList freqs = tokens[1].split("&");
     QList<uint> freqInts;
     for(int i = 0; i < freqs.size(); i++) {
         freqInts.push_back(freqs[i].midRef(1, freqs[i].length() - 1).toUInt());
     }
 
-    QStringList msg;
-    msg.append(fields[2]);
-    for(int i = 3; i < fields.length(); i++) {
-        msg.append(":" + fields[i]);
-    }
-
-    return PDURadioMessage(fields[0], freqInts, msg.join(""));
+    QStringList messageTokens = tokens.mid(2);
+    return PDURadioMessage(tokens[0], freqInts, messageTokens.join(":"));
 }

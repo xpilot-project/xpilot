@@ -9,9 +9,11 @@ class PDUFastPilotPosition : public PDUBase
 public:
     PDUFastPilotPosition(QString from, double lat, double lon, double alt, double pitch, double heading, double bank, double velocityLongitude, double velocityAltitude, double velocityLatitude, double velocityPitch, double velocityHeading, double velocityBank);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUFastPilotPosition Parse(QStringList fields);
+    static PDUFastPilotPosition fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "^"; }
 
     double Lat;
     double Lon;
@@ -25,6 +27,9 @@ public:
     double VelocityPitch;
     double VelocityHeading;
     double VelocityBank;
+
+private:
+    PDUFastPilotPosition();
 };
 
 #endif

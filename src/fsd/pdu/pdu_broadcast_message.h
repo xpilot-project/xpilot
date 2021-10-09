@@ -9,11 +9,16 @@ class PDUBroadcastMessage : public PDUBase
 public:
     PDUBroadcastMessage(QString from, QString message);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUBroadcastMessage Parse(QStringList fields);
+    static PDUBroadcastMessage fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "#TM"; }
 
     QString Message;
+
+private:
+    PDUBroadcastMessage();
 };
 
 #endif

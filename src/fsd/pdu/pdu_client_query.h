@@ -7,16 +7,19 @@
 class PDUClientQuery : public PDUBase
 {
 public:
-    PDUClientQuery(QString from, QString to, ClientQueryType queryType);
+    PDUClientQuery(QString from, QString to, ClientQueryType queryType, QStringList payload = {});
 
-    PDUClientQuery(QString from, QString to, ClientQueryType queryType, QStringList payload);
+    QStringList toTokens() const;
 
-    QString Serialize() override;
+    static PDUClientQuery fromTokens(const QStringList& fields);
 
-    static PDUClientQuery Parse(QStringList fields);
+    static QString pdu() { return "$CQ"; }
 
     ClientQueryType QueryType;
     QStringList Payload;
+
+private:
+    PDUClientQuery();
 };
 
 #endif

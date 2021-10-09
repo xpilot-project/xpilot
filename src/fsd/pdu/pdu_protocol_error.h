@@ -10,14 +10,19 @@ class PDUProtocolError: public PDUBase
 public:
     PDUProtocolError(QString from, QString to, NetworkError type, QString param, QString msg, bool fatal);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUProtocolError Parse(QStringList fields);
+    static PDUProtocolError fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "$ER"; }
 
     NetworkError ErrorType;
     QString Param;
     QString Message;
     bool Fatal;
+
+private:
+    PDUProtocolError();
 };
 
 #endif

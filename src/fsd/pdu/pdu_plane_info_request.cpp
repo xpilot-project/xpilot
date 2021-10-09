@@ -1,30 +1,27 @@
 #include "pdu_plane_info_request.h"
 
+PDUPlaneInfoRequest::PDUPlaneInfoRequest() : PDUBase() {}
+
 PDUPlaneInfoRequest::PDUPlaneInfoRequest(QString from, QString to) :
     PDUBase(from, to)
 {
     
 }
 
-QString PDUPlaneInfoRequest::Serialize()
+QStringList PDUPlaneInfoRequest::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("#SB");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append("PIR");
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUPlaneInfoRequest PDUPlaneInfoRequest::Parse(QStringList fields)
+PDUPlaneInfoRequest PDUPlaneInfoRequest::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 3) {
-
+    if(tokens.length() < 3) {
+        return {};
     }
 
-    return PDUPlaneInfoRequest(fields[0], fields[1]);
+    return PDUPlaneInfoRequest(tokens[0], tokens[1]);
 }

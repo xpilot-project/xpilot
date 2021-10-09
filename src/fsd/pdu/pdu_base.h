@@ -11,20 +11,10 @@
 class PDUBase
 {
 public:
+    PDUBase() {}
     PDUBase(QString from, QString to);
 
-    QString From;
-    QString To;
-
-    virtual QString Serialize() = 0;
-
-    static QString Reassemble(QStringList const& fields)
-    {
-        return fields.join(Delimeter);
-    }
-
     static uint PackPitchBankHeading(double pitch, double bank, double heading);
-
     static void UnpackPitchBankHeading(uint pbh, double &pitch, double& bank, double& heading);
 
     inline static const QString ClientQueryBroadcastRecipient = "@94835";
@@ -32,6 +22,15 @@ public:
     inline static const QChar Delimeter = ':';
     inline static const QString PacketDelimeter = "\r\n";
     inline static const QString ServerCallsign = "SERVER";
+
+    QString From;
+    QString To;
 };
+
+template <class T>
+QString Serialize(const T &message)
+{
+    return message.pdu() % message.toTokens().join(':') % QStringLiteral("\r\n");
+}
 
 #endif

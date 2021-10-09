@@ -17,8 +17,13 @@ namespace xpilot
         ControllerManager(NetworkManager& networkManager, QObject* parent = nullptr);
         void ValidateController(Controller& controller);
 
+    signals:
+        void controllerAdded(Controller controller);
+        void controllerDeleted(Controller controller);
+
     private:
         void OnControllerUpdateReceived(QString from, uint frequency, double lat, double lon);
+        void IsValidATCReceived(QString callsign);
 
     private:
         NetworkManager& m_networkManager;

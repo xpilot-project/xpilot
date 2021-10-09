@@ -1,27 +1,25 @@
 #include "pdu_delete_atc.h"
 
+PDUDeleteATC::PDUDeleteATC() : PDUBase() {}
+
 PDUDeleteATC::PDUDeleteATC(QString from, QString cid) : PDUBase(from, "")
 {
     CID = cid;
 }
 
-QString PDUDeleteATC::Serialize()
+QStringList PDUDeleteATC::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("#DA");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(CID);
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUDeleteATC PDUDeleteATC::Parse(QStringList fields)
+PDUDeleteATC PDUDeleteATC::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 1) {
-
+    if(tokens.length() < 1) {
+        return {};
     }
 
-    return PDUDeleteATC(fields[0], fields.length() >= 2 ? fields[1] : "");
+    return PDUDeleteATC(tokens[0], tokens.length() >= 2 ? tokens[1] : "");
 }

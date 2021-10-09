@@ -9,9 +9,11 @@ class PDUAddPilot : public PDUBase
 public:
     PDUAddPilot(QString callsign, QString cid, QString password, NetworkRating rating, ProtocolRevision proto, SimulatorType simType, QString realName);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUAddPilot Parse(QStringList fields);
+    static PDUAddPilot fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "#AP"; }
 
     QString CID;
     QString Password;
@@ -19,6 +21,9 @@ public:
     ProtocolRevision Protocol;
     SimulatorType SimType;
     QString RealName;
+
+private:
+    PDUAddPilot();
 };
 
 #endif

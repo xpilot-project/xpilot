@@ -1,19 +1,13 @@
 #include "pdu_pilot_position.h"
 
+PDUPilotPosition::PDUPilotPosition() : PDUBase() {}
+
 PDUPilotPosition::PDUPilotPosition(QString from, int txCode, bool squawkingModeC, bool identing, NetworkRating rating, double lat, double lon, int trueAlt, int pressureAlt, int gs, double pitch, double heading, double bank) :
     PDUBase(from, "")
 {
-    if(isnan(lat)) {
-
-    }
-
-    if(isnan(lon)) {
-
-    }
-
     SquawkCode = txCode;
-    IsSquawkingModeC = squawkingModeC;
-    IsIdenting = identing;
+    SquawkingModeC = squawkingModeC;
+    Identing = identing;
     Rating = rating;
     Lat = lat;
     Lon = lon;
@@ -25,56 +19,44 @@ PDUPilotPosition::PDUPilotPosition(QString from, int txCode, bool squawkingModeC
     Bank = bank;
 }
 
-QString PDUPilotPosition::Serialize()
+QStringList PDUPilotPosition::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("@");
-    tokens.append(IsIdenting ? "Y" : (IsSquawkingModeC ? "N" : "S"));
-    tokens.append(Delimeter);
+    tokens.append(Identing ? "Y" : (SquawkingModeC ? "N" : "S"));
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(QString::number(SquawkCode));
-    tokens.append(Delimeter);
     tokens.append(toQString(Rating));
-    tokens.append(Delimeter);
     tokens.append(QString::number(Lat, 'f', 6));
-    tokens.append(Delimeter);
     tokens.append(QString::number(Lon, 'f', 6));
-    tokens.append(Delimeter);
     tokens.append(QString::number(TrueAltitude));
-    tokens.append(Delimeter);
     tokens.append(QString::number(GroundSpeed));
-    tokens.append(Delimeter);
     tokens.append(QString::number(PackPitchBankHeading(Pitch, Bank, Heading)));
-    tokens.append(Delimeter);
     tokens.append(QString::number(PressureAltitude - TrueAltitude));
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUPilotPosition PDUPilotPosition::Parse(QStringList fields)
+PDUPilotPosition PDUPilotPosition::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 10) {
-
+    if(tokens.length() < 10) {
+        return {};
     }
 
     double pitch;
     double bank;
     double heading;
-    UnpackPitchBankHeading(fields[8].toUInt(), pitch, bank, heading);
+    UnpackPitchBankHeading(tokens[8].toUInt(), pitch, bank, heading);
 
     bool identing = false;
     bool charlie = false;
-    if(fields[0] == "N") {
+    if(tokens[0] == "N") {
         charlie = true;
     }
-    else if(fields[0] == "Y") {
+    else if(tokens[0] == "Y") {
         charlie = true;
         identing = true;
     }
 
-    return PDUPilotPosition(fields[1], fields[2].toInt(), charlie, identing, fromQString<NetworkRating>(fields[3]),
-            fields[4].toDouble(), fields[5].toDouble(), fields[6].toInt(),
-            fields[6].toInt() + fields[9].toInt(), fields[7].toInt(), pitch, heading, bank);
+    return PDUPilotPosition(tokens[1], tokens[2].toInt(), charlie, identing, fromQString<NetworkRating>(tokens[3]),
+            tokens[4].toDouble(), tokens[5].toDouble(), tokens[6].toInt(),
+            tokens[6].toInt() + tokens[9].toInt(), tokens[7].toInt(), pitch, heading, bank);
 }

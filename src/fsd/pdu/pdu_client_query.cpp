@@ -1,10 +1,6 @@
 #include "pdu_client_query.h"
 
-PDUClientQuery::PDUClientQuery(QString from, QString to, ClientQueryType queryType) :
-    PDUBase(from, to)
-{
-    QueryType = queryType;
-}
+PDUClientQuery::PDUClientQuery() : PDUBase() {}
 
 PDUClientQuery::PDUClientQuery(QString from, QString to, ClientQueryType queryType, QStringList payload) :
     PDUBase(from, to)
@@ -13,38 +9,23 @@ PDUClientQuery::PDUClientQuery(QString from, QString to, ClientQueryType queryTy
     Payload = payload;
 }
 
-QString PDUClientQuery::Serialize()
+QStringList PDUClientQuery::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("$CQ");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append(toQString(QueryType));
-    if(!Payload.isEmpty()) {
-        for(const auto& payloadItem : Payload) {
-            tokens.append(Delimeter);
-            tokens.append(payloadItem);
-        }
-    }
-
-    return tokens.join("");
+    tokens.append(Payload);
+    return tokens;
 }
 
-PDUClientQuery PDUClientQuery::Parse(QStringList fields)
+PDUClientQuery PDUClientQuery::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 3) {
-
+    if(tokens.length() < 3) {
+        return {};
     }
 
     QStringList payload;
-    if(fields.length() > 3) {
-        for(int i = 3; i < fields.length(); i++) {
-            payload.append(fields[i]);
-        }
-    }
-
-    return PDUClientQuery(fields[0], fields[1], fromQString<ClientQueryType>(fields[2]), payload);
+    if (tokens.size() > 3) { payload = tokens.mid(3); }
+    return PDUClientQuery(tokens[0], tokens[1], fromQString<ClientQueryType>(tokens[2]), payload);
 }

@@ -9,11 +9,13 @@ class PDUPlaneInfoResponse: public PDUBase
 public:
     PDUPlaneInfoResponse(QString from, QString to, QString equipment, QString airline, QString livery, QString csl);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUPlaneInfoResponse Parse(QStringList fields);
+    static PDUPlaneInfoResponse fromTokens(const QStringList& fields);
 
-    static inline QString FindValue(QStringList& fields, QString key)
+    static QString pdu() { return "#SB"; }
+
+    static inline QString FindValue(const QStringList& fields, QString key)
     {
         for(auto &field : fields) {
             if(field.toUpper().startsWith(key.toUpper() + "=")) {
@@ -27,6 +29,9 @@ public:
     QString Airline;
     QString Livery;
     QString CSL;
+
+private:
+    PDUPlaneInfoResponse();
 };
 
 #endif

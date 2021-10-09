@@ -1,9 +1,10 @@
 #include "pdu_base.h"
 
-PDUBase::PDUBase(QString from, QString to)
+PDUBase::PDUBase(QString from, QString to) :
+    From(from),
+    To(to)
 {
-    From = from;
-    To = to;
+
 }
 
 uint PDUBase::PackPitchBankHeading(double pitch, double bank, double heading)

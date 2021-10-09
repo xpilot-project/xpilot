@@ -9,11 +9,16 @@ class PDUDeletePilot : public PDUBase
 public:
     PDUDeletePilot(QString from, QString cid);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUDeletePilot Parse(QStringList fields);
+    static PDUDeletePilot fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "#DP"; }
 
     QString CID;
+
+private:
+    PDUDeletePilot();
 };
 
 #endif

@@ -74,8 +74,6 @@ set(FSD_SOURCES
     src/fsd/pdu/pdu_delete_pilot.cpp
     src/fsd/pdu/pdu_fast_pilot_position.h
     src/fsd/pdu/pdu_fast_pilot_position.cpp
-    src/fsd/pdu/pdu_flight_plan.h
-    src/fsd/pdu/pdu_flight_plan.cpp
     src/fsd/pdu/pdu_kill_request.h
     src/fsd/pdu/pdu_kill_request.cpp
     src/fsd/pdu/pdu_metar_request.h

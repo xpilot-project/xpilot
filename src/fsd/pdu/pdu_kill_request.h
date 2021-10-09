@@ -9,11 +9,16 @@ class PDUKillRequest: public PDUBase
 public:
     PDUKillRequest(QString from, QString victim, QString reason);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUKillRequest Parse(QStringList fields);
+    static PDUKillRequest fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "$!!"; }
 
     QString Reason;
+
+private:
+    PDUKillRequest();
 };
 
 #endif

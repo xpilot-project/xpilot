@@ -29,7 +29,6 @@
 #include "pdu/pdu_text_message.h"
 #include "pdu/pdu_plane_info_request.h"
 #include "pdu/pdu_plane_info_response.h"
-#include "pdu/pdu_flight_plan.h"
 #include "pdu/pdu_ping.h"
 #include "pdu/pdu_pong.h"
 #include "pdu/pdu_client_query.h"
@@ -55,7 +54,12 @@ namespace xpilot
         void Connect(QString address, quint32 port, bool challengeServer = true);
         void Disconnect();
 
-        void SendPDU(PDUBase&& message);
+        template<class T>
+        void SendPDU(const T &message)
+        {
+            if(!m_connected) return;
+            sendData(Serialize(message));
+        }
 
         bool getConnectionStatus() const { return m_connected; }
 
@@ -82,7 +86,6 @@ namespace xpilot
         void RaiseMetarResponseReceived(PDUMetarResponse pdu);
         void RaisePlaneInfoRequestReceived(PDUPlaneInfoRequest pdu);
         void RaisePlaneInfoResponseReceived(PDUPlaneInfoResponse pdu);
-        void RaiseFlightPlanReceived(PDUFlightPlan pdu);
         void RaisePingReceived(PDUPing pdu);
         void RaisePongReceived(PDUPong pdu);
         void RaiseClientQueryReceived(PDUClientQuery pdu);

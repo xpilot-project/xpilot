@@ -1,30 +1,27 @@
 #include "pdu_auth_challenge.h"
 
+PDUAuthChallenge::PDUAuthChallenge() : PDUBase() {}
+
 PDUAuthChallenge::PDUAuthChallenge(QString from, QString to, QString challenge) :
     PDUBase(from, to)
 {
-    Challenge = challenge;
+    ChallengeKey = challenge;
 }
 
-QString PDUAuthChallenge::Serialize()
+QStringList PDUAuthChallenge::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("$ZC");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
-    tokens.append(Challenge);
-
-    return tokens.join("");
+    tokens.append(ChallengeKey);
+    return tokens;
 }
 
-PDUAuthChallenge PDUAuthChallenge::Parse(QStringList fields)
+PDUAuthChallenge PDUAuthChallenge::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 3) {
-
+    if(tokens.length() < 3) {
+        return {};
     }
 
-    return PDUAuthChallenge(fields[0], fields[1], fields[2]);
+    return PDUAuthChallenge(tokens[0], tokens[1], tokens[2]);
 }

@@ -30,6 +30,7 @@ Window {
     property int currentTab
     property bool closing: false
     property bool networkConnected: false
+    property string ourCallsign: ""
     property bool initialized: false
     property bool simConnected: false
 
@@ -39,6 +40,7 @@ Window {
     property string colorGray: "#c0c0c0"
     property string colorYellow: "#ffff00"
     property string colorRed: "#eb2f06"
+    property string colorCyan: "#00ffff"
 
     FontLoader {
         id: ubuntuRegular
@@ -106,7 +108,7 @@ Window {
     }
 
     Component.onCompleted: {
-        appendInfoMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.");
+        appendMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.", colorYellow);
         width = AppConfig.WindowConfig.Width;
         height = AppConfig.WindowConfig.Height;
         x = AppConfig.WindowConfig.X;
@@ -162,11 +164,11 @@ Window {
         target: appCore
 
         function onServerListDownloaded(count) {
-            appendInfoMessage(`Server list download succeeded. ${count} servers found.`)
+            appendMessage(`Server list download succeeded. ${count} servers found.`, colorYellow)
         }
 
         function onServerListDownloadError(count) {
-            appendErrorMessage("Server list download failed. Using previously-cached server list.")
+            appendMessage("Server list download failed. Using previously-cached server list.", colorRed)
         }
     }
 
@@ -174,10 +176,10 @@ Window {
         target: udpClient
         function onSimConnectionStateChanged(state) {
             if(!simConnected && state) {
-                appendInfoMessage("X-Plane connection established.")
+                appendMessage("X-Plane connection established.", colorYellow)
             }
             else if(simConnected && !state) {
-                appendErrorMessage("X-Plane connection lost. Please make sure X-Plane is running and a flight is loaded.")
+                appendMessage("X-Plane connection lost. Please make sure X-Plane is running and a flight is loaded.", colorRed)
             }
             simConnected = state;
         }
@@ -186,7 +188,8 @@ Window {
     Connections {
         target: networkManager
 
-        function onNetworkConnected() {
+        function onNetworkConnected(callsign) {
+            ourCallsign = callsign
             networkConnected = true;
         }
 
@@ -197,37 +200,55 @@ Window {
         function onNotificationPosted(type, message) {
             switch(type) {
             case 0: // info
-                appendInfoMessage(message)
+                appendMessage(message, colorYellow)
                 break;
             case 1: // warning
-                appendWarningMessage(message)
+                appendMessage(message, colorOrange)
                 break;
             case 2: // error
-                appendErrorMessage(message)
+                appendMessage(message, colorRed)
                 break;
             case 3: // text message
-                appendMessage(message);
+                appendMessage(message, colorGray);
                 break;
             default:
-                appendInfoMessage(message);
+                appendMessage(message, colorYellow);
                 break;
             }
         }
 
         function onServerMessageReceived(message) {
-            cliModel.get(0).attributes.append({message:`[${TimestampUtils.currentTimestamp()}] SERVER: ${message}`, msgColor: colorGreen})
+            appendMessage(`SERVER: ${message}`, colorGreen)
         }
 
         function onBroadcastMessageReceived(from, message) {
-            cliModel.get(0).attributes.append({message:`[${TimestampUtils.currentTimestamp()}] [BROADCAST] ${from}: ${message}`, msgColor: colorOrange})
+            appendMessage(`[BROADCAST] ${from}: ${message}`, colorOrange)
             broadcastSound.play()
             mainWindow.alert(0)
         }
 
         function onSelcalAlertReceived(from, frequencies) {
-            appendInfoMessage(`SELCAL alert received on ${FrequencyUtils.formatFromFsd(frequencies[0])}`)
+            appendMessage(`SELCAL alert received on ${FrequencyUtils.formatFromFsd(frequencies[0])}`, colorYellow)
             selcalSound.play()
             mainWindow.alert(0)
+        }
+
+        function onRealNameReceived(callsign, name) {
+            var idx = findChatTab(callsign)
+            if(idx > 0) {
+                var model = cliModel.get(idx)
+                if(!model.realName) {
+                    model.attributes.insert(0, {message:`Name: ${name}`, msgColor: colorYellow})
+                    model.realName = true
+                }
+            }
+        }
+
+        function onPrivateMessageReceived(from, message) {
+            var idx = focusOrCreateTab(from)
+            if(idx > 0) {
+                appendPrivateMessage(idx, message, from, colorWhite)
+            }
         }
 
         function onRadioMessageReceived(args) {
@@ -246,7 +267,7 @@ Window {
                 message = `${args.From}: ${args.Message}`;
             }
 
-            cliModel.get(0).attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: args.IsDirect ? colorWhite : colorGray})
+            appendMessage(`[${TimestampUtils.currentTimestamp()}] ${message}`, args.IsDirect ? colorWhite : colorGray)
 
             if(args.IsDirect) {
                 directRadioMessageSound.play();
@@ -256,122 +277,127 @@ Window {
                 radioMessageSound.play();
             }
         }
+    }
+
+    Connections {
+        target: controllerManager
+
+        function findController(myModel, callsign) {
+            for(var i = 0; i < myModel.count; i++) {
+                var element = myModel.get(i);
+                if(callsign === element.Callsign) {
+                    return i;
+                }
+            }
+            return -1;
+        }
 
         function onControllerAdded(controller) {
-            console.log("Add: " + controller);
+            var idx;
+            if(controller.Callsign.endsWith("_CTR") || controller.Callsign.endsWith("_FSS")) {
+                idx = findController(nearbyEnroute, controller.Callsign)
+                if(idx < 0) {
+                    nearbyEnroute.append(controller)
+                }
+            }
+            else if(controller.Callsign.endsWith("_APP") || controller.Callsign.endsWith("_DEP")) {
+                idx = findController(nearbyApproach, controller.Callsign)
+                if(idx < 0) {
+                    nearbyApproach.append(controller)
+                }
+            }
+            else if(controller.Callsign.endsWith("_TWR")) {
+                idx = findController(nearbyTower, controller.Callsign)
+                if(idx < 0) {
+                    nearbyTower.append(controller)
+                }
+            }
+            else if(controller.Callsign.endsWith("_GND")) {
+                idx = findController(nearbyGround, controller.Callsign)
+                if(idx < 0) {
+                    nearbyGround.append(controller)
+                }
+            }
+            else if(controller.Callsign.endsWith("_DEL")) {
+                idx = findController(nearbyDelivery, controller.Callsign)
+                if(idx < 0) {
+                    nearbyDelivery.append(controller)
+                }
+            }
+            else if(controller.Callsign.endsWith("_ATIS")) {
+                idx = findController(nearbyAtis, controller.Callsign)
+                if(idx < 0) {
+                    nearbyAtis.append(controller)
+                }
+            }
+            else {
+                idx = findController(nearbyObservers, controller.Callsign)
+                if(idx < 0) {
+                    nearbyObservers.append(controller)
+                }
+            }
         }
 
         function onControllerDeleted(controller) {
-            console.log("Delete: " + controller);
+            var idx;
+            if(controller.Callsign.endsWith("_CTR") || controller.Callsign.endsWith("_FSS")) {
+                idx = findController(nearbyEnroute, controller.Callsign)
+                if(idx >= 0) {
+                    nearbyEnroute.remove(idx)
+                }
+            }
+            else if(controller.Callsign.endsWith("_APP") || controller.Callsign.endsWith("_DEP")) {
+                idx = findController(nearbyApproach, controller.Callsign)
+                if(idx >= 0) {
+                    nearbyApproach.remove(idx)
+                }
+            }
+            else if(controller.Callsign.endsWith("_TWR")) {
+                idx = findController(nearbyTower, controller.Callsign)
+                if(idx >= 0) {
+                    nearbyTower.remove(idx)
+                }
+            }
+            else if(controller.Callsign.endsWith("_GND")) {
+                idx = findController(nearbyGround, controller.Callsign)
+                if(idx >= 0) {
+                    nearbyGround.remove(idx)
+                }
+            }
+            else if(controller.Callsign.endsWith("_DEL")) {
+                idx = findController(nearbyDelivery, controller.Callsign)
+                if(idx >= 0) {
+                    nearbyDelivery.remove(idx)
+                }
+            }
+            else if(controller.Callsign.endsWith("_ATIS")) {
+                idx = findController(nearbyAtis, controller.Callsign)
+                if(idx >= 0) {
+                    nearbyAtis.remove(idx)
+                }
+            }
+            else {
+                idx = findController(nearbyObservers, controller.Callsign)
+                if(idx >= 0) {
+                    nearbyObservers.remove(idx)
+                }
+            }
         }
     }
 
-    //    Connections {
-    //        target: ipc
-
-    //        function onNotificationPosted(type, message) {
-    //            switch(type) {
-    //            case 0: // info
-    //                appendInfoMessage(message)
-    //                break;
-    //            case 1: // warning
-    //                appendWarningMessage(message)
-    //                break;
-    //            case 2: // error
-    //                appendErrorMessage(message)
-    //                break;
-    //            }
-    //        }
-
-    //        function onSimulatorConnected(isConnected) {
-    //            if(isConnected) {
-    //                if(!simConnected) {
-    //                    appendInfoMessage("X-Plane connection established.")
-    //                }
-    //                simConnected = true
-    //            } else {
-    //                if(simConnected) {
-    //                    appendErrorMessage("X-Plane connection lost.")
-    //                }
-    //                simConnected = false
-    //                radioStack.avionicsPower = false
-    //            }
-
-    //            toolbar.simConnected = isConnected
-    //        }
-
-    //        function onRadioStackReceived(stack)
-    //        {
-    //            radioStack.avionicsPower = stack.avionicsPowerOn;
-    //            radioStack.com1Frequency = FrequencyUtils.printFrequency(stack.com1Frequency);
-    //            radioStack.com2Frequency = FrequencyUtils.printFrequency(stack.com2Frequency);
-    //            radioStack.isCom1RxEnabled = stack.com1ReceiveEnabled;
-    //            radioStack.isCom2RxEnabled = stack.com2ReceiveEnabled;
-    //            radioStack.isCom1TxEnabled = stack.transmitComSelection === 6;
-    //            radioStack.isCom2TxEnabled = stack.transmitComSelection === 7;
-    //        }
-
-    //        function onNearbyAtcReceived(stations) {
-    //            stations.forEach(function(station) {
-    //                if(station.callsign.endsWith("_CTR") || station.callsign.endsWith("_FSS")) {
-    //                    nearbyEnroute.append(station)
-    //                }
-    //                else if(station.callsign.endsWith("_APP") || station.callsign.endsWith("_DEP")) {
-    //                    nearbyApproach.append(station)
-    //                }
-    //                else if(station.callsign.endsWith("_TWR")) {
-    //                    nearbyTower.append(station)
-    //                }
-    //                else if(station.callsign.endsWith("_GND")) {
-    //                    nearbyGround.append(station)
-    //                }
-    //                else if(station.callsign.endsWith("_DEL")) {
-    //                    nearbyDelivery.append(station)
-    //                }
-    //                else if(station.callsign.endsWith("_ATIS")) {
-    //                    nearbyAtis.append(station)
-    //                }
-    //                else {
-    //                    nearbyObservers.append(station)
-    //                }
-    //            })
-    //        }
-    //    }
-
-    //    function appendMessage(tabId, message) {
-    //        var element = cliModel.get(tabId + 1);
-    //        if(element) {
-    //            element.attributes.append({timestamp:currentTimestamp(),message:message});
-    //        } else {
-    //            cliModel.append({tabId: tabId, attributes: []});
-    //            appendMessage(tabId, message);
-    //        }
-    //    }
-
-    function appendMessage(message) {
+    function appendMessage(message, color = colorGray) {
         var model = cliModel.get(0)
-        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`})
+        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: color})
     }
 
-    function appendServerMessage(message) {
-        var model = cliModel.get(0)
-        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: colorGreen})
-    }
-
-    function appendInfoMessage(message) {
-        var model = cliModel.get(0)
-        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: colorYellow}) // yellow
-    }
-
-    function appendErrorMessage(message) {
-        var model = cliModel.get(0)
-        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: colorRed}) // red
-        errorSound.play();
-    }
-
-    function appendWarningMessage(message) {
-        var model = cliModel.get(0)
-        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: colorOrange}) // orange
+    function appendPrivateMessage(tab, message, from = "", color = colorCyan) {
+        var model = cliModel.get(tab)
+        if(from) {
+            model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${from}: ${message}`, msgColor: color})
+        }
+        else {
+            model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: color})
+        }
     }
 
     function appendNote(message) {
@@ -387,6 +413,32 @@ Window {
     function clearMessages() {
         var model = cliModel.get(0)
         model.attributes.clear()
+    }
+
+    function findChatTab(callsign) {
+        for(var i = 0; i < tabModel.count; i++) {
+            if(tabModel.get(i).title.toUpperCase() === callsign.toUpperCase()) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    function focusOrCreateTab(callsign) {
+        var idx = findChatTab(callsign)
+        if(idx === -1) {
+            tabModel.append({title: callsign.toUpperCase(), disposable: true})
+            idx = findChatTab(callsign)
+            cliModel.append({tabId: idx, attributes: [], realName: false})
+            tabListView.currentIndex = idx
+            currentTab = idx
+            networkManager.requestRealName(callsign)
+            return idx
+        } else {
+            tabListView.currentIndex = idx
+            currentTab = idx
+            return idx
+        }
     }
 
     Rectangle {
@@ -596,7 +648,12 @@ Window {
                         MouseArea {
                             anchors.fill: btnClose
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: tabModel.remove(itemIndex)
+                            onClicked: {
+                                view.currentIndex = 0
+                                currentTab = 0
+                                cliModel.remove(itemIndex)
+                                tabModel.remove(itemIndex)
+                            }
                         }
                     }
 
@@ -613,6 +670,7 @@ Window {
             }
 
             ListView {
+                id: tabListView
                 model: tabModel
                 delegate: tabDelegate
                 anchors.fill: parent
@@ -668,7 +726,6 @@ Window {
                                 rightPadding: 10
                                 bottomPadding: 5
                                 visible: tabId === currentTab
-
 
                                 ListView {
                                     id: listView
@@ -737,7 +794,7 @@ Window {
                                         cliTextField.clear()
                                     }
                                     if(event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
-                                        var cmd = cliTextField.text.split(" ");
+                                        var cmd = cliTextField.text.split(" ").filter(function(i) { return i })
 
                                         try {
 
@@ -745,64 +802,104 @@ Window {
                                                 throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
                                             }
 
-                                            switch(currentTab) {
-                                            case 0:
-                                                // radio messages
-                                                switch(cmd[0].toLowerCase())
-                                                {
-                                                case ".clear":
-                                                    clearMessages()
-                                                    cliTextField.clear()
-                                                    break;
-                                                case ".msg":
-                                                case ".chat":
-                                                    break;
-                                                case ".wallop":
-                                                    break;
-                                                case ".wx":
-                                                case ".metar":
-                                                    break;
-                                                case ".atis":
-                                                    break;
-                                                case ".com1":
-                                                case ".com2":
-                                                    if (!/^1\d\d[\.\,]\d{1,3}$/.test(cmd[1])) {
-                                                        throw "Invalid frequency format.";
+                                            if(currentTab == 0) {
+                                                if(cliTextField.text.startsWith(".")) {
+                                                    // radio messages
+                                                    switch(cmd[0].toLowerCase())
+                                                    {
+                                                    case ".clear":
+                                                        clearMessages()
+                                                        cliTextField.clear()
+                                                        break;
+                                                    case ".chat":
+                                                        if(cmd.length < 2) {
+                                                            throw "Not enough parameters. Expected .chat CALLSIGN"
+                                                        }
+                                                        if(cmd[1].length > 10) {
+                                                            throw "Callsign too long."
+                                                        }
+                                                        focusOrCreateTab(cmd[1])
+                                                        cliTextField.clear()
+                                                        break;
+                                                    case ".msg":
+                                                        if(cmd.length < 3) {
+                                                            throw "Not enough parameters. Expected .msg CALLSIGN MESSAGE"
+                                                        }
+                                                        if(!networkConnected) {
+                                                            throw "Not connected to network."
+                                                        }
+                                                        if(cmd[1].length > 10) {
+                                                            throw "Callsign too long."
+                                                        }
+                                                        focusOrCreateTab(cmd[1])
+                                                        cliTextField.clear()
+                                                        break;
+                                                    case ".wallop":
+                                                        if(cmd.length < 2) {
+                                                            throw "Not enough parameters. Expected .wallop MESSAGE"
+                                                        }
+                                                        break;
+                                                    case ".wx":
+                                                    case ".metar":
+                                                        if(cmd.length < 2) {
+                                                            throw `Not enough parameters. Expected ${cmd[0]} STATION-ID`
+                                                        }
+                                                        break;
+                                                    case ".atis":
+                                                        if(cmd.length < 2) {
+                                                            throw `Not enough parameters. Expected .atis CALLSIGN`
+                                                        }
+                                                        break;
+                                                    case ".com1":
+                                                    case ".com2":
+                                                        if (!/^1\d\d[\.\,]\d{1,3}$/.test(cmd[1])) {
+                                                            throw "Invalid frequency format.";
+                                                        }
+                                                        var freq = FrequencyUtils.frequencyToInt(cmd[1])
+                                                        var radio = cmd[0].toLowerCase() === ".com1" ? 1 : 2
+                                                        if(radio === 1) {
+                                                            udpClient.setCom1Frequency(freq);
+                                                        }
+                                                        else {
+                                                            udpClient.setCom2Frequency(freq);
+                                                        }
+                                                        cliTextField.clear()
+                                                        break;
+                                                    case ".tx":
+                                                        break;
+                                                    case ".rx":
+                                                        break;
+                                                    case ".x":
+                                                    case ".xpndr":
+                                                    case ".xpdr":
+                                                    case ".squawk":
+                                                    case ".sq":
+                                                        if(cmd.length < 2) {
+                                                            throw `Not enough parameters. Expected ${cmd[0]} SQUAWK-CODE`
+                                                        }
+                                                        if (!/^[0-7]{4}$/.test(cmd[1])) {
+                                                            throw "Invalid transponder code format.";
+                                                        }
+                                                        var code = parseInt(cmd[1])
+                                                        udpClient.setTransponderCode(code)
+                                                        cliTextField.clear()
+                                                        break;
+                                                    case ".towerview":
+                                                        break;
+                                                    default:
+                                                        throw `Unknown command: ${cmd[0].toLowerCase()}`
                                                     }
-                                                    var freq = FrequencyUtils.frequencyToInt(cmd[1])
-                                                    var radio = cmd[0].toLowerCase() === ".com1" ? 1 : 2
-                                                    if(radio === 1) {
-                                                        udpClient.setCom1Frequency(freq);
-                                                    }
-                                                    else {
-                                                        udpClient.setCom2Frequency(freq);
-                                                    }
-                                                    cliTextField.clear()
-                                                    break;
-                                                case ".tx":
-                                                    break;
-                                                case ".rx":
-                                                    break;
-                                                case ".x":
-                                                case ".xpndr":
-                                                case ".xpdr":
-                                                case ".squawk":
-                                                    if (!/^[0-7]{4}$/.test(cmd[1])) {
-                                                        throw "Invalid transponder code format.";
-                                                    }
-                                                    var code = parseInt(cmd[1])
-                                                    udpClient.setTransponderCode(code)
-                                                    cliTextField.clear()
-                                                    break;
-                                                case ".towerview":
-                                                    break;
-                                                default:
-                                                    appendMessage(cliTextField.text)
-                                                    cliTextField.clear()
-                                                    break;
                                                 }
-                                                break;
-                                            case 1:
+                                                else {
+                                                    if(!networkConnected) {
+                                                        throw "Not connected to network."
+                                                    }
+                                                    networkManager.sendRadioMessage(cliTextField.text)
+                                                    appendMessage(cliTextField.text, colorCyan)
+                                                    cliTextField.clear()
+                                                }
+                                            }
+                                            else if(currentTab == 1) {
                                                 // notes
                                                 switch(cmd[0].toLowerCase())
                                                 {
@@ -815,14 +912,22 @@ Window {
                                                     cliTextField.clear()
                                                     break;
                                                 }
-                                                break;
-                                            default:
-                                                // private message
-                                                break;
+                                            }
+                                            else {
+                                                if(!networkConnected) {
+                                                    appendPrivateMessage(currentTab, "Not connected to network.", "", colorRed)
+                                                    errorSound.play()
+                                                }
+                                                else {
+                                                    appendPrivateMessage(currentTab, cliTextField.text, ourCallsign, colorCyan)
+                                                    var callsign = tabModel.get(currentTab).title;
+                                                    networkManager.sendPrivateMessage(callsign, cliTextField.text)
+                                                    cliTextField.clear()
+                                                }
                                             }
                                         }
                                         catch(err) {
-                                            appendErrorMessage(err)
+                                            appendMessage(err, colorRed)
                                         }
                                     }
                                 }

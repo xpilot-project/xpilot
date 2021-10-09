@@ -9,9 +9,11 @@ class PDUATCPosition : public PDUBase
 public:
     PDUATCPosition(QString from, int freq, NetworkFacility facility, int visRange, NetworkRating rating, double lat, double lon);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUATCPosition Parse(QStringList fields);
+    static PDUATCPosition fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "%"; }
 
     int Frequency;
     NetworkFacility Facility;
@@ -19,6 +21,9 @@ public:
     NetworkRating Rating;
     double Lat;
     double Lon;
+
+private:
+    PDUATCPosition();
 };
 
 #endif

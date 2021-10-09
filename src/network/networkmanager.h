@@ -24,9 +24,11 @@ namespace xpilot
 
         Q_INVOKABLE void connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer);
         Q_INVOKABLE void disconnectFromNetwork();
+        Q_INVOKABLE void sendRadioMessage(QString message);
+        Q_INVOKABLE void sendPrivateMessage(QString to, QString message);
+        Q_INVOKABLE void requestRealName(QString callsign);
 
         void RequestMetar(QString station);
-        void RequestRealName(QString callsign);
         void RequestIsValidATC(QString callsign);
         void RequestCapabilities(QString callsign);
         void SendAircraftConfigurationUpdate(QString to, AircraftConfiguration config);
@@ -34,7 +36,7 @@ namespace xpilot
         void SendCapabilities(QString to);
 
     signals:
-        void networkConnected();
+        void networkConnected(QString callsign);
         void networkDisconnected();
         void notificationPosted(int type, QString message);
         void metarReceived(QString from, QString metar);
@@ -47,6 +49,8 @@ namespace xpilot
         void selcalAlertReceived(QString from, QList<uint> frequencies);
         void aircraftConfigurationInfoReceived(QString from, QString json);
         void controllerUpdateReceived(QString from, uint frequency, double lat, double lon);
+        void isValidAtcReceived(QString callsign);
+        void realNameReceived(QString callsign, QString name);
 
     private:
         FsdClient m_fsd { this };
@@ -61,6 +65,7 @@ namespace xpilot
         bool m_forcedDisconnect = false;
         QString m_forcedDisconnectReason = "";
         bool m_velocityEnabled = false;
+        QList<uint> m_transmitFreqs;
 
         void OnNetworkError(QString error);
         void OnNetworkConnected();

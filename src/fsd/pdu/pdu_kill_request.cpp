@@ -1,30 +1,27 @@
 #include "pdu_kill_request.h"
 
+PDUKillRequest::PDUKillRequest() : PDUBase() {}
+
 PDUKillRequest::PDUKillRequest(QString from, QString victim, QString reason) :
     PDUBase(from, victim)
 {
     Reason = reason;
 }
 
-QString PDUKillRequest::Serialize()
+QStringList PDUKillRequest::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("$!!");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append(Reason);
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUKillRequest PDUKillRequest::Parse(QStringList fields)
+PDUKillRequest PDUKillRequest::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 2) {
-
+    if(tokens.length() < 2) {
+        return {};
     }
 
-    return PDUKillRequest(fields[0], fields[1], fields.length() > 2 ? fields[2] : "");
+    return PDUKillRequest(tokens[0], tokens[1], tokens.length() > 2 ? tokens[2] : "");
 }

@@ -1,30 +1,27 @@
 #include "pdu_metar_response.h"
 
+PDUMetarResponse::PDUMetarResponse() : PDUBase() {}
+
 PDUMetarResponse::PDUMetarResponse(QString to, QString metar) :
     PDUBase(ServerCallsign, to)
 {
     Metar = metar;
 }
 
-QString PDUMetarResponse::Serialize()
+QStringList PDUMetarResponse::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("$AR");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append(Metar);
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUMetarResponse PDUMetarResponse::Parse(QStringList fields)
+PDUMetarResponse PDUMetarResponse::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 4) {
-
+    if(tokens.length() < 4) {
+        return {};
     }
 
-    return PDUMetarResponse(fields[1], fields[3]);
+    return PDUMetarResponse(tokens[1], tokens[3]);
 }

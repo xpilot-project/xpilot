@@ -9,11 +9,16 @@ class PDUDeleteATC : public PDUBase
 public:
     PDUDeleteATC(QString from, QString cid);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUDeleteATC Parse(QStringList fields);
+    static PDUDeleteATC fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "#DA"; }
 
     QString CID;
+
+private:
+    PDUDeleteATC();
 };
 
 #endif

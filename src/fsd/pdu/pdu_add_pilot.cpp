@@ -1,5 +1,7 @@
 #include "pdu_add_pilot.h"
 
+PDUAddPilot::PDUAddPilot() : PDUBase() {}
+
 PDUAddPilot::PDUAddPilot(QString callsign, QString cid, QString password, NetworkRating rating, ProtocolRevision proto, SimulatorType simType, QString realName) :
     PDUBase(callsign, "")
 {
@@ -11,37 +13,28 @@ PDUAddPilot::PDUAddPilot(QString callsign, QString cid, QString password, Networ
     RealName = realName;
 }
 
-QString PDUAddPilot::Serialize()
+QStringList PDUAddPilot::toTokens() const
 {
     QStringList tokens;
 
-    tokens.append("#AP");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(PDUBase::ServerCallsign);
-    tokens.append(Delimeter);
     tokens.append(CID);
-    tokens.append(Delimeter);
     tokens.append(Password);
-    tokens.append(Delimeter);
     tokens.append(toQString(Rating));
-    tokens.append(Delimeter);
     tokens.append(toQString(Protocol));
-    tokens.append(Delimeter);
     tokens.append(toQString(SimType));
-    tokens.append(Delimeter);
     tokens.append(RealName);
 
-    return tokens.join("");
+    return tokens;
 }
 
-PDUAddPilot PDUAddPilot::Parse(QStringList fields)
+PDUAddPilot PDUAddPilot::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 8)
-    {
-
+    if(tokens.size() < 8) {
+        return {};
     }
 
-    return PDUAddPilot(fields[0], fields[2], fields[3], fromQString<NetworkRating>(fields[4]),
-            fromQString<ProtocolRevision>(fields[5]), fromQString<SimulatorType>(fields[6]), fields[7]);
+    return PDUAddPilot(tokens[0], tokens[2], tokens[3], fromQString<NetworkRating>(tokens[4]),
+            fromQString<ProtocolRevision>(tokens[5]), fromQString<SimulatorType>(tokens[6]), tokens[7]);
 }

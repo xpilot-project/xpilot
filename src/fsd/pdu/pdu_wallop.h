@@ -9,11 +9,16 @@ class PDUWallop: public PDUBase
 public:
     PDUWallop(QString from, QString message);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUWallop Parse(QStringList fields);
+    static PDUWallop fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "#TM"; }
 
     QString Message;
+
+private:
+    PDUWallop();
 };
 
 #endif

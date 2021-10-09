@@ -10,15 +10,20 @@ namespace xpilot
         m_networkManager(networkManager)
     {
         connect(&m_networkManager, &NetworkManager::controllerUpdateReceived, this, &ControllerManager::OnControllerUpdateReceived);
+        connect(&m_networkManager, &NetworkManager::isValidAtcReceived, this, &ControllerManager::IsValidATCReceived);
     }
 
     void ControllerManager::OnControllerUpdateReceived(QString from, uint frequency, double lat, double lon)
     {
-        auto controllerIt = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
+        auto itr = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
             return n.Callsign == from;
         });
 
-        if(controllerIt == m_controllers.end()) {
+        if(itr == m_controllers.end())
+        {
+            qDebug() << "Frequency=" << frequency;
+            qDebug() << "NormalizedFrequency=" << Normalize25KhzFsdFrequency(frequency);
+
             Controller controller {};
             controller.Callsign = from.toUpper();
             controller.Frequency = frequency;
@@ -29,35 +34,58 @@ namespace xpilot
             controller.LastUpdate = QDateTime::currentSecsSinceEpoch();
             m_controllers.push_back(controller);
 
-            m_networkManager.RequestRealName(from);
+            m_networkManager.requestRealName(from);
             m_networkManager.RequestIsValidATC(from);
             m_networkManager.RequestCapabilities(from);
         }
         else
         {
-            bool isValid = controllerIt->IsValid;
-            bool hasFrequencyChanged = (uint)frequency != controllerIt->Frequency;
-            bool hasLocationChanged = lat != controllerIt->Latitude || lon != controllerIt->Longitude;
-            controllerIt->Frequency = frequency;
-            controllerIt->Latitude = lat;
-            controllerIt->Longitude = lon;
-            controllerIt->LastUpdate = QDateTime::currentSecsSinceEpoch();
-            ValidateController(*controllerIt);
+            bool isValid = itr->IsValid;
+            bool hasFrequencyChanged = (uint)frequency != itr->Frequency;
+            bool hasLocationChanged = lat != itr->Latitude || lon != itr->Longitude;
+            itr->Frequency = frequency;
+            itr->Latitude = lat;
+            itr->Longitude = lon;
+            itr->LastUpdate = QDateTime::currentSecsSinceEpoch();
+            ValidateController(*itr);
+            if(isValid && itr->IsValid)
+            {
+                if(hasFrequencyChanged)
+                {
+
+                }
+                if(hasLocationChanged)
+                {
+
+                }
+            }
+        }
+    }
+
+    void ControllerManager::IsValidATCReceived(QString callsign)
+    {
+        auto itr = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
+            return n.Callsign == callsign;
+        });
+        if(itr != m_controllers.end())
+        {
+            itr->IsValidATC = true;
+            ValidateController(*itr);
         }
     }
 
     void ControllerManager::ValidateController(Controller &controller)
     {
-//        bool isValid = controller.IsValid;
-//        controller.IsValid = controller.IsValidATC && (controller.Frequency >= 18000 && controller.Frequency <= 36975);
-//        if(isValid && !controller.IsValid)
-//        {
-//            emit controllerDeleted(controller);
-//            m_controllers.removeAll(controller);
-//        }
-//        else if(!isValid && controller.IsValid)
-//        {
-//            emit controllerAdded(controller);
-//        }
+        bool isValid = controller.IsValid;
+        controller.IsValid = controller.IsValidATC && (controller.Frequency >= 118000 && controller.Frequency <= 136975);
+        if(isValid && !controller.IsValid)
+        {
+            emit controllerDeleted(controller);
+            m_controllers.removeAll(controller);
+        }
+        else if(!isValid && controller.IsValid)
+        {
+            emit controllerAdded(controller);
+        }
     }
 }

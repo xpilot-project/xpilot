@@ -9,11 +9,16 @@ class PDUMetarResponse: public PDUBase
 public:
     PDUMetarResponse(QString to, QString metar);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUMetarResponse Parse(QStringList fields);
+    static PDUMetarResponse fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "$AR"; }
 
     QString Metar;
+
+private:
+    PDUMetarResponse();
 };
 
 #endif

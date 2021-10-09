@@ -1,5 +1,7 @@
 #include "pdu_server_identification.h"
 
+PDUServerIdentification::PDUServerIdentification() : PDUBase() {}
+
 PDUServerIdentification::PDUServerIdentification(QString from, QString to, QString version, QString initialChallengeKey)
     : PDUBase(from, to)
 {
@@ -7,27 +9,21 @@ PDUServerIdentification::PDUServerIdentification(QString from, QString to, QStri
     InitialChallengeKey = initialChallengeKey;
 }
 
-QString PDUServerIdentification::Serialize()
+QStringList PDUServerIdentification::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("$DI");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append(Version);
-    tokens.append(Delimeter);
     tokens.append(InitialChallengeKey);
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUServerIdentification PDUServerIdentification::Parse(QStringList fields)
+PDUServerIdentification PDUServerIdentification::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 4) {
-
+    if(tokens.length() < 4) {
+        return {};
     }
 
-    return PDUServerIdentification(fields[0], fields[1], fields[2], fields[3]);
+    return PDUServerIdentification(tokens[0], tokens[1], tokens[2], tokens[3]);
 }

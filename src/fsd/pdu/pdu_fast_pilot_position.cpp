@@ -1,23 +1,17 @@
 #include "pdu_fast_pilot_position.h"
 
+PDUFastPilotPosition::PDUFastPilotPosition() : PDUBase() {}
+
 PDUFastPilotPosition::PDUFastPilotPosition(QString from, double lat, double lon, double alt, double pitch, double heading, double bank, double velocityLongitude, double velocityAltitude, double velocityLatitude, double velocityPitch, double velocityHeading, double velocityBank) :
     PDUBase(from, "")
 {
-    if(isnan(lat)) {
-
-    }
-
-    if(isnan(lon)) {
-
-    }
-
     Lat = lat;
     Lon = lon;
     Altitude = alt;
     Pitch = pitch;
     Heading = heading;
     Bank = bank;
-    VelocityLongitude = velocityLongitude;
+    Bank = velocityLongitude;
     VelocityAltitude = velocityAltitude;
     VelocityLatitude = velocityLatitude;
     VelocityPitch = velocityPitch;
@@ -25,48 +19,35 @@ PDUFastPilotPosition::PDUFastPilotPosition(QString from, double lat, double lon,
     VelocityBank = velocityBank;
 }
 
-QString PDUFastPilotPosition::Serialize()
+QStringList PDUFastPilotPosition::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("^");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(QString::number(Lat, 'f', 6));
-    tokens.append(Delimeter);
     tokens.append(QString::number(Lon, 'f', 6));
-    tokens.append(Delimeter);
     tokens.append(QString::number(Altitude, 'f', 2));
-    tokens.append(Delimeter);
     tokens.append(QString::number(PackPitchBankHeading(Pitch, Bank, Heading)));
-    tokens.append(Delimeter);
-    tokens.append(QString::number(VelocityLongitude, 'f', 4));
-    tokens.append(Delimeter);
+    tokens.append(QString::number(Bank, 'f', 4));
     tokens.append(QString::number(VelocityAltitude, 'f', 4));
-    tokens.append(Delimeter);
     tokens.append(QString::number(VelocityLatitude, 'f', 4));
-    tokens.append(Delimeter);
     tokens.append(QString::number(VelocityPitch, 'f', 4));
-    tokens.append(Delimeter);
     tokens.append(QString::number(VelocityHeading, 'f', 4));
-    tokens.append(Delimeter);
     tokens.append(QString::number(VelocityBank, 'f', 4));
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUFastPilotPosition PDUFastPilotPosition::Parse(QStringList fields)
+PDUFastPilotPosition PDUFastPilotPosition::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 10) {
-
+    if(tokens.length() < 10) {
+        return {};
     }
 
     double pitch;
     double bank;
     double heading;
-    UnpackPitchBankHeading(fields[4].toUInt(), pitch, bank, heading);
+    UnpackPitchBankHeading(tokens[4].toUInt(), pitch, bank, heading);
 
-    return PDUFastPilotPosition(fields[0], fields[1].toDouble(), fields[2].toDouble(), fields[3].toDouble(),
-            pitch, heading, bank, fields[5].toDouble(), fields[6].toDouble(), fields[7].toDouble(),
-            fields[8].toDouble(), fields[9].toDouble(), fields[10].toDouble());
+    return PDUFastPilotPosition(tokens[0], tokens[1].toDouble(), tokens[2].toDouble(), tokens[3].toDouble(),
+            pitch, heading, bank, tokens[5].toDouble(), tokens[6].toDouble(), tokens[7].toDouble(),
+            tokens[8].toDouble(), tokens[9].toDouble(), tokens[10].toDouble());
 }

@@ -9,12 +9,17 @@ class PDUClientQueryResponse : public PDUBase
 public:
     PDUClientQueryResponse(QString from, QString to, ClientQueryType queryType, QStringList payload);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUClientQueryResponse Parse(QStringList fields);
+    static PDUClientQueryResponse fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "$CR"; }
 
     ClientQueryType QueryType;
     QStringList Payload;
+
+private:
+    PDUClientQueryResponse();
 };
 
 #endif

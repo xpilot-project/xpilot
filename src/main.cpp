@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
     context->setContextProperty("networkManager", &networkManager);
     context->setContextProperty("udpClient", &udpClient);
     context->setContextProperty("serverList", &serverList);
+    context->setContextProperty("controllerManager", &controllerManager);
     qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", singletonTypeProvider);
     qRegisterMetaType<ConnectInfo>("ConnectInfo");
     qRegisterMetaType<ClientWindowConfig>("ClientWindowConfig");

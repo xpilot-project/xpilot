@@ -1,5 +1,7 @@
 #include "pdu_protocol_error.h"
 
+PDUProtocolError::PDUProtocolError() : PDUBase() {}
+
 PDUProtocolError::PDUProtocolError(QString from, QString to, NetworkError type, QString param, QString msg, bool fatal) :
     PDUBase(from, to)
 {
@@ -9,31 +11,24 @@ PDUProtocolError::PDUProtocolError(QString from, QString to, NetworkError type, 
     Fatal = fatal;
 }
 
-QString PDUProtocolError::Serialize()
+QStringList PDUProtocolError::toTokens() const
 {
     QStringList tokens;
-
-    tokens.append("$ER");
     tokens.append(From);
-    tokens.append(Delimeter);
     tokens.append(To);
-    tokens.append(Delimeter);
     tokens.append(QString::number(static_cast<int>(ErrorType)));
-    tokens.append(Delimeter);
     tokens.append(Param);
-    tokens.append(Delimeter);
     tokens.append(Message);
-
-    return tokens.join("");
+    return tokens;
 }
 
-PDUProtocolError PDUProtocolError::Parse(QStringList fields)
+PDUProtocolError PDUProtocolError::fromTokens(const QStringList &tokens)
 {
-    if(fields.length() < 5) {
-
+    if(tokens.length() < 5) {
+        return {};
     }
 
-    NetworkError err = static_cast<NetworkError>(fields[2].toInt());
+    NetworkError err = static_cast<NetworkError>(tokens[2].toInt());
     bool fatal = ((err == NetworkError::CallsignInUse) ||
                   (err == NetworkError::CallsignInvalid) ||
                   (err == NetworkError::AlreadyRegistered) ||
@@ -45,5 +40,5 @@ PDUProtocolError PDUProtocolError::Parse(QStringList fields)
                   (err == NetworkError::InvalidPositionForRating) ||
                   (err == NetworkError::UnauthorizedSoftware));
 
-    return PDUProtocolError(fields[0], fields[1], err, fields[3], fields[4], fatal);
+    return PDUProtocolError(tokens[0], tokens[1], err, tokens[3], tokens[4], fatal);
 }

@@ -1,23 +1,31 @@
 #ifndef PDU_ADDATC_H
 #define PDU_ADDATC_H
 
-#include <QString>
 #include "pdu_base.h"
+
+#include <QString>
+#include <QStringList>
+#include <QVector>
 
 class PDUAddATC : public PDUBase
 {
 public:
     PDUAddATC(QString callsign, QString realName, QString cid, QString password, NetworkRating rating, ProtocolRevision proto);
 
-    QString Serialize() override;
+    QStringList toTokens() const;
 
-    static PDUAddATC Parse(QStringList fields);
+    static PDUAddATC fromTokens(const QStringList& fields);
+
+    static QString pdu() { return "#AA"; }
 
     QString RealName;
     QString CID;
     QString Password;
     NetworkRating Rating;
     ProtocolRevision Protocol;
+
+private:
+    PDUAddATC();
 };
 
 #endif
