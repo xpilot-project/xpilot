@@ -49,7 +49,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     QTimer *heartbeatTimer = new QTimer(this);
     connect(heartbeatTimer, &QTimer::timeout, this, [=] {
         qint64 now = QDateTime::currentSecsSinceEpoch();
-        if((now - m_lastUdpTimestamp) > 15) {
+        if((now - m_lastUdpTimestamp) > 5) {
             emit simConnectionStateChanged(false);
             m_simConnected = false;
             m_radioStackState = {};
