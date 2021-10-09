@@ -19,7 +19,7 @@
 #include "controllers/controller_manager.h"
 #include "network/networkmanager.h"
 #include "network/networkserverlist.h"
-#include "simulator/udpclient.h"
+#include "simulator/xplane_adapter.h"
 #include "aircrafts/user_aircraft_manager.h"
 #include "aircrafts/radio_stack_state.h"
 #include "version.h"
@@ -44,11 +44,11 @@ int main(int argc, char *argv[])
     QQmlContext *context = engine.rootContext();
 
     AppCore appCore;
-    UdpClient udpClient;
-    NetworkManager networkManager(udpClient);
+    XplaneAdapter xplaneAdapter;
+    NetworkManager networkManager(xplaneAdapter);
     ControllerManager controllerManager(networkManager);
     NetworkServerList serverList;
-    UserAircraftManager aircraftManager(udpClient, networkManager);
+    UserAircraftManager aircraftManager(xplaneAdapter, networkManager);
 
 #ifdef WIN32
     WORD wVersionRequested;
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
     context->setContextProperty("appCore", &appCore);
     context->setContextProperty("networkManager", &networkManager);
-    context->setContextProperty("udpClient", &udpClient);
+    context->setContextProperty("xplaneAdapter", &xplaneAdapter);
     context->setContextProperty("serverList", &serverList);
     context->setContextProperty("controllerManager", &controllerManager);
     qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", singletonTypeProvider);

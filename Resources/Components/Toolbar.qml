@@ -12,7 +12,7 @@ GridLayout {
     property bool networkConnected: false    
 
     Connections {
-        target: udpClient
+        target: xplaneAdapter
 
         function onSimConnectionStateChanged(state) {
             simConnected = state;

@@ -3,11 +3,11 @@
 
 using namespace xpilot;
 
-UserAircraftManager::UserAircraftManager(UdpClient& udpClient, NetworkManager& networkManager, QObject* parent) :
+UserAircraftManager::UserAircraftManager(XplaneAdapter& udpClient, NetworkManager& networkManager, QObject* parent) :
     QObject(parent),
     m_networkManager(networkManager)
 {
-    connect(&udpClient, &UdpClient::userAircraftDataChanged, this, &UserAircraftManager::OnUserAircraftDataUpdated);
+    connect(&udpClient, &XplaneAdapter::userAircraftDataChanged, this, &UserAircraftManager::OnUserAircraftDataUpdated);
     connect(&m_networkManager, &NetworkManager::aircraftConfigurationInfoReceived, this, &UserAircraftManager::OnAircraftConfigurationInfoReceived);
 
     QTimer* tokenRefreshTimer = new QTimer(this);

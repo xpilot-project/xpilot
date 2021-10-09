@@ -10,7 +10,7 @@
 
 namespace xpilot
 {
-    NetworkManager::NetworkManager(UdpClient &udpClient, QObject *owner) : QObject(owner)
+    NetworkManager::NetworkManager(XplaneAdapter &udpClient, QObject *owner) : QObject(owner)
     {
         connect(&m_fsd, &FsdClient::RaiseNetworkError, this, &NetworkManager::OnNetworkError);
         connect(&m_fsd, &FsdClient::RaiseNetworkConnected, this, &NetworkManager::OnNetworkConnected);
@@ -38,9 +38,9 @@ namespace xpilot
             qDebug() << "<< " << data;
         });
 
-        connect(&udpClient, &UdpClient::userAircraftDataChanged, this, &NetworkManager::OnUserAircraftDataUpdated);
-        connect(&udpClient, &UdpClient::userAircraftConfigDataChanged, this, &NetworkManager::OnUserAircraftConfigDataUpdated);
-        connect(&udpClient, &UdpClient::radioStackStateChanged, this, &NetworkManager::OnRadioStackStateChanged);
+        connect(&udpClient, &XplaneAdapter::userAircraftDataChanged, this, &NetworkManager::OnUserAircraftDataUpdated);
+        connect(&udpClient, &XplaneAdapter::userAircraftConfigDataChanged, this, &NetworkManager::OnUserAircraftConfigDataUpdated);
+        connect(&udpClient, &XplaneAdapter::radioStackStateChanged, this, &NetworkManager::OnRadioStackStateChanged);
 
         m_slowPositionTimer = new QTimer(this);
         connect(m_slowPositionTimer, &QTimer::timeout, this, &NetworkManager::OnSlowPositionTimerElapsed);

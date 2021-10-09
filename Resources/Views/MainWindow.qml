@@ -173,7 +173,7 @@ Window {
     }
 
     Connections {
-        target: udpClient
+        target: xplaneAdapter
         function onSimConnectionStateChanged(state) {
             if(!simConnected && state) {
                 appendMessage("X-Plane connection established.", colorYellow)
@@ -858,10 +858,10 @@ Window {
                                                         var freq = FrequencyUtils.frequencyToInt(cmd[1])
                                                         var radio = cmd[0].toLowerCase() === ".com1" ? 1 : 2
                                                         if(radio === 1) {
-                                                            udpClient.setCom1Frequency(freq);
+                                                            xplaneAdapter.setCom1Frequency(freq);
                                                         }
                                                         else {
-                                                            udpClient.setCom2Frequency(freq);
+                                                            xplaneAdapter.setCom2Frequency(freq);
                                                         }
                                                         cliTextField.clear()
                                                         break;
@@ -881,7 +881,7 @@ Window {
                                                             throw "Invalid transponder code format.";
                                                         }
                                                         var code = parseInt(cmd[1])
-                                                        udpClient.setTransponderCode(code)
+                                                        xplaneAdapter.setTransponderCode(code)
                                                         cliTextField.clear()
                                                         break;
                                                     case ".towerview":

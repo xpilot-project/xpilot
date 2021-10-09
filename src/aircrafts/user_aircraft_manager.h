@@ -5,7 +5,7 @@
 #include <optional>
 
 #include "src/network/networkmanager.h"
-#include "src/simulator/udpclient.h"
+#include "src/simulator/xplane_adapter.h"
 #include "src/aircrafts/user_aircraft_data.h"
 #include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/aircraft_configuration.h"
@@ -16,7 +16,7 @@ class UserAircraftManager : public QObject
 {
     Q_OBJECT
 public:
-    UserAircraftManager(UdpClient& udpClient, NetworkManager& networkManager, QObject* parent = nullptr);
+    UserAircraftManager(XplaneAdapter& udpClient, NetworkManager& networkManager, QObject* parent = nullptr);
 
 private:
     void OnUserAircraftDataUpdated(UserAircraftData data);

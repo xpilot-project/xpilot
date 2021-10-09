@@ -7,7 +7,7 @@
 
 #include "connectinfo.h"
 #include "src/fsd/fsd_client.h"
-#include "src/simulator/udpclient.h"
+#include "src/simulator/xplane_adapter.h"
 #include "src/aircrafts/user_aircraft_data.h"
 #include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/aircraft_configuration.h"
@@ -20,7 +20,7 @@ namespace xpilot
         Q_OBJECT
 
     public:
-        NetworkManager(UdpClient& udpClient, QObject *owner = nullptr);
+        NetworkManager(XplaneAdapter& udpClient, QObject *owner = nullptr);
 
         Q_INVOKABLE void connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer);
         Q_INVOKABLE void disconnectFromNetwork();

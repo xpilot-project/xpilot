@@ -17,7 +17,7 @@ ColumnLayout {
     property var radioStackState;
 
     Connections {
-        target: udpClient
+        target: xplaneAdapter
 
         function onSimConnectionStateChanged(state) {
             simConnected = state;

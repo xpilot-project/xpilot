@@ -125,8 +125,8 @@ set(PROJECT_SOURCES
     src/network/networkserverlist.cpp
     src/network/nearbyatc.h
     src/network/events/radio_message_received.h
-    src/simulator/udpclient.h
-    src/simulator/udpclient.cpp
+    src/simulator/xplane_adapter.h
+    src/simulator/xplane_adapter.cpp
     src/aircrafts/aircraft.h
     src/aircrafts/aircraft_visual_state.h
     src/aircrafts/velocity_vector.h

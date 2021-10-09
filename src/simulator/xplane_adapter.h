@@ -18,12 +18,12 @@
 #include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/radio_stack_state.h"
 
-class UdpClient : public QObject
+class XplaneAdapter : public QObject
 {
     Q_OBJECT
 
 public:
-    UdpClient(QObject* parent = nullptr);
+    XplaneAdapter(QObject* parent = nullptr);
 
     Q_INVOKABLE void setTransponderCode(int code);
     Q_INVOKABLE void setCom1Frequency(float freq);

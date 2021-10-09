@@ -1,4 +1,4 @@
-#include "udpclient.h"
+#include "xplane_adapter.h"
 
 #include <QTimer>
 #include <QtEndian>
@@ -41,10 +41,10 @@ enum DataRef
     PushToTalk
 };
 
-UdpClient::UdpClient(QObject* parent) : QObject(parent)
+XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 {
     socket = new QUdpSocket(this);
-    connect(socket, &QUdpSocket::readyRead, this, &UdpClient::OnDataReceived);
+    connect(socket, &QUdpSocket::readyRead, this, &XplaneAdapter::OnDataReceived);
 
     QTimer *heartbeatTimer = new QTimer(this);
     connect(heartbeatTimer, &QTimer::timeout, this, [=] {
@@ -76,7 +76,7 @@ UdpClient::UdpClient(QObject* parent) : QObject(parent)
     Subscribe();
 }
 
-void UdpClient::Subscribe()
+void XplaneAdapter::Subscribe()
 {
     SubscribeDataRef("sim/cockpit2/switches/avionics_power_on", DataRef::AvionicsPower, 5);
     SubscribeDataRef("sim/cockpit2/radios/actuators/audio_com_selection", DataRef::AudioComSelection, 5);
@@ -113,7 +113,7 @@ void UdpClient::Subscribe()
     SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 5);
 }
 
-void UdpClient::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
+void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
 {
     QByteArray data;
 
@@ -127,7 +127,7 @@ void UdpClient::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t freq
     socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, 49000);
 }
 
-void UdpClient::setDataRefValue(std::string dataRef, float value)
+void XplaneAdapter::setDataRefValue(std::string dataRef, float value)
 {
     QByteArray data;
 
@@ -140,7 +140,7 @@ void UdpClient::setDataRefValue(std::string dataRef, float value)
     socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, 49000);
 }
 
-void UdpClient::sendCommand(std::string command)
+void XplaneAdapter::sendCommand(std::string command)
 {
     QByteArray data;
 
@@ -152,27 +152,27 @@ void UdpClient::sendCommand(std::string command)
     socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, 49000);
 }
 
-void UdpClient::setTransponderCode(int code)
+void XplaneAdapter::setTransponderCode(int code)
 {
     setDataRefValue("sim/cockpit2/radios/actuators/transponder_code", code);
 }
 
-void UdpClient::setCom1Frequency(float freq)
+void XplaneAdapter::setCom1Frequency(float freq)
 {
     setDataRefValue("sim/cockpit2/radios/actuators/com1_frequency_hz_833", freq);
 }
 
-void UdpClient::setCom2Frequency(float freq)
+void XplaneAdapter::setCom2Frequency(float freq)
 {
     setDataRefValue("sim/cockpit2/radios/actuators/com2_frequency_hz_833", freq);
 }
 
-void UdpClient::transponderIdent()
+void XplaneAdapter::transponderIdent()
 {
     sendCommand("sim/transponder/transponder_ident");
 }
 
-void UdpClient::transponderModeToggle()
+void XplaneAdapter::transponderModeToggle()
 {
     if(m_radioStackState.SquawkingModeC) {
         setDataRefValue("sim/cockpit/radios/transponder_mode", 0);
@@ -181,7 +181,7 @@ void UdpClient::transponderModeToggle()
     }
 }
 
-void UdpClient::OnDataReceived()
+void XplaneAdapter::OnDataReceived()
 {
     while(socket->hasPendingDatagrams())
     {
