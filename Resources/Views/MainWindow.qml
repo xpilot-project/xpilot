@@ -174,6 +174,7 @@ Window {
 
     Connections {
         target: xplaneAdapter
+
         function onSimConnectionStateChanged(state) {
             if(!simConnected && state) {
                 appendMessage("X-Plane connection established.", colorYellow)
@@ -185,6 +186,15 @@ Window {
                 errorSound.play()
             }
             simConnected = state;
+        }
+
+        function onReplayModeDetected() {
+            if(networkConnected) {
+                networkManager.disconnectFromNetwork()
+                appendMessage("You have been disconnected from the network becasue Replay Mode is enabled.", colorRed)
+                mainWindow.alert(0);
+                errorSound.play()
+            }
         }
     }
 

@@ -38,6 +38,7 @@ enum DataRef
     GearDown,
     FlapRatio,
     SpeedbrakeRatio,
+    ReplayMode,
     PushToTalk
 };
 
@@ -110,6 +111,7 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/cockpit/switches/gear_handle_status", DataRef::GearDown, 5);
     SubscribeDataRef("sim/flightmodel/controls/flaprat", DataRef::FlapRatio, 5);
     SubscribeDataRef("sim/cockpit2/controls/speedbrake_ratio", DataRef::SpeedbrakeRatio, 5);
+    SubscribeDataRef("sim/operation/prefs/replay_mode", DataRef::ReplayMode, 5);
     SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 5);
 }
 
@@ -299,6 +301,11 @@ void XplaneAdapter::OnDataReceived()
                     break;
                 case DataRef::SpeedbrakeRatio:
                     m_userAircraftConfigData.SpeedbrakeRatio = value;
+                    break;
+                case DataRef::ReplayMode:
+                    if(value > 0) {
+                        emit replayModeDetected();
+                    }
                     break;
                 }
             }

@@ -45,6 +45,7 @@ signals:
     void userAircraftDataChanged(UserAircraftData data);
     void userAircraftConfigDataChanged(UserAircraftConfigData data);
     void radioStackStateChanged(RadioStackState radioStack);
+    void replayModeDetected();
 
 private:
     QUdpSocket* socket;
