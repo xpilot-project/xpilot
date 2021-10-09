@@ -179,7 +179,10 @@ Window {
                 appendMessage("X-Plane connection established.", colorYellow)
             }
             else if(simConnected && !state) {
+                networkManager.disconnectFromNetwork()
                 appendMessage("X-Plane connection lost. Please make sure X-Plane is running and a flight is loaded.", colorRed)
+                mainWindow.alert(0);
+                errorSound.play()
             }
             simConnected = state;
         }
