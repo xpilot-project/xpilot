@@ -76,7 +76,7 @@ GridLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    udpClient.transponderModeToggle();
+                    xplaneAdapter.transponderModeToggle();
                 }
             }
         }
@@ -89,7 +89,7 @@ GridLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    udpClient.transponderIdent();
+                    xplaneAdapter.transponderIdent();
                 }
             }
         }
