@@ -44,6 +44,7 @@ namespace xpilot
         void pilotDeleted(QString from);
         void serverMessageReceived(QString message);
         void privateMessageReceived(QString from, QString message);
+        void privateMessageSent(QString from, QString message);
         void broadcastMessageReceived(QString from, QString message);
         void radioMessageReceived(RadioMessageReceived args);
         void selcalAlertReceived(QString from, QList<uint> frequencies);

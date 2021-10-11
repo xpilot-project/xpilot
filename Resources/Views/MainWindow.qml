@@ -247,7 +247,7 @@ Window {
         }
 
         function onRealNameReceived(callsign, name) {
-            var idx = findChatTab(callsign)
+            var idx = getChatTabIndex(callsign)
             if(idx > 0) {
                 var model = cliModel.get(idx)
                 if(!model.realName) {
@@ -258,9 +258,28 @@ Window {
         }
 
         function onPrivateMessageReceived(from, message) {
-            var idx = focusOrCreateTab(from)
-            if(idx > 0) {
-                appendPrivateMessage(idx, message, from, colorWhite)
+            var tab = getChatTabIndex(from)
+            if(tab === null) {
+                createChatTab(from)
+                tab = getChatTabIndex(from)
+                appendPrivateMessage(tab, message, from, colorWhite)
+                mainWindow.alert(0)
+                newMessageSound.play()
+            }
+            else {
+                if(currentTab !== tab) {
+                    markTabUnread(from)
+                }
+                appendPrivateMessage(tab, message, from, colorWhite)
+                mainWindow.alert(0)
+                privateMessageSound.play()
+            }
+        }
+
+        function onPrivateMessageSent(to, message) {
+            var tab = getChatTabIndex(to)
+            if(tab !== null) {
+                appendPrivateMessage(tab, message, ourCallsign, colorCyan)
             }
         }
 
@@ -403,7 +422,7 @@ Window {
         model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: color})
     }
 
-    function appendPrivateMessage(tab, message, from = "", color = colorCyan) {
+    function appendPrivateMessage(tab, message, from, color = colorCyan) {
         var model = cliModel.get(tab)
         if(from) {
             model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${from}: ${message}`, msgColor: color})
@@ -428,29 +447,41 @@ Window {
         model.attributes.clear()
     }
 
-    function findChatTab(callsign) {
+    function getChatTabIndex(callsign) {
         for(var i = 0; i < tabModel.count; i++) {
             if(tabModel.get(i).title.toUpperCase() === callsign.toUpperCase()) {
                 return i;
             }
         }
-        return -1;
+        return null;
+    }
+
+    function createChatTab(callsign) {
+        tabModel.append({title: callsign.toUpperCase(), disposable: true, hasUnread: false})
+        var idx = getChatTabIndex(callsign)
+        cliModel.append({tabId: idx, attributes: [], realName: false})
+        tabListView.currentIndex = idx
+        currentTab = idx
+        networkManager.requestRealName(callsign)
     }
 
     function focusOrCreateTab(callsign) {
-        var idx = findChatTab(callsign)
-        if(idx === -1) {
-            tabModel.append({title: callsign.toUpperCase(), disposable: true})
-            idx = findChatTab(callsign)
-            cliModel.append({tabId: idx, attributes: [], realName: false})
+        var idx = getChatTabIndex(callsign)
+        if(idx === null) {
+            createChatTab(callsign)
+        }
+        else {
             tabListView.currentIndex = idx
             currentTab = idx
-            networkManager.requestRealName(callsign)
-            return idx
-        } else {
-            tabListView.currentIndex = idx
-            currentTab = idx
-            return idx
+        }
+    }
+
+    function markTabUnread(callsign) {
+        for(var i = 0; i < tabModel.count; i++) {
+            var tab = tabModel.get(i)
+            if(tab.title.toUpperCase() === callsign.toUpperCase()) {
+                tab.hasUnread = true
+            }
         }
     }
 
@@ -571,10 +602,12 @@ Window {
                 ListElement {
                     title: "Messages"
                     disposable: false
+                    hasUnread: false
                 }
                 ListElement {
                     title: "Notes"
                     disposable: false
+                    hasUnread: false
                 }
             }
 
@@ -639,7 +672,7 @@ Window {
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.leftMargin: 10
                         text: title
-                        color: itemIndex === view.currentIndex ? "white" : frameColor
+                        color: itemIndex === view.currentIndex ? "white" : (hasUnread ? "yellow" : frameColor)
                         font.family: robotoMono.name
                         font.pixelSize: 13
                     }
@@ -674,6 +707,7 @@ Window {
                         id: mouseArea
                         anchors.fill: parent
                         onClicked: {
+                            hasUnread = false
                             currentTab = itemIndex
                             view.currentIndex = itemIndex
                         }
@@ -845,6 +879,7 @@ Window {
                                                             throw "Callsign too long."
                                                         }
                                                         focusOrCreateTab(cmd[1])
+                                                        networkManager.sendPrivateMessage(cmd[1], cmd.slice(2).join(" "))
                                                         cliTextField.clear()
                                                         break;
                                                     case ".wallop":
@@ -932,7 +967,6 @@ Window {
                                                     errorSound.play()
                                                 }
                                                 else {
-                                                    appendPrivateMessage(currentTab, cliTextField.text, ourCallsign, colorCyan)
                                                     var callsign = tabModel.get(currentTab).title;
                                                     networkManager.sendPrivateMessage(callsign, cliTextField.text)
                                                     cliTextField.clear()

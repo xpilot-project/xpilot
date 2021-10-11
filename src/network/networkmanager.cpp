@@ -488,7 +488,8 @@ namespace xpilot
 
     void NetworkManager::sendPrivateMessage(QString to, QString message)
     {
-        m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, to, message));
+        m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, to.toUpper(), message));
+        emit privateMessageSent(to.toUpper(), message);
     }
 
     void NetworkManager::OnNetworkError(QString error)
