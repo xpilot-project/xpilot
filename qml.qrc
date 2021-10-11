@@ -24,7 +24,6 @@
         <file>Resources/Controls/VolumeSlider.qml</file>
         <file>Resources/Controls/CustomComboBox.qml</file>
         <file>Resources/Controls/PeakLevelControl.qml</file>
-        <file>Resources/Views/ImportIcaoFpl.qml</file>
         <file>Resources/Controls/CustomTextArea.qml</file>
         <file>Resources/Controls/GrayButton.qml</file>
         <file>Resources/Scripts/FrequencyUtils.js</file>
