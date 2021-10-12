@@ -309,6 +309,10 @@ Window {
                 radioMessageSound.play();
             }
         }
+
+        function onControllerAtisReceived(callsign, atis) {
+            console.log(callsign + "," + atis)
+        }
     }
 
     Connections {

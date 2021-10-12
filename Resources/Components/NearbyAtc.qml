@@ -83,6 +83,7 @@ Rectangle {
                             cursorShape: Qt.PointingHandCursor
 
                             onDoubleClicked: {
+                                networkManager.requestControllerAtis(Callsign)
                                 console.log("requestAtis")
                             }
 
@@ -216,6 +217,7 @@ Rectangle {
                             cursorShape: Qt.PointingHandCursor
 
                             onDoubleClicked: {
+                                networkManager.requestControllerAtis(Callsign)
                                 console.log("requestAtis")
                             }
 

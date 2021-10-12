@@ -165,6 +165,25 @@ namespace xpilot
         case ClientQueryType::RealName:
             emit realNameReceived(pdu.From, pdu.Payload.at(0));
             break;
+        case ClientQueryType::ATIS:
+            if(pdu.Payload.at(0) == "E")
+            {
+                // atis end
+                if(m_mapAtisMessages.contains(pdu.From.toUpper()))
+                {
+                    emit controllerAtisReceived(pdu.From.toUpper(), m_mapAtisMessages[pdu.From.toUpper()]);
+                    m_mapAtisMessages.remove(pdu.From.toUpper());
+                }
+            }
+            else if(pdu.Payload.at(0) == "T" || pdu.Payload.at(0) == "Z")
+            {
+                // controller info/controller logoff time
+                if(m_mapAtisMessages.contains(pdu.From.toUpper()))
+                {
+                    m_mapAtisMessages[pdu.From.toUpper()].push_back(pdu.Payload[1]);
+                }
+            }
+            break;
         }
     }
 
@@ -436,6 +455,15 @@ namespace xpilot
     void NetworkManager::requestRealName(QString callsign)
     {
         m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, callsign, ClientQueryType::RealName));
+    }
+
+    void NetworkManager::requestControllerAtis(QString callsign)
+    {
+        if(!m_mapAtisMessages.contains(callsign.toUpper()))
+        {
+            m_mapAtisMessages.insert(callsign.toUpper(), {});
+            m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, callsign, ClientQueryType::ATIS));
+        }
     }
 
     void NetworkManager::RequestIsValidATC(QString callsign)

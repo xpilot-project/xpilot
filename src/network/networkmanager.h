@@ -27,6 +27,7 @@ namespace xpilot
         Q_INVOKABLE void sendRadioMessage(QString message);
         Q_INVOKABLE void sendPrivateMessage(QString to, QString message);
         Q_INVOKABLE void requestRealName(QString callsign);
+        Q_INVOKABLE void requestControllerAtis(QString callsign);
 
         void RequestMetar(QString station);
         void RequestIsValidATC(QString callsign);
@@ -52,6 +53,7 @@ namespace xpilot
         void controllerUpdateReceived(QString from, uint frequency, double lat, double lon);
         void isValidAtcReceived(QString callsign);
         void realNameReceived(QString callsign, QString name);
+        void controllerAtisReceived(QString callsign, QStringList atis);
 
     private:
         FsdClient m_fsd { this };
@@ -67,6 +69,8 @@ namespace xpilot
         QString m_forcedDisconnectReason = "";
         bool m_velocityEnabled = false;
         QList<uint> m_transmitFreqs;
+
+        QMap<QString, QStringList> m_mapAtisMessages;
 
         void OnNetworkError(QString error);
         void OnNetworkConnected();
