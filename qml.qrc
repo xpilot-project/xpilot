@@ -36,5 +36,6 @@
         <file>Resources/Sounds/PrivateMessage.wav</file>
         <file>Resources/Sounds/RadioMessage.wav</file>
         <file>Resources/Sounds/SelCal.wav</file>
+        <file>Resources/Components/NearbyAtcGroup.qml</file>
     </qresource>
 </RCC>

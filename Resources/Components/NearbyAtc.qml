@@ -22,6 +22,8 @@ Rectangle {
     property variant atis;
     property variant observers;
 
+    signal startChatSession(string callsign)
+
     Text {
         id: title
         color: "#ffffff"
@@ -56,298 +58,74 @@ Rectangle {
             width: 100
             height: 100
 
-            Label {
-                id: titleCenter
-                color: "#6c757d"
-                text: qsTr("Center")
-                font.pixelSize: 14
-                font.family: robotoMono.name
-                renderType: Text.NativeRendering
-            }
+            // Center
 
-            Column {
-                id: centerControllers
-                Repeater {
-                    model: enroute
-                    Text {
-                        text: `${Callsign} - ${FrequencyUtils.formatNetwork(Frequency)}`
-                        font.pixelSize: 14
-                        font.family: robotoMono.name
-                        leftPadding: 15
-                        color: "#ffffff"
-                        renderType: Text.NativeRendering
-
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.RightButton | Qt.LeftButton
-                            cursorShape: Qt.PointingHandCursor
-
-                            onDoubleClicked: {
-                                networkManager.requestControllerAtis(Callsign)
-                                console.log("requestAtis")
-                            }
-
-                            onClicked: {
-                                if(mouse.button === Qt.RightButton) {
-                                    centerContextMenu.popup()
-                                }
-                            }
-                            onPressAndHold: {
-                                if(mouse.source === Qt.MouseEventNotSynthesized) {
-                                    centerContextMenu.popup()
-                                }
-                            }
-
-                            Menu {
-                                id: centerContextMenu
-                                MenuItem {
-                                    hoverEnabled: false
-                                    enabled: false
-                                    contentItem: Text {
-                                        text: callsign
-                                        font.pixelSize: 14
-                                        font.family: robotoMono.name
-                                        font.bold: true
-                                        verticalAlignment: Text.AlignVCenter
-                                        horizontalAlignment: Text.AlignHCenter
-                                        renderType: Text.NativeRendering
-                                        topPadding: 5
-                                        color: "#565E64"
-                                    }
-                                    height: 30
-                                }
-                                MenuSeparator{}
-                                MenuItem {
-                                    contentItem: Text {
-                                        text: "Send Private Message"
-                                        font.pixelSize: 13
-                                        font.family: robotoMono.name
-                                        verticalAlignment: Text.AlignVCenter
-                                        renderType: Text.NativeRendering
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                        }
-                                    }
-                                    height: 35
-                                }
-                                MenuItem {
-                                    contentItem: Text {
-                                        text: "Request Controller Info"
-                                        font.pixelSize: 13
-                                        font.family: robotoMono.name
-                                        verticalAlignment: Text.AlignVCenter
-                                        renderType: Text.NativeRendering
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                        }
-                                    }
-                                    height: 35
-                                }
-                                MenuItem {
-                                    contentItem: Text {
-                                        text: "Tune COM1 Radio"
-                                        font.pixelSize: 13
-                                        font.family: robotoMono.name
-                                        verticalAlignment: Text.AlignVCenter
-                                        renderType: Text.NativeRendering
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                        }
-                                    }
-                                    height: 35
-                                }
-                                MenuItem {
-                                    contentItem: Text {
-                                        text: "Tune COM2 Radio"
-                                        font.pixelSize: 13
-                                        font.family: robotoMono.name
-                                        verticalAlignment: Text.AlignVCenter
-                                        renderType: Text.NativeRendering
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: towerContextMenu.close()
-                                        }
-                                    }
-                                    height: 35
-                                }
-                            }
-                        }
-                    }
+            NearbyAtcGroup {
+                internalModel: tower
+                groupTitle: "Center"
+                onStartChatSession: {
+                    console.log("chatSession")
                 }
             }
 
-            Label {
-                id: titleApproach
-                color: "#6c757d"
-                text: qsTr("Approach/Departure")
-                font.pixelSize: 14
-                font.family: robotoMono.name
-                renderType: Text.NativeRendering
-            }
+            // Approach/Departure
 
-            Label {
-                id: titleTower
-                color: "#6c757d"
-                text: qsTr("Tower")
-                font.pixelSize: 14
-                font.family: robotoMono.name
-                renderType: Text.NativeRendering
-            }
-
-            Column {
-                id: towerControllers
-                Repeater {
-                    model: tower
-                    Text {
-                        text: `${Callsign} - ${FrequencyUtils.formatNetwork(Frequency)}`
-                        font.pixelSize: 14
-                        leftPadding: 15
-                        padding: 1
-                        font.family: robotoMono.name
-                        renderType: Text.NativeRendering
-                        color: "#ffffff"
-
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.RightButton | Qt.LeftButton
-                            cursorShape: Qt.PointingHandCursor
-
-                            onDoubleClicked: {
-                                networkManager.requestControllerAtis(Callsign)
-                                console.log("requestAtis")
-                            }
-
-                            onClicked: {
-                                if(mouse.button === Qt.RightButton) {
-                                    towerContextMenu.popup()
-                                }
-                            }
-                            onPressAndHold: {
-                                if(mouse.source === Qt.MouseEventNotSynthesized) {
-                                    towerContextMenu.popup()
-                                }
-                            }
-
-                            Menu {
-                                id: towerContextMenu
-                                MenuItem {
-                                    hoverEnabled: false
-                                    enabled: false
-                                    contentItem: Text {
-                                        text: Callsign
-                                        font.pixelSize: 14
-                                        font.family: robotoMono.name
-                                        font.bold: true
-                                        verticalAlignment: Text.AlignVCenter
-                                        horizontalAlignment: Text.AlignHCenter
-                                        renderType: Text.NativeRendering
-                                        topPadding: 5
-                                        color: "#565E64"
-                                    }
-                                    height: 30
-                                }
-                                MenuSeparator{}
-                                MenuItem {
-                                    contentItem: Text {
-                                        text: "Send Private Message"
-                                        font.pixelSize: 13
-                                        font.family: robotoMono.name
-                                        verticalAlignment: Text.AlignVCenter
-                                        renderType: Text.NativeRendering
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                        }
-                                    }
-                                    height: 35
-                                }
-                                MenuItem {
-                                    contentItem: Text {
-                                        text: "Request Controller Info"
-                                        font.pixelSize: 13
-                                        font.family: robotoMono.name
-                                        verticalAlignment: Text.AlignVCenter
-                                        renderType: Text.NativeRendering
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                        }
-                                    }
-                                    height: 35
-                                }
-                                MenuItem {
-                                    contentItem: Text {
-                                        text: "Tune COM1 Radio"
-                                        font.pixelSize: 13
-                                        font.family: robotoMono.name
-                                        verticalAlignment: Text.AlignVCenter
-                                        renderType: Text.NativeRendering
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                        }
-                                    }
-                                    height: 35
-                                }
-                                MenuItem {
-                                    contentItem: Text {
-                                        text: "Tune COM2 Radio"
-                                        font.pixelSize: 13
-                                        font.family: robotoMono.name
-                                        verticalAlignment: Text.AlignVCenter
-                                        renderType: Text.NativeRendering
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: towerContextMenu.close()
-                                        }
-                                    }
-                                    height: 35
-                                }
-                            }
-                        }
-                    }
+            NearbyAtcGroup {
+                internalModel: approach
+                groupTitle: "Approach/Departure"
+                onStartChatSession: {
+                    console.log("chatSession")
                 }
             }
 
-            Label {
-                id: titleGround
-                color: "#6c757d"
-                text: qsTr("Ground")
-                font.pixelSize: 14
-                font.family: robotoMono.name
-                renderType: Text.NativeRendering
+            // Tower
+
+            NearbyAtcGroup {
+                internalModel: tower
+                groupTitle: "Tower"
+                onStartChatSession: {
+                    console.log("chatSession")
+                }
             }
 
-            Label {
-                id: titleDelivery
-                color: "#6c757d"
-                text: qsTr("Delivery")
-                font.pixelSize: 14
-                font.family: robotoMono.name
-                renderType: Text.NativeRendering
+            // Ground
+
+            NearbyAtcGroup {
+                internalModel: ground
+                groupTitle: "Ground"
+                onStartChatSession: {
+                    console.log("chatSession")
+                }
             }
 
-            Label {
-                id: titleAtis
-                color: "#6c757d"
-                text: qsTr("ATIS")
-                font.pixelSize: 14
-                font.family: robotoMono.name
-                renderType: Text.NativeRendering
+            // Delivery
+
+            NearbyAtcGroup {
+                internalModel: delivery
+                groupTitle: "Delivery"
+                onStartChatSession: {
+                    console.log("chatSession")
+                }
             }
 
-            Label {
-                id: titleObservers
-                color: "#6c757d"
-                text: qsTr("Observers")
-                font.pixelSize: 14
-                font.family: robotoMono.name
-                renderType: Text.NativeRendering
+            // ATIS
+
+            NearbyAtcGroup {
+                internalModel: atis
+                groupTitle: "ATIS"
+                onStartChatSession: {
+                    console.log("chatSession")
+                }
+            }
+
+            // Observers
+
+            NearbyAtcGroup {
+                internalModel: observers
+                groupTitle: "Observers"
+                onStartChatSession: {
+                    console.log("chatSession")
+                }
             }
         }
     }
