@@ -450,10 +450,10 @@ Window {
     function getChatTabIndex(callsign) {
         for(var i = 0; i < tabModel.count; i++) {
             if(tabModel.get(i).title.toUpperCase() === callsign.toUpperCase()) {
-                return i;
+                return i
             }
         }
-        return null;
+        return null
     }
 
     function createChatTab(callsign) {
@@ -774,17 +774,21 @@ Window {
                                 bottomPadding: 5
                                 visible: tabId === currentTab
 
+                                onFocusChanged: {
+                                    cliTextField.forceActiveFocus()
+                                }
+
                                 ListView {
                                     id: listView
                                     model: attributes
                                     delegate: Rectangle {
                                         anchors.left: listView.contentItem.left
                                         anchors.right: listView.contentItem.right
-                                        height: text.contentHeight
+                                        height: textHistory.contentHeight
                                         color: 'transparent'
 
                                         TextEdit {
-                                            id: text
+                                            id: textHistory
                                             text: message
                                             readOnly: true
                                             selectByMouse: true
