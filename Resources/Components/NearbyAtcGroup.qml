@@ -9,7 +9,8 @@ Column {
 
     property variant internalModel
     property string groupTitle
-    signal startChatSession(string callsign)
+
+    signal sendPrivateMessage(string callsign)
 
     Label {
         color: "#6c757d"
@@ -51,14 +52,14 @@ Column {
 
                 Menu {
                     id: ctxtMenu
+
                     MenuItem {
                         hoverEnabled: false
                         enabled: false
                         contentItem: Text {
-                            text: callsign
-                            font.pixelSize: 14
+                            text: Callsign
+                            font.pixelSize: 16
                             font.family: robotoMono.name
-                            font.bold: true
                             verticalAlignment: Text.AlignVCenter
                             horizontalAlignment: Text.AlignHCenter
                             renderType: Text.NativeRendering
@@ -78,7 +79,10 @@ Column {
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: startChatSession(Callsign)
+                                onClicked: {
+                                    sendPrivateMessage(Callsign)
+                                    ctxtMenu.close()
+                                }
                             }
                         }
                         height: 35
@@ -93,7 +97,10 @@ Column {
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: networkManager.requestControllerAtis(Callsign)
+                                onClicked: {
+                                    networkManager.requestControllerAtis(Callsign)
+                                    ctxtMenu.close()
+                                }
                             }
                         }
                         height: 35
@@ -108,6 +115,10 @@ Column {
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    xplaneAdapter.setCom1Frequency(Frequency)
+                                    ctxtMenu.close()
+                                }
                             }
                         }
                         height: 35
@@ -122,6 +133,10 @@ Column {
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    xplaneAdapter.setCom2Frequency(Frequency)
+                                    ctxtMenu.close()
+                                }
                             }
                         }
                         height: 35

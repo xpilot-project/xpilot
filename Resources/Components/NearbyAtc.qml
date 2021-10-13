@@ -59,72 +59,65 @@ Rectangle {
             height: 100
 
             // Center
-
             NearbyAtcGroup {
-                internalModel: tower
+                internalModel: enroute
                 groupTitle: "Center"
-                onStartChatSession: {
-                    console.log("chatSession")
+                onSendPrivateMessage: {
+                    startChatSession(callsign)
                 }
             }
 
             // Approach/Departure
-
             NearbyAtcGroup {
                 internalModel: approach
                 groupTitle: "Approach/Departure"
-                onStartChatSession: {
-                    console.log("chatSession")
+                onSendPrivateMessage: {
+                    startChatSession(callsign)
                 }
             }
 
             // Tower
-
             NearbyAtcGroup {
                 internalModel: tower
                 groupTitle: "Tower"
-                onStartChatSession: {
-                    console.log("chatSession")
+                onSendPrivateMessage: {
+                    startChatSession(callsign)
                 }
             }
 
             // Ground
-
             NearbyAtcGroup {
                 internalModel: ground
                 groupTitle: "Ground"
-                onStartChatSession: {
-                    console.log("chatSession")
+                onSendPrivateMessage: {
+                    startChatSession(callsign)
                 }
             }
 
             // Delivery
-
             NearbyAtcGroup {
                 internalModel: delivery
                 groupTitle: "Delivery"
-                onStartChatSession: {
-                    console.log("chatSession")
+                onSendPrivateMessage: {
+                    startChatSession(callsign)
                 }
             }
 
             // ATIS
-
             NearbyAtcGroup {
                 internalModel: atis
                 groupTitle: "ATIS"
-                onStartChatSession: {
-                    console.log("chatSession")
+                onSendPrivateMessage: {
+                    startChatSession(callsign)
                 }
             }
 
             // Observers
-
             NearbyAtcGroup {
                 internalModel: observers
                 groupTitle: "Observers"
-                onStartChatSession: {
-                    console.log("chatSession")
+                onSendPrivateMessage: {
+                    startChatSession(callsign)
                 }
             }
         }

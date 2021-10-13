@@ -41,6 +41,7 @@ Window {
     property string colorYellow: "#ffff00"
     property string colorRed: "#eb2f06"
     property string colorCyan: "#00ffff"
+    property string colorBrightGreen: "#00c000"
 
     FontLoader {
         id: ubuntuRegular
@@ -208,6 +209,13 @@ Window {
 
         function onNetworkDisconnected() {
             networkConnected = false;
+            nearbyEnroute.clear()
+            nearbyApproach.clear()
+            nearbyTower.clear()
+            nearbyGround.clear()
+            nearbyDelivery.clear()
+            nearbyAtis.clear()
+            nearbyObservers.clear()
         }
 
         function onNotificationPosted(type, message) {
@@ -299,7 +307,7 @@ Window {
                 message = `${args.From}: ${args.Message}`;
             }
 
-            appendMessage(`[${TimestampUtils.currentTimestamp()}] ${message}`, args.IsDirect ? colorWhite : colorGray)
+            appendMessage(message, args.IsDirect ? colorWhite : colorGray)
 
             if(args.IsDirect) {
                 directRadioMessageSound.play();
@@ -311,7 +319,10 @@ Window {
         }
 
         function onControllerAtisReceived(callsign, atis) {
-            console.log(callsign + "," + atis)
+            appendMessage(`${callsign} ATIS:`, colorBrightGreen)
+            atis.forEach(function(line) {
+                appendMessage(line, colorBrightGreen)
+            })
         }
     }
 
@@ -581,6 +592,9 @@ Window {
                 delivery: nearbyDelivery
                 atis: nearbyAtis
                 observers: nearbyObservers
+                onStartChatSession: {
+                    focusOrCreateTab(callsign)
+                }
             }
         }
 
