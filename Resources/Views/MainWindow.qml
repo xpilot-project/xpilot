@@ -805,13 +805,9 @@ Window {
                                         height: textHistory.contentHeight
                                         color: 'transparent'
 
-                                        TextEdit {
+                                        Text {
                                             id: textHistory
                                             text: message
-                                            readOnly: true
-                                            selectByMouse: true
-                                            selectionColor: '#0164AD'
-                                            selectedTextColor: '#ffffff'
                                             width: parent.width
                                             wrapMode: Text.Wrap
                                             font.family: robotoMono.name
