@@ -112,7 +112,7 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/flightmodel/controls/flaprat", DataRef::FlapRatio, 5);
     SubscribeDataRef("sim/cockpit2/controls/speedbrake_ratio", DataRef::SpeedbrakeRatio, 5);
     SubscribeDataRef("sim/operation/prefs/replay_mode", DataRef::ReplayMode, 5);
-    SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 5);
+    SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 15);
 }
 
 void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
@@ -306,6 +306,9 @@ void XplaneAdapter::OnDataReceived()
                     if(value > 0) {
                         emit replayModeDetected();
                     }
+                    break;
+                case DataRef::PushToTalk:
+                    (value > 0) ? emit pttPressed() : emit pttReleased();
                     break;
                 }
             }

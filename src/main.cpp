@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 
     struct event_base* ev_base = nullptr;
     ev_base = event_base_new();
-    AudioForVatsim audio(ev_base);
+    AudioForVatsim audio(networkManager, xplaneAdapter, ev_base);
 
     QObject::connect(&app, SIGNAL(aboutToQuit()), &appCore, SLOT(SaveConfig()));
 

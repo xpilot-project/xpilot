@@ -28,6 +28,20 @@ ColumnLayout {
                 radioStackState = stack;
             }
         }
+
+        function onPttPressed() {
+            if(radioStackState.Com1TransmitEnabled) {
+                isCom1Tx = true
+            }
+            else if(radioStackState.Com2TransmitEnabled) {
+                isCom2Tx = true
+            }
+        }
+
+        function onPttReleased() {
+            isCom1Tx = false
+            isCom2Tx = false
+        }
     }
 
     Row {
@@ -66,7 +80,7 @@ ColumnLayout {
         RadioStackIndicator{
             id: com1Tx
             isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com1TransmitEnabled
-            isActive: false
+            isActive: isCom1Tx
             label: "TX"
         }
         Text {
@@ -75,7 +89,7 @@ ColumnLayout {
         RadioStackIndicator{
             id: com1Rx
             isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com1ReceiveEnabled
-            isActive: false
+            isActive: isCom1Rx
             label: "RX"
         }
     }
@@ -116,7 +130,7 @@ ColumnLayout {
         RadioStackIndicator{
             id: com2Tx
             isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com2TransmitEnabled
-            isActive: false
+            isActive: isCom2Tx
             label: "TX"
         }
         Text {
@@ -125,7 +139,7 @@ ColumnLayout {
         RadioStackIndicator{
             id: com2Rx
             isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com2ReceiveEnabled
-            isActive: false
+            isActive: isCom2Rx
             label: "RX"
         }
     }
