@@ -7,6 +7,7 @@ import "../Scripts/FrequencyUtils.js" as FrequencyUtils
 
 ColumnLayout {
     property bool simConnected: false
+    property bool networkConnected: false
 
     property var isCom1Rx: false
     property var isCom2Rx: false
@@ -41,6 +42,18 @@ ColumnLayout {
         function onPttReleased() {
             isCom1Tx = false
             isCom2Tx = false
+        }
+    }
+
+    Connections {
+        target: networkManager
+
+        function onNetworkConnected() {
+            networkConnected = true
+        }
+
+        function onNetworkDisconnected() {
+            networkConnected = false
         }
     }
 
@@ -95,7 +108,7 @@ ColumnLayout {
         RadioStackIndicator{
             id: com1Tx
             isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com1TransmitEnabled
-            isActive: isCom1Tx
+            isActive: networkConnected && isCom1Tx
             label: "TX"
         }
         Text {
@@ -145,7 +158,7 @@ ColumnLayout {
         RadioStackIndicator{
             id: com2Tx
             isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com2TransmitEnabled
-            isActive: isCom2Tx
+            isActive: networkConnected && isCom2Tx
             label: "TX"
         }
         Text {

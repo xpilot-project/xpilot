@@ -200,6 +200,30 @@ Window {
     }
 
     Connections {
+        target: audio
+
+        function onNotificationPosted(type, message) {
+            switch(type) {
+            case 0: // info
+                appendMessage(message, colorYellow)
+                break;
+            case 1: // warning
+                appendMessage(message, colorOrange)
+                break;
+            case 2: // error
+                appendMessage(message, colorRed)
+                break;
+            case 3: // text message
+                appendMessage(message, colorGray);
+                break;
+            default:
+                appendMessage(message, colorYellow);
+                break;
+            }
+        }
+    }
+
+    Connections {
         target: networkManager
 
         function onNetworkConnected(callsign) {

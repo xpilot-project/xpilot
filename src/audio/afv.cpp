@@ -1,5 +1,8 @@
 #include "afv.h"
+#include "src/appcore.h"
 #include "src/config/appconfig.h"
+
+using namespace afv_native::afv;
 
 namespace xpilot
 {
@@ -21,12 +24,55 @@ namespace xpilot
 #endif
 
         ev_base = event_base_new();
-        mClient = std::make_shared<afv_native::Client>(ev_base, "afv-samples", 2, "xPilot");
+        mClient = std::make_shared<afv_native::Client>(ev_base, "afv-samples", 2, "xPilot", "https://afv.vatsim.dev");
         mClient->ClientEventCallback.addCallback(nullptr, [&](afv_native::ClientEventType evt, void* data)
         {
-            int v = -1;
-            if(data != nullptr) {
-                v = *reinterpret_cast<int*>(data);
+            switch(evt)
+            {
+            case afv_native::ClientEventType::APIServerError:
+                if(data != nullptr) {
+                    auto error = *reinterpret_cast<APISessionError*>(data);
+                    switch(error) {
+                    case APISessionError::BadPassword:
+                    case APISessionError::RejectedCredentials:
+                        emit notificationPosted((int)NotificationType::Error, "Error connecting to voice server. Please check your VATSIM credentials and try again.");
+                        break;
+                    case APISessionError::ConnectionError:
+                        emit notificationPosted((int)NotificationType::Error, "Error initiating voice server connection.");
+                        break;
+                    }
+                }
+                break;
+            case afv_native::ClientEventType::VoiceServerChannelError:
+                if(data != nullptr) {
+                    int error = *reinterpret_cast<int*>(data);
+                    emit notificationPosted((int)NotificationType::Error, QString("Voice server error: %s").arg(error));
+                }
+                break;
+            case afv_native::ClientEventType::VoiceServerError:
+                if(data != nullptr) {
+                    auto error = *reinterpret_cast<VoiceSessionError*>(data);
+                    switch(error) {
+                    case VoiceSessionError::BadResponseFromAPIServer:
+                        emit notificationPosted((int)NotificationType::Error, "Voice server error: BadResponseFromAPIServer");
+                        break;
+                    case VoiceSessionError::Timeout:
+                        emit notificationPosted((int)NotificationType::Error, "Voice server error: Timeout");
+                        break;
+                    case VoiceSessionError::UDPChannelError:
+                        emit notificationPosted((int)NotificationType::Error, "Voice server error: UDPChannelError");
+                        break;
+                    }
+                }
+                break;
+            case afv_native::ClientEventType::StationAliasesUpdated:
+                break;
+            case afv_native::ClientEventType::VoiceServerConnected:
+                emit notificationPosted((int)NotificationType::Info, "Connected to voice server.");
+                break;
+            case afv_native::ClientEventType::VoiceServerDisconnected:
+                emit notificationPosted((int)NotificationType::Info, "Disconnected from voice server.");
+                break;
             }
         });
         mClient->setEnableInputFilters(true);
