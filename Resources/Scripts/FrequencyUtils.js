@@ -5,9 +5,6 @@ function checkFrequencyValid(frequency) {
     if (frequency < 108000000 || frequency > 136975000) {
         throw "Invalid frequency range.";
     }
-    if (num !== 0 && num !== 25000 && num !== 50000 && num !== 75000) {
-        throw "Invalid frequency format. 8.33kHz frequencies not currently supported.";
-    }
     return frequency;
 }
 

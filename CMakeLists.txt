@@ -173,7 +173,6 @@ set(AFV_NATIVE_HEADERS
     afv-native/include/afv-native/audio/ISampleSource.h
     afv-native/include/afv-native/audio/ISampleStorage.h
     afv-native/include/afv-native/audio/OutputMixer.h
-    afv-native/include/afv-native/audio/PinkNoiseGenerator.h
     afv-native/include/afv-native/audio/RecordedSampleSource.h
     afv-native/include/afv-native/audio/SineToneSource.h
     afv-native/include/afv-native/audio/SinkFrameSizeAdjuster.h

@@ -49,17 +49,7 @@ int main(int argc, char *argv[])
     ControllerManager controllerManager(networkManager);
     NetworkServerList serverList;
     UserAircraftManager aircraftManager(xplaneAdapter, networkManager);
-
-#ifdef WIN32
-    WORD wVersionRequested;
-    WSADATA wsaData;
-    wVersionRequested = MAKEWORD(2, 2);
-    WSAStartup(wVersionRequested, &wsaData);
-#endif
-
-    struct event_base* ev_base = nullptr;
-    ev_base = event_base_new();
-    AudioForVatsim audio(networkManager, xplaneAdapter, ev_base);
+    AudioForVatsim audio(networkManager, xplaneAdapter);
 
     QObject::connect(&app, SIGNAL(aboutToQuit()), &appCore, SLOT(SaveConfig()));
 
@@ -68,6 +58,7 @@ int main(int argc, char *argv[])
     context->setContextProperty("xplaneAdapter", &xplaneAdapter);
     context->setContextProperty("serverList", &serverList);
     context->setContextProperty("controllerManager", &controllerManager);
+    context->setContextProperty("audio", &audio);
     qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", singletonTypeProvider);
     qRegisterMetaType<ConnectInfo>("ConnectInfo");
     qRegisterMetaType<ClientWindowConfig>("ClientWindowConfig");

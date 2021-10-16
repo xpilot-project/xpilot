@@ -44,6 +44,21 @@ ColumnLayout {
         }
     }
 
+    Connections {
+        target: audio
+
+        function onRadioRxChanged(radio, state) {
+            switch(radio) {
+            case 0:
+                isCom1Rx = state;
+                break;
+            case 1:
+                isCom2Rx = state;
+                break;
+            }
+        }
+    }
+
     Row {
         id: com1
         spacing: 0
