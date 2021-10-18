@@ -18,7 +18,7 @@ public:
 
     QJsonObject toJson() const;
     AircraftConfigurationLights Clone();
-    void ApplyIncremental(AircraftConfigurationLights& inc);
+    void ApplyIncremental(const AircraftConfigurationLights& inc);
     AircraftConfigurationLights CreateIncremental(AircraftConfigurationLights& cfg);
     static AircraftConfigurationLights FromUserAircraftData(UserAircraftConfigData& uac);
 
@@ -40,7 +40,7 @@ public:
 
     QJsonObject toJson() const;
     AircraftConfigurationEngine Clone();
-    void ApplyIncremental(AircraftConfigurationEngine& inc);
+    void ApplyIncremental(const AircraftConfigurationEngine& inc);
     AircraftConfigurationEngine CreateIncremental(AircraftConfigurationEngine& cfg);
     static AircraftConfigurationEngine FromUserAircraftData(UserAircraftConfigData& uac, int engineNum);
 
@@ -74,7 +74,7 @@ public:
 
     QJsonObject toJson() const;
     AircraftConfigurationEngines Clone();
-    void ApplyIncremental(AircraftConfigurationEngines& inc);
+    void ApplyIncremental(const AircraftConfigurationEngines& inc);
     AircraftConfigurationEngines CreateIncremental(AircraftConfigurationEngines& cfg);
     static AircraftConfigurationEngines FromUserAircraftData(UserAircraftConfigData& uac);
 
@@ -92,6 +92,8 @@ public:
 class AircraftConfiguration
 {
 public:
+    AircraftConfiguration() {}
+
     std::optional<bool> IsFullData;
     std::optional<AircraftConfigurationLights> Lights;
     std::optional<AircraftConfigurationEngines> Engines;
@@ -102,7 +104,7 @@ public:
 
     QJsonObject ToJson() const;
     AircraftConfiguration Clone();
-    void ApplyIncremental(AircraftConfiguration& inc);
+    void ApplyIncremental(const AircraftConfiguration& inc);
     AircraftConfiguration CreateIncremental(AircraftConfiguration& cfg);
     static AircraftConfiguration FromUserAircraftData(UserAircraftConfigData& uac);
 
@@ -123,7 +125,7 @@ private:
 class AircraftConfigurationInfo
 {
 public:
-    bool IsFullRequest;
+    std::optional<bool> IsFullRequest;
     std::optional<AircraftConfiguration> Config;
     bool HasConfig() const;
     QString ToIncrementalJson() const;

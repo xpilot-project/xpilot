@@ -21,9 +21,6 @@ namespace xpilot
 
         if(itr == m_controllers.end())
         {
-            qDebug() << "Frequency=" << frequency;
-            qDebug() << "NormalizedFrequency=" << Normalize25KhzFsdFrequency(frequency);
-
             Controller controller {};
             controller.Callsign = from.toUpper();
             controller.Frequency = frequency;

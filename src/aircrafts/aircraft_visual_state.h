@@ -10,13 +10,13 @@ struct AircraftVisualState
     double Heading;
     double Bank;
 
-    bool operator==(AircraftVisualState& rhs) const
+    bool operator==(const AircraftVisualState& rhs) const
     {
          return Latitude == rhs.Latitude && Longitude == rhs.Longitude && Altitude == rhs.Altitude
                  && Pitch == rhs.Pitch && Heading == rhs.Heading && Bank == rhs.Bank;
     }
 
-    bool operator!=(AircraftVisualState& rhs) const
+    bool operator!=(const AircraftVisualState& rhs) const
     {
         return Latitude != rhs.Latitude || Longitude != rhs.Longitude || Altitude != rhs.Altitude
                 || Pitch != rhs.Pitch || Heading != rhs.Heading || Bank != rhs.Bank;

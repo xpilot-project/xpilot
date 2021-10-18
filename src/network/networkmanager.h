@@ -10,6 +10,7 @@
 #include "src/simulator/xplane_adapter.h"
 #include "src/aircrafts/user_aircraft_data.h"
 #include "src/aircrafts/user_aircraft_config_data.h"
+#include "src/aircrafts/aircraft_visual_state.h"
 #include "src/aircrafts/aircraft_configuration.h"
 #include "src/network/events/radio_message_received.h"
 
@@ -20,7 +21,7 @@ namespace xpilot
         Q_OBJECT
 
     public:
-        NetworkManager(XplaneAdapter& udpClient, QObject *owner = nullptr);
+        NetworkManager(XplaneAdapter& xplaneAdapter, QObject *owner = nullptr);
 
         Q_INVOKABLE void connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer);
         Q_INVOKABLE void disconnectFromNetwork();
@@ -32,6 +33,8 @@ namespace xpilot
         void RequestMetar(QString station);
         void RequestIsValidATC(QString callsign);
         void RequestCapabilities(QString callsign);
+        void SendAircraftInfoRequest(QString callsign);
+        void SendAircraftConfigurationRequest(QString callsign);
         void SendAircraftConfigurationUpdate(QString to, AircraftConfiguration config);
         void SendAircraftConfigurationUpdate(AircraftConfiguration config);
         void SendCapabilities(QString to);
@@ -50,13 +53,18 @@ namespace xpilot
         void radioMessageReceived(RadioMessageReceived args);
         void selcalAlertReceived(QString from, QList<uint> frequencies);
         void aircraftConfigurationInfoReceived(QString from, QString json);
+        void capabilitiesRequestReceived(QString callsign);
+        void capabilitiesResponseReceived(QString callsign, QString data);
         void controllerUpdateReceived(QString from, uint frequency, double lat, double lon);
         void isValidAtcReceived(QString callsign);
         void realNameReceived(QString callsign, QString name);
         void controllerAtisReceived(QString callsign, QStringList atis);
+        void slowPositionUpdateReceived(QString callsign, AircraftVisualState visualState, double groundSpeed);
+        void aircraftInfoReceived(QString callsign, QString equipment, QString airline);
 
     private:
         FsdClient m_fsd { this };
+        XplaneAdapter& m_xplaneAdapter;
         QTimer* m_slowPositionTimer;
         QTimer* m_fastPositionTimer;
         UserAircraftData m_userAircraftData;

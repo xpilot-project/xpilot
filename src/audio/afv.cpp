@@ -24,7 +24,7 @@ namespace xpilot
 #endif
 
         ev_base = event_base_new();
-        mClient = std::make_shared<afv_native::Client>(ev_base, "afv-samples", 2, "xPilot", "https://afv.vatsim.dev");
+        mClient = std::make_shared<afv_native::Client>(ev_base, "afv-samples", 2, "xPilot");
         mClient->ClientEventCallback.addCallback(nullptr, [&](afv_native::ClientEventType evt, void* data)
         {
             switch(evt)

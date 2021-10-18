@@ -10,7 +10,9 @@
 
 namespace xpilot
 {
-    NetworkManager::NetworkManager(XplaneAdapter &udpClient, QObject *owner) : QObject(owner)
+    NetworkManager::NetworkManager(XplaneAdapter &xplaneAdapter, QObject *owner) :
+        QObject(owner),
+        m_xplaneAdapter(xplaneAdapter)
     {
         connect(&m_fsd, &FsdClient::RaiseNetworkError, this, &NetworkManager::OnNetworkError);
         connect(&m_fsd, &FsdClient::RaiseNetworkConnected, this, &NetworkManager::OnNetworkConnected);
@@ -38,9 +40,9 @@ namespace xpilot
             qDebug() << "<< " << data;
         });
 
-        connect(&udpClient, &XplaneAdapter::userAircraftDataChanged, this, &NetworkManager::OnUserAircraftDataUpdated);
-        connect(&udpClient, &XplaneAdapter::userAircraftConfigDataChanged, this, &NetworkManager::OnUserAircraftConfigDataUpdated);
-        connect(&udpClient, &XplaneAdapter::radioStackStateChanged, this, &NetworkManager::OnRadioStackStateChanged);
+        connect(&xplaneAdapter, &XplaneAdapter::userAircraftDataChanged, this, &NetworkManager::OnUserAircraftDataUpdated);
+        connect(&xplaneAdapter, &XplaneAdapter::userAircraftConfigDataChanged, this, &NetworkManager::OnUserAircraftConfigDataUpdated);
+        connect(&xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, &NetworkManager::OnRadioStackStateChanged);
 
         m_slowPositionTimer = new QTimer(this);
         connect(m_slowPositionTimer, &QTimer::timeout, this, &NetworkManager::OnSlowPositionTimerElapsed);
@@ -58,6 +60,14 @@ namespace xpilot
             emit notificationPosted((int)NotificationType::Info, "Connected to network.");
         }
         emit networkConnected(m_connectInfo.Callsign);
+
+        QJsonObject reply;
+        reply.insert("type", "NetworkConnected");
+        QJsonObject data;
+        data.insert("callsign", m_connectInfo.Callsign);
+        reply.insert("data", data);
+        QJsonDocument doc(reply);
+        m_xplaneAdapter.sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
     }
 
     void NetworkManager::OnNetworkDisconnected()
@@ -80,6 +90,11 @@ namespace xpilot
         m_intentionalDisconnect = false;
         m_forcedDisconnect = false;
         m_forcedDisconnectReason = "";
+
+        QJsonObject reply;
+        reply.insert("type", "NetworkDisconnected");
+        QJsonDocument doc(reply);
+        m_xplaneAdapter.sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
 
         emit networkDisconnected();
     }
@@ -116,6 +131,10 @@ namespace xpilot
             emit aircraftConfigurationInfoReceived(pdu.From, pdu.Payload.join(":"));
             break;
         case ClientQueryType::Capabilities:
+            if(pdu.From.toUpper() != "SERVER")
+            {
+                emit capabilitiesRequestReceived(pdu.From);
+            }
             SendCapabilities(pdu.From);
             break;
         case ClientQueryType::COM1Freq:
@@ -184,6 +203,9 @@ namespace xpilot
                 }
             }
             break;
+        case ClientQueryType::Capabilities:
+            emit capabilitiesResponseReceived(pdu.From, pdu.Payload.join(":"));
+            break;
         }
     }
 
@@ -191,7 +213,7 @@ namespace xpilot
     {
         QRegularExpression re("^"+ QRegularExpression::escape(pdu.From) +"[A-Z]$");
 
-        if(m_connectInfo.ObserverMode || re.match(m_connectInfo.Callsign).hasMatch())
+        if(!m_connectInfo.ObserverMode || !re.match(m_connectInfo.Callsign).hasMatch())
         {
             AircraftVisualState visualState {};
             visualState.Latitude = pdu.Lat;
@@ -200,6 +222,8 @@ namespace xpilot
             visualState.Pitch = pdu.Pitch;
             visualState.Heading = pdu.Heading;
             visualState.Bank = pdu.Bank;
+
+            emit slowPositionUpdateReceived(pdu.From, visualState, pdu.GroundSpeed);
         }
     }
 
@@ -320,12 +344,15 @@ namespace xpilot
 
     void NetworkManager::OnPlaneInfoRequestReceived(PDUPlaneInfoRequest pdu)
     {
+        QRegularExpression re("^([A-Z]{3})\\d+");
+        QRegularExpressionMatch match = re.match(m_connectInfo.Callsign);
 
+        m_fsd.SendPDU(PDUPlaneInfoResponse(m_connectInfo.Callsign, pdu.From, m_connectInfo.TypeCode, match.hasMatch() ? match.captured(1)  : "", "", ""));
     }
 
     void NetworkManager::OnPlaneInfoResponseReceived(PDUPlaneInfoResponse pdu)
     {
-
+        emit aircraftInfoReceived(pdu.From, pdu.Equipment, pdu.Airline);
     }
 
     void NetworkManager::OnKillRequestReceived(PDUKillRequest pdu)
@@ -476,6 +503,22 @@ namespace xpilot
     void NetworkManager::RequestCapabilities(QString callsign)
     {
         m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, callsign, ClientQueryType::Capabilities));
+    }
+
+    void NetworkManager::SendAircraftInfoRequest(QString callsign)
+    {
+        m_fsd.SendPDU(PDUPlaneInfoRequest(m_connectInfo.Callsign, callsign));
+    }
+
+    void NetworkManager::SendAircraftConfigurationRequest(QString callsign)
+    {
+        AircraftConfigurationInfo acconfig;
+        acconfig.IsFullRequest = true;
+
+        QStringList args;
+        args.append(acconfig.RequestFullConfig());
+
+        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, callsign, ClientQueryType::AircraftConfiguration, args));
     }
 
     void NetworkManager::connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer)

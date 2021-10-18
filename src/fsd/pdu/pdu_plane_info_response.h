@@ -19,7 +19,7 @@ public:
     {
         for(auto &field : fields) {
             if(field.toUpper().startsWith(key.toUpper() + "=")) {
-                return field.left(key.length() + 1);
+                return field.mid(key.length() + 1);
             }
         }
         return "";

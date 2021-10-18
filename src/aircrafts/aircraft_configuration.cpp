@@ -2,14 +2,14 @@
 
 bool AircraftConfigurationInfo::HasConfig() const
 {
-    return Config.has_value();
+    return this->Config.has_value();
 }
 
 QString AircraftConfigurationInfo::ToIncrementalJson() const
 {
     QJsonObject obj;
-    if(this->Config.has_value() && !this->Config.value().IsFullData) {
-        obj["config"] = this->Config.value().ToJson();
+    if(this->Config.has_value() && !this->Config->IsFullData) {
+        obj["config"] = this->Config->ToJson();
     }
     QJsonDocument doc(obj);
     return doc.toJson(QJsonDocument::Compact);
@@ -20,7 +20,7 @@ QString AircraftConfigurationInfo::ToFullJson() const
     QJsonObject root;
 
     QJsonObject config;
-    if(this->Config.has_value())
+    if(this->Config)
     {
         config["is_full_data"] = true;
         if(this->Config->Lights.has_value()) {
@@ -29,10 +29,10 @@ QString AircraftConfigurationInfo::ToFullJson() const
         if(this->Config->Engines.has_value()) {
             config["engines"] = this->Config->Engines.value().toJson();
         }
-        config["flaps_pct"] = this->Config->FlapsPercent.value();
-        config["gear_down"] = this->Config->GearDown.value();
-        config["on_ground"] = this->Config->OnGround.value();
-        config["spoilers_out"] = this->Config->SpoilersDeployed.value();
+        config["flaps_pct"] = this->Config->FlapsPercent.has_value() ? this->Config->FlapsPercent.value() : 0;
+        config["gear_down"] = this->Config->GearDown.has_value() ? this->Config->GearDown.value() : true;
+        config["on_ground"] = this->Config->OnGround.has_value() ? this->Config->OnGround.value() : true;
+        config["spoilers_out"] = this->Config->SpoilersDeployed.has_value() ? this->Config->SpoilersDeployed.value() : false;
         root["config"] = config;
     }
 
@@ -67,29 +67,29 @@ AircraftConfigurationInfo AircraftConfigurationInfo::FromJson(QString json)
 
         else if(doc.object().contains("config"))
         {
-            cfg.Config = AircraftConfiguration();
+            const QJsonObject config = doc.object()["config"].toObject();
 
-            const QJsonObject json = doc.object()["config"].toObject();
+            cfg.Config = AircraftConfiguration{};
 
-            if(json.contains("is_full_data"))
+            if(config.contains("is_full_data"))
             {
-                cfg.Config->IsFullData = json["is_full_data"].toBool();
+                cfg.Config->IsFullData = config["is_full_data"].toBool();
             }
-            if(json.contains("flaps_pct"))
+            if(config.contains("flaps_pct"))
             {
-                cfg.Config->FlapsPercent = json["flaps_pct"].toInt();
+                cfg.Config->FlapsPercent = config["flaps_pct"].toInt();
             }
-            if(json.contains("gear_down"))
+            if(config.contains("gear_down"))
             {
-                cfg.Config->GearDown = json["gear_down"].toBool();
+                cfg.Config->GearDown = config["gear_down"].toBool();
             }
-            if(json.contains("on_ground"))
+            if(config.contains("on_ground"))
             {
-                cfg.Config->OnGround = json["on_ground"].toBool();
+                cfg.Config->OnGround = config["on_ground"].toBool();
             }
-            if(json.contains("spoilers_out"))
+            if(config.contains("spoilers_out"))
             {
-                cfg.Config->SpoilersDeployed = json["spoilers_out"].toBool();
+                cfg.Config->SpoilersDeployed = config["spoilers_out"].toBool();
             }
         }
     }
@@ -141,7 +141,7 @@ AircraftConfiguration AircraftConfiguration::Clone()
     return clone;
 }
 
-void AircraftConfiguration::ApplyIncremental(AircraftConfiguration &inc)
+void AircraftConfiguration::ApplyIncremental(const AircraftConfiguration &inc)
 {
     if(Lights.has_value()) {
         Lights->ApplyIncremental(inc.Lights.value());
@@ -188,19 +188,19 @@ QJsonObject AircraftConfigurationLights::toJson() const
 {
     QJsonObject obj;
     if(StrobesOn.has_value()) {
-        obj["strobe_on"] = StrobesOn.value();
+        obj["strobe_on"] = StrobesOn.has_value() ? StrobesOn.value() : true;
     }
     if(LandingOn.has_value()) {
-        obj["landing_on"] = LandingOn.value();
+        obj["landing_on"] = LandingOn.has_value() ? LandingOn.value() : true;
     }
     if(TaxiOn.has_value()) {
-        obj["taxi_on"] = TaxiOn.value();
+        obj["taxi_on"] = TaxiOn.has_value() ? TaxiOn.value() : true;
     }
     if(BeaconOn.has_value()) {
-        obj["beacon_on"] = BeaconOn.value();
+        obj["beacon_on"] = TaxiOn.has_value() ? BeaconOn.value() : true;
     }
     if(NavOn.has_value()) {
-        obj["nav_on"] = NavOn.value();
+        obj["nav_on"] = NavOn.has_value() ? NavOn.value() : true;
     }
     return obj;
 }
@@ -216,7 +216,7 @@ AircraftConfigurationLights AircraftConfigurationLights::Clone()
     return clone;
 }
 
-void AircraftConfigurationLights::ApplyIncremental(AircraftConfigurationLights &inc)
+void AircraftConfigurationLights::ApplyIncremental(const AircraftConfigurationLights &inc)
 {
     if(inc.StrobesOn.has_value()) StrobesOn = inc.StrobesOn.value();
     if(inc.LandingOn.has_value()) LandingOn = inc.LandingOn.value();
@@ -264,7 +264,7 @@ AircraftConfigurationEngine AircraftConfigurationEngine::Clone()
     return clone;
 }
 
-void AircraftConfigurationEngine::ApplyIncremental(AircraftConfigurationEngine& inc)
+void AircraftConfigurationEngine::ApplyIncremental(const AircraftConfigurationEngine& inc)
 {
     if(inc.Running.has_value()) Running = inc.Running;
 }
@@ -301,16 +301,16 @@ QJsonObject AircraftConfigurationEngines::toJson() const
 {
     QJsonObject obj;
     if(HasEngine1Object()) {
-        obj["1"] = Engine1->Running.value();
+        obj["1"] = Engine1->Running.has_value() ? Engine1->Running.value() : true;
     }
     if(HasEngine2Object()) {
-        obj["2"] = Engine2->Running.value();
+        obj["2"] = Engine2->Running.has_value() ? Engine2->Running.value() : true;
     }
     if(HasEngine3Object()) {
-        obj["3"] = Engine3->Running.value();
+        obj["3"] = Engine3->Running.has_value() ? Engine3->Running.value() : true;
     }
     if(HasEngine4Object()) {
-        obj["4"] = Engine4->Running.value();
+        obj["4"] = Engine4->Running.has_value() ? Engine4->Running.value() : true;
     }
     return obj;
 }
@@ -325,7 +325,7 @@ AircraftConfigurationEngines AircraftConfigurationEngines::Clone()
     return clone;
 }
 
-void AircraftConfigurationEngines::ApplyIncremental(AircraftConfigurationEngines &inc)
+void AircraftConfigurationEngines::ApplyIncremental(const AircraftConfigurationEngines &inc)
 {
     if(inc.HasEngine1Object() && HasEngine1Object()) Engine1->ApplyIncremental(inc.Engine1.value());
     if(inc.HasEngine2Object() && HasEngine2Object()) Engine2->ApplyIncremental(inc.Engine2.value());

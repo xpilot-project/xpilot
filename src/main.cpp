@@ -21,6 +21,7 @@
 #include "network/networkserverlist.h"
 #include "simulator/xplane_adapter.h"
 #include "aircrafts/user_aircraft_manager.h"
+#include "aircrafts/network_aircraft_manager.h"
 #include "aircrafts/radio_stack_state.h"
 #include "version.h"
 
@@ -46,6 +47,7 @@ int main(int argc, char *argv[])
     AppCore appCore;
     XplaneAdapter xplaneAdapter;
     NetworkManager networkManager(xplaneAdapter);
+    AircraftManager networkAircraftManager(networkManager, xplaneAdapter);
     ControllerManager controllerManager(networkManager);
     NetworkServerList serverList;
     UserAircraftManager aircraftManager(xplaneAdapter, networkManager);

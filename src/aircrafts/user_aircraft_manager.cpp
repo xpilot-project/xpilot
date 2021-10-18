@@ -3,11 +3,11 @@
 
 using namespace xpilot;
 
-UserAircraftManager::UserAircraftManager(XplaneAdapter& udpClient, NetworkManager& networkManager, QObject* parent) :
+UserAircraftManager::UserAircraftManager(XplaneAdapter& xplaneAdapter, NetworkManager& networkManager, QObject* parent) :
     QObject(parent),
     m_networkManager(networkManager)
 {
-    connect(&udpClient, &XplaneAdapter::userAircraftDataChanged, this, &UserAircraftManager::OnUserAircraftDataUpdated);
+    connect(&xplaneAdapter, &XplaneAdapter::userAircraftConfigDataChanged, this, &UserAircraftManager::OnUserAircraftConfigDataUpdated);
     connect(&m_networkManager, &NetworkManager::aircraftConfigurationInfoReceived, this, &UserAircraftManager::OnAircraftConfigurationInfoReceived);
 
     QTimer* tokenRefreshTimer = new QTimer(this);
@@ -19,11 +19,11 @@ UserAircraftManager::UserAircraftManager(XplaneAdapter& udpClient, NetworkManage
     tokenRefreshTimer->start(AcconfigTokenRefreshInterval);
 }
 
-void UserAircraftManager::OnUserAircraftDataUpdated(UserAircraftData data)
+void UserAircraftManager::OnUserAircraftConfigDataUpdated(UserAircraftConfigData data)
 {
-    if(m_userAircraftData != data)
+    if(m_userAircraftConfigData != data)
     {
-        m_userAircraftData = data;
+        m_userAircraftConfigData = data;
         if(!m_lastBroadcastConfig.has_value())
         {
             m_lastBroadcastConfig = AircraftConfiguration::FromUserAircraftData(m_userAircraftConfigData);
@@ -45,10 +45,9 @@ void UserAircraftManager::OnUserAircraftDataUpdated(UserAircraftData data)
 
 void UserAircraftManager::OnAircraftConfigurationInfoReceived(QString from, QString json)
 {
-    AircraftConfigurationInfo info;
-    info.FromJson(json);
+    auto acconfig = AircraftConfigurationInfo::FromJson(json);
 
-    if(info.IsFullRequest)
+    if(acconfig.IsFullRequest.has_value() && acconfig.IsFullRequest.value())
     {
         AircraftConfiguration cfg = AircraftConfiguration::FromUserAircraftData(m_userAircraftConfigData);
         cfg.IsFullData = true;

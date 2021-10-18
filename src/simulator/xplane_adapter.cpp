@@ -3,6 +3,8 @@
 #include <QTimer>
 #include <QtEndian>
 #include <QDateTime>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 enum DataRef
 {
@@ -24,6 +26,7 @@ enum DataRef
     Longitude,
     AltitudeMsl,
     AltitudeAgl,
+    GroundSpeed,
     Pitch,
     Heading,
     Bank,
@@ -44,6 +47,16 @@ enum DataRef
 
 XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 {
+    m_zmqContext = new zmq::context_t(1);
+    m_zmqSocket = new zmq::socket_t(*m_zmqContext, ZMQ_DEALER);
+    m_zmqSocket->set(zmq::sockopt::routing_id, "xpilot");
+    m_zmqSocket->set(zmq::sockopt::linger, 0);
+    m_zmqSocket->connect("tcp://localhost:53100");
+
+    m_zmqThread = new std::thread([&]{
+
+    });
+
     socket = new QUdpSocket(this);
     connect(socket, &QUdpSocket::readyRead, this, &XplaneAdapter::OnDataReceived);
 
@@ -106,6 +119,7 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/flightmodel/position/Qrad", DataRef::PitchVelocity, 5);
     SubscribeDataRef("sim/flightmodel/position/Rrad", DataRef::HeadingVelocity, 5);
     SubscribeDataRef("sim/flightmodel/position/Prad", DataRef::BankVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/groundspeed", DataRef::GroundSpeed, 5);
     SubscribeDataRef("sim/aircraft/engine/acf_num_engines", DataRef::EngineCount, 5);
     SubscribeDataRef("sim/flightmodel/failures/onground_any", DataRef::OnGround, 5);
     SubscribeDataRef("sim/cockpit/switches/gear_handle_status", DataRef::GearDown, 5);
@@ -272,6 +286,9 @@ void XplaneAdapter::OnDataReceived()
                 case DataRef::BankVelocity:
                     m_userAircraftData.BankVelocity = value;
                     break;
+                case DataRef::GroundSpeed:
+                    m_userAircraftData.GroundSpeed = value * 1.94384; // mps -> knots
+                    break;
                 case DataRef::BeaconLights:
                     m_userAircraftConfigData.BeaconOn = value;
                     break;
@@ -314,4 +331,161 @@ void XplaneAdapter::OnDataReceived()
             }
         }
     }
+}
+
+void XplaneAdapter::sendSocketMessage(const QString &message)
+{
+    if(message.isEmpty()) return;
+
+    if(m_zmqSocket != nullptr)
+    {
+        zmq::message_t msg(message.size());
+        std::memcpy(msg.data(), message.toStdString().data(), message.size());
+        m_zmqSocket->send(msg, zmq::send_flags::none);
+    }
+}
+
+void XplaneAdapter::AddPlaneToSimulator(const NetworkAircraft &aircraft)
+{
+    QJsonObject reply;
+    reply.insert("type", "AddPlane");
+
+    QJsonObject data;
+    data.insert("callsign", aircraft.Callsign);
+    data.insert("airline", aircraft.Airline);
+    data.insert("type_code", aircraft.TypeCode);
+    data.insert("latitude", aircraft.RemoteVisualState.Latitude);
+    data.insert("longitude", aircraft.RemoteVisualState.Longitude);
+    data.insert("altitude", aircraft.RemoteVisualState.Altitude);
+    data.insert("heading", aircraft.RemoteVisualState.Heading);
+    data.insert("bank", aircraft.RemoteVisualState.Bank);
+    data.insert("pitch", aircraft.RemoteVisualState.Pitch);
+    reply.insert("data", data);
+
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+}
+
+void XplaneAdapter::PlaneConfigChanged(const NetworkAircraft &aircraft)
+{
+    QJsonObject reply;
+    reply.insert("type", "AirplaneConfig");
+
+    QJsonObject data;
+    data.insert("callsign", aircraft.Callsign);
+    data.insert("full_config", aircraft.Configuration->IsFullData.has_value() && aircraft.Configuration->IsFullData.value());
+    data.insert("engines_on", aircraft.Configuration->Engines.has_value() && aircraft.Configuration->Engines->IsAnyEngineRunning());
+
+    if(aircraft.Configuration->OnGround.has_value())
+    {
+        data.insert("on_ground", aircraft.Configuration->OnGround.value());
+    }
+
+    if(aircraft.Configuration->FlapsPercent.has_value())
+    {
+        data.insert("flaps", aircraft.Configuration->FlapsPercent.value() / 100.0f);
+    }
+
+    if(aircraft.Configuration->GearDown.has_value())
+    {
+        data.insert("gear_down", aircraft.Configuration->GearDown.value());
+    }
+
+    if(aircraft.Configuration->Lights.has_value())
+    {
+        QJsonObject lights;
+
+        if(aircraft.Configuration->Lights->BeaconOn.has_value())
+        {
+            lights.insert("beacon_lights_on", aircraft.Configuration->Lights->BeaconOn.value());
+        }
+        if(aircraft.Configuration->Lights->LandingOn.has_value())
+        {
+            lights.insert("landing_lights_on", aircraft.Configuration->Lights->LandingOn.value());
+        }
+        if(aircraft.Configuration->Lights->NavOn.has_value())
+        {
+            lights.insert("nav_lights_on", aircraft.Configuration->Lights->NavOn.value());
+        }
+        if(aircraft.Configuration->Lights->StrobesOn.has_value())
+        {
+            lights.insert("strobe_lights_on", aircraft.Configuration->Lights->StrobesOn.value());
+        }
+        if(aircraft.Configuration->Lights->TaxiOn.has_value())
+        {
+            lights.insert("taxi_lights_on", aircraft.Configuration->Lights->TaxiOn.value());
+        }
+
+        data.insert("lights", lights);
+    }
+
+    reply.insert("data", data);
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+}
+
+void XplaneAdapter::DeleteAircraft(const NetworkAircraft &aircraft)
+{
+    QJsonObject reply;
+    reply.insert("type", "RemovePlane");
+
+    QJsonObject data;
+    data.insert("callsign", aircraft.Callsign);
+
+    reply.insert("data", data);
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+}
+
+void XplaneAdapter::DeleteAllAircraft()
+{
+    QJsonObject reply;
+    reply.insert("type", "RemoveAllPlanes");
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+}
+
+void XplaneAdapter::SendSlowPositionUpdate(const NetworkAircraft &aircraft, const AircraftVisualState &visualState, const double& groundSpeed)
+{
+    QJsonObject reply;
+    reply.insert("type", "SlowPositionUpdate");
+
+    QJsonObject data;
+    data.insert("callsign", aircraft.Callsign);
+    data.insert("latitude", visualState.Latitude);
+    data.insert("longitude", visualState.Longitude);
+    data.insert("altitude", visualState.Altitude);
+    data.insert("heading", visualState.Heading);
+    data.insert("bank", visualState.Bank);
+    data.insert("pitch", visualState.Pitch);
+    data.insert("ground_speed", groundSpeed);
+
+    reply.insert("data", data);
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+}
+
+void XplaneAdapter::SendFastPositionUpdate(const NetworkAircraft &aircraft, const AircraftVisualState &visualState, const VelocityVector &positionalVelocityVector, const VelocityVector &rotationalVelocityVector)
+{
+    QJsonObject reply;
+    reply.insert("type", "FastPositionUpdate");
+
+    QJsonObject data;
+    data.insert("callsign", aircraft.Callsign);
+    data.insert("latitude", visualState.Latitude);
+    data.insert("longitude", visualState.Longitude);
+    data.insert("altitude", visualState.Altitude);
+    data.insert("heading", visualState.Heading);
+    data.insert("bank", visualState.Bank);
+    data.insert("pitch", visualState.Pitch);
+    data.insert("vx", positionalVelocityVector.X);
+    data.insert("vy", positionalVelocityVector.Y);
+    data.insert("vz", positionalVelocityVector.Z);
+    data.insert("vp", rotationalVelocityVector.X);
+    data.insert("vh", rotationalVelocityVector.Y);
+    data.insert("vb", rotationalVelocityVector.Z);
+
+    reply.insert("data", data);
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
 }

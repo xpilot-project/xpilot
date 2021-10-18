@@ -19,7 +19,7 @@ public:
     UserAircraftManager(XplaneAdapter& udpClient, NetworkManager& networkManager, QObject* parent = nullptr);
 
 private:
-    void OnUserAircraftDataUpdated(UserAircraftData data);
+    void OnUserAircraftConfigDataUpdated(UserAircraftConfigData data);
     void OnAircraftConfigurationInfoReceived(QString from, QString json);
 
 private:
@@ -32,7 +32,8 @@ private:
     UserAircraftData m_userAircraftData;
     UserAircraftConfigData m_userAircraftConfigData;
     std::optional<AircraftConfiguration> m_lastBroadcastConfig;
-    bool m_airborne;
+    bool m_airborne = false;
+    bool m_initialAircraftDataReceived = false;
 };
 
 #endif

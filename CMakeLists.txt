@@ -37,8 +37,6 @@ find_package(Qt5QuickCompiler)
 
 qtquick_compiler_add_resources(RESOURCES qml.qrc)
 
-#AUX_SOURCE_DIRECTORY("${CMAKE_SOURCE_DIR}/protobuf" PROTOBUF_SRC)
-
 set(FSD_SOURCES
     src/fsd/enums.h
     src/fsd/client_properties.h
@@ -127,7 +125,7 @@ set(PROJECT_SOURCES
     src/network/events/radio_message_received.h
     src/simulator/xplane_adapter.h
     src/simulator/xplane_adapter.cpp
-    src/aircrafts/aircraft.h
+    src/aircrafts/network_aircraft.h
     src/aircrafts/aircraft_visual_state.h
     src/aircrafts/velocity_vector.h
     src/aircrafts/aircraft_configuration.h
@@ -136,7 +134,9 @@ set(PROJECT_SOURCES
     src/aircrafts/user_aircraft_config_data.h
     src/aircrafts/radio_stack_state.h
     src/aircrafts/user_aircraft_manager.h
-    src/aircrafts/user_aircraft_manager.cpp)
+    src/aircrafts/user_aircraft_manager.cpp
+    src/aircrafts/network_aircraft_manager.h
+    src/aircrafts/network_aircraft_manager.cpp)
 
 set(AFV_NATIVE_HEADERS
     afv-native/include/afv-native/Client.h
@@ -331,14 +331,6 @@ target_compile_definitions(xPilot
 target_link_libraries(xPilot
     PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::Network)
 
-#find_package(Protobuf REQUIRED)
-#if(Protobuf_FOUND)
-#        message("Found Protobuf library")
-#        message(${Protobuf_INCLUDE_DIRS})
-#        include_directories(${Protobuf_INCLUDE_DIRS})
-#        target_link_libraries(xPilot PRIVATE ${Protobuf_LIBRARIES})
-#endif(Protobuf_FOUND)
-
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32.lib)
 endif()
@@ -352,6 +344,8 @@ target_link_libraries(${PROJECT_NAME}
     CONAN_PKG::nlohmann_json
     CONAN_PKG::libcurl
     CONAN_PKG::libevent
+    CONAN_PKG::zeromq
+    CONAN_PKG::cppzmq
     ${OPUS_LIBARY_PATH}
     ${PORTAUDIO_LIBRARY_PATH}
     ${SPEEXDSP_LIBRARY_PATH}

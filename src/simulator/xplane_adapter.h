@@ -9,11 +9,17 @@
 #include <string>
 #include <mutex>
 #include <vector>
+#include <thread>
+#include <deque>
 
 #include <QObject>
 #include <QUdpSocket>
 #include <QDataStream>
 
+#include "zmq.hpp"
+
+#include "src/aircrafts/network_aircraft.h"
+#include "src/aircrafts/velocity_vector.h"
 #include "src/aircrafts/user_aircraft_data.h"
 #include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/radio_stack_state.h"
@@ -30,6 +36,14 @@ public:
     Q_INVOKABLE void setCom2Frequency(float freq);
     Q_INVOKABLE void transponderIdent();
     Q_INVOKABLE void transponderModeToggle();
+    Q_INVOKABLE void sendSocketMessage(const QString& message);
+
+    void AddPlaneToSimulator(const NetworkAircraft& aircraft);
+    void PlaneConfigChanged(const NetworkAircraft& aircraft);
+    void DeleteAircraft(const NetworkAircraft& aircraft);
+    void DeleteAllAircraft();
+    void SendSlowPositionUpdate(const NetworkAircraft& aircraft, const AircraftVisualState& visualState, const double& groundSpeed);
+    void SendFastPositionUpdate(const NetworkAircraft& aircraft, const AircraftVisualState& visualState, const VelocityVector& positionalVelocityVector, const VelocityVector& rotationalVelocityVector);
 
 private:
     void Subscribe();
@@ -57,6 +71,10 @@ private:
     UserAircraftData m_userAircraftData;
     UserAircraftConfigData m_userAircraftConfigData;
     RadioStackState m_radioStackState;
+
+    std::thread* m_zmqThread;
+    zmq::context_t* m_zmqContext;
+    zmq::socket_t* m_zmqSocket;
 };
 
 #endif

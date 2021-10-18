@@ -130,12 +130,16 @@ namespace xpilot
                 }
                 else if(pduTypeId == "#SB")
                 {
-                    if(fields.length() >= 3) {
-                        if(fields[2] == "PIR") {
+                    if(fields.length() >= 3)
+                    {
+                        if(fields[2] == "PIR")
+                        {
                             emit RaisePlaneInfoRequestReceived(PDUPlaneInfoRequest::fromTokens(fields));
                         }
-                        else if(fields[2] == "PI" && fields.length() >= 4) {
-                            if(fields[3] == "GEN") {
+                        else if(fields[2] == "PI" && fields.length() >= 4)
+                        {
+                            if(fields[3] == "GEN")
+                            {
                                 emit RaisePlaneInfoResponseReceived(PDUPlaneInfoResponse::fromTokens(fields));
                             }
                         }
