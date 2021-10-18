@@ -13,7 +13,7 @@ namespace xpilot
     void AppCore::DownloadServerList()
     {
         NetworkServerList networkServerList;
-        auto serverList = networkServerList.DownloadServerList("http://data.vatsim.net/vatsim-servers.json");
+        auto serverList = networkServerList.DownloadServerList("https://data.vatsim.net/v3/vatsim-servers.json");
 
         if(serverList.size() > 0) {
             emit serverListDownloaded(serverList.size());

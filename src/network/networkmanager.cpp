@@ -34,10 +34,10 @@ namespace xpilot
         connect(&m_fsd, &FsdClient::RaisePlaneInfoResponseReceived, this, &NetworkManager::OnPlaneInfoResponseReceived);
         connect(&m_fsd, &FsdClient::RaiseKillRequestReceived, this, &NetworkManager::OnKillRequestReceived);
         connect(&m_fsd, &FsdClient::RaiseRawDataSent, this, [](QString data){
-            qDebug() << ">> " << data;
+           // qDebug() << ">> " << data;
         });
         connect(&m_fsd, &FsdClient::RaiseRawDataReceived, this, [](QString data){
-            qDebug() << "<< " << data;
+           // qDebug() << "<< " << data;
         });
 
         connect(&xplaneAdapter, &XplaneAdapter::userAircraftDataChanged, this, &NetworkManager::OnUserAircraftDataUpdated);
@@ -449,18 +449,18 @@ namespace xpilot
 
     void NetworkManager::SendAircraftConfigurationUpdate(QString to, AircraftConfiguration config)
     {
-        AircraftConfigurationInfo acconfig{};
-        acconfig.Config = config;
+//        AircraftConfigurationInfo acconfig{};
+//        acconfig.Config = config;
 
-        QStringList payload;
-        if(config.IsFullData) {
-            payload.append(acconfig.ToFullJson());
-        }
-        else{
-            payload.append(acconfig.ToIncrementalJson());
-        }
+//        QStringList payload;
+//        if(config.IsFullData) {
+//            payload.append(acconfig.ToFullJson());
+//        }
+//        else{
+//            payload.append(acconfig.ToIncrementalJson());
+//        }
 
-        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, to, ClientQueryType::AircraftConfiguration, payload));
+//        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, to, ClientQueryType::AircraftConfiguration, payload));
     }
 
     void NetworkManager::SendCapabilities(QString to)
@@ -512,13 +512,13 @@ namespace xpilot
 
     void NetworkManager::SendAircraftConfigurationRequest(QString callsign)
     {
-        AircraftConfigurationInfo acconfig;
-        acconfig.IsFullRequest = true;
+//        AircraftConfigurationInfo acconfig;
+//        acconfig.IsFullRequest = true;
 
-        QStringList args;
-        args.append(acconfig.RequestFullConfig());
+//        QStringList args;
+//        args.append(acconfig.RequestFullConfig());
 
-        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, callsign, ClientQueryType::AircraftConfiguration, args));
+//        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, callsign, ClientQueryType::AircraftConfiguration, args));
     }
 
     void NetworkManager::connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer)

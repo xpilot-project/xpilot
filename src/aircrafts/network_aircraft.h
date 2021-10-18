@@ -22,17 +22,20 @@ struct NetworkAircraft
     QString Airline;
     QString TypeCode;
     AircraftVisualState RemoteVisualState;
-    std::optional<AircraftConfiguration> Configuration;
+//    std::optional<AircraftConfiguration> Configuration;
     QDateTime LastSlowPositionUpdateReceived;
     AircraftStatus Status;
     bool HaveVelocities;
 
     bool operator==(const NetworkAircraft& rhs) const
     {
-         return Callsign == rhs.Callsign && Airline == rhs.Airline && TypeCode == rhs.TypeCode
-                 && RemoteVisualState == rhs.RemoteVisualState && Configuration == rhs.Configuration
+         return Callsign == rhs.Callsign
+                 && Airline == rhs.Airline
+                 && TypeCode == rhs.TypeCode
+                 && RemoteVisualState == rhs.RemoteVisualState
                  && LastSlowPositionUpdateReceived == rhs.LastSlowPositionUpdateReceived
-                 && Status == rhs.Status && HaveVelocities == rhs.HaveVelocities;
+                 && Status == rhs.Status
+                 && HaveVelocities == rhs.HaveVelocities;
     }
 };
 

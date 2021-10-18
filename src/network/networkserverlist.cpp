@@ -47,6 +47,12 @@ namespace xpilot
         serverInfo.Location = "";
         serverList.append(serverInfo);
 
+        NetworkServerInfo vpsServer;
+        vpsServer.Name = "Velocity";
+        vpsServer.Address = "vps.downstairsgeek.com";
+        vpsServer.Location = "";
+        serverList.append(vpsServer);
+
         emit serverListDownloaded(serverList);
 
         return serverList;

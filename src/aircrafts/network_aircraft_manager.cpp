@@ -19,6 +19,11 @@ namespace xpilot
         connect(&m_networkManager, &NetworkManager::pilotDeleted, this, &AircraftManager::OnPilotDeleted);
         connect(m_staleAircraftCheckTimer, &QTimer::timeout, this, &AircraftManager::OnStaleAircraftTimeoutTimeout);
         connect(m_simulatorAircraftSyncTimer, &QTimer::timeout, this, &AircraftManager::OnSimulatorAircraftSyncTimeout);
+
+        auto cfg = AircraftConfigurationInfo::FromJson("{\"config\":{\"is_full_data\":true,\"lights\":{\"strobe_on\":true},\"on_ground\":false,\"flaps_pct\":50}}");
+        qDebug() << "OnGround: " << cfg.Config->OnGround.value_or(true);
+        qDebug() << "Flaps: " << cfg.Config->FlapsPercent.value_or(0);
+        qDebug() << "StrobeOn: " << cfg.Config->Lights->StrobeOn.value_or(true);
     }
 
     void AircraftManager::InitializeTimers()
@@ -122,19 +127,6 @@ namespace xpilot
         SyncSimulatorAircraft();
     }
 
-    void AircraftManager::OnAircraftConfigurationReceived(QString callsign, QString json)
-    {
-        AircraftConfigurationInfo info = AircraftConfigurationInfo::FromJson(json);
-
-        for(auto& plane : m_aircraft)
-        {
-            if(plane.Callsign == callsign && info.Config.has_value())
-            {
-                HandleAircraftConfiguration(plane, info.Config.value());
-            }
-        }
-    }
-
     void AircraftManager::OnAircraftInfoReceived(QString callsign, QString typeCode, QString airlineIcao)
     {
         auto planeIt = std::find_if(m_aircraft.begin(), m_aircraft.end(), [=](NetworkAircraft a){return a.Callsign == callsign;});
@@ -153,34 +145,47 @@ namespace xpilot
         }
     }
 
-    void AircraftManager::HandleAircraftConfiguration(NetworkAircraft &aircraft, const AircraftConfiguration &config)
+    void AircraftManager::OnAircraftConfigurationReceived(QString callsign, QString json)
     {
-        bool isFullData = config.IsFullData.has_value() && config.IsFullData.value();
+        //        AircraftConfigurationInfo info = AircraftConfigurationInfo::FromJson(json);
 
-        // We can just ignore incremental config updates if we haven't received a full config yet.
-        if(!isFullData && !aircraft.Configuration.has_value())
-        {
-            return;
-        }
-
-        if(isFullData)
-        {
-            aircraft.Configuration = config;
-        }
-        else
-        {
-            aircraft.Configuration->ApplyIncremental(config);
-        }
-
-        if((aircraft.Status == AircraftStatus::New) && IsEligibleToAddToSimulator(aircraft))
-        {
-            SyncSimulatorAircraft();
-        }
-        else if(aircraft.Status == AircraftStatus::Active)
-        {
-            m_xplaneAdapter.PlaneConfigChanged(aircraft);
-        }
+        //        for(auto& plane : m_aircraft)
+        //        {
+        //            if(plane.Callsign == callsign && info.Config.has_value())
+        //            {
+        //                HandleAircraftConfiguration(plane, info.Config.value());
+        //            }
+        //        }
     }
+
+    //    void AircraftManager::HandleAircraftConfiguration(NetworkAircraft &aircraft, const AircraftConfiguration &config)
+    //    {
+    //        bool isFullData = config.IsFullData.has_value() && config.IsFullData.value();
+
+    //        // We can just ignore incremental config updates if we haven't received a full config yet.
+    //        if(!isFullData && !aircraft.Configuration.has_value())
+    //        {
+    //            return;
+    //        }
+
+    //        if(isFullData)
+    //        {
+    //            aircraft.Configuration = config;
+    //        }
+    //        else
+    //        {
+    //            AircraftConfiguration::ApplyIncremental(aircraft.Configuration.value(), config);
+    //        }
+
+    //        if((aircraft.Status == AircraftStatus::New) && IsEligibleToAddToSimulator(aircraft))
+    //        {
+    //            SyncSimulatorAircraft();
+    //        }
+    //        else
+    //        {
+    //            m_xplaneAdapter.PlaneConfigChanged(aircraft);
+    //        }
+    //    }
 
     void AircraftManager::DeleteAllPlanes()
     {
@@ -221,10 +226,10 @@ namespace xpilot
 
     bool AircraftManager::IsEligibleToAddToSimulator(const NetworkAircraft &aircraft)
     {
-        if(!aircraft.Configuration.has_value())
-        {
-            return false;
-        }
+        //        if(!aircraft.Configuration.has_value())
+        //        {
+        //            return false;
+        //        }
 
         if(aircraft.TypeCode.isEmpty())
         {
