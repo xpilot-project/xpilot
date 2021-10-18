@@ -5,19 +5,13 @@
 #include <QJsonDocument>
 #include <optional>
 
-class AircraftConfigurationEngine
-{
-public:
-    bool Running;
-};
-
 class AircraftConfigurationEngines
 {
 public:
-    std::optional<AircraftConfigurationEngine> Engine1;
-    std::optional<AircraftConfigurationEngine> Engine2;
-    std::optional<AircraftConfigurationEngine> Engine3;
-    std::optional<AircraftConfigurationEngine> Engine4;
+    std::optional<bool> Engine1Running;
+    std::optional<bool> Engine2Running;
+    std::optional<bool> Engine3Running;
+    std::optional<bool> Engine4Running;
 };
 
 class AircraftConfigurationLights
@@ -43,6 +37,9 @@ public:
     std::optional<int> FlapsPercent;
     std::optional<bool> SpoilersDeployed;
     std::optional<bool> OnGround;
+
+    bool IsAnyEngineRunning() const { return Engines.has_value() && (Engines->Engine1Running.value_or(false) || Engines->Engine2Running.value_or(false) ||
+                 Engines->Engine3Running.value_or(false) || Engines->Engine4Running.value_or(false)); }
 
     QString ToJson() const
     {
@@ -126,11 +123,34 @@ public:
 
                 if(engines.contains("1"))
                 {
-                    info.Config->Engines->Engine1 = AircraftConfigurationEngine();
-                    const QJsonObject engine = engines["1"].toObject();
+                    auto engine = engines["1"].toObject();
                     if(engine.contains("on"))
                     {
-                        info.Config->Engines->Engine1->Running = engine["on"].toBool();
+                        info.Config->Engines->Engine1Running = engine["on"].toBool();
+                    }
+                }
+                if(engines.contains("2"))
+                {
+                    auto engine = engines["2"].toObject();
+                    if(engine.contains("on"))
+                    {
+                        info.Config->Engines->Engine2Running = engine["on"].toBool();
+                    }
+                }
+                if(engines.contains("3"))
+                {
+                    auto engine = engines["3"].toObject();
+                    if(engine.contains("on"))
+                    {
+                        info.Config->Engines->Engine3Running = engine["on"].toBool();
+                    }
+                }
+                if(engines.contains("4"))
+                {
+                    auto engine = engines["4"].toObject();
+                    if(engine.contains("on"))
+                    {
+                        info.Config->Engines->Engine4Running = engine["on"].toBool();
                     }
                 }
             }
