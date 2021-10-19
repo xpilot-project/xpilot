@@ -12,6 +12,8 @@ public:
     std::optional<bool> Engine2Running;
     std::optional<bool> Engine3Running;
     std::optional<bool> Engine4Running;
+
+    bool HasEngines() const { return Engine1Running.has_value() || Engine2Running.has_value() || Engine3Running.has_value() || Engine4Running.has_value(); }
 };
 
 class AircraftConfigurationLights
@@ -23,6 +25,8 @@ public:
     std::optional<bool> BeaconOn;
     std::optional<bool> NavOn;
     std::optional<bool> LogoOn;
+
+    bool HasLights() const { return StrobeOn.has_value() || LandingOn.has_value() || TaxiOn.has_value() || BeaconOn.has_value() || NavOn.has_value() || LogoOn.has_value(); }
 };
 
 class AircraftConfiguration
@@ -41,10 +45,81 @@ public:
     bool IsAnyEngineRunning() const { return Engines.has_value() && (Engines->Engine1Running.value_or(false) || Engines->Engine2Running.value_or(false) ||
                  Engines->Engine3Running.value_or(false) || Engines->Engine4Running.value_or(false)); }
 
+    AircraftConfiguration()
+    {
+        Lights = AircraftConfigurationLights();
+        Engines = AircraftConfigurationEngines();
+    }
+
     QString ToJson() const
     {
-        QJsonObject obj;
-        QJsonDocument doc(obj);
+        QJsonObject cfg;
+
+        if(!IsIncremental())
+        {
+            cfg["is_full_data"] = true;
+        }
+
+        if(GearDown.has_value())
+        {
+            cfg["gear_down"] = GearDown.value();
+        }
+        if(FlapsPercent.has_value())
+        {
+            cfg["flaps_pct"] = FlapsPercent.value();
+        }
+        if(SpoilersDeployed.has_value())
+        {
+            cfg["spoilers_out"] = SpoilersDeployed.value();
+        }
+        if(OnGround.has_value())
+        {
+            cfg["on_ground"] = OnGround.value();
+        }
+
+        if(Engines.has_value() && Engines->HasEngines())
+        {
+            QJsonObject engines;
+
+            if(Engines->Engine1Running.has_value())
+            {
+
+            }
+        }
+
+        if(Lights.has_value() && Lights->HasLights())
+        {
+            QJsonObject lights;
+
+            if(Lights->StrobeOn.has_value())
+            {
+                lights["strobe_on"] = Lights->StrobeOn.value();
+            }
+            if(Lights->LandingOn.has_value())
+            {
+                lights["landing_on"] = Lights->LandingOn.value();
+            }
+            if(Lights->TaxiOn.has_value())
+            {
+                lights["taxi_on"] = Lights->TaxiOn.value();
+            }
+            if(Lights->BeaconOn.has_value())
+            {
+                lights["beacon_on"] = Lights->BeaconOn.value();
+            }
+            if(Lights->NavOn.has_value())
+            {
+                lights["nav_on"] = Lights->NavOn.value();
+            }
+            if(Lights->LogoOn.has_value())
+            {
+                lights["logo_on"] = Lights->LogoOn.value();
+            }
+
+            cfg["lights"] = lights;
+        }
+
+        QJsonDocument doc(cfg);
         return doc.toJson(QJsonDocument::Compact);
     }
 };
@@ -56,6 +131,11 @@ public:
     std::optional<AircraftConfiguration> Config;
     bool HasConfig() const { return Config.has_value(); }
 
+    AircraftConfigurationInfo()
+    {
+        Config = AircraftConfiguration();
+    }
+
     QString ToJson() const
     {
         QJsonObject obj;
@@ -65,7 +145,7 @@ public:
             obj["request"] = "full";
         }
 
-        if(Config.has_value())
+        else if(Config.has_value())
         {
             obj["config"] = Config.value().ToJson();
         }

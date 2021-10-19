@@ -25,6 +25,10 @@ namespace xpilot
         qDebug() << "Flaps: " << cfg.Config->FlapsPercent.value_or(0);
         qDebug() << "StrobeOn: " << cfg.Config->Lights->StrobeOn.value_or(true);
         qDebug() << "AnyEngineRunning: " << cfg.Config->IsAnyEngineRunning();
+
+        auto cfg2 = AircraftConfigurationInfo();
+        cfg2.FullRequest = true;
+        qDebug() << cfg2.ToJson();
     }
 
     void AircraftManager::InitializeTimers()
