@@ -27,7 +27,7 @@ namespace xpilot
         qDebug() << "AnyEngineRunning: " << cfg.Config->IsAnyEngineRunning();
 
         auto cfg2 = AircraftConfigurationInfo();
-        cfg2.FullRequest = true;
+        cfg2.Config->Engines->Engine1Running = true;
         qDebug() << cfg2.ToJson();
     }
 
@@ -152,45 +152,68 @@ namespace xpilot
 
     void AircraftManager::OnAircraftConfigurationReceived(QString callsign, QString json)
     {
-        //        AircraftConfigurationInfo info = AircraftConfigurationInfo::FromJson(json);
+        AircraftConfigurationInfo info = AircraftConfigurationInfo::FromJson(json);
 
-        //        for(auto& plane : m_aircraft)
-        //        {
-        //            if(plane.Callsign == callsign && info.Config.has_value())
-        //            {
-        //                HandleAircraftConfiguration(plane, info.Config.value());
-        //            }
-        //        }
+        for(auto& plane : m_aircraft)
+        {
+            if(plane.Callsign == callsign && info.Config.has_value())
+            {
+                HandleAircraftConfiguration(plane, info.Config.value());
+            }
+        }
     }
 
-    //    void AircraftManager::HandleAircraftConfiguration(NetworkAircraft &aircraft, const AircraftConfiguration &config)
-    //    {
-    //        bool isFullData = config.IsFullData.has_value() && config.IsFullData.value();
+    void AircraftManager::HandleAircraftConfiguration(NetworkAircraft &aircraft, const AircraftConfiguration &config)
+    {
+        bool isFullData = config.IsFullData.has_value() && config.IsFullData.value();
 
-    //        // We can just ignore incremental config updates if we haven't received a full config yet.
-    //        if(!isFullData && !aircraft.Configuration.has_value())
-    //        {
-    //            return;
-    //        }
+        // We can just ignore incremental config updates if we haven't received a full config yet.
+        if(!isFullData && !aircraft.Configuration.has_value())
+        {
+            return;
+        }
 
-    //        if(isFullData)
-    //        {
-    //            aircraft.Configuration = config;
-    //        }
-    //        else
-    //        {
-    //            AircraftConfiguration::ApplyIncremental(aircraft.Configuration.value(), config);
-    //        }
+        if(isFullData)
+        {
+            aircraft.Configuration = config;
+        }
+        else
+        {
+            if(config.OnGround.has_value())
+            {
+                aircraft.Configuration->OnGround = config.OnGround;
+            }
+            if(config.GearDown.has_value())
+            {
+                aircraft.Configuration->GearDown = config.GearDown;
+            }
+            if(config.FlapsPercent.has_value())
+            {
+                aircraft.Configuration->FlapsPercent = config.FlapsPercent;
+            }
+            if(config.SpoilersDeployed.has_value())
+            {
+                aircraft.Configuration->SpoilersDeployed = config.SpoilersDeployed;
+            }
+            if(config.Lights->HasLights())
+            {
+                aircraft.Configuration->Lights = config.Lights;
+            }
+            if(config.Engines->HasEngines())
+            {
+                aircraft.Configuration->Engines = config.Engines;
+            }
+        }
 
-    //        if((aircraft.Status == AircraftStatus::New) && IsEligibleToAddToSimulator(aircraft))
-    //        {
-    //            SyncSimulatorAircraft();
-    //        }
-    //        else
-    //        {
-    //            m_xplaneAdapter.PlaneConfigChanged(aircraft);
-    //        }
-    //    }
+        if((aircraft.Status == AircraftStatus::New) && IsEligibleToAddToSimulator(aircraft))
+        {
+            SyncSimulatorAircraft();
+        }
+        else
+        {
+            m_xplaneAdapter.PlaneConfigChanged(aircraft);
+        }
+    }
 
     void AircraftManager::DeleteAllPlanes()
     {
@@ -231,10 +254,10 @@ namespace xpilot
 
     bool AircraftManager::IsEligibleToAddToSimulator(const NetworkAircraft &aircraft)
     {
-        //        if(!aircraft.Configuration.has_value())
-        //        {
-        //            return false;
-        //        }
+        if(!aircraft.Configuration.has_value())
+        {
+            return false;
+        }
 
         if(aircraft.TypeCode.isEmpty())
         {

@@ -449,18 +449,13 @@ namespace xpilot
 
     void NetworkManager::SendAircraftConfigurationUpdate(QString to, AircraftConfiguration config)
     {
-//        AircraftConfigurationInfo acconfig{};
-//        acconfig.Config = config;
+        AircraftConfigurationInfo acconfig{};
+        acconfig.Config = config;
 
-//        QStringList payload;
-//        if(config.IsFullData) {
-//            payload.append(acconfig.ToFullJson());
-//        }
-//        else{
-//            payload.append(acconfig.ToIncrementalJson());
-//        }
+        QStringList payload;
+        payload.append(acconfig.ToJson());
 
-//        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, to, ClientQueryType::AircraftConfiguration, payload));
+        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, to, ClientQueryType::AircraftConfiguration, payload));
     }
 
     void NetworkManager::SendCapabilities(QString to)
@@ -512,13 +507,13 @@ namespace xpilot
 
     void NetworkManager::SendAircraftConfigurationRequest(QString callsign)
     {
-//        AircraftConfigurationInfo acconfig;
-//        acconfig.IsFullRequest = true;
+        AircraftConfigurationInfo acconfig;
+        acconfig.FullRequest = true;
 
-//        QStringList args;
-//        args.append(acconfig.RequestFullConfig());
+        QStringList args;
+        args.append(acconfig.ToJson());
 
-//        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, callsign, ClientQueryType::AircraftConfiguration, args));
+        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, callsign, ClientQueryType::AircraftConfiguration, args));
     }
 
     void NetworkManager::connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer)

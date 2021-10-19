@@ -368,55 +368,66 @@ void XplaneAdapter::AddPlaneToSimulator(const NetworkAircraft &aircraft)
 
 void XplaneAdapter::PlaneConfigChanged(const NetworkAircraft &aircraft)
 {
-//    QJsonObject reply;
-//    reply.insert("type", "AirplaneConfig");
+    QJsonObject reply;
+    reply.insert("type", "AirplaneConfig");
 
-//    QJsonObject data;
-//    data.insert("callsign", aircraft.Callsign);
-//    data.insert("full_config", aircraft.Configuration->IsFullData.has_value() && aircraft.Configuration->IsFullData.value());
-//    data.insert("engines_on", aircraft.Configuration->Engines.IsAnyEngineRunning());
+    QJsonObject data;
+    data.insert("callsign", aircraft.Callsign);
 
-//    if(aircraft.Configuration->OnGround.has_value())
-//    {
-//        data.insert("on_ground", aircraft.Configuration->OnGround.value());
-//    }
+    if(!aircraft.Configuration->IsIncremental())
+    {
+        data.insert("full_config", true);
+    }
 
-//    if(aircraft.Configuration->FlapsPercent.has_value())
-//    {
-//        data.insert("flaps", aircraft.Configuration->FlapsPercent.value() / 100.0f);
-//    }
+    if(aircraft.Configuration->Engines.has_value())
+    {
+        data.insert("engines_on", aircraft.Configuration->IsAnyEngineRunning());
+    }
 
-//    if(aircraft.Configuration->GearDown.has_value())
-//    {
-//        data.insert("gear_down", aircraft.Configuration->GearDown.value());
-//    }
+    if(aircraft.Configuration->OnGround.has_value())
+    {
+        data.insert("on_ground", aircraft.Configuration->OnGround.value());
+    }
 
-//    QJsonObject lights;
-//    if(aircraft.Configuration->Lights.BeaconOn.has_value())
-//    {
-//        lights.insert("beacon_lights_on", aircraft.Configuration->Lights.BeaconOn.value());
-//    }
-//    if(aircraft.Configuration->Lights.LandingOn.has_value())
-//    {
-//        lights.insert("landing_lights_on", aircraft.Configuration->Lights.LandingOn.value());
-//    }
-//    if(aircraft.Configuration->Lights.NavOn.has_value())
-//    {
-//        lights.insert("nav_lights_on", aircraft.Configuration->Lights.NavOn.value());
-//    }
-//    if(aircraft.Configuration->Lights.StrobesOn.has_value())
-//    {
-//        lights.insert("strobe_lights_on", aircraft.Configuration->Lights.StrobesOn.value());
-//    }
-//    if(aircraft.Configuration->Lights.TaxiOn.has_value())
-//    {
-//        lights.insert("taxi_lights_on", aircraft.Configuration->Lights.TaxiOn.value());
-//    }
-//    data.insert("lights", lights);
+    if(aircraft.Configuration->FlapsPercent.has_value())
+    {
+        data.insert("flaps", aircraft.Configuration->FlapsPercent.value() / 100.0f);
+    }
 
-//    reply.insert("data", data);
-//    QJsonDocument doc(reply);
-//    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+    if(aircraft.Configuration->GearDown.has_value())
+    {
+        data.insert("gear_down", aircraft.Configuration->GearDown.value());
+    }
+
+    if(aircraft.Configuration->Lights->HasLights())
+    {
+        QJsonObject lights;
+        if(aircraft.Configuration->Lights->BeaconOn.has_value())
+        {
+            lights.insert("beacon_lights_on", aircraft.Configuration->Lights->BeaconOn.value());
+        }
+        if(aircraft.Configuration->Lights->LandingOn.has_value())
+        {
+            lights.insert("landing_lights_on", aircraft.Configuration->Lights->LandingOn.value());
+        }
+        if(aircraft.Configuration->Lights->NavOn.has_value())
+        {
+            lights.insert("nav_lights_on", aircraft.Configuration->Lights->NavOn.value());
+        }
+        if(aircraft.Configuration->Lights->StrobeOn.has_value())
+        {
+            lights.insert("strobe_lights_on", aircraft.Configuration->Lights->StrobeOn.value());
+        }
+        if(aircraft.Configuration->Lights->TaxiOn.has_value())
+        {
+            lights.insert("taxi_lights_on", aircraft.Configuration->Lights->TaxiOn.value());
+        }
+        data.insert("lights", lights);
+    }
+
+    reply.insert("data", data);
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
 }
 
 void XplaneAdapter::DeleteAircraft(const NetworkAircraft &aircraft)

@@ -22,7 +22,7 @@ struct NetworkAircraft
     QString Airline;
     QString TypeCode;
     AircraftVisualState RemoteVisualState;
-//    std::optional<AircraftConfiguration> Configuration;
+    std::optional<AircraftConfiguration> Configuration;
     QDateTime LastSlowPositionUpdateReceived;
     AircraftStatus Status;
     bool HaveVelocities;
