@@ -128,6 +128,10 @@ namespace xpilot
                 {
                     processTM(fields);
                 }
+                else if(pduTypeId == "$AR")
+                {
+                    emit RaiseMetarResponseReceived(PDUMetarResponse::fromTokens(fields));
+                }
                 else if(pduTypeId == "#SB")
                 {
                     if(fields.length() >= 3)

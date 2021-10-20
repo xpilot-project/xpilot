@@ -29,6 +29,7 @@ namespace xpilot
         Q_INVOKABLE void sendPrivateMessage(QString to, QString message);
         Q_INVOKABLE void requestRealName(QString callsign);
         Q_INVOKABLE void requestControllerAtis(QString callsign);
+        Q_INVOKABLE void requestMetar(QString station);
 
         void RequestMetar(QString station);
         void RequestIsValidATC(QString callsign);

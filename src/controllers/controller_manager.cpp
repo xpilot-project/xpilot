@@ -11,6 +11,11 @@ namespace xpilot
     {
         connect(&m_networkManager, &NetworkManager::controllerUpdateReceived, this, &ControllerManager::OnControllerUpdateReceived);
         connect(&m_networkManager, &NetworkManager::isValidAtcReceived, this, &ControllerManager::IsValidATCReceived);
+        connect(&m_networkManager, &NetworkManager::realNameReceived, this, &ControllerManager::OnRealNameReceived);
+        connect(&m_networkManager, &NetworkManager::networkDisconnected, this, [&]
+        {
+            m_controllers.clear();
+        });
     }
 
     void ControllerManager::OnControllerUpdateReceived(QString from, uint frequency, double lat, double lon)
@@ -47,13 +52,9 @@ namespace xpilot
             ValidateController(*itr);
             if(isValid && itr->IsValid)
             {
-                if(hasFrequencyChanged)
+                if(hasFrequencyChanged || hasLocationChanged)
                 {
-
-                }
-                if(hasLocationChanged)
-                {
-
+                    RefreshController(*itr);
                 }
             }
         }
@@ -69,6 +70,24 @@ namespace xpilot
             itr->IsValidATC = true;
             ValidateController(*itr);
         }
+    }
+
+    void ControllerManager::OnRealNameReceived(QString callsign, QString realName)
+    {
+        auto itr = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
+            return n.Callsign == callsign;
+        });
+        if(itr != m_controllers.end())
+        {
+            itr->RealName = realName;
+            RefreshController(*itr);
+        }
+    }
+
+    void ControllerManager::RefreshController(Controller controller)
+    {
+        emit controllerDeleted(controller);
+        emit controllerAdded(controller);
     }
 
     void ControllerManager::ValidateController(Controller &controller)

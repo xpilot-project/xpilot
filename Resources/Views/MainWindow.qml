@@ -348,6 +348,10 @@ Window {
                 appendMessage(line, colorBrightGreen)
             })
         }
+
+        function onMetarReceived(station, metar) {
+            appendMessage(`METAR: ${metar}`, colorBrightGreen)
+        }
     }
 
     Connections {
@@ -934,6 +938,8 @@ Window {
                                                         if(cmd.length < 2) {
                                                             throw `Not enough parameters. Expected ${cmd[0]} STATION-ID`
                                                         }
+                                                        networkManager.requestMetar(cmd[1])
+                                                        cliTextField.clear();
                                                         break;
                                                     case ".atis":
                                                         if(cmd.length < 2) {

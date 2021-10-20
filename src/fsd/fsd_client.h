@@ -61,7 +61,7 @@ namespace xpilot
             sendData(Serialize(message));
         }
 
-        bool getConnectionStatus() const { return m_connected; }
+        bool IsConnected() const { return m_connected; }
 
     signals:
         void RaiseNetworkConnected();

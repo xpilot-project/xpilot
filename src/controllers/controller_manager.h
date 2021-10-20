@@ -20,10 +20,13 @@ namespace xpilot
     signals:
         void controllerAdded(Controller controller);
         void controllerDeleted(Controller controller);
+        void controllerUpdated(Controller controller);
 
     private:
         void OnControllerUpdateReceived(QString from, uint frequency, double lat, double lon);
         void IsValidATCReceived(QString callsign);
+        void OnRealNameReceived(QString callsign, QString realName);
+        void RefreshController(Controller controller);
 
     private:
         NetworkManager& m_networkManager;

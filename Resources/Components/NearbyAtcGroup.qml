@@ -30,10 +30,15 @@ Column {
             color: "#ffffff"
             renderType: Text.NativeRendering
 
+            ToolTip.visible: callsignMouseArea.containsMouse
+            ToolTip.text: RealName
+
             MouseArea {
+                id: callsignMouseArea
                 anchors.fill: parent
                 acceptedButtons: Qt.RightButton | Qt.LeftButton
                 cursorShape: Qt.PointingHandCursor
+                hoverEnabled: true
 
                 onDoubleClicked: {
                     networkManager.requestControllerAtis(Callsign)

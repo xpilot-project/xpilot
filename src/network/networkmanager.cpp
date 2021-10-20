@@ -34,10 +34,10 @@ namespace xpilot
         connect(&m_fsd, &FsdClient::RaisePlaneInfoResponseReceived, this, &NetworkManager::OnPlaneInfoResponseReceived);
         connect(&m_fsd, &FsdClient::RaiseKillRequestReceived, this, &NetworkManager::OnKillRequestReceived);
         connect(&m_fsd, &FsdClient::RaiseRawDataSent, this, [](QString data){
-           // qDebug() << ">> " << data;
+           qDebug() << ">> " << data;
         });
         connect(&m_fsd, &FsdClient::RaiseRawDataReceived, this, [](QString data){
-           // qDebug() << "<< " << data;
+           qDebug() << "<< " << data;
         });
 
         connect(&xplaneAdapter, &XplaneAdapter::userAircraftDataChanged, this, &NetworkManager::OnUserAircraftDataUpdated);
@@ -486,6 +486,11 @@ namespace xpilot
             m_mapAtisMessages.insert(callsign.toUpper(), {});
             m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, callsign, ClientQueryType::ATIS));
         }
+    }
+
+    void NetworkManager::requestMetar(QString station)
+    {
+        m_fsd.SendPDU(PDUMetarRequest(m_connectInfo.Callsign, station));
     }
 
     void NetworkManager::RequestIsValidATC(QString callsign)

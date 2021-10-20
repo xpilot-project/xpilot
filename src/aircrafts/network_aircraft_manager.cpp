@@ -19,16 +19,6 @@ namespace xpilot
         connect(&m_networkManager, &NetworkManager::pilotDeleted, this, &AircraftManager::OnPilotDeleted);
         connect(m_staleAircraftCheckTimer, &QTimer::timeout, this, &AircraftManager::OnStaleAircraftTimeoutTimeout);
         connect(m_simulatorAircraftSyncTimer, &QTimer::timeout, this, &AircraftManager::OnSimulatorAircraftSyncTimeout);
-
-        auto cfg = AircraftConfigurationInfo::FromJson("{\"config\":{\"is_full_data\":true,\"lights\":{\"strobe_on\":true},\"on_ground\":false,\"flaps_pct\":50,\"engines\":{\"1\":{\"on\":false},\"2\":{\"on\":false}}}}");
-        qDebug() << "OnGround: " << cfg.Config->OnGround.value_or(true);
-        qDebug() << "Flaps: " << cfg.Config->FlapsPercent.value_or(0);
-        qDebug() << "StrobeOn: " << cfg.Config->Lights->StrobeOn.value_or(true);
-        qDebug() << "AnyEngineRunning: " << cfg.Config->IsAnyEngineRunning();
-
-        auto cfg2 = AircraftConfigurationInfo();
-        cfg2.Config->Engines->Engine1Running = true;
-        qDebug() << cfg2.ToJson();
     }
 
     void AircraftManager::InitializeTimers()

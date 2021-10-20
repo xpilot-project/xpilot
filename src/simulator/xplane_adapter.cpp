@@ -262,6 +262,15 @@ void XplaneAdapter::OnDataReceived()
                 case DataRef::Longitude:
                     m_userAircraftData.Longitude = value;
                     break;
+                case DataRef::Heading:
+                    m_userAircraftData.Heading = value;
+                    break;
+                case DataRef::Pitch:
+                    m_userAircraftData.Pitch = value;
+                    break;
+                case DataRef::Bank:
+                    m_userAircraftData.Bank = value;
+                    break;
                 case DataRef::AltitudeMsl:
                     m_userAircraftData.AltitudeMslM = value;
                     break;
