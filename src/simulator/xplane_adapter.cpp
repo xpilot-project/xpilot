@@ -439,6 +439,21 @@ void XplaneAdapter::PlaneConfigChanged(const NetworkAircraft &aircraft)
     sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
 }
 
+void XplaneAdapter::PlaneModelChanged(const NetworkAircraft &aircraft)
+{
+    QJsonObject reply;
+    reply.insert("type", "ChangeModel");
+
+    QJsonObject data;
+    data.insert("callsign", aircraft.Callsign);
+    data.insert("type_code", aircraft.TypeCode);
+    data.insert("airline", aircraft.Airline);
+
+    reply.insert("data", data);
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+}
+
 void XplaneAdapter::DeleteAircraft(const NetworkAircraft &aircraft)
 {
     QJsonObject reply;

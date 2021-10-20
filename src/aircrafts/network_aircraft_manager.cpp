@@ -131,6 +131,7 @@ namespace xpilot
             if(!planeIt->TypeCode.isEmpty() && planeIt->TypeCode != typeCode)
             {
                 planeIt->TypeCode = typeCode;
+                m_xplaneAdapter.PlaneModelChanged(*planeIt);
                 return;
             }
 
