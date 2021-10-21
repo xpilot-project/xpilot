@@ -21,6 +21,8 @@ Window {
     modality: Qt.ApplicationModal
 
     property var serverListLoaded: false
+    property var inputDeviceListLoaded: false
+    property var outputDeviceListLoaded: false
 
     signal closeWindow()
 
@@ -36,9 +38,8 @@ Window {
         txtYourName.text = AppConfig.Name;
         txtHomeAirport.text = AppConfig.HomeAirport;
         networkServerCombobox.model = AppConfig.CachedServers;
-
-        listenDeviceCombobox.model = audio.outputDeviceList;
-        microphoneDeviceCombobox.model = audio.inputDeviceList;
+        outputDeviceList.model = audio.OutputDevices;
+        inputDeviceList.model = audio.InputDevices;
     }
 
     GridLayout {
@@ -295,18 +296,26 @@ Window {
             }
 
             CustomComboBox {
-                id: microphoneDeviceCombobox
+                id: inputDeviceList
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: text7.bottom
                 anchors.topMargin: 5
                 anchors.leftMargin: 0
                 anchors.rightMargin: 0
-                textRole: "DeviceName"
-                valueRole: "Id"
-                //                model: Net.toVariantList(config.microphoneDevices)
-                //                Component.onCompleted: currentIndex = indexOfValue(config.appConfig.inputDeviceName)
-                //                onActivated: config.setInputDevice(currentValue)
+                textRole: "name"
+                valueRole: "id"
+                onModelChanged: {
+                    currentIndex = inputDeviceList.indexOfValue(AppConfig.InputDevice)
+                    inputDeviceListLoaded = true
+                }
+                onCurrentIndexChanged: {
+                    if(inputDeviceListLoaded) {
+                        var device = inputDeviceList.valueAt(currentIndex)
+                        AppConfig.InputDevice = device
+                        audio.setInputDevice(device)
+                    }
+                }
             }
         }
 
@@ -329,18 +338,26 @@ Window {
             }
 
             CustomComboBox {
-                id: listenDeviceCombobox
+                id: outputDeviceList
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: text9.bottom
                 anchors.topMargin: 5
                 anchors.leftMargin: 0
                 anchors.rightMargin: 0
-                textRole: "DeviceName"
-                valueRole: "Id"
-                //                model: Net.toVariantList(config.listenDevices)
-                //                Component.onCompleted: currentIndex = indexOfValue(config.appConfig.outputDeviceName)
-                //                onActivated: config.setListenDevice(currentValue)
+                textRole: "name"
+                valueRole: "id"
+                onModelChanged: {
+                    currentIndex = outputDeviceList.indexOfValue(AppConfig.OutputDevice)
+                    outputDeviceListLoaded = true
+                }
+                onCurrentIndexChanged: {
+                    if(outputDeviceListLoaded) {
+                        var device = outputDeviceList.valueAt(currentIndex)
+                        AppConfig.OutputDevice = device
+                        audio.setOutputDevice(device)
+                    }
+                }
             }
         }
 
@@ -431,7 +448,9 @@ Window {
                 VolumeSlider {
                     id: com1Slider
                     comLabel: "COM1"
-                    onVolumeValueChanged: (v) => {}
+                    onVolumeValueChanged: {
+                        console.log(volume);
+                    }
                 }
 
                 VolumeSlider {

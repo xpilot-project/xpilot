@@ -4,6 +4,7 @@
 #include "src/common/notificationtype.h"
 
 #include <QMap>
+#include <QtGlobal>
 
 using namespace afv_native::afv;
 
@@ -87,10 +88,10 @@ namespace xpilot
         mClient->setEnableInputFilters(true);
         mAudioDrivers = afv_native::audio::AudioDevice::getAPIs();
 
-        for(const auto& driver : mAudioDrivers)
-        {
-            qDebug() << driver.first << ": " << driver.second.c_str();
-        }
+        //        for(const auto& driver : mAudioDrivers)
+        //        {
+        //            qDebug() << driver.first << ": " << driver.second.c_str();
+        //        }
 
         configureAudioDevices();
 
@@ -149,6 +150,42 @@ namespace xpilot
 #endif
     }
 
+    void AudioForVatsim::setInputDevice(QString deviceId)
+    {
+        mClient->stopAudio();
+        mClient->setAudioInputDevice(deviceId.toStdString());
+        mClient->startAudio();
+    }
+
+    void AudioForVatsim::setOutputDevice(QString deviceId)
+    {
+        mClient->stopAudio();
+        mClient->setAudioOutputDevice(deviceId.toStdString());
+        mClient->startAudio();
+    }
+
+    void AudioForVatsim::setCom1Volume(double volume)
+    {
+        if(volume > 100) {
+            volume = 100;
+        }
+        if(volume < 0) {
+            volume = 0;
+        }
+        mClient->setRadioGain(0, volume / 100.0f);
+    }
+
+    void AudioForVatsim::setCom2Volume(double volume)
+    {
+        if(volume > 100) {
+            volume = 100;
+        }
+        if(volume < 0) {
+            volume = 0;
+        }
+        mClient->setRadioGain(0, volume / 100.0f);
+    }
+
     void AudioForVatsim::OnNetworkConnected(QString callsign)
     {
         configureAudioDevices();
@@ -177,6 +214,11 @@ namespace xpilot
 
     void AudioForVatsim::configureAudioDevices()
     {
+        mClient->stopAudio();
+
+        m_outputDevices.clear();
+        m_inputDevices.clear();
+
         auto outputDevices = afv_native::audio::AudioDevice::getCompatibleOutputDevicesForApi(0);
         for(const auto& device: outputDevices)
         {
@@ -195,9 +237,17 @@ namespace xpilot
             m_inputDevices.append(info);
         }
 
-//        mClient->setAudioOutputDevice("Speakers (C-Media USB Audio Device   )");
-//        mClient->setAudioInputDevice("Microphone (C-Media USB Audio Device   )");
-//        mClient->startAudio();
+        if(!AppConfig::getInstance()->InputDevice.isEmpty())
+        {
+            mClient->setAudioInputDevice(AppConfig::getInstance()->InputDevice.toStdString());
+        }
+
+        if(!AppConfig::getInstance()->OutputDevice.isEmpty())
+        {
+            mClient->setAudioOutputDevice(AppConfig::getInstance()->OutputDevice.toStdString());
+        }
+
+        mClient->startAudio();
     }
 
     void AudioForVatsim::updateTransceivers()

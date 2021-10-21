@@ -45,6 +45,8 @@ void AppConfig::loadConfig()
     Name = jsonMap["Name"].toString();
     HomeAirport = jsonMap["HomeAirport"].toString();
     ServerName = jsonMap["ServerName"].toString();
+    InputDevice = jsonMap["InputDevice"].toString();
+    OutputDevice = jsonMap["OutputDevice"].toString();
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
     for(const auto & value : cachedServers) {
@@ -84,6 +86,8 @@ void AppConfig::saveConfig()
     jsonObj["Name"] = Name;
     jsonObj["HomeAirport"] = HomeAirport;
     jsonObj["ServerName"] = ServerName;
+    jsonObj["InputDevice"] = InputDevice;
+    jsonObj["OutputDevice"] = OutputDevice;
 
     QJsonArray cachedServers;
     for(auto & server : CachedServers) {

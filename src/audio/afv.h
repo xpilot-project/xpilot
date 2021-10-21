@@ -20,12 +20,48 @@ namespace xpilot
     class AudioForVatsim : public QObject
     {
         Q_OBJECT
-        Q_PROPERTY(QList<AudioDeviceInfo> outputDeviceList MEMBER m_outputDevices)
-        Q_PROPERTY(QList<AudioDeviceInfo> inputDeviceList MEMBER m_inputDevices)
 
     public:
         AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, QObject* parent = nullptr);
         ~AudioForVatsim();
+
+        QVariant InputDevices() const
+        {
+            QVariantList itemList;
+
+            for(const auto &device: m_inputDevices)
+            {
+                QVariantMap itemMap;
+                itemMap.insert("id", device.Id);
+                itemMap.insert("name", device.DeviceName);
+                itemList.append(itemMap);
+            }
+
+            return QVariant::fromValue(itemList);
+        }
+
+        QVariant OutputDevices() const
+        {
+            QVariantList itemList;
+
+            for(const auto &device: m_outputDevices)
+            {
+                QVariantMap itemMap;
+                itemMap.insert("id", device.Id);
+                itemMap.insert("name", device.DeviceName);
+                itemList.append(itemMap);
+            }
+
+            return QVariant::fromValue(itemList);
+        }
+
+        Q_PROPERTY(QVariant OutputDevices READ OutputDevices)
+        Q_PROPERTY(QVariant InputDevices READ InputDevices)
+
+        Q_INVOKABLE void setInputDevice(QString deviceId);
+        Q_INVOKABLE void setOutputDevice(QString deviceId);
+        Q_INVOKABLE void setCom1Volume(double volume);
+        Q_INVOKABLE void setCom2Volume(double volume);
 
     private slots:
         void OnNetworkConnected(QString callsign);
