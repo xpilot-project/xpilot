@@ -1,6 +1,7 @@
 #include "afv.h"
 #include "src/appcore.h"
 #include "src/config/appconfig.h"
+#include "src/common/notificationtype.h"
 
 using namespace afv_native::afv;
 

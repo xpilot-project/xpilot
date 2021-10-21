@@ -1,41 +1,31 @@
-#ifndef APP_CORE_H
-#define APP_CORE_H
+#pragma once
 
 #include <QObject>
-#include <QDir>
-#include <QFile>
 
-#include "src/network/networkmanager.h"
-#include "src/config/appconfig.h"
+class QQmlApplicationEngine;
+class QQmlEngine;
+class QJSEngine;
 
 namespace xpilot
 {
-    enum class NotificationType
-    {
-        Info,
-        Warning,
-        Error,
-        TextMessage,
-        ServerMessage,
-        RadioMessageSent,
-        RadioMessageReceived
-    };
+    int Main(int argc, char* argv[]);
 
     class AppCore : public QObject
     {
         Q_OBJECT
 
+    public:
+        AppCore(QQmlEngine* qmlEngine);
+        virtual ~AppCore() {}
+
+        static QObject* appConfigInstance(QQmlEngine* engine, QJSEngine* scriptEngine);
+
     signals:
         void serverListDownloaded(int count);
         void serverListDownloadError();
 
-    public slots:
-        void SaveConfig();
-
-    public:
-        AppCore(QObject *owner = nullptr);
+    private:
+        QQmlApplicationEngine* engine;
         void DownloadServerList();
     };
 }
-
-#endif

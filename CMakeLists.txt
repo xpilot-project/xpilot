@@ -107,6 +107,7 @@ set(PROJECT_SOURCES
     src/common/simplecrypt.cpp
     src/common/frequency_utils.h
     src/common/qserializer.h
+    src/common/notificationtype.h
     src/config/appconfig.h
     src/config/appconfig.cpp
     src/config/windowconfig.h

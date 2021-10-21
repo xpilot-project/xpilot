@@ -5,6 +5,7 @@
 #include "src/version.h"
 #include "src/network/vatsim_config.h"
 #include "src/common/frequency_utils.h"
+#include "src/common/notificationtype.h"
 #include "src/aircrafts/aircraft_visual_state.h"
 #include "src/aircrafts/velocity_vector.h"
 
