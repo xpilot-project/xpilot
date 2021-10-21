@@ -115,6 +115,7 @@ set(PROJECT_SOURCES
     src/appcore.cpp
     src/audio/afv.cpp
     src/audio/afv.h
+    src/audio/audiodeviceinfo.h
     src/controllers/controller.h
     src/controllers/controller_manager.h
     src/controllers/controller_manager.cpp

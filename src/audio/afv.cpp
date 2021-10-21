@@ -3,6 +3,8 @@
 #include "src/config/appconfig.h"
 #include "src/common/notificationtype.h"
 
+#include <QMap>
+
 using namespace afv_native::afv;
 
 namespace xpilot
@@ -41,6 +43,8 @@ namespace xpilot
                     case APISessionError::ConnectionError:
                         emit notificationPosted((int)NotificationType::Error, "Error initiating voice server connection.");
                         break;
+                    default:
+                        break;
                     }
                 }
                 break;
@@ -63,6 +67,8 @@ namespace xpilot
                     case VoiceSessionError::UDPChannelError:
                         emit notificationPosted((int)NotificationType::Error, "Voice server error: UDPChannelError");
                         break;
+                    default:
+                        break;
                     }
                 }
                 break;
@@ -74,15 +80,19 @@ namespace xpilot
             case afv_native::ClientEventType::VoiceServerDisconnected:
                 emit notificationPosted((int)NotificationType::Info, "Disconnected from voice server.");
                 break;
+            default:
+                break;
             }
         });
         mClient->setEnableInputFilters(true);
         mAudioDrivers = afv_native::audio::AudioDevice::getAPIs();
 
-        //        for(const auto& driver : mAudioDrivers)
-        //        {
-        //            qDebug() << driver.first << ": " << driver.second.c_str();
-        //        }
+        for(const auto& driver : mAudioDrivers)
+        {
+            qDebug() << driver.first << ": " << driver.second.c_str();
+        }
+
+        configureAudioDevices();
 
         connect(m_transceiverTimer, &QTimer::timeout, this, &AudioForVatsim::OnTransceiverTimer);
         connect(m_RxTxQueryTimer, &QTimer::timeout, this, [=]{
@@ -167,23 +177,27 @@ namespace xpilot
 
     void AudioForVatsim::configureAudioDevices()
     {
-        mClient->setAudioApi(2);
-
-        auto inputDevices = afv_native::audio::AudioDevice::getCompatibleInputDevicesForApi(2);
-        for(const auto& device: inputDevices)
-        {
-            qDebug() << "\"" << device.second.name.c_str() << "\"";
-        }
-
-        auto outputDevices = afv_native::audio::AudioDevice::getCompatibleOutputDevicesForApi(2);
+        auto outputDevices = afv_native::audio::AudioDevice::getCompatibleOutputDevicesForApi(0);
         for(const auto& device: outputDevices)
         {
-            qDebug() << "\"" << device.second.name.c_str() << "\"";
+            AudioDeviceInfo info{};
+            info.DeviceName = QString(device.second.name.c_str());
+            info.Id = QString(device.second.id.c_str());
+            m_outputDevices.append(info);
         }
 
-        mClient->setAudioOutputDevice("Speakers (C-Media USB Audio Device   )");
-        mClient->setAudioInputDevice("Microphone (C-Media USB Audio Device   )");
-        mClient->startAudio();
+        auto inputDevices = afv_native::audio::AudioDevice::getCompatibleInputDevicesForApi(0);
+        for(const auto& device: inputDevices)
+        {
+            AudioDeviceInfo info{};
+            info.DeviceName = QString(device.second.name.c_str());
+            info.Id = QString(device.second.id.c_str());
+            m_inputDevices.append(info);
+        }
+
+//        mClient->setAudioOutputDevice("Speakers (C-Media USB Audio Device   )");
+//        mClient->setAudioInputDevice("Microphone (C-Media USB Audio Device   )");
+//        mClient->startAudio();
     }
 
     void AudioForVatsim::updateTransceivers()

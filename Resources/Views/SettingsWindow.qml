@@ -37,7 +37,8 @@ Window {
         txtHomeAirport.text = AppConfig.HomeAirport;
         networkServerCombobox.model = AppConfig.CachedServers;
 
-        var test = AppConfig.RecentConnection.Callsign;
+        listenDeviceCombobox.model = audio.outputDeviceList;
+        microphoneDeviceCombobox.model = audio.inputDeviceList;
     }
 
     GridLayout {
@@ -301,6 +302,8 @@ Window {
                 anchors.topMargin: 5
                 anchors.leftMargin: 0
                 anchors.rightMargin: 0
+                textRole: "DeviceName"
+                valueRole: "Id"
                 //                model: Net.toVariantList(config.microphoneDevices)
                 //                Component.onCompleted: currentIndex = indexOfValue(config.appConfig.inputDeviceName)
                 //                onActivated: config.setInputDevice(currentValue)
@@ -333,6 +336,8 @@ Window {
                 anchors.topMargin: 5
                 anchors.leftMargin: 0
                 anchors.rightMargin: 0
+                textRole: "DeviceName"
+                valueRole: "Id"
                 //                model: Net.toVariantList(config.listenDevices)
                 //                Component.onCompleted: currentIndex = indexOfValue(config.appConfig.outputDeviceName)
                 //                onActivated: config.setListenDevice(currentValue)

@@ -65,6 +65,7 @@ void AppConfig::loadConfig()
     WindowConfig.Y = window["Y"].toInt();
     WindowConfig.Width = qMax(window["Width"].toInt(), 800);
     WindowConfig.Height = qMax(window["Height"].toInt(), 250);
+    WindowConfig.Maximized = window["Maximized"].toBool();
 
     if(!VatsimPassword.isEmpty()) {
         VatsimPasswordDecrypted = crypto.decryptToString(VatsimPassword);
@@ -104,6 +105,7 @@ void AppConfig::saveConfig()
     window["Y"] = WindowConfig.Y;
     window["Width"] = qMax(WindowConfig.Width, 800);
     window["Height"] = qMax(WindowConfig.Height, 250);
+    window["Maximized"] = WindowConfig.Maximized;
     jsonObj["WindowConfig"] = window;
 
     QJsonDocument jsonDoc(jsonObj);

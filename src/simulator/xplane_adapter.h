@@ -69,9 +69,9 @@ private:
     qint64 m_lastUdpTimestamp;
     bool m_simConnected = false;
 
-    UserAircraftData m_userAircraftData;
-    UserAircraftConfigData m_userAircraftConfigData;
-    RadioStackState m_radioStackState;
+    UserAircraftData m_userAircraftData{};
+    UserAircraftConfigData m_userAircraftConfigData{};
+    RadioStackState m_radioStackState{};
 
     std::thread* m_zmqThread;
     zmq::context_t* m_zmqContext;

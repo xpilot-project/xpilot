@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QThread>
+#include <QList>
 
 #include <thread>
 #include <memory>
@@ -12,12 +13,16 @@
 #include "src/simulator/xplane_adapter.h"
 #include <event2/event.h>
 #include "afv-native/Client.h"
+#include "audiodeviceinfo.h"
 
 namespace xpilot
 {
     class AudioForVatsim : public QObject
     {
         Q_OBJECT
+        Q_PROPERTY(QList<AudioDeviceInfo> outputDeviceList MEMBER m_outputDevices)
+        Q_PROPERTY(QList<AudioDeviceInfo> inputDeviceList MEMBER m_inputDevices)
+
     public:
         AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, QObject* parent = nullptr);
         ~AudioForVatsim();
@@ -50,6 +55,9 @@ namespace xpilot
 
         RadioStackState m_radioStackState;
         UserAircraftData m_userAircraftData;
+
+        QList<AudioDeviceInfo> m_outputDevices;
+        QList<AudioDeviceInfo> m_inputDevices;
     };
 }
 

@@ -62,6 +62,7 @@ int xpilot::Main(int argc, char* argv[])
     qRegisterMetaType<ConnectInfo>("ConnectInfo");
     qRegisterMetaType<ClientWindowConfig>("ClientWindowConfig");
     qRegisterMetaType<RadioStackState>("RadioStackState");
+    qRegisterMetaType<AudioDeviceInfo>("AudioDeviceInfo");
 
     context->setContextProperty("appCore", &appCore);
     context->setContextProperty("networkManager", &networkManager);
