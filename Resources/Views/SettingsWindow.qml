@@ -12,7 +12,7 @@ Window {
     id: formSettings
     title: "Settings"
     width: 650
-    height: 560
+    height: 590
     minimumHeight: height
     minimumWidth: width
     maximumHeight: height
@@ -21,6 +21,7 @@ Window {
     modality: Qt.ApplicationModal
 
     property var serverListLoaded: false
+    property var apiListLoaded: false
     property var inputDeviceListLoaded: false
     property var outputDeviceListLoaded: false
 
@@ -32,6 +33,26 @@ Window {
         closeWindow()
     }
 
+    Connections {
+        target: audio
+
+        function onInputDevicesChanged() {
+            if(inputDeviceListLoaded) {
+                inputDeviceList.model = audio.InputDevices;
+            }
+        }
+
+        function onOutputDevicesChanged() {
+            if(outputDeviceListLoaded) {
+                outputDeviceList.model = audio.OutputDevices;
+            }
+        }
+
+        function onInputVuChanged(vu) {
+            peakLevel.value = vu
+        }
+    }
+
     Component.onCompleted: {
         txtVatsimId.text = AppConfig.VatsimId;
         txtVatsimPassword.text = AppConfig.VatsimPasswordDecrypted;
@@ -40,6 +61,9 @@ Window {
         networkServerCombobox.model = AppConfig.CachedServers;
         outputDeviceList.model = audio.OutputDevices;
         inputDeviceList.model = audio.InputDevices;
+        audioApiList.model = audio.AudioApis;
+        com1Slider.volume = AppConfig.Com1Volume;
+        com2Slider.volume = AppConfig.Com2Volume;
     }
 
     GridLayout {
@@ -51,7 +75,7 @@ Window {
         anchors.topMargin: 15
         columnSpacing: 15
         rowSpacing: 10
-        rows: 7
+        rows: 8
         columns: 2
 
         Item {
@@ -279,11 +303,53 @@ Window {
         }
 
         Item {
+            id: audioApi
+            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+            Layout.column: 0
+            Layout.columnSpan: 2
+            Layout.preferredWidth: 50
+            Layout.row: 6
+            Layout.fillWidth: true
+            Layout.preferredHeight: 50
+            Text {
+                id: audioApiLabel
+                color: "#333333"
+                text: qsTr("Audio API")
+                renderType: Text.NativeRendering
+                font.pixelSize: 13
+                font.family: ubuntuRegular.name
+            }
+
+            CustomComboBox {
+                id: audioApiList
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: audioApiLabel.bottom
+                anchors.topMargin: 5
+                anchors.leftMargin: 0
+                anchors.rightMargin: 0
+                textRole: "name"
+                valueRole: "id"
+                onModelChanged: {
+                    currentIndex = audioApiList.find(AppConfig.AudioApi)
+                    apiListLoaded = true
+                }
+                onCurrentIndexChanged: {
+                    if(apiListLoaded) {
+                        AppConfig.AudioApi = audioApiList.textAt(currentIndex)
+                        var api = audioApiList.valueAt(currentIndex)
+                        audio.setAudioApi(api)
+                    }
+                }
+            }
+        }
+
+        Item {
             id: microphoneDevice
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.column: 0
             Layout.preferredWidth: 50
-            Layout.row: 6
+            Layout.row: 7
             Layout.fillWidth: true
             Layout.preferredHeight: 50
             Text {
@@ -304,14 +370,14 @@ Window {
                 anchors.leftMargin: 0
                 anchors.rightMargin: 0
                 textRole: "name"
-                valueRole: "id"
+                valueRole: "name"
                 onModelChanged: {
                     currentIndex = inputDeviceList.indexOfValue(AppConfig.InputDevice)
                     inputDeviceListLoaded = true
                 }
                 onCurrentIndexChanged: {
                     if(inputDeviceListLoaded) {
-                        var device = inputDeviceList.valueAt(currentIndex)
+                        var device = inputDeviceList.textAt(currentIndex)
                         AppConfig.InputDevice = device
                         audio.setInputDevice(device)
                     }
@@ -324,7 +390,7 @@ Window {
             id: listenDevice
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.column: 1
-            Layout.row: 6
+            Layout.row: 7
             Layout.preferredWidth: 50
             Layout.fillWidth: true
             Layout.preferredHeight: 50
@@ -346,14 +412,14 @@ Window {
                 anchors.leftMargin: 0
                 anchors.rightMargin: 0
                 textRole: "name"
-                valueRole: "id"
+                valueRole: "name"
                 onModelChanged: {
                     currentIndex = outputDeviceList.indexOfValue(AppConfig.OutputDevice)
                     outputDeviceListLoaded = true
                 }
                 onCurrentIndexChanged: {
                     if(outputDeviceListLoaded) {
-                        var device = outputDeviceList.valueAt(currentIndex)
+                        var device = outputDeviceList.textAt(currentIndex)
                         AppConfig.OutputDevice = device
                         audio.setOutputDevice(device)
                     }
@@ -367,7 +433,7 @@ Window {
             height: 130
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.column: 0
-            Layout.row: 7
+            Layout.row: 8
             Layout.fillWidth: true
 
             ColumnLayout {
@@ -383,7 +449,6 @@ Window {
                     id: peakLevel
                     width: 300
                     height: 13
-                    value: 0
                 }
 
                 Text {
@@ -434,7 +499,7 @@ Window {
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.fillWidth: true
             Layout.column: 1
-            Layout.row: 7
+            Layout.row: 8
             ColumnLayout {
                 id: columnLayout4
                 anchors.left: parent.left
@@ -449,14 +514,16 @@ Window {
                     id: com1Slider
                     comLabel: "COM1"
                     onVolumeValueChanged: {
-                        console.log(volume);
+                        audio.setCom1Volume(volume)
                     }
                 }
 
                 VolumeSlider {
                     id: com2Slider
                     comLabel: "COM2"
-                    onVolumeValueChanged: (v) => {}
+                    onVolumeValueChanged: {
+                        audio.setCom2Volume(volume)
+                    }
                 }
             }
         }

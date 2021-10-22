@@ -1,10 +1,12 @@
 #ifndef AFV_H
 #define AFV_H
 
+#include <QtGlobal>
 #include <QObject>
 #include <QTimer>
 #include <QThread>
 #include <QList>
+#include <QVariantList>
 
 #include <thread>
 #include <memory>
@@ -20,27 +22,15 @@ namespace xpilot
     class AudioForVatsim : public QObject
     {
         Q_OBJECT
+        Q_PROPERTY(QVariant OutputDevices READ getOutputDevices NOTIFY outputDevicesChanged)
+        Q_PROPERTY(QVariant InputDevices READ getInputDevices NOTIFY inputDevicesChanged)
+        Q_PROPERTY(QVariant AudioApis READ getAudioApis NOTIFY audioApisChanged)
 
     public:
         AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, QObject* parent = nullptr);
         ~AudioForVatsim();
 
-        QVariant InputDevices() const
-        {
-            QVariantList itemList;
-
-            for(const auto &device: m_inputDevices)
-            {
-                QVariantMap itemMap;
-                itemMap.insert("id", device.Id);
-                itemMap.insert("name", device.DeviceName);
-                itemList.append(itemMap);
-            }
-
-            return QVariant::fromValue(itemList);
-        }
-
-        QVariant OutputDevices() const
+        QVariant getOutputDevices() const
         {
             QVariantList itemList;
 
@@ -55,9 +45,37 @@ namespace xpilot
             return QVariant::fromValue(itemList);
         }
 
-        Q_PROPERTY(QVariant OutputDevices READ OutputDevices)
-        Q_PROPERTY(QVariant InputDevices READ InputDevices)
+        QVariant getInputDevices() const
+        {
+            QVariantList itemList;
 
+            for(const auto &device: m_inputDevices)
+            {
+                QVariantMap itemMap;
+                itemMap.insert("id", device.Id);
+                itemMap.insert("name", device.DeviceName);
+                itemList.append(itemMap);
+            }
+
+            return QVariant::fromValue(itemList);
+        }
+
+        QVariant getAudioApis() const
+        {
+            QVariantList itemList;
+
+            for(const auto &api: m_audioDrivers)
+            {
+                QVariantMap itemMap;
+                itemMap.insert("id", api.first);
+                itemMap.insert("name", api.second.c_str());
+                itemList.append(itemMap);
+            }
+
+            return QVariant::fromValue(itemList);
+        }
+
+        Q_INVOKABLE void setAudioApi(int api);
         Q_INVOKABLE void setInputDevice(QString deviceId);
         Q_INVOKABLE void setOutputDevice(QString deviceId);
         Q_INVOKABLE void setCom1Volume(double volume);
@@ -71,6 +89,10 @@ namespace xpilot
     signals:
         void notificationPosted(int type, QString message);
         void radioRxChanged(uint radio, bool active);
+        void outputDevicesChanged();
+        void inputDevicesChanged();
+        void audioApisChanged();
+        void inputVuChanged(float vu);
 
     private:
         void configureAudioDevices();
@@ -79,11 +101,11 @@ namespace xpilot
     private:
         struct event_base* ev_base;
         bool m_keepAlive = false;
-        std::shared_ptr<afv_native::Client> mClient;
-        std::map<afv_native::audio::AudioDevice::Api, std::string> mAudioDrivers;
+        std::shared_ptr<afv_native::Client> m_client;
         QTimer* m_transceiverTimer;
         QTimer* m_eventTimer;
-        QTimer* m_RxTxQueryTimer;
+        QTimer* m_rxTxQueryTimer;
+        QTimer* m_vuTimer;
         QThread *m_workerThread;
 
         bool m_com1Rx = false;
@@ -92,8 +114,15 @@ namespace xpilot
         RadioStackState m_radioStackState;
         UserAircraftData m_userAircraftData;
 
+        int m_audioApi = 0;
         QList<AudioDeviceInfo> m_outputDevices;
         QList<AudioDeviceInfo> m_inputDevices;
+        std::map<afv_native::audio::AudioDevice::Api, std::string> m_audioDrivers;
+
+        double scaleValue(double &value, double limitMin, double limitMax, double baseMin, double baseMax) const
+        {
+            return ((limitMax - limitMin) * (value - baseMin)) / (baseMax - baseMin) + limitMin;
+        }
     };
 }
 

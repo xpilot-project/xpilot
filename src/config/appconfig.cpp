@@ -45,8 +45,11 @@ void AppConfig::loadConfig()
     Name = jsonMap["Name"].toString();
     HomeAirport = jsonMap["HomeAirport"].toString();
     ServerName = jsonMap["ServerName"].toString();
+    AudioApi = jsonMap["AudioApi"].toString();
     InputDevice = jsonMap["InputDevice"].toString();
     OutputDevice = jsonMap["OutputDevice"].toString();
+    Com1Volume = qMin(qMax(jsonMap["Com1Volume"].toInt(), 0), 100);
+    Com2Volume = qMin(qMax(jsonMap["Com2Volume"].toInt(), 0), 100);
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
     for(const auto & value : cachedServers) {
@@ -86,8 +89,11 @@ void AppConfig::saveConfig()
     jsonObj["Name"] = Name;
     jsonObj["HomeAirport"] = HomeAirport;
     jsonObj["ServerName"] = ServerName;
+    jsonObj["AudioApi"] = AudioApi;
     jsonObj["InputDevice"] = InputDevice;
     jsonObj["OutputDevice"] = OutputDevice;
+    jsonObj["Com1Volume"] = qMin(qMax(Com1Volume, 0), 100);
+    jsonObj["Com2Volume"] = qMin(qMax(Com2Volume, 0), 100);
 
     QJsonArray cachedServers;
     for(auto & server : CachedServers) {

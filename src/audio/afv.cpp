@@ -4,7 +4,6 @@
 #include "src/common/notificationtype.h"
 
 #include <QMap>
-#include <QtGlobal>
 
 using namespace afv_native::afv;
 
@@ -12,13 +11,17 @@ namespace xpilot
 {
     AudioForVatsim::AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, QObject* parent) :
         QObject(parent),
-        mClient()
+        m_client()
     {
         m_transceiverTimer = new QTimer(this);
         m_transceiverTimer->setInterval(5000);
 
-        m_RxTxQueryTimer = new QTimer(this);
-        m_RxTxQueryTimer->setInterval(50);
+        m_rxTxQueryTimer = new QTimer(this);
+        m_rxTxQueryTimer->setInterval(50);
+
+        m_vuTimer = new QTimer(this);
+        m_vuTimer->setInterval(50);
+        m_vuTimer->start();
 
 #ifdef Q_OS_WIN
         WORD wVersionRequested;
@@ -28,8 +31,8 @@ namespace xpilot
 #endif
 
         ev_base = event_base_new();
-        mClient = std::make_shared<afv_native::Client>(ev_base, "afv-samples", 2, "xPilot");
-        mClient->ClientEventCallback.addCallback(nullptr, [&](afv_native::ClientEventType evt, void* data)
+        m_client = std::make_shared<afv_native::Client>(ev_base, "afv-samples", 2, "xPilot");
+        m_client->ClientEventCallback.addCallback(nullptr, [&](afv_native::ClientEventType evt, void* data)
         {
             switch(evt)
             {
@@ -85,20 +88,27 @@ namespace xpilot
                 break;
             }
         });
-        mClient->setEnableInputFilters(true);
-        mAudioDrivers = afv_native::audio::AudioDevice::getAPIs();
+        m_client->setEnableInputFilters(true);
 
-        //        for(const auto& driver : mAudioDrivers)
-        //        {
-        //            qDebug() << driver.first << ": " << driver.second.c_str();
-        //        }
+        m_audioDrivers = afv_native::audio::AudioDevice::getAPIs();
+        for(const auto& driver : m_audioDrivers)
+        {
+            if(QString(driver.second.c_str()) == AppConfig::getInstance()->AudioApi)
+            {
+                m_audioApi = driver.first;
+            }
+        }
 
         configureAudioDevices();
 
         connect(m_transceiverTimer, &QTimer::timeout, this, &AudioForVatsim::OnTransceiverTimer);
-        connect(m_RxTxQueryTimer, &QTimer::timeout, this, [=]{
-            emit radioRxChanged(0, m_radioStackState.Com1ReceiveEnabled && mClient->getRxActive(0));
-            emit radioRxChanged(1, m_radioStackState.Com2ReceiveEnabled && mClient->getRxActive(1));
+        connect(m_rxTxQueryTimer, &QTimer::timeout, this, [=]{
+            emit radioRxChanged(0, m_radioStackState.Com1ReceiveEnabled && m_client->getRxActive(0));
+            emit radioRxChanged(1, m_radioStackState.Com2ReceiveEnabled && m_client->getRxActive(1));
+        });
+        connect(m_vuTimer, &QTimer::timeout, this, [=]{
+            double vu = m_client->getInputPeak();
+            emit inputVuChanged(scaleValue(vu, 0, 100, -40, 0));
         });
         connect(&networkManager, &NetworkManager::networkConnected, this, &AudioForVatsim::OnNetworkConnected);
         connect(&networkManager, &NetworkManager::networkDisconnected, this, &AudioForVatsim::OnNetworkDisconnected);
@@ -107,10 +117,10 @@ namespace xpilot
                 m_radioStackState = state;
 
                 if(m_radioStackState.Com1TransmitEnabled) {
-                    mClient->setTxRadio(0);
+                    m_client->setTxRadio(0);
                 }
                 else if(m_radioStackState.Com2TransmitEnabled) {
-                    mClient->setTxRadio(1);
+                    m_client->setTxRadio(1);
                 }
 
                 updateTransceivers();
@@ -122,10 +132,10 @@ namespace xpilot
             }
         });
         connect(&xplaneAdapter, &XplaneAdapter::pttPressed, this, [&]{
-            mClient->setPtt(true);
+            m_client->setPtt(true);
         });
         connect(&xplaneAdapter, &XplaneAdapter::pttReleased, this, [&]{
-            mClient->setPtt(false);
+            m_client->setPtt(false);
         });
 
         m_keepAlive = true;
@@ -144,57 +154,64 @@ namespace xpilot
         m_keepAlive = false;
         m_workerThread->terminate();
         m_workerThread->deleteLater();
-        mClient.reset();
+        m_client.reset();
 #ifdef Q_OS_WIN
         WSACleanup();
 #endif
     }
 
-    void AudioForVatsim::setInputDevice(QString deviceId)
+    void AudioForVatsim::setAudioApi(int api)
     {
-        mClient->stopAudio();
-        mClient->setAudioInputDevice(deviceId.toStdString());
-        mClient->startAudio();
+        m_audioApi = api;
+        m_client->setAudioApi(api);
+        configureAudioDevices();
     }
 
-    void AudioForVatsim::setOutputDevice(QString deviceId)
+    void AudioForVatsim::setInputDevice(QString deviceName)
     {
-        mClient->stopAudio();
-        mClient->setAudioOutputDevice(deviceId.toStdString());
-        mClient->startAudio();
+        m_client->stopAudio();
+        m_client->setAudioInputDevice(deviceName.toStdString());
+        m_client->startAudio();
+    }
+
+    void AudioForVatsim::setOutputDevice(QString deviceName)
+    {
+        m_client->stopAudio();
+        m_client->setAudioOutputDevice(deviceName.toStdString());
+        m_client->startAudio();
     }
 
     void AudioForVatsim::setCom1Volume(double volume)
     {
-        if(volume > 100) {
-            volume = 100;
-        }
-        if(volume < 0) {
-            volume = 0;
-        }
-        mClient->setRadioGain(0, volume / 100.0f);
+        double v = volume;
+        if(v < 0) v = 0;
+        if(v > 100) v = 100;
+        m_client->setRadioGain(0, v / 100.0f);
+
+        AppConfig::getInstance()->Com1Volume = v;
+        AppConfig::getInstance()->saveConfig();
     }
 
     void AudioForVatsim::setCom2Volume(double volume)
     {
-        if(volume > 100) {
-            volume = 100;
-        }
-        if(volume < 0) {
-            volume = 0;
-        }
-        mClient->setRadioGain(0, volume / 100.0f);
+        double v = volume;
+        if(v < 0) v = 0;
+        if(v > 100) v = 100;
+        m_client->setRadioGain(1, v / 100.0f);
+
+        AppConfig::getInstance()->Com2Volume = v;
+        AppConfig::getInstance()->saveConfig();
     }
 
     void AudioForVatsim::OnNetworkConnected(QString callsign)
     {
         configureAudioDevices();
 
-        mClient->setCallsign(callsign.toStdString());
-        mClient->setCredentials(AppConfig::getInstance()->VatsimId.toStdString(), AppConfig::getInstance()->VatsimPasswordDecrypted.toStdString());
-        mClient->connect();
+        m_client->setCallsign(callsign.toStdString());
+        m_client->setCredentials(AppConfig::getInstance()->VatsimId.toStdString(), AppConfig::getInstance()->VatsimPasswordDecrypted.toStdString());
+        m_client->connect();
         m_transceiverTimer->start();
-        m_RxTxQueryTimer->start();
+        m_rxTxQueryTimer->start();
     }
 
     void AudioForVatsim::OnNetworkDisconnected()
@@ -202,9 +219,9 @@ namespace xpilot
         emit radioRxChanged(0, false);
         emit radioRxChanged(0, false);
 
-        mClient->disconnect();
+        m_client->disconnect();
         m_transceiverTimer->stop();
-        m_RxTxQueryTimer->stop();
+        m_rxTxQueryTimer->stop();
     }
 
     void AudioForVatsim::OnTransceiverTimer()
@@ -214,50 +231,53 @@ namespace xpilot
 
     void AudioForVatsim::configureAudioDevices()
     {
-        mClient->stopAudio();
+        m_client->stopAudio();
 
         m_outputDevices.clear();
         m_inputDevices.clear();
 
-        auto outputDevices = afv_native::audio::AudioDevice::getCompatibleOutputDevicesForApi(0);
+        auto outputDevices = afv_native::audio::AudioDevice::getCompatibleOutputDevicesForApi(m_audioApi);
         for(const auto& device: outputDevices)
         {
-            AudioDeviceInfo info{};
-            info.DeviceName = QString(device.second.name.c_str());
-            info.Id = QString(device.second.id.c_str());
-            m_outputDevices.append(info);
+            AudioDeviceInfo audioDevice{};
+            audioDevice.DeviceName = device.second.name.c_str();
+            audioDevice.Id = device.first;
+            m_outputDevices.append(audioDevice);
         }
 
-        auto inputDevices = afv_native::audio::AudioDevice::getCompatibleInputDevicesForApi(0);
+        emit outputDevicesChanged();
+
+        auto inputDevices = afv_native::audio::AudioDevice::getCompatibleInputDevicesForApi(m_audioApi);
         for(const auto& device: inputDevices)
         {
-            AudioDeviceInfo info{};
-            info.DeviceName = QString(device.second.name.c_str());
-            info.Id = QString(device.second.id.c_str());
-            m_inputDevices.append(info);
+            AudioDeviceInfo audioDevice{};
+            audioDevice.DeviceName = device.second.name.c_str();
+            audioDevice.Id = device.first;
+            m_inputDevices.append(audioDevice);
         }
+
+        emit inputDevicesChanged();
 
         if(!AppConfig::getInstance()->InputDevice.isEmpty())
         {
-            mClient->setAudioInputDevice(AppConfig::getInstance()->InputDevice.toStdString());
+            m_client->setAudioInputDevice(AppConfig::getInstance()->InputDevice.toStdString());
         }
 
         if(!AppConfig::getInstance()->OutputDevice.isEmpty())
         {
-            mClient->setAudioOutputDevice(AppConfig::getInstance()->OutputDevice.toStdString());
+            m_client->setAudioOutputDevice(AppConfig::getInstance()->OutputDevice.toStdString());
         }
 
-        mClient->startAudio();
+        m_client->setRadioGain(0, AppConfig::getInstance()->Com1Volume / 100.0f);
+        m_client->setRadioGain(0, AppConfig::getInstance()->Com2Volume / 100.0f);
+
+        m_client->startAudio();
     }
 
     void AudioForVatsim::updateTransceivers()
     {
-        mClient->setRadioState(0, m_radioStackState.Com1ReceiveEnabled ? m_radioStackState.Com1Frequency * 1000 : 0);
-        mClient->setRadioState(1, m_radioStackState.Com2ReceiveEnabled ? m_radioStackState.Com2Frequency * 1000 : 0);
-
-        mClient->setRadioGain(0, 1.0f);
-        mClient->setRadioGain(1, 1.0f);
-
-        mClient->setClientPosition(m_userAircraftData.Latitude, m_userAircraftData.Longitude, m_userAircraftData.AltitudeMslM, m_userAircraftData.AltitudeAglM);
+        m_client->setRadioState(0, m_radioStackState.Com1ReceiveEnabled ? m_radioStackState.Com1Frequency * 1000 : 0);
+        m_client->setRadioState(1, m_radioStackState.Com2ReceiveEnabled ? m_radioStackState.Com2Frequency * 1000 : 0);
+        m_client->setClientPosition(m_userAircraftData.Latitude, m_userAircraftData.Longitude, m_userAircraftData.AltitudeMslM, m_userAircraftData.AltitudeAglM);
     }
 }

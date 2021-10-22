@@ -40,8 +40,11 @@ namespace xpilot
         QVector<NetworkServerInfo> CachedServers;
         ConnectInfo RecentConnection;
         ClientWindowConfig WindowConfig;
+        QString AudioApi;
         QString OutputDevice;
         QString InputDevice;
+        int Com1Volume;
+        int Com2Volume;
 
         QVariant VariantCachedServers() const
         {
@@ -65,9 +68,12 @@ namespace xpilot
         Q_PROPERTY(QString ServerName MEMBER ServerName)
         Q_PROPERTY(QVariant CachedServers READ VariantCachedServers)
         Q_PROPERTY(ConnectInfo RecentConnection MEMBER RecentConnection)
-        Q_PROPERTY(ClientWindowConfig WindowConfig MEMBER WindowConfig)
+        Q_PROPERTY(ClientWindowConfig WindowConfig MEMBER WindowConfig)\
+        Q_PROPERTY(QString AudioApi MEMBER AudioApi)
         Q_PROPERTY(QString InputDevice MEMBER InputDevice)
         Q_PROPERTY(QString OutputDevice MEMBER OutputDevice)
+        Q_PROPERTY(int Com1Volume MEMBER Com1Volume)
+        Q_PROPERTY(int Com2Volume MEMBER Com2Volume)
 
     private:
         static AppConfig* instance;

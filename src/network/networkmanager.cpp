@@ -548,6 +548,11 @@ namespace xpilot
 
     void NetworkManager::disconnectFromNetwork()
     {
+        if(!m_fsd.IsConnected())
+        {
+            return;
+        }
+
         m_intentionalDisconnect = true;
         m_fsd.SendPDU(PDUDeletePilot(m_connectInfo.Callsign, AppConfig::getInstance()->VatsimId));
         m_fsd.Disconnect();
