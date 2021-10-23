@@ -80,6 +80,8 @@ namespace xpilot
         Q_INVOKABLE void setOutputDevice(QString deviceId);
         Q_INVOKABLE void setCom1Volume(double volume);
         Q_INVOKABLE void setCom2Volume(double volume);
+        Q_INVOKABLE void disableAudioEffects(bool disabled);
+        Q_INVOKABLE void enableHfSquelch(bool enabled);
 
     private slots:
         void OnNetworkConnected(QString callsign);

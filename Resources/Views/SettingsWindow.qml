@@ -64,6 +64,7 @@ Window {
         audioApiList.model = audio.AudioApis;
         com1Slider.volume = AppConfig.Com1Volume;
         com2Slider.volume = AppConfig.Com2Volume;
+        switchDisableRadioEffects.checked = AppConfig.AudioEffectsDisabled;
     }
 
     GridLayout {
@@ -480,6 +481,9 @@ Window {
                     font.pixelSize: 13
                     leftPadding: 0
                     font.family: ubuntuRegular.name
+                    onCheckedChanged: {
+                        audio.enableHfSquelch(switchEnableHfSquelch.checked)
+                    }
                 }
 
                 CustomSwitch {
@@ -488,6 +492,9 @@ Window {
                     font.pixelSize: 13
                     leftPadding: 0
                     font.family: ubuntuRegular.name
+                    onCheckedChanged: {
+                        audio.disableAudioEffects(switchDisableRadioEffects.checked)
+                    }
                 }
             }
         }

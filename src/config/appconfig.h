@@ -45,6 +45,8 @@ namespace xpilot
         QString InputDevice;
         int Com1Volume;
         int Com2Volume;
+        bool AudioEffectsDisabled;
+        bool HFSquelchEnabled;
 
         QVariant VariantCachedServers() const
         {
@@ -74,6 +76,8 @@ namespace xpilot
         Q_PROPERTY(QString OutputDevice MEMBER OutputDevice)
         Q_PROPERTY(int Com1Volume MEMBER Com1Volume)
         Q_PROPERTY(int Com2Volume MEMBER Com2Volume)
+        Q_PROPERTY(bool AudioEffectsDisabled MEMBER AudioEffectsDisabled)
+        Q_PROPERTY(bool HFSquelchEnabled MEMBER HFSquelchEnabled)
 
     private:
         static AppConfig* instance;

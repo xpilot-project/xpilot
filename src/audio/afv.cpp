@@ -89,6 +89,8 @@ namespace xpilot
             }
         });
         m_client->setEnableInputFilters(true);
+        m_client->setEnableOutputEffects(!AppConfig::getInstance()->AudioEffectsDisabled);
+        m_client->setEnableHfSquelch(AppConfig::getInstance()->HFSquelchEnabled);
 
         m_audioDrivers = afv_native::audio::AudioDevice::getAPIs();
         for(const auto& driver : m_audioDrivers)
@@ -200,6 +202,20 @@ namespace xpilot
         m_client->setRadioGain(1, v / 100.0f);
 
         AppConfig::getInstance()->Com2Volume = v;
+        AppConfig::getInstance()->saveConfig();
+    }
+
+    void AudioForVatsim::disableAudioEffects(bool disabled)
+    {
+        m_client->setEnableOutputEffects(!disabled);
+        AppConfig::getInstance()->AudioEffectsDisabled = disabled;
+        AppConfig::getInstance()->saveConfig();
+    }
+
+    void AudioForVatsim::enableHfSquelch(bool enabled)
+    {
+        m_client->setEnableHfSquelch(enabled);
+        AppConfig::getInstance()->HFSquelchEnabled = enabled;
         AppConfig::getInstance()->saveConfig();
     }
 
