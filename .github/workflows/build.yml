@@ -26,7 +26,6 @@ jobs:
 
     steps:
       - name: Install Qt
-        if: ${{ false }}
         uses: jurplel/install-qt-action@v2
         with:
           version: ${{ env.qt_version }}
