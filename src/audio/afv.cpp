@@ -109,8 +109,11 @@ namespace xpilot
             emit radioRxChanged(1, m_radioStackState.Com2ReceiveEnabled && m_client->getRxActive(1));
         });
         connect(m_vuTimer, &QTimer::timeout, this, [=]{
-            double vu = m_client->getInputPeak();
-            emit inputVuChanged(scaleValue(vu, 0, 100, -40, 0));
+            if(!AppConfig::getInstance()->InputDevice.isEmpty())
+            {
+                double vu = m_client->getInputPeak();
+                emit inputVuChanged(scaleValue(vu, 0, 100, -40, 0));
+            }
         });
         connect(&networkManager, &NetworkManager::networkConnected, this, &AudioForVatsim::OnNetworkConnected);
         connect(&networkManager, &NetworkManager::networkDisconnected, this, &AudioForVatsim::OnNetworkDisconnected);

@@ -90,7 +90,7 @@ AppCore::AppCore(QQmlEngine* qmlEngine) :
     });
 }
 
-QObject *AppCore::appConfigInstance(QQmlEngine *engine, QJSEngine *scriptEngine)
+QObject *AppCore::appConfigInstance(QQmlEngine*, QJSEngine*)
 {
     return AppConfig::getInstance();
 }

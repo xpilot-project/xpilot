@@ -43,11 +43,16 @@ namespace xpilot
         QString AudioApi;
         QString OutputDevice;
         QString InputDevice;
-        int Com1Volume;
-        int Com2Volume;
+        int Com1Volume = 100;
+        int Com2Volume = 100;
         bool AudioEffectsDisabled;
         bool HFSquelchEnabled;
         bool AutoModeC;
+        bool DisableNotificationSounds;
+        bool AlertPrivateMessage;
+        bool AlertDirectRadioMessage;
+        bool AlertSelcal;
+        bool AlertDisconnect;
 
         QVariant VariantCachedServers() const
         {
@@ -71,7 +76,7 @@ namespace xpilot
         Q_PROPERTY(QString ServerName MEMBER ServerName)
         Q_PROPERTY(QVariant CachedServers READ VariantCachedServers)
         Q_PROPERTY(ConnectInfo RecentConnection MEMBER RecentConnection)
-        Q_PROPERTY(ClientWindowConfig WindowConfig MEMBER WindowConfig)\
+        Q_PROPERTY(ClientWindowConfig WindowConfig MEMBER WindowConfig)
         Q_PROPERTY(QString AudioApi MEMBER AudioApi)
         Q_PROPERTY(QString InputDevice MEMBER InputDevice)
         Q_PROPERTY(QString OutputDevice MEMBER OutputDevice)
@@ -80,6 +85,18 @@ namespace xpilot
         Q_PROPERTY(bool AudioEffectsDisabled MEMBER AudioEffectsDisabled)
         Q_PROPERTY(bool HFSquelchEnabled MEMBER HFSquelchEnabled)
         Q_PROPERTY(bool AutoModeC MEMBER AutoModeC)
+        Q_PROPERTY(bool DisableNotificationSounds MEMBER DisableNotificationSounds NOTIFY disableNotificationSoundsChanged)
+        Q_PROPERTY(bool AlertPrivateMessage MEMBER AlertPrivateMessage NOTIFY alertPrivateMessageChanged);
+        Q_PROPERTY(bool AlertDirectRadioMessage MEMBER AlertDirectRadioMessage NOTIFY alertDirectRadioMessageChanged);
+        Q_PROPERTY(bool AlertSelcal MEMBER AlertSelcal NOTIFY alertSelcalChanged);
+        Q_PROPERTY(bool AlertDisconnect MEMBER AlertDisconnect NOTIFY alertDisconnectChanged);
+
+    signals:
+        void disableNotificationSoundsChanged();
+        void alertPrivateMessageChanged();
+        void alertDirectRadioMessageChanged();
+        void alertSelcalChanged();
+        void alertDisconnectChanged();
 
     private:
         static AppConfig* instance;

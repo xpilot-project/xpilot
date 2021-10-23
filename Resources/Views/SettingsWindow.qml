@@ -64,8 +64,14 @@ Window {
         audioApiList.model = audio.AudioApis;
         com1Slider.volume = AppConfig.Com1Volume;
         com2Slider.volume = AppConfig.Com2Volume;
+        switchEnableHfSquelch.checked = AppConfig.HFSquelchEnabled;
         switchDisableRadioEffects.checked = AppConfig.AudioEffectsDisabled;
         switchAutoModeC.checked = AppConfig.AutoModeC;
+        switchDisableSounds.checked = AppConfig.DisableNotificationSounds;
+        switchAlertDirectRadioMessage.checked = AppConfig.AlertDirectRadioMessage;
+        switchAlertPrivateMessage.checked = AppConfig.AlertPrivateMessage;
+        switchAlertSelcal.checked = AppConfig.AlertSelcal;
+        switchAlertDisconnect.checked = AppConfig.AlertDisconnect;
     }
 
     GridLayout {
@@ -260,48 +266,63 @@ Window {
                 }
 
                 CustomSwitch {
-                    id: switchEnableSounds
-                    text: "Enable notification sounds"
+                    id: switchAlertPrivateMessage
+                    text: "Alert when new private message received"
                     font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
                     font.family: ubuntuRegular.name
+                    onCheckedChanged: {
+                        AppConfig.AlertPrivateMessage = switchAlertPrivateMessage.checked
+                    }
                 }
 
                 CustomSwitch {
-                    id: switchFlashPrivateMessage
-                    text: "Flash taskbar icon for new private message"
+                    id: switchAlertDirectRadioMessage
+                    text: "Alert when direct radio message received"
                     font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
                     font.family: ubuntuRegular.name
+                    onCheckedChanged: {
+                        AppConfig.AlertDirectRadioMessage = switchAlertDirectRadioMessage.checked
+                    }
                 }
 
                 CustomSwitch {
-                    id: switchFlashRadioMessage
-                    text: "Flash taskbar icon for text radio message"
+                    id: switchAlertSelcal
+                    text: "Alert when SELCAL notification received"
                     font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
                     font.family: ubuntuRegular.name
+                    onCheckedChanged: {
+                        AppConfig.AlertSelcal = switchAlertSelcal.checked
+                    }
                 }
 
                 CustomSwitch {
-                    id: switchFlashSelcal
-                    text: "Flash taskbar icon for SELCAL alert"
+                    id: switchAlertDisconnect
+                    text: "Alert when disconnected from the network"
                     font.pixelSize: 13
+                    font.family: ubuntuRegular.name
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
-                    font.family: ubuntuRegular.name
+                    onCheckedChanged: {
+                        AppConfig.AlertDisconnect = switchAlertDisconnect.checked
+                    }
                 }
 
                 CustomSwitch {
-                    id: switchFlashDisconnect
-                    text: "Flash taskbar icon when disconnected from the network"
+                    id: switchDisableSounds
+                    text: "Disable notification sounds"
                     font.pixelSize: 13
-                    font.family: ubuntuRegular.name
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
+                    font.family: ubuntuRegular.name
+                    onCheckedChanged: {
+                        AppConfig.DisableNotificationSounds = switchDisableSounds.checked
+                    }
                 }
             }
         }

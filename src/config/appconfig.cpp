@@ -24,6 +24,22 @@ void AppConfig::loadConfig()
 {
     QFile configFile("AppConfig.json");
     if(!configFile.open(QIODevice::ReadOnly)) {
+
+        // set default values
+        WindowConfig.X = 10;
+        WindowConfig.Y = 10;
+        WindowConfig.Width = 800;
+        WindowConfig.Height = 250;
+        AlertDirectRadioMessage = true;
+        AlertDisconnect = true;
+        AlertSelcal = true;
+        AudioEffectsDisabled = false;
+        AutoModeC = true;
+        Com1Volume = 50;
+        Com2Volume = 50;
+        DisableNotificationSounds = false;
+        HFSquelchEnabled = false;
+
         saveConfig();
         loadConfig();
         return;
@@ -53,6 +69,11 @@ void AppConfig::loadConfig()
     AudioEffectsDisabled = jsonMap["AudioEffectsDisabled"].toBool();
     HFSquelchEnabled = jsonMap["HFSquelchEnabled"].toBool();
     AutoModeC = jsonMap["AutoModeC"].toBool();
+    DisableNotificationSounds = jsonMap["DisableNotificationSounds"].toBool();
+    AlertPrivateMessage = jsonMap["AlertPrivateMessage"].toBool();
+    AlertDirectRadioMessage = jsonMap["AlertDirectRadioMessage"].toBool();
+    AlertSelcal = jsonMap["AlertSelcal"].toBool();
+    AlertDisconnect = jsonMap["AlertDisconnect"].toBool();
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
     for(const auto & value : cachedServers) {
@@ -100,6 +121,11 @@ void AppConfig::saveConfig()
     jsonObj["AudioEffectsDisabled"] = AudioEffectsDisabled;
     jsonObj["HFSquelchEnabled"] = HFSquelchEnabled;
     jsonObj["AutoModeC"] = AutoModeC;
+    jsonObj["DisableNotificationSounds"] = DisableNotificationSounds;
+    jsonObj["AlertPrivateMessage"] = AlertPrivateMessage;
+    jsonObj["AlertDirectRadioMessage"] = AlertDirectRadioMessage;
+    jsonObj["AlertSelcal"] = AlertSelcal;
+    jsonObj["AlertDisconnect"] = AlertDisconnect;
 
     QJsonArray cachedServers;
     for(auto & server : CachedServers) {

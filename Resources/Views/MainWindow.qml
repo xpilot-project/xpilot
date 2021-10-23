@@ -56,45 +56,49 @@ Window {
     SoundEffect {
         id: alertSound
         source: "../Sounds/Alert.wav"
+        muted: AppConfig.DisableNotificationSounds
     }
 
     SoundEffect {
         id: broadcastSound
         source: "../Sounds/Broadcast.wav"
+        muted: AppConfig.DisableNotificationSounds
     }
 
     SoundEffect {
         id: directRadioMessageSound
         source: "../Sounds/DirectRadioMessage.wav"
+        muted: AppConfig.DisableNotificationSounds
     }
 
     SoundEffect {
         id: errorSound
         source: "../Sounds/Error.wav"
+        muted: AppConfig.DisableNotificationSounds
     }
-
 
     SoundEffect {
         id: newMessageSound
         source: "../Sounds/NewMessage.wav"
+        muted: AppConfig.DisableNotificationSounds
     }
-
 
     SoundEffect {
         id: privateMessageSound
         source: "../Sounds/PrivateMessage.wav"
+        muted: AppConfig.DisableNotificationSounds
     }
-
 
     SoundEffect {
         id: radioMessageSound
         source: "../Sounds/RadioMessage.wav"
+        muted: AppConfig.DisableNotificationSounds
     }
-
 
     SoundEffect {
         id: selcalSound
         source: "../Sounds/SelCal.wav"
+        muted: AppConfig.DisableNotificationSounds
     }
 
     MessageDialog {
@@ -193,7 +197,9 @@ Window {
             if(networkConnected) {
                 networkManager.disconnectFromNetwork()
                 appendMessage("You have been disconnected from the network becasue Replay Mode is enabled.", colorRed)
-                mainWindow.alert(0);
+                if(AppConfig.AlertDisconnect) {
+                    mainWindow.alert(0);
+                }
                 errorSound.play()
             }
         }
@@ -275,7 +281,9 @@ Window {
         function onSelcalAlertReceived(from, frequencies) {
             appendMessage(`SELCAL alert received on ${FrequencyUtils.formatFromFsd(frequencies[0])}`, colorYellow)
             selcalSound.play()
-            mainWindow.alert(0)
+            if(AppConfig.AlertSelcal) {
+                mainWindow.alert(0)
+            }
         }
 
         function onRealNameReceived(callsign, name) {
@@ -295,7 +303,9 @@ Window {
                 createChatTab(from)
                 tab = getChatTabIndex(from)
                 appendPrivateMessage(tab, message, from, colorWhite)
-                mainWindow.alert(0)
+                if(AppConfig.AlertPrivateMessage) {
+                    mainWindow.alert(0)
+                }
                 newMessageSound.play()
             }
             else {
@@ -303,7 +313,9 @@ Window {
                     markTabUnread(from)
                 }
                 appendPrivateMessage(tab, message, from, colorWhite)
-                mainWindow.alert(0)
+                if(AppConfig.AlertPrivateMessage) {
+                    mainWindow.alert(0)
+                }
                 privateMessageSound.play()
             }
         }
@@ -335,7 +347,9 @@ Window {
 
             if(args.IsDirect) {
                 directRadioMessageSound.play();
-                mainWindow.alert(0);
+                if(AppConfig.AlertDirectRadioMessage) {
+                    mainWindow.alert(0);
+                }
             }
             else {
                 radioMessageSound.play();
