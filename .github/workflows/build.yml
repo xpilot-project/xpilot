@@ -14,8 +14,8 @@ env:
 
 jobs:
   buildLinux:
-    runs-on: ubuntu-20.04
-    #runs-on: self-hosted
+    #runs-on: ubuntu-20.04
+    runs-on: self-hosted
 
     env:
       VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
@@ -36,11 +36,6 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
-
-      - name: Setup Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: "3.10.x"
 
       - name: Install Conan
         id: conan
