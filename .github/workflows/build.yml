@@ -41,10 +41,12 @@ jobs:
         with:
           python-version: "3.10.x"
 
-      - name: Install Conan and Conan package tools
-        run: |
-          pip install conan
-          pip install conan_package_tools
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+
+      - name: Conan version
+        run: echo "${{ steps.conan.outputs.version }}"
 
       - name: Create build environment
         run: cmake -E make_directory ${{ github.workspace }}/build
