@@ -1,3 +1,6 @@
 [submodule "afv-native"]
 	path = afv-native
 	url = git@github.com:xpilot-project/AFV-Native.git
+[submodule "externals"]
+	path = externals
+	url = git@github.com:xpilot-project/externals.git

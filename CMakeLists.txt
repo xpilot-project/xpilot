@@ -31,8 +31,8 @@ endif()
 configure_file(src/network/vatsim_config.cpp.in ${CMAKE_BINARY_DIR}/generated/vatsim_config.cpp)
 include_directories(${CMAKE_BINARY_DIR}/generated)
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick Network REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick Network REQUIRED)
+find_package(QT NAMES Qt5 COMPONENTS Core Quick Network REQUIRED)
+find_package(Qt5 COMPONENTS Core Quick Network REQUIRED)
 find_package(Qt5QuickCompiler)
 
 qtquick_compiler_add_resources(RESOURCES qml.qrc)
@@ -341,9 +341,11 @@ if(WIN32)
 endif()
 
 if(WIN32)
-set(VATSIM_AUTH ${CMAKE_SOURCE_DIR}/vatsimauth.lib)
+set(VATSIM_AUTH ${CMAKE_SOURCE_DIR}/externals/windows/vatsimauth.lib)
 elseif(UNIX)
-set(VATSIM_AUTH ${CMAKE_SOURCE_DIR}/vatsimauth.so)
+set(VATSIM_AUTH ${CMAKE_SOURCE_DIR}/externals/linux/vatsimauth.a)
+elseif(APPLE)
+set(VATSIM_AUTH ${CMAKE_SOURCE_DIR}/externals/macos/vatsimauth.a)
 endif()
 
 target_link_libraries(${PROJECT_NAME}
