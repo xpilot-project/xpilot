@@ -177,6 +177,7 @@ set(AFV_NATIVE_HEADERS
     afv-native/include/afv-native/audio/ISampleStorage.h
     afv-native/include/afv-native/audio/OutputMixer.h
     afv-native/include/afv-native/audio/RecordedSampleSource.h
+    afv-native/include/afv-native/audio/SimpleCompressorEffect.h
     afv-native/include/afv-native/audio/SineToneSource.h
     afv-native/include/afv-native/audio/SinkFrameSizeAdjuster.h
     afv-native/include/afv-native/audio/SourceFrameSizeAdjuster.h
@@ -225,6 +226,7 @@ set(AFV_NATIVE_SOURCES
     afv-native/src/audio/FilterSource.cpp
     afv-native/src/audio/OutputMixer.cpp
     afv-native/src/audio/RecordedSampleSource.cpp
+    afv-native/src/audio/SimpleCompressorEffect.cpp
     afv-native/src/audio/SineToneSource.cpp
     afv-native/src/audio/SinkFrameSizeAdjuster.cpp
     afv-native/src/audio/SourceFrameSizeAdjuster.cpp
