@@ -30,11 +30,10 @@ jobs:
         with:
           version: ${{ env.qt_version }}
 
-      - name: Checkout repository
+      - name: Checkout repository and submodules
         uses: actions/checkout@v2
         with:
-          submodules: true
-          fetch-depth: 0
+          submodules: recursive
 
       - name: Install Conan
         id: conan
