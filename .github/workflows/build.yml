@@ -10,10 +10,11 @@ concurrency:
 
 env:
   qt_version: 5.15.2
+  BUILD_TYPE: Release
 
 jobs:
   buildLinux:
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
 
     env:
       VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
