@@ -85,16 +85,42 @@ QString AircraftConfiguration::ToJson() const
         {
             lights["nav_on"] = Lights->NavOn.value();
         }
-        if(Lights->LogoOn.has_value())
-        {
-            lights["logo_on"] = Lights->LogoOn.value();
-        }
 
         cfg["lights"] = lights;
     }
 
     QJsonDocument doc(cfg);
     return doc.toJson(QJsonDocument::Compact);
+}
+
+AircraftConfiguration AircraftConfiguration::FromUserAircraftData(UserAircraftConfigData config)
+{
+    AircraftConfiguration cfg = AircraftConfiguration();
+    cfg.Lights = AircraftConfigurationLights::FromUserAircraftData(config);
+    cfg.Engines = AircraftConfigurationEngines::FromUserAircraftData(config);
+    cfg.GearDown = config.GearDown;
+    cfg.FlapsPercent = (int)(config.FlapsRatio * 100.0 / 5.0) * 5; // round to nearest 5
+    cfg.SpoilersDeployed = config.SpeedbrakeRatio > 0;
+    cfg.OnGround = config.OnGround;
+    return cfg;
+}
+
+AircraftConfiguration AircraftConfiguration::CreateIncremental(AircraftConfiguration config)
+{
+    AircraftConfiguration inc = AircraftConfiguration();
+    if(config.Lights.has_value() && config.Lights->HasLights())
+    {
+        inc.Lights = Lights->CreateIncremental(config.Lights.value());
+    }
+    if(config.Engines.has_value() && config.Engines->HasEngines())
+    {
+        inc.Engines = Engines->CreateIncremental(config.Engines.value());
+    }
+    if(config.GearDown != GearDown) inc.GearDown = config.GearDown;
+    if(config.FlapsPercent != FlapsPercent) inc.FlapsPercent = config.FlapsPercent;
+    if(config.SpoilersDeployed != SpoilersDeployed) inc.SpoilersDeployed = config.SpoilersDeployed;
+    if(config.OnGround != OnGround) inc.OnGround = config.OnGround;
+    return inc;
 }
 
 QString AircraftConfigurationInfo::ToJson() const
@@ -221,12 +247,50 @@ AircraftConfigurationInfo AircraftConfigurationInfo::FromJson(const QString &jso
             {
                 info.Config->Lights->NavOn = lights["nav_on"].toBool();
             }
-            if(lights.contains("logo_on"))
-            {
-                info.Config->Lights->LogoOn = lights["logo_on"].toBool();
-            }
         }
     }
 
     return info;
+}
+
+AircraftConfigurationLights AircraftConfigurationLights::FromUserAircraftData(UserAircraftConfigData config)
+{
+    AircraftConfigurationLights cfg = AircraftConfigurationLights();
+    cfg.LandingOn = config.LandingLightsOn;
+    cfg.TaxiOn = config.TaxiLightsOn;
+    cfg.BeaconOn = config.BeaconOn;
+    cfg.NavOn = config.NavLightsOn;
+    cfg.StrobeOn = config.StrobesOn;
+    return cfg;
+}
+
+AircraftConfigurationLights AircraftConfigurationLights::CreateIncremental(AircraftConfigurationLights config)
+{
+    AircraftConfigurationLights inc = AircraftConfigurationLights();
+    if(config.StrobeOn != StrobeOn) inc.StrobeOn = config.StrobeOn;
+    if(config.TaxiOn != TaxiOn) inc.TaxiOn = config.TaxiOn;
+    if(config.LandingOn != LandingOn) inc.LandingOn = config.LandingOn;
+    if(config.BeaconOn != BeaconOn) inc.BeaconOn = config.BeaconOn;
+    if(config.NavOn != NavOn) inc.NavOn = config.NavOn;
+    return inc;
+}
+
+AircraftConfigurationEngines AircraftConfigurationEngines::FromUserAircraftData(UserAircraftConfigData config)
+{
+    AircraftConfigurationEngines cfg = AircraftConfigurationEngines();
+    if(config.EngineCount >= 1) cfg.Engine1Running = config.Engine1Running;
+    if(config.EngineCount >= 2) cfg.Engine2Running = config.Engine2Running;
+    if(config.EngineCount >= 3) cfg.Engine3Running = config.Engine3Running;
+    if(config.EngineCount >= 4) cfg.Engine4Running = config.Engine4Running;
+    return cfg;
+}
+
+AircraftConfigurationEngines AircraftConfigurationEngines::CreateIncremental(AircraftConfigurationEngines config)
+{
+    AircraftConfigurationEngines inc = AircraftConfigurationEngines();
+    if(config.Engine1Running != Engine1Running) inc.Engine1Running = config.Engine1Running;
+    if(config.Engine2Running != Engine2Running) inc.Engine2Running = config.Engine2Running;
+    if(config.Engine3Running != Engine3Running) inc.Engine3Running = config.Engine3Running;
+    if(config.Engine4Running != Engine4Running) inc.Engine4Running = config.Engine4Running;
+    return inc;
 }

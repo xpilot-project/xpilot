@@ -65,6 +65,7 @@ Window {
         com1Slider.volume = AppConfig.Com1Volume;
         com2Slider.volume = AppConfig.Com2Volume;
         switchDisableRadioEffects.checked = AppConfig.AudioEffectsDisabled;
+        switchAutoModeC.checked = AppConfig.AutoModeC;
     }
 
     GridLayout {
@@ -253,7 +254,9 @@ Window {
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
                     font.family: ubuntuRegular.name
-
+                    onCheckedChanged: {
+                        AppConfig.AutoModeC = switchAutoModeC.checked
+                    }
                 }
 
                 CustomSwitch {

@@ -52,6 +52,7 @@ void AppConfig::loadConfig()
     Com2Volume = qMin(qMax(jsonMap["Com2Volume"].toInt(), 0), 100);
     AudioEffectsDisabled = jsonMap["AudioEffectsDisabled"].toBool();
     HFSquelchEnabled = jsonMap["HFSquelchEnabled"].toBool();
+    AutoModeC = jsonMap["AutoModeC"].toBool();
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
     for(const auto & value : cachedServers) {
@@ -98,6 +99,7 @@ void AppConfig::saveConfig()
     jsonObj["Com2Volume"] = qMin(qMax(Com2Volume, 0), 100);
     jsonObj["AudioEffectsDisabled"] = AudioEffectsDisabled;
     jsonObj["HFSquelchEnabled"] = HFSquelchEnabled;
+    jsonObj["AutoModeC"] = AutoModeC;
 
     QJsonArray cachedServers;
     for(auto & server : CachedServers) {

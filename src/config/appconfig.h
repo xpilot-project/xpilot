@@ -47,6 +47,7 @@ namespace xpilot
         int Com2Volume;
         bool AudioEffectsDisabled;
         bool HFSquelchEnabled;
+        bool AutoModeC;
 
         QVariant VariantCachedServers() const
         {
@@ -78,6 +79,7 @@ namespace xpilot
         Q_PROPERTY(int Com2Volume MEMBER Com2Volume)
         Q_PROPERTY(bool AudioEffectsDisabled MEMBER AudioEffectsDisabled)
         Q_PROPERTY(bool HFSquelchEnabled MEMBER HFSquelchEnabled)
+        Q_PROPERTY(bool AutoModeC MEMBER AutoModeC)
 
     private:
         static AppConfig* instance;
