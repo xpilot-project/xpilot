@@ -177,7 +177,6 @@ set(AFV_NATIVE_HEADERS
     afv-native/include/afv-native/audio/ISampleStorage.h
     afv-native/include/afv-native/audio/OutputMixer.h
     afv-native/include/afv-native/audio/RecordedSampleSource.h
-    afv-native/include/afv-native/audio/SimpleCompressorEffect.h
     afv-native/include/afv-native/audio/SineToneSource.h
     afv-native/include/afv-native/audio/SinkFrameSizeAdjuster.h
     afv-native/include/afv-native/audio/SourceFrameSizeAdjuster.h
@@ -226,7 +225,6 @@ set(AFV_NATIVE_SOURCES
     afv-native/src/audio/FilterSource.cpp
     afv-native/src/audio/OutputMixer.cpp
     afv-native/src/audio/RecordedSampleSource.cpp
-    afv-native/src/audio/SimpleCompressorEffect.cpp
     afv-native/src/audio/SineToneSource.cpp
     afv-native/src/audio/SinkFrameSizeAdjuster.cpp
     afv-native/src/audio/SourceFrameSizeAdjuster.cpp
@@ -262,9 +260,7 @@ set(AFV_NATIVE_THIRDPARTY_SOURCES
     afv-native/extern/simpleSource/SimpleHeader.h
     afv-native/extern/simpleSource/SimpleLimit.cpp
     afv-native/extern/simpleSource/SimpleLimit.h
-    afv-native/extern/simpleSource/SimpleCompProcess.inl
-    afv-native/extern/simpleSource/SimpleGateProcess.inl
-    afv-native/extern/simpleSource/SimpleLimitProcess.inl)
+    afv-native/extern/simpleSource/SimpleCompProcess.inl)
 
 # Set some Win32 Specific Settings
 IF(WIN32)
