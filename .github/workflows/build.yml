@@ -27,8 +27,34 @@ jobs:
         uses: jurplel/install-qt-action@v2
         with:
           version: ${{ env.qt_version }}
+
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
           submodules: true
           fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.6.x"
+          architecture: "x64"
+
+      - name: Install Conan and Conan package tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install conan
+          pip install conan_package_tools
+
+      - name: Create build environment
+        run: cmake -E make_directory ${{ github.workspace }}/build
+
+      - name: Initialize Conan
+        shell: bash
+        working-directory: ${{ github.workspace }}/build
+        run: conan install $GITHUB_WORKSPACE --build missing
+
+      - name: Configure CMake
+        shell: bash
+        working-directory: ${{ github.workspace }}/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DVATSIM_CLIENT_ID=$VATSIM_CLIENT_ID -DVATSIM_CLIENT_KEY=$VATSIM_CLIENT_KEY
