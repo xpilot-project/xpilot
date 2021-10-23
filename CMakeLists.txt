@@ -340,7 +340,11 @@ if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32.lib)
 endif()
 
+if(WIN32)
 set(VATSIM_AUTH ${CMAKE_SOURCE_DIR}/vatsimauth.lib)
+elseif(UNIX)
+set(VATSIM_AUTH ${CMAKE_SOURCE_DIR}/vatsimauth.so)
+endif()
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
