@@ -290,39 +290,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/afv-native/src PREFIX "AFV Sources
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/afv-native/include PREFIX "AFV Headers" FILES ${AFV_NATIVE_HEADERS})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/afv-native/extern PREFIX "Third Party" FILES ${AFV_NATIVE_THIRDPARTY_SOURCES})
 
-if(WIN32)
-    set(OPUS_URL https://github.com/xpilot-project/opus/releases/download/xpilot/windows-opus.lib)
-    set(OPUS_LIBARY_PATH ${CMAKE_BINARY_DIR}/import/windows-opus.lib)
-
-    set(PORTAUDIO_URL https://github.com/xpilot-project/portaudio/releases/download/xpilot/windows-portaudio.lib)
-    set(PORTAUDIO_LIBRARY_PATH ${CMAKE_BINARY_DIR}/import/windows-portaudio.lib)
-
-    set(SPEEXDSP_URL https://github.com/xpilot-project/speexdsp/releases/download/xpilot/windows-speexdsp.lib)
-    set(SPEEXDSP_LIBRARY_PATH ${CMAKE_BINARY_DIR}/import/windows-speexdsp.lib)
-elseif(UNIX)
-    set(OPUS_URL https://github.com/xpilot-project/opus/releases/download/xpilot/linux-opus.lib)
-    set(OPUS_LIBARY_PATH ${CMAKE_BINARY_DIR}/import/linux-opus.lib)
-
-    set(PORTAUDIO_URL https://github.com/xpilot-project/portaudio/releases/download/xpilot/linux-libportaudio.lib)
-    set(PORTAUDIO_LIBRARY_PATH ${CMAKE_BINARY_DIR}/import/linux-libportaudio.lib)
-
-    set(SPEEXDSP_URL https://github.com/xpilot-project/speexdsp/releases/download/xpilot/linux-libspeexdsp.lib)
-    set(SPEEXDSP_LIBRARY_PATH ${CMAKE_BINARY_DIR}/import/linux-libspeexdsp.lib)
-elseif(APPLE)
-    set(OPUS_URL https://github.com/xpilot-project/opus/releases/download/xpilot/macos-opus.lib)
-    set(OPUS_LIBARY_PATH ${CMAKE_BINARY_DIR}/import/macos-opus.lib)
-
-    set(PORTAUDIO_URL https://github.com/xpilot-project/portaudio/releases/download/xpilot/macos-libportaudio.lib)
-    set(PORTAUDIO_LIBRARY_PATH ${CMAKE_BINARY_DIR}/import/macos-libportaudio.lib)
-
-    set(SPEEXDSP_URL https://github.com/xpilot-project/speexdsp/releases/download/xpilot/macos-libspeexdsp.lib)
-    set(SPEEXDSP_LIBRARY_PATH ${CMAKE_BINARY_DIR}/import/macos-libspeexdsp.lib)
-endif()
-
-file(DOWNLOAD ${OPUS_URL} ${OPUS_LIBARY_PATH})
-file(DOWNLOAD ${PORTAUDIO_URL} ${PORTAUDIO_LIBRARY_PATH})
-file(DOWNLOAD ${SPEEXDSP_URL} ${SPEEXDSP_LIBRARY_PATH})
-
 target_include_directories(${PROJECT_NAME}
     PRIVATE
     ${CMAKE_SOURCE_DIR}/afv-native/extern/cpp-jwt/include
@@ -341,11 +308,20 @@ if(WIN32)
 endif()
 
 if(WIN32)
-set(VATSIM_AUTH ${CMAKE_SOURCE_DIR}/externals/windows/vatsimauth.lib)
+set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/vatsimauth.lib)
+set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/opus.lib)
+set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/portaudio.lib)
+set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/speexdsp.lib)
 elseif(UNIX)
-set(VATSIM_AUTH ${CMAKE_SOURCE_DIR}/externals/linux/vatsimauth.a)
+set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/vatsimauth.a)
+set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libopus.a)
+set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libportaudio.a)
+set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
 elseif(APPLE)
-set(VATSIM_AUTH ${CMAKE_SOURCE_DIR}/externals/macos/vatsimauth.a)
+set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/vatsimauth.a)
+set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libopus.a)
+set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libportaudio.a)
+set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libspeexdsp.a)
 endif()
 
 target_link_libraries(${PROJECT_NAME}
@@ -357,10 +333,10 @@ target_link_libraries(${PROJECT_NAME}
     CONAN_PKG::libevent
     CONAN_PKG::zeromq
     CONAN_PKG::cppzmq
-    ${OPUS_LIBARY_PATH}
-    ${PORTAUDIO_LIBRARY_PATH}
-    ${SPEEXDSP_LIBRARY_PATH}
-    ${VATSIM_AUTH})
+    ${OPUS_LIBRARY}
+    ${PORTAUDIO_LIBRARY}
+    ${SPEEX_LIBRARY}
+    ${VATSIM_AUTH_LIBRARY})
 
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PUBLIC _USE_MATH_DEFINES)
