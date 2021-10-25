@@ -1,7 +1,6 @@
 #include <QtGlobal>
 #include "appconfig.h"
 
-
 using namespace xpilot;
 
 AppConfig* AppConfig::instance = 0;
@@ -39,6 +38,9 @@ void AppConfig::loadConfig()
         Com2Volume = 50;
         DisableNotificationSounds = false;
         HFSquelchEnabled = false;
+        XplaneNetworkAddress = DEFAULT_XPLANE_NETWORK_ADDRESS;
+        XplanePluginPort = DEFAULT_PLUGIN_PORT;
+        XplaneUdpPort = XPLANE_UDP_PORT;
 
         saveConfig();
         loadConfig();
@@ -74,6 +76,9 @@ void AppConfig::loadConfig()
     AlertDirectRadioMessage = jsonMap["AlertDirectRadioMessage"].toBool();
     AlertSelcal = jsonMap["AlertSelcal"].toBool();
     AlertDisconnect = jsonMap["AlertDisconnect"].toBool();
+    XplaneNetworkAddress = jsonMap["XplaneNetworkAddress"].toString();
+    XplanePluginPort = jsonMap["XplanePluginPort"].toInt();
+    XplaneUdpPort = jsonMap["XplaneUdpPort"].toInt();
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
     for(const auto & value : cachedServers) {
@@ -126,6 +131,9 @@ void AppConfig::saveConfig()
     jsonObj["AlertDirectRadioMessage"] = AlertDirectRadioMessage;
     jsonObj["AlertSelcal"] = AlertSelcal;
     jsonObj["AlertDisconnect"] = AlertDisconnect;
+    jsonObj["XplaneNetworkAddress"] = XplaneNetworkAddress.isEmpty() ? DEFAULT_XPLANE_NETWORK_ADDRESS : XplaneNetworkAddress;
+    jsonObj["XplanePluginPort"] = XplanePluginPort == 0 ? DEFAULT_PLUGIN_PORT : XplanePluginPort;
+    jsonObj["XplaneUdpPort"] = XplaneUdpPort == 0 ? XPLANE_UDP_PORT : XplaneUdpPort;
 
     QJsonArray cachedServers;
     for(auto & server : CachedServers) {

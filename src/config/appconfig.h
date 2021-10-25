@@ -17,6 +17,10 @@
 #include "src/network/networkserverlist.h"
 #include "src/network/connectinfo.h"
 
+#define DEFAULT_XPLANE_NETWORK_ADDRESS "localhost"
+#define DEFAULT_PLUGIN_PORT 53100
+#define XPLANE_UDP_PORT 49000
+
 namespace xpilot
 {
     class AppConfig : public QObject
@@ -53,6 +57,9 @@ namespace xpilot
         bool AlertDirectRadioMessage;
         bool AlertSelcal;
         bool AlertDisconnect;
+        QString XplaneNetworkAddress;
+        int XplanePluginPort;
+        int XplaneUdpPort;
 
         QVariant VariantCachedServers() const
         {

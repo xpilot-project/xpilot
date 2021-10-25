@@ -1,10 +1,13 @@
 #include "xplane_adapter.h"
+#include "src/config/appconfig.h"
 
 #include <QTimer>
 #include <QtEndian>
 #include <QDateTime>
 #include <QJsonObject>
 #include <QJsonDocument>
+
+using namespace xpilot;
 
 enum DataRef
 {
@@ -47,11 +50,13 @@ enum DataRef
 
 XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 {
+    m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch() - 5; // default to 5 seconds ago to prevent ghost X-Plane connection status
+
     m_zmqContext = new zmq::context_t(1);
     m_zmqSocket = new zmq::socket_t(*m_zmqContext, ZMQ_DEALER);
     m_zmqSocket->set(zmq::sockopt::routing_id, "xpilot");
     m_zmqSocket->set(zmq::sockopt::linger, 0);
-    m_zmqSocket->connect("tcp://localhost:53100");
+    m_zmqSocket->connect(QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
 
     m_zmqThread = new std::thread([&]{
 
@@ -140,7 +145,7 @@ void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t 
     data.insert(13, dataRef.c_str());
     data.resize(413);
 
-    socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, 49000);
+    socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, AppConfig::getInstance()->XplaneUdpPort);
 }
 
 void XplaneAdapter::setDataRefValue(std::string dataRef, float value)
@@ -153,7 +158,7 @@ void XplaneAdapter::setDataRefValue(std::string dataRef, float value)
     data.insert(9, dataRef.c_str());
     data.resize(509);
 
-    socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, 49000);
+    socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, AppConfig::getInstance()->XplaneUdpPort);
 }
 
 void XplaneAdapter::sendCommand(std::string command)
@@ -165,7 +170,7 @@ void XplaneAdapter::sendCommand(std::string command)
     data.insert(5, command.c_str());
     data.resize(command.length() + 6);
 
-    socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, 49000);
+    socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, AppConfig::getInstance()->XplaneUdpPort);
 }
 
 void XplaneAdapter::setTransponderCode(int code)
