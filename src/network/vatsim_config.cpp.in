@@ -10,3 +10,8 @@ const QString VatsimClientKey()
 {
 	return "@VATSIM_CLIENT_KEY@";
 }
+
+const quint64 ConfigEncryptionKey()
+{
+    return @CONFIG_ENCRYPTION_KEY@;
+}

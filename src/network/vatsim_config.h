@@ -5,5 +5,6 @@
 
 const ushort VatsimClientId();
 const QString VatsimClientKey();
+const quint64 ConfigEncryptionKey();
 
 #endif

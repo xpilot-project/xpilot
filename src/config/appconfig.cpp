@@ -1,5 +1,6 @@
 #include <QtGlobal>
 #include "appconfig.h"
+#include "src/network/vatsim_config.h"
 
 using namespace xpilot;
 
@@ -56,7 +57,7 @@ void AppConfig::loadConfig()
     QJsonObject jsonObj = doc.object();
     QVariantMap jsonMap = jsonObj.toVariantMap();
 
-    crypto.setKey(Q_UINT64_C(0x195ead8a7710623b));
+    crypto.setKey(ConfigEncryptionKey());
 
     VatsimId = jsonMap["VatsimId"].toString();
     VatsimPassword = jsonMap["VatsimPassword"].toString();
