@@ -50,11 +50,14 @@ namespace xpilot
             itr->Longitude = lon;
             itr->LastUpdate = QDateTime::currentSecsSinceEpoch();
             ValidateController(*itr);
-            if(isValid && itr->IsValid)
+            if(itr != m_controllers.end())
             {
-                if(hasFrequencyChanged || hasLocationChanged)
+                if(isValid && itr->IsValid)
                 {
-                    RefreshController(*itr);
+                    if(hasFrequencyChanged || hasLocationChanged)
+                    {
+                        RefreshController(*itr);
+                    }
                 }
             }
         }

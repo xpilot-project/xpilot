@@ -43,7 +43,7 @@ namespace xpilot
 
         NetworkServerInfo serverInfo;
         serverInfo.Name = "Dev";
-        serverInfo.Address = "192.168.50.56";
+        serverInfo.Address = "192.168.56.101";
         serverInfo.Location = "";
         serverList.append(serverInfo);
 

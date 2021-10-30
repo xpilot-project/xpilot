@@ -37,5 +37,10 @@
         <file>Resources/Sounds/RadioMessage.wav</file>
         <file>Resources/Sounds/SelCal.wav</file>
         <file>Resources/Components/NearbyAtcGroup.qml</file>
+        <file>Resources/Samples/AC_Bus.wav</file>
+        <file>Resources/Samples/Click.wav</file>
+        <file>Resources/Samples/Crackle.wav</file>
+        <file>Resources/Samples/HF_WhiteNoise.wav</file>
+        <file>Resources/Samples/WhiteNoise.wav</file>
     </qresource>
 </RCC>
