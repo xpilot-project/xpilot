@@ -83,7 +83,10 @@ namespace xpilot
         if(itr != m_controllers.end())
         {
             itr->RealName = realName;
-            RefreshController(*itr);
+            if(itr->IsValid)
+            {
+                RefreshController(*itr);
+            }
         }
     }
 

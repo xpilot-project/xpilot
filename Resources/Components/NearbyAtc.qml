@@ -20,7 +20,6 @@ Rectangle {
     property variant ground;
     property variant delivery;
     property variant atis;
-    property variant observers;
 
     signal startChatSession(string callsign)
 
@@ -107,15 +106,6 @@ Rectangle {
             NearbyAtcGroup {
                 internalModel: atis
                 groupTitle: "ATIS"
-                onSendPrivateMessage: {
-                    startChatSession(callsign)
-                }
-            }
-
-            // Observers
-            NearbyAtcGroup {
-                internalModel: observers
-                groupTitle: "Observers"
                 onSendPrivateMessage: {
                     startChatSession(callsign)
                 }

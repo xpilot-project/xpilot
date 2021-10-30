@@ -245,7 +245,6 @@ Window {
             nearbyGround.clear()
             nearbyDelivery.clear()
             nearbyAtis.clear()
-            nearbyObservers.clear()
         }
 
         function onNotificationPosted(type, message) {
@@ -419,12 +418,6 @@ Window {
                     nearbyAtis.append(controller)
                 }
             }
-            else {
-                idx = findController(nearbyObservers, controller.Callsign)
-                if(idx < 0) {
-                    nearbyObservers.append(controller)
-                }
-            }
         }
 
         function onControllerDeleted(controller) {
@@ -463,12 +456,6 @@ Window {
                 idx = findController(nearbyAtis, controller.Callsign)
                 if(idx >= 0) {
                     nearbyAtis.remove(idx)
-                }
-            }
-            else {
-                idx = findController(nearbyObservers, controller.Callsign)
-                if(idx >= 0) {
-                    nearbyObservers.remove(idx)
                 }
             }
         }
@@ -620,10 +607,6 @@ Window {
                 id: nearbyAtis
             }
 
-            ListModel {
-                id: nearbyObservers
-            }
-
             NearbyAtc {
                 id: nearbyAtc
                 anchors.fill: parent
@@ -633,7 +616,6 @@ Window {
                 ground: nearbyGround
                 delivery: nearbyDelivery
                 atis: nearbyAtis
-                observers: nearbyObservers
                 onStartChatSession: {
                     focusOrCreateTab(callsign)
                 }
