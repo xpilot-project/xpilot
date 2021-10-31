@@ -29,6 +29,7 @@ namespace xpilot
             Controller controller {};
             controller.Callsign = from.toUpper();
             controller.Frequency = frequency;
+            controller.FrequencyHz = frequency * 1000;
             controller.NormalizedFrequency = Normalize25KhzFsdFrequency(frequency);
             controller.RealName = "Unknown";
             controller.Latitude = lat;
@@ -46,6 +47,7 @@ namespace xpilot
             bool hasFrequencyChanged = (uint)frequency != itr->Frequency;
             bool hasLocationChanged = lat != itr->Latitude || lon != itr->Longitude;
             itr->Frequency = frequency;
+            itr->FrequencyHz = frequency * 1000;
             itr->Latitude = lat;
             itr->Longitude = lon;
             itr->LastUpdate = QDateTime::currentSecsSinceEpoch();

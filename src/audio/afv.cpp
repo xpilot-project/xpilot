@@ -9,7 +9,7 @@ using namespace afv_native::afv;
 
 namespace xpilot
 {
-    AudioForVatsim::AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, QObject* parent) :
+    AudioForVatsim::AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, ControllerManager& controllerManager, QObject* parent) :
         QObject(parent),
         m_client()
     {
@@ -77,6 +77,10 @@ namespace xpilot
                 }
                 break;
             case afv_native::ClientEventType::StationAliasesUpdated:
+            {
+                auto stations = m_client->getStationAliases();
+                m_aliasedStations = QVector<afv_native::afv::dto::Station>(stations.begin(), stations.end());
+            }
                 break;
             case afv_native::ClientEventType::VoiceServerConnected:
                 emit notificationPosted((int)NotificationType::Info, "Connected to voice server.");
@@ -141,6 +145,34 @@ namespace xpilot
         });
         connect(&xplaneAdapter, &XplaneAdapter::pttReleased, this, [&]{
             m_client->setPtt(false);
+        });
+
+        connect(&controllerManager, &ControllerManager::controllerAdded, this, [&](Controller controller)
+        {
+            m_controllers.push_back(controller);
+        });
+        connect(&controllerManager, &ControllerManager::controllerUpdated, this, [&](Controller controller)
+        {
+            auto it = std::find_if(m_controllers.begin(), m_controllers.end(), [=](Controller &c)
+            {
+                return c.Callsign == controller.Callsign;
+            });
+
+            if(it != m_controllers.constEnd())
+            {
+                *it = controller;
+            }
+        });
+        connect(&controllerManager, &ControllerManager::controllerDeleted, this, [&](Controller controller)
+        {
+            auto it = std::find_if(m_controllers.begin(), m_controllers.end(), [=](Controller &c)
+            {
+                return c.Callsign == controller.Callsign;
+            });
+            if(it != m_controllers.end())
+            {
+                m_controllers.removeAll(*it);
+            }
         });
 
         m_keepAlive = true;
@@ -295,8 +327,62 @@ namespace xpilot
 
     void AudioForVatsim::updateTransceivers()
     {
-        m_client->setRadioState(0, m_radioStackState.Com1ReceiveEnabled ? m_radioStackState.Com1Frequency * 1000 : 0);
-        m_client->setRadioState(1, m_radioStackState.Com2ReceiveEnabled ? m_radioStackState.Com2Frequency * 1000 : 0);
+        quint32 com1Alias = getAliasFrequency(m_radioStackState.Com1Frequency * 1000);
+        quint32 com2Alias = getAliasFrequency(m_radioStackState.Com2Frequency * 1000);
+
+        com1Alias > 0 ? (emit radioAliasChanged(0, com1Alias)) : (emit radioAliasChanged(0, 0));
+        com2Alias > 0 ? (emit radioAliasChanged(1, com2Alias)) : (emit radioAliasChanged(1, 0));
+
+        m_client->setRadioState(0, m_radioStackState.Com1ReceiveEnabled ? (com1Alias > 0 ? com1Alias : m_radioStackState.Com1Frequency * 1000) : 0);
+        m_client->setRadioState(1, m_radioStackState.Com2ReceiveEnabled ? (com2Alias > 0 ? com2Alias : m_radioStackState.Com2Frequency * 1000) : 0);
         m_client->setClientPosition(m_userAircraftData.Latitude, m_userAircraftData.Longitude, m_userAircraftData.AltitudeMslM, m_userAircraftData.AltitudeAglM);
+    }
+
+    bool AudioForVatsim::fuzzyMatchCallsign(const QString &callsign, const QString &compareTo) const
+    {
+        if(callsign.isEmpty() || compareTo.isEmpty())
+        {
+            return false;
+        }
+
+        QString prefixA;
+        QString suffixA;
+        QString prefixB;
+        QString suffixB;
+        this->getPrefixSuffix(callsign, prefixA, suffixA);
+        this->getPrefixSuffix(compareTo, prefixB, suffixB);
+        return (prefixA == prefixB) && (suffixA == suffixB);
+    }
+
+    void AudioForVatsim::getPrefixSuffix(const QString &callsign, QString &prefix, QString &suffix) const
+    {
+        const QRegularExpression separator("[(\\-|_)]");
+        const QStringList parts = callsign.split(separator);
+
+        prefix = parts.size() > 0 ? parts.first() : QString();
+        suffix = parts.size() > 1 ? parts.last() : QString();
+    }
+
+    quint32 AudioForVatsim::getAliasFrequency(quint32 frequency) const
+    {
+        auto it = std::find_if(m_controllers.constBegin(), m_controllers.constEnd(), [&](const Controller &c)
+        {
+            return c.FrequencyHz == frequency;
+        });
+
+        if(it != m_controllers.constEnd())
+        {
+            auto alias = std::find_if(m_aliasedStations.constBegin(), m_aliasedStations.constEnd(), [&](const afv_native::afv::dto::Station &station)
+            {
+                return it->FrequencyHz == station.FrequencyAlias && fuzzyMatchCallsign(station.Name.c_str(), it->Callsign);
+            });
+
+            if(alias != m_aliasedStations.constEnd())
+            {
+                return alias->Frequency;
+            }
+        }
+
+        return 0;
     }
 }

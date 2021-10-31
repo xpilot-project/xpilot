@@ -50,7 +50,7 @@ int xpilot::Main(int argc, char* argv[])
     AircraftManager networkAircraftManager(networkManager, xplaneAdapter);
     ControllerManager controllerManager(networkManager);
     UserAircraftManager aircraftManager(xplaneAdapter, networkManager);
-    AudioForVatsim audio(networkManager, xplaneAdapter);
+    AudioForVatsim audio(networkManager, xplaneAdapter, controllerManager);
 
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [&](){
         networkManager.disconnectFromNetwork();

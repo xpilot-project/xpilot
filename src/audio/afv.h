@@ -13,6 +13,8 @@
 
 #include "src/network/networkmanager.h"
 #include "src/simulator/xplane_adapter.h"
+#include "src/controllers/controller_manager.h"
+#include "src/controllers/controller.h"
 #include <event2/event.h>
 #include "afv-native/Client.h"
 #include "audiodeviceinfo.h"
@@ -27,7 +29,7 @@ namespace xpilot
         Q_PROPERTY(QVariant AudioApis READ getAudioApis NOTIFY audioApisChanged)
 
     public:
-        AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, QObject* parent = nullptr);
+        AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, ControllerManager& controllerManager, QObject* parent = nullptr);
         ~AudioForVatsim();
 
         QVariant getOutputDevices() const
@@ -95,6 +97,7 @@ namespace xpilot
         void inputDevicesChanged();
         void audioApisChanged();
         void inputVuChanged(float vu);
+        void radioAliasChanged(uint radio, quint32 frequency);
 
     private:
         void configureAudioDevices();
@@ -120,6 +123,14 @@ namespace xpilot
         QList<AudioDeviceInfo> m_outputDevices;
         QList<AudioDeviceInfo> m_inputDevices;
         std::map<afv_native::audio::AudioDevice::Api, std::string> m_audioDrivers;
+
+        bool fuzzyMatchCallsign(const QString &callsign, const QString &compareTo) const;
+        void getPrefixSuffix(const QString &callsign, QString &prefix, QString &suffix) const;
+
+        QVector<afv_native::afv::dto::Station> m_aliasedStations;
+        quint32 getAliasFrequency(quint32 frequency) const;
+
+        QList<Controller> m_controllers;
 
         double scaleValue(double &value, double limitMin, double limitMax, double baseMin, double baseMax) const
         {

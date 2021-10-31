@@ -17,6 +17,9 @@ ColumnLayout {
 
     property var radioStackState;
 
+    property var com1Hf: 0
+    property var com2Hf: 0
+
     Connections {
         target: xplaneAdapter
 
@@ -70,6 +73,17 @@ ColumnLayout {
                 break;
             }
         }
+
+        function onRadioAliasChanged(radio, frequency) {
+            switch(radio) {
+            case 0:
+                com1Hf = frequency / 1000000;
+                break;
+            case 1:
+                com2Hf = frequency / 1000000;
+                break;
+            }
+        }
     }
 
     Row {
@@ -100,6 +114,15 @@ ColumnLayout {
             font.pixelSize: 16
             font.family: robotoMono.name
             renderType: Text.NativeRendering
+
+            ToolTip.visible: com1MouseArea.containsMouse && com1Hf > 0
+            ToolTip.text: "Com1 HF: " + com1Hf
+
+            MouseArea {
+                id: com1MouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+            }
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
@@ -150,6 +173,15 @@ ColumnLayout {
             font.pixelSize: 16
             font.family: robotoMono.name
             renderType: Text.NativeRendering
+
+            ToolTip.visible: com2MouseArea.containsMouse && com2Hf > 0
+            ToolTip.text: "Com2 HF: " + com2Hf
+
+            MouseArea {
+                id: com2MouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+            }
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter

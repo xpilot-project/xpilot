@@ -20,6 +20,7 @@ public:
     QString Callsign;
     uint Frequency;
     uint NormalizedFrequency;
+    quint32  FrequencyHz;
     double Latitude;
     double Longitude;
     qint64 LastUpdate;
@@ -32,6 +33,7 @@ public:
       return Callsign == rhs.Callsign
               && Frequency == rhs.Frequency
               && NormalizedFrequency == rhs.NormalizedFrequency
+              && FrequencyHz == rhs.FrequencyHz
               && Latitude == rhs.Latitude
               && Longitude == rhs.Longitude
               && LastUpdate == rhs.LastUpdate
@@ -45,6 +47,7 @@ public:
         return Callsign != rhs.Callsign
                 || Frequency != rhs.Frequency
                 || NormalizedFrequency != rhs.NormalizedFrequency
+                || FrequencyHz != rhs.FrequencyHz
                 || Latitude != rhs.Latitude
                 || Longitude != rhs.Longitude
                 || LastUpdate != rhs.LastUpdate
