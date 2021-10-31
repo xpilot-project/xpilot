@@ -268,7 +268,7 @@ namespace xpilot
     void AudioForVatsim::OnNetworkDisconnected()
     {
         emit radioRxChanged(0, false);
-        emit radioRxChanged(0, false);
+        emit radioRxChanged(1, false);
 
         m_client->disconnect();
         m_transceiverTimer->stop();
