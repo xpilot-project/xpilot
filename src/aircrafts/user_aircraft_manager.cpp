@@ -12,6 +12,13 @@ UserAircraftManager::UserAircraftManager(XplaneAdapter& xplaneAdapter, NetworkMa
 {
     connect(&xplaneAdapter, &XplaneAdapter::userAircraftConfigDataChanged, this, &UserAircraftManager::OnUserAircraftConfigDataUpdated);
     connect(&xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, &UserAircraftManager::OnRadioStackUpdated);
+    connect(&xplaneAdapter, &XplaneAdapter::simConnectionStateChanged, this, [&](bool connected)
+    {
+        if(!connected)
+        {
+            m_initialAircraftDataReceived = false;
+        }
+    });
     connect(&m_networkManager, &NetworkManager::aircraftConfigurationInfoReceived, this, &UserAircraftManager::OnAircraftConfigurationInfoReceived);
 
     QTimer* tokenRefreshTimer = new QTimer(this);
