@@ -320,7 +320,7 @@ namespace xpilot
         }
 
         m_client->setRadioGain(0, AppConfig::getInstance()->Com1Volume / 100.0f);
-        m_client->setRadioGain(0, AppConfig::getInstance()->Com2Volume / 100.0f);
+        m_client->setRadioGain(1, AppConfig::getInstance()->Com2Volume / 100.0f);
 
         m_client->startAudio();
     }
