@@ -63,11 +63,16 @@ signals:
     void replayModeDetected();
     void pttPressed();
     void pttReleased();
+    void invalidPluginVersion();
+    void invalidCslConfiguration();
 
 private:
     QUdpSocket* socket;
     qint64 m_lastUdpTimestamp;
     bool m_simConnected = false;
+    bool m_initialHandshake = false;
+    bool m_validPluginVersion = true;
+    bool m_validCsl = true;
 
     UserAircraftData m_userAircraftData{};
     UserAircraftConfigData m_userAircraftConfigData{};

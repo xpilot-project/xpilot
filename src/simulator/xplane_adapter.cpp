@@ -9,6 +9,8 @@
 
 using namespace xpilot;
 
+constexpr int MIN_PLUGIN_VERSION = 200;
+
 enum DataRef
 {
     AvionicsPower,
@@ -59,7 +61,67 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     m_zmqSocket->connect(QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
 
     m_zmqThread = new std::thread([&]{
+        while(m_zmqSocket)
+        {
+            try {
+                zmq::message_t routing_id;
+                m_zmqSocket->recv(routing_id, zmq::recv_flags::none); // ignore
 
+                zmq::message_t msg;
+                m_zmqSocket->recv(msg, zmq::recv_flags::none);
+                QString data(std::string(static_cast<char*>(msg.data()), msg.size()).c_str());
+
+                if(!data.isEmpty())
+                {
+                    QByteArray json_bytes = data.toLocal8Bit();
+                    auto json_doc = QJsonDocument::fromJson(json_bytes);
+
+                    if(json_doc.isNull() || !json_doc.isObject())
+                    {
+                        return;
+                    }
+
+                    QJsonObject obj = json_doc.object();
+
+                    if(obj.contains("type"))
+                    {
+                        if(obj["type"] == "PluginVersion")
+                        {
+                            QJsonObject data = obj["data"].toObject();
+                            if(data.contains("version"))
+                            {
+                                if(data["version"].toInt() < MIN_PLUGIN_VERSION)
+                                {
+                                    m_validPluginVersion = false;
+                                    emit invalidPluginVersion();
+                                }
+                                m_initialHandshake = true;
+                            }
+                        }
+
+                        if(obj["type"] == "ValidateCsl")
+                        {
+                            QJsonObject data = obj["data"].toObject();
+                            if(data.contains("is_valid"))
+                            {
+                                if(!data["is_valid"].toBool())
+                                {
+                                    m_validCsl = false;
+                                    emit invalidCslConfiguration();
+                                }
+                            }
+                            m_initialHandshake = true;
+                        }
+                    }
+                }
+            }
+            catch(zmq::error_t &e) {
+
+            }
+            catch(...) {
+
+            }
+        }
     });
 
     socket = new QUdpSocket(this);
@@ -68,15 +130,32 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     QTimer *heartbeatTimer = new QTimer(this);
     connect(heartbeatTimer, &QTimer::timeout, this, [=] {
         qint64 now = QDateTime::currentSecsSinceEpoch();
-        if((now - m_lastUdpTimestamp) > 5) {
+
+        if(!m_initialHandshake || (now - m_lastUdpTimestamp) > 5) {
             emit simConnectionStateChanged(false);
             m_simConnected = false;
             m_radioStackState = {};
             m_userAircraftData = {};
             m_userAircraftConfigData = {};
             Subscribe();
+
+            // request plugin version
+            {
+                QJsonObject reply;
+                reply.insert("type", "PluginVersion");
+                QJsonDocument doc(reply);
+                sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+            }
+
+            // validate csl
+            {
+                QJsonObject reply;
+                reply.insert("type", "ValidateCsl");
+                QJsonDocument doc(reply);
+                sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+            }
         } else {
-            if(!m_simConnected) {
+            if(!m_simConnected && m_validPluginVersion && m_validCsl) {
                 emit simConnectionStateChanged(true);
                 m_simConnected = true;
             }

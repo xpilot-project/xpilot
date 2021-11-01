@@ -203,6 +203,18 @@ Window {
                 errorSound.play()
             }
         }
+
+        function onInvalidPluginVersion() {
+            appendMessage("Unsupported xPilot plugin version detected. Please close X-Plane and reinstall the latest version of xPilot.", colorRed)
+            errorSound.play()
+            mainWindow.alert(0)
+        }
+
+        function onInvalidCslConfiguration() {
+            appendMessage("No valid CSL paths are configured or enabled, or you have no CSL models installed. Please verify the CSL configuration in X-Plane (Plugins > xPilot > Preferences). If you need assistance configuring your CSL paths, see the \"CSL Model Configuration\" section in the xPilot Documentation (http://docs.xpilot-project.org). Restart X-Plane and xPilot after you have properly configured your CSL models.", colorRed)
+            errorSound.play()
+            mainWindow.alert(0)
+        }
     }
 
     Connections {
