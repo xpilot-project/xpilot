@@ -3,9 +3,11 @@
 
 #include <QObject>
 #include <QList>
+#include <QTimer>
 
 #include "controller.h"
 #include "src/network/networkmanager.h"
+#include "src/simulator/xplane_adapter.h"
 
 namespace xpilot
 {
@@ -14,7 +16,7 @@ namespace xpilot
         Q_OBJECT
 
     public:
-        ControllerManager(NetworkManager& networkManager, QObject* parent = nullptr);
+        ControllerManager(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, QObject* parent = nullptr);
         void ValidateController(Controller& controller);
 
     signals:
@@ -29,8 +31,10 @@ namespace xpilot
         void RefreshController(Controller controller);
 
     private:
-        NetworkManager& m_networkManager;
+        NetworkManager &m_networkManager;
+        XplaneAdapter &m_xplaneAdapter;
         QList<Controller> m_controllers;
+        QTimer *m_nearbyAtcTimer;
     };
 }
 

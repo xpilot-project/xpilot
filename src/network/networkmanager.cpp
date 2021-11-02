@@ -6,6 +6,7 @@
 #include "src/network/vatsim_config.h"
 #include "src/common/frequency_utils.h"
 #include "src/common/notificationtype.h"
+#include "src/common/utils.h"
 #include "src/aircrafts/aircraft_visual_state.h"
 #include "src/aircrafts/velocity_vector.h"
 
@@ -35,15 +36,41 @@ namespace xpilot
         connect(&m_fsd, &FsdClient::RaisePlaneInfoResponseReceived, this, &NetworkManager::OnPlaneInfoResponseReceived);
         connect(&m_fsd, &FsdClient::RaiseKillRequestReceived, this, &NetworkManager::OnKillRequestReceived);
         connect(&m_fsd, &FsdClient::RaiseRawDataSent, this, [](QString data){
-           qDebug() << ">> " << data;
+            //qDebug() << ">> " << data;
         });
         connect(&m_fsd, &FsdClient::RaiseRawDataReceived, this, [](QString data){
-           qDebug() << "<< " << data;
+            //qDebug() << "<< " << data;
         });
 
         connect(&xplaneAdapter, &XplaneAdapter::userAircraftDataChanged, this, &NetworkManager::OnUserAircraftDataUpdated);
         connect(&xplaneAdapter, &XplaneAdapter::userAircraftConfigDataChanged, this, &NetworkManager::OnUserAircraftConfigDataUpdated);
         connect(&xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, &NetworkManager::OnRadioStackStateChanged);
+        connect(&xplaneAdapter, &XplaneAdapter::requestStationInfo, this, &NetworkManager::OnRequestControllerInfo);
+        connect(&xplaneAdapter, &XplaneAdapter::radioMessageSent, this, &NetworkManager::sendRadioMessage);
+        connect(&xplaneAdapter, &XplaneAdapter::privateMessageSent, this, &NetworkManager::privateMessageSent);
+
+        connect(this, &NetworkManager::notificationPosted, this, [&](int type, QString message)
+        {
+            auto msgType = static_cast<NotificationType>(type);
+            switch(msgType)
+            {
+            case NotificationType::Error:
+                m_xplaneAdapter.NotificationPosted(message, COLOR_RED);
+                break;
+            case NotificationType::Info:
+                m_xplaneAdapter.NotificationPosted(message, COLOR_YELLOW);
+                break;
+            case NotificationType::RadioMessageSent:
+                m_xplaneAdapter.NotificationPosted(message, COLOR_CYAN);
+                break;
+            case NotificationType::ServerMessage:
+                m_xplaneAdapter.NotificationPosted(message, COLOR_GREEN);
+                break;
+            case NotificationType::Warning:
+                m_xplaneAdapter.NotificationPosted(message, COLOR_ORANGE);
+                break;
+            }
+        });
 
         m_slowPositionTimer = new QTimer(this);
         connect(m_slowPositionTimer, &QTimer::timeout, this, &NetworkManager::OnSlowPositionTimerElapsed);
@@ -279,10 +306,10 @@ namespace xpilot
         if(pdu.From.toUpper() == "SERVER")
         {
             emit serverMessageReceived(pdu.Message);
+            m_xplaneAdapter.NotificationPosted(pdu.Message, COLOR_GREEN);
         }
         else
         {
-            qDebug() << pdu.Message;
             emit privateMessageReceived(pdu.From, pdu.Message);
         }
     }
@@ -340,6 +367,7 @@ namespace xpilot
             args.DualReceiver = m_radioStackState.Com1ReceiveEnabled && m_radioStackState.Com2ReceiveEnabled;
 
             emit radioMessageReceived(args);
+            m_xplaneAdapter.RadioMessageReceived(pdu.From.toUpper(), pdu.Messages, direct);
         }
     }
 
@@ -394,6 +422,11 @@ namespace xpilot
                 m_transmitFreqs.append(MatchFsdFormat(m_radioStackState.Com2Frequency));
             }
         }
+    }
+
+    void NetworkManager::OnRequestControllerInfo(QString callsign)
+    {
+        requestControllerAtis(callsign);
     }
 
     void NetworkManager::SendSlowPositionPacket()
@@ -561,11 +594,13 @@ namespace xpilot
     void NetworkManager::sendRadioMessage(QString message)
     {
         m_fsd.SendPDU(PDURadioMessage(m_connectInfo.Callsign, m_transmitFreqs, message));
+        m_xplaneAdapter.SendRadioMessage(message);
     }
 
     void NetworkManager::sendPrivateMessage(QString to, QString message)
     {
         m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, to.toUpper(), message));
+        m_xplaneAdapter.SendPrivateMessage(to, message);
         emit privateMessageSent(to.toUpper(), message);
     }
 

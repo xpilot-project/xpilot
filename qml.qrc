@@ -42,5 +42,6 @@
         <file>Resources/Samples/Crackle.wav</file>
         <file>Resources/Samples/HF_WhiteNoise.wav</file>
         <file>Resources/Samples/WhiteNoise.wav</file>
+        <file>Resources/Scripts/StringUtils.js</file>
     </qresource>
 </RCC>

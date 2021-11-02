@@ -48,7 +48,7 @@ int xpilot::Main(int argc, char* argv[])
     XplaneAdapter xplaneAdapter;
     NetworkManager networkManager(xplaneAdapter);
     AircraftManager networkAircraftManager(networkManager, xplaneAdapter);
-    ControllerManager controllerManager(networkManager);
+    ControllerManager controllerManager(networkManager, xplaneAdapter);
     UserAircraftManager aircraftManager(xplaneAdapter, networkManager);
     AudioForVatsim audio(networkManager, xplaneAdapter, controllerManager);
 

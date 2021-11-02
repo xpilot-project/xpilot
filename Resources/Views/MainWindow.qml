@@ -11,6 +11,7 @@ import QtQuick.Dialogs 1.2
 import AppConfig 1.0
 import "../Scripts/FrequencyUtils.js" as FrequencyUtils
 import "../Scripts/TimestampUtils.js" as TimestampUtils
+import "../Scripts/StringUtils.js" as StringUtils
 import "../Components"
 import "../Controls"
 
@@ -214,6 +215,10 @@ Window {
             appendMessage("No valid CSL paths are configured or enabled, or you have no CSL models installed. Please verify the CSL configuration in X-Plane (Plugins > xPilot > Preferences). If you need assistance configuring your CSL paths, see the \"CSL Model Configuration\" section in the xPilot Documentation (http://docs.xpilot-project.org). Restart X-Plane and xPilot after you have properly configured your CSL models.", colorRed)
             errorSound.play()
             mainWindow.alert(0)
+        }
+
+        function onRadioMessageSent(message) {
+            appendMessage(message, colorCyan)
         }
     }
 
@@ -475,7 +480,7 @@ Window {
 
     function appendMessage(message, color = colorGray) {
         var model = cliModel.get(0)
-        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: color})
+        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message.linkify()}`, msgColor: color})
     }
 
     function appendPrivateMessage(tab, message, from, color = colorCyan) {
@@ -850,6 +855,13 @@ Window {
                                             renderType: Text.NativeRendering
                                             font.pixelSize: 13
                                             color: msgColor || '#ffffff'
+                                            linkColor: '#ffffff'
+                                            onLinkActivated: Qt.openUrlExternally(link)
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                acceptedButtons: Qt.NoButton
+                                                cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                            }
                                         }
                                     }
                                     onCountChanged: {

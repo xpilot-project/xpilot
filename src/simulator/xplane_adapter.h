@@ -45,6 +45,10 @@ public:
     void DeleteAllAircraft();
     void SendSlowPositionUpdate(const NetworkAircraft& aircraft, const AircraftVisualState& visualState, const double& groundSpeed);
     void SendFastPositionUpdate(const NetworkAircraft& aircraft, const AircraftVisualState& visualState, const VelocityVector& positionalVelocityVector, const VelocityVector& rotationalVelocityVector);
+    void SendRadioMessage(const QString message);
+    void RadioMessageReceived(const QString from, const QString message, bool isDirect);
+    void NotificationPosted(const QString message, qint64 color);
+    void SendPrivateMessage(const QString to, const QString message);
 
 private:
     void Subscribe();
@@ -65,6 +69,9 @@ signals:
     void pttReleased();
     void invalidPluginVersion();
     void invalidCslConfiguration();
+    void requestStationInfo(QString callsign);
+    void radioMessageSent(QString message);
+    void privateMessageSent(QString to, QString message);
 
 private:
     QUdpSocket* socket;
@@ -73,6 +80,7 @@ private:
     bool m_initialHandshake = false;
     bool m_validPluginVersion = true;
     bool m_validCsl = true;
+    bool m_requestsSent = false;
 
     UserAircraftData m_userAircraftData{};
     UserAircraftConfigData m_userAircraftConfigData{};

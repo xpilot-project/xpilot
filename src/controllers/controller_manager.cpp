@@ -1,20 +1,46 @@
 #include <QDateTime>
+#include <QJsonArray>
 
 #include "controller_manager.h"
 #include "src/common/frequency_utils.h"
 
 namespace xpilot
 {
-    ControllerManager::ControllerManager(NetworkManager& networkManager, QObject *parent) :
+    ControllerManager::ControllerManager(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, QObject *parent) :
         QObject(parent),
-        m_networkManager(networkManager)
+        m_networkManager(networkManager),
+        m_xplaneAdapter(xplaneAdapter),
+        m_nearbyAtcTimer(new QTimer(this))
     {
         connect(&m_networkManager, &NetworkManager::controllerUpdateReceived, this, &ControllerManager::OnControllerUpdateReceived);
         connect(&m_networkManager, &NetworkManager::isValidAtcReceived, this, &ControllerManager::IsValidATCReceived);
         connect(&m_networkManager, &NetworkManager::realNameReceived, this, &ControllerManager::OnRealNameReceived);
-        connect(&m_networkManager, &NetworkManager::networkDisconnected, this, [&]
-        {
+        connect(&m_networkManager, &NetworkManager::networkConnected, this, [&] {
             m_controllers.clear();
+            m_nearbyAtcTimer->start(5000);
+        });
+        connect(&m_networkManager, &NetworkManager::networkDisconnected, this, [&] {
+            m_controllers.clear();
+            m_nearbyAtcTimer->stop();
+        });
+        connect(m_nearbyAtcTimer, &QTimer::timeout, this, [&]{
+            QJsonObject reply;
+            reply.insert("type", "NearbyAtc");
+
+            QJsonArray data_array;
+            for(const auto &atc : std::as_const(m_controllers))
+            {
+                QJsonObject data;
+                data.insert("callsign", atc.Callsign);
+                data.insert("xplane_frequency", (qint32)atc.Frequency);
+                data.insert("frequency", QString::number(atc.Frequency / 1000.0));
+                data.insert("real_name", atc.RealName);
+                data_array.push_back(data);
+            }
+
+            reply.insert("data", data_array);
+            QJsonDocument doc(reply);
+            m_xplaneAdapter.sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
         });
     }
 

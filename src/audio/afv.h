@@ -104,6 +104,7 @@ namespace xpilot
         void updateTransceivers();
 
     private:
+        XplaneAdapter& m_xplaneAdapter;
         struct event_base* ev_base;
         bool m_keepAlive = false;
         std::shared_ptr<afv_native::Client> m_client;

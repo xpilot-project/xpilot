@@ -108,6 +108,7 @@ set(PROJECT_SOURCES
     src/common/frequency_utils.h
     src/common/qserializer.h
     src/common/notificationtype.h
+    src/common/utils.h
     src/config/appconfig.h
     src/config/appconfig.cpp
     src/config/windowconfig.h

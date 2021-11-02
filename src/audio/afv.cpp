@@ -2,6 +2,7 @@
 #include "src/appcore.h"
 #include "src/config/appconfig.h"
 #include "src/common/notificationtype.h"
+#include "src/common/utils.h"
 
 #include <QMap>
 
@@ -11,6 +12,7 @@ namespace xpilot
 {
     AudioForVatsim::AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, ControllerManager& controllerManager, QObject* parent) :
         QObject(parent),
+        m_xplaneAdapter(xplaneAdapter),
         m_client()
     {
         m_transceiverTimer = new QTimer(this);
@@ -172,6 +174,28 @@ namespace xpilot
             if(it != m_controllers.end())
             {
                 m_controllers.removeAll(*it);
+            }
+        });
+        connect(this, &AudioForVatsim::notificationPosted, this, [&](int type, QString message)
+        {
+            auto msgType = static_cast<NotificationType>(type);
+            switch(msgType)
+            {
+            case NotificationType::Error:
+                m_xplaneAdapter.NotificationPosted(message, COLOR_RED);
+                break;
+            case NotificationType::Info:
+                m_xplaneAdapter.NotificationPosted(message, COLOR_YELLOW);
+                break;
+            case NotificationType::RadioMessageSent:
+                m_xplaneAdapter.NotificationPosted(message, COLOR_CYAN);
+                break;
+            case NotificationType::ServerMessage:
+                m_xplaneAdapter.NotificationPosted(message, COLOR_GREEN);
+                break;
+            case NotificationType::Warning:
+                m_xplaneAdapter.NotificationPosted(message, COLOR_ORANGE);
+                break;
             }
         });
 

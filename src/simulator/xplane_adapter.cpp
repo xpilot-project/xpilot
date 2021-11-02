@@ -64,9 +64,6 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
         while(m_zmqSocket)
         {
             try {
-                zmq::message_t routing_id;
-                m_zmqSocket->recv(routing_id, zmq::recv_flags::none); // ignore
-
                 zmq::message_t msg;
                 m_zmqSocket->recv(msg, zmq::recv_flags::none);
                 QString data(std::string(static_cast<char*>(msg.data()), msg.size()).c_str());
@@ -99,7 +96,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
                             }
                         }
 
-                        if(obj["type"] == "ValidateCsl")
+                        else if(obj["type"] == "ValidateCsl")
                         {
                             QJsonObject data = obj["data"].toObject();
                             if(data.contains("is_valid"))
@@ -111,6 +108,44 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
                                 }
                             }
                             m_initialHandshake = true;
+                        }
+
+                        else if(obj["type"] == "RequestStationInfo")
+                        {
+                            if(obj.contains("data"))
+                            {
+                                QJsonObject data = obj["data"].toObject();
+                                if(!data["callsign"].toString().isEmpty())
+                                {
+                                    emit requestStationInfo(data["callsign"].toString());
+                                }
+                            }
+                        }
+
+                        else if(obj["type"] == "RadioMessageSent")
+                        {
+                            if(obj.contains("data"))
+                            {
+                                QJsonObject data = obj["data"].toObject();
+                                if(!data["message"].toString().isEmpty())
+                                {
+                                    emit radioMessageSent(data["message"].toString());
+                                }
+                            }
+                        }
+
+                        else if(obj["type"] == "PrivateMessageSent")
+                        {
+                            if(obj.contains("data"))
+                            {
+                                QJsonObject data = obj["data"].toObject();
+                                QString to = data["to"].toString();
+                                QString message = data["message"].toString();
+                                if(!message.isEmpty() && !to.isEmpty())
+                                {
+                                    emit privateMessageSent(to, message);
+                                }
+                            }
                         }
                     }
                 }
@@ -139,26 +174,32 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
             m_userAircraftConfigData = {};
             Subscribe();
 
-            // request plugin version
+            if(!m_requestsSent)
             {
-                QJsonObject reply;
-                reply.insert("type", "PluginVersion");
-                QJsonDocument doc(reply);
-                sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
-            }
+                // request plugin version
+                {
+                    QJsonObject reply;
+                    reply.insert("type", "PluginVersion");
+                    QJsonDocument doc(reply);
+                    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+                }
 
-            // validate csl
-            {
-                QJsonObject reply;
-                reply.insert("type", "ValidateCsl");
-                QJsonDocument doc(reply);
-                sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+                // validate csl
+                {
+                    QJsonObject reply;
+                    reply.insert("type", "ValidateCsl");
+                    QJsonDocument doc(reply);
+                    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+                }
+
+                m_requestsSent = true;
             }
         } else {
             if(!m_simConnected && m_validPluginVersion && m_validCsl) {
                 emit simConnectionStateChanged(true);
                 m_simConnected = true;
             }
+            m_requestsSent = false;
         }
     });
     heartbeatTimer->start(1000);
@@ -432,6 +473,11 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
 
     if(m_zmqSocket != nullptr)
     {
+        std::string identity = "xpilot";
+        zmq::message_t part1(identity.size());
+        std::memcpy(part1.data(), identity.data(), identity.size());
+        m_zmqSocket->send(part1, zmq::send_flags::sndmore);
+
         zmq::message_t msg(message.size());
         std::memcpy(msg.data(), message.toStdString().data(), message.size());
         m_zmqSocket->send(msg, zmq::send_flags::none);
@@ -598,6 +644,62 @@ void XplaneAdapter::SendFastPositionUpdate(const NetworkAircraft &aircraft, cons
     data.insert("vp", rotationalVelocityVector.X);
     data.insert("vh", rotationalVelocityVector.Y);
     data.insert("vb", rotationalVelocityVector.Z);
+
+    reply.insert("data", data);
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+}
+
+void XplaneAdapter::SendRadioMessage(const QString message)
+{
+    QJsonObject reply;
+    reply.insert("type", "RadioMessageSent");
+
+    QJsonObject data;
+    data.insert("message", message);
+
+    reply.insert("data", data);
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+}
+
+void XplaneAdapter::RadioMessageReceived(const QString from, const QString message, bool isDirect)
+{
+    QJsonObject reply;
+    reply.insert("type", "RadioMessageReceived");
+
+    QJsonObject data;
+    data.insert("from", from);
+    data.insert("message", message);
+    data.insert("direct", isDirect);
+
+    reply.insert("data", data);
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+}
+
+void XplaneAdapter::NotificationPosted(const QString message, qint64 color)
+{
+    QJsonObject reply;
+    reply.insert("type", "NotificationPosted");
+
+    QJsonObject data;
+    data.insert("message", message);
+    data.insert("color", color);
+
+    reply.insert("data", data);
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+}
+
+void XplaneAdapter::SendPrivateMessage(const QString to, const QString message)
+{
+    QJsonObject reply;
+    reply.insert("type", "PrivateMessageSent");
+
+    QJsonObject data;
+    data.insert("to", to);
+    data.insert("message", message);
 
     reply.insert("data", data);
     QJsonDocument doc(reply);

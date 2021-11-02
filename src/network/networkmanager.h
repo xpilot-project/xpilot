@@ -104,6 +104,7 @@ namespace xpilot
         void OnUserAircraftDataUpdated(UserAircraftData data);
         void OnUserAircraftConfigDataUpdated(UserAircraftConfigData data);
         void OnRadioStackStateChanged(RadioStackState radioStack);
+        void OnRequestControllerInfo(QString callsign);
 
         void SendSlowPositionPacket();
         void SendFastPositionPacket();
