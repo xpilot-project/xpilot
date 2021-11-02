@@ -139,7 +139,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
                             if(obj.contains("data"))
                             {
                                 QJsonObject data = obj["data"].toObject();
-                                QString to = data["to"].toString();
+                                QString to = data["to"].toString().toUpper();
                                 QString message = data["message"].toString();
                                 if(!message.isEmpty() && !to.isEmpty())
                                 {
@@ -698,7 +698,21 @@ void XplaneAdapter::SendPrivateMessage(const QString to, const QString message)
     reply.insert("type", "PrivateMessageSent");
 
     QJsonObject data;
-    data.insert("to", to);
+    data.insert("to", to.toUpper());
+    data.insert("message", message);
+
+    reply.insert("data", data);
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+}
+
+void XplaneAdapter::PrivateMessageReceived(const QString from, const QString message)
+{
+    QJsonObject reply;
+    reply.insert("type", "PrivateMessageReceived");
+
+    QJsonObject data;
+    data.insert("from", from.toUpper());
     data.insert("message", message);
 
     reply.insert("data", data);

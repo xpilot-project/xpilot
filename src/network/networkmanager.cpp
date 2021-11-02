@@ -47,7 +47,7 @@ namespace xpilot
         connect(&xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, &NetworkManager::OnRadioStackStateChanged);
         connect(&xplaneAdapter, &XplaneAdapter::requestStationInfo, this, &NetworkManager::OnRequestControllerInfo);
         connect(&xplaneAdapter, &XplaneAdapter::radioMessageSent, this, &NetworkManager::sendRadioMessage);
-        connect(&xplaneAdapter, &XplaneAdapter::privateMessageSent, this, &NetworkManager::privateMessageSent);
+        connect(&xplaneAdapter, &XplaneAdapter::privateMessageSent, this, &NetworkManager::sendPrivateMessage);
 
         connect(this, &NetworkManager::notificationPosted, this, [&](int type, QString message)
         {
@@ -311,6 +311,7 @@ namespace xpilot
         else
         {
             emit privateMessageReceived(pdu.From, pdu.Message);
+            m_xplaneAdapter.PrivateMessageReceived(pdu.From.toUpper(), pdu.Message);
         }
     }
 
@@ -601,7 +602,7 @@ namespace xpilot
     {
         m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, to.toUpper(), message));
         m_xplaneAdapter.SendPrivateMessage(to, message);
-        emit privateMessageSent(to.toUpper(), message);
+        emit privateMessageSent(to, message);
     }
 
     void NetworkManager::OnNetworkError(QString error)

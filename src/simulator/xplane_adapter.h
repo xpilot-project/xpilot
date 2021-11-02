@@ -49,6 +49,7 @@ public:
     void RadioMessageReceived(const QString from, const QString message, bool isDirect);
     void NotificationPosted(const QString message, qint64 color);
     void SendPrivateMessage(const QString to, const QString message);
+    void PrivateMessageReceived(const QString from, const QString message);
 
 private:
     void Subscribe();

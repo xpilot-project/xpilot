@@ -341,6 +341,11 @@ Window {
             if(tab !== null) {
                 appendPrivateMessage(tab, message, ourCallsign, colorCyan)
             }
+            else {
+                createChatTab(to)
+                tab = getChatTabIndex(to)
+                appendPrivateMessage(tab, message, ourCallsign, colorCyan)
+            }
         }
 
         function onRadioMessageReceived(args) {
