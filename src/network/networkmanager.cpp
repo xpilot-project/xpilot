@@ -85,18 +85,23 @@ namespace xpilot
     {
         if(m_connectInfo.ObserverMode) {
             emit notificationPosted((int)NotificationType::Info, "Connected to network in observer mode.");
+        }
+        else if(m_connectInfo.TowerViewMode) {
+            emit notificationPosted((int)NotificationType::Info, "Connected to TowerView proxy.");
         } else {
             emit notificationPosted((int)NotificationType::Info, "Connected to network.");
         }
         emit networkConnected(m_connectInfo.Callsign);
 
-        QJsonObject reply;
-        reply.insert("type", "NetworkConnected");
-        QJsonObject data;
-        data.insert("callsign", m_connectInfo.Callsign);
-        reply.insert("data", data);
-        QJsonDocument doc(reply);
-        m_xplaneAdapter.sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+        if(!m_connectInfo.TowerViewMode) {
+            QJsonObject reply;
+            reply.insert("type", "NetworkConnected");
+            QJsonObject data;
+            data.insert("callsign", m_connectInfo.Callsign);
+            reply.insert("data", data);
+            QJsonDocument doc(reply);
+            m_xplaneAdapter.sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+        }
     }
 
     void NetworkManager::OnNetworkDisconnected()
@@ -579,6 +584,25 @@ namespace xpilot
         else
         {
             emit notificationPosted((int)NotificationType::Error, "Callsign and Type Code are required.");
+        }
+    }
+
+    void NetworkManager::connectTowerView(QString callsign, QString address)
+    {
+        if(AppConfig::getInstance()->configRequired()) {
+            emit notificationPosted((int)NotificationType::Error, "It looks like this may be the first time you've run xPilot on this computer. "
+"Some configuration items are required before you can connect to the network. Open Settings and verify your network credentials are saved.");
+            return;
+        }
+        if(!callsign.isEmpty() && !address.isEmpty())
+        {
+            ConnectInfo connectInfo{};
+            connectInfo.Callsign = callsign;
+            connectInfo.TowerViewMode = true;
+            m_connectInfo = connectInfo;
+
+            emit notificationPosted((int)NotificationType::Info, "Connecting to TowerView proxy...");
+            m_fsd.Connect(address, 6809, false);
         }
     }
 

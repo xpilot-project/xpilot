@@ -1025,6 +1025,21 @@ Window {
                                                         cliTextField.clear()
                                                         break;
                                                     case ".towerview":
+                                                        if(!simConnected)
+                                                        {
+                                                            throw "xPilot is unable to connect to X-Plane. Please make sure X-Plane is running and a flight is loaded."
+                                                        }
+                                                        var tvServerAddress = "127.0.0.1"
+                                                        var tvCallsign = "TOWER"
+                                                        if(cmd.length >= 2)
+                                                        {
+                                                            tvServerAddress = cmd[1]
+                                                            if(cmd.length >= 3)
+                                                            {
+                                                                tvCallsign = cmd[2].toUpperCase()
+                                                            }
+                                                        }
+                                                        networkManager.connectTowerView(tvCallsign, tvServerAddress)
                                                         break;
                                                     default:
                                                         throw `Unknown command: ${cmd[0].toLowerCase()}`

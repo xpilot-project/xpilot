@@ -24,6 +24,7 @@ namespace xpilot
         NetworkManager(XplaneAdapter& xplaneAdapter, QObject *owner = nullptr);
 
         Q_INVOKABLE void connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer);
+        Q_INVOKABLE void connectTowerView(QString callsign, QString address);
         Q_INVOKABLE void disconnectFromNetwork();
         Q_INVOKABLE void sendRadioMessage(QString message);
         Q_INVOKABLE void sendPrivateMessage(QString to, QString message);
