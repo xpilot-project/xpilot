@@ -37,6 +37,8 @@ public:
     Q_INVOKABLE void transponderIdent();
     Q_INVOKABLE void transponderModeToggle();
     Q_INVOKABLE void sendSocketMessage(const QString& message);
+    Q_INVOKABLE void setAudioComSelection(int radio);
+    Q_INVOKABLE void setAudioSelection(int radio, bool status);
 
     void AddPlaneToSimulator(const NetworkAircraft& aircraft);
     void PlaneConfigChanged(const NetworkAircraft& aircraft);

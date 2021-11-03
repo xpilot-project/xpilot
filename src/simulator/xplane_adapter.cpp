@@ -159,6 +159,30 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
                                 }
                             }
                         }
+
+                        else if(obj["type"] == "SetAudioComSelection")
+                        {
+                            if(obj.contains("data"))
+                            {
+                                QJsonObject data = obj["data"].toObject();
+                                if(!data["radio"].toString().isEmpty())
+                                {
+                                    setAudioComSelection(data["radio"].toInt());
+                                }
+                            }
+                        }
+
+                        else if(obj["type"] == "SetAudioSelection")
+                        {
+                            if(obj.contains("data"))
+                            {
+                                QJsonObject data = obj["data"].toObject();
+                                if(!data["radio"].toString().isEmpty() && !data["status"].toString().isEmpty())
+                                {
+                                    setAudioSelection(data["radio"].toInt(), data["status"].toBool());
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -493,6 +517,32 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
         zmq::message_t msg(message.size());
         std::memcpy(msg.data(), message.toStdString().data(), message.size());
         m_zmqSocket->send(msg, zmq::send_flags::none);
+    }
+}
+
+void XplaneAdapter::setAudioComSelection(int radio)
+{
+    switch(radio)
+    {
+    case 1:
+        setDataRefValue("sim/cockpit2/radios/actuators/audio_com_selection", 6);
+        break;
+    case 2:
+        setDataRefValue("sim/cockpit2/radios/actuators/audio_com_selection", 7);
+        break;
+    }
+}
+
+void XplaneAdapter::setAudioSelection(int radio, bool status)
+{
+    switch(radio)
+    {
+    case 1:
+        setDataRefValue("sim/cockpit2/radios/actuators/audio_selection_com1", (int)status);
+        break;
+    case 2:
+        setDataRefValue("sim/cockpit2/radios/actuators/audio_selection_com2", (int)status);
+        break;
     }
 }
 

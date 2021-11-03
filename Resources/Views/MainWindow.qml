@@ -987,8 +987,27 @@ Window {
                                                         cliTextField.clear()
                                                         break;
                                                     case ".tx":
+                                                        if(cmd.length < 2) {
+                                                            throw `Not enough parameters. Expected .tx com1 or .tx com2`
+                                                        }
+                                                        var radio = cmd[1].toLowerCase() === "com1" ? 1 : 2
+                                                        xplaneAdapter.setAudioComSelection(radio)
+                                                        cliTextField.clear()
                                                         break;
                                                     case ".rx":
+                                                        if(cmd.length < 3) {
+                                                            throw `Not enough parameters. Expected .rx com<n> on|off`
+                                                        }
+                                                        if(cmd[1].toLowerCase() !== "com1" && cmd[1].toLowerCase() !== "com2") {
+                                                            throw `Invalid parameters. Expected .rx com<n> on|off`
+                                                        }
+                                                        if(cmd[2].toLowerCase() !== "on" && cmd[2].toLowerCase() !== "off") {
+                                                            throw `Invalid parameters. Expected .rx com<n> on|off`
+                                                        }
+                                                        var radio = cmd[1].toLowerCase() === "com1" ? 1 : 2
+                                                        var status = cmd[2].toLowerCase() === "on" ? 1 : 0
+                                                        xplaneAdapter.setAudioSelection(radio, status)
+                                                        cliTextField.clear()
                                                         break;
                                                     case ".x":
                                                     case ".xpndr":
