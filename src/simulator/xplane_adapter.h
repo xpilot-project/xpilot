@@ -71,6 +71,7 @@ signals:
     void invalidPluginVersion();
     void invalidCslConfiguration();
     void requestStationInfo(QString callsign);
+    void requestMetar(QString station);
     void radioMessageSent(QString message);
     void privateMessageSent(QString to, QString message);
 

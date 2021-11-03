@@ -48,6 +48,7 @@ namespace xpilot
         connect(&xplaneAdapter, &XplaneAdapter::requestStationInfo, this, &NetworkManager::OnRequestControllerInfo);
         connect(&xplaneAdapter, &XplaneAdapter::radioMessageSent, this, &NetworkManager::sendRadioMessage);
         connect(&xplaneAdapter, &XplaneAdapter::privateMessageSent, this, &NetworkManager::sendPrivateMessage);
+        connect(&xplaneAdapter, &XplaneAdapter::requestMetar, this, &NetworkManager::RequestMetar);
 
         connect(this, &NetworkManager::notificationPosted, this, [&](int type, QString message)
         {
@@ -284,6 +285,7 @@ namespace xpilot
     void NetworkManager::OnMetarResponseReceived(PDUMetarResponse pdu)
     {
         emit metarReceived(pdu.From.toUpper(), pdu.Metar);
+        m_xplaneAdapter.NotificationPosted(QString("METAR: %1").arg(pdu.Metar), COLOR_BRIGHT_GREEN);
     }
 
     void NetworkManager::OnDeletePilotReceived(PDUDeletePilot pdu)

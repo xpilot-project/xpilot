@@ -147,6 +147,18 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
                                 }
                             }
                         }
+
+                        else if(obj["type"] == "RequestMetar")
+                        {
+                            if(obj.contains("data"))
+                            {
+                                QJsonObject data = obj["data"].toObject();
+                                if(!data["station"].toString().isEmpty())
+                                {
+                                    emit requestMetar(data["station"].toString());
+                                }
+                            }
+                        }
                     }
                 }
             }
