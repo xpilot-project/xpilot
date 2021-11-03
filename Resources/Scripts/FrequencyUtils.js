@@ -2,7 +2,7 @@
 
 function checkFrequencyValid(frequency) {
     let num = frequency % 100000;
-    if (frequency < 108000000 || frequency > 136975000) {
+    if (frequency < 118000000 || frequency > 136975000) {
         throw "Invalid frequency range.";
     }
     return frequency;
