@@ -42,7 +42,7 @@ namespace xpilot
         void SendCapabilities(QString to);
 
     signals:
-        void networkConnected(QString callsign);
+        void networkConnected(QString callsign, bool enableVoice);
         void networkDisconnected();
         void notificationPosted(int type, QString message);
         void metarReceived(QString from, QString metar);

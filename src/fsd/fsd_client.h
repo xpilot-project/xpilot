@@ -67,9 +67,7 @@ namespace xpilot
         void RaiseNetworkConnected();
         void RaiseNetworkDisconnected();
         void sendDataError();
-
         void RaiseNetworkError(QString error);
-
         void RaiseServerIdentificationReceived(PDUServerIdentification pdu);
         void RaiseClientIdentificationReceived(PDUClientIdentification pdu);
         void RaisePilotPositionReceived(PDUPilotPosition pdu);

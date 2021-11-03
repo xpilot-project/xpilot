@@ -1029,7 +1029,11 @@ Window {
                                                         {
                                                             throw "xPilot is unable to connect to X-Plane. Please make sure X-Plane is running and a flight is loaded."
                                                         }
-                                                        var tvServerAddress = "127.0.0.1"
+                                                        if(networkConnected)
+                                                        {
+                                                            throw "You must first disconnect from the network before using TowerView"
+                                                        }
+                                                        var tvServerAddress = "localhost"
                                                         var tvCallsign = "TOWER"
                                                         if(cmd.length >= 2)
                                                         {
@@ -1040,6 +1044,7 @@ Window {
                                                             }
                                                         }
                                                         networkManager.connectTowerView(tvCallsign, tvServerAddress)
+                                                        cliTextField.clear()
                                                         break;
                                                     default:
                                                         throw `Unknown command: ${cmd[0].toLowerCase()}`

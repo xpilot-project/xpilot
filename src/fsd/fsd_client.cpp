@@ -20,8 +20,8 @@ namespace xpilot
             emit RaiseNetworkError("Invalid pilot client build. Please download a new copy from the xPilot website.");
             return;
         }
-        if(m_socket->isOpen()) return;
         m_challengeServer = challengeServer;
+        m_socket->reset();
         m_socket->connectToHost(address, port);
     }
 

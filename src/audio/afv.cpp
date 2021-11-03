@@ -278,8 +278,13 @@ namespace xpilot
         AppConfig::getInstance()->saveConfig();
     }
 
-    void AudioForVatsim::OnNetworkConnected(QString callsign)
+    void AudioForVatsim::OnNetworkConnected(QString callsign, bool enableVoice)
     {
+        if(!enableVoice)
+        {
+            return;
+        }
+
         configureAudioDevices();
 
         m_client->setCallsign(callsign.toStdString());

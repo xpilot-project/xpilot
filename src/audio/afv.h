@@ -86,7 +86,7 @@ namespace xpilot
         Q_INVOKABLE void enableHfSquelch(bool enabled);
 
     private slots:
-        void OnNetworkConnected(QString callsign);
+        void OnNetworkConnected(QString callsign, bool enableVoice);
         void OnNetworkDisconnected();
         void OnTransceiverTimer();
 

@@ -91,7 +91,7 @@ namespace xpilot
         } else {
             emit notificationPosted((int)NotificationType::Info, "Connected to network.");
         }
-        emit networkConnected(m_connectInfo.Callsign);
+        emit networkConnected(m_connectInfo.Callsign, !m_connectInfo.TowerViewMode);
 
         if(!m_connectInfo.TowerViewMode) {
             QJsonObject reply;
@@ -109,16 +109,21 @@ namespace xpilot
         m_fastPositionTimer->stop();
         m_slowPositionTimer->stop();
 
-        if(m_forcedDisconnect) {
-            if(!m_forcedDisconnectReason.isEmpty()) {
-                emit notificationPosted((int)NotificationType::Error, "Forcibly disconnected from network: " + m_forcedDisconnectReason);
-            }
-            else {
-                emit notificationPosted((int)NotificationType::Error, "Forcibly disconnected from network.");
-            }
+        if(m_connectInfo.TowerViewMode) {
+            emit notificationPosted((int)NotificationType::Info, "Disconnected from TowerView proxy.");
         }
         else {
-            emit notificationPosted((int)NotificationType::Info, "Disconnected from network.");
+            if(m_forcedDisconnect) {
+                if(!m_forcedDisconnectReason.isEmpty()) {
+                    emit notificationPosted((int)NotificationType::Error, "Forcibly disconnected from network: " + m_forcedDisconnectReason);
+                }
+                else {
+                    emit notificationPosted((int)NotificationType::Error, "Forcibly disconnected from network.");
+                }
+            }
+            else {
+                emit notificationPosted((int)NotificationType::Info, "Disconnected from network.");
+            }
         }
 
         m_intentionalDisconnect = false;
