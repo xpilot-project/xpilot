@@ -159,30 +159,6 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
                                 }
                             }
                         }
-
-                        else if(obj["type"] == "SetAudioComSelection")
-                        {
-                            if(obj.contains("data"))
-                            {
-                                QJsonObject data = obj["data"].toObject();
-                                if(!data["radio"].toString().isEmpty())
-                                {
-                                    setAudioComSelection(data["radio"].toInt());
-                                }
-                            }
-                        }
-
-                        else if(obj["type"] == "SetAudioSelection")
-                        {
-                            if(obj.contains("data"))
-                            {
-                                QJsonObject data = obj["data"].toObject();
-                                if(!data["radio"].toString().isEmpty() && !data["status"].toString().isEmpty())
-                                {
-                                    setAudioSelection(data["radio"].toInt(), data["status"].toBool());
-                                }
-                            }
-                        }
                     }
                 }
             }
