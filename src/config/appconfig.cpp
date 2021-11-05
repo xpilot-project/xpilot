@@ -1,4 +1,5 @@
 #include <QtGlobal>
+#include <QCoreApplication>
 #include "appconfig.h"
 #include "src/network/vatsim_config.h"
 
@@ -22,7 +23,7 @@ AppConfig *AppConfig::getInstance()
 
 void AppConfig::loadConfig()
 {
-    QFile configFile("AppConfig.json");
+    QFile configFile(QCoreApplication::applicationDirPath() + "/AppConfig.json");
     if(!configFile.open(QIODevice::ReadOnly)) {
 
         // set default values
@@ -160,7 +161,7 @@ void AppConfig::saveConfig()
     jsonObj["WindowConfig"] = window;
 
     QJsonDocument jsonDoc(jsonObj);
-    QFile configFile("AppConfig.json");
+    QFile configFile(QCoreApplication::applicationDirPath() + "/AppConfig.json");
     if(!configFile.open(QIODevice::WriteOnly)) {
         qDebug() << "Failed to write config file";
         return;

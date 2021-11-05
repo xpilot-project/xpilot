@@ -270,9 +270,9 @@ IF(WIN32)
 SET(GUI_TYPE WIN32)
 ENDIF(WIN32)
 # Set some Apple MacOS Specific settings
-IF (APPLE)
+IF(${CMAKE_HOST_SYSTEM} MATCHES "Darwin")
 SET(GUI_TYPE MACOSX_BUNDLE)
-ENDIF (APPLE)
+ENDIF()
 
 add_executable(xPilot
     ${GUI_TYPE}
@@ -309,20 +309,27 @@ if(WIN32)
 endif()
 
 if(WIN32)
-set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/vatsimauth.lib)
-set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/opus.lib)
-set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/portaudio.lib)
-set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/speexdsp.lib)
-elseif(UNIX)
-set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/vatsimauth.a)
-set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libopus.a)
-set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libportaudio.a)
-set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
-elseif(APPLE)
-set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/vatsimauth.a)
-set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libopus.a)
-set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libportaudio.a)
-set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libspeexdsp.a)
+    set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/vatsimauth.lib)
+    set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/opus.lib)
+    set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/portaudio.lib)
+    set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/speexdsp.lib)
+endif()
+
+if(${CMAKE_HOST_SYSTEM} MATCHES "Linux")
+    set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/vatsimauth.a)
+    set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libopus.a)
+    set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libportaudio.a)
+    set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
+endif()
+
+if(${CMAKE_HOST_SYSTEM} MATCHES "Darwin")
+    set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/vatsimauth.a)
+    set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libopus.a)
+    set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libportaudio.a)
+    set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libspeexdsp.a)
+    find_library(COREFOUNDATION CoreFoundation)
+    find_library(COREAUDIO CoreAudio)
+    find_library(AUDIOTOOLBOX AudioToolbox)
 endif()
 
 target_link_libraries(${PROJECT_NAME}
@@ -337,7 +344,10 @@ target_link_libraries(${PROJECT_NAME}
     ${OPUS_LIBRARY}
     ${PORTAUDIO_LIBRARY}
     ${SPEEX_LIBRARY}
-    ${VATSIM_AUTH_LIBRARY})
+    ${VATSIM_AUTH_LIBRARY}
+    ${COREFOUNDATION}
+    ${COREAUDIO}
+    ${AUDIOTOOLBOX})
 
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PUBLIC _USE_MATH_DEFINES)

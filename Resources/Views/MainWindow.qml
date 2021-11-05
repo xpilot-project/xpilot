@@ -1178,27 +1178,25 @@ Window {
 
         onMouseXChanged: {
             // Use system native move & resize on Qt >= 5.15
-            if (mainWindow.startSystemMove != undefined
-                    && Qt.platform.os !== "osx") {
+            if (mainWindow.startSystemMove != undefined && Qt.platform.os !== "osx") {
                 return
             }
 
-            if (mainWindow.visibility == Window.Maximized
-                    || mainWindow.visibility == Window.FullScreen || !pressed) {
+            if (mainWindow.visibility == Window.Maximized || mainWindow.visibility == Window.FullScreen || !pressed) {
                 return
             }
 
             if (activeEdges & Qt.LeftEdge) {
                 mainWindow.width -= (mouseX - lastMouseX)
-                if (mainWindow.width < window.minimumWidth) {
-                    mainWindow.width = window.minimumWidth
+                if (mainWindow.width < mainWindow.minimumWidth) {
+                    mainWindow.width = mainWindow.minimumWidth
                 } else {
                     mainWindow.x += (mouseX - lastMouseX)
                 }
             } else if (activeEdges & Qt.RightEdge) {
                 mainWindow.width += (mouseX - lastMouseX)
-                if (mainWindow.width < window.minimumWidth) {
-                    mainWindow.width = window.minimumWidth
+                if (mainWindow.width < mainWindow.minimumWidth) {
+                    mainWindow.width = mainWindow.minimumWidth
                 }
                 lastMouseX = mouseX
             } else if (moveable) {
@@ -1208,27 +1206,25 @@ Window {
 
         onMouseYChanged: {
             // Use system native move & resize on Qt >= 5.15
-            if (mainWindow.startSystemMove != undefined
-                    && Qt.platform.os !== "osx") {
+            if (mainWindow.startSystemMove != undefined && Qt.platform.os !== "osx") {
                 return
             }
 
-            if (mainWindow.visibility == Window.Maximized
-                    || mainWindow.visibility == Window.FullScreen || !pressed) {
+            if (mainWindow.visibility == Window.Maximized || mainWindow.visibility == Window.FullScreen || !pressed) {
                 return
             }
 
             if (activeEdges & Qt.TopEdge) {
                 mainWindow.height -= (mouseY - lastMouseY)
-                if (mainWindow.height < window.minimumHeight) {
-                    mainWindow.height = window.minimumHeight
+                if (mainWindow.height < mainWindow.minimumHeight) {
+                    mainWindow.height = mainWindow.minimumHeight
                 } else {
                     mainWindow.y += (mouseY - lastMouseY)
                 }
             } else if (activeEdges & Qt.BottomEdge) {
                 mainWindow.height += (mouseY - lastMouseY)
-                if (mainWindow.height < window.minimumHeight) {
-                    mainWindow.height = window.minimumHeight
+                if (mainWindow.height < mainWindow.minimumHeight) {
+                    mainWindow.height = mainWindow.minimumHeight
                 }
                 lastMouseY = mouseY
             } else if (moveable) {
