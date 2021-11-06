@@ -60,7 +60,7 @@ jobs:
           cmake --build . --config $BUILD_TYPE
 
       - name: Qt Deploy
-        working-directory: ${{ github.workspace }}build/bin
+        working-directory: ${{ github.workspace }}/build/bin
         run: |
           ${{ env.Qt5_DIR }}/bin/macdeployqt xPilot.app \
           -qmldir=${{ github.workspace}}/Resources \
