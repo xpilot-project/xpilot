@@ -24,15 +24,23 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(NOT VATSIM_CLIENT_ID)
+if (NOT VATSIM_CLIENT_ID)
     set(VATSIM_CLIENT_ID 0)
-endif()
+endif ()
+
+if (NOT VATSIM_CLIENT_KEY)
+    set(VATSIM_CLIENT_KEY "")
+endif ()
+
+if (NOT CONFIG_ENCRYPTION_KEY)
+    set(CONFIG_ENCRYPTION_KEY 0)
+endif ()
 
 configure_file(src/network/vatsim_config.cpp.in ${CMAKE_BINARY_DIR}/generated/vatsim_config.cpp)
 include_directories(${CMAKE_BINARY_DIR}/generated)
 
-find_package(QT NAMES Qt5 COMPONENTS Core Quick Network REQUIRED)
-find_package(Qt5 COMPONENTS Core Quick Network REQUIRED)
+find_package(QT NAMES Qt5 COMPONENTS Core Quick Network Svg REQUIRED)
+find_package(Qt5 COMPONENTS Core Quick Network Svg REQUIRED)
 find_package(Qt5QuickCompiler)
 
 qtquick_compiler_add_resources(RESOURCES qml.qrc)
@@ -266,13 +274,14 @@ set(AFV_NATIVE_THIRDPARTY_SOURCES
     afv-native/extern/simpleSource/SimpleCompProcess.inl)
 
 # Set some Win32 Specific Settings
-IF(WIN32)
-SET(GUI_TYPE WIN32)
-ENDIF(WIN32)
+if (WIN32)
+    set(GUI_TYPE WIN32)
+endif (WIN32)
+
 # Set some Apple MacOS Specific settings
-IF(${CMAKE_HOST_SYSTEM} MATCHES "Darwin")
-SET(GUI_TYPE MACOSX_BUNDLE)
-ENDIF()
+if (APPLE)
+    SET(GUI_TYPE MACOSX_BUNDLE)
+endif ()
 
 add_executable(xPilot
     ${GUI_TYPE}
@@ -284,8 +293,7 @@ add_executable(xPilot
     ${AFV_API_SOURCES}
     ${AFV_NATIVE_THIRDPARTY_SOURCES}
     xpilot.rc
-    qml.qrc
-    )
+    qml.qrc)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/afv-native/src PREFIX "AFV Sources" FILES ${AFV_NATIVE_SOURCES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/afv-native/include PREFIX "AFV Headers" FILES ${AFV_NATIVE_HEADERS})
@@ -299,30 +307,28 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC
     ${CMAKE_SOURCE_DIR}/afv-native/include)
 
-target_compile_definitions(xPilot
-    PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
-target_link_libraries(xPilot
-    PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::Network)
+target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core Qt5::Quick Qt5::Network Qt5::Svg)
 
-if(WIN32)
+if (WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32.lib)
-endif()
+endif ()
 
-if(WIN32)
+if (WIN32)
     set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/vatsimauth.lib)
     set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/opus.lib)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/portaudio.lib)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/speexdsp.lib)
-endif()
+endif ()
 
-if(${CMAKE_HOST_SYSTEM} MATCHES "Linux")
+if (UNIX)
     set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/vatsimauth.a)
     set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libopus.a)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libportaudio.a)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
-endif()
+endif ()
 
-if(${CMAKE_HOST_SYSTEM} MATCHES "Darwin")
+if (APPLE)
     set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/vatsimauth.a)
     set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libopus.a)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libportaudio.a)
@@ -330,7 +336,7 @@ if(${CMAKE_HOST_SYSTEM} MATCHES "Darwin")
     find_library(COREFOUNDATION CoreFoundation)
     find_library(COREAUDIO CoreAudio)
     find_library(AUDIOTOOLBOX AudioToolbox)
-endif()
+endif ()
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC

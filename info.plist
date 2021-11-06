@@ -3,11 +3,23 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleName</key>
+	<string>xPilot</string>
+	<key>CFBundleDisplayName</key>
+	<string>xPilot</string>
+	<key>CFBundleGetInfoString</key>
+	<string>X-Plane pilot client for VATSIM</string>
+	<key>CFBundleIconFile</key>
+	<string>xpilot.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>jshannon.xpilot</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSHighResolutionCapable</key>
-	<string>True</string>
-	<key>CFBundleIconFile</key>
-	<string>Contents/Resources/xPilot.icns</string>
+	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Audio for VATSIM requires access to your microphone.</string>
 </dict>
 </plist>
