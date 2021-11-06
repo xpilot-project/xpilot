@@ -280,7 +280,9 @@ endif (WIN32)
 
 # Set some Apple MacOS Specific settings
 if (APPLE)
-    SET(GUI_TYPE MACOSX_BUNDLE)
+    set(GUI_TYPE MACOSX_BUNDLE)
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist")
+    set_source_files_properties(${CMAKE_SOURCE_DIR}/xpilot.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 endif ()
 
 add_executable(xPilot
