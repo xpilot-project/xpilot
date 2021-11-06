@@ -281,8 +281,6 @@ endif (WIN32)
 # Set some Apple MacOS Specific settings
 if (APPLE)
     set(GUI_TYPE MACOSX_BUNDLE)
-    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist")
-    set_source_files_properties(${CMAKE_SOURCE_DIR}/xpilot.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 endif ()
 
 add_executable(xPilot
@@ -338,6 +336,14 @@ if (APPLE)
     find_library(COREFOUNDATION CoreFoundation)
     find_library(COREAUDIO CoreAudio)
     find_library(AUDIOTOOLBOX AudioToolbox)
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist")
+
+    add_custom_target(osx_bundle_dirs
+        COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources
+        COMMAND cp ${CMAKE_SOURCE_DIR}/xpilot.icns ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources/xpilot.icns)
+
+    add_dependencies(${PROJECT_NAME} osx_bundle_dirs)
 endif ()
 
 target_link_libraries(${PROJECT_NAME}
