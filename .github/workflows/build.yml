@@ -62,7 +62,7 @@ jobs:
       - name: Qt Deploy
         working-directory: ${{ github.workspace }}build/bin
         run: |
-          $Qt5_DIR/bin/macdeployqt xPilot.app \
+          ${{ env.Qt5_DIR }}/bin/macdeployqt xPilot.app \
           -qmldir=${{ github.workspace}}/Resources \
           -executable=xPilot.app/Contents/MacOS/xPilot
           
