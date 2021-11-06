@@ -30,7 +30,7 @@ jobs:
         run: ./scripts/make_keychain.sh
 
       - name: Install Qt
-        uses: jurplel/install-qt-actions@v2
+        uses: jurplel/install-qt-action@v2
         with:
             version: ${{ env.qt_version }}
           
