@@ -1,8 +1,6 @@
 name: Build xPilot
 
-on:
-  push:
-  pull_request:
+on: [push]
 
 concurrency:
   group: ${{ github.ref }}
@@ -11,51 +9,52 @@ concurrency:
 env:
   qt_version: 5.15.2
   BUILD_TYPE: Release
+  VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
+  VATSIM_CLIENT_KEY: ${{ secrets.VATSIM_CLIENT_KEY }}
+  CONFIG_ENCRYPTION_KEY: ${{ secrets.CONFIG_ENCRYPTION_KEY }}
 
 jobs:
-  buildLinux:
-    #runs-on: ubuntu-20.04
-    runs-on: self-hosted
 
-    env:
-      VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
-      VATSIM_CLIENT_KEY: ${{ secrets.VATSIM_CLIENT_KEY }}
-
-    outputs:
-      warnings: ${{ steps.warnings.outputs.warnings }}
+  build-mac:
+    runs-on: macos-latest
 
     steps:
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-          version: ${{ env.qt_version }}
-
-      - name: Checkout repository and submodules
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
           submodules: recursive
+      
+      - name: Developer certificate
+        env:
+          CERTIFICATE: ${{ secrets.APPLE_SIGNING_CERTIFICATE }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
+        run: ./scripts/make_keychain.sh
 
-      - name: Install Conan
-        id: conan
-        uses: turtlebrowser/get-conan@main
+      - name: Install Qt
+        uses: jurplel/install-qt-actions@v2
+        with:
+            version: ${{ env.qt_version }}
+          
+      - name: Install conan
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install conan
+          pip3 install conan_package_tools
 
-      - name: Conan version
-        run: echo "${{ steps.conan.outputs.version }}"
+      - name: Initialize CMake
+        run: |
+          cmake -E make_directory ${{ github.workspace }}/build
 
-      - name: Create build environment
-        run: cmake -E make_directory ${{ github.workspace }}/build
-
-      - name: Initialize Conan
-        shell: bash
+      - name: Install conan packages
         working-directory: ${{ github.workspace }}/build
-        run: conan install $GITHUB_WORKSPACE --build missing
+        run: |
+          conan install $GITHUB_WORKSPACE
 
-      - name: Configure CMake
-        shell: bash
+      - name: CMake
         working-directory: ${{ github.workspace }}/build
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DVATSIM_CLIENT_ID=$VATSIM_CLIENT_ID -DVATSIM_CLIENT_KEY=$VATSIM_CLIENT_KEY
+        run: |
+          cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DVATSIM_CLIENT_ID=$VATSIM_CLIENT_ID -DVATSIM_CLIENT_KEY=$VATSIM_CLIENT_KEY -DCONFIG_ENCRYPTION_KEY=$CONFIG_ENCRYPTION_KEY
 
       - name: Build
         working-directory: ${{ github.workspace }}/build
-        shell: bash
-        run: cmake --build . --config $BUILD_TYPE
+        run: |
+          cmake --build . --config $BUILD_TYPE
