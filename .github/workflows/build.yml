@@ -56,7 +56,7 @@ jobs:
         working-directory: ${{ github.workspace }}/build/bin
         run: |
           ${{ env.Qt5_DIR }}/bin/windeployqt xPilot.exe \
-          -qmldir=${{ github.workspace}}/Resources
+          -qmldir="${{ github.workspace}}\Resources"
 
       - uses: actions/upload-artifact@master
         with:
@@ -113,10 +113,10 @@ jobs:
           -qmldir=${{ github.workspace}}/Resources \
           -executable=xPilot.app/Contents/MacOS/xPilot
 
-      - name: Code signing
-        working-directory: ${{ github.workspace }}/build/bin
-        run: |
-          codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --deep --verify --timestamp ./xPilot.app
+      #- name: Code signing
+      #  working-directory: ${{ github.workspace }}/build/bin
+      #  run: |
+      #    codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --deep --verify --timestamp ./xPilot.app
 
       - uses: actions/upload-artifact@master
         with:
