@@ -35,20 +35,20 @@ jobs:
 
       - name: Initialize CMake
         run: |
-          cmake -E make_directory ${{ github.workspace }}\build
+          cmake -E make_directory ${{ github.workspace }}/build
 
       - name: Install conan packages
-        working-directory: ${{ github.workspace }}\build
+        working-directory: ${{ github.workspace }}/build
         run: |
           conan install ..
 
       - name: CMake
-        working-directory: ${{ github.workspace }}\build
+        working-directory: ${{ github.workspace }}/build
         run: |
           cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
 
       - name: Build
-        working-directory: ${{ github.workspace }}\build
+        working-directory: ${{ github.workspace }}/build
         run: |
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
@@ -56,8 +56,8 @@ jobs:
         working-directory: ${{ github.workspace }}\build\bin
         shell: bash
         run: |
-          ${{ env.Qt5_DIR }}\bin\windeployqt xPilot.exe \
-          -qmldir="${{ github.workspace}}\Resources"
+          ${{ env.Qt5_DIR }}/bin/windeployqt.exe xPilot.exe \
+          -qmldir="${{ github.workspace}}/Resources"
 
       - uses: actions/upload-artifact@master
         with:
@@ -115,9 +115,9 @@ jobs:
           -executable=xPilot.app/Contents/MacOS/xPilot \
           -dmg
 
-      - name: Code signing
-        run: |
-          codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --deep --verify --timestamp ${{ github.workspace }}/build/bin/xPilot.dmg
+      #- name: Code signing
+      #  run: |
+      #    codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --deep --verify --timestamp ${{ github.workspace }}/build/bin/xPilot.dmg
 
       - uses: actions/upload-artifact@master
         with:
