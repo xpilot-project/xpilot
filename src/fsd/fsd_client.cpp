@@ -1,5 +1,5 @@
 #include "fsd_client.h"
-#include "src/network/vatsim_config.h"
+#include "src/common/build_config.h"
 
 namespace xpilot
 {
@@ -16,7 +16,7 @@ namespace xpilot
 
     void FsdClient::Connect(QString address, quint32 port, bool challengeServer)
     {
-        if(VatsimClientId() == 0 || VatsimClientKey().isEmpty()) {
+        if(BuildConfig::VatsimClientId() == 0 || BuildConfig::VatsimClientKey().isEmpty()) {
             emit RaiseNetworkError("Invalid pilot client build. Please download a new copy from the xPilot website.");
             return;
         }
@@ -100,7 +100,8 @@ namespace xpilot
                 if(pduTypeId == "$DI")
                 {
                     auto pdu = PDUServerIdentification::fromTokens(fields);
-                    m_clientAuthSessionKey = GenerateAuthResponse(pdu.InitialChallengeKey.toStdString().c_str(), VatsimClientId(), VatsimClientKey().toStdString().c_str());
+                    m_clientAuthSessionKey = GenerateAuthResponse(pdu.InitialChallengeKey.toStdString().c_str(), BuildConfig::VatsimClientId(),
+                                                                  BuildConfig::VatsimClientKey().toStdString().c_str());
                     m_clientAuthChallengeKey = m_clientAuthSessionKey;
                     emit RaiseServerIdentificationReceived(pdu);
                 }
@@ -168,7 +169,8 @@ namespace xpilot
                 else if(pduTypeId == "$ZC")
                 {
                     auto pdu = PDUAuthChallenge::fromTokens(fields);
-                    QString response = GenerateAuthResponse(pdu.ChallengeKey.toStdString().c_str(), VatsimClientId(), m_clientAuthChallengeKey.toStdString().c_str());
+                    QString response = GenerateAuthResponse(pdu.ChallengeKey.toStdString().c_str(), BuildConfig::VatsimClientId(),
+                                                            m_clientAuthChallengeKey.toStdString().c_str());
                     std::string combined = m_clientAuthSessionKey.toStdString() + response.toStdString();
                     m_clientAuthChallengeKey = toMd5(combined.c_str());
                     SendPDU(PDUAuthResponse(pdu.To, pdu.From, response));

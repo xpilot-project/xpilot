@@ -1,4 +1,5 @@
 #include "networkserverlist.h"
+#include "src/common/build_config.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -40,12 +41,6 @@ namespace xpilot
             serverInfo.Location = server["location"].toString();
             serverList.append(serverInfo);
         }
-
-        NetworkServerInfo vpsServer;
-        vpsServer.Name = "Velocity";
-        vpsServer.Address = "vps.downstairsgeek.com";
-        vpsServer.Location = "";
-        serverList.append(vpsServer);
 
         emit serverListDownloaded(serverList);
 

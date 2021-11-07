@@ -3,8 +3,8 @@ xpilot ICON "Resources/Icons/AppIcon.ico"
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     2,0,0
-PRODUCTVERSION  2,0,0
+FILEVERSION     @VERSION_MAJOR@,@VERSION_MINOR@,@VERSION_PATCH@
+PRODUCTVERSION  @VERSION_MAJOR@,@VERSION_MINOR@,@VERSION_PATCH@
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
@@ -12,9 +12,9 @@ BEGIN
         BEGIN
             VALUE "CompanyName",        "Justin Shannon"
             VALUE "FileDescription",    "X-Plane pilot client for the VATSIM network"
-            VALUE "FileVersion",        2.0.0
+            VALUE "FileVersion",        @VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@
             VALUE "ProductName",        "xPilot"
-            VALUE "ProductVersion",     "2.0.0"
+            VALUE "ProductVersion",     "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@"
         END
     END
 

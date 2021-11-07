@@ -1,9 +1,13 @@
+#include <algorithm>
+#include <chrono>
+#include <random>
+#include <QRandomGenerator>
+
 #include "networkmanager.h"
 #include "networkserverlist.h"
 #include "src/appcore.h"
 #include "src/config/appconfig.h"
-#include "src/version.h"
-#include "src/network/vatsim_config.h"
+#include "src/common/build_config.h"
 #include "src/common/frequency_utils.h"
 #include "src/common/notificationtype.h"
 #include "src/common/utils.h"
@@ -91,7 +95,7 @@ namespace xpilot
         } else {
             emit notificationPosted((int)NotificationType::Info, "Connected to network.");
         }
-        emit networkConnected(m_connectInfo.Callsign, !m_connectInfo.TowerViewMode);
+        emit networkConnected(m_connectInfo.Callsign, !m_connectInfo.TowerViewMode && !BuildConfig::isVelocityBuild());
 
         if(!m_connectInfo.TowerViewMode) {
             QJsonObject reply;
@@ -140,7 +144,7 @@ namespace xpilot
 
     void NetworkManager::OnServerIdentificationReceived(PDUServerIdentification pdu)
     {
-        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, VatsimClientId(), "xPilot", 1, 2, AppConfig::getInstance()->VatsimId, GetSystemUid(), ""));
+        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, BuildConfig::VatsimClientId(), "xPilot", 1, 2, AppConfig::getInstance()->VatsimId, GetSystemUid(), ""));
 
         if(m_connectInfo.ObserverMode) {
             m_fsd.SendPDU(PDUAddATC(m_connectInfo.Callsign, AppConfig::getInstance()->Name, AppConfig::getInstance()->VatsimId,
@@ -156,7 +160,7 @@ namespace xpilot
         SendEmptyFastPositionPacket();
         m_slowPositionTimer->setInterval(m_connectInfo.ObserverMode ? 15000 : 5000);
         m_slowPositionTimer->start();
-        if(m_velocityEnabled && !m_connectInfo.ObserverMode)
+        if(BuildConfig::isVelocityBuild() && !m_connectInfo.ObserverMode)
         {
             m_fastPositionTimer->start();
         }
@@ -195,7 +199,7 @@ namespace xpilot
             break;
         case ClientQueryType::INF:
             QString inf = QString("xPilot %1 PID=%2 (%3) IP=%4 SYS_UID=%5 FS_VER=XPlane LT=%6 LO=%7 AL=%8")
-                    .arg(QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH),
+                    .arg(BuildConfig::getVersionString(),
                          AppConfig::getInstance()->VatsimId,
                          AppConfig::getInstance()->Name,
                          m_publicIp,
@@ -459,7 +463,7 @@ namespace xpilot
 
     void NetworkManager::SendFastPositionPacket()
     {
-        if(m_velocityEnabled && !m_connectInfo.ObserverMode)
+        if(BuildConfig::isVelocityBuild() && !m_connectInfo.ObserverMode)
         {
             m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign, m_userAircraftData.Latitude, m_userAircraftData.Longitude,
                                                m_userAircraftData.AltitudeMslM * 3.28084, m_userAircraftData.Pitch, m_userAircraftData.Heading,
@@ -471,7 +475,7 @@ namespace xpilot
 
     void NetworkManager::SendEmptyFastPositionPacket()
     {
-        if(!m_connectInfo.ObserverMode && m_velocityEnabled)
+        if(!m_connectInfo.ObserverMode && BuildConfig::isVelocityBuild())
         {
             m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign, m_userAircraftData.Latitude, m_userAircraftData.Longitude,
                                                m_userAircraftData.AltitudeMslM * 3.28084, m_userAircraftData.Pitch, m_userAircraftData.Heading,
@@ -583,8 +587,21 @@ namespace xpilot
             connectInfo.ObserverMode = observer;
             m_connectInfo = connectInfo;
 
-            emit notificationPosted((int)NotificationType::Info, "Connecting to network...");
-            m_fsd.Connect(AppConfig::getInstance()->getNetworkServer(), 6809);
+            if(BuildConfig::isVelocityBuild())
+            {
+                QStringList serverList{"vps.downstairsgeek.com", "c.downstairsgeek.com"};
+                unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+                std::default_random_engine e(seed);
+                std::shuffle(serverList.begin(), serverList.end(), e);
+
+                emit notificationPosted((int)NotificationType::Info, "Connecting to network (Velocity Beta)...");
+                m_fsd.Connect(serverList.first(), 6809);
+            }
+            else
+            {
+                emit notificationPosted((int)NotificationType::Info, "Connecting to network...");
+                m_fsd.Connect(AppConfig::getInstance()->getNetworkServer(), 6809);
+            }
         }
         else
         {

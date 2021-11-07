@@ -13,6 +13,7 @@
 #include "src/aircrafts/aircraft_visual_state.h"
 #include "src/aircrafts/aircraft_configuration.h"
 #include "src/network/events/radio_message_received.h"
+#include "src/common/build_config.h"
 
 namespace xpilot
 {
@@ -77,7 +78,6 @@ namespace xpilot
         bool m_intentionalDisconnect =  false;
         bool m_forcedDisconnect = false;
         QString m_forcedDisconnectReason = "";
-        bool m_velocityEnabled = false;
         QList<uint> m_transmitFreqs;
 
         QMap<QString, QStringList> m_mapAtisMessages;

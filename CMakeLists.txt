@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.19)
 project(xPilot LANGUAGES CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -24,6 +24,20 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+file(READ ${CMAKE_SOURCE_DIR}/xpilot.json XPILOT_JSON)
+
+string(JSON VELOCITY_BUILD GET ${XPILOT_JSON} velocity_build)
+string(JSON GITHUB_URL GET ${XPILOT_JSON} github_url)
+string(JSON VERSION_MAJOR GET ${XPILOT_JSON} version major)
+string(JSON VERSION_MINOR GET ${XPILOT_JSON} version minor)
+string(JSON VERSION_PATCH GET ${XPILOT_JSON} version patch)
+
+if (VELOCITY_BUILD)
+    set(VELOCITY_BUILD true)
+else()
+    set(VELOCITY_BUILD false)
+endif()
+
 if (NOT VATSIM_CLIENT_ID)
     set(VATSIM_CLIENT_ID 0)
 endif ()
@@ -36,8 +50,10 @@ if (NOT CONFIG_ENCRYPTION_KEY)
     set(CONFIG_ENCRYPTION_KEY 0)
 endif ()
 
-configure_file(src/network/vatsim_config.cpp.in ${CMAKE_BINARY_DIR}/generated/vatsim_config.cpp)
+configure_file(src/common/build_config.cpp.in ${CMAKE_BINARY_DIR}/generated/build_config.cpp)
 include_directories(${CMAKE_BINARY_DIR}/generated)
+
+configure_file(xpilot.rc.in ${CMAKE_SOURCE_DIR}/xpilot.rc @ONLY)
 
 find_package(QT NAMES Qt5 COMPONENTS Core Quick Network Svg REQUIRED)
 find_package(Qt5 COMPONENTS Core Quick Network Svg REQUIRED)
@@ -107,10 +123,10 @@ set(FSD_SOURCES
 
 set(PROJECT_SOURCES
     src/main.cpp
-    src/version.h
     src/network/vatsim_auth.h
-    src/network/vatsim_config.h
-    ${CMAKE_BINARY_DIR}/generated/vatsim_config.cpp
+    src/common/build_config.h
+    src/common/build_config.inc
+    ${CMAKE_BINARY_DIR}/generated/build_config.cpp
     src/common/simplecrypt.h
     src/common/simplecrypt.cpp
     src/common/frequency_utils.h

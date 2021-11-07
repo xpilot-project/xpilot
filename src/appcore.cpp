@@ -3,7 +3,6 @@
 #endif
 
 #include "appcore.h"
-#include "version.h"
 #include "config/appconfig.h"
 #include "controllers/controller_manager.h"
 #include "network/networkmanager.h"
@@ -13,6 +12,7 @@
 #include "aircrafts/network_aircraft_manager.h"
 #include "aircrafts/radio_stack_state.h"
 #include "audio/afv.h"
+#include "common/build_config.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -33,10 +33,8 @@ int xpilot::Main(int argc, char* argv[])
     QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-    QCoreApplication::setOrganizationName(VER_COMPANYNAME_STR);
-    QCoreApplication::setOrganizationDomain("xpilot-project.org");
-    QCoreApplication::setApplicationName(VER_PRODUCTNAME_STR);
-    QCoreApplication::setApplicationVersion(QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
+    QCoreApplication::setApplicationName("xPilot");
+    QCoreApplication::setApplicationVersion(xpilot::BuildConfig::getVersionString());
 
     QGuiApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));
@@ -69,6 +67,8 @@ int xpilot::Main(int argc, char* argv[])
     context->setContextProperty("xplaneAdapter", &xplaneAdapter);
     context->setContextProperty("controllerManager", &controllerManager);
     context->setContextProperty("audio", &audio);
+    context->setContextProperty("appVersion", BuildConfig::getVersionString());
+    context->setContextProperty("isVelocityBuild", BuildConfig::isVelocityBuild());
 
     const QUrl url(QStringLiteral("qrc:/Resources/Views/MainWindow.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app, [url](QObject *obj, const QUrl &objUrl) {
@@ -85,9 +85,12 @@ AppCore::AppCore(QQmlEngine* qmlEngine) :
     QObject(qmlEngine),
     engine(qobject_cast<QQmlApplicationEngine*>(qmlEngine))
 {
-    QTimer::singleShot(0, this, [this]{
-        DownloadServerList();
-    });
+    if(!BuildConfig::isVelocityBuild())
+    {
+        QTimer::singleShot(0, this, [this]{
+            DownloadServerList();
+        });
+    }
 }
 
 QObject *AppCore::appConfigInstance(QQmlEngine*, QJSEngine*)

@@ -3,7 +3,7 @@
 #include <QStandardPaths>
 #include <QDir>
 #include "appconfig.h"
-#include "src/network/vatsim_config.h"
+#include "src/common/build_config.h"
 
 using namespace xpilot;
 
@@ -25,7 +25,12 @@ AppConfig *AppConfig::getInstance()
 
 static const QString &dataRoot()
 {
-    static const QString path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/org.vatsim.xpilot/";
+    QString folder("/org.vatsim.xpilot/");
+    if(BuildConfig::isVelocityBuild())
+    {
+        folder = QString("/org.vatsim.xpilot-velocity/");
+    }
+    static const QString path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + folder;
     return path;
 }
 
@@ -71,7 +76,7 @@ void AppConfig::loadConfig()
     QJsonObject jsonObj = doc.object();
     QVariantMap jsonMap = jsonObj.toVariantMap();
 
-    crypto.setKey(ConfigEncryptionKey());
+    crypto.setKey(BuildConfig::ConfigEncryptionKey());
 
     VatsimId = jsonMap["VatsimId"].toString();
     VatsimPassword = jsonMap["VatsimPassword"].toString();

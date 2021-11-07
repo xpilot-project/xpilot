@@ -66,6 +66,7 @@ jobs:
           path: build/bin/xPilot.exe
 
   build-mac:
+    if: ${{ false }}
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2

@@ -114,6 +114,11 @@ Window {
     }
 
     Component.onCompleted: {
+        if(isVelocityBuild) {
+             appendMessage(`Welcome to xPilot Velocity Beta v${appVersion}`, colorYellow)
+        } else {
+            appendMessage(`Welcome to xPilot v${appVersion}`, colorYellow)
+        }
         appendMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.", colorYellow);
         width = AppConfig.WindowConfig.Width;
         height = AppConfig.WindowConfig.Height;
