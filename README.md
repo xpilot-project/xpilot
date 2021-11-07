@@ -14,7 +14,7 @@ xPilot is a cross-platform X-Plane 11 pilot client for the VATSIM network, suppo
 xPilot is written in C++ using the [Qt framework](https://www.qt.io/). Please read the [Contribution Guide](CONTRIBUTING.md) for details on how to contribute to the project.
 
 # Licensing
-xPilot is licensed under the [GPLv3 open-source license](LICENSE.md).
+xPilot is licensed under the [GPLv3 open-source license](LICENSE).
 
 # Acknowledgments
 * [Qt](https://www.qt.io) cross platform C++ development kit
