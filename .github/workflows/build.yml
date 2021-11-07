@@ -113,17 +113,16 @@ jobs:
         run: |
           ${{ env.Qt5_DIR }}/bin/macdeployqt xPilot.app \
           -qmldir=${{ github.workspace}}/Resources \
-          -executable=xPilot.app/Contents/MacOS/xPilot \
-          -dmg
+          -executable=xPilot.app/Contents/MacOS/xPilot
 
       - name: Code signing
         working-directory: ${{ github.workspace }}/build/bin
-        run: codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep xPilot.dmg
+        run: codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep xPilot.app
 
       - uses: actions/upload-artifact@master
         with:
           name: xPilot_MacOS
-          path: ${{ github.workspace }}/build/bin/xPilot.dmg
+          path: ${{ github.workspace }}/build/bin/xPilot
 
   build-lin:
     if: ${{ false }}
