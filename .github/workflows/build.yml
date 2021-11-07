@@ -119,16 +119,16 @@ jobs:
         working-directory: ${{ github.workspace }}/build/bin
         run: codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep xPilot.app
 
-      - uses: actions/setup-node@v2
-        with:
-            node-version: '14'
-      - run: npm install
+      - name: Install create-dmg
+        run: |
+          brew install create-dmg
+          brew link create-dmg
 
       - name: Create dmg
         working-directory: ${{ github.workspace }}/build/bin
         run: |
-          npm install --global create-dmg \
-          create-dmg 'xPilot.app' --identity="${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}"
+          create-dmg --volname "xPilot" "xPilot.dmg" .
+          codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep xPilot.dmg
 
       - uses: actions/upload-artifact@master
         with:
