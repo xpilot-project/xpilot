@@ -124,7 +124,19 @@ jobs:
 
       - name: Create dmg
         working-directory: ${{ github.workspace }}/build/bin
-        run: create-dmg --volname "xPilot" --volicon "${{ github.workspace }}/xpilot.icns" --skip-jenkins "xPilot.dmg" .
+        run: |
+          create-dmg \
+            --volname "xPilot" \
+            --volicon "${{ github.workspace }}/xpilot.icns" \
+            --window-pos 200 120 \
+            --window-size 800 400 \
+            --icon-size 100 \
+            --icon "xPilot.app" 200 190 \
+            --hide-extension "xPilot.app" \
+            --app-drop-link 600 185 \
+            --skip-jenkins \
+            "xPilot.dmg" \
+            "${{ github.workspace }}/build/bin"
       
       - name: Code sign dmg
         working-directory: ${{ github.workspace }}/build/bin
