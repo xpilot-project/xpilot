@@ -40,12 +40,12 @@ jobs:
       - name: Install conan packages
         working-directory: ${{ github.workspace }}/build
         run: |
-          conan install $GITHUB_WORKSPACE
+          conan install ..
 
       - name: CMake
         working-directory: ${{ github.workspace }}/build
         run: |
-          cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DVATSIM_CLIENT_ID=$VATSIM_CLIENT_ID -DVATSIM_CLIENT_KEY=$VATSIM_CLIENT_KEY -DCONFIG_ENCRYPTION_KEY=$CONFIG_ENCRYPTION_KEY
+          cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DVATSIM_CLIENT_ID=$VATSIM_CLIENT_ID -DVATSIM_CLIENT_KEY=$VATSIM_CLIENT_KEY -DCONFIG_ENCRYPTION_KEY=$CONFIG_ENCRYPTION_KEY
 
       - name: Build
         working-directory: ${{ github.workspace }}/build
@@ -116,7 +116,7 @@ jobs:
       - name: Code signing
         working-directory: ${{ github.workspace }}/build/bin
         run: |
-          codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --verify --timestamp --deep ./xPilot.app
+          codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --verify --timestamp --deep xPilot.app
 
       - uses: actions/upload-artifact@master
         with:
