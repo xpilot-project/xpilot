@@ -16,6 +16,7 @@ env:
 jobs:
 
   build-win:
+    if: ${{ false }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -124,6 +125,7 @@ jobs:
           path: ${{ github.workspace }}/build/bin/xPilot.app
 
   build-lin:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
