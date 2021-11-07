@@ -41,12 +41,6 @@ namespace xpilot
             serverList.append(serverInfo);
         }
 
-        NetworkServerInfo serverInfo;
-        serverInfo.Name = "Dev";
-        serverInfo.Address = "192.168.56.101";
-        serverInfo.Location = "";
-        serverList.append(serverInfo);
-
         NetworkServerInfo vpsServer;
         vpsServer.Name = "Velocity";
         vpsServer.Address = "vps.downstairsgeek.com";

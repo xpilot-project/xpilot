@@ -128,9 +128,6 @@ jobs:
           create-dmg \
             --volname "xPilot" \
             --volicon "${{ github.workspace }}/xpilot.icns" \
-            --window-pos 200 120 \
-            --window-size 800 400 \
-            --icon-size 100 \
             --icon "xPilot.app" 200 190 \
             --hide-extension "xPilot.app" \
             --app-drop-link 600 185 \
