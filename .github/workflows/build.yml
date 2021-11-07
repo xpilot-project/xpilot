@@ -115,6 +115,9 @@ jobs:
           -qmldir=${{ github.workspace}}/Resources \
           -executable=xPilot.app/Contents/MacOS/xPilot
 
+      - name: List contents
+        run: ls ${{ github.workspace }}/build/bin
+
       - name: Code signing
         working-directory: ${{ github.workspace }}/build/bin
         run: codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep xPilot.app
@@ -122,7 +125,7 @@ jobs:
       - uses: actions/upload-artifact@master
         with:
           name: xPilot_MacOS
-          path: ${{ github.workspace }}/build/bin/xPilot
+          path: ${{ github.workspace }}/build/bin/
 
   build-lin:
     if: ${{ false }}
