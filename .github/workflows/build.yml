@@ -115,17 +115,25 @@ jobs:
           -qmldir=${{ github.workspace}}/Resources \
           -executable=xPilot.app/Contents/MacOS/xPilot
 
-      - name: List contents
-        run: ls ${{ github.workspace }}/build/bin
-
       - name: Code signing
         working-directory: ${{ github.workspace }}/build/bin
         run: codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep xPilot.app
 
+      - uses: actions/setup-node@v2
+        with:
+            node-version: '14'
+      - run: npm install
+
+      - name: Create dmg
+        working-directory: ${{ github.workspace }}/build/bin
+        run: |
+          npm install --global create-dmg \
+          create-dmg 'xPilot.app' --identity="${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}"
+
       - uses: actions/upload-artifact@master
         with:
           name: xPilot_MacOS
-          path: ${{ github.workspace }}/build/bin/
+          path: ${{ github.workspace }}/build/bin/xPilot.dmg
 
   build-lin:
     if: ${{ false }}
