@@ -116,8 +116,7 @@ jobs:
 
       - name: Code signing
         working-directory: ${{ github.workspace }}/build/bin
-        run: |
-          codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --verify --timestamp --deep ./xPilot.app
+        run: codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep xPilot.app
 
       - uses: actions/upload-artifact@master
         with:
