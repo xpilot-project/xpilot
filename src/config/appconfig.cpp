@@ -1,5 +1,7 @@
 #include <QtGlobal>
 #include <QCoreApplication>
+#include <QStandardPaths>
+#include <QDir>
 #include "appconfig.h"
 #include "src/network/vatsim_config.h"
 
@@ -21,9 +23,20 @@ AppConfig *AppConfig::getInstance()
     return instance;
 }
 
+static const QString &dataRoot()
+{
+    static const QString path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/org.vatsim.xpilot/";
+    return path;
+}
+
 void AppConfig::loadConfig()
 {
-    QFile configFile(QCoreApplication::applicationDirPath() + "/AppConfig.json");
+    QDir dir(dataRoot());
+    if(!dir.exists()) {
+        dir.mkpath(dataRoot());
+    }
+
+    QFile configFile(dataRoot() + "AppConfig.json");
     if(!configFile.open(QIODevice::ReadOnly)) {
 
         // set default values
@@ -161,7 +174,7 @@ void AppConfig::saveConfig()
     jsonObj["WindowConfig"] = window;
 
     QJsonDocument jsonDoc(jsonObj);
-    QFile configFile(QCoreApplication::applicationDirPath() + "/AppConfig.json");
+    QFile configFile(dataRoot() + "AppConfig.json");
     if(!configFile.open(QIODevice::WriteOnly)) {
         qDebug() << "Failed to write config file";
         return;

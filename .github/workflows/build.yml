@@ -120,15 +120,15 @@ jobs:
         run: codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep xPilot.app
 
       - name: Install create-dmg
-        run: |
-          brew install create-dmg
-          brew link create-dmg
+        run: brew install create-dmg
 
       - name: Create dmg
         working-directory: ${{ github.workspace }}/build/bin
-        run: |
-          create-dmg --volname "xPilot" "xPilot.dmg" .
-          codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep xPilot.dmg
+        run: create-dmg --volname "xPilot" --volicon "${{ github.workspace }}/xpilot.icns" --skip-jenkins "xPilot.dmg" .
+      
+      - name: Code sign dmg
+        working-directory: ${{ github.workspace }}/build/bin
+        run: codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep xPilot.dmg
 
       - uses: actions/upload-artifact@master
         with:
