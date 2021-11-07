@@ -15,9 +15,56 @@ env:
 
 jobs:
 
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+            version: ${{ env.qt_version }}
+          
+      - name: Install conan
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install conan
+          pip3 install conan_package_tools
+
+      - name: Initialize CMake
+        run: |
+          cmake -E make_directory ${{ github.workspace }}/build
+
+      - name: Install conan packages
+        working-directory: ${{ github.workspace }}/build
+        run: |
+          conan install $GITHUB_WORKSPACE
+
+      - name: CMake
+        working-directory: ${{ github.workspace }}/build
+        run: |
+          cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DVATSIM_CLIENT_ID=$VATSIM_CLIENT_ID -DVATSIM_CLIENT_KEY=$VATSIM_CLIENT_KEY -DCONFIG_ENCRYPTION_KEY=$CONFIG_ENCRYPTION_KEY
+
+      - name: Build
+        working-directory: ${{ github.workspace }}/build
+        run: |
+          cmake --build . --config $BUILD_TYPE
+
+      - name: Qt Deploy
+        working-directory: ${{ github.workspace }}/build/bin
+        run: |
+          ${{ env.Qt5_DIR }}/bin/windeployqt xPilot.exe \
+          -qmldir=${{ github.workspace}}/Resources
+
+      - uses: actions/upload-artifact@master
+        with:
+          name: xPilot_Win
+          path: build/bin/xPilot.exe
+
   build-mac:
     runs-on: macos-latest
-
     steps:
       - uses: actions/checkout@v2
         with:
@@ -69,7 +116,7 @@ jobs:
       - name: Code signing
         working-directory: ${{ github.workspace }}/build/bin
         run: |
-          codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --verify --timestamp ./xPilot.app
+          codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --verify --timestamp --deep ./xPilot.app
 
       - uses: actions/upload-artifact@master
         with:
