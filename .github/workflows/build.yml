@@ -115,9 +115,9 @@ jobs:
           -executable=xPilot.app/Contents/MacOS/xPilot \
           -dmg
 
-      #- name: Code signing
-      #  run: |
-      #    codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --deep --verify --timestamp ${{ github.workspace }}/build/bin/xPilot.dmg
+      - name: Code signing
+        run: |
+          codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --deep --verify --timestamp ${{ github.workspace }}/build/bin/xPilot.dmg
 
       - uses: actions/upload-artifact@master
         with:
