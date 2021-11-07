@@ -65,4 +65,13 @@ jobs:
           ${{ env.Qt5_DIR }}/bin/macdeployqt xPilot.app \
           -qmldir=${{ github.workspace}}/Resources \
           -executable=xPilot.app/Contents/MacOS/xPilot
-          
+
+      - name: Code signing
+        working-directory: ${{ github.workspace }}/build/bin
+        run: |
+          codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --verify --timestamp ./xPilot.app
+
+      - uses: actions/upload-artifact@master
+        with:
+          name: xPilot_MacOS
+          path: build/bin/xPilot.app
