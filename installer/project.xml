@@ -2,7 +2,6 @@
     <shortName>xPilot</shortName>
     <fullName>xPilot</fullName>
     <version>2.0.0</version>
-    <installerFilename>${product_shortname}-Velocity-${platform_name}-v${product_version}.${platform_exec_suffix}</installerFilename>
     <licenseFile>${src_prefix}/LICENSE</licenseFile>
     <wrapLicenseFileText>0</wrapLicenseFileText>
     <functionDefinitionList>

@@ -12,12 +12,18 @@ env:
   VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
   VATSIM_CLIENT_KEY: ${{ secrets.VATSIM_CLIENT_KEY }}
   CONFIG_ENCRYPTION_KEY: ${{ secrets.CONFIG_ENCRYPTION_KEY }}
+  IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
 
 jobs:
 
   build-win:
-    if: ${{ false }}
+
     runs-on: windows-latest
+
+    env:
+      INSTALLBUILDER_URL: https://installbuilder.com/installbuilder-enterprise-21.9.0-windows-x64-installer.exe
+      INSTALLBUILDER_DIR: ../ib
+
     steps:
       - uses: actions/checkout@v2
         with:
@@ -26,6 +32,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
+            setup-python: false
             version: ${{ env.qt_version }}
           
       - name: Install conan
@@ -59,11 +66,37 @@ jobs:
         run: |
           ${{ env.Qt5_DIR }}/bin/windeployqt.exe xPilot.exe \
           -qmldir="${{ github.workspace}}/Resources"
+          echo "XPILOT_BIN_DIR=`pwd`" >> $GITHUB_ENV
+
+      - name: Get version
+        working-directory: ${{ github.workspace }}
+        shell: bash
+        run: |
+          XPILOT_VERSION=$(cat xpilot.json | jq '(.version.major|tostring) + "." + (.version.minor|tostring) + "." + (.version.patch|tostring)')
+          echo "$XPILOT_VERSION" >> $GITHUB_ENV
+
+      - name: Setup InstallBuilder
+        shell: bash
+        run: |
+          curl -L ${{ env.INSTALLBUILDER_URL }} --output ib.exe
+          ./ib.exe --mode unattended --prefix ${{ env.INSTALLBUILDER_DIR  }}
+          ${{ env.INSTALLBUILDER_DIR }}/bin/builder-cli.exe --version
+          echo "$IB_LICENSE" > lic.xml
+          echo "INSTALLER_SRC_PREFIX=$(pwd)" >> $GITHUB_ENV
+          echo "INSTALLER_BIN_PREFIX=$XPILOT_BIN_DIR" >> $GITHUB_ENV
+
+      - name: Create installer
+        shell: bash
+        run: |
+          ${{ env.INSTALLBUILDER_DIR }}/bin/builder-cli.exe build ${{ github.workspace }}/installer/project.xml \
+              --license lic.xml \
+              --setvars project.outputDirectory=$(pwd) \
+              --setvars project.version=$XPILOT_VERSION
 
       - uses: actions/upload-artifact@master
         with:
-          name: xPilot_Windows
-          path: build/bin/xPilot.exe
+          name: xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe
+          path: xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe
 
   build-mac:
     if: ${{ false }}
