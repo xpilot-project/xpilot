@@ -157,7 +157,7 @@ jobs:
 
       - name: Code signing
         working-directory: ${{ github.workspace }}/build/bin
-        run: codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep xPilot.app
+        run: codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep -o runtime xPilot.app
 
       - name: Get version
         working-directory: ${{ github.workspace }}
