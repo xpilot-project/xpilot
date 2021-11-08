@@ -14,11 +14,12 @@ env:
   CONFIG_ENCRYPTION_KEY: ${{ secrets.CONFIG_ENCRYPTION_KEY }}
   IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
   IB_URL: https://installbuilder.com/installbuilder-enterprise-21.9.0-linux-x64-installer.run
-  IB_DiR: ../ib
+  IB_DIR: ../ib
 
 jobs:
 
-  build:
+  build-linux:
+
     runs-on: ubuntu-latest
 
     steps:
@@ -66,7 +67,7 @@ jobs:
       - name: Create AppImage
         run: |
           mkdir -p appdir/usr/bin
-          ${{ github.workspace }}/linuxdeploy-x86_64.AppImage --plugin=qt --output=appimage --create-desktop-file --executable=${{ github.workspace }}/build/bin/xPilot --appdir=appdir --icon-file=xpilot.png
+          ${{ github.workspace }}/linuxdeploy-x86_64.AppImage --plugin=qt --output=appimage --create-desktop-file --executable=${{ github.workspace }}/build/bin/xPilot --appdir=appdir --icon-file=xPilot.png
 
       - name: Get version
         working-directory: ${{ github.workspace }}
@@ -79,8 +80,8 @@ jobs:
         run: |
           curl -L ${{ env.IB_URL }} --output ib.run
           chmod +x ib.run
-          ./ib.run --mode unattended --prefix ${{ env.IB_DiR }}
-          ${{ env.IB_DiR }}/bin/builder --version
+          ./ib.run --mode unattended --prefix ${{ env.IB_DIR }}
+          ${{ env.IB_DIR }}/bin/builder --version
           echo "$IB_LICENSE" > lic.xml
           echo "INSTALLER_SRC_PREFIX=$(pwd)" >> $GITHUB_ENV
           echo "INSTALLER_BIN_PREFIX=$XPILOT_BIN_DIR" >> $GITHUB_ENV
@@ -88,7 +89,7 @@ jobs:
       - name: Create installer
         shell: bash
         run: |
-          ${{ env.IB_DiR }}/bin/builder build installer/project.xml \
+          ${{ env.IB_DIR }}/bin/builder build installer/project.xml \
               --license lic.xml \
               --setvars project.outputDirectory=$(pwd) \
               --setvars project.version=${{ env.XPILOT_VERSION }}

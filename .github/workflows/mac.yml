@@ -18,7 +18,8 @@ env:
 
 jobs:
 
-  build:
+  build-macos:
+  
     runs-on: macos-latest
 
     steps:

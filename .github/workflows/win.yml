@@ -18,7 +18,8 @@ env:
 
 jobs:
 
-  build:
+  build-windows:
+
     runs-on: windows-latest
 
     steps:
@@ -77,7 +78,7 @@ jobs:
         run: |
           curl -L ${{ env.IB_URL }} --output ib.exe
           ./ib.exe --mode unattended --prefix ${{ env.IB_DIR  }}
-          ${{ env.IB_IDR }}/bin/builder-cli.exe --version
+          ${{ env.IB_DIR }}/bin/builder-cli.exe --version
           echo "$IB_LICENSE" > lic.xml
           echo "INSTALLER_SRC_PREFIX=$(pwd)" >> $GITHUB_ENV
           echo "INSTALLER_BIN_PREFIX=$XPILOT_BIN_DIR" >> $GITHUB_ENV
