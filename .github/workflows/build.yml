@@ -21,6 +21,8 @@ jobs:
   
   build-linux:
 
+    if: ${{ false }}
+    
     runs-on: ubuntu-latest
 
     env:
@@ -106,6 +108,8 @@ jobs:
   ########################## Build Windows ##########################
   
   build-windows:
+
+    if: ${{ false }}
 
     runs-on: windows-latest
 
@@ -272,7 +276,8 @@ jobs:
           ${{ env.IB_DIR }}/bin/builder build installer/project.xml \
               --license lic.xml \
               --setvars project.outputDirectory=$(pwd) \
-              --setvars project.version=${{ env.XPILOT_VERSION }}
+              --setvars project.version=${{ env.XPILOT_VERSION }} \
+              --setvars password=${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
 
       - uses: actions/upload-artifact@master
         with:

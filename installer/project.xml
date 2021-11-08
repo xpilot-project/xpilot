@@ -4,6 +4,9 @@
     <version>2.0.0</version>
     <licenseFile>${src_prefix}/LICENSE</licenseFile>
     <wrapLicenseFileText>0</wrapLicenseFileText>
+    <osxSigningIdentity>${apple_signing_identity}</osxSigningIdentity>
+    <osxApplicationBundleIdentifier>com.vatsim.xpilot</osxApplicationBundleIdentifier>
+    <osxSigningKeychainFile>/Users/runner/Library/Keychains/Signing keychain-db</osxSigningKeychainFile>
     <functionDefinitionList>
         <actionDefinition>
             <name>checkXpilotOpen</name>
@@ -197,6 +200,10 @@
                 <compareText logic="equals" text="${env(INSTALLER_BIN_PREFIX)}" value=""/>
             </ruleList>
         </setInstallerVariable>
+        <runProgram>
+            <program>security</program>
+            <programArguments>unlock-keychain -p '${password}' "${project.osxSigningKeychainFile}"</programArguments>
+        </runProgram>
     </preBuildActionList>
     <preInstallationActionList>
         <checkXpilotOpen/>
