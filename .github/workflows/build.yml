@@ -87,7 +87,7 @@ jobs:
       - name: Create installer
         shell: bash
         run: |
-          ${{ env.INSTALLBUILDER_DIR }}/bin/builder-cli.exe build ${{ github.workspace }}/installer/project.xml \
+          ${{ env.INSTALLBUILDER_DIR }}/bin/builder-cli.exe build installer/project.xml \
               --license lic.xml \
               --setvars project.outputDirectory=$(pwd) \
               --setvars project.version=$XPILOT_VERSION
