@@ -234,7 +234,6 @@
     <enableRollback>0</enableRollback>
     <enableTimestamp>1</enableTimestamp>
     <osxApplicationBundleIcon>${src_prefix}/xpilot.icns</osxApplicationBundleIcon>
-    <osxApplicationBundleIdentifier>org.vatsim.xpilot.macinstaller</osxApplicationBundleIdentifier>
     <startMenuGroupName>xPilot</startMenuGroupName>
     <vendor>xPilot for VATSIM</vendor>
     <windowsExecutableIcon>${src_prefix}/xpilot.ico</windowsExecutableIcon>
