@@ -284,11 +284,13 @@ jobs:
               --setvars password=${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
 
       - name: Notarize Installer
-        uses: devbotsxyz/xcode-notarize@v1
-        with:
-          product-path: xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
-          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+        shell: bash
+        run: |
+          xcrun altool --notarize-app \
+          --primary-bundle-id "com.vatsim.xpilot" \
+          --username "${{ secrets.NOTARIZATION_USERNAME }}" \
+          --password "${{ secrets.NOTARIZATION_PASSWORD }}" \
+          --file xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
 
       - uses: actions/upload-artifact@master
         with:
