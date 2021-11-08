@@ -72,7 +72,7 @@ jobs:
         working-directory: ${{ github.workspace }}
         shell: bash
         run: |
-          echo "XPILOT_VERSION=$(cat xpilot.json | jq '(.version.major|tostring) + "." + (.version.minor|tostring) + "." + (.version.patch|tostring)')" >> $GITHUB_ENV
+          echo XPILOT_VERSION=$(cat xpilot.json | jq '(.version.major|tostring) + "." + (.version.minor|tostring) + "." + (.version.patch|tostring)') >> $GITHUB_ENV
 
       - name: Setup InstallBuilder
         shell: bash
