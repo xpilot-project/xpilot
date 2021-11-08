@@ -203,7 +203,9 @@
         <runProgram>
             <program>security</program>
             <programArguments>unlock-keychain -p '${password}' "${project.osxSigningKeychainFile}"</programArguments>
-            <platformTest type="osx"/>
+            <ruleList>
+                <platformTest type="osx"/>
+            </ruleList>
         </runProgram>
     </preBuildActionList>
     <preInstallationActionList>
