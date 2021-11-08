@@ -205,6 +205,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
+            setup-python: false
             version: ${{ env.qt_version }}
           
       - name: Install conan
@@ -232,19 +233,19 @@ jobs:
         run: |
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Qt Deploy
-        working-directory: ${{ github.workspace }}/build/bin
-        run: |
-          mkdir -p appdir/usr/bin
-          cd appdir
-          cp ../xPilot usr/bin
-          cp ${{ github.workspace }}/xpilot.desktop .
-          cp ${{ github.workspace }}/xpilot.png .
-          cd ..
-          unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
-          wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-          chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-          ./linuxdeployqt-continuous-x86_64.AppImage xPilot -appimage -verbose=2 -qmldir=${{ github.workspace}}/Resources
+      # - name: Qt Deploy
+      #   working-directory: ${{ github.workspace }}/build/bin
+      #   run: |
+      #     mkdir -p appdir/usr/bin
+      #     cd appdir
+      #     cp ../xPilot usr/bin
+      #     cp ${{ github.workspace }}/xpilot.desktop .
+      #     cp ${{ github.workspace }}/xpilot.png .
+      #     cd ..
+      #     unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
+      #     wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+      #     chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+      #     ./linuxdeployqt-continuous-x86_64.AppImage xPilot -appimage -verbose=2 -qmldir=${{ github.workspace}}/Resources
 
       - name: Get version
         working-directory: ${{ github.workspace }}
