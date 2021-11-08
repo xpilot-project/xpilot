@@ -1,6 +1,6 @@
 {
   "velocity_build": true,
-  "github_url": "",
+  "github_url": "https://api.github.com/repos/swift-project/pilotclient/",
   "version": {
     "major": 2,
     "minor": 0,

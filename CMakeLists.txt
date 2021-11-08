@@ -133,6 +133,8 @@ set(PROJECT_SOURCES
     src/common/qserializer.h
     src/common/notificationtype.h
     src/common/utils.h
+    src/common/versioncheck.h
+    src/common/versioncheck.cpp
     src/config/appconfig.h
     src/config/appconfig.cpp
     src/config/windowconfig.h

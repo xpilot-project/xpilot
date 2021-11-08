@@ -13,6 +13,7 @@
 #include "aircrafts/radio_stack_state.h"
 #include "audio/afv.h"
 #include "common/build_config.h"
+#include "common/versioncheck.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -85,12 +86,13 @@ AppCore::AppCore(QQmlEngine* qmlEngine) :
     QObject(qmlEngine),
     engine(qobject_cast<QQmlApplicationEngine*>(qmlEngine))
 {
-    if(!BuildConfig::isVelocityBuild())
-    {
-        QTimer::singleShot(0, this, [this]{
+    QTimer::singleShot(0, this, [this]{
+        PerformVersionCheck();
+        if(!BuildConfig::isVelocityBuild())
+        {
             DownloadServerList();
-        });
-    }
+        }
+    });
 }
 
 QObject *AppCore::appConfigInstance(QQmlEngine*, QJSEngine*)
@@ -114,4 +116,10 @@ void AppCore::DownloadServerList()
     else {
         emit serverListDownloadError();
     }
+}
+
+void AppCore::PerformVersionCheck()
+{
+    VersionCheck versionCheck;
+    versionCheck.readUpdateInfo();
 }

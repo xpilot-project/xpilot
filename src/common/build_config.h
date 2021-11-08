@@ -19,6 +19,8 @@ namespace xpilot
         static constexpr bool isRunningOnWindowsPlatform();
         static const QString getPlatformString();
 
+        static const QString githubRepoApiUrl();
+
         static const QVersionNumber getVersion();
         static const QString getVersionString();
         static const QString getShortVersionString();

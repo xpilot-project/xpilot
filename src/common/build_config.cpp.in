@@ -21,6 +21,11 @@ const bool xpilot::BuildConfig::isVelocityBuild()
     return @VELOCITY_BUILD@;
 }
 
+const QString xpilot::BuildConfig::githubRepoApiUrl()
+{
+    return "@GITHUB_URL@";
+}
+
 const QString xpilot::BuildConfig::getPlatformString()
 {
     static const QString p([]

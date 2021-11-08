@@ -27,5 +27,6 @@ namespace xpilot
     private:
         QQmlApplicationEngine* engine;
         void DownloadServerList();
+        void PerformVersionCheck();
     };
 }
