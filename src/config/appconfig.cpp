@@ -25,15 +25,13 @@ AppConfig *AppConfig::getInstance()
 
 static const QString &dataRoot()
 {
-    QDir folder(QCoreApplication::applicationDirPath());
-
-#ifdef Q_OS_MACOS
-    folder.cdUp();
-    folder.cdUp();
-    folder.cdUp();
-#endif
-
-    return folder.path();
+    QString folder("/org.vatsim.xpilot/");
+    if(BuildConfig::isVelocityBuild())
+    {
+        folder = QString("/org.vatsim.xpilot-velocity/");
+    }
+    static const QString path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + folder;
+    return path;
 }
 
 void AppConfig::loadConfig()
@@ -43,7 +41,7 @@ void AppConfig::loadConfig()
         dir.mkpath(dataRoot());
     }
 
-    QFile configFile(dataRoot() + "/AppConfig.json");
+    QFile configFile(dataRoot() + "AppConfig.json");
     if(!configFile.open(QIODevice::ReadOnly)) {
 
         // set default values
@@ -181,7 +179,7 @@ void AppConfig::saveConfig()
     jsonObj["WindowConfig"] = window;
 
     QJsonDocument jsonDoc(jsonObj);
-    QFile configFile(dataRoot() + "/AppConfig.json");
+    QFile configFile(dataRoot() + "AppConfig.json");
     if(!configFile.open(QIODevice::WriteOnly)) {
         qDebug() << "Failed to write config file";
         return;
