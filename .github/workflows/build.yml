@@ -110,7 +110,7 @@ jobs:
   
   build-windows:
 
-    if: ${{ false }}
+    #if: ${{ false }}
 
     runs-on: windows-latest
 
@@ -195,7 +195,7 @@ jobs:
   
   build-macos:
 
-    if: ${{ false }}
+    #if: ${{ false }}
   
     runs-on: macos-latest
 
