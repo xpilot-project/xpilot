@@ -243,7 +243,7 @@ jobs:
         working-directory: ${{ github.workspace }}/build/bin
         run: |
           mkdir -p appdir/usr/bin
-          ${{ github.workspace }}/linuxdeploy-x86_64.AppImage --plugin=qt --output=appimage --create-desktop-file --executable=xPilot --appdir appdir --icon-file=${{ github.workspace }}/xpilot.png
+          ${{ github.workspace }}/linuxdeploy-x86_64.AppImage --plugin=qt --output=appimage --create-desktop-file --executable=xPilot --appdir appdir --icon-file=xpilot
 
       - name: Get version
         working-directory: ${{ github.workspace }}
