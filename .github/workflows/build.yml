@@ -242,6 +242,7 @@ jobs:
       - name: Create AppImage
         working-directory: ${{ github.workspace }}/build/bin
         run: |
+          cp ${{ github.workspace }}/xpilot.png .
           mkdir -p appdir/usr/bin
           ${{ github.workspace }}/linuxdeploy-x86_64.AppImage --plugin=qt --output=appimage --create-desktop-file --executable=xPilot --appdir appdir --icon-file=xpilot
 
