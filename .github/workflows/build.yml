@@ -98,8 +98,13 @@ jobs:
           path: xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe
 
   build-mac:
-    if: ${{ false }}
+
     runs-on: macos-latest
+
+    env:
+      INSTALLBUILDER_URL: https://installbuilder.com/installbuilder-enterprise-21.9.0-osx-installer.dmg
+      INSTALLBUILDER_DIR: ../ib
+
     steps:
       - uses: actions/checkout@v2
         with:
@@ -114,6 +119,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
+            setup-python: false
             version: ${{ env.qt_version }}
           
       - name: Install conan
@@ -147,35 +153,41 @@ jobs:
           ${{ env.Qt5_DIR }}/bin/macdeployqt xPilot.app \
           -qmldir=${{ github.workspace}}/Resources \
           -executable=xPilot.app/Contents/MacOS/xPilot
+          echo "XPILOT_BIN_DIR=`pwd`" >> $GITHUB_ENV
 
       - name: Code signing
         working-directory: ${{ github.workspace }}/build/bin
         run: codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep xPilot.app
 
-      - name: Install create-dmg
-        run: brew install create-dmg
-
-      - name: Create dmg
-        working-directory: ${{ github.workspace }}/build/bin
+      - name: Get version
+        working-directory: ${{ github.workspace }}
+        shell: bash
         run: |
-          create-dmg \
-            --volname "xPilot" \
-            --volicon "${{ github.workspace }}/xpilot.icns" \
-            --icon "xPilot.app" 200 190 \
-            --hide-extension "xPilot.app" \
-            --app-drop-link 600 185 \
-            --skip-jenkins \
-            "xPilot.dmg" \
-            "${{ github.workspace }}/build/bin"
-      
-      - name: Code sign dmg
-        working-directory: ${{ github.workspace }}/build/bin
-        run: codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep xPilot.dmg
+          echo "XPILOT_VERSION=$(cat xpilot.json | cat xpilot.json | jq -r '"\(.version.major).\(.version.minor).\(.version.patch)"')" >> $GITHUB_ENV
+
+      - name: Setup InstallBuilder
+        shell: bash
+        run: |
+          curl -L ${{ env.INSTALLBUILDER_URL }} --output ib.dmg
+          hdiutil attach ib.dmg
+          /Volumes/InstallBuilder\ Enterprise/*.app/Contents/MacOS/installbuilder.sh --mode unattended --prefix ${{ env.INSTALLBUILDER_DIR }}
+          ${{ env.INSTALLBUILDER_DIR }}/bin/builder --version
+          echo "$IB_LICENSE" > lic.xml
+          echo "INSTALLER_SRC_PREFIX=$(pwd)" >> $GITHUB_ENV
+          echo "INSTALLER_BIN_PREFIX=$XPILOT_BIN_DIR" >> $GITHUB_ENV
+
+      - name: Create installer
+        shell: bash
+        run: |
+          ${{ env.INSTALLBUILDER_DIR }}/bin/builder build installer/project.xml \
+              --license lic.xml \
+              --setvars project.outputDirectory=$(pwd) \
+              --setvars project.version=${{ env.XPILOT_VERSION }}
 
       - uses: actions/upload-artifact@master
         with:
-          name: xPilot_MacOS
-          path: ${{ github.workspace }}/build/bin/xPilot.dmg
+          name: xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
+          path: xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
 
   build-lin:
     if: ${{ false }}
