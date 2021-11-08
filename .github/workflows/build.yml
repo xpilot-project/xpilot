@@ -22,7 +22,7 @@ jobs:
   build-linux:
 
     if: ${{ false }}
-    
+
     runs-on: ubuntu-latest
 
     env:
@@ -277,6 +277,7 @@ jobs:
               --license lic.xml \
               --setvars project.outputDirectory=$(pwd) \
               --setvars project.version=${{ env.XPILOT_VERSION }} \
+              --setvars apple_signing_identity=${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }} \
               --setvars password=${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
 
       - uses: actions/upload-artifact@master
