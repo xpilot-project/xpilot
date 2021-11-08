@@ -28,9 +28,9 @@ static const QString &dataRoot()
     QDir folder(QCoreApplication::applicationDirPath());
 
 #ifdef Q_OS_MACOS
-    bin.cdUp();
-    bin.cdUp();
-    bin.cdUp();
+    folder.cdUp();
+    folder.cdUp();
+    folder.cdUp();
 #endif
 
     return folder.path();
