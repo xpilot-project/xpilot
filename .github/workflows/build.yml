@@ -17,7 +17,7 @@ env:
 jobs:
 
   build-win:
-
+    if: ${{ false }}
     runs-on: windows-latest
 
     env:
@@ -98,7 +98,7 @@ jobs:
           path: xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe
 
   build-mac:
-
+    if: ${{ false }}
     runs-on: macos-latest
 
     env:
@@ -190,8 +190,13 @@ jobs:
           path: xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
 
   build-lin:
-    if: ${{ false }}
+    
     runs-on: ubuntu-latest
+
+    env:
+      INSTALLBUILDER_URL: https://installbuilder.com/installbuilder-enterprise-21.9.0-linux-x64-installer.run
+      INSTALLBUILDER_DIR: ../ib
+
     steps:
       - uses: actions/checkout@v2
         with:
@@ -227,13 +232,46 @@ jobs:
         run: |
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      #- name: Qt Deploy
-      #  working-directory: ${{ github.workspace }}\build\bin
-      #  run: |
-      #    ${{ env.Qt5_DIR }}\bin\windeployqt xPilot.exe \
-      #    -qmldir="${{ github.workspace}}\Resources"
+      - name: Qt Deploy
+        working-directory: ${{ github.workspace }}/build/bin
+        run: |
+          mkdir -p appdir/usr/bin
+          cd appdir
+          cp ../xPilot usr/bin
+          cp ${{ github.workspace }}/xpilot.desktop .
+          cp ${{ github.workspace }}/xpilot.png .
+          cd ..
+          unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
+          wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+          chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+          ./linuxdeployqt-continuous-x86_64.AppImage xPilot -appimage -verbose=2 -qmldir=${{ github.workspace}}/Resources
 
-      - uses: actions/upload-artifact@master
+      - name: Get version
+        working-directory: ${{ github.workspace }}
+        shell: bash
+        run: |
+          echo "XPILOT_VERSION=$(cat xpilot.json | cat xpilot.json | jq -r '"\(.version.major).\(.version.minor).\(.version.patch)"')" >> $GITHUB_ENV
+
+      - name: Setup InstallBuilder
+        shell: bash
+        run: |
+          curl -L ${{ env.INSTALLBUILDER_URL }} --output ib.run
+          chmod +x ib.run
+          ./ib.run --mode unattended --prefix ${{ env.INSTALLBUILDER_DIR }}
+          ${{ env.INSTALLBUILDER_DIR }}/bin/builder --version
+          echo "$IB_LICENSE" > lic.xml
+          echo "INSTALLER_SRC_PREFIX=$(pwd)" >> $GITHUB_ENV
+          echo "INSTALLER_BIN_PREFIX=$XPILOT_BIN_DIR" >> $GITHUB_ENV
+
+      - name: Create installer
+        shell: bash
+        run: |
+          ${{ env.INSTALLBUILDER_DIR }}/bin/builder build installer/project.xml \
+              --license lic.xml \
+              --setvars project.outputDirectory=$(pwd) \
+              --setvars project.version=${{ env.XPILOT_VERSION }}
+
+      - uses: actions/upload-artifact@v1
         with:
-          name: xPilot_Linux
-          path: build/bin/xPilot
+          name: xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run
+          path: xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run
