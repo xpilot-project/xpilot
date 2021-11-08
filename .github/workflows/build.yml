@@ -72,7 +72,7 @@ jobs:
         working-directory: ${{ github.workspace }}
         shell: bash
         run: |
-          echo XPILOT_VERSION=$(cat xpilot.json | jq '(.version.major|tostring) + "." + (.version.minor|tostring) + "." + (.version.patch|tostring)') >> $GITHUB_ENV
+          echo "XPILOT_VERSION=$(cat xpilot.json | cat xpilot.json | jq -r '"\(.version.major).\(.version.minor).\(.version.patch)"')" >> $GITHUB_ENV
 
       - name: Setup InstallBuilder
         shell: bash
@@ -90,7 +90,7 @@ jobs:
           ${{ env.INSTALLBUILDER_DIR }}/bin/builder-cli.exe build installer/project.xml \
               --license lic.xml \
               --setvars project.outputDirectory=$(pwd) \
-              --setvars project.version=$XPILOT_VERSION
+              --setvars project.version=${{ env.XPILOT_VERSION }}
 
       - uses: actions/upload-artifact@master
         with:
