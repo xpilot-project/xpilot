@@ -107,7 +107,16 @@ namespace xpilot
             }
         }
 
-        configureAudioDevices();
+        QTimer::singleShot(0, this, [this]{
+            if(m_audioDrivers.empty())
+            {
+                emit notificationPosted((int)NotificationType::Error, "Could not initialize audio drivers or devices.");
+            }
+            else
+            {
+                configureAudioDevices();
+            }
+        });
 
         connect(m_transceiverTimer, &QTimer::timeout, this, &AudioForVatsim::OnTransceiverTimer);
         connect(m_rxTxQueryTimer, &QTimer::timeout, this, [=]{
