@@ -69,11 +69,10 @@ jobs:
         with:
           dir: ${{ github.workspace }}
           plugins: qt appimage
-        run: |
-          export QML_SOURCES_PATHS=${{ github.workspace }}/Resources
       
       - name: Create AppImage
         run: |
+          export QML_SOURCES_PATHS=${{ github.workspace }}/Resources
           mkdir -p appdir/usr/bin
           ${{ github.workspace }}/linuxdeploy-x86_64.AppImage --plugin=qt --output=appimage --create-desktop-file --executable=${{ github.workspace }}/build/bin/xPilot --appdir=appdir --icon-file=xPilot.png
           mkdir -p ${{ github.workspace }}/output && mv xPilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
