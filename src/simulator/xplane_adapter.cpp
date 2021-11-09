@@ -50,6 +50,8 @@ enum DataRef
     PushToTalk
 };
 
+QHostAddress m_hostAddress;
+
 XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 {
     m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch() - 5; // default to 5 seconds ago to prevent ghost X-Plane connection status

@@ -87,8 +87,6 @@ private:
     bool m_validCsl = true;
     bool m_requestsSent = false;
 
-    QHostAddress m_udpAddress;
-
     UserAircraftData m_userAircraftData{};
     UserAircraftConfigData m_userAircraftConfigData{};
     RadioStackState m_radioStackState{};
