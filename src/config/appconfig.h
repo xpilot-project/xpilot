@@ -17,7 +17,7 @@
 #include "src/network/networkserverlist.h"
 #include "src/network/connectinfo.h"
 
-#define DEFAULT_XPLANE_NETWORK_ADDRESS "localhost"
+#define DEFAULT_XPLANE_NETWORK_ADDRESS "127.0.0.1"
 #define DEFAULT_PLUGIN_PORT 53100
 #define XPLANE_UDP_PORT 49000
 

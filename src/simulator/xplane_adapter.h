@@ -15,6 +15,7 @@
 #include <QObject>
 #include <QUdpSocket>
 #include <QDataStream>
+#include <QHostAddress>
 
 #include "zmq.hpp"
 
@@ -85,6 +86,8 @@ private:
     bool m_validPluginVersion = true;
     bool m_validCsl = true;
     bool m_requestsSent = false;
+
+    QHostAddress m_udpAddress;
 
     UserAircraftData m_userAircraftData{};
     UserAircraftConfigData m_userAircraftConfigData{};

@@ -172,6 +172,15 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     });
 
     socket = new QUdpSocket(this);
+
+    m_hostAddress = QHostAddress(AppConfig::getInstance()->XplaneNetworkAddress);
+    if(AppConfig::getInstance()->XplaneNetworkAddress.toLower() == "localhost")
+    {
+        // udp socket doesn't work if the address is "localhost" so we need to convert it
+        m_hostAddress = QHostAddress::LocalHost;
+    }
+    socket->bind(m_hostAddress);
+
     connect(socket, &QUdpSocket::readyRead, this, &XplaneAdapter::OnDataReceived);
 
     QTimer *heartbeatTimer = new QTimer(this);
@@ -277,7 +286,7 @@ void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t 
     data.insert(13, dataRef.c_str());
     data.resize(413);
 
-    socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, AppConfig::getInstance()->XplaneUdpPort);
+    socket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
 }
 
 void XplaneAdapter::setDataRefValue(std::string dataRef, float value)
@@ -290,7 +299,7 @@ void XplaneAdapter::setDataRefValue(std::string dataRef, float value)
     data.insert(9, dataRef.c_str());
     data.resize(509);
 
-    socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, AppConfig::getInstance()->XplaneUdpPort);
+    socket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
 }
 
 void XplaneAdapter::sendCommand(std::string command)
@@ -302,7 +311,7 @@ void XplaneAdapter::sendCommand(std::string command)
     data.insert(5, command.c_str());
     data.resize(command.length() + 6);
 
-    socket->writeDatagram(data.data(), data.size(), QHostAddress::LocalHost, AppConfig::getInstance()->XplaneUdpPort);
+    socket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
 }
 
 void XplaneAdapter::setTransponderCode(int code)
