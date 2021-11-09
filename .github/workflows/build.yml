@@ -69,6 +69,8 @@ jobs:
         with:
           dir: ${{ github.workspace }}
           plugins: qt appimage
+        run: |
+          export QML_SOURCES_PATHS=${{ github.workspace }}/Resources
       
       - name: Create AppImage
         run: |
@@ -110,7 +112,7 @@ jobs:
   
   build-windows:
 
-    #if: ${{ false }}
+    if: ${{ false }}
 
     runs-on: windows-latest
 
@@ -195,7 +197,7 @@ jobs:
   
   build-macos:
 
-    #if: ${{ false }}
+    if: ${{ false }}
   
     runs-on: macos-latest
 
