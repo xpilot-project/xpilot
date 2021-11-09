@@ -344,14 +344,6 @@ if (UNIX)
     set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libopus.a)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libportaudio.a)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
-
-    if(ALSA_FOUND)
-        set( ALSA_LIBRARIES ${ALSA_LIBRARY} )
-    endif()
-
-    if(PulseAudio_FOUND)
-        set( PULSE_LIBRARIES ${PulseAudio_LIBRARIES})
-    endif()
 endif ()
 
 if (APPLE)
@@ -387,9 +379,7 @@ target_link_libraries(${PROJECT_NAME}
     ${VATSIM_AUTH_LIBRARY}
     ${COREFOUNDATION}
     ${COREAUDIO}
-    ${AUDIOTOOLBOX}
-    ${ALSA_LIBRARIES}
-    ${PULSE_LIBRARIES})
+    ${AUDIOTOOLBOX})
 
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PUBLIC _USE_MATH_DEFINES)
