@@ -344,6 +344,8 @@ if (UNIX)
     set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libopus.a)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libportaudio.a)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
+
+    target_link_options(${PROJECT_NAME} PRIVATE -lasound)
 endif ()
 
 if (APPLE)
