@@ -3,5 +3,5 @@ Type=Application
 Name=xPilot
 Comment=X-Plane pilot client for the VATSIM network
 Exec=xPilot
-Icon=xpilot
+Icon=xPilot
 Categories=Game;

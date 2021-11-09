@@ -74,7 +74,7 @@ jobs:
         run: |
           export QML_SOURCES_PATHS=${{ github.workspace }}/Resources
           mkdir -p appdir/usr/bin
-          ${{ github.workspace }}/linuxdeploy-x86_64.AppImage --plugin=qt --output=appimage --create-desktop-file --executable=${{ github.workspace }}/build/bin/xPilot --appdir=appdir --icon-file=xPilot.png
+          ${{ github.workspace }}/linuxdeploy-x86_64.AppImage --plugin=qt --output=appimage --desktop-file=${{ github.workspace }}/xpilot.desktop --executable=${{ github.workspace }}/build/bin/xPilot --appdir=appdir --icon-file=xPilot.png
           mkdir -p ${{ github.workspace }}/output && mv xPilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
 
       - name: Get version
