@@ -345,9 +345,6 @@ if (UNIX)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libportaudio.a)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
 
-    find_package(ALSA)
-    find_package(PulseAudio)
-    
     if(ALSA_FOUND)
         set( ALSA_LIBRARIES ${ALSA_LIBRARY} )
     endif()

@@ -29,10 +29,6 @@ jobs:
       IB_URL: https://installbuilder.com/installbuilder-enterprise-21.9.0-linux-x64-installer.run
 
     steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get install libasound2-dev
-          
       - uses: actions/checkout@v2
         with:
           submodules: recursive
