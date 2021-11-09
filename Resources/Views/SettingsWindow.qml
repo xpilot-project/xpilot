@@ -39,12 +39,14 @@ Window {
         function onInputDevicesChanged() {
             if(inputDeviceListLoaded) {
                 inputDeviceList.model = audio.InputDevices;
+                inputDeviceList.currentIndex = -1;
             }
         }
 
         function onOutputDevicesChanged() {
             if(outputDeviceListLoaded) {
                 outputDeviceList.model = audio.OutputDevices;
+                outputDeviceList.currentIndex = -1;
             }
         }
 
