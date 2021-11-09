@@ -345,7 +345,7 @@ if (UNIX)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libportaudio.a)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
 
-    target_link_options(${PROJECT_NAME} PRIVATE -lasound)
+    find_library(ALSA_LIBRARY NAMES asound)
 endif ()
 
 if (APPLE)
@@ -381,7 +381,8 @@ target_link_libraries(${PROJECT_NAME}
     ${VATSIM_AUTH_LIBRARY}
     ${COREFOUNDATION}
     ${COREAUDIO}
-    ${AUDIOTOOLBOX})
+    ${AUDIOTOOLBOX}
+    ${ALSA_LIBRARY})
 
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PUBLIC _USE_MATH_DEFINES)
