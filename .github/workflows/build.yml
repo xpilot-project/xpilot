@@ -174,10 +174,11 @@ jobs:
           echo "XPILOT_BIN_DIR=`pwd`" >> $GITHUB_ENV
 
       - name: Copy OpenSSL Libraries
+        working-directory: ${{ github.workspace }}\externals\windows
         shell: bash
         run: |
-          cp ${{ github.workspace }}/externals/windows/libcrypto-1_1-x64.dll ${{ github.workspace }}\build\bin\
-          cp ${{ github.workspace }}/externals/windows/libssl-1_1-x64.dll ${{ github.workspace }}\build\bin\
+          cp libcrypto-1_1-x64.dll ${{ github.workspace }}\build\bin\
+          cp libssl-1_1-x64.dll ${{ github.workspace }}\build\bin\
 
       - name: Get version
         working-directory: ${{ github.workspace }}
