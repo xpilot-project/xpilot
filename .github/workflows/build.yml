@@ -21,7 +21,7 @@ jobs:
   
   build-linux:
 
-    #if: ${{ false }}
+    if: ${{ false }}
 
     runs-on: ubuntu-latest
 
@@ -78,7 +78,13 @@ jobs:
         run: |
           export QML_SOURCES_PATHS=${{ github.workspace }}/Resources
           mkdir -p appdir/usr/bin
-          ${{ github.workspace }}/linuxdeploy-x86_64.AppImage --plugin=qt --output=appimage --desktop-file=${{ github.workspace }}/xpilot.desktop --executable=${{ github.workspace }}/build/bin/xPilot --appdir=appdir --icon-file=xPilot.png
+          ${{ github.workspace }}/linuxdeploy-x86_64.AppImage \
+            --plugin=qt \
+            --output=appimage \
+            --desktop-file=${{ github.workspace }}/xpilot.desktop \
+            --executable=${{ github.workspace }}/build/bin/xPilot \
+            --appdir=appdir \
+            --icon-file=xPilot.png
           mkdir -p ${{ github.workspace }}/output && mv xPilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
 
       - name: Get version
@@ -115,7 +121,7 @@ jobs:
   
   build-windows:
 
-    if: ${{ false }}
+    #if: ${{ false }}
 
     runs-on: windows-latest
 
@@ -166,6 +172,12 @@ jobs:
           ${{ env.Qt5_DIR }}/bin/windeployqt.exe xPilot.exe \
           -qmldir="${{ github.workspace}}/Resources"
           echo "XPILOT_BIN_DIR=`pwd`" >> $GITHUB_ENV
+
+      - name: Copy OpenSSL Libraries
+        shell: bash
+        run: |
+          cp ${{ github.workspace }}/externals/libcrypto-1_1-x64.dll ${{ github.workspace }}\build\bin
+          cp ${{ github.workspace }}/externals/libssl-1_1-x64.dll ${{ github.workspace }}\build\bin
 
       - name: Get version
         working-directory: ${{ github.workspace }}
