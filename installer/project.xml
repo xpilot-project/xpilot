@@ -165,7 +165,7 @@
                     <runInTerminal>0</runInTerminal>
                     <windowsExec>${installdir}/${product_shortname}.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>
-                    <windowsIcon>${installdir}/xpilot.ico</windowsIcon>
+                    <windowsIcon></windowsIcon>
                     <windowsPath></windowsPath>
                 </startMenuShortcut>
             </startMenuShortcutList>
