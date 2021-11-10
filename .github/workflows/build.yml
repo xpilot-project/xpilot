@@ -176,8 +176,8 @@ jobs:
       - name: Copy OpenSSL Libraries
         shell: bash
         run: |
-          cp ${{ github.workspace }}/externals/libcrypto-1_1-x64.dll ${{ github.workspace }}\build\bin
-          cp ${{ github.workspace }}/externals/libssl-1_1-x64.dll ${{ github.workspace }}\build\bin
+          cp ${{ github.workspace }}/externals/windows/libcrypto-1_1-x64.dll ${{ github.workspace }}\build\bin
+          cp ${{ github.workspace }}/externals/windows/libssl-1_1-x64.dll ${{ github.workspace }}\build\bin
 
       - name: Get version
         working-directory: ${{ github.workspace }}
