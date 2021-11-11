@@ -1,0 +1,73 @@
+#include "src/common/build_config.h"
+#include <QString>
+
+const ushort xpilot::BuildConfig::VatsimClientId()
+{
+    return @VATSIM_CLIENT_ID@;
+}
+
+const QString xpilot::BuildConfig::VatsimClientKey()
+{
+	return "@VATSIM_CLIENT_KEY@";
+}
+
+const quint64 xpilot::BuildConfig::ConfigEncryptionKey()
+{
+    return @CONFIG_ENCRYPTION_KEY@;
+}
+
+const bool xpilot::BuildConfig::isVelocityBuild()
+{
+    return @VELOCITY_BUILD@;
+}
+
+const QString xpilot::BuildConfig::githubRepoApiUrl()
+{
+    return "@GITHUB_URL@";
+}
+
+const QString xpilot::BuildConfig::getPlatformString()
+{
+    static const QString p([]
+    {
+        if(xpilot::BuildConfig::isRunningOnLinuxPlatform()) return QString("Linux");
+        if(xpilot::BuildConfig::isRunningOnMacOSPlatform()) return QString("MacOS");
+        if(xpilot::BuildConfig::isRunningOnWindowsPlatform()) return QString("Windows");
+        return QString("unknown");
+    }());
+    return p;
+}
+
+constexpr int xpilot::BuildConfig::versionMajor()
+{
+    return @VERSION_MAJOR@;
+}
+
+constexpr int xpilot::BuildConfig::versionMinor()
+{
+    return @VERSION_MINOR@;
+}
+
+constexpr int xpilot::BuildConfig::versionPatch()
+{
+    return @VERSION_PATCH@;
+}
+
+const QVersionNumber xpilot::BuildConfig::getVersion()
+{
+    static const QVersionNumber v { versionMajor(), versionMinor(), versionPatch() };
+    return v;
+}
+
+const QString xpilot::BuildConfig::getVersionString()
+{
+    static const QString s(getVersion().toString());
+    return s;
+}
+
+const QString xpilot::BuildConfig::getShortVersionString()
+{
+    static const QVersionNumber v { versionMajor(), versionMinor(), versionPatch() };
+    static const QString s(v.toString());
+    return s;
+}

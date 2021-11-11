@@ -12,6 +12,8 @@ env:
   VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
   VATSIM_CLIENT_KEY: ${{ secrets.VATSIM_CLIENT_KEY }}
   CONFIG_ENCRYPTION_KEY: ${{ secrets.CONFIG_ENCRYPTION_KEY }}
+  CLIENT_DIR: ${{ github.workspace }}/client
+  PLUGIN_DIR: ${{ github.workspace }}/plugin
   IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
   IB_DIR: ../ib
 
@@ -21,7 +23,7 @@ jobs:
   
   build-linux:
 
-    if: ${{ false }}
+    #if: ${{ false }}
 
     runs-on: ubuntu-latest
 
@@ -31,17 +33,12 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          sudo apt-get install libasound2-dev
+          sudo apt-get update
+          sudo apt-get install libasound2-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev
           
       - uses: actions/checkout@v2
         with:
           submodules: recursive
-
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-            setup-python: false
-            version: ${{ env.QT_VERSION }}
           
       - name: Install conan
         run: |
@@ -49,22 +46,63 @@ jobs:
           pip3 install conan
           pip3 install conan_package_tools
 
-      - name: Initialize CMake
-        run: |
-          cmake -E make_directory ${{ github.workspace }}/build
+      ### Buid Plugin ###
 
-      - name: Install conan packages
-        working-directory: ${{ github.workspace }}/build
+      - name: Create plugin build directory
+        working-directory: ${{ env.PLUGIN_DIR }}
+        run: |
+          cmake -E make_directory build
+
+      - name: Install plugin conan packages
+        working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
           conan install ..
 
-      - name: CMake
-        working-directory: ${{ github.workspace }}/build
+      - name: Plugin CMake
+        working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
-          cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
+          cmake ..
 
-      - name: Build
-        working-directory: ${{ github.workspace }}/build
+      - name: Build plugin
+        working-directory: ${{ env.PLUGIN_DIR }}/build
+        run: |
+          cmake --build . --config ${{ env.BUILD_TYPE }}
+
+      - name: Package plugin
+        run: |
+          mkdir -p ${{ github.workspace }}/xPilot/lin_x64
+          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.xpl ${{ github.workspace }}/xPilot/lin_x64
+          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
+
+      ### Build Client ###
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+            setup-python: false
+            version: ${{ env.QT_VERSION }}
+
+      - name: Create client build directory
+        working-directory: ${{ env.CLIENT_DIR }}
+        run: |
+          cmake -E make_directory build
+
+      - name: Install client conan packages
+        working-directory: ${{ env.CLIENT_DIR }}/build
+        run: |
+          conan install ..
+
+      - name: Client CMake
+        working-directory: ${{ env.CLIENT_DIR }}/build
+        run: |
+          cmake ${{ env.CLIENT_DIR }} \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
+            -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
+            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
+
+      - name: Build client
+        working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
@@ -76,19 +114,18 @@ jobs:
       
       - name: Create AppImage
         run: |
-          export QML_SOURCES_PATHS=${{ github.workspace }}/Resources
+          export QML_SOURCES_PATHS=${{ env.CLIENT_DIR }}/Resources
           mkdir -p appdir/usr/bin
-          ${{ github.workspace }}/linuxdeploy-x86_64.AppImage \
+          linuxdeploy-x86_64.AppImage \
             --plugin=qt \
             --output=appimage \
-            --desktop-file=${{ github.workspace }}/xpilot.desktop \
-            --executable=${{ github.workspace }}/build/bin/xPilot \
+            --desktop-file=${{ env.CLIENT_DIR }}/xpilot.desktop \
+            --executable=${{ env.CLIENT_DIR }}/build/bin/xPilot \
             --appdir=appdir \
-            --icon-file=xPilot.png
+            --icon-file=${{ env.CLIENT_DIR }}/xPilot.png
           mkdir -p ${{ github.workspace }}/output && mv xPilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
 
       - name: Get version
-        working-directory: ${{ github.workspace }}
         shell: bash
         run: |
           echo "XPILOT_VERSION=$(cat xpilot.json | cat xpilot.json | jq -r '"\(.version.major).\(.version.minor).\(.version.patch)"')" >> $GITHUB_ENV
@@ -101,8 +138,9 @@ jobs:
           ./ib.run --mode unattended --prefix ${{ env.IB_DIR }}
           ${{ env.IB_DIR }}/bin/builder --version
           echo "$IB_LICENSE" > lic.xml
-          echo "INSTALLER_SRC_PREFIX=$(pwd)" >> $GITHUB_ENV
+          echo "INSTALLER_SRC_PREFIX=$(pwd)/client" >> $GITHUB_ENV
           echo "INSTALLER_BIN_PREFIX=${{ github.workspace }}/output" >> $GITHUB_ENV
+          echo "REPO_ROOT_PREFIX=$(pwd)" >> $GITHUB_ENV
 
       - name: Create installer
         shell: bash
@@ -112,10 +150,13 @@ jobs:
               --setvars project.outputDirectory=$(pwd) \
               --setvars project.version=${{ env.XPILOT_VERSION }}
 
-      - uses: actions/upload-artifact@v1
+      - name: Upload installer and plugin files
+        uses: actions/upload-artifact@v2
         with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run
-          path: xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run
+          name: xPilot-${{ env.XPILOT_VERSION }}-Linux.zip
+          path: |
+            xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run
+            xPilot/
 
   ########################## Build Windows ##########################
   
@@ -133,54 +174,84 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
+          
+      - name: Install Conan
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install conan
+          pip3 install conan_package_tools
+
+      ### Buid Plugin ###
+
+      - name: Create plugin build directory
+        working-directory: ${{ env.PLUGIN_DIR }}
+        run: |
+          cmake -E make_directory build
+
+      - name: Install plugin conan packages
+        working-directory: ${{ env.PLUGIN_DIR }}/build
+        run: |
+          conan install .. -s compiler.runtime=MT
+
+      - name: Plugin CMake
+        working-directory: ${{ env.PLUGIN_DIR }}/build
+        run: |
+          cmake ..
+
+      - name: Build plugin
+        working-directory: ${{ env.PLUGIN_DIR }}/build
+        run: |
+          cmake --build . --config ${{ env.BUILD_TYPE }}
+
+      - name: Package plugin
+        run: |
+          mkdir -p ${{ github.workspace }}/xPilot/win_x64
+          cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.xpl ${{ github.workspace }}/xPilot/win_x64
+          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
+
+      ### Build Client ###
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
             setup-python: false
             version: ${{ env.QT_VERSION }}
-          
-      - name: Install conan
-        run: |
-          python3 -m pip install --upgrade pip
-          pip3 install conan
-          pip3 install conan_package_tools
 
-      - name: Initialize CMake
+      - name: Create client build directory
+        working-directory: ${{ env.CLIENT_DIR }}
         run: |
-          cmake -E make_directory ${{ github.workspace }}/build
+          cmake -E make_directory build
 
-      - name: Install conan packages
-        working-directory: ${{ github.workspace }}/build
+      - name: Install client conan packages
+        working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
           conan install ..
 
-      - name: CMake
-        working-directory: ${{ github.workspace }}/build
+      - name: Client CMake
+        working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
           cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
 
-      - name: Build
-        working-directory: ${{ github.workspace }}/build
+      - name: Build client
+        working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Qt Deploy
-        working-directory: ${{ github.workspace }}\build\bin
+      - name: Deploy Qt application
+        working-directory: ${{ env.CLIENT_DIR }}/build/bin
         shell: bash
         run: |
           ${{ env.Qt5_DIR }}/bin/windeployqt.exe xPilot.exe \
-          -qmldir="${{ github.workspace}}/Resources"
+          -qmldir="${{ env.CLIENT_DIR }}/Resources"
           echo "XPILOT_BIN_DIR=`pwd`" >> $GITHUB_ENV
 
-      - name: Copy OpenSSL Libraries
+      - name: Copy OpenSSL libraries
         shell: bash
         run: |
-          cp externals/windows/libcrypto-1_1-x64.dll "$XPILOT_BIN_DIR"
-          cp externals/windows/libssl-1_1-x64.dll "$XPILOT_BIN_DIR"
+          cp client/externals/windows/libcrypto-1_1-x64.dll "$XPILOT_BIN_DIR"
+          cp client/externals/windows/libssl-1_1-x64.dll "$XPILOT_BIN_DIR"
 
       - name: Get version
-        working-directory: ${{ github.workspace }}
         shell: bash
         run: |
           echo "XPILOT_VERSION=$(cat xpilot.json | cat xpilot.json | jq -r '"\(.version.major).\(.version.minor).\(.version.patch)"')" >> $GITHUB_ENV
@@ -192,8 +263,9 @@ jobs:
           ./ib.exe --mode unattended --prefix ${{ env.IB_DIR  }}
           ${{ env.IB_DIR }}/bin/builder-cli.exe --version
           echo "$IB_LICENSE" > lic.xml
-          echo "INSTALLER_SRC_PREFIX=$(pwd)" >> $GITHUB_ENV
+          echo "INSTALLER_SRC_PREFIX=$(pwd)/client" >> $GITHUB_ENV
           echo "INSTALLER_BIN_PREFIX=$XPILOT_BIN_DIR" >> $GITHUB_ENV
+          echo "REPO_ROOT_PREFIX=$(pwd)" >> $GITHUB_ENV
 
       - name: Create installer
         shell: bash
@@ -203,16 +275,19 @@ jobs:
               --setvars project.outputDirectory=$(pwd) \
               --setvars project.version=${{ env.XPILOT_VERSION }}
 
-      - uses: actions/upload-artifact@master
+      - name: Upload installer and plugin files
+        uses: actions/upload-artifact@v2
         with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe
-          path: xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe
+          name: xPilot-${{ env.XPILOT_VERSION }}-Windows.zip
+          path: |
+            xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe
+            xPilot/
 
   ########################## Build macOS ##########################
   
   build-macos:
 
-    if: ${{ false }}
+    #if: ${{ false }}
   
     runs-on: macos-latest
 
@@ -224,57 +299,88 @@ jobs:
         with:
           submodules: recursive
       
-      - name: Developer certificate
+      - name: Load developer certificate
         env:
           CERTIFICATE: ${{ secrets.APPLE_SIGNING_CERTIFICATE }}
           CERTIFICATE_PASSWORD: ${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
         run: ./scripts/make_keychain.sh
+          
+      - name: Install Conan
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install conan
+          pip3 install conan_package_tools
+
+      ### Buid Plugin ###
+
+      - name: Create plugin build directory
+        working-directory: ${{ env.PLUGIN_DIR }}
+        run: |
+          cmake -E make_directory build
+
+      - name: Install plugin conan packages
+        working-directory: ${{ env.PLUGIN_DIR }}/build
+        run: |
+          conan install ..
+
+      - name: Plugin CMake
+        working-directory: ${{ env.PLUGIN_DIR }}/build
+        run: |
+          cmake ..
+
+      - name: Build plugin
+        working-directory: ${{ env.PLUGIN_DIR }}/build
+        run: |
+          cmake --build . --config ${{ env.BUILD_TYPE }}
+
+      - name: Package plugin
+        run: |
+          mkdir -p ${{ github.workspace }}/xPilot/mac_x64
+          cp ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.xpl ${{ github.workspace }}/xPilot/mac_x64
+          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
+
+      ### Build Client ###
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
             setup-python: false
             version: ${{ env.QT_VERSION }}
-          
-      - name: Install conan
-        run: |
-          python3 -m pip install --upgrade pip
-          pip3 install conan
-          pip3 install conan_package_tools
 
-      - name: Initialize CMake
+      - name: Create client build directory
+        working-directory: ${{ env.CLIENT_DIR }}
         run: |
-          cmake -E make_directory ${{ github.workspace }}/build
+          cmake -E make_directory build
 
-      - name: Install conan packages
-        working-directory: ${{ github.workspace }}/build
+      - name: Install client conan packages
+        working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
           conan install ..
 
-      - name: CMake
-        working-directory: ${{ github.workspace }}/build
+      - name: Client CMake
+        working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
-          cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
+          cmake .. \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
+            -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
+            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
 
-      - name: Build
-        working-directory: ${{ github.workspace }}/build
+      - name: Build client
+        working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Qt Deploy
-        working-directory: ${{ github.workspace }}/build/bin
+      - name: Deploy Qt app bundle
+        working-directory: ${{ env.CLIENT_DIR }}/build/bin
         run: |
           ${{ env.Qt5_DIR }}/bin/macdeployqt xPilot.app \
-          -qmldir=${{ github.workspace}}/Resources \
-          -executable=xPilot.app/Contents/MacOS/xPilot
+          -qmldir=${{ env.CLIENT_DIR }}/Resources \
+          -executable=xPilot.app/Contents/MacOS/xPilot \
+          -sign-for-notarization="${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}"
           echo "XPILOT_BIN_DIR=`pwd`" >> $GITHUB_ENV
 
-      - name: Code signing
-        working-directory: ${{ github.workspace }}/build/bin
-        run: codesign --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --timestamp --deep -o runtime xPilot.app
-
       - name: Get version
-        working-directory: ${{ github.workspace }}
         shell: bash
         run: |
           echo "XPILOT_VERSION=$(cat xpilot.json | cat xpilot.json | jq -r '"\(.version.major).\(.version.minor).\(.version.patch)"')" >> $GITHUB_ENV
@@ -287,8 +393,9 @@ jobs:
           /Volumes/InstallBuilder\ Enterprise/*.app/Contents/MacOS/installbuilder.sh --mode unattended --prefix ${{ env.IB_DIR }}
           ${{ env.IB_DIR }}/bin/builder --version
           echo "$IB_LICENSE" > lic.xml
-          echo "INSTALLER_SRC_PREFIX=$(pwd)" >> $GITHUB_ENV
+          echo "INSTALLER_SRC_PREFIX=$(pwd)/client" >> $GITHUB_ENV
           echo "INSTALLER_BIN_PREFIX=$XPILOT_BIN_DIR" >> $GITHUB_ENV
+          echo "REPO_ROOT_PREFIX=$(pwd)" >> $GITHUB_ENV
 
       - name: Create installer
         shell: bash
@@ -300,7 +407,7 @@ jobs:
               --setvars apple_signing_identity=${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }} \
               --setvars password=${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
 
-      - name: Notarize Installer
+      - name: Notarize installer
         shell: bash
         run: |
           xcrun altool --notarize-app \
@@ -309,7 +416,10 @@ jobs:
           --password "${{ secrets.NOTARIZATION_PASSWORD }}" \
           --file xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
 
-      - uses: actions/upload-artifact@master
+      - name: Upload installer and plugin files
+        uses: actions/upload-artifact@v2
         with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
-          path: xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
+          name: xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip
+          path: |
+            xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
+            xPilot/

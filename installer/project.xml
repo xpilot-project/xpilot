@@ -2,7 +2,7 @@
     <shortName>xPilot</shortName>
     <fullName>xPilot</fullName>
     <version>2.0.0</version>
-    <licenseFile>${src_prefix}/LICENSE</licenseFile>
+    <licenseFile>${root_prefix}/LICENSE</licenseFile>
     <wrapLicenseFileText>0</wrapLicenseFileText>
     <osxSigningIdentity>${apple_signing_identity}</osxSigningIdentity>
     <osxApplicationBundleIdentifier>com.vatsim.xpilot</osxApplicationBundleIdentifier>
@@ -180,13 +180,6 @@
             </ruleList>
         </setInstallerVariable>
         <setInstallerVariable>
-            <name>src_prefix</name>
-            <value>C:\Users\Justin\Documents\GitHub\xpilot-project\XpilotQml\XpilotQml</value>
-            <ruleList>
-                <compareText logic="equals" text="${env(INSTALLER_SRC_PREFIX)}" value=""/>
-            </ruleList>
-        </setInstallerVariable>
-        <setInstallerVariable>
             <name>bin_prefix</name>
             <value>${env(INSTALLER_BIN_PREFIX)}</value>
             <ruleList>
@@ -194,10 +187,10 @@
             </ruleList>
         </setInstallerVariable>
         <setInstallerVariable>
-            <name>bin_prefix</name>
-            <value>C:\Users\Justin\Documents\GitHub\xpilot-project\XpilotQml\build-XpilotQml-Desktop_Qt_5_15_2_MSVC2019_64bit-Release\bin</value>
+            <name>root_prefix</name>
+            <value>${env(REPO_ROOT_PREFIX)}</value>
             <ruleList>
-                <compareText logic="equals" text="${env(INSTALLER_BIN_PREFIX)}" value=""/>
+                <compareText logic="does_not_equal" text="${env(REPO_ROOT_PREFIX)}" value=""/>
             </ruleList>
         </setInstallerVariable>
         <runProgram>
@@ -299,4 +292,3 @@
         </directoryParameter>
     </parameterList>
 </project>
-
