@@ -1,6 +1,10 @@
 name: Build xPilot
 
-on: push
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 concurrency:
   group: ${{ github.ref }}
@@ -427,3 +431,24 @@ jobs:
           path: |
             xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
             xPilot/
+
+  ########################## Create Release ##########################
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "xPilot*.zip"
+          name: xPilot v${{ env.XPILOT_VERSION }}
+          prerelease: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
