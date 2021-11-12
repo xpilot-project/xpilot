@@ -32,6 +32,8 @@ namespace xpilot
         WSAStartup(wVersionRequested, &wsaData);
 #endif
 
+        afv_native::setLogger(nullptr);
+
         ev_base = event_base_new();
         m_client = std::make_shared<afv_native::Client>(ev_base, 2, "xPilot");
         m_client->ClientEventCallback.addCallback(nullptr, [&](afv_native::ClientEventType evt, void* data)

@@ -6,6 +6,8 @@ libcurl/7.75.0
 libevent/2.1.12
 zeromq/4.3.4
 cppzmq/4.8.1
+sentry-native/0.4.12
+sentry-crashpad/0.4.12
 
 [generators]
 cmake

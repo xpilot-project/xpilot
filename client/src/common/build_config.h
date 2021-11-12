@@ -32,6 +32,8 @@ namespace xpilot
 
         static bool isBetaVersion();
         static const int versionBeta();
+
+        static const QString getSentryDsn();
     };
 }
 

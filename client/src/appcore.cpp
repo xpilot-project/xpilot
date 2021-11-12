@@ -14,6 +14,7 @@
 #include "audio/afv.h"
 #include "common/build_config.h"
 #include "common/versioncheck.h"
+#include "sentry.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -26,11 +27,19 @@
 #include <QObject>
 #include <QQuickWindow>
 #include <QSslSocket>
+#include <QScopeGuard>
 
 using namespace xpilot;
 
 int xpilot::Main(int argc, char* argv[])
 {
+    sentry_options_t *options = sentry_options_new();
+    sentry_options_set_dsn(options, BuildConfig::getSentryDsn().toStdString().c_str());
+    sentry_options_set_release(options, BuildConfig::getVersionString().toStdString().c_str());
+    sentry_init(options);
+
+    auto sentryClose = qScopeGuard([]{ sentry_close(); });
+
     QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 

@@ -58,6 +58,10 @@ if (NOT CONFIG_ENCRYPTION_KEY)
     set(CONFIG_ENCRYPTION_KEY 0)
 endif ()
 
+if(NOT SENTRY_DSN)
+    set(SENTRY_DSN "")
+endif ()
+
 configure_file(src/common/build_config.cpp.in ${CMAKE_BINARY_DIR}/generated/build_config.cpp)
 include_directories(${CMAKE_BINARY_DIR}/generated)
 
@@ -346,6 +350,11 @@ if (WIN32)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/portaudio.lib)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/speexdsp.lib)
     set(ALSA_LIBRARY "")
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CONAN_BIN_DIRS_SENTRY-CRASHPAD}/crashpad_handler.exe"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endif ()
 
 if (UNIX)
@@ -355,6 +364,11 @@ if (UNIX)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
 
     find_library(ALSA_LIBRARY NAMES asound)
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CONAN_BIN_DIRS_SENTRY-CRASHPAD}/crashpad_handler"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endif ()
 
 if (APPLE)
@@ -363,7 +377,7 @@ if (APPLE)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libportaudio.a)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libspeexdsp.a)
     set(ALSA_LIBRARY "")
-    
+
     find_library(COREFOUNDATION CoreFoundation)
     find_library(COREAUDIO CoreAudio)
     find_library(AUDIOTOOLBOX AudioToolbox)
@@ -375,6 +389,11 @@ if (APPLE)
         COMMAND cp ${CMAKE_SOURCE_DIR}/xpilot.icns ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources/xpilot.icns)
 
     add_dependencies(${PROJECT_NAME} osx_bundle_dirs)
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CONAN_BIN_DIRS_SENTRY-CRASHPAD}/crashpad_handler"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endif ()
 
 target_link_libraries(${PROJECT_NAME}
@@ -386,6 +405,8 @@ target_link_libraries(${PROJECT_NAME}
     CONAN_PKG::libevent
     CONAN_PKG::zeromq
     CONAN_PKG::cppzmq
+    CONAN_PKG::sentry-native
+    CONAN_PKG::sentry-crashpad
     ${OPUS_LIBRARY}
     ${PORTAUDIO_LIBRARY}
     ${SPEEX_LIBRARY}

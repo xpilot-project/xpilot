@@ -71,6 +71,11 @@ const QVersionNumber xpilot::BuildConfig::getVersion()
 
 const QString xpilot::BuildConfig::getVersionString()
 {
+    if(isBetaVersion()) {
+        static const QString s(getVersion().toString() + QString("-beta.%1").arg(versionBeta()));
+        return s;
+    }
+
     static const QString s(getVersion().toString());
     return s;
 }
@@ -80,4 +85,9 @@ const QString xpilot::BuildConfig::getShortVersionString()
     static const QVersionNumber v { versionMajor(), versionMinor(), versionPatch() };
     static const QString s(v.toString());
     return s;
+}
+
+const QString xpilot::BuildConfig::getSentryDsn()
+{
+    return "@SENTRY_DSN@";
 }
