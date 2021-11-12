@@ -440,16 +440,23 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v2
-        with:
-          path: ${{ github.workspace }}
+
+      - name: Get version from tag
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//:1}
+
+      - name: Repackage
+        run: |
+          mv xPilot*MacOS.zip xPilot-${{ steps.get_version.outputs.VERSION }}-MacOS
+          mv xPilot*Windows.zip xPilot-${{ steps.get_version.outputs.VERSION }}-Windows
+          mv xPilot*Linux.zip xPilot-${{ steps.get_version.outputs.VERSION }}-Linux
+          zip -r xPilot-${{ steps.get_version.outputs.VERSION }}-MacOS.zip xPilot*MacOS/
+          zip -r xPilot-${{ steps.get_version.outputs.VERSION }}-Windows.zip xPilot*Windows/
+          zip -r xPilot-${{ steps.get_version.outputs.VERSION }}-Linux.zip xPilot*Linux/
 
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: ${{ github.workspace }}
-
-      - name: Get version from tag
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
 
       - name: Create release
         uses: softprops/action-gh-release@v1

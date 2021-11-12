@@ -349,6 +349,7 @@ if (WIN32)
     set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/opus.lib)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/portaudio.lib)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/speexdsp.lib)
+    set(AFV_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/afv_native.lib)
     set(ALSA_LIBRARY "")
 
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -362,6 +363,7 @@ if (UNIX)
     set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libopus.a)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libportaudio.a)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
+    set(AFV_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libafv_native.a)
 
     find_library(ALSA_LIBRARY NAMES asound)
 
@@ -376,6 +378,7 @@ if (APPLE)
     set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libopus.a)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libportaudio.a)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libspeexdsp.a)
+    set(AFV_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libafv_native.a)
     set(ALSA_LIBRARY "")
 
     find_library(COREFOUNDATION CoreFoundation)
@@ -407,9 +410,7 @@ target_link_libraries(${PROJECT_NAME}
     CONAN_PKG::cppzmq
     CONAN_PKG::sentry-native
     CONAN_PKG::sentry-crashpad
-    ${OPUS_LIBRARY}
-    ${PORTAUDIO_LIBRARY}
-    ${SPEEX_LIBRARY}
+    ${AFV_LIBRARY}
     ${VATSIM_AUTH_LIBRARY}
     ${COREFOUNDATION}
     ${COREAUDIO}
