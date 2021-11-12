@@ -4,9 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-    branches:
-      - master
-  pull_request:
 
 concurrency:
   group: ${{ github.ref }}
@@ -438,7 +435,6 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
     needs: [build-linux, build-windows, build-macos]
 
     steps:
@@ -446,10 +442,13 @@ jobs:
         uses: actions/download-artifact@v2
 
       - name: Create release
-        uses: ncipollo/release-action@v1
+        uses: softprops/action-gh-release@v1
         with:
-          artifacts: "xPilot*.zip"
-          name: xPilot v${{ env.XPILOT_VERSION }}
+          name: xPilot ${{ github.ref }}
+          body: xPilot ${{ github.ref }}
           prerelease: true
           draft: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            xPilot*.zip
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
