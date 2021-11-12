@@ -29,6 +29,9 @@ namespace xpilot
         static constexpr int versionMajor();
         static constexpr int versionMinor();
         static constexpr int versionPatch();
+
+        static bool isBetaVersion();
+        static const int versionBeta();
     };
 }
 

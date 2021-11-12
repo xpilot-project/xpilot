@@ -28,9 +28,17 @@ file(READ ${CMAKE_SOURCE_DIR}/../xpilot.json XPILOT_JSON)
 
 string(JSON VELOCITY_BUILD GET ${XPILOT_JSON} velocity_build)
 string(JSON GITHUB_URL GET ${XPILOT_JSON} github_url)
+string(JSON IS_BETA_VERSION GET ${XPILOT_JSON} is_beta)
 string(JSON VERSION_MAJOR GET ${XPILOT_JSON} version major)
 string(JSON VERSION_MINOR GET ${XPILOT_JSON} version minor)
 string(JSON VERSION_PATCH GET ${XPILOT_JSON} version patch)
+string(JSON VERSION_BETA GET ${XPILOT_JSON} version beta)
+
+if (IS_BETA_VERSION)
+    set(IS_BETA_VERSION true)
+else()
+    set(IS_BETA_VERSION false)
+endif()
 
 if (VELOCITY_BUILD)
     set(VELOCITY_BUILD true)

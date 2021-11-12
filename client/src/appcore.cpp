@@ -121,5 +121,14 @@ void AppCore::DownloadServerList()
 void AppCore::PerformVersionCheck()
 {
     VersionCheck versionCheck;
-    versionCheck.readUpdateInfo();
+
+    connect(&versionCheck, &VersionCheck::newVersionAvailable, [=](QString version, QString url)
+    {
+        emit newVersionAvailable(version, url);
+    });
+    connect(&versionCheck, &VersionCheck::noUpdatesAvailable, [=](){
+       emit noUpdatesAvailable();
+    });
+
+    versionCheck.checkForUpdates();
 }

@@ -23,6 +23,8 @@ namespace xpilot
     signals:
         void serverListDownloaded(int count);
         void serverListDownloadError();
+        void newVersionAvailable(QString version, QString downloadUrl);
+        void noUpdatesAvailable();
 
     private:
         QQmlApplicationEngine* engine;

@@ -53,6 +53,16 @@ constexpr int xpilot::BuildConfig::versionPatch()
     return @VERSION_PATCH@;
 }
 
+bool xpilot::BuildConfig::isBetaVersion()
+{
+    return @IS_BETA_VERSION@;
+}
+
+const int xpilot::BuildConfig::versionBeta()
+{
+    return @VERSION_BETA@;
+}
+
 const QVersionNumber xpilot::BuildConfig::getVersion()
 {
     static const QVersionNumber v { versionMajor(), versionMinor(), versionPatch() };

@@ -113,9 +113,22 @@ Window {
         }
     }
 
+    MessageDialog {
+        id: newVersionDialog
+        property string downloadUrl: ""
+        title: "New xPilot Version Available"
+        text: "A new version of xPilot is available. Would you like to download and install it now?"
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            if(downloadUrl) {
+                Qt.openUrlExternally(downloadUrl)
+            }
+        }
+    }
+
     Component.onCompleted: {
         if(isVelocityBuild) {
-             appendMessage(`Welcome to xPilot Velocity Beta v${appVersion}`, colorYellow)
+            appendMessage(`Welcome to xPilot Velocity Beta v${appVersion}`, colorYellow)
         } else {
             appendMessage(`Welcome to xPilot v${appVersion}`, colorYellow)
         }
@@ -180,6 +193,15 @@ Window {
 
         function onServerListDownloadError(count) {
             appendMessage("Server list download failed. Using previously-cached server list.", colorRed)
+        }
+
+        function onNewVersionAvailable(version, downloadUrl) {
+            newVersionDialog.downloadUrl = downloadUrl
+            newVersionDialog.open()
+        }
+
+        function onNoUpdatesAvailable() {
+            appendMessage("Version check complete. You are running the latest version of xPilot.", colorYellow)
         }
     }
 

@@ -15,11 +15,11 @@ class VersionCheck : public QObject
 
 public:
     VersionCheck(QObject *parent = nullptr);
-    void readUpdateInfo();
-    void getUpdateInfo() const;
+    void checkForUpdates();
 
-private:
-
+signals:
+    void newVersionAvailable(QString versionNumber, QString downloadLink);
+    void noUpdatesAvailable();
 };
 
 #endif // VERSIONCHECK_H

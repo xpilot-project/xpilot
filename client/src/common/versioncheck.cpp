@@ -16,7 +16,7 @@ VersionCheck::VersionCheck(QObject *parent) :
 
 }
 
-void VersionCheck::readUpdateInfo()
+void VersionCheck::checkForUpdates()
 {
     QNetworkAccessManager manager;
     QByteArray response;
@@ -33,39 +33,91 @@ void VersionCheck::readUpdateInfo()
 
     if(!response.isEmpty())
     {
-        const QJsonValue release = QJsonDocument::fromJson(response).array().first();
+        bool isNewVersion = false;
+
+        auto release = QJsonDocument::fromJson(response).array().first();
+
+        if(release.isUndefined())
+        {
+            emit noUpdatesAvailable();
+            return;
+        }
 
         QString version = release[QLatin1String("tag_name")].toString();
         if(version.isEmpty() || version[0] != 'v') return;
         version.remove(0, 1);
-        if(containsChar(version, [](QChar c) { return c != '.' && !is09(c); })) return;
 
         bool published = !release[QLatin1String("draft")].toBool();
-        bool alpha = release[QLatin1String("prerelease")].toBool();
+        bool beta = release[QLatin1String("prerelease")].toBool();
 
-        for (const QJsonValue asset : release[QLatin1String("assets")].toArray())
+        if(!published) return;
+
+        int suffixIndex;
+        auto v = QVersionNumber::fromString(version, &suffixIndex);
+
+        QString betaIdentifier = version.mid(suffixIndex + 1);
+        if(beta && !betaIdentifier.isEmpty())
+        {
+            QRegularExpression rx("beta\\.(\\d+)", QRegularExpression::CaseInsensitiveOption);
+            QRegularExpressionMatch match = rx.match(betaIdentifier);
+            int betaNumber = match.captured(1).toInt();
+
+            if(BuildConfig::isBetaVersion())
+            {
+                if(betaNumber > BuildConfig::versionBeta())
+                {
+                    isNewVersion = true;
+                }
+            }
+        }
+        else
+        {
+            if(v > BuildConfig::getVersion())
+            {
+                isNewVersion = true;
+            }
+        }
+
+        if(!isNewVersion)
+        {
+            emit noUpdatesAvailable();
+            return;
+        }
+
+        auto assets = release[QLatin1String("assets")].toArray();
+
+        if(assets.isEmpty())
+        {
+            emit noUpdatesAvailable();
+            return;
+        }
+
+        for (const QJsonValue asset : assets)
         {
             QString name = asset[QLatin1String("name")].toString();
-            QString filename = QStringLiteral("v%1/%2").arg(version, name);
-            int size = asset[QLatin1String("size")].toInt();
+            QString downloadUrl = asset[QLatin1String("browser_download_url")].toString();
 
-            if(name.contains("windows"))
+            if(BuildConfig::isRunningOnWindowsPlatform())
             {
-
+                if(name.toLower().contains("windows"))
+                {
+                    emit newVersionAvailable(name, downloadUrl);
+                }
             }
-            else if(name.contains("macos"))
+            else if(BuildConfig::isRunningOnMacOSPlatform())
             {
-
+                if(name.toLower().contains("macos"))
+                {
+                    emit newVersionAvailable(name, downloadUrl);
+                }
             }
-            else if(name.contains("linux"))
+            else if(BuildConfig::isRunningOnLinuxPlatform())
             {
-
+                if(name.toLower().contains("linux"))
+                {
+                    emit newVersionAvailable(name, downloadUrl);
+                }
             }
         }
     }
-}
-
-void VersionCheck::getUpdateInfo() const
-{
-
 }
