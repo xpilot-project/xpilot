@@ -435,12 +435,11 @@ jobs:
   ########################## Create Release ##########################
 
   release:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: [build-linux, build-windows, build-macos]
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build-linux, build-windows, build-macos]
 
     steps:
-
       - name: Download artifacts
         uses: actions/download-artifact@v2
 
