@@ -447,12 +447,11 @@ jobs:
 
       - name: Create release
         uses: softprops/action-gh-release@v1
-        working-directory: ${{ github.workspace }}
         with:
           name: xPilot ${{ steps.get_version.outputs.VERSION }}
           prerelease: true
           draft: true
           files: |
-            xPilot*.zip
+            ${{ github.workspace }}/xPilot*.zip
         env:
           GITHUB_TOKEN: ${{ github.token }}
