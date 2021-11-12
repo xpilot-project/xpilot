@@ -155,15 +155,13 @@ jobs:
               --setvars project.outputDirectory=$(pwd) \
               --setvars project.version=${{ env.XPILOT_VERSION }}
 
-      - name: Create artifact bundle
-        run: |
-          zip -r xPilot-${{ env.XPILOT_VERSION }}-Linux.zip xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run xPilot/
-
       - name: Upload installer and plugin files
         uses: actions/upload-artifact@v2
         with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-Linux
-          path: xPilot-${{ env.XPILOT_VERSION }}-Linux.zip
+          name: xPilot-${{ env.XPILOT_VERSION }}-Linux.zip
+          path: |
+            xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run
+            xPilot/
 
   ########################## Build Windows ##########################
   
@@ -282,15 +280,13 @@ jobs:
               --setvars project.outputDirectory=$(pwd) \
               --setvars project.version=${{ env.XPILOT_VERSION }}
 
-      - name: Create artifact bundle
-        run: |
-          zip -r xPilot-${{ env.XPILOT_VERSION }}-Windows.zip xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe xPilot/
-
       - name: Upload installer and plugin files
         uses: actions/upload-artifact@v2
         with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-Windows
-          path: xPilot-${{ env.XPILOT_VERSION }}-Windows.zip
+          name: xPilot-${{ env.XPILOT_VERSION }}-Windows.zip
+          path: |
+            xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe
+            xPilot/
 
   ########################## Build macOS ##########################
   
@@ -427,15 +423,13 @@ jobs:
           --password "${{ secrets.NOTARIZATION_PASSWORD }}" \
           --file xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
 
-      - name: Create artifact bundle
-        run: |
-          zip -r xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg xPilot/
-
       - name: Upload installer and plugin files
         uses: actions/upload-artifact@v2
         with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-MacOS
-          path: xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip
+          name: xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip
+          path: |
+            xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
+            xPilot/
 
   ########################## Create Release ##########################
 
