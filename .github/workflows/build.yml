@@ -440,10 +440,12 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v2
+        with:
+          path: ${{ github.workspace }}
 
-      - name: Flatten directories
-        run: |
-          mv xPilot*/* .
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: ${{ github.workspace }}
 
       - name: Get version from tag
         id: get_version
