@@ -60,7 +60,7 @@ bool xpilot::BuildConfig::isBetaVersion()
 
 const int xpilot::BuildConfig::versionBeta()
 {
-    return @VERSION_BETA@;
+    return @BETA_NUMBER@;
 }
 
 const QVersionNumber xpilot::BuildConfig::getVersion()

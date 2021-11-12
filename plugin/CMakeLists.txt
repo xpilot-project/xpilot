@@ -14,9 +14,19 @@ set_property(GLOBAL PROPERTY CXX_STANDARD_REQUIRED 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD 17)
 
 file(READ ${CMAKE_SOURCE_DIR}/../xpilot.json XPILOT_JSON)
+string(JSON IS_BETA_VERSION GET ${XPILOT_JSON} is_beta)
+string(JSON BETA_NUMBER GET ${XPILOT_JSON} beta_number)
 string(JSON VERSION_MAJOR GET ${XPILOT_JSON} version major)
 string(JSON VERSION_MINOR GET ${XPILOT_JSON} version minor)
 string(JSON VERSION_PATCH GET ${XPILOT_JSON} version patch)
+
+if (IS_BETA_VERSION)
+    set(IS_BETA_VERSION true)
+    set(VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}-beta.${BETA_NUMBER})
+else()
+    set(IS_BETA_VERSION false)
+    set(VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+endif()
 
 configure_file(${CMAKE_SOURCE_DIR}/include/Constants.h.in ${CMAKE_SOURCE_DIR}/include/Constants.h @ONLY)
 

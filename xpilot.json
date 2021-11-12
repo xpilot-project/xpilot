@@ -2,10 +2,10 @@
   "velocity_build": false,
   "github_url": "https://api.github.com/repos/xpilot-project/xpilot/",
   "is_beta": true,
+  "beta_number": 1,
   "version": {
     "major": 2,
     "minor": 0,
-    "patch": 0,
-    "beta": 1
+    "patch": 0
   }
 }
