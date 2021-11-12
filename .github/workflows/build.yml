@@ -130,7 +130,7 @@ jobs:
       - name: Get version
         shell: bash
         run: |
-          echo "XPILOT_VERSION=$(cat xpilot.json | jq 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
+          echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
 
       - name: Setup InstallBuilder
         shell: bash
@@ -256,7 +256,7 @@ jobs:
       - name: Get version
         shell: bash
         run: |
-          echo "XPILOT_VERSION=$(cat xpilot.json | jq 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
+          echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
 
       - name: Setup InstallBuilder
         shell: bash
@@ -387,7 +387,7 @@ jobs:
       - name: Get version
         shell: bash
         run: |
-          echo "XPILOT_VERSION=$(cat xpilot.json | jq 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
+          echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
 
       - name: Setup InstallBuilder
         shell: bash
