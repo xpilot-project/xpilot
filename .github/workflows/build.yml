@@ -441,6 +441,10 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
 
+      - name: Flatten directories
+        run: |
+          mv xPilot*/* .
+
       - name: Get version from tag
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
@@ -452,6 +456,6 @@ jobs:
           prerelease: true
           draft: true
           files: |
-            ${{ github.workspace }}/xPilot*.zip
+            xPilot*.zip
         env:
           GITHUB_TOKEN: ${{ github.token }}
