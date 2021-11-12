@@ -441,11 +441,15 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
 
+      - name: Get version from tag
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
       - name: Create release
         uses: softprops/action-gh-release@v1
+        working-directory: ${{ github.workspace }}
         with:
-          name: xPilot ${{ github.ref }}
-          body: xPilot ${{ github.ref }}
+          name: xPilot ${{ steps.get_version.outputs.VERSION }}
           prerelease: true
           draft: true
           files: |
