@@ -251,8 +251,8 @@
             </ruleList>
         </runProgram>
         <runProgram>
-            <program>${installdir}/xPilot.app</program>
-            <programArguments>&amp;</programArguments>
+            <program>open</program>
+            <programArguments>${installdir}/xPilot.app</programArguments>
             <progressText>Launch ${project.fullName} now.</progressText>
             <ruleList>
                 <platformTest type="osx"/>
