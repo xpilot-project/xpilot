@@ -26,10 +26,6 @@ AppConfig *AppConfig::getInstance()
 static const QString &dataRoot()
 {
     QString folder("/org.vatsim.xpilot/");
-    if(BuildConfig::isVelocityBuild())
-    {
-        folder = QString("/org.vatsim.xpilot-velocity/");
-    }
     static const QString path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + folder;
     return path;
 }
@@ -61,6 +57,7 @@ void AppConfig::loadConfig()
         XplaneNetworkAddress = DEFAULT_XPLANE_NETWORK_ADDRESS;
         XplanePluginPort = DEFAULT_PLUGIN_PORT;
         XplaneUdpPort = XPLANE_UDP_PORT;
+        VelocityEnabled = false;
 
         saveConfig();
         loadConfig();
@@ -99,6 +96,7 @@ void AppConfig::loadConfig()
     XplaneNetworkAddress = jsonMap["XplaneNetworkAddress"].toString();
     XplanePluginPort = jsonMap["XplanePluginPort"].toInt();
     XplaneUdpPort = jsonMap["XplaneUdpPort"].toInt();
+    VelocityEnabled = jsonMap["VelocityEnabled"].toBool();
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
     for(const auto & value : cachedServers) {
@@ -154,6 +152,7 @@ void AppConfig::saveConfig()
     jsonObj["XplaneNetworkAddress"] = XplaneNetworkAddress.isEmpty() ? DEFAULT_XPLANE_NETWORK_ADDRESS : XplaneNetworkAddress;
     jsonObj["XplanePluginPort"] = XplanePluginPort == 0 ? DEFAULT_PLUGIN_PORT : XplanePluginPort;
     jsonObj["XplaneUdpPort"] = XplaneUdpPort == 0 ? XPLANE_UDP_PORT : XplaneUdpPort;
+    jsonObj["VelocityEnabled"] = VelocityEnabled;
 
     QJsonArray cachedServers;
     for(auto & server : CachedServers) {

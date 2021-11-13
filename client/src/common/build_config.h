@@ -12,7 +12,6 @@ namespace xpilot
         static const ushort VatsimClientId();
         static const QString VatsimClientKey();
         static const quint64 ConfigEncryptionKey();
-        static const bool isVelocityBuild();
 
         static constexpr bool isRunningOnMacOSPlatform();
         static constexpr bool isRunningOnLinuxPlatform();

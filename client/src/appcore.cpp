@@ -78,7 +78,7 @@ int xpilot::Main(int argc, char* argv[])
     context->setContextProperty("controllerManager", &controllerManager);
     context->setContextProperty("audio", &audio);
     context->setContextProperty("appVersion", BuildConfig::getVersionString());
-    context->setContextProperty("isVelocityBuild", BuildConfig::isVelocityBuild());
+    context->setContextProperty("isVelocityEnabled", AppConfig::getInstance()->VelocityEnabled);
 
     const QUrl url(QStringLiteral("qrc:/Resources/Views/MainWindow.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app, [url](QObject *obj, const QUrl &objUrl) {
@@ -97,10 +97,6 @@ AppCore::AppCore(QQmlEngine* qmlEngine) :
 {
     QTimer::singleShot(0, this, [this]{
         PerformVersionCheck();
-        if(!BuildConfig::isVelocityBuild())
-        {
-            DownloadServerList();
-        }
     });
 }
 

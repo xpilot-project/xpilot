@@ -95,7 +95,7 @@ namespace xpilot
         } else {
             emit notificationPosted((int)NotificationType::Info, "Connected to network.");
         }
-        emit networkConnected(m_connectInfo.Callsign, !m_connectInfo.TowerViewMode && !BuildConfig::isVelocityBuild());
+        emit networkConnected(m_connectInfo.Callsign, !m_connectInfo.TowerViewMode && !AppConfig::getInstance()->VelocityEnabled);
 
         if(!m_connectInfo.TowerViewMode) {
             QJsonObject reply;
@@ -160,7 +160,7 @@ namespace xpilot
         SendEmptyFastPositionPacket();
         m_slowPositionTimer->setInterval(m_connectInfo.ObserverMode ? 15000 : 5000);
         m_slowPositionTimer->start();
-        if(BuildConfig::isVelocityBuild() && !m_connectInfo.ObserverMode)
+        if(AppConfig::getInstance()->VelocityEnabled && !m_connectInfo.ObserverMode)
         {
             m_fastPositionTimer->start();
         }
@@ -463,7 +463,7 @@ namespace xpilot
 
     void NetworkManager::SendFastPositionPacket()
     {
-        if(BuildConfig::isVelocityBuild() && !m_connectInfo.ObserverMode)
+        if(AppConfig::getInstance()->VelocityEnabled && !m_connectInfo.ObserverMode)
         {
             m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign, m_userAircraftData.Latitude, m_userAircraftData.Longitude,
                                                m_userAircraftData.AltitudeMslM * 3.28084, m_userAircraftData.Pitch, m_userAircraftData.Heading,
@@ -475,7 +475,7 @@ namespace xpilot
 
     void NetworkManager::SendEmptyFastPositionPacket()
     {
-        if(!m_connectInfo.ObserverMode && BuildConfig::isVelocityBuild())
+        if(!m_connectInfo.ObserverMode && AppConfig::getInstance()->VelocityEnabled)
         {
             m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign, m_userAircraftData.Latitude, m_userAircraftData.Longitude,
                                                m_userAircraftData.AltitudeMslM * 3.28084, m_userAircraftData.Pitch, m_userAircraftData.Heading,
@@ -587,7 +587,7 @@ namespace xpilot
             connectInfo.ObserverMode = observer;
             m_connectInfo = connectInfo;
 
-            if(BuildConfig::isVelocityBuild())
+            if(AppConfig::getInstance()->VelocityEnabled)
             {
                 QStringList serverList{"vps.downstairsgeek.com", "c.downstairsgeek.com"};
                 unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();

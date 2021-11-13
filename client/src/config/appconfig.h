@@ -60,6 +60,7 @@ namespace xpilot
         QString XplaneNetworkAddress;
         int XplanePluginPort;
         int XplaneUdpPort;
+        bool VelocityEnabled;
 
         QVariant VariantCachedServers() const
         {

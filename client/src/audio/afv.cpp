@@ -242,14 +242,14 @@ namespace xpilot
     void AudioForVatsim::setInputDevice(QString deviceName)
     {
         m_client->stopAudio();
-        m_client->setAudioInputDevice(deviceName.toStdString());
+        m_client->setAudioInputDevice(deviceName.toStdString().c_str());
         m_client->startAudio();
     }
 
     void AudioForVatsim::setOutputDevice(QString deviceName)
     {
         m_client->stopAudio();
-        m_client->setAudioOutputDevice(deviceName.toStdString());
+        m_client->setAudioOutputDevice(deviceName.toStdString().c_str());
         m_client->startAudio();
     }
 

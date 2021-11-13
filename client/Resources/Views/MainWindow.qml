@@ -127,8 +127,8 @@ Window {
     }
 
     Component.onCompleted: {
-        if(isVelocityBuild) {
-            appendMessage(`Welcome to xPilot Velocity Beta v${appVersion}`, colorYellow)
+        if(isVelocityEnabled) {
+            appendMessage(`Welcome to xPilot v${appVersion} (Velocity Enabled)`, colorYellow)
         } else {
             appendMessage(`Welcome to xPilot v${appVersion}`, colorYellow)
         }
