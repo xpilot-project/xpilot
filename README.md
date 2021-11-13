@@ -2,7 +2,7 @@
 xPilot is a cross-platform X-Plane 11 pilot client for VATSIM, supporting Windows, Linux and macOS.
 
 # Download
-[![Release](https://img.shields.io/github/v/release/xpilot-project/xpilot)][1]
+[![Release](https://img.shields.io/github/v/release/xpilot-project/xpilot?include_prereleases)][1]
 
 [1]: https://github.com/xpilot-project/xpilot/releases/latest
 
