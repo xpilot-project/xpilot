@@ -441,18 +441,18 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
 
-      - name: Get version from tag
+      - name: Get version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//:1}
+        uses: battila7/get-version-action@v2
 
       - name: Repackage
         run: |
-          mv xPilot*MacOS.zip xPilot-${{ steps.get_version.outputs.VERSION }}-MacOS
-          mv xPilot*Windows.zip xPilot-${{ steps.get_version.outputs.VERSION }}-Windows
-          mv xPilot*Linux.zip xPilot-${{ steps.get_version.outputs.VERSION }}-Linux
-          zip -r xPilot-${{ steps.get_version.outputs.VERSION }}-MacOS.zip xPilot*MacOS/
-          zip -r xPilot-${{ steps.get_version.outputs.VERSION }}-Windows.zip xPilot*Windows/
-          zip -r xPilot-${{ steps.get_version.outputs.VERSION }}-Linux.zip xPilot*Linux/
+          mv xPilot*MacOS.zip xPilot-${{ steps.get_version.outputs.version-without-v }}-MacOS
+          mv xPilot*Windows.zip xPilot-${{ steps.get_version.outputs.version-without-v }}-Windows
+          mv xPilot*Linux.zip xPilot-${{ steps.get_version.outputs.version-without-v }}-Linux
+          zip -r xPilot-${{ steps.get_version.outputs.version-without-v }}-MacOS.zip xPilot*MacOS/
+          zip -r xPilot-${{ steps.get_version.outputs.version-without-v }}-Windows.zip xPilot*Windows/
+          zip -r xPilot-${{ steps.get_version.outputs.version-without-v }}-Linux.zip xPilot*Linux/
 
       - name: Display structure of downloaded files
         run: ls -R
@@ -461,7 +461,7 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
-          name: xPilot ${{ steps.get_version.outputs.VERSION }}
+          name: xPilot ${{ steps.get_version.outputs.version }}
           prerelease: true
           draft: true
           files: |

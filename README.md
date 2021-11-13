@@ -4,7 +4,7 @@ xPilot is a cross-platform X-Plane 11 pilot client for the VATSIM network, suppo
 # Download
 [![Release](https://img.shields.io/github/v/release/xpilot-project/xpilot)][1]
 
-[1]: https://github.com/xpilot-project/xpilit/releases/latest
+[1]: https://github.com/xpilot-project/xpilot/releases/latest
 
 # Resources
 :globe_with_meridians: [Website](https://xpilot-project.org)
