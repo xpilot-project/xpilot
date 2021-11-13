@@ -60,12 +60,6 @@ int xpilot::Main(int argc, char* argv[])
     UserAircraftManager aircraftManager(xplaneAdapter, networkManager);
     AudioForVatsim audio(networkManager, xplaneAdapter, controllerManager);
 
-    QObject::connect(&app, &QCoreApplication::aboutToQuit, [&](){
-        networkManager.disconnectFromNetwork();
-        xplaneAdapter.DeleteAllAircraft();
-        AppConfig::getInstance()->saveConfig();
-    });
-
     qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", &AppCore::appConfigInstance);
     qRegisterMetaType<ConnectInfo>("ConnectInfo");
     qRegisterMetaType<ClientWindowConfig>("ClientWindowConfig");
@@ -79,6 +73,12 @@ int xpilot::Main(int argc, char* argv[])
     context->setContextProperty("audio", &audio);
     context->setContextProperty("appVersion", BuildConfig::getVersionString());
     context->setContextProperty("isVelocityEnabled", AppConfig::getInstance()->VelocityEnabled);
+
+    QObject::connect(&app, &QCoreApplication::aboutToQuit, [&](){
+        networkManager.disconnectFromNetwork();
+        xplaneAdapter.DeleteAllAircraft();
+        AppConfig::getInstance()->saveConfig();
+    });
 
     const QUrl url(QStringLiteral("qrc:/Resources/Views/MainWindow.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app, [url](QObject *obj, const QUrl &objUrl) {

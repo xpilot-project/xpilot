@@ -22,13 +22,13 @@ namespace xpilot
         int Height;
         bool Maximized;
 
-        bool operator==(const ClientWindowConfig& b)
+        bool operator==(ClientWindowConfig& rhs) const
         {
-            return X == b.X && Y == b.Y && Width == b.Width && Height == b.Height && Maximized == b.Maximized;
+            return X == rhs.X && Y == rhs.Y && Width == rhs.Width && Height == rhs.Height && Maximized == rhs.Maximized;
         }
-        bool operator!=(const ClientWindowConfig& b)
+        bool operator!=(ClientWindowConfig& rhs) const
         {
-            return X != b.X || Y != b.Y || Width != b.Width || Height != b.Height || Maximized != b.Maximized;
+            return X != rhs.X || Y != rhs.Y || Width != rhs.Width || Height != rhs.Height || Maximized != rhs.Maximized;
         }
     };
 }

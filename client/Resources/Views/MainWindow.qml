@@ -137,6 +137,9 @@ Window {
         height = AppConfig.WindowConfig.Height;
         x = AppConfig.WindowConfig.X;
         y = AppConfig.WindowConfig.Y;
+        if(AppConfig.WindowConfig.Maximized) {
+            mainWindow.showMaximized()
+        }
         initialized = true;
     }
 
@@ -158,13 +161,28 @@ Window {
         }
     }
 
+    onVisibilityChanged: {
+        if(initialized && visibility !== Window.Hidden) {
+            var isMaximized = (visibility === Window.Maximized || visibility === Window.FullScreen)
+            AppConfig.WindowConfig.Maximized = isMaximized
+        }
+    }
+
     onHeightChanged: {
+        if(visibility === Window.Maximized || visibility === Window.FullScreen) {
+            return;
+        }
+
         if(initialized) {
             AppConfig.WindowConfig.Height = height;
         }
     }
 
     onWidthChanged: {
+        if(visibility === Window.Maximized || visibility === Window.FullScreen) {
+            return;
+        }
+
         if(initialized) {
             AppConfig.WindowConfig.Width = width;
         }
@@ -1160,7 +1178,7 @@ Window {
         }
 
         onDoubleClicked: {
-            if (mainWindow.visibility == Window.Maximized) {
+            if (mainWindow.visibility == Window.Maximized || mainWindow.visibility == Window.FullScreen) {
                 mainWindow.showNormal()
             } else {
                 mainWindow.showMaximized()

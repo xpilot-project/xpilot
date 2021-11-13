@@ -7,7 +7,7 @@
 
 using namespace xpilot;
 
-AppConfig* AppConfig::instance = 0;
+AppConfig* AppConfig::instance = nullptr;
 
 AppConfig::AppConfig(QObject* parent) :
     QObject(parent)
@@ -17,7 +17,7 @@ AppConfig::AppConfig(QObject* parent) :
 
 AppConfig *AppConfig::getInstance()
 {
-    if(instance == 0) {
+    if(instance == nullptr) {
         instance = new AppConfig;
     }
     return instance;
@@ -45,6 +45,7 @@ void AppConfig::loadConfig()
         WindowConfig.Y = 10;
         WindowConfig.Width = 800;
         WindowConfig.Height = 250;
+        WindowConfig.Maximized = false;
         AlertDirectRadioMessage = true;
         AlertDisconnect = true;
         AlertSelcal = true;
