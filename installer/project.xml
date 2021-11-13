@@ -243,7 +243,7 @@
             </ruleList>
         </runProgram>
         <runProgram>
-            <program>${installdir}/xPilot</program>
+            <program>${installdir}/xPilot.AppImage</program>
             <programArguments>&amp;</programArguments>
             <progressText>Launch ${project.fullName} now.</progressText>
             <ruleList>
@@ -251,7 +251,7 @@
             </ruleList>
         </runProgram>
         <runProgram>
-            <program>${installdir}/${product_shortname}.app/Contents/MacOS/xPilot</program>
+            <program>${installdir}/xPilot.app</program>
             <programArguments>&amp;</programArguments>
             <progressText>Launch ${project.fullName} now.</progressText>
             <ruleList>
