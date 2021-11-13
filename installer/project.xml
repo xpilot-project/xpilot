@@ -5,7 +5,7 @@
     <licenseFile>${root_prefix}/LICENSE</licenseFile>
     <wrapLicenseFileText>0</wrapLicenseFileText>
     <osxSigningIdentity>${apple_signing_identity}</osxSigningIdentity>
-    <osxApplicationBundleIdentifier>com.vatsim.xpilot</osxApplicationBundleIdentifier>
+    <osxApplicationBundleIdentifier>org.vatsim.xpilot</osxApplicationBundleIdentifier>
     <osxSigningKeychainFile>/Users/runner/Library/Keychains/Signing keychain-db</osxSigningKeychainFile>
     <functionDefinitionList>
         <actionDefinition>

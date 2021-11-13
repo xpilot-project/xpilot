@@ -418,7 +418,7 @@ jobs:
         shell: bash
         run: |
           xcrun altool --notarize-app \
-          --primary-bundle-id "com.vatsim.xpilot" \
+          --primary-bundle-id "org.vatsim.xpilot" \
           --username "${{ secrets.NOTARIZATION_USERNAME }}" \
           --password "${{ secrets.NOTARIZATION_PASSWORD }}" \
           --file xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg

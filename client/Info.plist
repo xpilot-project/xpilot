@@ -11,7 +11,7 @@
 		<key>CFBundleIconFile</key>
 		<string>xpilot.icns</string>
 		<key>CFBundleIdentifier</key>
-		<string>com.vatsim.xpilot</string>
+		<string>org.vatsim.xpilot</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>NSPrincipalClass</key>
