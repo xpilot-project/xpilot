@@ -302,6 +302,43 @@
                 </fileTest>
             </ruleList>
         </actionGroup>
+        <!-- linux -->
+        <actionGroup>
+            <actionList>
+                <readFile>
+                    <name>lastInstallDir</name>
+                    <path>~/local/share/org.vatsim.xpilot/lastinstallpath.txt</path>
+                    <ruleList>
+                        <platformTest type="linux"/>
+                    </ruleList>
+                </readFile>
+            </actionList>
+            <ruleList>
+                <platformTest type="linux"/>
+                <fileTest>
+                    <condition>readable</condition>
+                    <path>~/local/share/org.vatsim.xpilot/lastinstallpath.txt</path>
+                </fileTest>
+            </ruleList>
+        </actionGroup>
+        <actionGroup>
+            <actionList>
+                <readFile>
+                    <name>lastXplanePath</name>
+                    <path>~/local/share/org.vatsim.xpilot/lastxplanepath.txt</path>
+                    <ruleList>
+                        <platformTest type="linux"/>
+                    </ruleList>
+                </readFile>
+            </actionList>
+            <ruleList>
+                <platformTest type="linux"/>
+                <fileTest>
+                    <condition>readable</condition>
+                    <path>~/local/share/org.vatsim.xpilot/lastxplanepath.txt</path>
+                </fileTest>
+            </ruleList>
+        </actionGroup>
         <!-- set variables -->
         <setInstallerVariable>
             <name>installdir</name>
@@ -310,9 +347,6 @@
         <setInstallerVariable>
             <name>xplanepath</name>
             <value>${lastXplanePath}</value>
-            <ruleList>
-                <platformTest type="windows"/>
-            </ruleList>
         </setInstallerVariable>
     </preInstallationActionList>
     <readyToInstallActionList>
@@ -338,6 +372,18 @@
             <files>${windows_folder_local_appdata}/org.vatsim.xpilot</files>
             <ruleList>
                 <platformTest type="windows"/>
+            </ruleList>
+        </addFilesToUninstaller>
+        <addFilesToUninstaller>
+            <files>~/Library/Application Support/org.vatsim.xpilot</files>
+            <ruleList>
+                <platformTest type="osx"/>
+            </ruleList>
+        </addFilesToUninstaller>
+        <addFilesToUninstaller>
+            <files>~/local/share/org.vatsim.xpilot</files>
+            <ruleList>
+                <platformTest type="linux"/>
             </ruleList>
         </addFilesToUninstaller>
     </readyToInstallActionList>
