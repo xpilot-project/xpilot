@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include "Constants.h"
 #include "Config.h"
 #include "Utilities.h"
 #include "XPMPMultiplayer.h"
@@ -64,11 +65,18 @@ namespace xpilot
             saveConfig();
         }
 
+        // which conversion to do with older config files?
+        enum cfgConvE { CFG_NO_CONV=0, CFG_PORT_CONV } conv = CFG_NO_CONV;
+
         try
         {
             json jf = json::parse(ifs);
             if (!jf.empty())
             {
+                if(!jf.contains("Version"))
+                {
+                    conv = CFG_PORT_CONV;
+                }
                 if (jf.contains("ShowAircraftLabels"))
                 {
                     setShowHideLabels(jf["ShowAircraftLabels"]);
@@ -80,6 +88,11 @@ namespace xpilot
                 if (jf.contains("PluginPort"))
                 {
                     std::string v = json_to_string(jf["PluginPort"]);
+                    if(conv == CFG_PORT_CONV && v == "45001")
+                    {
+                        // convert to 53100 if previously on 45001
+                        v = "53100";
+                    }
                     setTcpPort(v);
                 }
                 if (jf.contains("DebugModelMatching"))
@@ -156,6 +169,7 @@ namespace xpilot
 
         json j;
 
+        j["Version"] = CONFIG_VERSION;
         j["ShowAircraftLabels"] = getShowHideLabels();
         j["DefaultIcaoType"] = getDefaultAcIcaoType();
         j["PluginPort"] = getTcpPort();
