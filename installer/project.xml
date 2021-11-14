@@ -307,7 +307,7 @@
             <actionList>
                 <readFile>
                     <name>lastInstallDir</name>
-                    <path>~/local/share/org.vatsim.xpilot/lastinstallpath.txt</path>
+                    <path>~/.local/share/org.vatsim.xpilot/lastinstallpath.txt</path>
                     <ruleList>
                         <platformTest type="linux"/>
                     </ruleList>
@@ -317,7 +317,7 @@
                 <platformTest type="linux"/>
                 <fileTest>
                     <condition>readable</condition>
-                    <path>~/local/share/org.vatsim.xpilot/lastinstallpath.txt</path>
+                    <path>~/.local/share/org.vatsim.xpilot/lastinstallpath.txt</path>
                 </fileTest>
             </ruleList>
         </actionGroup>
@@ -325,7 +325,7 @@
             <actionList>
                 <readFile>
                     <name>lastXplanePath</name>
-                    <path>~/local/share/org.vatsim.xpilot/lastxplanepath.txt</path>
+                    <path>~/.local/share/org.vatsim.xpilot/lastxplanepath.txt</path>
                     <ruleList>
                         <platformTest type="linux"/>
                     </ruleList>
@@ -335,7 +335,7 @@
                 <platformTest type="linux"/>
                 <fileTest>
                     <condition>readable</condition>
-                    <path>~/local/share/org.vatsim.xpilot/lastxplanepath.txt</path>
+                    <path>~/.local/share/org.vatsim.xpilot/lastxplanepath.txt</path>
                 </fileTest>
             </ruleList>
         </actionGroup>
@@ -381,7 +381,7 @@
             </ruleList>
         </addFilesToUninstaller>
         <addFilesToUninstaller>
-            <files>~/local/share/org.vatsim.xpilot</files>
+            <files>~/.local/share/org.vatsim.xpilot</files>
             <ruleList>
                 <platformTest type="linux"/>
             </ruleList>
