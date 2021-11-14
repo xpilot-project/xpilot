@@ -168,7 +168,7 @@ jobs:
   
   build-windows:
 
-    if: ${{ false }}
+    #if: ${{ false }}
 
     runs-on: windows-latest
 
@@ -272,6 +272,7 @@ jobs:
           echo "INSTALLER_SRC_PREFIX=$(pwd)/client" >> $GITHUB_ENV
           echo "INSTALLER_BIN_PREFIX=$XPILOT_BIN_DIR" >> $GITHUB_ENV
           echo "REPO_ROOT_PREFIX=$(pwd)" >> $GITHUB_ENV
+          echo "INSTALLER_PLUGIN_PREFIX=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
 
       - name: Create installer
         shell: bash
@@ -293,7 +294,7 @@ jobs:
   
   build-macos:
 
-    if: ${{ false }}
+    #if: ${{ false }}
   
     runs-on: macos-latest
 
@@ -404,6 +405,7 @@ jobs:
           echo "INSTALLER_SRC_PREFIX=$(pwd)/client" >> $GITHUB_ENV
           echo "INSTALLER_BIN_PREFIX=$XPILOT_BIN_DIR" >> $GITHUB_ENV
           echo "REPO_ROOT_PREFIX=$(pwd)" >> $GITHUB_ENV
+          echo "INSTALLER_PLUGIN_PREFIX=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
 
       - name: Create installer
         shell: bash
