@@ -247,6 +247,27 @@
         <actionGroup>
             <actionList>
                 <readFile>
+                    <name>lastXplanePath</name>
+                    <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastxplanepath.txt</path>
+                    <ruleList>
+                        <platformTest type="windows"/>
+                    </ruleList>
+                </readFile>
+            </actionList>
+            <ruleList>
+                <platformTest>
+                    <type>windows</type>
+                </platformTest>
+                <fileTest>
+                    <condition>readable</condition>
+                    <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastxplanepath.txt</path>
+                </fileTest>
+            </ruleList>
+        </actionGroup>
+        <!-- macos -->
+        <actionGroup>
+            <actionList>
+                <readFile>
                     <name>lastInstallDir</name>
                     <path>~/Library/Application Support/org.vatsim.xpilot/lastinstallpath.txt</path>
                     <ruleList>
@@ -266,22 +287,21 @@
             <actionList>
                 <readFile>
                     <name>lastXplanePath</name>
-                    <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastxplanepath.txt</path>
+                    <path>~/Library/Application Support/org.vatsim.xpilot/lastxplanepath.txt</path>
                     <ruleList>
-                        <platformTest type="windows"/>
+                        <platformTest type="osx"/>
                     </ruleList>
                 </readFile>
             </actionList>
             <ruleList>
-                <platformTest>
-                    <type>windows</type>
-                </platformTest>
+                <platformTest type="osx"/>
                 <fileTest>
                     <condition>readable</condition>
-                    <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastxplanepath.txt</path>
+                    <path>~/Library/Application Support/org.vatsim.xpilot/lastxplanepath.txt</path>
                 </fileTest>
             </ruleList>
         </actionGroup>
+        <!-- set variables -->
         <setInstallerVariable>
             <name>installdir</name>
             <value>${lastInstallDir}</value>
@@ -339,6 +359,27 @@
             <text>${xplanepath}</text>
             <ruleList>
                 <platformTest type="windows"/>
+            </ruleList>
+        </writeFile>
+        <!-- macos -->
+        <createDirectory>
+            <path>~/Library/Application Support/org.vatsim.xpilot</path>
+            <ruleList>
+                <platformTest type="osx"/>
+            </ruleList>
+        </createDirectory>
+        <writeFile>
+            <path>~/Library/Application Support/org.vatsim.xpilot/lastinstallpath.txt</path>
+            <text>${installdir}</text>
+            <ruleList>
+                <platformTest type="osx"/>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <path>~/Library/Application Support/org.vatsim.xpilot/lastxplanepath.txt</path>
+            <text>${xplanepath}</text>
+            <ruleList>
+                <platformTest type="osx"/>
             </ruleList>
         </writeFile>
     </postInstallationActionList>
