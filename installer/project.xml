@@ -3,10 +3,6 @@
     <fullName>xPilot</fullName>
     <version>2.0.0</version>
     <licenseFile>${root_prefix}/LICENSE</licenseFile>
-    <wrapLicenseFileText>0</wrapLicenseFileText>
-    <osxSigningIdentity>${apple_signing_identity}</osxSigningIdentity>
-    <osxApplicationBundleIdentifier>org.vatsim.xpilot</osxApplicationBundleIdentifier>
-    <osxSigningKeychainFile>/Users/runner/Library/Keychains/Signing keychain-db</osxSigningKeychainFile>
     <functionDefinitionList>
         <actionDefinition>
             <name>checkXpilotOpen</name>
@@ -43,8 +39,8 @@
     <componentList>
         <component>
             <name>default</name>
-            <description>Default Component</description>
-            <canBeEdited>1</canBeEdited>
+            <description>xPilot</description>
+            <canBeEdited>0</canBeEdited>
             <selected>1</selected>
             <show>1</show>
             <desktopShortcutList>
@@ -146,6 +142,18 @@
                         </distributionFile>
                     </distributionFileList>
                 </folder>
+                <folder>
+                    <description>X-Plane Plugin</description>
+                    <destination>${xplanepath}/Resources/plugins/xPilot</destination>
+                    <name>xplaneplugin</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <allowWildcards>1</allowWildcards>
+                            <origin>${plugin_prefix}/*</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
             </folderList>
             <startMenuShortcutList>
                 <startMenuShortcut>
@@ -187,6 +195,13 @@
             </ruleList>
         </setInstallerVariable>
         <setInstallerVariable>
+            <name>plugin_prefix</name>
+            <value>${env(INSTALLER_PLUGIN_PREFIX)}</value>
+            <ruleList>
+                <compareText logic="does_not_equal" text="${env(INSTALLER_PLUGIN_PREFIX)}" value=""/>
+            </ruleList>
+        </setInstallerVariable>
+        <setInstallerVariable>
             <name>root_prefix</name>
             <value>${env(REPO_ROOT_PREFIX)}</value>
             <ruleList>
@@ -203,6 +218,81 @@
     </preBuildActionList>
     <preInstallationActionList>
         <checkXpilotOpen/>
+        <setInstallerVariable>
+            <name>lastInstallDir</name>
+            <value>${platform_install_prefix}/${product_shortname}</value>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>lastXplanePath</name>
+            <value></value>
+        </setInstallerVariable>
+        <actionGroup>
+            <actionList>
+                <readFile>
+                    <name>lastInstallDir</name>
+                    <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastinstallpath.txt</path>
+                    <ruleList>
+                        <platformTest type="windows"/>
+                    </ruleList>
+                </readFile>
+            </actionList>
+            <ruleList>
+                <platformTest type="windows"/>
+                <fileTest>
+                    <condition>readable</condition>
+                    <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastinstallpath.txt</path>
+                </fileTest>
+            </ruleList>
+        </actionGroup>
+        <actionGroup>
+            <actionList>
+                <readFile>
+                    <name>lastInstallDir</name>
+                    <path>~/Library/Application Support/org.vatsim.xpilot/lastinstallpath.txt</path>
+                    <ruleList>
+                        <platformTest type="osx"/>
+                    </ruleList>
+                </readFile>
+            </actionList>
+            <ruleList>
+                <platformTest type="osx"/>
+                <fileTest>
+                    <condition>readable</condition>
+                    <path>~/Library/Application Support/org.vatsim.xpilot/lastinstallpath.txt</path>
+                </fileTest>
+            </ruleList>
+        </actionGroup>
+        <actionGroup>
+            <actionList>
+                <readFile>
+                    <name>lastXplanePath</name>
+                    <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastxplanepath.txt</path>
+                    <ruleList>
+                        <platformTest type="windows"/>
+                    </ruleList>
+                </readFile>
+            </actionList>
+            <ruleList>
+                <platformTest>
+                    <type>windows</type>
+                </platformTest>
+                <fileTest>
+                    <condition>readable</condition>
+                    <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastxplanepath.txt</path>
+                </fileTest>
+            </ruleList>
+        </actionGroup>
+        <setInstallerVariable>
+            <name>installdir</name>
+            <value>${lastInstallDir}</value>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>xplanepath</name>
+            <value>${lastXplanePath}</value>
+            <ruleList>
+                <platformTest type="windows"/>
+            </ruleList>
+        </setInstallerVariable>
     </preInstallationActionList>
     <readyToInstallActionList>
         <setInstallerVariable>
@@ -223,13 +313,44 @@
                 <platformTest type="linux"/>
             </ruleList>
         </setInstallerVariable>
+        <addFilesToUninstaller>
+            <files>${windows_folder_local_appdata}/org.vatsim.xpilot</files>
+            <ruleList>
+                <platformTest type="windows"/>
+            </ruleList>
+        </addFilesToUninstaller>
     </readyToInstallActionList>
+    <postInstallationActionList>
+        <createDirectory>
+            <path>${windows_folder_local_appdata}/org.vatsim.xpilot</path>
+            <ruleList>
+                <platformTest type="windows"/>
+            </ruleList>
+        </createDirectory>
+        <writeFile>
+            <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastinstallpath.txt</path>
+            <text>${installdir}</text>
+            <ruleList>
+                <platformTest type="windows"/>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastxplanepath.txt</path>
+            <text>${xplanepath}</text>
+            <ruleList>
+                <platformTest type="windows"/>
+            </ruleList>
+        </writeFile>
+    </postInstallationActionList>
     <compressionAlgorithm>lzma-ultra</compressionAlgorithm>
     <createOsxBundleDmg>1</createOsxBundleDmg>
     <disableSplashScreen>1</disableSplashScreen>
     <enableRollback>0</enableRollback>
     <enableTimestamp>1</enableTimestamp>
     <osxApplicationBundleIcon>${src_prefix}/xpilot.icns</osxApplicationBundleIcon>
+    <osxApplicationBundleIdentifier>org.vatsim.xpilot</osxApplicationBundleIdentifier>
+    <osxSigningIdentity>${apple_signing_identity}</osxSigningIdentity>
+    <osxSigningKeychainFile>C:/Users/runner/Library/Keychains/Signing keychain-db</osxSigningKeychainFile>
     <startMenuGroupName>xPilot</startMenuGroupName>
     <vendor>xPilot for VATSIM</vendor>
     <windowsExecutableIcon>${src_prefix}/xpilot.ico</windowsExecutableIcon>
@@ -237,7 +358,7 @@
         <runProgram>
             <program>${installdir}/xPilot.exe</program>
             <programArguments>&amp;</programArguments>
-            <progressText>Launch ${project.fullName} now.</progressText>
+            <progressText>Launch ${project.fullName}.</progressText>
             <ruleList>
                 <platformTest type="windows"/>
             </ruleList>
@@ -245,7 +366,7 @@
         <runProgram>
             <program>${installdir}/xPilot.AppImage</program>
             <programArguments>&amp;</programArguments>
-            <progressText>Launch ${project.fullName} now.</progressText>
+            <progressText>Launch ${project.fullName}.</progressText>
             <ruleList>
                 <platformTest type="linux"/>
             </ruleList>
@@ -253,13 +374,50 @@
         <runProgram>
             <program>open</program>
             <programArguments>${installdir}/xPilot.app</programArguments>
-            <progressText>Launch ${project.fullName} now.</progressText>
+            <progressText>Launch ${project.fullName}.</progressText>
             <ruleList>
                 <platformTest type="osx"/>
             </ruleList>
         </runProgram>
     </finalPageActionList>
     <parameterList>
+        <directoryParameter>
+            <name>xplanepath</name>
+            <title>X-Plane 11 Location</title>
+            <description></description>
+            <explanation>Please browse to the folder where X-Plane 11 is installed so that the xPilot plugin can be installed.
+
+Advanced Users: If X-Plane is not installed on this computer, leave the folder path empty to skip installing the plugin. You will need to run the installer on the computer where X-Plane is installed to install the plugin.</explanation>
+            <value></value>
+            <default></default>
+            <allowEmptyValue>1</allowEmptyValue>
+            <mustBeWritable>0</mustBeWritable>
+            <mustExist>1</mustExist>
+            <width>40</width>
+            <validationActionList>
+                <throwError text="Invalid X-Plane folder path. The path should be the root folder of where X-Plane.exe is installed.">
+                    <ruleList>
+                        <stringTest text="${xplanepath}" type="not_empty"/>
+                        <fileExists negate="1" path="${xplanepath}/X-Plane.exe"/>
+                        <platformTest type="windows"/>
+                    </ruleList>
+                </throwError>
+                <throwError text="Invalid X-Plane folder path. The path should be the root folder of where X-Plane.app is installed.">
+                    <ruleList>
+                        <stringTest text="${xplanepath}" type="not_empty"/>
+                        <fileExists negate="1" path="${xplanepath}/X-Plane.app"/>
+                        <platformTest type="osx"/>
+                    </ruleList>
+                </throwError>
+                <throwError text="Invalid X-Plane folder path. The path should be the root folder of where the X-Plane-x86_64 executable is installed.">
+                    <ruleList>
+                        <stringTest text="${xplanepath}" type="not_empty"/>
+                        <fileExists negate="1" path="${xplanepath}/X-Plane-x86_64"/>
+                        <platformTest type="linux"/>
+                    </ruleList>
+                </throwError>
+            </validationActionList>
+        </directoryParameter>
         <directoryParameter>
             <name>installdir</name>
             <description>Installer.Parameter.installdir.description</description>
@@ -271,24 +429,7 @@
             <mustBeWritable>1</mustBeWritable>
             <mustExist>0</mustExist>
             <width>40</width>
-            <preShowPageActionList>
-                <actionGroup>
-                    <actionList>
-                        <setInstallerVariable>
-                            <name>platform_install_prefix</name>
-                            <value>/opt</value>
-                        </setInstallerVariable>
-                        <setInstallerVariable>
-                            <name>installdir</name>
-                            <value>/opt/${product_fullname}</value>
-                        </setInstallerVariable>
-                    </actionList>
-                    <ruleList>
-                        <compareText logic="equals" text="${install_for}" value="all"/>
-                        <platformTest type="linux"/>
-                    </ruleList>
-                </actionGroup>
-            </preShowPageActionList>
         </directoryParameter>
     </parameterList>
 </project>
+
