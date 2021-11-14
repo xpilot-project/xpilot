@@ -429,6 +429,27 @@
                 <platformTest type="osx"/>
             </ruleList>
         </writeFile>
+        <!-- linux -->
+        <createDirectory>
+            <path>~/.local/share/org.vatsim.xpilot</path>
+            <ruleList>
+                <platformTest type="linux"/>
+            </ruleList>
+        </createDirectory>
+        <writeFile>
+            <path>~/.local/share/org.vatsim.xpilot/lastinstallpath.txt</path>
+            <text>${installdir}</text>
+            <ruleList>
+                <platformTest type="linux"/>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <path>~/.local/share/org.vatsim.xpilot/lastxplanepath.txt</path>
+            <text>${xplanepath}</text>
+            <ruleList>
+                <platformTest type="linux"/>
+            </ruleList>
+        </writeFile>
     </postInstallationActionList>
     <compressionAlgorithm>lzma-ultra</compressionAlgorithm>
     <createOsxBundleDmg>1</createOsxBundleDmg>
