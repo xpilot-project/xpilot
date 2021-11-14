@@ -26,7 +26,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 file(READ ${CMAKE_SOURCE_DIR}/../xpilot.json XPILOT_JSON)
 
-string(JSON VELOCITY_BUILD GET ${XPILOT_JSON} velocity_build)
 string(JSON GITHUB_URL GET ${XPILOT_JSON} github_url)
 string(JSON IS_BETA_VERSION GET ${XPILOT_JSON} is_beta)
 string(JSON BETA_NUMBER GET ${XPILOT_JSON} beta_number)
@@ -38,12 +37,6 @@ if (IS_BETA_VERSION)
     set(IS_BETA_VERSION true)
 else()
     set(IS_BETA_VERSION false)
-endif()
-
-if (VELOCITY_BUILD)
-    set(VELOCITY_BUILD true)
-else()
-    set(VELOCITY_BUILD false)
 endif()
 
 if (NOT VATSIM_CLIENT_ID)
