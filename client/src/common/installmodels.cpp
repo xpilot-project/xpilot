@@ -14,7 +14,8 @@
 using namespace libzippp;
 
 InstallModels::InstallModels(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    nam(new QNetworkAccessManager)
 {
     //    m_worker = new ModelWorker(this);
 
@@ -45,36 +46,42 @@ void InstallModels::DoExtractModels()
 QtPromise::QPromise<void> InstallModels::download(const QString &url)
 {
     return QtPromise::QPromise<void>{[&](const auto &resolve, const auto &reject)
-    {
-        m_file = new QSaveFile("C:/X-Plane 11.50/Resources/plugins/xPilot/Resources/CSL/Bluebell.json");
-        if(!m_file->open(QIODevice::WriteOnly))
         {
-            reject("Error opening file for writing");
-            return;
-        }
+            m_file = new QSaveFile("C:/X-Plane 11.50/Resources/plugins/xPilot/Resources/CSL/Bluebell.json");
+            if(!m_file->open(QIODevice::WriteOnly))
+            {
+                reject("Error opening file for writing");
+                return;
+            }
 
-        m_reply = nam.get(QNetworkRequest{url});
-        QObject::connect(m_reply, &QNetworkReply::downloadProgress, [&](qint64 ist, qint64 max) {
-            qDebug() << "int: " <<  ist << " max: " << max;
-        });
-        QObject::connect(m_reply, &QNetworkReply::readyRead, [&]{
-            if(m_file) {
-                m_file->write(m_reply->readAll());
-            }
-        });
-        QObject::connect(m_reply, &QNetworkReply::finished, [&]() {
-            if(m_file){
-                m_file->write(m_reply->readAll());
-                m_file->commit();
-            }
-            m_reply->deleteLater();
-        });
-    }};
+            m_reply = nam->get(QNetworkRequest{url});
+            QObject::connect(m_reply, &QNetworkReply::downloadProgress, [&](qint64 read, qint64 total) {
+                double pct = ((double)read / (double)total);
+                emit downloadProgressChanged(pct);
+            });
+            QObject::connect(m_reply, &QNetworkReply::readyRead, [&]{
+                if(m_file) {
+                    m_file->write(m_reply->readAll());
+                }
+            });
+            QObject::connect(m_reply, &QNetworkReply::finished, [=]() {
+                if(m_reply->error() == QNetworkReply::NoError) {
+                    if(m_file){
+                        m_file->write(m_reply->readAll());
+                        m_file->commit();
+                        resolve();
+                    }
+                }
+                m_reply->deleteLater();
+            });
+        }};
 }
 
 void InstallModels::downloadModels()
 {
-    download("https://cdn.xpilot-project.org/TypeCodes.json").fail([](QNetworkReply::NetworkError error) {
+    download("https://cdn.xpilot-project.org/CSL/Bluebell.zip").then([&](){
+        emit downloadFinished();
+    }).fail([](QNetworkReply::NetworkError error) {
         // error
     }).fail([](QString err) {
         qDebug() << "ERROR: " << err;
@@ -85,6 +92,7 @@ void InstallModels::cancel()
 {
     if(m_file) {
         m_file->cancelWriting();
+        m_file->deleteLater();
     }
     if(m_reply) {
         m_reply->abort();

@@ -41,8 +41,12 @@ public:
     Q_INVOKABLE void downloadModels();
     Q_INVOKABLE void cancel();
 
+signals:
+    void downloadFinished();
+    void downloadProgressChanged(double value);
+
 private:
-    QNetworkAccessManager nam;
+    QNetworkAccessManager *nam = nullptr;
     QNetworkReply *m_reply = nullptr;
     QSaveFile *m_file = nullptr;
 };

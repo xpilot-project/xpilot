@@ -129,103 +129,6 @@ Window {
         }
     }
 
-    //    Dialog {
-    //        id: askModelInstall
-    //        title: "Download CSL Model Packages"
-
-    //        Label {
-    //            text: "It looks like this is your first time using xPilot. Before you can connect to the network, you must\r\n" +
-    //                  "download a CSL aircraft model set. Would you like to download and install one now?\r\n\r\n" +
-    //                  "If you choose No, you will have to manually install a model set yourself.\r\n"
-    //            font.pointSize: 10
-    //            renderType: Text.NativeRendering
-    //        }
-
-    //        standardButtons: Dialog.Yes | Dialog.No
-    //        onYes: {
-    //            installModels.extractModels()
-    //        }
-    //    }
-
-    Popup {
-        id: askModelInstall
-        width: 600
-        height: 180
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        modal: true
-        focus: true
-        closePolicy: Popup.NoAutoClose
-
-        Label {
-            id: label1
-            text: "It looks like this is your first time using xPilot. Before you can connect to the network, you must\r\n" +
-                  "download a CSL aircraft model set. Would you like to download and install one now?\r\n\r\n" +
-                  "If you choose No, you will have to manually install a model set yourself.\r\n"
-            font.pointSize: 10
-            renderType: Text.NativeRendering
-            wrapMode: Text.WordWrap
-            x: 20
-            y: 20
-        }
-
-        BlueButton {
-            id: btnYes
-            text: "Yes"
-            width: 50
-            height: 30
-            font.pointSize: 10
-            anchors.top: label1.bottom
-            anchors.left: label1.left
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    btnCancel.visible = true
-                    btnNo.visible = false
-                    btnYes.visible = false
-                    installModels.downloadModels()
-                }
-            }
-        }
-
-        GrayButton {
-            id: btnNo
-            text: "No"
-            width: 50
-            height: 30
-            font.pointSize: 10
-            anchors.top: label1.bottom
-            x: 80
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    askModelInstall.close()
-                }
-            }
-        }
-
-        GrayButton {
-            id: btnCancel
-            visible: false
-            text: "Cancel"
-            width: 80
-            height: 30
-            font.pointSize: 10
-            anchors.top: label1.bottom
-            anchors.left: label1.left
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    installModels.cancel()
-                    askModelInstall.close()
-                }
-            }
-        }
-    }
-
     Component.onCompleted: {
         if(isVelocityEnabled) {
             appendMessage(`Welcome to xPilot v${appVersion} (Velocity Enabled)`, colorYellow)
@@ -241,7 +144,7 @@ Window {
             mainWindow.showMaximized()
         }
         if(AppConfig.AskModelInstall) {
-            askModelInstall.open()
+            popupInstallModels.open()
         }
         initialized = true;
     }
@@ -288,6 +191,154 @@ Window {
 
         if(initialized) {
             AppConfig.WindowConfig.Width = width;
+        }
+    }
+
+    Popup {
+        id: popupInstallModels
+        width: 600
+        height: 180
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        modal: true
+        focus: true
+        closePolicy: Popup.NoAutoClose
+
+        property double downloadProgressPct: 0
+
+        Label {
+            id: labelAskDownload
+            text: "It looks like this is your first time using xPilot. Before you can connect to the network, you must\r\n" +
+                  "download a CSL aircraft model set. Would you like to download and install one now?\r\n\r\nDownload size: Approximately 560MB.\r\n\r\n" +
+                  "If you choose No, you will have to manually install a model set yourself.\r\n"
+            font.pointSize: 10
+            renderType: Text.NativeRendering
+            x: 15
+            y: 10
+        }
+
+        Label {
+            id: labelDownloading
+            visible: false
+            text: "Downloading CSL aircraft model set. Please wait...\r\n"
+            font.pointSize: 10
+            renderType: Text.NativeRendering
+            wrapMode: Text.WordWrap
+            x: 20
+            y: 40
+        }
+
+        ProgressBar {
+            id: progbressBarDownload
+            visible: false
+            value: popupInstallModels.downloadProgressPct
+            anchors.top: labelDownloading.bottom
+            anchors.left: labelDownloading.left
+            padding: 5
+
+            background: Rectangle {
+                implicitWidth: 480
+                implicitHeight: 6
+                color: "#e6e6e6"
+                radius: 3
+            }
+
+            contentItem: Item {
+                implicitWidth: 480
+                implicitHeight: 4
+
+                Rectangle {
+                    width: progbressBarDownload.visualPosition * parent.width
+                    height: parent.height
+                    radius: 2
+                    color: "#17a81a"
+                }
+            }
+        }
+
+        Label {
+            id: labelPercent
+            text: "100%"
+            visible: false
+            font.pointSize: 10
+            renderType: Text.NativeRendering
+            wrapMode: Text.WordWrap
+            anchors.top: progbressBarDownload.top
+            anchors.left: progbressBarDownload.right
+            anchors.leftMargin: 10
+        }
+
+        GrayButton {
+            id: btnCancel
+            visible: false
+            text: "Cancel"
+            width: 80
+            height: 30
+            font.pointSize: 10
+            anchors.topMargin: 10
+            anchors.top: progbressBarDownload.bottom
+            anchors.left: progbressBarDownload.left
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    installModels.cancel()
+                    popupInstallModels.close()
+                }
+            }
+        }
+
+        BlueButton {
+            id: btnYes
+            text: "Yes"
+            width: 50
+            height: 30
+            font.pointSize: 10
+            anchors.top: labelAskDownload.bottom
+            anchors.left: labelAskDownload.left
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    btnNo.visible = false
+                    btnYes.visible = false
+                    labelAskDownload.visible = false
+
+                    btnCancel.visible = true
+                    labelDownloading.visible = true
+                    progbressBarDownload.visible = true
+
+                    installModels.downloadModels()
+                }
+            }
+        }
+
+        GrayButton {
+            id: btnNo
+            text: "No"
+            width: 50
+            height: 30
+            font.pointSize: 10
+            anchors.top: labelAskDownload.bottom
+            anchors.left: btnYes.right
+            anchors.leftMargin: 10
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    popupInstallModels.close()
+                }
+            }
+        }
+    }
+
+    Connections {
+        target: installModels
+        function onDownloadFinished() {
+            popupInstallModels.close()
+        }
+        function onDownloadProgressChanged(val) {
+            popupInstallModels.downloadProgressPct = val
         }
     }
 
