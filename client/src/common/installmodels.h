@@ -36,8 +36,8 @@ public:
     InstallModels(QObject *parent = nullptr);
     ~InstallModels();
 
-    void DoExtractModels();
     QtPromise::QPromise<void> download(const QString& url);
+    QtPromise::QPromise<void> extractModelSet();
     Q_INVOKABLE void downloadModels();
     Q_INVOKABLE void cancel();
 
@@ -49,6 +49,7 @@ private:
     QNetworkAccessManager *nam = nullptr;
     QNetworkReply *m_reply = nullptr;
     QSaveFile *m_file = nullptr;
+    bool m_stopExtract = false;
 };
 
 #endif // INSTALLMODELS_H
