@@ -61,6 +61,7 @@ namespace xpilot
         int XplanePluginPort;
         int XplaneUdpPort;
         bool VelocityEnabled;
+        bool AskModelInstall;
 
         QVariant VariantCachedServers() const
         {
@@ -94,10 +95,11 @@ namespace xpilot
         Q_PROPERTY(bool HFSquelchEnabled MEMBER HFSquelchEnabled)
         Q_PROPERTY(bool AutoModeC MEMBER AutoModeC)
         Q_PROPERTY(bool DisableNotificationSounds MEMBER DisableNotificationSounds NOTIFY disableNotificationSoundsChanged)
-        Q_PROPERTY(bool AlertPrivateMessage MEMBER AlertPrivateMessage NOTIFY alertPrivateMessageChanged);
-        Q_PROPERTY(bool AlertDirectRadioMessage MEMBER AlertDirectRadioMessage NOTIFY alertDirectRadioMessageChanged);
-        Q_PROPERTY(bool AlertSelcal MEMBER AlertSelcal NOTIFY alertSelcalChanged);
+        Q_PROPERTY(bool AlertPrivateMessage MEMBER AlertPrivateMessage NOTIFY alertPrivateMessageChanged)
+        Q_PROPERTY(bool AlertDirectRadioMessage MEMBER AlertDirectRadioMessage NOTIFY alertDirectRadioMessageChanged)
+        Q_PROPERTY(bool AlertSelcal MEMBER AlertSelcal NOTIFY alertSelcalChanged)
         Q_PROPERTY(bool AlertDisconnect MEMBER AlertDisconnect NOTIFY alertDisconnectChanged);
+        Q_PROPERTY(bool AskModelInstall MEMBER AskModelInstall)
 
     signals:
         void disableNotificationSoundsChanged();

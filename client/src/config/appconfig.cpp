@@ -59,6 +59,7 @@ void AppConfig::loadConfig()
         XplanePluginPort = DEFAULT_PLUGIN_PORT;
         XplaneUdpPort = XPLANE_UDP_PORT;
         VelocityEnabled = false;
+        AskModelInstall = true;
 
         saveConfig();
         loadConfig();
@@ -98,6 +99,7 @@ void AppConfig::loadConfig()
     XplanePluginPort = jsonMap["XplanePluginPort"].toInt();
     XplaneUdpPort = jsonMap["XplaneUdpPort"].toInt();
     VelocityEnabled = jsonMap["VelocityEnabled"].toBool();
+    AskModelInstall = jsonMap["AskModelInstall"].toBool();
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
     for(const auto & value : cachedServers) {
@@ -154,6 +156,7 @@ void AppConfig::saveConfig()
     jsonObj["XplanePluginPort"] = XplanePluginPort == 0 ? DEFAULT_PLUGIN_PORT : XplanePluginPort;
     jsonObj["XplaneUdpPort"] = XplaneUdpPort == 0 ? XPLANE_UDP_PORT : XplaneUdpPort;
     jsonObj["VelocityEnabled"] = VelocityEnabled;
+    jsonObj["AskModelInstall"] = AskModelInstall;
 
     QJsonArray cachedServers;
     for(auto & server : CachedServers) {

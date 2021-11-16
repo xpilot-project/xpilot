@@ -14,6 +14,7 @@
 #include "audio/afv.h"
 #include "common/build_config.h"
 #include "common/versioncheck.h"
+#include "common/installmodels.h"
 #include "sentry.h"
 
 #include <QGuiApplication>
@@ -53,6 +54,7 @@ int xpilot::Main(int argc, char* argv[])
     QQmlContext *context = engine.rootContext();
 
     AppCore appCore(&engine);
+    InstallModels installModels;
     XplaneAdapter xplaneAdapter;
     NetworkManager networkManager(xplaneAdapter);
     AircraftManager networkAircraftManager(networkManager, xplaneAdapter);
@@ -73,6 +75,7 @@ int xpilot::Main(int argc, char* argv[])
     context->setContextProperty("audio", &audio);
     context->setContextProperty("appVersion", BuildConfig::getVersionString());
     context->setContextProperty("isVelocityEnabled", AppConfig::getInstance()->VelocityEnabled);
+    context->setContextProperty("installModels", &installModels);
 
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [&](){
         networkManager.disconnectFromNetwork();

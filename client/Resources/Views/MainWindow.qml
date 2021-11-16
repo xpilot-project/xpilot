@@ -26,6 +26,9 @@ Window {
     minimumWidth: 800
     color: "#272C2E"
 
+    x: Screen.width / 2 - width / 2
+    y: Screen.height / 2 - height / 2
+
     property QtObject connectWindow
     property QtObject settingsWindow
     property int currentTab
@@ -126,19 +129,119 @@ Window {
         }
     }
 
+    //    Dialog {
+    //        id: askModelInstall
+    //        title: "Download CSL Model Packages"
+
+    //        Label {
+    //            text: "It looks like this is your first time using xPilot. Before you can connect to the network, you must\r\n" +
+    //                  "download a CSL aircraft model set. Would you like to download and install one now?\r\n\r\n" +
+    //                  "If you choose No, you will have to manually install a model set yourself.\r\n"
+    //            font.pointSize: 10
+    //            renderType: Text.NativeRendering
+    //        }
+
+    //        standardButtons: Dialog.Yes | Dialog.No
+    //        onYes: {
+    //            installModels.extractModels()
+    //        }
+    //    }
+
+    Popup {
+        id: askModelInstall
+        width: 600
+        height: 180
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        modal: true
+        focus: true
+        closePolicy: Popup.NoAutoClose
+
+        Label {
+            id: label1
+            text: "It looks like this is your first time using xPilot. Before you can connect to the network, you must\r\n" +
+                  "download a CSL aircraft model set. Would you like to download and install one now?\r\n\r\n" +
+                  "If you choose No, you will have to manually install a model set yourself.\r\n"
+            font.pointSize: 10
+            renderType: Text.NativeRendering
+            wrapMode: Text.WordWrap
+            x: 20
+            y: 20
+        }
+
+        BlueButton {
+            id: btnYes
+            text: "Yes"
+            width: 50
+            height: 30
+            font.pointSize: 10
+            anchors.top: label1.bottom
+            anchors.left: label1.left
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    btnCancel.visible = true
+                    btnNo.visible = false
+                    btnYes.visible = false
+                    installModels.downloadModels()
+                }
+            }
+        }
+
+        GrayButton {
+            id: btnNo
+            text: "No"
+            width: 50
+            height: 30
+            font.pointSize: 10
+            anchors.top: label1.bottom
+            x: 80
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    askModelInstall.close()
+                }
+            }
+        }
+
+        GrayButton {
+            id: btnCancel
+            visible: false
+            text: "Cancel"
+            width: 80
+            height: 30
+            font.pointSize: 10
+            anchors.top: label1.bottom
+            anchors.left: label1.left
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    installModels.cancel()
+                    askModelInstall.close()
+                }
+            }
+        }
+    }
+
     Component.onCompleted: {
         if(isVelocityEnabled) {
             appendMessage(`Welcome to xPilot v${appVersion} (Velocity Enabled)`, colorYellow)
         } else {
             appendMessage(`Welcome to xPilot v${appVersion}`, colorYellow)
         }
+        x = Screen.width / 2 - width / 2
+        y = Screen.height / 2 - height / 2
         appendMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.", colorYellow);
-        width = AppConfig.WindowConfig.Width;
-        height = AppConfig.WindowConfig.Height;
         x = AppConfig.WindowConfig.X;
         y = AppConfig.WindowConfig.Y;
         if(AppConfig.WindowConfig.Maximized) {
             mainWindow.showMaximized()
+        }
+        if(AppConfig.AskModelInstall) {
+            askModelInstall.open()
         }
         initialized = true;
     }

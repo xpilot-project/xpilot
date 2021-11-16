@@ -457,10 +457,6 @@ jobs:
           zip -r xPilot-${{ steps.get_version.outputs.version-without-v }}-Windows.zip xPilot*Windows/
           zip -r xPilot-${{ steps.get_version.outputs.version-without-v }}-Linux.zip xPilot*Linux/
 
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: ${{ github.workspace }}
-
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:

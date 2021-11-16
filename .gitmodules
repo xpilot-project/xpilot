@@ -4,3 +4,9 @@
 [submodule "client/externals"]
 	path = client/externals
 	url = git@github.com:xpilot-project/externals.git
+[submodule "client/qtpromise"]
+	path = client/qtpromise
+	url = git@github.com:simonbrunel/qtpromise.git
+[submodule "client/3rdparty/qtpromise"]
+	path = client/3rdparty/qtpromise
+	url = git@github.com:simonbrunel/qtpromise.git

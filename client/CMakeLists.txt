@@ -140,6 +140,10 @@ set(PROJECT_SOURCES
     src/common/utils.h
     src/common/versioncheck.h
     src/common/versioncheck.cpp
+    src/common/installmodels.h
+    src/common/installmodels.cpp
+    src/common/libzippp.h
+    src/common/libzippp.cpp
     src/config/appconfig.h
     src/config/appconfig.cpp
     src/config/windowconfig.h
@@ -389,6 +393,8 @@ if (APPLE)
         $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endif ()
 
+add_subdirectory(3rdparty/qtpromise)
+
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
     CONAN_PKG::openssl
@@ -400,6 +406,7 @@ target_link_libraries(${PROJECT_NAME}
     CONAN_PKG::cppzmq
     CONAN_PKG::sentry-native
     CONAN_PKG::sentry-crashpad
+    CONAN_PKG::libzip
     ${OPUS_LIBRARY}
     ${PORTAUDIO_LIBRARY}
     ${SPEEX_LIBRARY}
@@ -407,7 +414,8 @@ target_link_libraries(${PROJECT_NAME}
     ${COREFOUNDATION}
     ${COREAUDIO}
     ${AUDIOTOOLBOX}
-    ${ALSA_LIBRARY})
+    ${ALSA_LIBRARY}
+    qtpromise)
 
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PUBLIC _USE_MATH_DEFINES)
