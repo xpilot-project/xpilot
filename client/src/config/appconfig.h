@@ -30,6 +30,7 @@ namespace xpilot
     public:
         explicit AppConfig(QObject * owner = nullptr);
         static AppConfig *getInstance();
+        const static QString &dataRoot();
 
         Q_INVOKABLE void saveConfig();
         void loadConfig();
@@ -61,7 +62,7 @@ namespace xpilot
         int XplanePluginPort;
         int XplaneUdpPort;
         bool VelocityEnabled;
-        bool AskModelInstall;
+        bool SilenceModelInstall;
 
         QVariant VariantCachedServers() const
         {
@@ -99,7 +100,7 @@ namespace xpilot
         Q_PROPERTY(bool AlertDirectRadioMessage MEMBER AlertDirectRadioMessage NOTIFY alertDirectRadioMessageChanged)
         Q_PROPERTY(bool AlertSelcal MEMBER AlertSelcal NOTIFY alertSelcalChanged)
         Q_PROPERTY(bool AlertDisconnect MEMBER AlertDisconnect NOTIFY alertDisconnectChanged);
-        Q_PROPERTY(bool AskModelInstall MEMBER AskModelInstall)
+        Q_PROPERTY(bool SilenceModelInstall MEMBER SilenceModelInstall)
 
     signals:
         void disableNotificationSoundsChanged();

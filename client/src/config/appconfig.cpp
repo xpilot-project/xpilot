@@ -23,7 +23,7 @@ AppConfig *AppConfig::getInstance()
     return instance;
 }
 
-static const QString &dataRoot()
+const QString &AppConfig::dataRoot()
 {
     QString folder("/org.vatsim.xpilot/");
     static const QString path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + folder;
@@ -59,7 +59,6 @@ void AppConfig::loadConfig()
         XplanePluginPort = DEFAULT_PLUGIN_PORT;
         XplaneUdpPort = XPLANE_UDP_PORT;
         VelocityEnabled = false;
-        AskModelInstall = true;
 
         saveConfig();
         loadConfig();
@@ -99,7 +98,7 @@ void AppConfig::loadConfig()
     XplanePluginPort = jsonMap["XplanePluginPort"].toInt();
     XplaneUdpPort = jsonMap["XplaneUdpPort"].toInt();
     VelocityEnabled = jsonMap["VelocityEnabled"].toBool();
-    AskModelInstall = jsonMap["AskModelInstall"].toBool();
+    SilenceModelInstall = jsonMap["SilenceModelInstall"].toBool();
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
     for(const auto & value : cachedServers) {
@@ -156,7 +155,7 @@ void AppConfig::saveConfig()
     jsonObj["XplanePluginPort"] = XplanePluginPort == 0 ? DEFAULT_PLUGIN_PORT : XplanePluginPort;
     jsonObj["XplaneUdpPort"] = XplaneUdpPort == 0 ? XPLANE_UDP_PORT : XplaneUdpPort;
     jsonObj["VelocityEnabled"] = VelocityEnabled;
-    jsonObj["AskModelInstall"] = AskModelInstall;
+    jsonObj["SilenceModelInstall"] = SilenceModelInstall;
 
     QJsonArray cachedServers;
     for(auto & server : CachedServers) {

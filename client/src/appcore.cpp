@@ -46,6 +46,8 @@ int xpilot::Main(int argc, char* argv[])
 
     QCoreApplication::setApplicationName("xPilot");
     QCoreApplication::setApplicationVersion(xpilot::BuildConfig::getVersionString());
+    QCoreApplication::setOrganizationName("Justin Shannon");
+    QCoreApplication::setOrganizationDomain("org.vatsim.xpilot");
 
     QGuiApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));
