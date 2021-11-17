@@ -6,7 +6,6 @@
 
 #include <fstream>
 
-#include <QDebug>
 #include <QFile>
 #include <QDir>
 #include <QtConcurrent/QtConcurrent>
@@ -40,7 +39,7 @@ QPromise<void> InstallModels::DownloadModels(const QString &url)
             m_file = new QSaveFile(pathAppend(tempPath, "Bluebell.zip"));
             if(!m_file->open(QIODevice::WriteOnly))
             {
-                reject(QString{"Error opening file for writing."});
+                reject(QString{"Error opening file for writing. Restart xPilot and try again."});
                 return;
             }
 
@@ -63,7 +62,9 @@ QPromise<void> InstallModels::DownloadModels(const QString &url)
                     }
                 }
                 else {
-                    reject(QString{m_reply->error()});
+                    if(m_reply->error() != QNetworkReply::OperationCanceledError) {
+                        reject(QString{m_reply->errorString()});
+                    }
                 }
                 m_reply->deleteLater();
             });
@@ -74,9 +75,8 @@ QPromise<void> InstallModels::UnzipModels(const QString &path)
 {
     return QPromise<void>{[&](const auto &resolve, const auto &reject)
         {
-            return QtConcurrent::run([=] {
-                emit unzipStarted();
-
+            return QtConcurrent::run([=]
+            {
                 QString tempPath = QDir::fromNativeSeparators(AppConfig::dataRoot());
 
                 if(!QFile(pathAppend(tempPath, "Bluebell.zip")).exists()) {
@@ -111,7 +111,11 @@ QPromise<void> InstallModels::UnzipModels(const QString &path)
                 // create directories
                 for(it = entries.begin(); it != entries.end(); ++it)
                 {
-                    if(m_stopExtract) return;
+                    if(m_stopExtract) {
+                        zf.close();
+                        DeleteTempDownload();
+                        return;
+                    }
 
                     entry = *it;
                     size_t size = entry.getSize();
@@ -129,7 +133,11 @@ QPromise<void> InstallModels::UnzipModels(const QString &path)
                 // create files
                 for(it = entries.begin(); it != entries.end(); ++it)
                 {
-                    if(m_stopExtract) return;
+                    if(m_stopExtract) {
+                        zf.close();
+                        DeleteTempDownload();
+                        return;
+                    }
 
                     entry = *it;
                     size_t size = entry.getSize();
@@ -180,12 +188,21 @@ void InstallModels::CreatePluginConfig(const QString &path)
     configFile.write(doc.toJson());
 }
 
+void InstallModels::DeleteTempDownload()
+{
+    QString tempPath = QDir::fromNativeSeparators(AppConfig::dataRoot());
+    QFile tempFile(pathAppend(tempPath, "Bluebell.zip"));
+    if(!tempFile.remove()) {
+        emit errorEncountered("Delete temporary download error: " + tempFile.errorString());
+    }
+}
+
 void InstallModels::downloadModels()
 {
     DownloadModels("https://cdn.xpilot-project.org/CSL/Bluebell.zip").then([&]{
         emit setXplanePath();
     }).fail([&](const QString &err){
-        qDebug() << "Download Error: " << err;
+        errorEncountered("Download error: " + err);
     });
 }
 
@@ -199,7 +216,7 @@ void InstallModels::validatePath(QString path)
     if(xplanePath.isReadable()) {
         if(BuildConfig::isRunningOnWindowsPlatform()) {
             QString xplaneExe = pathAppend(xplanePath.path(), "X-Plane.exe");
-            pathValid = QFileInfo(xplaneExe).exists() && QFileInfo(xplaneExe).isFile();
+            pathValid = QFileInfo::exists(xplaneExe) && QFileInfo(xplaneExe).isFile();
             if(!pathValid) {
                 emit invalidXplanePath("Invalid X-Plane folder path. The path should be the root folder of where X-Plane.exe is installed.");
                 return;
@@ -207,7 +224,7 @@ void InstallModels::validatePath(QString path)
         }
         else if(BuildConfig::isRunningOnMacOSPlatform()) {
             QString xplaneExe = pathAppend(xplanePath.path(), "X-Plane.app");
-            pathValid = QFileInfo(xplaneExe).exists() && QFileInfo(xplaneExe).isFile();
+            pathValid = QFileInfo::exists(xplaneExe) && QFileInfo(xplaneExe).isFile();
             if(!pathValid) {
                 emit invalidXplanePath("Invalid X-Plane folder path. The path should be the root folder of where X-Plane.app is installed.");
                 return;
@@ -215,7 +232,7 @@ void InstallModels::validatePath(QString path)
         }
         else if(BuildConfig::isRunningOnLinuxPlatform()) {
             QString xplaneExe = pathAppend(xplanePath.path(), "X-Plane-x86_64");
-            pathValid = QFileInfo(xplaneExe).exists() && QFileInfo(xplaneExe).isFile();
+            pathValid = QFileInfo::exists(xplaneExe) && QFileInfo(xplaneExe).isFile();
             if(!pathValid) {
                 emit invalidXplanePath("Invalid X-Plane folder path. The path should be the root folder of where the X-Plane-x86_64 executable is installed.");
                 return;
@@ -230,8 +247,7 @@ void InstallModels::validatePath(QString path)
     if(xpilotPath.isReadable()) {
         if(BuildConfig::isRunningOnWindowsPlatform()) {
             QString pluginFile = pathAppend(xpilotPath.path(), "win_x64/xPilot.xpl");
-            qDebug() << pluginFile;
-            pluginValid = QFileInfo(pluginFile).exists() && QFileInfo(pluginFile).isFile();
+            pluginValid = QFileInfo::exists(pluginFile) && QFileInfo(pluginFile).isFile();
             if(!pluginValid) {
                 emit invalidXplanePath(pluginError);
                 return;
@@ -239,7 +255,7 @@ void InstallModels::validatePath(QString path)
         }
         else if(BuildConfig::isRunningOnMacOSPlatform()) {
             QString pluginFile = pathAppend(xpilotPath.path(), "mac_x64/xPilot.xpl");
-            pluginValid = QFileInfo(pluginFile).exists() && QFileInfo(pluginFile).isFile();
+            pluginValid = QFileInfo::exists(pluginFile) && QFileInfo(pluginFile).isFile();
             if(!pluginValid) {
                 emit invalidXplanePath(pluginError);
                 return;
@@ -247,7 +263,7 @@ void InstallModels::validatePath(QString path)
         }
         else if(BuildConfig::isRunningOnLinuxPlatform()) {
             QString pluginFile = pathAppend(xpilotPath.path(), "lin_x64/xPilot.xpl");
-            pluginValid = QFileInfo(pluginFile).exists() && QFileInfo(pluginFile).isFile();
+            pluginValid = QFileInfo::exists(pluginFile) && QFileInfo(pluginFile).isFile();
             if(!pluginValid) {
                 emit invalidXplanePath(pluginError);
                 return;
@@ -260,15 +276,11 @@ void InstallModels::validatePath(QString path)
         emit validXplanePath();
         UnzipModels(xpPath).then([=]{
             CreatePluginConfig(xpPath);
-
-            QString tempPath = QDir::fromNativeSeparators(AppConfig::dataRoot());
-            QFile tempDownload(pathAppend(tempPath, "Bluebell.zip"));
-            tempDownload.remove();
-
+            DeleteTempDownload();
             emit unzipFinished();
         })
         .fail([&](const QString &err){
-            qDebug() << "Unzip error: " << err;
+            emit errorEncountered("Unzip error: " + err);
         });
     }
 }
@@ -279,9 +291,11 @@ void InstallModels::cancel()
         m_file->cancelWriting();
         m_file->deleteLater();
     }
+
     if(m_reply) {
         m_reply->abort();
         m_reply->deleteLater();
     }
+
     m_stopExtract = true;
 }

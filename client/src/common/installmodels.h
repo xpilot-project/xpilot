@@ -19,6 +19,7 @@ public:
     QtPromise::QPromise<void> DownloadModels(const QString& url);
     QtPromise::QPromise<void> UnzipModels(const QString &path);
     void CreatePluginConfig(const QString &path);
+    void DeleteTempDownload();
     Q_INVOKABLE void downloadModels();
     Q_INVOKABLE void validatePath(QString path);
     Q_INVOKABLE void cancel();
@@ -28,9 +29,9 @@ signals:
     void setXplanePath();
     void invalidXplanePath(QString errorText);
     void validXplanePath();
-    void unzipStarted();
     void unzipProgressChanged(double value);
     void unzipFinished();
+    void errorEncountered(QString error);
 
 private:
     QNetworkAccessManager *nam = nullptr;

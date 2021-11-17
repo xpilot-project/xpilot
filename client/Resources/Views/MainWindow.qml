@@ -13,6 +13,7 @@ import "../Scripts/FrequencyUtils.js" as FrequencyUtils
 import "../Scripts/TimestampUtils.js" as TimestampUtils
 import "../Scripts/StringUtils.js" as StringUtils
 import "../Components"
+import "../InstallModels"
 import "../Controls"
 
 Window {
@@ -105,6 +106,18 @@ Window {
         muted: AppConfig.DisableNotificationSounds
     }
 
+    DownloadModels {
+        id: modelInstall_downloadModels
+    }
+
+    SetXplanePath {
+        id: modelInstall_setXplanePath
+    }
+
+    ExtractModels {
+        id: modelInstall_extractModels
+    }
+
     MessageDialog {
         id: confirmClose
         title: "Confirm Close"
@@ -144,7 +157,7 @@ Window {
             mainWindow.showMaximized()
         }
         if(!AppConfig.SilenceModelInstall) {
-            popupDownloadModels.open()
+            modelInstall_downloadModels.open()
         }
         initialized = true;
     }
@@ -194,403 +207,39 @@ Window {
         }
     }
 
-    // Downloading CSL models
-    Popup {
-        id: popupDownloadModels
-        width: 600
-        height: 180
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        modal: true
-        focus: true
-        closePolicy: Popup.NoAutoClose
-
-        property double downloadProgressPct: 0
-
-        Label {
-            id: labelAskDownload
-            text: "It looks like this is your first time using xPilot. Before you can connect to the network, you must\r\n" +
-                  "install a CSL aircraft model set. Would you like to download and install one now?\r\n\r\nDownload size: Approximately 560MB.\r\n\r\n" +
-                  "If you choose No, you will have to manually install a model set yourself.\r\n"
-            font.pointSize: 10
-            renderType: Text.NativeRendering
-            x: 15
-            y: 10
-        }
-
-        Label {
-            id: labelDownloading
-            visible: false
-            text: "Downloading CSL aircraft model set. Please wait..."
-            font.pointSize: 10
-            renderType: Text.NativeRendering
-            wrapMode: Text.WordWrap
-            x: 20
-            y: 40
-        }
-
-        ProgressBar {
-            id: progbressBarDownload
-            visible: false
-            value: popupDownloadModels.downloadProgressPct
-            anchors.top: labelDownloading.bottom
-            anchors.left: labelDownloading.left
-            anchors.topMargin: 10
-            padding: 5
-
-            background: Rectangle {
-                implicitWidth: 480
-                implicitHeight: 6
-                color: "#e6e6e6"
-                radius: 3
-            }
-
-            contentItem: Item {
-                implicitWidth: 480
-                implicitHeight: 6
-
-                Rectangle {
-                    width: progbressBarDownload.visualPosition * parent.width
-                    height: parent.height
-                    radius: 2
-                    color: "#0164AD"
-                }
-            }
-        }
-
-        Label {
-            id: labelPercent
-            text: (popupDownloadModels.downloadProgressPct * 100).toFixed(0) + "%"
-            visible: false
-            font.pointSize: 10
-            renderType: Text.NativeRendering
-            wrapMode: Text.WordWrap
-            anchors.top: progbressBarDownload.top
-            anchors.left: progbressBarDownload.right
-            anchors.leftMargin: 10
-        }
-
-        GrayButton {
-            id: btnCancel
-            visible: false
-            text: "Cancel"
-            width: 80
-            height: 30
-            font.pointSize: 10
-            anchors.topMargin: 10
-            anchors.top: progbressBarDownload.bottom
-            anchors.left: progbressBarDownload.left
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    installModels.cancel()
-                    popupDownloadModels.close()
-                }
-            }
-        }
-
-        BlueButton {
-            id: btnYes
-            text: "Yes"
-            width: 50
-            height: 30
-            font.pointSize: 10
-            anchors.top: labelAskDownload.bottom
-            anchors.left: labelAskDownload.left
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    btnNo.visible = false
-                    btnYes.visible = false
-                    labelAskDownload.visible = false
-                    chkDontAskAgainModels.visible = false
-
-                    btnCancel.visible = true
-                    labelDownloading.visible = true
-                    progbressBarDownload.visible = true
-                    labelPercent.visible = true
-
-                    installModels.downloadModels()
-                }
-            }
-        }
-
-        GrayButton {
-            id: btnNo
-            text: "No"
-            width: 50
-            height: 30
-            font.pointSize: 10
-            anchors.top: labelAskDownload.bottom
-            anchors.left: btnYes.right
-            anchors.leftMargin: 10
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    if(chkDontAskAgainModels.checked) {
-                        AppConfig.SilenceModelInstall = true
-                        AppConfig.saveConfig()
-                    }
-                    popupDownloadModels.close()
-                }
-            }
-        }
-
-        CheckBox {
-            id: chkDontAskAgainModels
-            text: qsTr("Don't ask me again")
-            anchors.top: btnNo.top
-            anchors.left: btnNo.right
-            anchors.leftMargin: 10
-
-            indicator: Rectangle {
-                implicitWidth: 16
-                implicitHeight: 16
-                x: chkDontAskAgainModels.leftPadding
-                y: parent.height / 2 - height / 2
-                radius: 3
-                border.color: chkDontAskAgainModels.down ? "#272C2E" : "#565E64"
-
-                Rectangle {
-                    width: 8
-                    height: 8
-                    x: 4
-                    y: 4
-                    radius: 2
-                    color: chkDontAskAgainModels.down ? "#272C2E" : "#565E64"
-                    visible: chkDontAskAgainModels.checked
-                }
-            }
-
-            contentItem: Text {
-                text: chkDontAskAgainModels.text
-                font: chkDontAskAgainModels.font
-                opacity: enabled ? 1.0 : 0.3
-                color: chkDontAskAgainModels.down ? "#272C2E" : "#565E64"
-                verticalAlignment: Text.AlignVCenter
-                leftPadding: chkDontAskAgainModels.indicator.width + chkDontAskAgainModels.spacing
-                renderType: Text.NativeRendering
-            }
-        }
-    }
-
-    Popup {
-        id: popupXplanePath
-        width: 600
-        height: 180
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        modal: true
-        focus: true
-        closePolicy: Popup.NoAutoClose
-
-        Connections {
-            target: installModels
-
-            function onInvalidXplanePath(errorText) {
-                xplanePathUrl.color = "red"
-                xplanePathUrl.text = errorText
-            }
-        }
-
-        Label {
-            id: lblXplanePath
-            text: "Please browse to the folder where X-Plane 11 is installed:"
-            font.pointSize: 10
-            renderType: Text.NativeRendering
-            wrapMode: Text.WordWrap
-            x: 20
-            y: 30
-        }
-
-        BlueButton {
-            text: "Select Folder..."
-            width: 120
-            height: 25
-            font.pointSize: 10
-            anchors.left: lblXplanePath.right
-            anchors.leftMargin: 10
-            y: 25
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    xplanePath.open()
-                }
-            }
-        }
-
-        FileDialog {
-            id: xplanePath
-            title: "Select X-Plane 11 Folder"
-            selectFolder: true
-            onAccepted: {
-                var path = xplanePath.folder.toString()
-                path = path.replace(/^file:\/{3}/,"")
-                xplanePathUrl.color = "black"
-                xplanePathUrl.text = `<b>Path:</b> ${path}`
-            }
-        }
-
-        Text {
-            id: xplanePathUrl
-            anchors.top: lblXplanePath.bottom
-            anchors.left: lblXplanePath.left
-            anchors.topMargin: 15
-            font.pointSize: 10
-            renderType: Text.NativeRendering
-            wrapMode: Text.WordWrap
-            width: 480
-        }
-
-        BlueButton {
-            id: xplanePathBtnOk
-            text: "OK"
-            width: 80
-            height: 30
-            font.pointSize: 10
-            anchors.topMargin: 15
-            anchors.top: xplanePathUrl.bottom
-            anchors.left: xplanePathUrl.left
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    installModels.validatePath(xplanePath.folder.toString())
-                }
-            }
-        }
-
-        GrayButton {
-            id: xplanePathBtnCancel
-            text: "Cancel"
-            width: 80
-            height: 30
-            font.pointSize: 10
-            anchors.topMargin: 15
-            anchors.top: xplanePathUrl.bottom
-            anchors.left: xplanePathBtnOk.right
-            anchors.leftMargin: 10
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    installModels.cancel()
-                    popupXplanePath.close()
-                }
-            }
-        }
-    }
-
-    // Install/unzipping downloaded models
-    Popup {
-        id: popupUnzipModels
-        width: 600
-        height: 180
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        modal: true
-        focus: true
-        closePolicy: Popup.NoAutoClose
-
-        property double unzipProgressPct: 0
-
-        Label {
-            id: lblUnzipping
-            text: "Installing CSL aircraft model set. Please wait..."
-            font.pointSize: 10
-            renderType: Text.NativeRendering
-            wrapMode: Text.WordWrap
-            x: 20
-            y: 40
-        }
-
-        ProgressBar {
-            id: progressBarUnzipping
-            value: popupUnzipModels.unzipProgressPct
-            anchors.top: lblUnzipping.bottom
-            anchors.left: lblUnzipping.left
-            anchors.topMargin: 10
-            padding: 5
-
-            background: Rectangle {
-                implicitWidth: 480
-                implicitHeight: 6
-                color: "#e6e6e6"
-                radius: 3
-            }
-
-            contentItem: Item {
-                implicitWidth: 480
-                implicitHeight: 6
-
-                Rectangle {
-                    width: progressBarUnzipping.visualPosition * parent.width
-                    height: parent.height
-                    radius: 2
-                    color: "#0164AD"
-                }
-            }
-        }
-
-        Label {
-            id: labelPctInstall
-            text: (popupUnzipModels.unzipProgressPct * 100).toFixed(0) + "%"
-            font.pointSize: 10
-            renderType: Text.NativeRendering
-            wrapMode: Text.WordWrap
-            anchors.top: progressBarUnzipping.top
-            anchors.left: progressBarUnzipping.right
-            anchors.leftMargin: 10
-        }
-
-        GrayButton {
-            id: btnCancelUnzip
-            text: "Cancel"
-            width: 80
-            height: 30
-            font.pointSize: 10
-            anchors.topMargin: 10
-            anchors.top: progressBarUnzipping.bottom
-            anchors.left: progressBarUnzipping.left
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    installModels.cancel()
-                    popupUnzipModels.close()
-                }
-            }
-        }
-    }
-
     Connections {
         target: installModels
+
         function onSetXplanePath() {
-            popupDownloadModels.close()
-            popupXplanePath.open()
+            modelInstall_downloadModels.close()
+            modelInstall_setXplanePath.open()
         }
 
         function onValidXplanePath() {
-            popupXplanePath.close()
-            popupUnzipModels.open()
+            modelInstall_setXplanePath.close()
+            modelInstall_extractModels.open()
         }
 
         function onUnzipFinished() {
-            popupUnzipModels.close()
+            modelInstall_extractModels.close()
             appendMessage("CSL aircraft model package successfully installed! Please restart xPilot and X-Plane before connecting to the network.", colorYellow);
             AppConfig.SilenceModelInstall = true
         }
 
         function onDownloadProgressChanged(val) {
-            popupDownloadModels.downloadProgressPct = val
+            modelInstall_downloadModels.pctProgress = val
         }
 
         function onUnzipProgressChanged(val) {
-            popupUnzipModels.unzipProgressPct = val
+            modelInstall_extractModels.pctProgress = val
+        }
+
+        function onErrorEncountered(error) {
+            modelInstall_downloadModels.close()
+            modelInstall_setXplanePath.close()
+            modelInstall_extractModels.close()
+            appendMessage(error, colorRed);
+            errorSound.play()
         }
     }
 
