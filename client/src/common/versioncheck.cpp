@@ -148,7 +148,7 @@ void VersionCheck::PerformVersionCheck()
 
 QtPromise::QPromise<void> VersionCheck::DownloadInstaller()
 {
-    return QPromise<void>{[&](auto resolve, auto reject)
+    return QPromise<void>{[&](const auto resolve, const auto reject)
         {
             emit downloadStarted();
 

@@ -32,7 +32,7 @@ InstallModels::~InstallModels()
 
 QPromise<void> InstallModels::DownloadModels(const QString &url)
 {
-    return QPromise<void>{[&](auto resolve, auto reject)
+    return QPromise<void>{[&](const auto resolve, const auto reject)
         {
             QString tempPath = QDir::fromNativeSeparators(AppConfig::dataRoot());
 
@@ -73,7 +73,7 @@ QPromise<void> InstallModels::DownloadModels(const QString &url)
 
 QPromise<void> InstallModels::UnzipModels(const QString &path)
 {
-    return QPromise<void>{[&](const auto &resolve, const auto &reject)
+    return QPromise<void>{[&](const auto resolve, const auto reject)
         {
             return QtConcurrent::run([=]
             {
