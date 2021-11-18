@@ -452,9 +452,9 @@ jobs:
       #     mv xPilot*Windows.zip .
       #     mv xPilot*Linux.zip .
 
-      - name: Repackage
+      - name: List directory contents
         run: |
-          mv xPilot*Linux.zip .
+          ls -R
 
       - name: Create release
         uses: softprops/action-gh-release@v1
