@@ -56,6 +56,7 @@ int xpilot::Main(int argc, char* argv[])
     QQmlContext *context = engine.rootContext();
 
     AppCore appCore(&engine);
+    VersionCheck versionCheck;
     InstallModels installModels;
     XplaneAdapter xplaneAdapter;
     NetworkManager networkManager(xplaneAdapter);
@@ -63,6 +64,10 @@ int xpilot::Main(int argc, char* argv[])
     ControllerManager controllerManager(networkManager, xplaneAdapter);
     UserAircraftManager aircraftManager(xplaneAdapter, networkManager);
     AudioForVatsim audio(networkManager, xplaneAdapter, controllerManager);
+
+    QTimer::singleShot(500, [&]{
+        versionCheck.PerformVersionCheck();
+    });
 
     qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", &AppCore::appConfigInstance);
     qRegisterMetaType<ConnectInfo>("ConnectInfo");
@@ -78,6 +83,7 @@ int xpilot::Main(int argc, char* argv[])
     context->setContextProperty("appVersion", BuildConfig::getVersionString());
     context->setContextProperty("isVelocityEnabled", AppConfig::getInstance()->VelocityEnabled);
     context->setContextProperty("installModels", &installModels);
+    context->setContextProperty("versionCheck", &versionCheck);
 
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [&](){
         networkManager.disconnectFromNetwork();
@@ -100,9 +106,7 @@ AppCore::AppCore(QQmlEngine* qmlEngine) :
     QObject(qmlEngine),
     engine(qobject_cast<QQmlApplicationEngine*>(qmlEngine))
 {
-    QTimer::singleShot(0, this, [this]{
-        PerformVersionCheck();
-    });
+
 }
 
 QObject *AppCore::appConfigInstance(QQmlEngine*, QJSEngine*)
@@ -126,19 +130,4 @@ void AppCore::DownloadServerList()
     else {
         emit serverListDownloadError();
     }
-}
-
-void AppCore::PerformVersionCheck()
-{
-    VersionCheck versionCheck;
-
-    connect(&versionCheck, &VersionCheck::newVersionAvailable, [=](QString version, QString url)
-    {
-        emit newVersionAvailable(version, url);
-    });
-    connect(&versionCheck, &VersionCheck::noUpdatesAvailable, [=](){
-       emit noUpdatesAvailable();
-    });
-
-    versionCheck.checkForUpdates();
 }

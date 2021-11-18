@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include "src/common/versioncheck.h"
 
 class QQmlApplicationEngine;
 class QQmlEngine;

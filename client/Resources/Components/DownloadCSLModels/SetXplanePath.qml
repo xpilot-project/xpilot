@@ -6,7 +6,7 @@ import QtQuick.Window 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.2
 import AppConfig 1.0
-import "../Controls"
+import "../../Controls"
 
 Popup {
         id: popup

@@ -13,7 +13,8 @@ import "../Scripts/FrequencyUtils.js" as FrequencyUtils
 import "../Scripts/TimestampUtils.js" as TimestampUtils
 import "../Scripts/StringUtils.js" as StringUtils
 import "../Components"
-import "../InstallModels"
+import "../Components/DownloadCSLModels"
+import "../Components/VersionCheck"
 import "../Controls"
 
 Window {
@@ -107,15 +108,23 @@ Window {
     }
 
     DownloadModels {
-        id: modelInstall_downloadModels
+        id: modal_downloadModels
     }
 
     SetXplanePath {
-        id: modelInstall_setXplanePath
+        id: modal_setXplanePath
     }
 
     ExtractModels {
-        id: modelInstall_extractModels
+        id: modal_extractModels
+    }
+
+    NewVersionAvailable {
+        id: modal_newVersionAvailable
+    }
+
+    DownloadingUpdate {
+        id: modal_downlodingUpdate;
     }
 
     MessageDialog {
@@ -126,19 +135,6 @@ Window {
         onYes: {
             closing = true
             mainWindow.close()
-        }
-    }
-
-    MessageDialog {
-        id: newVersionDialog
-        property string downloadUrl: ""
-        title: "New xPilot Version Available"
-        text: "A new version of xPilot is available. Would you like to download and install it now?"
-        standardButtons: StandardButton.Yes | StandardButton.No
-        onYes: {
-            if(downloadUrl) {
-                Qt.openUrlExternally(downloadUrl)
-            }
         }
     }
 
@@ -155,9 +151,6 @@ Window {
         y = AppConfig.WindowConfig.Y;
         if(AppConfig.WindowConfig.Maximized) {
             mainWindow.showMaximized()
-        }
-        if(!AppConfig.SilenceModelInstall) {
-            modelInstall_downloadModels.open()
         }
         initialized = true;
     }
@@ -208,20 +201,46 @@ Window {
     }
 
     Connections {
+        target: versionCheck
+
+        function onNewVersionAvailable() {
+            modal_newVersionAvailable.open()
+        }
+
+        function onDownloadStarted() {
+            modal_downlodingUpdate.open()
+        }
+
+        function onNoUpdatesAvailable() {
+            appendMessage("Version check complete. You are running the latest version of xPilot.", colorYellow)
+
+            if(!AppConfig.SilenceModelInstall) {
+                // this is here because we don't want to overload the user with popups
+                modal_downloadModels.open()
+            }
+        }
+
+        function onErrorEncountered(error) {
+            appendMessage(error, colorRed)
+            errorSound.play()
+        }
+    }
+
+    Connections {
         target: installModels
 
         function onSetXplanePath() {
-            modelInstall_downloadModels.close()
-            modelInstall_setXplanePath.open()
+            modal_downloadModels.close()
+            modal_setXplanePath.open()
         }
 
         function onValidXplanePath() {
-            modelInstall_setXplanePath.close()
-            modelInstall_extractModels.open()
+            modal_setXplanePath.close()
+            modal_extractModels.open()
         }
 
         function onUnzipFinished() {
-            modelInstall_extractModels.close()
+            modal_extractModels.close()
             appendMessage("CSL aircraft model package successfully installed! Please restart xPilot and X-Plane before connecting to the network.", colorYellow);
             AppConfig.SilenceModelInstall = true
         }
@@ -231,13 +250,13 @@ Window {
         }
 
         function onUnzipProgressChanged(val) {
-            modelInstall_extractModels.pctProgress = val
+            modal_extractModels.pctProgress = val
         }
 
         function onErrorEncountered(error) {
             modelInstall_downloadModels.close()
-            modelInstall_setXplanePath.close()
-            modelInstall_extractModels.close()
+            modal_setXplanePath.close()
+            modal_extractModels.close()
             appendMessage(error, colorRed);
             errorSound.play()
         }
@@ -266,15 +285,6 @@ Window {
 
         function onServerListDownloadError(count) {
             appendMessage("Server list download failed. Using previously-cached server list.", colorRed)
-        }
-
-        function onNewVersionAvailable(version, downloadUrl) {
-            newVersionDialog.downloadUrl = downloadUrl
-            newVersionDialog.open()
-        }
-
-        function onNoUpdatesAvailable() {
-            appendMessage("Version check complete. You are running the latest version of xPilot.", colorYellow)
         }
     }
 

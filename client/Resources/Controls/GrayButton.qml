@@ -20,6 +20,6 @@ Button {
         cursorShape: Qt.PointingHandCursor
     }
     background: Rectangle {
-        color: btnMouseArea.pressed ? '#363b3f' : btnMouseArea.containsMouse ? '#565e64' : '#6c757d'
+        color: btnMouseArea.pressed ? '#363b3f' : btnMouseArea.containsMouse ? '#565e64' : btn.enabled ? '#6c757d' : '#c1c1c1'
     }
 }

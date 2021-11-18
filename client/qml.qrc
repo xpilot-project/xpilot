@@ -43,8 +43,10 @@
         <file>Resources/Samples/HF_WhiteNoise.wav</file>
         <file>Resources/Samples/WhiteNoise.wav</file>
         <file>Resources/Scripts/StringUtils.js</file>
-        <file>Resources/InstallModels/DownloadModels.qml</file>
-        <file>Resources/InstallModels/SetXplanePath.qml</file>
-        <file>Resources/InstallModels/ExtractModels.qml</file>
+        <file>Resources/Components/DownloadCSLModels/DownloadModels.qml</file>
+        <file>Resources/Components/DownloadCSLModels/ExtractModels.qml</file>
+        <file>Resources/Components/DownloadCSLModels/SetXplanePath.qml</file>
+        <file>Resources/Components/VersionCheck/NewVersionAvailable.qml</file>
+        <file>Resources/Components/VersionCheck/DownloadingUpdate.qml</file>
     </qresource>
 </RCC>

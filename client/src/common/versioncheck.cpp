@@ -1,123 +1,214 @@
 #include "versioncheck.h"
 #include "src/common/utils.h"
 #include "src/common/build_config.h"
+#include "src/config/appconfig.h"
 
 #include <QStringLiteral>
 #include <QStringBuilder>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QNetworkReply>
+#include <QNetworkAccessManager>
+#include <QProcess>
 
 using namespace xpilot;
+using namespace QtPromise;
 
 VersionCheck::VersionCheck(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    nam(new QNetworkAccessManager)
 {
 
 }
 
-void VersionCheck::checkForUpdates()
+QtPromise::QPromise<QByteArray> VersionCheck::CheckForUpdates()
 {
-    QNetworkAccessManager manager;
-    QByteArray response;
-    QEventLoop loop;
-    connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
-    connect(&manager, &QNetworkAccessManager::finished, [&](QNetworkReply *reply) {
-        if(reply->error() == QNetworkReply::NoError)
+    return QPromise<QByteArray>{[&](auto &resolve, auto &reject)
         {
-            response = reply->readAll();
-        }
-    });
-    manager.get(QNetworkRequest(QUrl(BuildConfig::githubRepoApiUrl() % u"releases")));
-    loop.exec();
+            QString url(BuildConfig::githubRepoApiUrl() % u"releases");
+            m_reply = nam->get(QNetworkRequest{url});
 
-    if(!response.isEmpty())
-    {
-        bool isNewVersion = false;
+            QObject::connect(m_reply, &QNetworkReply::finished, [=]() {
+                if(m_reply->error() == QNetworkReply::NoError)
+                {
+                    resolve(m_reply->readAll());
+                }
+                else
+                {
+                    reject(QString{m_reply->errorString()});
+                }
+            });
+        }};
+}
 
-        auto release = QJsonDocument::fromJson(response).array().first();
-
-        if(release.isUndefined())
+void VersionCheck::PerformVersionCheck()
+{
+    CheckForUpdates().then([&](const QByteArray &response){
+        if(!response.isEmpty())
         {
-            emit noUpdatesAvailable();
-            return;
-        }
+            bool isNewVersion = false;
 
-        QString version = release[QLatin1String("tag_name")].toString();
-        if(version.isEmpty() || version[0] != 'v') return;
-        version.remove(0, 1);
+            auto release = QJsonDocument::fromJson(response).array().first();
 
-        bool published = !release[QLatin1String("draft")].toBool();
-        bool beta = release[QLatin1String("prerelease")].toBool();
-
-        if(!published) return;
-
-        int suffixIndex;
-        auto v = QVersionNumber::fromString(version, &suffixIndex);
-
-        QString betaIdentifier = version.mid(suffixIndex + 1);
-        if(beta && !betaIdentifier.isEmpty())
-        {
-            QRegularExpression rx("beta\\.(\\d+)", QRegularExpression::CaseInsensitiveOption);
-            QRegularExpressionMatch match = rx.match(betaIdentifier);
-            int betaNumber = match.captured(1).toInt();
-
-            if(BuildConfig::isBetaVersion())
+            if(release.isUndefined())
             {
-                if(betaNumber > BuildConfig::versionBeta())
+                emit noUpdatesAvailable();
+                return;
+            }
+
+            QString version = release[QLatin1String("tag_name")].toString();
+            if(version.isEmpty() || version[0] != 'v') return;
+            version.remove(0, 1);
+
+            bool published = !release[QLatin1String("draft")].toBool();
+            bool beta = release[QLatin1String("prerelease")].toBool();
+
+            if(!published) return;
+
+            int suffixIndex;
+            auto v = QVersionNumber::fromString(version, &suffixIndex);
+
+            QString betaIdentifier = version.mid(suffixIndex + 1);
+            if(beta && !betaIdentifier.isEmpty())
+            {
+                QRegularExpression rx("beta\\.(\\d+)", QRegularExpression::CaseInsensitiveOption);
+                QRegularExpressionMatch match = rx.match(betaIdentifier);
+                int betaNumber = match.captured(1).toInt();
+
+                if(BuildConfig::isBetaVersion())
+                {
+                    if(v > BuildConfig::getVersion() || betaNumber > BuildConfig::versionBeta())
+                    {
+                        isNewVersion = true;
+                    }
+                }
+            }
+            else
+            {
+                if(v > BuildConfig::getVersion())
                 {
                     isNewVersion = true;
                 }
             }
-        }
-        else
-        {
-            if(v > BuildConfig::getVersion())
+
+            if(!isNewVersion)
             {
-                isNewVersion = true;
+                emit noUpdatesAvailable();
+                return;
             }
-        }
 
-        if(!isNewVersion)
-        {
-            emit noUpdatesAvailable();
-            return;
-        }
+            auto assets = release[QLatin1String("assets")].toArray();
 
-        auto assets = release[QLatin1String("assets")].toArray();
-
-        if(assets.isEmpty())
-        {
-            emit noUpdatesAvailable();
-            return;
-        }
-
-        for (const QJsonValue asset : assets)
-        {
-            QString name = asset[QLatin1String("name")].toString();
-            QString downloadUrl = asset[QLatin1String("browser_download_url")].toString();
-
-            if(BuildConfig::isRunningOnWindowsPlatform())
+            if(assets.isEmpty())
             {
-                if(name.toLower().contains("windows"))
+                emit noUpdatesAvailable();
+                return;
+            }
+
+            for (const QJsonValue asset : assets)
+            {
+                QString name = asset[QLatin1String("name")].toString();
+                QString downloadUrl = asset[QLatin1String("browser_download_url")].toString();
+
+                if(BuildConfig::isRunningOnWindowsPlatform())
                 {
-                    emit newVersionAvailable(name, downloadUrl);
+                    if(name.toLower().contains("windows"))
+                    {
+                        emit newVersionAvailable();
+                        qDebug() << name;
+                        m_fileName = name;
+                        m_downloadUrl = downloadUrl;
+                    }
+                }
+                else if(BuildConfig::isRunningOnMacOSPlatform())
+                {
+                    if(name.toLower().contains("macos"))
+                    {
+                        emit newVersionAvailable();
+                        m_fileName = name;
+                        m_downloadUrl = downloadUrl;
+                    }
+                }
+                else if(BuildConfig::isRunningOnLinuxPlatform())
+                {
+                    if(name.toLower().contains("linux"))
+                    {
+                        emit newVersionAvailable();
+                        m_fileName = name;
+                        m_downloadUrl = downloadUrl;
+                    }
                 }
             }
-            else if(BuildConfig::isRunningOnMacOSPlatform())
-            {
-                if(name.toLower().contains("macos"))
-                {
-                    emit newVersionAvailable(name, downloadUrl);
-                }
-            }
-            else if(BuildConfig::isRunningOnLinuxPlatform())
-            {
-                if(name.toLower().contains("linux"))
-                {
-                    emit newVersionAvailable(name, downloadUrl);
-                }
-            }
         }
-    }
+    }).fail([&](const QString &err){
+        qDebug() << "error: " << err;
+    });
+}
+
+QtPromise::QPromise<void> VersionCheck::DownloadInstaller()
+{
+    return QPromise<void>{[&](auto resolve, auto reject)
+        {
+            emit downloadStarted();
+
+            QString tempPath = QDir::fromNativeSeparators(AppConfig::dataRoot());
+
+            m_file = new QSaveFile(pathAppend(tempPath, m_fileName));
+            if(!m_file->open(QIODevice::WriteOnly))
+            {
+                reject(QString{"Error opening file for writing. Restart xPilot and try again."});
+                return;
+            }
+
+            QNetworkRequest req(m_downloadUrl);
+            req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, true);
+            m_reply = nam->get(req);
+
+            QObject::connect(m_reply, &QNetworkReply::downloadProgress, [&](qint64 read, qint64 total) {
+                emit downloadPercentChanged((double)read / (double)total);
+            });
+            QObject::connect(m_reply, &QNetworkReply::readyRead, [&]{
+                if(m_file) {
+                    m_file->write(m_reply->readAll());
+                }
+            });
+            QObject::connect(m_reply, &QNetworkReply::finished, [=]() {
+                if(m_reply->error() == QNetworkReply::NoError) {
+                    if(m_file){
+                        m_file->write(m_reply->readAll());
+                        m_file->commit();
+                        resolve();
+                    }
+                }
+                else {
+                    if(m_reply->error() != QNetworkReply::OperationCanceledError) {
+                        reject(QString{m_reply->errorString()});
+                    }
+                }
+                m_reply->deleteLater();
+            });
+        }};
+}
+
+void VersionCheck::downloadInstaller()
+{
+    DownloadInstaller().then([&](){
+        emit downloadFinished();
+        LaunchInstaller();
+    }).fail([&](const QString &err){
+        qDebug() << err;
+        emit errorEncountered("Error downloading xPilot update: " + err);
+    });
+}
+
+void VersionCheck::LaunchInstaller()
+{
+    QString path(pathAppend(QDir::fromNativeSeparators(AppConfig::dataRoot()), m_fileName));
+
+    QProcess p;
+    p.setProgram(path);
+    p.startDetached();
+    p.waitForStarted();
+    QCoreApplication::quit();
 }

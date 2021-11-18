@@ -8,6 +8,9 @@
 #include <QEventLoop>
 #include <QStringBuilder>
 #include <QUrl>
+#include <QSaveFile>
+#include <QPointer>
+#include <QtPromise>
 
 class VersionCheck : public QObject
 {
@@ -15,11 +18,27 @@ class VersionCheck : public QObject
 
 public:
     VersionCheck(QObject *parent = nullptr);
-    void checkForUpdates();
+
+    void PerformVersionCheck();
+    QtPromise::QPromise<QByteArray> CheckForUpdates();
+    QtPromise::QPromise<void> DownloadInstaller();
+    Q_INVOKABLE void downloadInstaller();
+    void LaunchInstaller();
 
 signals:
-    void newVersionAvailable(QString versionNumber, QString downloadLink);
+    void newVersionAvailable();
     void noUpdatesAvailable();
+    void downloadStarted();
+    void downloadPercentChanged(double pct);
+    void downloadFinished();
+    void errorEncountered(QString error);
+
+private:
+    QNetworkAccessManager *nam = nullptr;
+    QPointer<QNetworkReply> m_reply;
+    QPointer<QSaveFile> m_file;
+    QString m_fileName;
+    QString m_downloadUrl;
 };
 
 #endif // VERSIONCHECK_H
