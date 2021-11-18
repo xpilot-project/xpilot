@@ -446,11 +446,9 @@ jobs:
         id: get_version
         uses: battila7/get-version-action@v2
 
-      # - name: Repackage
-      #   run: |
-      #     mv xPilot*MacOS.zip .
-      #     mv xPilot*Windows.zip .
-      #     mv xPilot*Linux.zip .
+      - name: Reorganize
+        run: |
+          mv xPilot*/* . && rmdir xPilot*/
 
       - name: List directory contents
         run: |
@@ -463,19 +461,6 @@ jobs:
           prerelease: true
           draft: true
           files: |
-            xPilot-*-linux-x64-installer.run
+            xPilot*
         env:
           GITHUB_TOKEN: ${{ github.token }}
-
-      # - name: Create release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     name: xPilot ${{ steps.get_version.outputs.version }}
-      #     prerelease: true
-      #     draft: true
-      #     files: |
-      #       xPilot-*-linux-x64-installer.run
-      #       xPilot-*-windows-x64-installer.exe
-      #       xPilot-*-osx-installer.dmg
-      #   env:
-      #     GITHUB_TOKEN: ${{ github.token }}
