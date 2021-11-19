@@ -15,6 +15,8 @@
 #include "common/build_config.h"
 #include "common/versioncheck.h"
 #include "common/installmodels.h"
+#include "common/runguard.h"
+#include "common/utils.h"
 #include "sentry.h"
 
 #include <QGuiApplication>
@@ -48,6 +50,11 @@ int xpilot::Main(int argc, char* argv[])
     QCoreApplication::setApplicationVersion(xpilot::BuildConfig::getVersionString());
     QCoreApplication::setOrganizationName("Justin Shannon");
     QCoreApplication::setOrganizationDomain("org.vatsim.xpilot");
+
+    RunGuard guard("org.vatsim.xpilot");
+    if(!guard.tryToRun()) {
+        return 0;
+    }
 
     QGuiApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));

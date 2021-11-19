@@ -144,6 +144,8 @@ set(PROJECT_SOURCES
     src/common/installmodels.cpp
     src/common/libzippp.h
     src/common/libzippp.cpp
+    src/common/runguard.h
+    src/common/runguard.cpp
     src/config/appconfig.h
     src/config/appconfig.cpp
     src/config/windowconfig.h
