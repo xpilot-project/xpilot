@@ -23,6 +23,7 @@ public:
     QtPromise::QPromise<QByteArray> CheckForUpdates();
     QtPromise::QPromise<void> DownloadInstaller();
     Q_INVOKABLE void downloadInstaller();
+    Q_INVOKABLE void cancelDownload();
     void LaunchInstaller();
 
 signals:

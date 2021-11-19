@@ -116,14 +116,13 @@ void VersionCheck::PerformVersionCheck()
                     if(name.toLower().contains("windows"))
                     {
                         emit newVersionAvailable();
-                        qDebug() << name;
                         m_fileName = name;
                         m_downloadUrl = downloadUrl;
                     }
                 }
                 else if(BuildConfig::isRunningOnMacOSPlatform())
                 {
-                    if(name.toLower().contains("macos"))
+                    if(name.toLower().contains("osx"))
                     {
                         emit newVersionAvailable();
                         m_fileName = name;
@@ -142,7 +141,7 @@ void VersionCheck::PerformVersionCheck()
             }
         }
     }).fail([&](const QString &err){
-        qDebug() << "error: " << err;
+        emit errorEncountered("Version check error: " + err);
     });
 }
 
@@ -197,18 +196,47 @@ void VersionCheck::downloadInstaller()
         emit downloadFinished();
         LaunchInstaller();
     }).fail([&](const QString &err){
-        qDebug() << err;
         emit errorEncountered("Error downloading xPilot update: " + err);
     });
+}
+
+void VersionCheck::cancelDownload()
+{
+    if(m_reply) {
+        m_reply->abort();
+        m_reply->deleteLater();
+    }
+    if(m_file) {
+        m_file->cancelWriting();
+        m_file->deleteLater();
+    }
 }
 
 void VersionCheck::LaunchInstaller()
 {
     QString path(pathAppend(QDir::fromNativeSeparators(AppConfig::dataRoot()), m_fileName));
 
-    QProcess p;
-    p.setProgram(path);
-    p.startDetached();
-    p.waitForStarted();
-    QCoreApplication::quit();
+    if(BuildConfig::isRunningOnLinuxPlatform()) {
+        // ensure linux installer is executable
+        QFile executable(path);
+        executable.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner| QFile::ReadGroup | QFile::ExeGroup | QFile::ReadOther | QFile::ExeOther);
+    }
+
+    if(BuildConfig::isRunningOnMacOSPlatform()) {
+        // macos: we have to mount the disk image
+        QProcess p;
+        p.setProgram("hdiutil");
+        p.setArguments(QStringList() << "attach" << path << "-autoopen");
+        p.startDetached();
+        p.waitForStarted();
+        QCoreApplication::quit();
+    }
+    else {
+        // windows: we can directly launch the installer
+        QProcess p;
+        p.setProgram(path);
+        p.startDetached();
+        p.waitForStarted();
+        QCoreApplication::quit();
+    }
 }

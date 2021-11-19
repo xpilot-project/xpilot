@@ -24,7 +24,7 @@ Popup {
         text: "It looks like this is your first time using xPilot. Before you can connect to the network, you must\r\n" +
               "install a CSL aircraft model set. Would you like to download and install one now?\r\n\r\nDownload size: Approximately 560MB.\r\n\r\n" +
               "If you choose No, you will have to manually install a model set yourself.\r\n"
-        font.pointSize: 10
+        font.pixelSize: 14
         renderType: Text.NativeRendering
         x: 15
         y: 10
@@ -34,7 +34,7 @@ Popup {
         id: labelDownloading
         visible: false
         text: "Downloading CSL aircraft model set. Please wait..."
-        font.pointSize: 10
+        font.pixelSize: 14
         renderType: Text.NativeRendering
         wrapMode: Text.WordWrap
         x: 20
@@ -74,7 +74,7 @@ Popup {
         id: labelPercent
         text: (popup.pctProgress * 100).toFixed(0) + "%"
         visible: false
-        font.pointSize: 10
+        font.pixelSize: 14
         renderType: Text.NativeRendering
         wrapMode: Text.WordWrap
         anchors.top: progressBar.top
@@ -88,7 +88,7 @@ Popup {
         text: "Cancel"
         width: 80
         height: 30
-        font.pointSize: 10
+        font.pixelSize: 14
         anchors.topMargin: 10
         anchors.top: progressBar.bottom
         anchors.left: progressBar.left
@@ -107,7 +107,7 @@ Popup {
         text: "Yes"
         width: 50
         height: 30
-        font.pointSize: 10
+        font.pixelSize: 14
         anchors.top: labelAskDownload.bottom
         anchors.left: labelAskDownload.left
         MouseArea {
@@ -134,7 +134,7 @@ Popup {
         text: "No"
         width: 50
         height: 30
-        font.pointSize: 10
+        font.pixelSize: 14
         anchors.top: labelAskDownload.bottom
         anchors.left: btnYes.right
         anchors.leftMargin: 10
