@@ -364,7 +364,7 @@ Window {
             networkConnected = true;
         }
 
-        function onNetworkDisconnected() {
+        function onNetworkDisconnected(forced) {
             networkConnected = false;
             nearbyEnroute.clear()
             nearbyApproach.clear()
@@ -372,6 +372,11 @@ Window {
             nearbyGround.clear()
             nearbyDelivery.clear()
             nearbyAtis.clear()
+
+            if(forced && AppConfig.AlertDisconnect) {
+                errorSound.play()
+                mainWindow.alert(0)
+            }
         }
 
         function onNotificationPosted(type, message) {

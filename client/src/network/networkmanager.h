@@ -44,7 +44,7 @@ namespace xpilot
 
     signals:
         void networkConnected(QString callsign, bool enableVoice);
-        void networkDisconnected();
+        void networkDisconnected(bool forced);
         void notificationPosted(int type, QString message);
         void metarReceived(QString from, QString metar);
         void controllerDeleted(QString from);
@@ -85,6 +85,7 @@ namespace xpilot
         void OnNetworkError(QString error);
         void OnNetworkConnected();
         void OnNetworkDisconnected();
+        void OnForceDisconnected(QString reason);
         void OnServerIdentificationReceived(PDUServerIdentification pdu);
         void OnClientQueryReceived(PDUClientQuery pdu);
         void OnClientQueryResponseReceived(PDUClientQueryResponse pdu);

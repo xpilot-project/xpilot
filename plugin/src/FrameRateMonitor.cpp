@@ -34,33 +34,37 @@ namespace xpilot
 		m_gaveDisconnectWarning(false),
 		m_gaveHealthyWarning(false)
 	{
+			// give 30 second "warm-up" period after loading sim
+			XPLMRegisterFlightLoopCallback(flightLoopCallback, 30.0f, this);
+	}
 
+	FrameRateMonitor::~FrameRateMonitor()
+	{
+		XPLMUnregisterFlightLoopCallback(flightLoopCallback, this);
 	}
 
 	void FrameRateMonitor::startMonitoring()
 	{
 		resetFrameRateDetection();
-
-		// give 30 second "warm-up" period after connecting
-		XPLMRegisterFlightLoopCallback(flightLoopCallback, 30.0f, this);
 	}
 
 	void FrameRateMonitor::stopMonitoring()
 	{
 		resetFrameRateDetection();
-		XPLMUnregisterFlightLoopCallback(flightLoopCallback, this);
 	}
 
 	float FrameRateMonitor::flightLoopCallback(float, float, int, void* ref)
 	{
 		auto* monitor = static_cast<FrameRateMonitor*>(ref);
 
-		if (monitor->skipMonitoring())
+		if (monitor->skipMonitoring()) {
+			monitor->resetFrameRateDetection();
 			return -1.0f;
+		}
 
 		float fps = 1 / monitor->m_frameRatePeriod;
 
-		if (fps < 20.0f)
+		if (fps > 20.0f)
 		{
 			float elapsed = monitor->m_stopwatch.elapsed(xpilot::Stopwatch::SECONDS);
 			if (!monitor->m_stopwatch.isRunning())

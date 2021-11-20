@@ -53,6 +53,7 @@ namespace xpilot
         connect(&xplaneAdapter, &XplaneAdapter::radioMessageSent, this, &NetworkManager::sendRadioMessage);
         connect(&xplaneAdapter, &XplaneAdapter::privateMessageSent, this, &NetworkManager::sendPrivateMessage);
         connect(&xplaneAdapter, &XplaneAdapter::requestMetar, this, &NetworkManager::RequestMetar);
+        connect(&xplaneAdapter, &XplaneAdapter::forceDisconnect, this, &NetworkManager::OnForceDisconnected);
 
         connect(this, &NetworkManager::notificationPosted, this, [&](int type, QString message)
         {
@@ -130,16 +131,25 @@ namespace xpilot
             }
         }
 
-        m_intentionalDisconnect = false;
-        m_forcedDisconnect = false;
-        m_forcedDisconnectReason = "";
-
         QJsonObject reply;
         reply.insert("type", "NetworkDisconnected");
         QJsonDocument doc(reply);
         m_xplaneAdapter.sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
 
-        emit networkDisconnected();
+        emit networkDisconnected(m_forcedDisconnect);
+
+        m_intentionalDisconnect = false;
+        m_forcedDisconnect = false;
+        m_forcedDisconnectReason = "";
+    }
+
+    void NetworkManager::OnForceDisconnected(QString reason)
+    {
+        m_forcedDisconnect = true;
+        m_forcedDisconnectReason = reason;
+
+        m_fsd.SendPDU(PDUDeletePilot(m_connectInfo.Callsign, AppConfig::getInstance()->VatsimId));
+        m_fsd.Disconnect();
     }
 
     void NetworkManager::OnServerIdentificationReceived(PDUServerIdentification pdu)

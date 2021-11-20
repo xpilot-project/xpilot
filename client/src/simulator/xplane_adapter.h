@@ -78,6 +78,7 @@ signals:
     void requestMetar(QString station);
     void radioMessageSent(QString message);
     void privateMessageSent(QString to, QString message);
+    void forceDisconnect(QString reason);
 
 private:
     QUdpSocket* socket;

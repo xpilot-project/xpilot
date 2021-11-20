@@ -161,6 +161,20 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
                                 }
                             }
                         }
+
+                        else if(obj["type"] == "ForceDisconnect")
+                        {
+                            QString reason;
+                            if(obj.contains("data"))
+                            {
+                                QJsonObject data = obj["data"].toObject();
+                                if(!data["reason"].toString().isEmpty())
+                                {
+                                    reason = data["reason"].toString();
+                                }
+                            }
+                            emit forceDisconnect(reason);
+                        }
                     }
                 }
             }

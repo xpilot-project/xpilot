@@ -35,6 +35,7 @@ namespace xpilot
     {
 	public:
 		FrameRateMonitor(XPilot* env);
+		~FrameRateMonitor();
 		void stopMonitoring();
 		void startMonitoring();
 	protected:
