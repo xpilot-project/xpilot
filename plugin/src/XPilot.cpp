@@ -714,7 +714,7 @@ namespace xpilot
 		}
 	}
 
-	void XPilot::togglePreferencesWindow()
+	void XPilot::toggleSettingsWindow()
 	{
 		m_settingsWindow->SetVisible(!m_settingsWindow->GetVisible());
 	}

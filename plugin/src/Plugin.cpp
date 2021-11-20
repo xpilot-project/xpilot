@@ -214,6 +214,14 @@ int ToggleAircraftLabelsCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhas
     return 0;
 }
 
+void MenuHandler(void *mRef, void* iRef)
+{
+    if (!strcmp((const char *)iRef, "Settings"))
+    {
+        environment->toggleSettingsWindow();
+    }
+}
+
 void RegisterMenuItems()
 {
     PttCommand = XPLMCreateCommand("xpilot/ptt", "xPilot: Radio Push-to-Talk (PTT)");
@@ -240,9 +248,9 @@ void RegisterMenuItems()
     XPLMRegisterCommandHandler(ContactAtcCommand, ContactAtcCommandHandler, 1, (void*)0);
 
     PluginMenuIdx = XPLMAppendMenuItem(XPLMFindPluginsMenu(), "xPilot", nullptr, 0);
-    PluginMenu = XPLMCreateMenu("xPilot", XPLMFindPluginsMenu(), PluginMenuIdx, nullptr, nullptr);
+    PluginMenu = XPLMCreateMenu("xPilot", XPLMFindPluginsMenu(), PluginMenuIdx, MenuHandler, nullptr);
 
-    MenuSettings = XPLMAppendMenuItem(PluginMenu, "Settings", nullptr, 0);
+    MenuSettings = XPLMAppendMenuItem(PluginMenu, "Settings", (void*)"Settings", 0);
     MenuNearbyAtc = XPLMAppendMenuItemWithCommand(PluginMenu, "Nearby ATC", ToggleNearbyATCWindowCommand);
     MenuTextMessageConsole = XPLMAppendMenuItemWithCommand(PluginMenu, "Text Message Console", ToggleMessageConsoleCommand);
     MenuNotificationPanel = XPLMAppendMenuItemWithCommand(PluginMenu, "Notification Panel", ToggleMessgePreviewPanelCommnd);

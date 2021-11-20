@@ -90,7 +90,7 @@ namespace xpilot
 		void TryGetTcasControl();
 		void ReleaseTcasControl();
 
-		void togglePreferencesWindow();
+		void toggleSettingsWindow();
 		void toggleNearbyAtcWindow();
 		void toggleTextMessageConsole();
 		void setNotificationPanelAlwaysVisible(bool visible);
