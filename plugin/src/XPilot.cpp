@@ -623,7 +623,7 @@ namespace xpilot
 
 		if (!Config::Instance().hasValidPaths())
 		{
-			std::string err = "No valid CSL paths are configured (or enabled). Verify the CSL configuration in X-Plane (via the top menu: Plugins > xPilot > Settings > CSL Configuration).";
+			std::string err = "There are no valid CSL paths configured. Please verify your CSL configuration in X-Plane (Plugins > xPilot > Settings > CSL Configuration).";
 			addNotification(err.c_str(), 192, 57, 43);
 			LOG_MSG(logERROR, err.c_str());
 		}
