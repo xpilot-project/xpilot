@@ -113,7 +113,9 @@ AppCore::AppCore(QQmlEngine* qmlEngine) :
     QObject(qmlEngine),
     engine(qobject_cast<QQmlApplicationEngine*>(qmlEngine))
 {
-
+    QTimer::singleShot(0, [&]{
+        DownloadServerList();
+    });
 }
 
 QObject *AppCore::appConfigInstance(QQmlEngine*, QJSEngine*)

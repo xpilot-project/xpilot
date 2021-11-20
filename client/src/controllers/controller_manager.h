@@ -29,6 +29,7 @@ namespace xpilot
         void IsValidATCReceived(QString callsign);
         void OnRealNameReceived(QString callsign, QString realName);
         void RefreshController(Controller controller);
+        void OnControllerDeleted(QString callsign);
 
     private:
         NetworkManager &m_networkManager;

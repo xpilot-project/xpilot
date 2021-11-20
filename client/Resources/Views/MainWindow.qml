@@ -246,7 +246,7 @@ Window {
         }
 
         function onDownloadProgressChanged(val) {
-            modelInstall_downloadModels.pctProgress = val
+            modal_downloadModels.pctProgress = val
         }
 
         function onUnzipProgressChanged(val) {
@@ -254,7 +254,7 @@ Window {
         }
 
         function onErrorEncountered(error) {
-            modelInstall_downloadModels.close()
+            modal_downloadModels.close()
             modal_setXplanePath.close()
             modal_extractModels.close()
             appendMessage(error, colorRed);

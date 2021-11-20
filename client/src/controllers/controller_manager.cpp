@@ -15,6 +15,7 @@ namespace xpilot
         connect(&m_networkManager, &NetworkManager::controllerUpdateReceived, this, &ControllerManager::OnControllerUpdateReceived);
         connect(&m_networkManager, &NetworkManager::isValidAtcReceived, this, &ControllerManager::IsValidATCReceived);
         connect(&m_networkManager, &NetworkManager::realNameReceived, this, &ControllerManager::OnRealNameReceived);
+        connect(&m_networkManager, &NetworkManager::controllerDeleted, this, &ControllerManager::OnControllerDeleted);
         connect(&m_networkManager, &NetworkManager::networkConnected, this, [&] {
             m_controllers.clear();
             m_nearbyAtcTimer->start(5000);
@@ -122,6 +123,18 @@ namespace xpilot
     {
         emit controllerDeleted(controller);
         emit controllerAdded(controller);
+    }
+
+    void ControllerManager::OnControllerDeleted(QString callsign)
+    {
+        auto itr = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
+            return n.Callsign == callsign;
+        });
+        if(itr != m_controllers.end())
+        {
+            emit controllerDeleted(*itr);
+            m_controllers.removeAll(*itr);
+        }
     }
 
     void ControllerManager::ValidateController(Controller &controller)
