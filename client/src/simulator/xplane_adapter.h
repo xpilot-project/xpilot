@@ -16,6 +16,7 @@
 #include <QUdpSocket>
 #include <QDataStream>
 #include <QHostAddress>
+#include <QList>
 
 #include "zmq.hpp"
 
@@ -40,6 +41,9 @@ public:
     Q_INVOKABLE void sendSocketMessage(const QString& message);
     Q_INVOKABLE void setAudioComSelection(int radio);
     Q_INVOKABLE void setAudioSelection(int radio, bool status);
+    Q_INVOKABLE void ignoreAircraft(QString callsign);
+    Q_INVOKABLE void unignoreAircraft(QString callsign);
+    Q_INVOKABLE void showIgnoreList();
 
     void AddPlaneToSimulator(const NetworkAircraft& aircraft);
     void PlaneConfigChanged(const NetworkAircraft& aircraft);
@@ -79,6 +83,11 @@ signals:
     void radioMessageSent(QString message);
     void privateMessageSent(QString to, QString message);
     void forceDisconnect(QString reason);
+    void aircraftIgnored(QString callsign);
+    void aircraftAlreadyIgnored(QString callsign);
+    void aircraftUnignored(QString callsign);
+    void aircraftNotIgnored(QString callsign);
+    void ignoreList(QStringList list);
 
 private:
     QUdpSocket* socket;
@@ -92,6 +101,8 @@ private:
     UserAircraftData m_userAircraftData{};
     UserAircraftConfigData m_userAircraftConfigData{};
     RadioStackState m_radioStackState{};
+
+    QList<QString> m_ignoreList;
 
     std::thread* m_zmqThread;
     zmq::context_t* m_zmqContext;

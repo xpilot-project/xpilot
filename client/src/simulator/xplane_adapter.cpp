@@ -547,6 +547,33 @@ void XplaneAdapter::setAudioSelection(int radio, bool status)
     }
 }
 
+void XplaneAdapter::ignoreAircraft(QString callsign)
+{
+    if(!m_ignoreList.contains(callsign.toUpper())) {
+        m_ignoreList.push_back(callsign.toUpper());
+        emit aircraftIgnored(callsign.toUpper());
+        return;
+    }
+
+    emit aircraftAlreadyIgnored(callsign.toUpper()); // aircraft already ignored
+}
+
+void XplaneAdapter::unignoreAircraft(QString callsign)
+{
+    if(m_ignoreList.contains(callsign.toUpper())) {
+        m_ignoreList.removeAll(callsign.toUpper());
+        emit aircraftUnignored(callsign.toUpper());
+        return;
+    }
+
+    emit aircraftNotIgnored(callsign.toUpper()); // aircraft not previously ignored
+}
+
+void XplaneAdapter::showIgnoreList()
+{
+    emit ignoreList(m_ignoreList);
+}
+
 void XplaneAdapter::AddPlaneToSimulator(const NetworkAircraft &aircraft)
 {
     QJsonObject reply;

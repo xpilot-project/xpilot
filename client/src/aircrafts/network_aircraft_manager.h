@@ -51,6 +51,8 @@ namespace xpilot
         void UpdateExistingAircraft(NetworkAircraft& aircraft, const AircraftVisualState& visualState, double groundSpeed);
         bool IsEligibleToAddToSimulator(const NetworkAircraft& aircraft);
         void SyncSimulatorAircraft();
+        void OnIgnoreAircraft(QString callsign);
+        void OnUnignoreAircraft(QString callsign);
     };
 }
 

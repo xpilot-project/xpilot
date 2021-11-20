@@ -330,6 +330,33 @@ Window {
         function onRadioMessageSent(message) {
             appendMessage(message, colorCyan)
         }
+
+        function onAircraftIgnored(callsign) {
+            appendMessage(`${callsign} has been added to the ignore list.`, colorYellow)
+        }
+
+        function onAircraftAlreadyIgnored(callsign) {
+            appendMessage(`${callsign} is already in the ignore list.`, colorRed)
+            errorSound.play()
+        }
+
+        function onAircraftUnignored(callsign) {
+            appendMessage(`${callsign} has been removed from the ignore list.`, colorYellow)
+        }
+
+        function onAircraftNotIgnored(callsign) {
+            appendMessage(`${callsign} was not found in the ignore list.`, colorRed)
+            errorSound.play()
+        }
+
+        function onIgnoreList(list) {
+            if(list.length > 0) {
+                appendMessage(`The following aircraft are currently ignored: ${list.join(", ")}`, colorYellow)
+            }
+            else {
+                appendMessage("The ignore list is currently empty.", colorYellow)
+            }
+        }
     }
 
     Connections {
@@ -1159,6 +1186,24 @@ Window {
                                                             }
                                                         }
                                                         networkManager.connectTowerView(tvCallsign, tvServerAddress)
+                                                        cliTextField.clear()
+                                                        break;
+                                                    case ".ignore":
+                                                        if(cmd.length < 2) {
+                                                            throw `Not enough parameters. Expected .ignore CALLSIGN`
+                                                        }
+                                                        xplaneAdapter.ignoreAircraft(cmd[1])
+                                                        cliTextField.clear()
+                                                        break;
+                                                    case ".ignorelist":
+                                                        xplaneAdapter.showIgnoreList()
+                                                        cliTextField.clear()
+                                                        break;
+                                                    case ".unignore":
+                                                        if(cmd.length < 2) {
+                                                            throw `Not enough parameters. Expected .unignore CALLSIGN`
+                                                        }
+                                                        xplaneAdapter.unignoreAircraft(cmd[1])
                                                         cliTextField.clear()
                                                         break;
                                                     default:
