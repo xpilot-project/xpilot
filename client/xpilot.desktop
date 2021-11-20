@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=xPilot
-Comment=X-Plane pilot client for the VATSIM network
-Exec=xPilot
-Icon=xPilot
+Comment=X-Plane Pilot Client for VATSIM
+Exec=xpilot
+Icon=xpilot
 Categories=Game;
