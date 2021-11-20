@@ -1,5 +1,6 @@
 #include "xplane_adapter.h"
 #include "src/config/appconfig.h"
+#include "src/common/utils.h"
 
 #include <QTimer>
 #include <QtEndian>
@@ -54,6 +55,25 @@ QHostAddress m_hostAddress;
 
 XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 {
+    QDir pluginLogPath(pathAppend(AppConfig::getInstance()->dataRoot(), "PluginLogs"));
+    if(!pluginLogPath.exists()) {
+        pluginLogPath.mkdir(".");
+    }
+
+    // keep only the last 5 log files
+    QFileInfoList files = pluginLogPath.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Time);
+    const int MAX_LOGS_TO_RETAIN = 5;
+    for(int index = files.size(); index >= MAX_LOGS_TO_RETAIN; --index) {
+        const QFileInfo &info = files.at(index - 1);
+        QFile::remove(info.absoluteFilePath());
+    }
+
+    m_pluginLog.setFileName(pathAppend(pluginLogPath.path(), QString("PluginLog-%1.txt").arg(QDateTime::currentDateTimeUtc().toString("yyyyMMdd-hhmmss"))));
+    if(m_pluginLog.open(QFile::WriteOnly))
+    {
+        m_rawDataStream.setDevice(&m_pluginLog);
+    }
+
     m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch() - 5; // default to 5 seconds ago to prevent ghost X-Plane connection status
 
     m_zmqContext = new zmq::context_t(1);
@@ -72,6 +92,9 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 
                 if(!data.isEmpty())
                 {
+                    m_rawDataStream << QString("[%1] <<< %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), data);
+                    m_rawDataStream.flush();
+
                     QByteArray json_bytes = data.toLocal8Bit();
                     auto json_doc = QJsonDocument::fromJson(json_bytes);
 
@@ -518,6 +541,9 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
         zmq::message_t msg(message.size());
         std::memcpy(msg.data(), message.toStdString().data(), message.size());
         m_zmqSocket->send(msg, zmq::send_flags::none);
+
+        m_rawDataStream << QString("[%1] >>> %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), message);
+        m_rawDataStream.flush();
     }
 }
 

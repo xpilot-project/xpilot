@@ -2,6 +2,7 @@
 #include <chrono>
 #include <random>
 #include <QRandomGenerator>
+#include <QDateTime>
 
 #include "networkmanager.h"
 #include "networkserverlist.h"
@@ -20,6 +21,25 @@ namespace xpilot
         QObject(owner),
         m_xplaneAdapter(xplaneAdapter)
     {
+        QDir networkLogPath(pathAppend(AppConfig::getInstance()->dataRoot(), "NetworkLogs"));
+        if(!networkLogPath.exists()) {
+            networkLogPath.mkdir(".");
+        }
+
+        // keep only the last 5 log files
+        QFileInfoList files = networkLogPath.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Time);
+        const int MAX_LOGS_TO_RETAIN = 5;
+        for(int index = files.size(); index >= MAX_LOGS_TO_RETAIN; --index) {
+            const QFileInfo &info = files.at(index - 1);
+            QFile::remove(info.absoluteFilePath());
+        }
+
+        m_networkLog.setFileName(pathAppend(networkLogPath.path(), QString("NetworkLog-%1.txt").arg(QDateTime::currentDateTimeUtc().toString("yyyyMMdd-hhmmss"))));
+        if(m_networkLog.open(QFile::WriteOnly))
+        {
+            m_rawDataStream.setDevice(&m_networkLog);
+        }
+
         connect(&m_fsd, &FsdClient::RaiseNetworkError, this, &NetworkManager::OnNetworkError);
         connect(&m_fsd, &FsdClient::RaiseNetworkConnected, this, &NetworkManager::OnNetworkConnected);
         connect(&m_fsd, &FsdClient::RaiseNetworkDisconnected, this, &NetworkManager::OnNetworkDisconnected);
@@ -39,12 +59,8 @@ namespace xpilot
         connect(&m_fsd, &FsdClient::RaisePlaneInfoRequestReceived, this, &NetworkManager::OnPlaneInfoRequestReceived);
         connect(&m_fsd, &FsdClient::RaisePlaneInfoResponseReceived, this, &NetworkManager::OnPlaneInfoResponseReceived);
         connect(&m_fsd, &FsdClient::RaiseKillRequestReceived, this, &NetworkManager::OnKillRequestReceived);
-        connect(&m_fsd, &FsdClient::RaiseRawDataSent, this, [](QString data){
-            //qDebug() << ">> " << data;
-        });
-        connect(&m_fsd, &FsdClient::RaiseRawDataReceived, this, [](QString data){
-            //qDebug() << "<< " << data;
-        });
+        connect(&m_fsd, &FsdClient::RaiseRawDataSent, this, &NetworkManager::OnRawDataSent);
+        connect(&m_fsd, &FsdClient::RaiseRawDataReceived, this, &NetworkManager::OnRawDataReceived);
 
         connect(&xplaneAdapter, &XplaneAdapter::userAircraftDataChanged, this, &NetworkManager::OnUserAircraftDataUpdated);
         connect(&xplaneAdapter, &XplaneAdapter::userAircraftConfigDataChanged, this, &NetworkManager::OnUserAircraftConfigDataUpdated);
@@ -84,6 +100,11 @@ namespace xpilot
         m_fastPositionTimer = new QTimer(this);
         m_fastPositionTimer->setInterval(200);
         connect(m_fastPositionTimer, &QTimer::timeout, this, &NetworkManager::OnFastPositionTimerElapsed);
+    }
+
+    NetworkManager::~NetworkManager()
+    {
+        m_networkLog.close();
     }
 
     void NetworkManager::OnNetworkConnected()
@@ -666,5 +687,18 @@ namespace xpilot
     void NetworkManager::OnNetworkError(QString error)
     {
         emit notificationPosted((int)NotificationType::Error, error);
+    }
+
+    void NetworkManager::OnRawDataSent(QString data)
+    {
+        m_rawDataStream << QString("[%1] >>> %2").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"),
+                                                   data.replace(AppConfig::getInstance()->VatsimPasswordDecrypted, "********"));
+        m_rawDataStream.flush();
+    }
+
+    void NetworkManager::OnRawDataReceived(QString data)
+    {
+        m_rawDataStream << QString("[%1] <<< %2").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), data);
+        m_rawDataStream.flush();
     }
 }

@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QTimer>
 #include <QVector>
+#include <QTextStream>
+#include <QFile>
 
 #include "connectinfo.h"
 #include "src/fsd/fsd_client.h"
@@ -23,6 +25,7 @@ namespace xpilot
 
     public:
         NetworkManager(XplaneAdapter& xplaneAdapter, QObject *owner = nullptr);
+        ~NetworkManager();
 
         Q_INVOKABLE void connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer);
         Q_INVOKABLE void connectTowerView(QString callsign, QString address);
@@ -79,6 +82,8 @@ namespace xpilot
         bool m_forcedDisconnect = false;
         QString m_forcedDisconnectReason = "";
         QList<uint> m_transmitFreqs;
+        QFile m_networkLog;
+        QTextStream m_rawDataStream;
 
         QMap<QString, QStringList> m_mapAtisMessages;
 
@@ -102,6 +107,8 @@ namespace xpilot
         void OnPlaneInfoRequestReceived(PDUPlaneInfoRequest pdu);
         void OnPlaneInfoResponseReceived(PDUPlaneInfoResponse pdu);
         void OnKillRequestReceived(PDUKillRequest pdu);
+        void OnRawDataSent(QString data);
+        void OnRawDataReceived(QString data);
 
         void OnUserAircraftDataUpdated(UserAircraftData data);
         void OnUserAircraftConfigDataUpdated(UserAircraftConfigData data);

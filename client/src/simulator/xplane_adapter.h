@@ -17,6 +17,8 @@
 #include <QDataStream>
 #include <QHostAddress>
 #include <QList>
+#include <QFile>
+#include <QTextStream>
 
 #include "zmq.hpp"
 
@@ -107,6 +109,9 @@ private:
     std::thread* m_zmqThread;
     zmq::context_t* m_zmqContext;
     zmq::socket_t* m_zmqSocket;
+
+    QFile m_pluginLog;
+    QTextStream m_rawDataStream;
 };
 
 #endif
