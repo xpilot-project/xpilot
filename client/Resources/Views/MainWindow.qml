@@ -1265,6 +1265,11 @@ Window {
         }
     }
 
+    function absoluteMousePos(mouseArea) {
+        var windowAbs = mouseArea.mapToItem(null, mouseArea.mouseX, mouseArea.mouseY)
+        return Qt.point(windowAbs.x + mainWindow.x, windowAbs.y + mainWindow.y)
+    }
+
     MouseArea {
         id: mouseArea
         property real lastMouseX: 0
@@ -1275,6 +1280,10 @@ Window {
         hoverEnabled: true
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton
+
+        property var startMousePos;
+        property var startWindowPos;
+        property var startWindowSize;
 
         cursorShape: {
             const p = Qt.point(mouseX, mouseY)
@@ -1317,8 +1326,7 @@ Window {
             if (mouseY > mainWindow.height - gutterSize)
                 activeEdges |= Qt.BottomEdge
 
-            if (mainWindow.startSystemMove != undefined
-                    && Qt.platform.os !== "osx") {
+            if (mainWindow.startSystemMove != undefined && Qt.platform.os !== "osx") {
                 if (activeEdges == 0) {
                     mainWindow.startSystemMove()
                 } else {
@@ -1328,6 +1336,9 @@ Window {
                 lastMouseX = mouseX
                 lastMouseY = mouseY
                 moveable = (activeEdges === 0)
+                startMousePos = absoluteMousePos(this)
+                startWindowPos = Qt.point(mainWindow.x, mainWindow.y)
+                startWindowSize = Qt.size(mainWindow.width, mainWindow.height)
             }
         }
 
@@ -1346,20 +1357,22 @@ Window {
                 return
             }
 
-            if (activeEdges & Qt.LeftEdge) {
-                mainWindow.width -= (mouseX - lastMouseX)
-                if (mainWindow.width < mainWindow.minimumWidth) {
-                    mainWindow.width = mainWindow.minimumWidth
-                } else {
-                    mainWindow.x += (mouseX - lastMouseX)
-                }
-            } else if (activeEdges & Qt.RightEdge) {
-                mainWindow.width += (mouseX - lastMouseX)
-                if (mainWindow.width < mainWindow.minimumWidth) {
-                    mainWindow.width = mainWindow.minimumWidth
-                }
-                lastMouseX = mouseX
-            } else if (moveable) {
+            var abs;
+            var newWidth;
+            var newX;
+
+            if(activeEdges & Qt.RightEdge) {
+                abs = absoluteMousePos(this)
+                newWidth = Math.max(mainWindow.minimumWidth, startWindowSize.width + (abs.x - startMousePos.x))
+                mainWindow.setGeometry(mainWindow.x, mainWindow.y, newWidth, mainWindow.height)
+            }
+            else if(activeEdges & Qt.LeftEdge) {
+                abs = absoluteMousePos(this)
+                newWidth = Math.max(mainWindow.minimumWidth, startWindowSize.width - (abs.x - startMousePos.x))
+                newX = startWindowPos.x - (newWidth - startWindowSize.width)
+                mainWindow.setGeometry(newX, mainWindow.y, newWidth, mainWindow.height)
+            }
+            else if(moveable) {
                 mainWindow.x += (mouseX - lastMouseX)
             }
         }
@@ -1374,20 +1387,22 @@ Window {
                 return
             }
 
-            if (activeEdges & Qt.TopEdge) {
-                mainWindow.height -= (mouseY - lastMouseY)
-                if (mainWindow.height < mainWindow.minimumHeight) {
-                    mainWindow.height = mainWindow.minimumHeight
-                } else {
-                    mainWindow.y += (mouseY - lastMouseY)
-                }
-            } else if (activeEdges & Qt.BottomEdge) {
-                mainWindow.height += (mouseY - lastMouseY)
-                if (mainWindow.height < mainWindow.minimumHeight) {
-                    mainWindow.height = mainWindow.minimumHeight
-                }
-                lastMouseY = mouseY
-            } else if (moveable) {
+            var abs;
+            var newHeight;
+            var newY;
+
+            if(activeEdges & Qt.TopEdge) {
+                abs = absoluteMousePos(this)
+                newHeight = Math.max(mainWindow.minimumHeight, startWindowSize.height - (abs.y - startMousePos.y))
+                newY = startWindowPos.y - (newHeight - startWindowSize.height)
+                mainWindow.setGeometry(mainWindow.x, newY, mainWindow.width, newHeight)
+            }
+            else if(activeEdges & Qt.BottomEdge) {
+                abs = absoluteMousePos(this)
+                newHeight = Math.max(mainWindow.minimumHeight, startWindowSize.height + (abs.y - startMousePos.y))
+                mainWindow.setGeometry(mainWindow.x, mainWindow.y, mainWindow.width, newHeight)
+            }
+            else if(moveable) {
                 mainWindow.y += (mouseY - lastMouseY)
             }
         }
