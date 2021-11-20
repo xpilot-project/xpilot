@@ -34,7 +34,7 @@ namespace xpilot
                 QJsonObject data;
                 data.insert("callsign", atc.Callsign);
                 data.insert("xplane_frequency", (qint32)atc.Frequency);
-                data.insert("frequency", QString::number(atc.Frequency / 1000.0));
+                data.insert("frequency", QString::number(atc.Frequency / 1000.0, 'f', 3));
                 data.insert("real_name", atc.RealName);
                 data_array.push_back(data);
             }

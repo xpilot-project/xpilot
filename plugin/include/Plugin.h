@@ -30,9 +30,6 @@ void UpdateMenuItems();
 inline XPLMCommandRef PttCommand = NULL;
 inline int PttCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon);
 
-inline XPLMCommandRef ToggleSettingsCommand = NULL;
-inline int ToggleSettingsCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon);
-
 inline XPLMCommandRef ToggleNearbyATCWindowCommand = NULL;
 inline int ToggleNearbyATCWindowCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon);
 
@@ -56,7 +53,7 @@ inline int ContactAtcCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase i
 
 inline int PluginMenuIdx;
 inline XPLMMenuID PluginMenu;
-static int MenuPreferences = 0;
+static int MenuSettings = 0;
 static int MenuNearbyAtc = 0;
 static int MenuDefaultAtis = 0;
 static int MenuTextMessageConsole = 0;

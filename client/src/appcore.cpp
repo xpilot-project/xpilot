@@ -95,6 +95,7 @@ int xpilot::Main(int argc, char* argv[])
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [&](){
         networkManager.disconnectFromNetwork();
         xplaneAdapter.DeleteAllAircraft();
+        xplaneAdapter.DeleteAllControllers();
         AppConfig::getInstance()->saveConfig();
     });
 

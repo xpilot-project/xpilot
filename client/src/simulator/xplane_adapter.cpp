@@ -654,6 +654,14 @@ void XplaneAdapter::DeleteAllAircraft()
     sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
 }
 
+void XplaneAdapter::DeleteAllControllers()
+{
+    QJsonObject reply;
+    reply.insert("type", "NearbyAtc");
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+}
+
 void XplaneAdapter::SendSlowPositionUpdate(const NetworkAircraft &aircraft, const AircraftVisualState &visualState, const double& groundSpeed)
 {
     QJsonObject reply;

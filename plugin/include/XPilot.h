@@ -94,7 +94,7 @@ namespace xpilot
 		void toggleNearbyAtcWindow();
 		void toggleTextMessageConsole();
 		void setNotificationPanelAlwaysVisible(bool visible);
-		bool setNotificationPanelAlwaysVisible() const;
+		bool getNotificationPanelAlwaysVisible() const;
 
 		void DeleteAllAircraft();
 

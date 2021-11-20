@@ -107,7 +107,6 @@ PLUGIN_API void XPluginStop(void)
         XPImgWindowCleanup();
         XPLMDestroyMenu(PluginMenu);
         XPLMUnregisterCommandHandler(PttCommand, PttCommandHandler, 0, 0);
-        XPLMUnregisterCommandHandler(ToggleSettingsCommand, ToggleSettingsCommandHandler, 0, 0);
         XPLMUnregisterCommandHandler(ToggleMessgePreviewPanelCommnd, ToggleMessagePreviewPanelCommandHandler, 0, 0);
         XPLMUnregisterCommandHandler(ToggleNearbyATCWindowCommand, ToggleNearbyATCWindowCommandHandler, 0, 0);
         XPLMUnregisterCommandHandler(ToggleMessageConsoleCommand, ToggleMessageConsoleCommandHandler, 0, 0);
@@ -151,15 +150,6 @@ int  PttCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void*
     return 0;
 }
 
-int ToggleSettingsCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
-{
-    if (inPhase == xplm_CommandEnd)
-    {
-        environment->togglePreferencesWindow();
-    }
-    return 0;
-}
-
 int ToggleNearbyATCWindowCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
 {
     if (inPhase == xplm_CommandEnd)
@@ -173,7 +163,7 @@ int ToggleMessagePreviewPanelCommandHandler(XPLMCommandRef inCommand, XPLMComman
 {
     if (inPhase == xplm_CommandEnd)
     {
-        environment->setNotificationPanelAlwaysVisible(!environment->setNotificationPanelAlwaysVisible());
+        environment->setNotificationPanelAlwaysVisible(!environment->getNotificationPanelAlwaysVisible());
     }
     return 0;
 }
@@ -226,26 +216,23 @@ int ToggleAircraftLabelsCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhas
 
 void RegisterMenuItems()
 {
-    PttCommand = XPLMCreateCommand("xpilot/ptt", "xPilot: Radio Push-To-Talk (PTT)");
+    PttCommand = XPLMCreateCommand("xpilot/ptt", "xPilot: Radio Push-to-Talk (PTT)");
     XPLMRegisterCommandHandler(PttCommand, PttCommandHandler, 1, (void*)0);
 
-    ToggleSettingsCommand = XPLMCreateCommand("xpilot/toggle_preferences", "xPilot: Toggle Settings Window");
-    XPLMRegisterCommandHandler(ToggleSettingsCommand, ToggleSettingsCommandHandler, 1, (void*)0);
+    ToggleMessageConsoleCommand = XPLMCreateCommand("xpilot/toggle_text_message_console", "xPilot: Toggle Text Message Console");
+    XPLMRegisterCommandHandler(ToggleMessageConsoleCommand, ToggleMessageConsoleCommandHandler, 1, (void*)0);
+
+    ToggleMessgePreviewPanelCommnd = XPLMCreateCommand("xpilot/toggle_notification_panel", "xPilot: Toggle Notification Panel");
+    XPLMRegisterCommandHandler(ToggleMessgePreviewPanelCommnd, ToggleMessagePreviewPanelCommandHandler, 1, (void*)0);
 
     ToggleNearbyATCWindowCommand = XPLMCreateCommand("xpilot/toggle_nearby_atc", "xPilot: Toggle Nearby ATC Window");
     XPLMRegisterCommandHandler(ToggleNearbyATCWindowCommand, ToggleNearbyATCWindowCommandHandler, 1, (void*)0);
-
-    ToggleMessgePreviewPanelCommnd = XPLMCreateCommand("xpilot/toggle_notification_panel", "xPilot: Toggle Message Preview Panel");
-    XPLMRegisterCommandHandler(ToggleMessgePreviewPanelCommnd, ToggleMessagePreviewPanelCommandHandler, 1, (void*)0);
 
     ToggleDefaultAtisCommand = XPLMCreateCommand("xpilot/toggle_default_atis", "xPilot: Toggle Default X-Plane ATIS");
     XPLMRegisterCommandHandler(ToggleDefaultAtisCommand, ToggleDefaultAtisCommandHandler, 1, (void*)0);
 
     ToggleTcasCommand = XPLMCreateCommand("xpilot/toggle_tcas", "xPilot: Toggle TCAS Control");
     XPLMRegisterCommandHandler(ToggleTcasCommand, ToggleTcasCommandHandler, 1, (void*)0);
-
-    ToggleMessageConsoleCommand = XPLMCreateCommand("xpilot/toggle_text_message_console", "xPilot: Toggle Message Console");
-    XPLMRegisterCommandHandler(ToggleMessageConsoleCommand, ToggleMessageConsoleCommandHandler, 1, (void*)0);
 
     ToggleAircraftLabelsCommand = XPLMCreateCommand("xpilot/toggle_aircraft_labels", "xPilot: Toggle Aircraft Labels");
     XPLMRegisterCommandHandler(ToggleAircraftLabelsCommand, ToggleAircraftLabelsCommandHandler, 1, (void*)0);
@@ -255,13 +242,13 @@ void RegisterMenuItems()
     PluginMenuIdx = XPLMAppendMenuItem(XPLMFindPluginsMenu(), "xPilot", nullptr, 0);
     PluginMenu = XPLMCreateMenu("xPilot", XPLMFindPluginsMenu(), PluginMenuIdx, nullptr, nullptr);
 
-    MenuPreferences = XPLMAppendMenuItemWithCommand(PluginMenu, "Settings", ToggleSettingsCommand);
+    MenuSettings = XPLMAppendMenuItem(PluginMenu, "Settings", nullptr, 0);
     MenuNearbyAtc = XPLMAppendMenuItemWithCommand(PluginMenu, "Nearby ATC", ToggleNearbyATCWindowCommand);
-    MenuTextMessageConsole = XPLMAppendMenuItemWithCommand(PluginMenu, "Toggle Message Console", ToggleMessageConsoleCommand);
-    MenuNotificationPanel = XPLMAppendMenuItemWithCommand(PluginMenu, "Toggle Message Preview Panel", ToggleMessgePreviewPanelCommnd);
+    MenuTextMessageConsole = XPLMAppendMenuItemWithCommand(PluginMenu, "Text Message Console", ToggleMessageConsoleCommand);
+    MenuNotificationPanel = XPLMAppendMenuItemWithCommand(PluginMenu, "Notification Panel", ToggleMessgePreviewPanelCommnd);
     MenuDefaultAtis = XPLMAppendMenuItemWithCommand(PluginMenu, "Default ATIS", ToggleDefaultAtisCommand);
-    MenuToggleTcas = XPLMAppendMenuItemWithCommand(PluginMenu, "Toggle TCAS", ToggleTcasCommand);
-    MenuToggleAircraftLabels = XPLMAppendMenuItemWithCommand(PluginMenu, "Toggle Aircraft Labels", ToggleAircraftLabelsCommand);
+    MenuToggleTcas = XPLMAppendMenuItemWithCommand(PluginMenu, "TCAS", ToggleTcasCommand);
+    MenuToggleAircraftLabels = XPLMAppendMenuItemWithCommand(PluginMenu, "Aircraft Labels", ToggleAircraftLabelsCommand);
 }
 
 void UpdateMenuItems()

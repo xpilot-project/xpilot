@@ -734,7 +734,7 @@ namespace xpilot
 		m_notificationPanel->setAlwaysVisible(visible);
 	}
 
-	bool XPilot::setNotificationPanelAlwaysVisible()const
+	bool XPilot::getNotificationPanelAlwaysVisible()const
 	{
 		return m_notificationPanel->isAlwaysVisible();
 	}

@@ -45,3 +45,4 @@ compile_commands.json
 *.rc
 
 plugin/include/Constants.h
+plugin/build/*
