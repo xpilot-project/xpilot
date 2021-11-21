@@ -1,6 +1,6 @@
 #include "aircraft_configuration.h"
 
-QString AircraftConfiguration::ToJson() const
+QJsonObject AircraftConfiguration::ToJson() const
 {
     QJsonObject cfg;
 
@@ -89,8 +89,7 @@ QString AircraftConfiguration::ToJson() const
         cfg["lights"] = lights;
     }
 
-    QJsonDocument doc(cfg);
-    return doc.toJson(QJsonDocument::Compact);
+    return cfg;
 }
 
 AircraftConfiguration AircraftConfiguration::FromUserAircraftData(UserAircraftConfigData config)

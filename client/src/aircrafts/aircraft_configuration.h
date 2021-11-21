@@ -69,7 +69,7 @@ public:
         Engines = AircraftConfigurationEngines();
     }
 
-    QString ToJson() const;
+    QJsonObject ToJson() const;
 
     static AircraftConfiguration FromUserAircraftData(UserAircraftConfigData config);
 

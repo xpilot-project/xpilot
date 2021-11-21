@@ -534,10 +534,7 @@ namespace xpilot
         AircraftConfigurationInfo acconfig{};
         acconfig.Config = config;
 
-        QStringList payload;
-        payload.append(acconfig.ToJson());
-
-        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, to, ClientQueryType::AircraftConfiguration, payload));
+        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, to, ClientQueryType::AircraftConfiguration, {acconfig.ToJson()}));
     }
 
     void NetworkManager::SendCapabilities(QString to)
