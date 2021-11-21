@@ -57,7 +57,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 {
     QDir pluginLogPath(pathAppend(AppConfig::getInstance()->dataRoot(), "PluginLogs"));
     if(!pluginLogPath.exists()) {
-        pluginLogPath.mkdir(".");
+        pluginLogPath.mkpath(".");
     }
 
     // keep only the last 5 log files

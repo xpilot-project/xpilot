@@ -23,7 +23,7 @@ namespace xpilot
     {
         QDir networkLogPath(pathAppend(AppConfig::getInstance()->dataRoot(), "NetworkLogs"));
         if(!networkLogPath.exists()) {
-            networkLogPath.mkdir(".");
+            networkLogPath.mkpath(".");
         }
 
         // keep only the last 5 log files

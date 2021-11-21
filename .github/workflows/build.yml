@@ -28,7 +28,7 @@ jobs:
 
     #if: ${{ false }}
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     env:
       IB_URL: https://installbuilder.com/installbuilder-enterprise-21.9.0-linux-x64-installer.run
@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install libasound2-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev
+          sudo apt-get install libasound2-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev python3-setuptools
           
       - uses: actions/checkout@v2
         with:
@@ -126,10 +126,12 @@ jobs:
           linuxdeploy-x86_64.AppImage \
             --plugin=qt \
             --output=appimage \
-            --desktop-file=${{ env.CLIENT_DIR }}/xpilot.desktop \
+            --create-desktop-file \
+            --executable=${{ env.CLIENT_DIR }}/build/bin/xpilot \
             --appdir=AppDir \
             --icon-file=${{ env.CLIENT_DIR }}/xpilot.png
-          mkdir -p ${{ github.workspace }}/output && mv xPilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
+          mkdir -p ${{ github.workspace }}/output && mv xpilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
+          cp ${{ env.CLIENT_DIR }}/xpilot.png ${{ github.workspace }}/output
 
       - name: Get version
         shell: bash
@@ -168,7 +170,7 @@ jobs:
   
   build-windows:
 
-    if: ${{ false }}
+    #if: ${{ false }}
 
     runs-on: windows-latest
 
@@ -293,7 +295,7 @@ jobs:
   
   build-macos:
 
-    if: ${{ false }}
+    #if: ${{ false }}
   
     runs-on: macos-latest
 
