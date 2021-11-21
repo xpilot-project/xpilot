@@ -137,6 +137,9 @@
                             <origin>${plugin_prefix}/*</origin>
                         </distributionFile>
                     </distributionFileList>
+                    <ruleList>
+                        <stringTest text="${xplanepath}" type="not_empty"/>
+                    </ruleList>
                 </folder>
             </folderList>
             <startMenuShortcutList>
