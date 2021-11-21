@@ -14,7 +14,7 @@
 
 #include "windowconfig.h"
 #include "src/common/simplecrypt.h"
-#include "src/network/networkserverlist.h"
+#include "src/network/serverlistmanager.h"
 #include "src/network/connectinfo.h"
 
 #define DEFAULT_XPLANE_NETWORK_ADDRESS "127.0.0.1"

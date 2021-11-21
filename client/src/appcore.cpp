@@ -6,7 +6,7 @@
 #include "config/appconfig.h"
 #include "controllers/controller_manager.h"
 #include "network/networkmanager.h"
-#include "network/networkserverlist.h"
+#include "network/serverlistmanager.h"
 #include "simulator/xplane_adapter.h"
 #include "aircrafts/user_aircraft_manager.h"
 #include "aircrafts/network_aircraft_manager.h"
@@ -33,6 +33,11 @@
 #include <QScopeGuard>
 
 using namespace xpilot;
+
+static QObject *appConfigSingleton(QQmlEngine *, QJSEngine *)
+{
+    return AppConfig::getInstance();
+}
 
 int xpilot::Main(int argc, char* argv[])
 {
@@ -62,7 +67,7 @@ int xpilot::Main(int argc, char* argv[])
     QQmlApplicationEngine engine;
     QQmlContext *context = engine.rootContext();
 
-    AppCore appCore(&engine);
+    ServerListManager serverListManager;
     VersionCheck versionCheck;
     InstallModels installModels;
     XplaneAdapter xplaneAdapter;
@@ -73,16 +78,16 @@ int xpilot::Main(int argc, char* argv[])
     AudioForVatsim audio(networkManager, xplaneAdapter, controllerManager);
 
     QTimer::singleShot(500, [&]{
+        serverListManager.PerformServerListDownload("https://data.vatsim.net/v3/vatsim-servers.json");
         versionCheck.PerformVersionCheck();
     });
 
-    qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", &AppCore::appConfigInstance);
+    qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", appConfigSingleton);
     qRegisterMetaType<ConnectInfo>("ConnectInfo");
     qRegisterMetaType<ClientWindowConfig>("ClientWindowConfig");
     qRegisterMetaType<RadioStackState>("RadioStackState");
     qRegisterMetaType<AudioDeviceInfo>("AudioDeviceInfo");
 
-    context->setContextProperty("appCore", &appCore);
     context->setContextProperty("networkManager", &networkManager);
     context->setContextProperty("xplaneAdapter", &xplaneAdapter);
     context->setContextProperty("controllerManager", &controllerManager);
@@ -91,6 +96,7 @@ int xpilot::Main(int argc, char* argv[])
     context->setContextProperty("isVelocityEnabled", AppConfig::getInstance()->VelocityEnabled);
     context->setContextProperty("installModels", &installModels);
     context->setContextProperty("versionCheck", &versionCheck);
+    context->setContextProperty("serverListManager", &serverListManager);
 
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [&](){
         networkManager.disconnectFromNetwork();
@@ -108,36 +114,4 @@ int xpilot::Main(int argc, char* argv[])
     engine.load(url);
 
     return app.exec();
-}
-
-AppCore::AppCore(QQmlEngine* qmlEngine) :
-    QObject(qmlEngine),
-    engine(qobject_cast<QQmlApplicationEngine*>(qmlEngine))
-{
-    QTimer::singleShot(0, [&]{
-        DownloadServerList();
-    });
-}
-
-QObject *AppCore::appConfigInstance(QQmlEngine*, QJSEngine*)
-{
-    return AppConfig::getInstance();
-}
-
-void AppCore::DownloadServerList()
-{
-    NetworkServerList networkServerList;
-    auto serverList = networkServerList.DownloadServerList("https://data.vatsim.net/v3/vatsim-servers.json");
-
-    if(serverList.size() > 0) {
-        emit serverListDownloaded(serverList.size());
-        AppConfig::getInstance()->CachedServers.clear();
-        for(auto & server: serverList) {
-            AppConfig::getInstance()->CachedServers.append(server);
-        }
-        AppConfig::getInstance()->saveConfig();
-    }
-    else {
-        emit serverListDownloadError();
-    }
 }

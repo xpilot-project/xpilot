@@ -8,6 +8,8 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
+#include <QtPromise>
+#include <QPointer>
 
 namespace xpilot
 {
@@ -23,15 +25,21 @@ namespace xpilot
         Q_PROPERTY(QString Address MEMBER Address)
     };
 
-    class NetworkServerList : public QObject
+    class ServerListManager : public QObject
     {
         Q_OBJECT
     public:
-        NetworkServerList(QObject * parent = nullptr);
-        QVector<NetworkServerInfo> DownloadServerList(const QString& url);
+        ServerListManager(QObject * parent = nullptr);
+        void PerformServerListDownload(const QString &url);
+        QtPromise::QPromise<QVector<NetworkServerInfo>> DownloadServerList(const QString &url);
 
     signals:
-        void serverListDownloaded(QVector<NetworkServerInfo>& servers);
+        void serverListDownloaded(int count);
+        void serverListDownloadError(QString error);
+
+    private:
+        QNetworkAccessManager *nam = nullptr;
+        QPointer<QNetworkReply> m_reply;
     };
 }
 

@@ -5,7 +5,7 @@
 #include <QDateTime>
 
 #include "networkmanager.h"
-#include "networkserverlist.h"
+#include "serverlistmanager.h"
 #include "src/appcore.h"
 #include "src/config/appconfig.h"
 #include "src/common/build_config.h"

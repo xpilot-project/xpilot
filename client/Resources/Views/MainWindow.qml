@@ -277,7 +277,7 @@ Window {
     }
 
     Connections {
-        target: appCore
+        target: serverListManager
 
         function onServerListDownloaded(count) {
             appendMessage(`Server list download succeeded. ${count} servers found.`, colorYellow)

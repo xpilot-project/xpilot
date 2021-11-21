@@ -160,8 +160,8 @@ set(PROJECT_SOURCES
     src/network/networkmanager.h
     src/network/networkmanager.cpp
     src/network/connectinfo.h
-    src/network/networkserverlist.h
-    src/network/networkserverlist.cpp
+    src/network/serverlistmanager.h
+    src/network/serverlistmanager.cpp
     src/network/nearbyatc.h
     src/network/events/radio_message_received.h
     src/simulator/xplane_adapter.h
