@@ -70,15 +70,9 @@ int xpilot::Main(int argc, char* argv[])
     if(!database.families().contains("Ubuntu"))
     {
         // we must check if Ubuntu is already instead (at least for Linux), otherwise the FileDialog gets all corrupted...
-        qint32 id = QFontDatabase::addApplicationFont(":/Resources/Fonts/Ubuntu-Regular.ttf");
-        QStringList fontList = QFontDatabase::applicationFontFamilies(id);
-        QString family = fontList.at(0);
-        app.setFont(QFont(family));
+        QFontDatabase::addApplicationFont(":/Resources/Fonts/Ubuntu-Regular.ttf");
     }
-    else
-    {
-        app.setFont(QFont("Ubuntu"));
-    }
+    app.setFont(QFont("Ubuntu", 10));
 
     QQmlApplicationEngine engine;
     QQmlContext *context = engine.rootContext();
