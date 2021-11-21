@@ -36,6 +36,13 @@ QPromise<void> InstallModels::DownloadModels(const QString &url)
         {
             QString tempPath = QDir::fromNativeSeparators(AppConfig::dataRoot());
 
+            if(QFile::exists(pathAppend(tempPath, "Bluebell.zip")))
+            {
+                // zip already exists, don't download again
+                resolve();
+                return;
+            }
+
             m_file = new QSaveFile(pathAppend(tempPath, "Bluebell.zip"));
             if(!m_file->open(QIODevice::WriteOnly))
             {
@@ -113,7 +120,6 @@ QPromise<void> InstallModels::UnzipModels(const QString &path)
                 {
                     if(m_stopExtract) {
                         zf.close();
-                        DeleteTempDownload();
                         return;
                     }
 
@@ -135,7 +141,6 @@ QPromise<void> InstallModels::UnzipModels(const QString &path)
                 {
                     if(m_stopExtract) {
                         zf.close();
-                        DeleteTempDownload();
                         return;
                     }
 
@@ -224,7 +229,7 @@ void InstallModels::validatePath(QString path)
         }
         else if(BuildConfig::isRunningOnMacOSPlatform()) {
             QString xplaneExe = pathAppend(xplanePath.path(), "X-Plane.app");
-            pathValid = QFileInfo::exists(xplaneExe) && QFileInfo(xplaneExe).isFile();
+            pathValid = QFileInfo::exists(xplaneExe) && QFileInfo(xplaneExe).isDir();
             if(!pathValid) {
                 emit invalidXplanePath("Invalid X-Plane folder path. The path should be the root folder of where X-Plane.app is installed.");
                 return;
