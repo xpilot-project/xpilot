@@ -177,9 +177,12 @@ void InstallModels::CreatePluginConfig(const QString &path)
 {
     QJsonObject config;
 
+    QString tmp(pathAppend(path, "Resources/plugins/xPilot/Resources/CSL/Bluebell"));
+    QString nativePath = QDir::toNativeSeparators(tmp);
+
     QJsonObject cslPath;
     cslPath.insert("Enabled", true);
-    cslPath.insert("Path", pathAppend(path, "Resources/plugins/xPilot/Resources/CSL/Bluebell"));
+    cslPath.insert("Path", nativePath);
 
     QJsonArray paths;
     paths.push_back(cslPath);
