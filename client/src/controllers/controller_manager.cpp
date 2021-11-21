@@ -31,6 +31,8 @@ namespace xpilot
             QJsonArray data_array;
             for(const auto &atc : std::as_const(m_controllers))
             {
+                if(!atc.IsValidATC) continue;
+
                 QJsonObject data;
                 data.insert("callsign", atc.Callsign);
                 data.insert("xplane_frequency", (qint32)atc.Frequency);
