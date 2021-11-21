@@ -59,6 +59,7 @@ void AppConfig::loadConfig()
         XplanePluginPort = DEFAULT_PLUGIN_PORT;
         XplaneUdpPort = XPLANE_UDP_PORT;
         VelocityEnabled = false;
+        SilenceModelInstall = false;
 
         saveConfig();
         loadConfig();

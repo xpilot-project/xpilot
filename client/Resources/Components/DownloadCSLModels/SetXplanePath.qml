@@ -11,7 +11,7 @@ import "../../Controls"
 Popup {
         id: popup
         width: 600
-        height: 180
+        height: 200
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
         modal: true
@@ -40,7 +40,7 @@ Popup {
         BlueButton {
             text: "Select Folder..."
             width: 120
-            height: 25
+            height: 30
             font.pixelSize: 14
             anchors.left: lblXplanePath.right
             anchors.leftMargin: 10
@@ -70,7 +70,7 @@ Popup {
             id: xplanePathUrl
             anchors.top: lblXplanePath.bottom
             anchors.left: lblXplanePath.left
-            anchors.topMargin: 15
+            anchors.topMargin: 20
             font.pixelSize: 14
             renderType: Text.NativeRendering
             wrapMode: Text.WordWrap
@@ -83,7 +83,7 @@ Popup {
             width: 80
             height: 30
             font.pixelSize: 14
-            anchors.topMargin: 15
+            anchors.topMargin: 25
             anchors.top: xplanePathUrl.bottom
             anchors.left: xplanePathUrl.left
             MouseArea {
@@ -101,7 +101,7 @@ Popup {
             width: 80
             height: 30
             font.pixelSize: 14
-            anchors.topMargin: 15
+            anchors.topMargin: 25
             anchors.top: xplanePathUrl.bottom
             anchors.left: xplanePathBtnOk.right
             anchors.leftMargin: 10

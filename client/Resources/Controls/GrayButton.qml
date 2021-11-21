@@ -7,7 +7,6 @@ Button {
     contentItem: Text {
         color: '#ffffff'
         text: btn.text
-        font.family: ubuntuRegular.name
         font.pixelSize: btn.font.pixelSize
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter

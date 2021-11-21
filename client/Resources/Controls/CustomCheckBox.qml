@@ -8,7 +8,6 @@ CheckBox {
     padding: 0
     contentItem: Text {
         text: control.text
-        font.family: control.font.family
         font.pixelSize: 13
         opacity: enabled ? 1.0 : 0.3
         color: "#0164AD"

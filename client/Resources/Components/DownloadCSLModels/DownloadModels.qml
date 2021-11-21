@@ -10,7 +10,7 @@ import "../../Controls"
 Popup {
     id: popup
     width: 650
-    height: 195
+    height: 200
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
     modal: true
@@ -159,6 +159,7 @@ Popup {
         anchors.top: btnNo.top
         anchors.left: btnNo.right
         anchors.leftMargin: 10
+        font.pixelSize: 14
 
         indicator: Rectangle {
             implicitWidth: 16

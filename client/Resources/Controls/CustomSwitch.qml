@@ -26,7 +26,6 @@ Switch {
 
     contentItem: Text {
         text: control.text
-        font.family: ubuntuRegular.name
         font.pixelSize: 13
         opacity: enabled ? 1.0 : 0.3
         color: "#333333"

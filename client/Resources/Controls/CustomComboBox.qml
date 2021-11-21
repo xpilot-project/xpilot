@@ -24,7 +24,6 @@ ComboBox {
         highlighted: control.highlightedIndex === index
         contentItem: Text {
             text: modelData != null ? (control.textRole ? modelData[control.textRole] : modelData) : null
-            font.family: ubuntuRegular.name
             font.pixelSize: 13
             color: hovered ? '#ffffff' : '#333333'
             verticalAlignment: Text.AlignVCenter
@@ -38,7 +37,6 @@ ComboBox {
         padding: 5
         clip: true
         font.pixelSize: 13
-        font.family: ubuntuRegular.name
         verticalAlignment: Text.AlignVCenter
         color: '#333333'
         renderType: Text.NativeRendering

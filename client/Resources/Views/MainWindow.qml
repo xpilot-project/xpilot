@@ -50,11 +50,6 @@ Window {
     property string colorBrightGreen: "#00c000"
 
     FontLoader {
-        id: ubuntuRegular
-        source: "../Fonts/Ubuntu-Regular.ttf"
-    }
-
-    FontLoader {
         id: robotoMono
         source: "../Fonts/Roboto-Mono.ttf"
     }
@@ -152,6 +147,9 @@ Window {
         if(AppConfig.WindowConfig.Maximized) {
             mainWindow.showMaximized()
         }
+        if(!AppConfig.SilenceModelInstall) {
+            modal_downloadModels.open()
+        }
         initialized = true;
     }
 
@@ -213,11 +211,6 @@ Window {
 
         function onNoUpdatesAvailable() {
             appendMessage("Version check complete. You are running the latest version of xPilot.", colorYellow)
-
-            if(!AppConfig.SilenceModelInstall) {
-                // this is here because we don't want to overload the user with popups
-                modal_downloadModels.open()
-            }
         }
 
         function onErrorEncountered(error) {

@@ -31,6 +31,8 @@
 #include <QQuickWindow>
 #include <QSslSocket>
 #include <QScopeGuard>
+#include <QFont>
+#include <QFontDatabase>
 
 using namespace xpilot;
 
@@ -63,6 +65,11 @@ int xpilot::Main(int argc, char* argv[])
 
     QGuiApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));
+
+    qint32 id = QFontDatabase::addApplicationFont(":/Resources/Fonts/Ubuntu-Regular.ttf");
+    QStringList fontList = QFontDatabase::applicationFontFamilies(id);
+    QString family = fontList.at(0);
+    app.setFont(QFont(family));
 
     QQmlApplicationEngine engine;
     QQmlContext *context = engine.rootContext();

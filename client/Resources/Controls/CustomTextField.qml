@@ -9,7 +9,6 @@ TextField {
         border.color: textField.focus ? '#565E64' : '#babfc4'
         color: textField.enabled ? 'transparent' : '#E6E7E8'
     }
-    font.family: ubuntuRegular.name
     font.pixelSize: 13
     color: '#333333'
     height: 30

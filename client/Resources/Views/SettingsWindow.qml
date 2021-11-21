@@ -101,7 +101,6 @@ Window {
                 text: qsTr("VATSIM ID")
                 font.pixelSize: 13
                 renderType: Text.NativeRendering
-                font.family: ubuntuRegular.name
             }
             CustomTextField {
                 id: txtVatsimId
@@ -128,7 +127,6 @@ Window {
                 text: qsTr("VATSIM Password")
                 font.pixelSize: 13
                 renderType: Text.NativeRendering
-                font.family: ubuntuRegular.name
             }
             CustomTextField {
                 id: txtVatsimPassword
@@ -153,7 +151,6 @@ Window {
                 text: qsTr("Your Name")
                 renderType: Text.NativeRendering
                 font.pixelSize: 13
-                font.family: ubuntuRegular.name
             }
 
             CustomTextField {
@@ -179,7 +176,6 @@ Window {
                 text: qsTr("Home Airport")
                 renderType: Text.NativeRendering
                 font.pixelSize: 13
-                font.family: ubuntuRegular.name
             }
             CustomTextField {
                 id: txtHomeAirport
@@ -208,7 +204,6 @@ Window {
                 text: qsTr("VATSIM Server")
                 font.pixelSize: 13
                 renderType: Text.NativeRendering
-                font.family: ubuntuRegular.name
             }
             CustomComboBox {
                 id: networkServerCombobox
@@ -261,7 +256,6 @@ Window {
                     clip: false
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
-                    font.family: ubuntuRegular.name
                     onCheckedChanged: {
                         AppConfig.AutoModeC = switchAutoModeC.checked
                     }
@@ -273,7 +267,6 @@ Window {
                     font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
-                    font.family: ubuntuRegular.name
                     onCheckedChanged: {
                         AppConfig.AlertPrivateMessage = switchAlertPrivateMessage.checked
                     }
@@ -285,7 +278,6 @@ Window {
                     font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
-                    font.family: ubuntuRegular.name
                     onCheckedChanged: {
                         AppConfig.AlertDirectRadioMessage = switchAlertDirectRadioMessage.checked
                     }
@@ -297,7 +289,6 @@ Window {
                     font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
-                    font.family: ubuntuRegular.name
                     onCheckedChanged: {
                         AppConfig.AlertSelcal = switchAlertSelcal.checked
                     }
@@ -307,7 +298,6 @@ Window {
                     id: switchAlertDisconnect
                     text: "Alert when disconnected from the network"
                     font.pixelSize: 13
-                    font.family: ubuntuRegular.name
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
@@ -321,7 +311,6 @@ Window {
                     font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
-                    font.family: ubuntuRegular.name
                     onCheckedChanged: {
                         AppConfig.DisableNotificationSounds = switchDisableSounds.checked
                     }
@@ -344,7 +333,6 @@ Window {
                 text: qsTr("Audio API")
                 renderType: Text.NativeRendering
                 font.pixelSize: 13
-                font.family: ubuntuRegular.name
             }
 
             CustomComboBox {
@@ -385,7 +373,6 @@ Window {
                 text: qsTr("Microphone Device")
                 renderType: Text.NativeRendering
                 font.pixelSize: 13
-                font.family: ubuntuRegular.name
             }
 
             CustomComboBox {
@@ -427,7 +414,6 @@ Window {
                 text: qsTr("Listen Device")
                 renderType: Text.NativeRendering
                 font.pixelSize: 13
-                font.family: ubuntuRegular.name
             }
 
             CustomComboBox {
@@ -486,7 +472,6 @@ Window {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     renderType: Text.NativeRendering
-                    font.family: ubuntuRegular.name
                 }
             }
 
@@ -506,7 +491,6 @@ Window {
                     text: "Enable HF Squelch"
                     font.pixelSize: 13
                     leftPadding: 0
-                    font.family: ubuntuRegular.name
                     onCheckedChanged: {
                         audio.enableHfSquelch(switchEnableHfSquelch.checked)
                     }
@@ -517,7 +501,6 @@ Window {
                     text: "Disable Radio Effects"
                     font.pixelSize: 13
                     leftPadding: 0
-                    font.family: ubuntuRegular.name
                     onCheckedChanged: {
                         audio.disableAudioEffects(switchDisableRadioEffects.checked)
                     }

@@ -19,7 +19,6 @@ Rectangle {
             text: comLabel
             anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: 13
-            font.family: ubuntuRegular.name
             renderType: Text.NativeRendering
         }
 
@@ -66,7 +65,6 @@ Rectangle {
             text: Math.round(control.value) + "%"
             anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: 13
-            font.family: ubuntuRegular.name
             renderType: Text.NativeRendering
         }
     }
