@@ -456,17 +456,6 @@ namespace xpilot
 					}
 				}
 			}
-			catch (zmq::error_t& e)
-			{
-				if (e.num() != ETERM)
-				{
-					LOG_MSG(logERROR, "Socket receive exception: %s", e.what());
-				}
-			}
-			catch (std::exception& e)
-			{
-				LOG_MSG(logERROR, "Socket receive exception: %s", e.what());
-			}
 			catch (...)
 			{
 			}
@@ -519,8 +508,6 @@ namespace xpilot
 			return Config::Instance().getDebugModelMatching();
 		if (!strcmp(item, XPMP_CFG_ITM_LOGLEVEL))
 			return Config::Instance().getLogLevel();
-		if (!strcmp(item, XPMP_CFG_ITM_REPLDATAREFS))
-			return 1;
 		if (!strcmp(item, XPMP_CFG_ITM_CLAMPALL))
 			return 0;
 		return defaultVal;
