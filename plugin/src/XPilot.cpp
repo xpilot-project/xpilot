@@ -378,6 +378,7 @@ namespace xpilot
 									{
 										m_aircraftManager->RemoveAllPlanes();
 										m_frameRateMonitor->stopMonitoring();
+										m_nearbyAtcWindow->UpdateList({});
 										ReleaseTcasControl();
 										m_xplaneAtisEnabled = 1;
 										m_networkCallsign.setValue("");

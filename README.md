@@ -21,4 +21,5 @@ xPilot is licensed under the [GPLv3 open-source license](LICENSE).
 * [Qt](https://www.qt.io) cross platform C++ development kit
 * [AFV-Native](https://github.com/xsquawkbox/AFV-Native) cross platform Audio for VATSIM client implementation
 * [ZeroMQ](https://zeromq.org) asynchronous messaging library
+* [ImGui](https://github.com/ocornut/imgui) graphical user interface, used for the X-Plane plugin windows
 * Application icon created by [Freepik](https://www.flaticon.com/authors/freepik)

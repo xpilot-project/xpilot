@@ -45,16 +45,19 @@ namespace xpilot {
 				for (auto& item : data["data"].items())
 				{
 					try {
+						std::string callsign = item.value()["callsign"];
+						std::string frequency = item.value()["frequency"];
+						int xplaneFrequency = static_cast<double>(item.value()["xplane_frequency"]);
+						std::string realName = item.value()["real_name"];
+
 						NearbyATCList atc;
-						atc.setCallsign(item.value()["callsign"]);
-						atc.setFrequency(item.value()["frequency"]);
-						atc.setXplaneFrequency(item.value()["xplane_frequency"]);
-						atc.setRealName(item.value()["real_name"]);
+						atc.setCallsign(callsign);
+						atc.setFrequency(frequency);
+						atc.setXplaneFrequency(xplaneFrequency);
+						atc.setRealName(realName);
 						NearbyList.push_back(atc);
 					}
-					catch (nlohmann::detail::type_error& e) {
-
-					}
+					catch (nlohmann::detail::type_error& e) { }
 				}
 			}
 		}
@@ -68,51 +71,55 @@ namespace xpilot {
 		}
 	}
 
-	void NearbyATCWindow::buildInterface() {
-
-		ImGui::PushFont(0);
-
-		ImGui::Columns(4, "whosonline", false);
-		ImGui::SetColumnWidth(0, 150);
-		ImGui::SetColumnWidth(1, 200);
-		ImGui::SetColumnWidth(2, 100);
-		ImGui::SetColumnWidth(3, 50);
-	
-
-		ImGui::Separator();
-
-		ImGui::Text("Callsign");
-		ImGui::NextColumn();
-		ImGui::Text("Real Name");
-		ImGui::NextColumn();
-		ImGui::Text("Frequency");
-		ImGui::NextColumn();
-		ImGui::Text("Actions");
-		ImGui::NextColumn();
-
-		ImGui::Separator();
-
-		std::lock_guard<std::mutex> lock(m_mutex);
+	void NearbyATCWindow::buildInterface() 
+	{
+		static ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY;
+		if (ImGui::BeginTable("##nearbyatc", 4, flags))
 		{
-			for (auto& e : NearbyList)
+			ImGui::TableSetupColumn("Callsign", ImGuiTableColumnFlags_WidthFixed, 150);
+			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 170);
+			ImGui::TableSetupColumn("Frequency", ImGuiTableColumnFlags_WidthFixed, 100);
+			ImGui::TableSetupColumn("Actions", ImGuiTableColumnFlags_WidthFixed, 50);
+			ImGui::TableSetupScrollFreeze(0, 1);
+			ImGui::TableHeadersRow();
+			
+			std::lock_guard<std::mutex> lock(m_mutex);
 			{
-				ImGui::Text(e.getCallsign().c_str());
-				ImGui::NextColumn();
-				ImGui::Text(e.getRealName().c_str());
-				ImGui::NextColumn();
-				ImGui::Text(e.getFrequency().c_str());
-				ImGui::NextColumn();
-				if (ImGui::ButtonIcon(ICON_FA_INFO, "Request Station Information"))
+				for (auto &station : NearbyList)
 				{
-					m_env->requestStationInfo(e.getCallsign());
-				}
-				ImGui::SameLine();
-				if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM1 Frequency"))
-				{
-					m_com1Frequency = e.getXplaneFrequency();
+					ImGui::TableNextRow();
+
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("%s", station.getCallsign().c_str());
+
+					ImGui::TableSetColumnIndex(1);
+					ImGui::Text("%s", station.getRealName().c_str());
+				
+					ImGui::TableSetColumnIndex(2);
+					ImGui::Text("%s", station.getFrequency().c_str());
+
+					ImGui::TableSetColumnIndex(3);
+
+					std::string btn1 = "RequestInfo#" + station.getCallsign();
+					ImGui::PushID(btn1.c_str());
+					if (ImGui::ButtonIcon(ICON_FA_INFO, "Request Station Information"))
+					{
+						m_env->requestStationInfo(station.getCallsign().c_str());
+					}
+					ImGui::PopID();
+					
+					ImGui::SameLine();
+
+					std::string btn2 = "Frequency#" + station.getCallsign();
+					ImGui::PushID(btn2.c_str());
+					if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM1 Frequency"))
+					{
+						m_com1Frequency = station.getXplaneFrequency();
+					}
+					ImGui::PopID();
 				}
 			}
+			ImGui::EndTable();
 		}
-		ImGui::PopFont();
 	}
 }
