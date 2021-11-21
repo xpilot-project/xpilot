@@ -7,9 +7,7 @@ xPilot is a cross-platform X-Plane 11 pilot client for VATSIM, supporting Window
 [1]: https://github.com/xpilot-project/xpilot/releases/latest
 
 # Resources
-:globe_with_meridians: [Website](https://xpilot-project.org)
-
-:blue_book: [Documentation](https://docs.xpilot-project.org)
+:globe_with_meridians: [Website and Documentation](https://beta.xpilot-project.org)
 
 :wave: [Discord](https://vats.im/xpilot-discord)
 
