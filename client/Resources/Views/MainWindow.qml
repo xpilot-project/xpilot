@@ -1038,16 +1038,51 @@ Window {
                                 Layout.fillHeight: true
                                 Layout.fillWidth: true
                                 selectByMouse: true
+
+                                property var commandHistory: []
+                                property int historyIndex: -1
+                                property var commandLineValue: ""
+
                                 background: Rectangle {
                                     color: 'transparent'
                                     border.color: '#5C5C5C'
                                 }
+
                                 Keys.onPressed: {
                                     if(event.key === Qt.Key_Escape) {
                                         cliTextField.clear()
                                     }
-                                    if(event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
+                                    else if(event.key === Qt.Key_Down) {
+                                        if(historyIndex == -1) {
+                                            commandLineValue = cliTextField.text
+                                        }
+                                        historyIndex--
+                                        if(historyIndex < 0) {
+                                            historyIndex = -1
+                                            cliTextField.text = commandLineValue
+                                            return
+                                        }
+                                        cliTextField.text = commandHistory[historyIndex]
+                                        return
+                                    }
+                                    else if(event.key === Qt.Key_Up) {
+                                        if(historyIndex == -1) {
+                                            commandLineValue = cliTextField.text
+                                        }
+                                        historyIndex++
+                                        if(historyIndex >= commandHistory.length) {
+                                            historyIndex = -1
+                                            cliTextField.text = commandLineValue
+                                            return
+                                        }
+                                        cliTextField.text = commandHistory[historyIndex]
+                                        return
+                                    }
+                                    else if(event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
                                         var cmd = cliTextField.text.split(" ").filter(function(i) { return i })
+
+                                        commandHistory.unshift(cliTextField.text)
+                                        historyIndex = -1
 
                                         try {
 
@@ -1258,6 +1293,7 @@ Window {
                                             appendMessage(err, colorRed)
                                         }
                                     }
+                                    historyIndex = -1
                                 }
                             }
                         }
