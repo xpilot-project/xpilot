@@ -63,6 +63,7 @@ namespace xpilot
         int XplaneUdpPort;
         bool VelocityEnabled;
         bool SilenceModelInstall;
+        QStringList VisualMachines;
 
         QVariant VariantCachedServers() const
         {
@@ -101,6 +102,7 @@ namespace xpilot
         Q_PROPERTY(bool AlertSelcal MEMBER AlertSelcal NOTIFY alertSelcalChanged)
         Q_PROPERTY(bool AlertDisconnect MEMBER AlertDisconnect NOTIFY alertDisconnectChanged);
         Q_PROPERTY(bool SilenceModelInstall MEMBER SilenceModelInstall)
+        Q_PROPERTY(QStringList VisualMachines MEMBER VisualMachines)
 
     signals:
         void disableNotificationSoundsChanged();

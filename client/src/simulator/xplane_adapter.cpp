@@ -82,6 +82,14 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     m_zmqSocket->set(zmq::sockopt::linger, 0);
     m_zmqSocket->connect(QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
 
+    for(const QString &machine : AppConfig::getInstance()->VisualMachines) {
+        auto socket = new zmq::socket_t(*m_zmqContext, ZMQ_DEALER);
+        socket->set(zmq::sockopt::routing_id, "xpilot");
+        socket->set(zmq::sockopt::linger, 0);
+        socket->connect(QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
+        m_visualSockets.push_back(socket);
+    }
+
     m_zmqThread = new std::thread([&]{
         while(m_zmqSocket)
         {
@@ -541,6 +549,17 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
         zmq::message_t msg(message.size());
         std::memcpy(msg.data(), message.toStdString().data(), message.size());
         m_zmqSocket->send(msg, zmq::send_flags::none);
+
+        for(auto &visualSocket : m_visualSockets) {
+            std::string identity = "xpilot";
+            zmq::message_t part1(identity.size());
+            std::memcpy(part1.data(), identity.data(), identity.size());
+            visualSocket->send(part1, zmq::send_flags::sndmore);
+
+            zmq::message_t msg(message.size());
+            std::memcpy(msg.data(), message.toStdString().data(), message.size());
+            visualSocket->send(msg, zmq::send_flags::none);
+        }
 
         m_rawDataStream << QString("[%1] >>> %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), message);
         m_rawDataStream.flush();

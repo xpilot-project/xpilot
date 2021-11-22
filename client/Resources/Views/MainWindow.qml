@@ -1199,6 +1199,22 @@ Window {
                                                         xplaneAdapter.unignoreAircraft(cmd[1])
                                                         cliTextField.clear()
                                                         break;
+                                                    case ".visualip":
+                                                        if(cmd.length < 2) {
+                                                            AppConfig.VisualMachines = []
+                                                            AppConfig.saveConfig()
+                                                            appendMessage("X-Plane visual machine addresses cleared", colorYellow);
+                                                        }
+                                                        else {
+                                                            AppConfig.VisualMachines = []
+                                                            for(var x = 1; x < cmd.length; x++) {
+                                                                AppConfig.VisualMachines.push(cmd[x])
+                                                            }
+                                                            AppConfig.saveConfig()
+                                                            appendMessage(`X-Plane visual machine(s) set to ${AppConfig.VisualMachines.join(", ")}. You must restart xPilot for the changes to take effect.`, colorYellow)
+                                                        }
+                                                        cliTextField.clear()
+                                                        break;
                                                     default:
                                                         throw `Unknown command: ${cmd[0].toLowerCase()}`
                                                     }

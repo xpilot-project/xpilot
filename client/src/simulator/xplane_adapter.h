@@ -109,6 +109,7 @@ private:
     std::thread* m_zmqThread;
     zmq::context_t* m_zmqContext;
     zmq::socket_t* m_zmqSocket;
+    QList<zmq::socket_t*> m_visualSockets;
 
     QFile m_pluginLog;
     QTextStream m_rawDataStream;

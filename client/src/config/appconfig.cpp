@@ -100,6 +100,7 @@ void AppConfig::loadConfig()
     XplaneUdpPort = jsonMap["XplaneUdpPort"].toInt();
     VelocityEnabled = jsonMap["VelocityEnabled"].toBool();
     SilenceModelInstall = jsonMap["SilenceModelInstall"].toBool();
+    VisualMachines = jsonMap["VisualMachines"].toStringList();
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
     for(const auto & value : cachedServers) {
@@ -166,6 +167,12 @@ void AppConfig::saveConfig()
         cachedServers.append(item);
     }
     jsonObj["CachedServers"] = cachedServers;
+
+    QJsonArray visualMachines;
+    for(auto &machine : VisualMachines) {
+        visualMachines.append(machine);
+    }
+    jsonObj["VisualMachines"] = visualMachines;
 
     QJsonObject recentConnection;
     recentConnection["Callsign"] = RecentConnection.Callsign;
