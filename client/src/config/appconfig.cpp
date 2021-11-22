@@ -1,5 +1,7 @@
 #include <QtGlobal>
 #include <QCoreApplication>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QStandardPaths>
 #include <QDir>
 #include "appconfig.h"
@@ -40,11 +42,15 @@ void AppConfig::loadConfig()
     QFile configFile(dataRoot() + "AppConfig.json");
     if(!configFile.open(QIODevice::ReadOnly)) {
 
+        QScreen *primaryScreen = QGuiApplication::primaryScreen();
+        int x = (primaryScreen->size().width() / 2) - (DefaultWidth / 2);
+        int y = (primaryScreen->size().height() / 2) - (DefaultHeight / 2);
+
         // set default values
-        WindowConfig.X = 10;
-        WindowConfig.Y = 10;
-        WindowConfig.Width = 800;
-        WindowConfig.Height = 250;
+        WindowConfig.X = x;
+        WindowConfig.Y = y;
+        WindowConfig.Width = DefaultWidth;
+        WindowConfig.Height = DefaultHeight;
         WindowConfig.Maximized = false;
         AlertDirectRadioMessage = true;
         AlertDisconnect = true;
@@ -119,8 +125,8 @@ void AppConfig::loadConfig()
     QJsonObject window = jsonMap["WindowConfig"].toJsonObject();
     WindowConfig.X = window["X"].toInt();
     WindowConfig.Y = window["Y"].toInt();
-    WindowConfig.Width = qMax(window["Width"].toInt(), 800);
-    WindowConfig.Height = qMax(window["Height"].toInt(), 250);
+    WindowConfig.Width = qMax(window["Width"].toInt(), DefaultWidth);
+    WindowConfig.Height = qMax(window["Height"].toInt(), DefaultHeight);
     WindowConfig.Maximized = window["Maximized"].toBool();
 
     if(!VatsimPassword.isEmpty()) {
@@ -183,8 +189,8 @@ void AppConfig::saveConfig()
     QJsonObject window;
     window["X"] = WindowConfig.X;
     window["Y"] = WindowConfig.Y;
-    window["Width"] = qMax(WindowConfig.Width, 800);
-    window["Height"] = qMax(WindowConfig.Height, 250);
+    window["Width"] = qMax(WindowConfig.Width, DefaultWidth);
+    window["Height"] = qMax(WindowConfig.Height, DefaultHeight);
     window["Maximized"] = WindowConfig.Maximized;
     jsonObj["WindowConfig"] = window;
 

@@ -115,6 +115,9 @@ namespace xpilot
         static AppConfig* instance;
         SimpleCrypt crypto;
         QString VatsimPassword;
+
+        int DefaultWidth = 800;
+        int DefaultHeight = 250;
     };
 }
 

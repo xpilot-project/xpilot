@@ -139,16 +139,21 @@ Window {
         } else {
             appendMessage(`Welcome to xPilot v${appVersion}`, colorYellow)
         }
-        x = Screen.width / 2 - width / 2
-        y = Screen.height / 2 - height / 2
+
         appendMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.", colorYellow);
-        x = AppConfig.WindowConfig.X;
-        y = AppConfig.WindowConfig.Y;
-        if(AppConfig.WindowConfig.Maximized) {
-            mainWindow.showMaximized()
-        }
+
         if(!AppConfig.SilenceModelInstall) {
             modal_downloadModels.open()
+        }
+
+        if(AppConfig.WindowConfig.Maximized) {
+            mainWindow.showFullScreen()
+        }
+        else {
+            width = Math.max(minimumWidth, AppConfig.WindowConfig.Width)
+            height = Math.max(minimumHeight, AppConfig.WindowConfig.Height)
+            x = AppConfig.WindowConfig.X;
+            y = AppConfig.WindowConfig.Y;
         }
         initialized = true;
     }
@@ -161,20 +166,40 @@ Window {
 
     onXChanged: {
         if(initialized) {
+            if(visibility === Window.Maximized || visibility === Window.FullScreen) {
+                return;
+            }
             AppConfig.WindowConfig.X = x;
+            AppConfig.saveConfig()
         }
     }
 
     onYChanged: {
         if(initialized) {
+            if(visibility === Window.Maximized || visibility === Window.FullScreen) {
+                return;
+            }
             AppConfig.WindowConfig.Y = y;
+            AppConfig.saveConfig()
         }
     }
 
     onVisibilityChanged: {
         if(initialized && visibility !== Window.Hidden) {
             var isMaximized = (visibility === Window.Maximized || visibility === Window.FullScreen)
+            if(AppConfig.WindowConfig.Maximized && !isMaximized) {
+                width = minimumWidth
+                height = minimumHeight
+                var center = Qt.point(Screen.width / 2 - width / 2, Screen.height / 2 - height / 2)
+                x = center.x
+                y = center.y
+                AppConfig.WindowConfig.X = center.x
+                AppConfig.WindowConfig.Y = center.y
+                AppConfig.WindowConfig.Width = width
+                AppConfig.WindowConfig.Height = height
+            }
             AppConfig.WindowConfig.Maximized = isMaximized
+            AppConfig.saveConfig()
         }
     }
 
@@ -185,6 +210,7 @@ Window {
 
         if(initialized) {
             AppConfig.WindowConfig.Height = height;
+            AppConfig.saveConfig()
         }
     }
 
@@ -195,6 +221,7 @@ Window {
 
         if(initialized) {
             AppConfig.WindowConfig.Width = width;
+            AppConfig.saveConfig()
         }
     }
 
@@ -1350,7 +1377,7 @@ Window {
             if (mainWindow.visibility == Window.Maximized || mainWindow.visibility == Window.FullScreen) {
                 mainWindow.showNormal()
             } else {
-                mainWindow.showMaximized()
+                mainWindow.showFullScreen()
             }
             moveable = false
         }
