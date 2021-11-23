@@ -133,7 +133,7 @@ Window {
                 echoMode: TextInput.Password
                 y: 20
                 onTextChanged: {
-                    AppConfig.VatsimPasswordDecrypted = txtVatsimPassword.text;
+                    AppConfig.VatsimPasswordDecrypted = txtVatsimPassword.text.trim()
                 }
             }
         }
