@@ -10,7 +10,7 @@ import "../../Controls"
 Popup {
     id: popup
     width: 570
-    height: 180
+    height: 210
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
     modal: true
@@ -47,7 +47,7 @@ Popup {
         value: popup.pctProgress
         anchors.top: promptText.bottom
         anchors.left: promptText.left
-        anchors.topMargin: 10
+        anchors.topMargin: 15
         padding: 5
 
         background: Rectangle {
@@ -89,7 +89,7 @@ Popup {
         font.pixelSize: 14
         anchors.top: progressBar.bottom
         anchors.left: progressBar.left
-        anchors.topMargin: 10
+        anchors.topMargin: 15
         renderType: Text.NativeRendering
     }
 

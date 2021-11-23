@@ -10,7 +10,7 @@ import "../../Controls"
 Popup {
     id: popup
     width: 550
-    height: 120
+    height: 150
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
     modal: true
@@ -36,7 +36,7 @@ Popup {
         font.pixelSize: 14
         anchors.top: labelAskDownload.bottom
         anchors.left: labelAskDownload.left
-        anchors.topMargin: 10
+        anchors.topMargin: 15
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
@@ -55,7 +55,7 @@ Popup {
         font.pixelSize: 14
         anchors.top: labelAskDownload.bottom
         anchors.left: btnYes.right
-        anchors.topMargin: 10
+        anchors.topMargin: 15
         anchors.leftMargin: 10
         MouseArea {
             anchors.fill: parent
