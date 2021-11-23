@@ -35,6 +35,7 @@ namespace xpilot
         Q_INVOKABLE void requestRealName(QString callsign);
         Q_INVOKABLE void requestControllerAtis(QString callsign);
         Q_INVOKABLE void requestMetar(QString station);
+        Q_INVOKABLE void sendWallop(QString message);
 
         void RequestMetar(QString station);
         void RequestIsValidATC(QString callsign);

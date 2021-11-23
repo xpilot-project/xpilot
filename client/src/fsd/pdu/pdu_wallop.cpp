@@ -11,7 +11,6 @@ PDUWallop::PDUWallop(QString from, QString message) :
 QStringList PDUWallop::toTokens() const
 {
     QStringList tokens;
-    tokens.append("#TM");
     tokens.append(From);
     tokens.append(To);
     tokens.append(Message);

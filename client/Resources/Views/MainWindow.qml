@@ -1154,6 +1154,8 @@ Window {
                                                         if(cmd.length < 2) {
                                                             throw "Not enough parameters. Expected .wallop MESSAGE"
                                                         }
+                                                        networkManager.sendWallop(cmd.slice(1).join(" "))
+                                                        cliTextField.clear()
                                                         break;
                                                     case ".wx":
                                                     case ".metar":
@@ -1167,6 +1169,8 @@ Window {
                                                         if(cmd.length < 2) {
                                                             throw `Not enough parameters. Expected .atis CALLSIGN`
                                                         }
+                                                        networkManager.requestControllerAtis(cmd[1])
+                                                        cliTextField.clear()
                                                         break;
                                                     case ".com1":
                                                     case ".com2":

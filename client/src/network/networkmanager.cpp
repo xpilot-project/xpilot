@@ -269,7 +269,15 @@ namespace xpilot
                     m_mapAtisMessages.remove(pdu.From.toUpper());
                 }
             }
-            else if(pdu.Payload.at(0) == "T" || pdu.Payload.at(0) == "Z")
+            else if(pdu.Payload.at(0) == "Z")
+            {
+                // controller info/controller logoff time
+                if(m_mapAtisMessages.contains(pdu.From.toUpper()))
+                {
+                    m_mapAtisMessages[pdu.From.toUpper()].push_back(QString("Estimated logoff time: %1").arg(pdu.Payload[1]));
+                }
+            }
+            else if(pdu.Payload.at(0) == "T")
             {
                 // controller info/controller logoff time
                 if(m_mapAtisMessages.contains(pdu.From.toUpper()))
@@ -571,6 +579,11 @@ namespace xpilot
     void NetworkManager::requestMetar(QString station)
     {
         m_fsd.SendPDU(PDUMetarRequest(m_connectInfo.Callsign, station));
+    }
+
+    void NetworkManager::sendWallop(QString message)
+    {
+        m_fsd.SendPDU(PDUWallop(m_connectInfo.Callsign, message));
     }
 
     void NetworkManager::RequestIsValidATC(QString callsign)
