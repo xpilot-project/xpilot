@@ -64,7 +64,7 @@ namespace xpilot
 
 		float fps = 1 / monitor->m_frameRatePeriod;
 
-		if (fps > 20.0f)
+		if (fps < 20.0f)
 		{
 			float elapsed = monitor->m_stopwatch.elapsed(xpilot::Stopwatch::SECONDS);
 			if (!monitor->m_stopwatch.isRunning())
