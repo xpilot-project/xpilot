@@ -88,6 +88,7 @@ namespace xpilot
         QMap<QString, QStringList> m_mapAtisMessages;
 
         void OnNetworkError(QString error);
+        void OnProtocolErrorReceived(PDUProtocolError error);
         void OnNetworkConnected();
         void OnNetworkDisconnected();
         void OnForceDisconnected(QString reason);

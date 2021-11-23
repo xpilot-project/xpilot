@@ -41,6 +41,7 @@ namespace xpilot
         }
 
         connect(&m_fsd, &FsdClient::RaiseNetworkError, this, &NetworkManager::OnNetworkError);
+        connect(&m_fsd, &FsdClient::RaiseProtocolErrorReceived, this, &NetworkManager::OnProtocolErrorReceived);
         connect(&m_fsd, &FsdClient::RaiseNetworkConnected, this, &NetworkManager::OnNetworkConnected);
         connect(&m_fsd, &FsdClient::RaiseNetworkDisconnected, this, &NetworkManager::OnNetworkDisconnected);
         connect(&m_fsd, &FsdClient::RaiseServerIdentificationReceived, this, &NetworkManager::OnServerIdentificationReceived);
@@ -684,6 +685,11 @@ namespace xpilot
     void NetworkManager::OnNetworkError(QString error)
     {
         emit notificationPosted((int)NotificationType::Error, error);
+    }
+
+    void NetworkManager::OnProtocolErrorReceived(PDUProtocolError error)
+    {
+        emit notificationPosted((int)NotificationType::Error, QString("Network Error: %1").arg(error.Message));
     }
 
     void NetworkManager::OnRawDataSent(QString data)
