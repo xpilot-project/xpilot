@@ -24,6 +24,7 @@ Window {
     property var apiListLoaded: false
     property var inputDeviceListLoaded: false
     property var outputDeviceListLoaded: false
+    property var initialized: false
 
     signal closeWindow()
 
@@ -74,6 +75,16 @@ Window {
         switchAlertPrivateMessage.checked = AppConfig.AlertPrivateMessage;
         switchAlertSelcal.checked = AppConfig.AlertSelcal;
         switchAlertDisconnect.checked = AppConfig.AlertDisconnect;
+    }
+
+    onAfterRendering: {
+        if(!initialized) {
+            // prevent window from opening outside of screen bounds
+            if((y - 50) < screen.virtualY) {
+                y = screen.virtualY + 50
+            }
+            initialized = true
+        }
     }
 
     GridLayout {
