@@ -26,7 +26,7 @@ QtPromise::QPromise<QByteArray> VersionCheck::CheckForUpdates()
 {
     return QPromise<QByteArray>{[&](const auto resolve, const auto reject)
         {
-            QString url(BuildConfig::githubRepoApiUrl() % u"releases");
+            QString url(BuildConfig::versionCheckUrl());
             m_reply = nam->get(QNetworkRequest{url});
 
             QObject::connect(m_reply, &QNetworkReply::finished, [=]() {

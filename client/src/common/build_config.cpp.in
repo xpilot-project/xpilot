@@ -16,9 +16,9 @@ const quint64 xpilot::BuildConfig::ConfigEncryptionKey()
     return @CONFIG_ENCRYPTION_KEY@;
 }
 
-const QString xpilot::BuildConfig::githubRepoApiUrl()
+const QString xpilot::BuildConfig::versionCheckUrl()
 {
-    return "@GITHUB_URL@";
+    return "@VERSION_URL@";
 }
 
 const QString xpilot::BuildConfig::getPlatformString()

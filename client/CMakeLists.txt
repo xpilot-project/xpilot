@@ -26,7 +26,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 file(READ ${CMAKE_SOURCE_DIR}/../xpilot.json XPILOT_JSON)
 
-string(JSON GITHUB_URL GET ${XPILOT_JSON} github_url)
+string(JSON VERSION_URL GET ${XPILOT_JSON} version_url)
 string(JSON IS_BETA_VERSION GET ${XPILOT_JSON} is_beta)
 string(JSON BETA_NUMBER GET ${XPILOT_JSON} beta_number)
 string(JSON VERSION_MAJOR GET ${XPILOT_JSON} version major)

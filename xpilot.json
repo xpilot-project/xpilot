@@ -1,5 +1,5 @@
 {
-    "github_url": "https://api.github.com/repos/xpilot-project/xpilot/",
+    "version_url": "https://xpilot-project.org/api/v3/VersionCheck",
     "is_beta": true,
     "beta_number": 2,
     "version": {
