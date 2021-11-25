@@ -329,9 +329,9 @@ Window {
                 networkManager.disconnectFromNetwork()
                 appendMessage("You have been disconnected from the network becasue Replay Mode is enabled.", colorRed)
                 if(AppConfig.AlertDisconnect) {
-                    mainWindow.alert(0);
+                    mainWindow.alert(0)
+                    errorSound.play()
                 }
-                errorSound.play()
             }
         }
 
@@ -452,15 +452,17 @@ Window {
 
         function onBroadcastMessageReceived(from, message) {
             appendMessage(`[BROADCAST] ${from}: ${message}`, colorOrange)
-            broadcastSound.play()
-            mainWindow.alert(0)
+            if(AppConfig.AlertNetworkBroadcast) {
+                broadcastSound.play()
+                mainWindow.alert(0)
+            }
         }
 
         function onSelcalAlertReceived(from, frequencies) {
             appendMessage(`SELCAL alert received on ${FrequencyUtils.formatFromFsd(frequencies[0])}`, colorYellow)
-            selcalSound.play()
             if(AppConfig.AlertSelcal) {
                 mainWindow.alert(0)
+                selcalSound.play()
             }
         }
 
@@ -483,8 +485,8 @@ Window {
                 appendPrivateMessage(tab, message, from, colorWhite)
                 if(AppConfig.AlertPrivateMessage) {
                     mainWindow.alert(0)
+                    newMessageSound.play()
                 }
-                newMessageSound.play()
             }
             else {
                 if(currentTab !== tab) {
@@ -493,8 +495,8 @@ Window {
                 appendPrivateMessage(tab, message, from, colorWhite)
                 if(AppConfig.AlertPrivateMessage) {
                     mainWindow.alert(0)
+                    privateMessageSound.play()
                 }
-                privateMessageSound.play()
             }
         }
 
@@ -529,13 +531,15 @@ Window {
             appendMessage(message, args.IsDirect ? colorWhite : colorGray)
 
             if(args.IsDirect) {
-                directRadioMessageSound.play();
                 if(AppConfig.AlertDirectRadioMessage) {
                     mainWindow.alert(0);
+                    directRadioMessageSound.play();
                 }
             }
             else {
-                radioMessageSound.play();
+                if(AppConfig.AlertRadioMessage) {
+                    radioMessageSound.play();
+                }
             }
         }
 

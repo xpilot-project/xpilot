@@ -70,7 +70,8 @@ Window {
         switchEnableHfSquelch.checked = AppConfig.HFSquelchEnabled;
         switchDisableRadioEffects.checked = AppConfig.AudioEffectsDisabled;
         switchAutoModeC.checked = AppConfig.AutoModeC;
-        switchDisableSounds.checked = AppConfig.DisableNotificationSounds;
+        switchAlertBroadcast.checked = AppConfig.AlertNetworkBroadcast;
+        switchAlertRadioMessage.checked = AppConfig.AlertRadioMessage;
         switchAlertDirectRadioMessage.checked = AppConfig.AlertDirectRadioMessage;
         switchAlertPrivateMessage.checked = AppConfig.AlertPrivateMessage;
         switchAlertSelcal.checked = AppConfig.AlertSelcal;
@@ -274,7 +275,7 @@ Window {
 
                 CustomSwitch {
                     id: switchAlertPrivateMessage
-                    text: "Alert when new private message received"
+                    text: "Alert when new private message is received"
                     font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
@@ -284,8 +285,19 @@ Window {
                 }
 
                 CustomSwitch {
+                    id: switchAlertRadioMessage
+                    text: "Alert when radio message is received"
+                    font.pixelSize: 13
+                    Layout.preferredHeight: 32
+                    Layout.preferredWidth: 287
+                    onCheckedChanged: {
+                        AppConfig.AlertRadioMessage = switchAlertRadioMessage.checked
+                    }
+                }
+
+                CustomSwitch {
                     id: switchAlertDirectRadioMessage
-                    text: "Alert when direct radio message received"
+                    text: "Alert when direct radio message is received"
                     font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
@@ -295,8 +307,19 @@ Window {
                 }
 
                 CustomSwitch {
+                    id: switchAlertBroadcast
+                    text: "Alert when network broadcast message is received"
+                    font.pixelSize: 13
+                    Layout.preferredHeight: 32
+                    Layout.preferredWidth: 287
+                    onCheckedChanged: {
+                        AppConfig.AlertNetworkBroadcast = switchAlertBroadcast.checked
+                    }
+                }
+
+                CustomSwitch {
                     id: switchAlertSelcal
-                    text: "Alert when SELCAL notification received"
+                    text: "Alert when SELCAL notification is received"
                     font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
@@ -307,23 +330,12 @@ Window {
 
                 CustomSwitch {
                     id: switchAlertDisconnect
-                    text: "Alert when disconnected from the network"
+                    text: "Alert when disconnected from network"
                     font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
                         AppConfig.AlertDisconnect = switchAlertDisconnect.checked
-                    }
-                }
-
-                CustomSwitch {
-                    id: switchDisableSounds
-                    text: "Disable notification sounds"
-                    font.pixelSize: 13
-                    Layout.preferredHeight: 32
-                    Layout.preferredWidth: 287
-                    onCheckedChanged: {
-                        AppConfig.DisableNotificationSounds = switchDisableSounds.checked
                     }
                 }
             }

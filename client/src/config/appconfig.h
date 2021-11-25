@@ -53,9 +53,10 @@ namespace xpilot
         bool AudioEffectsDisabled;
         bool HFSquelchEnabled;
         bool AutoModeC;
-        bool DisableNotificationSounds;
         bool AlertPrivateMessage;
         bool AlertDirectRadioMessage;
+        bool AlertRadioMessage;
+        bool AlertNetworkBroadcast;
         bool AlertSelcal;
         bool AlertDisconnect;
         QString XplaneNetworkAddress;
@@ -96,19 +97,21 @@ namespace xpilot
         Q_PROPERTY(bool AudioEffectsDisabled MEMBER AudioEffectsDisabled)
         Q_PROPERTY(bool HFSquelchEnabled MEMBER HFSquelchEnabled)
         Q_PROPERTY(bool AutoModeC MEMBER AutoModeC)
-        Q_PROPERTY(bool DisableNotificationSounds MEMBER DisableNotificationSounds NOTIFY disableNotificationSoundsChanged)
         Q_PROPERTY(bool AlertPrivateMessage MEMBER AlertPrivateMessage NOTIFY alertPrivateMessageChanged)
+        Q_PROPERTY(bool AlertRadioMessage MEMBER AlertRadioMessage NOTIFY alertRadioMessageChanged)
         Q_PROPERTY(bool AlertDirectRadioMessage MEMBER AlertDirectRadioMessage NOTIFY alertDirectRadioMessageChanged)
         Q_PROPERTY(bool AlertSelcal MEMBER AlertSelcal NOTIFY alertSelcalChanged)
+        Q_PROPERTY(bool AlertNetworkBroadcast MEMBER AlertNetworkBroadcast NOTIFY alertNetworkBroadcastChanged)
         Q_PROPERTY(bool AlertDisconnect MEMBER AlertDisconnect NOTIFY alertDisconnectChanged);
         Q_PROPERTY(bool SilenceModelInstall MEMBER SilenceModelInstall)
         Q_PROPERTY(QStringList VisualMachines MEMBER VisualMachines)
 
     signals:
-        void disableNotificationSoundsChanged();
         void alertPrivateMessageChanged();
+        void alertRadioMessageChanged();
         void alertDirectRadioMessageChanged();
         void alertSelcalChanged();
+        void alertNetworkBroadcastChanged();
         void alertDisconnectChanged();
 
     private:
