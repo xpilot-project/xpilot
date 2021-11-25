@@ -684,8 +684,10 @@ namespace xpilot
 
     void NetworkManager::sendRadioMessage(QString message)
     {
-        m_fsd.SendPDU(PDURadioMessage(m_connectInfo.Callsign, m_transmitFreqs, message));
-        m_xplaneAdapter.SendRadioMessage(message);
+        if(m_transmitFreqs.size() > 0) {
+            m_fsd.SendPDU(PDURadioMessage(m_connectInfo.Callsign, m_transmitFreqs, message));
+            m_xplaneAdapter.SendRadioMessage(message);
+        }
     }
 
     void NetworkManager::sendPrivateMessage(QString to, QString message)
