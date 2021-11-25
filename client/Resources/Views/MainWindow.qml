@@ -57,49 +57,41 @@ Window {
     SoundEffect {
         id: alertSound
         source: "../Sounds/Alert.wav"
-        muted: AppConfig.DisableNotificationSounds
     }
 
     SoundEffect {
         id: broadcastSound
         source: "../Sounds/Broadcast.wav"
-        muted: AppConfig.DisableNotificationSounds
     }
 
     SoundEffect {
         id: directRadioMessageSound
         source: "../Sounds/DirectRadioMessage.wav"
-        muted: AppConfig.DisableNotificationSounds
     }
 
     SoundEffect {
         id: errorSound
         source: "../Sounds/Error.wav"
-        muted: AppConfig.DisableNotificationSounds
     }
 
     SoundEffect {
         id: newMessageSound
         source: "../Sounds/NewMessage.wav"
-        muted: AppConfig.DisableNotificationSounds
     }
 
     SoundEffect {
         id: privateMessageSound
         source: "../Sounds/PrivateMessage.wav"
-        muted: AppConfig.DisableNotificationSounds
     }
 
     SoundEffect {
         id: radioMessageSound
         source: "../Sounds/RadioMessage.wav"
-        muted: AppConfig.DisableNotificationSounds
     }
 
     SoundEffect {
         id: selcalSound
         source: "../Sounds/SelCal.wav"
-        muted: AppConfig.DisableNotificationSounds
     }
 
     DownloadModels {
