@@ -97,20 +97,20 @@ namespace xpilot
             return m_defaultAtis;
         }
 
-        bool setShowMessagePreview(bool enabled);
-        bool getShowNotificationBar()const
+        bool setNotificationPanelVisible(bool enabled);
+        bool getNotificationPanelVisible()const
         {
-            return m_showNotificationBar;
+            return m_notificationPanelVisibe;
         }
 
-        bool setMessagePreviewTimeout(int timeout);
-        int getNotificationBarDisappaerTime() const
+        bool setNotificationPanelTimeout(int timeout);
+        int getNotificationPanelTimeout() const
         {
-            return m_notificationBarDisappearTime;
+            return m_notificationPanelTimeout;
         }
         int getActualMessagePreviewTime()const
         {
-            switch (m_notificationBarDisappearTime)
+            switch (m_notificationPanelTimeout)
             {
                 case 0:
                     return 5;
@@ -173,8 +173,8 @@ namespace xpilot
         bool m_overrideContactAtcCommand = false;
         int m_labelColor = COLOR_YELLOW;
         bool m_disableTcas = false;
-        bool m_showNotificationBar = true;
-        int m_notificationBarDisappearTime = 10;
+        bool m_notificationPanelVisibe = true;
+        int m_notificationPanelTimeout = 10;
         int m_maxLabelDist = 3;
         bool m_labelCutoffVis = true;
         int m_logLevel = 2; // 0=Debug, 1=Info, 2=Warning, 3=Error, 4=Fatal, 5=Msg

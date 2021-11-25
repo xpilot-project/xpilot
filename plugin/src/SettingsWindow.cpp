@@ -37,7 +37,7 @@ namespace xpilot
 	static std::string fallbackTypeCode;
 	static bool overrideContactAtcCommand;
 	static bool showMessagePreview = true;
-	static int messagePreviewTimeout = 2;
+	static int notificationPanelTimeout = 2;
 	static int labelMaxDistance = 3;
 	static bool labelVisibilityCutoff = true;
 	static float lblCol[4];
@@ -74,8 +74,8 @@ namespace xpilot
 		debugModelMatching = xpilot::Config::Instance().getDebugModelMatching();
 		showHideLabels = xpilot::Config::Instance().getShowHideLabels();
 		fallbackTypeCode = xpilot::Config::Instance().getDefaultAcIcaoType();
-		showMessagePreview = xpilot::Config::Instance().getShowNotificationBar();
-		messagePreviewTimeout = xpilot::Config::Instance().getNotificationBarDisappaerTime();
+		showMessagePreview = xpilot::Config::Instance().getNotificationPanelVisible();
+		notificationPanelTimeout = xpilot::Config::Instance().getNotificationPanelTimeout();
 		overrideContactAtcCommand = xpilot::Config::Instance().getOverrideContactAtcCommand();
 		labelMaxDistance = xpilot::Config::Instance().getMaxLabelDistance();
 		labelVisibilityCutoff = xpilot::Config::Instance().getLabelCutoffVis();
@@ -124,29 +124,29 @@ namespace xpilot
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text("Automatically Show Message Preview Panel");
+					ImGui::Text("Automatically Show Notification Panel");
 					ImGui::SameLine();
 					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "If enabled, new messages will automatically appear at the top right of the X-Plane window.");
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##AutoShowMessagePreview", &showMessagePreview))
 					{
-						xpilot::Config::Instance().setShowMessagePreview(showMessagePreview);
+						xpilot::Config::Instance().setNotificationPanelVisible(showMessagePreview);
 						Save();
 					}
 
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text("Hide Message Preview Panel After...");
+					ImGui::Text("Hide Notification Panel After...");
 					ImGui::SameLine();
-					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Automatically hide the Message Preview Panel after the selected number of seconds.");
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Automatically hide the Notification Panel after the selected number of seconds.");
 					ImGui::TableSetColumnIndex(1);
 					const float cbWidth = ImGui::CalcTextSize("5 Seconds_______").x;
 					ImGui::SetNextItemWidth(cbWidth);
 					const char* autoHideOptions[] = { "5 seconds", "10 seconds", "15 seconds", "30 seconds", "60 seconds" };
-					if (ImGui::Combo("##AutoHide", &messagePreviewTimeout, autoHideOptions, IM_ARRAYSIZE(autoHideOptions)))
+					if (ImGui::Combo("##AutoHide", &notificationPanelTimeout, autoHideOptions, IM_ARRAYSIZE(autoHideOptions)))
 					{
-						xpilot::Config::Instance().setMessagePreviewTimeout(messagePreviewTimeout);
+						xpilot::Config::Instance().setNotificationPanelTimeout(notificationPanelTimeout);
 						Save();
 					}
 

@@ -105,11 +105,11 @@ namespace xpilot
                 }
                 if (jf.contains("ShowNotificationBar"))
                 {
-                    setShowMessagePreview(jf["ShowNotificationBar"]);
+                    setNotificationPanelVisible(jf["ShowNotificationBar"]);
                 }
                 if (jf.contains("NotificationBarDisappearTime"))
                 {
-                    setMessagePreviewTimeout(jf["NotificationBarDisappearTime"]);
+                    setNotificationPanelTimeout(jf["NotificationBarDisappearTime"]);
                 }
                 if (jf.contains("OverrideContactAtc"))
                 {
@@ -175,8 +175,8 @@ namespace xpilot
         j["PluginPort"] = getTcpPort();
         j["DebugModelMatching"] = getDebugModelMatching();
         j["EnableDefaultAtis"] = getDefaultAtisEnabled();
-        j["ShowNotificationBar"] = getShowNotificationBar();
-        j["NotificationBarDisappearTime"] = getNotificationBarDisappaerTime();
+        j["ShowNotificationBar"] = getNotificationPanelVisible();
+        j["NotificationBarDisappearTime"] = getNotificationPanelTimeout();
         j["OverrideContactAtc"] = getOverrideContactAtcCommand();
         j["LabelColor"] = getAircraftLabelColor();
         j["DisableTcas"] = getDisableTcas();
@@ -321,39 +321,39 @@ namespace xpilot
         return true;
     }
 
-    bool Config::setShowMessagePreview(bool show)
+    bool Config::setNotificationPanelVisible(bool show)
     {
-        m_showNotificationBar = show;
+        m_notificationPanelVisibe = show;
         return true;
     }
 
-    bool Config::setMessagePreviewTimeout(int timeout)
+    bool Config::setNotificationPanelTimeout(int timeout)
     {
         switch (timeout)
         {
             case 5:
-                m_notificationBarDisappearTime = 0;
+                m_notificationPanelTimeout = 0;
                 break;
             case 10:
-                m_notificationBarDisappearTime = 1;
+                m_notificationPanelTimeout = 1;
                 break;
             case 15:
-                m_notificationBarDisappearTime = 2;
+                m_notificationPanelTimeout = 2;
                 break;
             case 30:
-                m_notificationBarDisappearTime = 3;
+                m_notificationPanelTimeout = 3;
                 break;
             case 60:
-                m_notificationBarDisappearTime = 4;
+                m_notificationPanelTimeout = 4;
                 break;
             default:
                 if (timeout <= 4)
                 {
-                    m_notificationBarDisappearTime = timeout;
+                    m_notificationPanelTimeout = timeout;
                 }
                 else
                 {
-                    m_notificationBarDisappearTime = 2;
+                    m_notificationPanelTimeout = 2;
                 }
                 break;
         }

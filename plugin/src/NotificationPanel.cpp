@@ -115,7 +115,7 @@ namespace xpilot
             NotificationHistory.push_back(notification);
             m_scrollToBottom = true;
 
-            if (Config::Instance().getShowNotificationBar())
+            if (Config::Instance().getNotificationPanelVisible())
             {
                 SetVisible(true);
                 m_disappearTime = std::chrono::system_clock::now() +
