@@ -103,7 +103,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
                     m_rawDataStream << QString("[%1] <<< %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), data);
                     m_rawDataStream.flush();
 
-                    QByteArray json_bytes = data.toLocal8Bit();
+                    QByteArray json_bytes = data.toUtf8();
                     auto json_doc = QJsonDocument::fromJson(json_bytes);
 
                     if(json_doc.isNull() || !json_doc.isObject())

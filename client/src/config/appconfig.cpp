@@ -78,7 +78,7 @@ void AppConfig::loadConfig()
     QString json(config.readAll());
     configFile.close();
 
-    QByteArray jsonBytes = json.toLocal8Bit();
+    QByteArray jsonBytes = json.toUtf8();
     auto doc = QJsonDocument::fromJson(jsonBytes);
     QJsonObject jsonObj = doc.object();
     QVariantMap jsonMap = jsonObj.toVariantMap();
