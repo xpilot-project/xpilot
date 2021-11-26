@@ -128,7 +128,7 @@ jobs:
       - name: Upload debug information files
         working-directory: ${{ env.CLIENT_DIR }}/build/bin
         run: |
-          sentry-cli upload-dif .
+          sentry-cli upload-dif xpilot xpilot.debug
 
       - name: Install LinuxDeploy
         uses: miurahr/install-linuxdeploy-action@v1
@@ -274,7 +274,7 @@ jobs:
       - name: Upload debug information files
         working-directory: ${{ env.CLIENT_DIR }}/build/bin
         run: |
-          sentry-cli upload-dif .
+          sentry-cli upload-dif xPilot.exe xPilot.pdb
 
       - name: Deploy Qt application
         working-directory: ${{ env.CLIENT_DIR }}/build/bin
@@ -428,7 +428,7 @@ jobs:
       - name: Upload debug information files
         working-directory: ${{ env.CLIENT_DIR }}/build/bin
         run: |
-          sentry-cli upload-dif .
+          sentry-cli upload-dif xPilot.app/Contents/MacOS/xPilot xPilot.dSYM
 
       - name: Deploy Qt app bundle
         working-directory: ${{ env.CLIENT_DIR }}/build/bin
