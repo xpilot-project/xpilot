@@ -188,7 +188,7 @@ jobs:
   
   build-windows:
 
-    if: ${{ false }}
+    #if: ${{ false }}
 
     runs-on: windows-latest
 
@@ -263,6 +263,19 @@ jobs:
         run: |
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
+      - name: Setup Sentry CLI
+        uses: mathieu-bour/setup-sentry-cli@1.2.0
+        with:
+          version: latest
+          token: ${{ secrets.SENTRY_TOKEN }}
+          organization: xpilot
+          project: xpilot
+
+      - name: Upload debug information files
+        working-directory: ${{ env.CLIENT_DIR }}/build/bin
+        run: |
+          sentry-cli upload-dif .
+
       - name: Deploy Qt application
         working-directory: ${{ env.CLIENT_DIR }}/build/bin
         shell: bash
@@ -313,7 +326,7 @@ jobs:
   
   build-macos:
 
-    if: ${{ false }}
+    #if: ${{ false }}
   
     runs-on: macos-latest
 
@@ -398,6 +411,24 @@ jobs:
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
           cmake --build . --config ${{ env.BUILD_TYPE }}
+
+      - name: Extract debug symbols
+        working-directory: ${{ env.CLIENT_DIR }}/build/bin
+        run: |
+          dsymutil xPilot.app/Contents/MacOS/xPilot -o xPilot.dSYM
+
+      - name: Setup Sentry CLI
+        uses: mathieu-bour/setup-sentry-cli@1.2.0
+        with:
+          version: latest
+          token: ${{ secrets.SENTRY_TOKEN }}
+          organization: xpilot
+          project: xpilot
+
+      - name: Upload debug information files
+        working-directory: ${{ env.CLIENT_DIR }}/build/bin
+        run: |
+          sentry-cli upload-dif .
 
       - name: Deploy Qt app bundle
         working-directory: ${{ env.CLIENT_DIR }}/build/bin
