@@ -381,16 +381,19 @@ namespace xpilot
         QList<uint> frequencies;
 
         for(int i = 0; i < pdu.Frequencies.size(); i++) {
+
             uint frequency = (uint)pdu.Frequencies[i];
 
-            if(m_radioStackState.Com1ReceiveEnabled && Normalize25KhzFsdFrequency(frequency) == MatchFsdFormat(m_radioStackState.Com1Frequency))
+            if(m_radioStackState.Com1ReceiveEnabled && FromNetworkFormat(Normalize25KhzFsdFrequency(frequency)) ==
+                    Normalize25KhzFsdFrequency(m_radioStackState.Com1Frequency))
             {
                 if(!frequencies.contains(frequency))
                 {
                     frequencies.push_back(frequency);
                 }
             }
-            else if(m_radioStackState.Com2ReceiveEnabled && Normalize25KhzFsdFrequency(frequency) == MatchFsdFormat(m_radioStackState.Com2Frequency))
+            else if(m_radioStackState.Com2ReceiveEnabled && FromNetworkFormat(Normalize25KhzFsdFrequency(frequency)) ==
+                    Normalize25KhzFsdFrequency(m_radioStackState.Com2Frequency))
             {
                 if(!frequencies.contains(frequency))
                 {
@@ -401,7 +404,7 @@ namespace xpilot
 
         if(frequencies.size() == 0) return;
 
-        QRegularExpression re("^SELCAL ([A-Z][A-Z]\\-[A-Z][A-Z])$");
+        QRegularExpression re("^SELCAL ([A-Z][A-Z]-?[A-Z][A-Z])$");
         QRegularExpressionMatch match = re.match(pdu.Messages);
 
         if(match.hasMatch())
@@ -472,11 +475,19 @@ namespace xpilot
             m_transmitFreqs.clear();
             if(m_radioStackState.Com1TransmitEnabled)
             {
-                m_transmitFreqs.append(MatchFsdFormat(m_radioStackState.Com1Frequency));
+                m_transmitFreqs.append(Normalize25KhzFsdFrequency(MatchFsdFormat(m_radioStackState.Com1Frequency)));
+                if(!m_transmitFreqs.contains(Denormalize25KhzFsdFrequency(MatchFsdFormat(m_radioStackState.Com1Frequency))))
+                {
+                    m_transmitFreqs.append(Denormalize25KhzFsdFrequency(MatchFsdFormat(m_radioStackState.Com1Frequency)));
+                }
             }
             else if(m_radioStackState.Com2TransmitEnabled)
             {
-                m_transmitFreqs.append(MatchFsdFormat(m_radioStackState.Com2Frequency));
+                m_transmitFreqs.append(Normalize25KhzFsdFrequency(MatchFsdFormat(m_radioStackState.Com2Frequency)));
+                if(!m_transmitFreqs.contains(Denormalize25KhzFsdFrequency(MatchFsdFormat(m_radioStackState.Com2Frequency))))
+                {
+                    m_transmitFreqs.append(Denormalize25KhzFsdFrequency(MatchFsdFormat(m_radioStackState.Com2Frequency)));
+                }
             }
         }
     }

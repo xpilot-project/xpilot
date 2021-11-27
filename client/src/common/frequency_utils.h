@@ -13,11 +13,25 @@ static uint Normalize25KhzFsdFrequency(uint freq)
     return freq;
 }
 
+static uint FromNetworkFormat(uint freq)
+{
+    return (freq + 100000);
+}
+
+static uint Denormalize25KhzFsdFrequency(uint freq)
+{
+    if((freq % 100) == 25 || (freq % 100) == 75)
+    {
+        freq -= 5;
+    }
+    return freq;
+}
+
 static uint MatchFsdFormat(uint freq)
 {
     QString tmp = QString::number(freq);
     tmp = tmp.mid(1, tmp.length() - 1);
-    return Normalize25KhzFsdFrequency(tmp.toUInt());
+    return tmp.toUInt();
 }
 
 #endif

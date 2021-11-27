@@ -21,7 +21,7 @@ QStringList PDURadioMessage::toTokens() const
 
     QStringList tokens;
     tokens.append(From);
-    tokens.append(freqs);
+    tokens.append(freqs.join(""));
     tokens.append(Messages);
     return tokens;
 }

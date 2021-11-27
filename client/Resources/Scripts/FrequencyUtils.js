@@ -49,6 +49,6 @@ function printFrequency(frequency) {
     return "---.---";
 }
 
-function formatNetwork(freq) {
-    return (freq / 1000.0).toFixed(3);
+function fromNetworkFormat(freq) {
+    return ((freq + 100000.0) / 1000.0).toFixed(3);
 }

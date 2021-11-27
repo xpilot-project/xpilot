@@ -451,7 +451,7 @@ Window {
         }
 
         function onSelcalAlertReceived(from, frequencies) {
-            appendMessage(`SELCAL alert received on ${FrequencyUtils.formatFromFsd(frequencies[0])}`, colorYellow)
+            appendMessage(`SELCAL alert received on ${FrequencyUtils.fromNetworkFormat(frequencies[0])}`, colorYellow)
             if(AppConfig.AlertSelcal) {
                 mainWindow.alert(0)
                 selcalSound.play()

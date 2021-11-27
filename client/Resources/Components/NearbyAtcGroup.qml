@@ -23,7 +23,7 @@ Column {
     Repeater {
         model: internalModel
         Text {
-            text: `${Callsign} - ${FrequencyUtils.formatNetwork(Frequency)}`
+            text: `${Callsign} - ${FrequencyUtils.printFrequency(Frequency)}`
             font.pixelSize: 14
             font.family: robotoMono.name
             leftPadding: 15
