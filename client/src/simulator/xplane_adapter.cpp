@@ -33,7 +33,7 @@ enum DataRef
     Latitude,
     Longitude,
     AltitudeMsl,
-    AltitudeAgl,
+    AltitudePressure,
     GroundSpeed,
     Pitch,
     Heading,
@@ -306,7 +306,7 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/flightmodel/position/latitude", DataRef::Latitude, 5);
     SubscribeDataRef("sim/flightmodel/position/longitude", DataRef::Longitude, 5);
     SubscribeDataRef("sim/flightmodel/position/elevation", DataRef::AltitudeMsl, 5);
-    SubscribeDataRef("sim/flightmodel/position/y_agl", DataRef::AltitudeAgl, 5);
+    SubscribeDataRef("sim/cockpit2/gauges/indicators/altitude_ft_pilot", DataRef::AltitudePressure, 5);
     SubscribeDataRef("sim/flightmodel/position/theta", DataRef::Pitch, 5);
     SubscribeDataRef("sim/flightmodel/position/psi", DataRef::Heading, 5);
     SubscribeDataRef("sim/flightmodel/position/phi", DataRef::Bank, 5);
@@ -487,8 +487,8 @@ void XplaneAdapter::OnDataReceived()
                 case DataRef::AltitudeMsl:
                     m_userAircraftData.AltitudeMslM = value;
                     break;
-                case DataRef::AltitudeAgl:
-                    m_userAircraftData.AltitudeAglM = value;
+                case DataRef::AltitudePressure:
+                    m_userAircraftData.AltitudePressure = value;
                     break;
                 case DataRef::LatitudeVelocity:
                     m_userAircraftData.LatitudeVelocity = value;

@@ -504,11 +504,19 @@ namespace xpilot
                                          m_userAircraftData.Latitude, m_userAircraftData.Longitude));
         }
         else {
-            m_fsd.SendPDU(PDUPilotPosition(m_connectInfo.Callsign, m_radioStackState.TransponderCode, m_radioStackState.SquawkingModeC,
-                                           m_radioStackState.SquawkingIdent, NetworkRating::OBS, m_userAircraftData.Latitude,
-                                           m_userAircraftData.Longitude, m_userAircraftData.AltitudeMslM * 3.28084,
-                                           m_userAircraftData.AltitudeAglM * 3.28084, m_userAircraftData.GroundSpeed,
-                                           m_userAircraftData.Pitch, m_userAircraftData.Heading, m_userAircraftData.Bank));
+            m_fsd.SendPDU(PDUPilotPosition(m_connectInfo.Callsign,
+                                           m_radioStackState.TransponderCode,
+                                           m_radioStackState.SquawkingModeC,
+                                           m_radioStackState.SquawkingIdent,
+                                           NetworkRating::OBS,
+                                           m_userAircraftData.Latitude,
+                                           m_userAircraftData.Longitude,
+                                           m_userAircraftData.AltitudeMslM * 3.28084,
+                                           m_userAircraftData.AltitudePressure,
+                                           m_userAircraftData.GroundSpeed,
+                                           m_userAircraftData.Pitch,
+                                           m_userAircraftData.Heading,
+                                           m_userAircraftData.Bank));
         }
     }
 
@@ -516,10 +524,18 @@ namespace xpilot
     {
         if(AppConfig::getInstance()->VelocityEnabled && !m_connectInfo.ObserverMode)
         {
-            m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign, m_userAircraftData.Latitude, m_userAircraftData.Longitude,
-                                               m_userAircraftData.AltitudeMslM * 3.28084, m_userAircraftData.Pitch, m_userAircraftData.Heading,
-                                               m_userAircraftData.Bank, m_userAircraftData.LongitudeVelocity, m_userAircraftData.AltitudeVelocity,
-                                               m_userAircraftData.LatitudeVelocity, m_userAircraftData.PitchVelocity, m_userAircraftData.HeadingVelocity,
+            m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign,
+                                               m_userAircraftData.Latitude,
+                                               m_userAircraftData.Longitude,
+                                               m_userAircraftData.AltitudeMslM * 3.28084,
+                                               m_userAircraftData.Pitch,
+                                               m_userAircraftData.Heading,
+                                               m_userAircraftData.Bank,
+                                               m_userAircraftData.LongitudeVelocity,
+                                               m_userAircraftData.AltitudeVelocity,
+                                               m_userAircraftData.LatitudeVelocity,
+                                               m_userAircraftData.PitchVelocity,
+                                               m_userAircraftData.HeadingVelocity,
                                                m_userAircraftData.BankVelocity));
         }
     }
@@ -528,9 +544,19 @@ namespace xpilot
     {
         if(!m_connectInfo.ObserverMode && AppConfig::getInstance()->VelocityEnabled)
         {
-            m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign, m_userAircraftData.Latitude, m_userAircraftData.Longitude,
-                                               m_userAircraftData.AltitudeMslM * 3.28084, m_userAircraftData.Pitch, m_userAircraftData.Heading,
-                                               m_userAircraftData.Bank, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
+            m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign,
+                                               m_userAircraftData.Latitude,
+                                               m_userAircraftData.Longitude,
+                                               m_userAircraftData.AltitudeMslM * 3.28084,
+                                               m_userAircraftData.Pitch,
+                                               m_userAircraftData.Heading,
+                                               m_userAircraftData.Bank,
+                                               0.0,
+                                               0.0,
+                                               0.0,
+                                               0.0,
+                                               0.0,
+                                               0.0));
         }
     }
 
@@ -721,7 +747,7 @@ namespace xpilot
     void NetworkManager::OnRawDataSent(QString data)
     {
         m_rawDataStream << QString("[%1] >>> %2").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"),
-                                                   data.replace(AppConfig::getInstance()->VatsimPasswordDecrypted, "********"));
+                                                      data.replace(AppConfig::getInstance()->VatsimPasswordDecrypted, "********"));
         m_rawDataStream.flush();
     }
 

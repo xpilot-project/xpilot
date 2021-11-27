@@ -378,7 +378,7 @@ namespace xpilot
 
         m_client->setRadioState(0, m_radioStackState.Com1ReceiveEnabled ? (com1Alias > 0 ? com1Alias : m_radioStackState.Com1Frequency * 1000) : 0);
         m_client->setRadioState(1, m_radioStackState.Com2ReceiveEnabled ? (com2Alias > 0 ? com2Alias : m_radioStackState.Com2Frequency * 1000) : 0);
-        m_client->setClientPosition(m_userAircraftData.Latitude, m_userAircraftData.Longitude, m_userAircraftData.AltitudeMslM, m_userAircraftData.AltitudeAglM);
+        m_client->setClientPosition(m_userAircraftData.Latitude, m_userAircraftData.Longitude, m_userAircraftData.AltitudeMslM, m_userAircraftData.AltitudePressure * 0.3048);
     }
 
     bool AudioForVatsim::fuzzyMatchCallsign(const QString &callsign, const QString &compareTo) const
