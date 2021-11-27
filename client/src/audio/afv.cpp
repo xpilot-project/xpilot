@@ -145,6 +145,9 @@ namespace xpilot
                     m_client->setTxRadio(1);
                 }
 
+                m_client->setRadioGain(0, m_radioStackState.Com1Volume / 100.0);
+                m_client->setRadioGain(1, m_radioStackState.Com2Volume / 100.0);
+
                 updateTransceivers();
             }
         });

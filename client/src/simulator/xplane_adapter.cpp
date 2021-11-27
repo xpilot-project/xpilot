@@ -20,6 +20,8 @@ enum DataRef
     Com2AudioSelection,
     Com1Frequency,
     Com2Frequency,
+    Com1Volume,
+    Com2Volume,
     TransponderMode,
     TransponderIdent,
     TransponderCode,
@@ -291,6 +293,8 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/cockpit2/radios/actuators/audio_selection_com2", DataRef::Com2AudioSelection, 5);
     SubscribeDataRef("sim/cockpit2/radios/actuators/com1_frequency_hz_833", DataRef::Com1Frequency, 5);
     SubscribeDataRef("sim/cockpit2/radios/actuators/com2_frequency_hz_833", DataRef::Com2Frequency, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_volume_com1", DataRef::Com1Volume, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_volume_com2", DataRef::Com2Volume, 5);
     SubscribeDataRef("sim/cockpit/radios/transponder_mode", DataRef::TransponderMode, 5);
     SubscribeDataRef("sim/cockpit/radios/transponder_id", DataRef::TransponderIdent, 5);
     SubscribeDataRef("sim/cockpit/radios/transponder_code", DataRef::TransponderCode, 5);
@@ -439,6 +443,22 @@ void XplaneAdapter::OnDataReceived()
                     break;
                 case DataRef::Com2Frequency:
                     m_radioStackState.Com2Frequency = value;
+                    break;
+                case DataRef::Com1Volume:
+                {
+                    int volume = qRound(value * 100);
+                    volume = (volume > 100) ? 100 : volume;
+                    volume = (volume < 0) ? 0 : volume;
+                    m_radioStackState.Com1Volume = volume;
+                }
+                    break;
+                case DataRef::Com2Volume:
+                {
+                    int volume = qRound(value * 100);
+                    volume = (volume > 100) ? 100 : volume;
+                    volume = (volume < 0) ? 0 : volume;
+                    m_radioStackState.Com2Volume = volume;
+                }
                     break;
                 case DataRef::TransponderIdent:
                     m_radioStackState.SquawkingIdent = value;
