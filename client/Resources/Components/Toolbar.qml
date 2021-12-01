@@ -10,7 +10,7 @@ GridLayout {
     anchors.fill: parent
     property bool simConnected: false
     property bool networkConnected: false
-    property var myCallsign;
+    property var myCallsign: ""
 
     Connections {
         target: xplaneAdapter
@@ -63,7 +63,7 @@ GridLayout {
                         var comp = Qt.createComponent("qrc:/Resources/Views/ConnectWindow.qml")
                         if(comp.status === Component.Ready) {
                             connectWindow = comp.createObject(mainWindow)
-                            connectWindow.show()
+                            connectWindow.open()
                         }
                     }
                 }
