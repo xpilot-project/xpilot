@@ -413,11 +413,13 @@ namespace xpilot
 
 							else if (MessageType == "RadioMessageReceived")
 							{
-								std::string msg(j["data"]["message"]);
+								std::string from(j["data"]["from"]);
+								std::string message(j["data"]["message"]);
 								bool isDirect = static_cast<bool>(j["data"]["direct"]);
 								double r = isDirect ? 255 : 192;
 								double g = isDirect ? 255 : 192;
 								double b = isDirect ? 255 : 192;
+								std::string msg = string_format("%s: %s", from.c_str(), message.c_str());
 								RadioMessageReceived(msg, r, g, b);
 								AddNotificationPanelMessage(msg, r, g, b);
 							}
