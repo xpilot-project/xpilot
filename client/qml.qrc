@@ -48,5 +48,6 @@
         <file>Resources/Components/DownloadCSLModels/SetXplanePath.qml</file>
         <file>Resources/Components/VersionCheck/NewVersionAvailable.qml</file>
         <file>Resources/Components/VersionCheck/DownloadingUpdate.qml</file>
+        <file>Resources/Components/DisconnectDialog.qml</file>
     </qresource>
 </RCC>

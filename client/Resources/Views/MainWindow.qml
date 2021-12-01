@@ -114,15 +114,8 @@ Window {
         id: modal_downlodingUpdate;
     }
 
-    MessageDialog {
+    DisconnectDialog {
         id: confirmClose
-        title: "Confirm Close"
-        text: "You are still connected to the network. Are you sure you want to close xPilot?"
-        standardButtons: StandardButton.Yes | StandardButton.No
-        onYes: {
-            closing = true
-            mainWindow.close()
-        }
     }
 
     Component.onCompleted: {
