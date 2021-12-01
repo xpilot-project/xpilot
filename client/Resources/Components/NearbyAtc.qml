@@ -39,6 +39,7 @@ Rectangle {
         anchors.rightMargin: 0
         anchors.leftMargin: 0
         anchors.topMargin: 0
+        renderType: Text.NativeRendering
     }
 
     ScrollView {

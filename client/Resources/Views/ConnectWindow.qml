@@ -9,7 +9,7 @@ import "../Controls"
 
 Window {
     id: connectWindow
-    title: "Connect"
+    title: "Connect to VATSIM"
     width: 400
     height: 180
     minimumHeight: height
@@ -63,6 +63,7 @@ Window {
                 anchors.top: callsign.bottom
                 anchors.topMargin: -20
                 selectByMouse: true
+                maximumLength: observerMode.checked ? 8 : 7
                 onTextChanged: {
                     text = text.toUpperCase()
                 }

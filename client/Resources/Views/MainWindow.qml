@@ -25,7 +25,7 @@ Window {
     width: 800
     height: 250
     minimumHeight: 250
-    minimumWidth: 800
+    minimumWidth: 870
     color: "#272C2E"
 
     x: Screen.width / 2 - width / 2

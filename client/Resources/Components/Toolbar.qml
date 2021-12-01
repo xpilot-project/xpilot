@@ -9,7 +9,8 @@ GridLayout {
     columns: 2
     anchors.fill: parent
     property bool simConnected: false
-    property bool networkConnected: false    
+    property bool networkConnected: false
+    property var myCallsign;
 
     Connections {
         target: xplaneAdapter
@@ -31,8 +32,9 @@ GridLayout {
     Connections {
         target: networkManager
 
-        function onNetworkConnected() {
+        function onNetworkConnected(callsign) {
             networkConnected = true;
+            myCallsign = callsign
         }
 
         function onNetworkDisconnected() {
@@ -41,7 +43,7 @@ GridLayout {
     }
 
     Row {
-        leftPadding: 15
+        leftPadding: 10
         spacing: 5
 
         ToolbarButton {
@@ -123,11 +125,24 @@ GridLayout {
                 }
             }
         }
+
+        Text {
+            id: myCallsignLabel
+            text: myCallsign
+            font.family: robotoMono.name
+            font.pixelSize: 16
+            renderType: Text.NativeRendering
+            color: "white"
+            leftPadding: 5
+            height: 30
+            verticalAlignment: Text.AlignVCenter
+            visible: networkConnected
+        }
     }
 
     Row {
         Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-        rightPadding: 15
+        rightPadding: 5
         layoutDirection: Qt.RightToLeft
         spacing: -10
 
