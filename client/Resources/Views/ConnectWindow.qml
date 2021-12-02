@@ -58,7 +58,7 @@ Popup {
             width: 80
             height: 30
             font.pixelSize: 14
-            anchors.top: errorLabel.bottom 
+            anchors.top: errorLabel.bottom
             x: 10
             MouseArea {
                 anchors.fill: parent
@@ -117,6 +117,7 @@ Popup {
             Layout.topMargin: 0
             Layout.column: 1
             Layout.row: 1
+            z: 100
 
             Text {
                 color: "#000"
@@ -124,7 +125,6 @@ Popup {
                 font.pixelSize: 13
                 renderType: Text.NativeRendering
             }
-
 
             CustomTextField {
                 id: txtTypeCode
@@ -134,6 +134,68 @@ Popup {
                 selectByMouse: true
                 onTextChanged: {
                     text = text.toUpperCase()
+                }
+            }
+
+            ListModel {
+                id: icaoModel
+                ListElement {
+                    icao: "C172"
+                    model: "Cessna Skyhawk"
+                }
+            }
+
+            Rectangle {
+                id: icaoDropdown
+                visible: txtTypeCode.text.length > 0
+                anchors.top: txtTypeCode.bottom
+                anchors.topMargin: 2
+                width: 200
+                height: 120
+                color: "white"
+                border.color: "#BABFC4"
+                border.width: 1
+                clip: true
+                z: 100
+
+                ListView {
+                    id: icaoList
+                    currentIndex: -1
+                    z: 100
+                    anchors.fill: parent
+                    highlight: Rectangle { color: "lightsteelblue"; }
+                    model: icaoModel
+                    delegate: Component {
+                        id: contactDelegate
+                        Item {
+                            width: icaoDropdown.width
+                            height: 40
+                            Column {
+                                Text {
+                                    text: icao
+                                    leftPadding: 5
+                                    topPadding: 5
+                                    color: "#333333"
+                                    renderType: Text.NativeRendering
+                                }
+                                Text {
+                                    text: model
+                                    leftPadding: 5
+                                    color: "#333333"
+                                    renderType: Text.NativeRendering
+                                }
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    icaoList.currentIndex = index
+                                    txtTypeCode.text = icaoModel.get(icaoList.currentIndex).icao
+                                }
+                            }
+                        }
+                    }
+                    ScrollBar.vertical: ScrollBar { active: true }
                 }
             }
         }
@@ -214,6 +276,7 @@ Popup {
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
                 font.pixelSize: 13
+
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
