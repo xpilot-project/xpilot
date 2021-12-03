@@ -142,6 +142,8 @@ set(PROJECT_SOURCES
     src/common/versioncheck.cpp
     src/common/installmodels.h
     src/common/installmodels.cpp
+    src/common/typecodedatabase.h
+    src/common/typecodedatabase.cpp
     src/common/libzippp.h
     src/common/libzippp.cpp
     src/common/runguard.h

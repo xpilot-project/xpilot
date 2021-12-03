@@ -17,12 +17,57 @@ Popup {
     focus: true
     closePolicy: Popup.NoAutoClose
 
+    property bool showIcaoSuggestions: false
+
     signal closeWindow()
+
+    InvalidTypeCodeDialog {
+        id: invaidTypeCodeDialog
+
+        onUseInvalidTypeCode: {
+            connectToNetwork()
+        }
+    }
+
+    Connections {
+        target: typeCodeDatabase
+
+        function onTypeCodeResults(results) {
+            typeCodeList.clear()
+            for(var i = 0; i < results.length; i++) {
+                var item = results[i];
+                typeCodeList.append({name: item.name, icao: item.typeCode, manufacturer: item.manufacturer});
+            }
+            typeCodeResults.visible = typeCodeList.count > 0
+        }
+
+        function onValidateTypeCode(valid) {
+            if(valid) {
+                connectToNetwork()
+            }
+            else {
+                invaidTypeCodeDialog.open()
+            }
+        }
+    }
 
     Component.onCompleted: {
         txtCallsign.text = AppConfig.RecentConnection.Callsign;
         txtTypeCode.text = AppConfig.RecentConnection.TypeCode;
         txtSelcal.text = AppConfig.RecentConnection.SelcalCode;
+    }
+
+    function connectToNetwork() {
+        networkManager.connectToNetwork(txtCallsign.text, txtTypeCode.text, txtSelcal.text, observerMode.checked);
+        AppConfig.RecentConnection.Callsign = txtCallsign.text;
+        AppConfig.RecentConnection.TypeCode = txtTypeCode.text;
+        AppConfig.RecentConnection.SelcalCode = txtSelcal.text;
+        AppConfig.saveConfig();
+        closeWindow()
+    }
+
+    ListModel {
+        id: typeCodeList
     }
 
     Popup {
@@ -135,62 +180,64 @@ Popup {
                 onTextChanged: {
                     text = text.toUpperCase()
                 }
-            }
-
-            ListModel {
-                id: icaoModel
-                ListElement {
-                    icao: "C172"
-                    model: "Cessna Skyhawk"
+                Keys.onReleased: {
+                    if(txtTypeCode.text.length > 0) {
+                        typeCodeDatabase.searchTypeCodes(txtTypeCode.text.toUpperCase());
+                    }
+                    else {
+                        typeCodeResults.visible = false
+                    }
                 }
             }
 
             Rectangle {
-                id: icaoDropdown
-                visible: txtTypeCode.text.length > 0
+                id: typeCodeResults
+                visible: false
                 anchors.top: txtTypeCode.bottom
                 anchors.topMargin: 2
-                width: 200
+                width: 300
                 height: 120
                 color: "white"
                 border.color: "#BABFC4"
                 border.width: 1
                 clip: true
-                z: 100
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.ArrowCursor
+                    hoverEnabled: true
+                }
 
                 ListView {
-                    id: icaoList
+                    id: typeCodeListView
                     currentIndex: -1
-                    z: 100
                     anchors.fill: parent
                     highlight: Rectangle { color: "lightsteelblue"; }
-                    model: icaoModel
+                    model: typeCodeList
                     delegate: Component {
                         id: contactDelegate
                         Item {
-                            width: icaoDropdown.width
-                            height: 40
+                            width: typeCodeResults.width
+                            height: 25
                             Column {
                                 Text {
-                                    text: icao
+                                    text: `<b>${icao}</b>: ${manufacturer} ${name}`
                                     leftPadding: 5
                                     topPadding: 5
                                     color: "#333333"
                                     renderType: Text.NativeRendering
-                                }
-                                Text {
-                                    text: model
-                                    leftPadding: 5
-                                    color: "#333333"
-                                    renderType: Text.NativeRendering
+                                    verticalAlignment: Text.AlignVCenter
                                 }
                             }
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
+                                hoverEnabled: true
+                                onEntered: typeCodeListView.currentIndex = index
                                 onClicked: {
-                                    icaoList.currentIndex = index
-                                    txtTypeCode.text = icaoModel.get(icaoList.currentIndex).icao
+                                    typeCodeListView.currentIndex = index
+                                    txtTypeCode.text = typeCodeList.get(typeCodeListView.currentIndex).icao
+                                    typeCodeResults.visible = false
                                 }
                             }
                         }
@@ -316,12 +363,7 @@ Popup {
                             }
                         }
 
-                        networkManager.connectToNetwork(txtCallsign.text, txtTypeCode.text, txtSelcal.text, observerMode.checked);
-                        AppConfig.RecentConnection.Callsign = txtCallsign.text;
-                        AppConfig.RecentConnection.TypeCode = txtTypeCode.text;
-                        AppConfig.RecentConnection.SelcalCode = txtSelcal.text;
-                        AppConfig.saveConfig();
-                        closeWindow()
+                        typeCodeDatabase.validateTypeCodeBeforeConnect(txtTypeCode.text.toUpperCase())
                     }
                 }
             }

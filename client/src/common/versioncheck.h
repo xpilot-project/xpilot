@@ -12,6 +12,8 @@
 #include <QPointer>
 #include <QtPromise>
 
+using namespace QtPromise;
+
 class VersionCheck : public QObject
 {
     Q_OBJECT
@@ -20,8 +22,8 @@ public:
     VersionCheck(QObject *parent = nullptr);
 
     void PerformVersionCheck();
-    QtPromise::QPromise<QByteArray> CheckForUpdates();
-    QtPromise::QPromise<void> DownloadInstaller();
+    QPromise<QByteArray> CheckForUpdates();
+    QPromise<void> DownloadInstaller();
     Q_INVOKABLE void downloadInstaller();
     Q_INVOKABLE void cancelDownload();
     void LaunchInstaller();

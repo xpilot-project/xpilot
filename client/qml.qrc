@@ -49,5 +49,6 @@
         <file>Resources/Components/VersionCheck/NewVersionAvailable.qml</file>
         <file>Resources/Components/VersionCheck/DownloadingUpdate.qml</file>
         <file>Resources/Components/DisconnectDialog.qml</file>
+        <file>Resources/Components/InvalidTypeCodeDialog.qml</file>
     </qresource>
 </RCC>

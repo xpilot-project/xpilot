@@ -14,6 +14,7 @@
 #include "audio/afv.h"
 #include "common/build_config.h"
 #include "common/versioncheck.h"
+#include "common/typecodedatabase.h"
 #include "common/installmodels.h"
 #include "common/runguard.h"
 #include "common/utils.h"
@@ -79,6 +80,7 @@ int xpilot::Main(int argc, char* argv[])
 
     ServerListManager serverListManager;
     VersionCheck versionCheck;
+    TypeCodeDatabase typeCodeDatabase;
     InstallModels installModels;
     XplaneAdapter xplaneAdapter;
     NetworkManager networkManager(xplaneAdapter);
@@ -90,6 +92,7 @@ int xpilot::Main(int argc, char* argv[])
     QTimer::singleShot(500, [&]{
         serverListManager.PerformServerListDownload("https://data.vatsim.net/v3/vatsim-servers.json");
         versionCheck.PerformVersionCheck();
+        typeCodeDatabase.PerformTypeCodeDownload();
     });
 
     qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", appConfigSingleton);
@@ -97,6 +100,7 @@ int xpilot::Main(int argc, char* argv[])
     qRegisterMetaType<ClientWindowConfig>("ClientWindowConfig");
     qRegisterMetaType<RadioStackState>("RadioStackState");
     qRegisterMetaType<AudioDeviceInfo>("AudioDeviceInfo");
+    qRegisterMetaType<TypeCodeInfo>("TypeCodeInfo");
 
     context->setContextProperty("networkManager", &networkManager);
     context->setContextProperty("xplaneAdapter", &xplaneAdapter);
@@ -107,6 +111,7 @@ int xpilot::Main(int argc, char* argv[])
     context->setContextProperty("installModels", &installModels);
     context->setContextProperty("versionCheck", &versionCheck);
     context->setContextProperty("serverListManager", &serverListManager);
+    context->setContextProperty("typeCodeDatabase", &typeCodeDatabase);
 
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [&](){
         networkManager.disconnectFromNetwork();

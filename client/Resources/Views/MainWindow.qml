@@ -232,6 +232,15 @@ Window {
     }
 
     Connections {
+        target: typeCodeDatabase
+
+        function onTypeCodeDownloadError(error) {
+            appendMessage(error, colorRed)
+            errorSound.play()
+        }
+    }
+
+    Connections {
         target: installModels
 
         function onSetXplanePath() {
