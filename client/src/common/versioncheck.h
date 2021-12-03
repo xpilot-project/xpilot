@@ -22,6 +22,7 @@ public:
     VersionCheck(QObject *parent = nullptr);
 
     void PerformVersionCheck();
+    void DeleteOlderInstallers();
     QPromise<QByteArray> CheckForUpdates();
     QPromise<void> DownloadInstaller();
     Q_INVOKABLE void downloadInstaller();

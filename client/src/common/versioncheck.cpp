@@ -11,6 +11,7 @@
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QProcess>
+#include <QDirIterator>
 
 using namespace xpilot;
 using namespace QtPromise;
@@ -44,6 +45,7 @@ QtPromise::QPromise<QByteArray> VersionCheck::CheckForUpdates()
 
 void VersionCheck::PerformVersionCheck()
 {
+    DeleteOlderInstallers();
     CheckForUpdates().then([&](const QByteArray &response){
         if(!response.isEmpty())
         {
@@ -143,6 +145,16 @@ void VersionCheck::PerformVersionCheck()
     }).fail([&](const QString &err){
         emit errorEncountered("Version check error: " + err);
     });
+}
+
+void VersionCheck::DeleteOlderInstallers()
+{
+    QString tempPath = QDir::fromNativeSeparators(AppConfig::dataRoot());
+    QDirIterator it(tempPath, {"*.exe", "*.dmg", "*.run"}, QDir::Files);
+    while(it.hasNext()) {
+        QFile file(it.next());
+        file.remove();
+    }
 }
 
 QtPromise::QPromise<void> VersionCheck::DownloadInstaller()
