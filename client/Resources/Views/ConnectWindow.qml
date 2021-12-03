@@ -21,6 +21,11 @@ Popup {
 
     signal closeWindow()
 
+    MouseArea {
+        anchors.fill: parent
+        onClicked: typeCodeResults.visible = false
+    }
+
     InvalidTypeCodeDialog {
         id: invaidTypeCodeDialog
 
@@ -181,11 +186,16 @@ Popup {
                     text = text.toUpperCase()
                 }
                 Keys.onReleased: {
-                    if(txtTypeCode.text.length > 0) {
-                        typeCodeDatabase.searchTypeCodes(txtTypeCode.text.toUpperCase());
+                    if(event.key === Qt.Key_Escape) {
+                        typeCodeResults.visible = false
                     }
                     else {
-                        typeCodeResults.visible = false
+                        if(txtTypeCode.text.length > 0) {
+                            typeCodeDatabase.searchTypeCodes(txtTypeCode.text.toUpperCase());
+                        }
+                        else {
+                            typeCodeResults.visible = false
+                        }
                     }
                 }
             }
