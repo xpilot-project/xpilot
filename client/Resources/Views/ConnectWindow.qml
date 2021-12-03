@@ -17,8 +17,6 @@ Popup {
     focus: true
     closePolicy: Popup.NoAutoClose
 
-    property bool showIcaoSuggestions: false
-
     signal closeWindow()
 
     MouseArea {
