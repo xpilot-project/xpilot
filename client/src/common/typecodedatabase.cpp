@@ -68,6 +68,8 @@ void TypeCodeDatabase::PerformTypeCodeDownload()
             }
             file.close();
         });
+    }).fail([&](QString error) {
+        emit typeCodeDownloadError(error);
     });
 }
 
@@ -76,18 +78,18 @@ QPromise<QString> TypeCodeDatabase::GetTypeCodeUrl()
     return QPromise<QString>{[&](const auto resolve, const auto reject)
         {
             QString url("https://xpilot-project.org/api/v3/TypeCodes");
-            QNetworkReply *reply = nam->get(QNetworkRequest{url});
+            m_reply = nam->get(QNetworkRequest{url});
 
-            QObject::connect(reply, &QNetworkReply::finished, [=]() {
-                if(reply->error() == QNetworkReply::NoError)
+            QObject::connect(m_reply, &QNetworkReply::finished, [=]() {
+                if(m_reply->error() == QNetworkReply::NoError)
                 {
-                    QByteArray response = reply->readAll();
+                    QByteArray response = m_reply->readAll();
                     if(!response.isEmpty()) {
                         auto json = QJsonDocument::fromJson(response).object();
 
                         QString tempPath = QDir::fromNativeSeparators(AppConfig::dataRoot());
                         auto hash = fileChecksum(pathAppend(tempPath, "TypeCodes.json"), QCryptographicHash::Sha256);
-                        if(!hash.isEmpty() && hash.toHex() != json["Hash"].toString()) {
+                        if(hash.isEmpty() || hash.toHex() != json["Hash"].toString()) {
                             resolve(json["TypeCodesUrl"].toString());
                         }
                         else {
@@ -95,12 +97,12 @@ QPromise<QString> TypeCodeDatabase::GetTypeCodeUrl()
                         }
                     }
                     else {
-                        reject(QString{"Could not download aircraft typecode database. Download URL not found."});
+                        reject(QString{"Could not download aircraft typecode database - response is empty."});
                     }
                 }
                 else
                 {
-                    reject(QString{reply->errorString()});
+                    reject(QString{"Aircraft Type Code Database Error: " + m_reply->errorString()});
                 }
             });
         }};
@@ -118,37 +120,38 @@ QPromise<void> TypeCodeDatabase::DownloadTypeCodes(QString url)
             }
 
             QString tempPath = QDir::fromNativeSeparators(AppConfig::dataRoot());
-            QSaveFile *typeCodes = new QSaveFile(pathAppend(tempPath, "TypeCodes.json"));
+            m_file = new QSaveFile(pathAppend(tempPath, "TypeCodes.json"));
 
-            if(!typeCodes->open(QIODevice::WriteOnly))
+            if(!m_file->open(QIODevice::WriteOnly | QIODevice::Text))
             {
+                emit typeCodeDownloadError("Error creating aircraft database file: " + m_file->errorString());
                 return;
             }
 
             QNetworkRequest req(url);
             req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, true);
-            QPointer<QNetworkReply> reply = nam->get(req);
+            m_reply = nam->get(req);
 
-            QObject::connect(reply, &QNetworkReply::readyRead, [&]{
-                if(typeCodes) {
-                    typeCodes->write(reply->readAll());
+            QObject::connect(m_reply, &QNetworkReply::readyRead, [&]{
+                if(m_file) {
+                    m_file->write(m_reply->readAll());
                 }
             });
-            QObject::connect(reply, &QNetworkReply::finished, [=]() {
-                if(reply->error() == QNetworkReply::NoError) {
-                    if(typeCodes){
-                        typeCodes->write(reply->readAll());
-                        typeCodes->commit();
+            QObject::connect(m_reply, &QNetworkReply::finished, [=]() {
+                if(m_reply->error() == QNetworkReply::NoError) {
+                    if(m_file){
+                        m_file->write(m_reply->readAll());
+                        m_file->commit();
                     }
                     resolve();
                 }
                 else {
-                    if(reply->error() != QNetworkReply::OperationCanceledError) {
-                        emit typeCodeDownloadError("Error downloading aircraft type code database: " + reply->errorString());
+                    if(m_reply->error() != QNetworkReply::OperationCanceledError) {
+                        emit typeCodeDownloadError("Error downloading aircraft type code database: " + m_reply->errorString());
                         reject();
                     }
                 }
-                reply->deleteLater();
+                m_reply->deleteLater();
             });
         }};
 }
@@ -179,8 +182,8 @@ void TypeCodeDatabase::searchTypeCodes(QString predicate)
 void TypeCodeDatabase::validateTypeCodeBeforeConnect(QString typeCode)
 {
     auto result = std::find_if(m_typeCodes.begin(), m_typeCodes.end(), [&](TypeCodeInfo info){
-        return info.TypeCode.toUpper() == typeCode.toUpper();
-    });
+            return info.TypeCode.toUpper() == typeCode.toUpper();
+});
 
     emit validateTypeCode(result != m_typeCodes.end());
 }

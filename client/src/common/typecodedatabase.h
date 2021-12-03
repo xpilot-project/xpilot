@@ -43,6 +43,8 @@ signals:
 
 private:
     QNetworkAccessManager *nam = nullptr;
+    QPointer<QNetworkReply> m_reply;
+    QPointer<QSaveFile> m_file;
     QList<TypeCodeInfo> m_typeCodes;
 };
 
