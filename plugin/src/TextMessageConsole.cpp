@@ -40,6 +40,7 @@ namespace xpilot
 		RequestAtis,
 		MetarRequest,
 		SetRadioFrequency,
+		SetTransponderCode,
 		OverrideRx,
 		OverrideTx,
 		Close,
@@ -55,6 +56,7 @@ namespace xpilot
 		if (v == ".atis") return xpilot::CommandOptions::RequestAtis;
 		if (v == ".metar" || v == ".wx") return xpilot::CommandOptions::MetarRequest;
 		if (v == ".com1" || v == ".com2") return xpilot::CommandOptions::SetRadioFrequency;
+		if (v == ".x" || v == ".xpdr" || v == ".xpndr" || v == ".squawk" || v == ".sq") return xpilot::CommandOptions::SetTransponderCode;
 		if (v == ".tx") return xpilot::CommandOptions::OverrideTx;
 		if (v == ".rx") return xpilot::CommandOptions::OverrideRx;
 		if (v == ".clear") return xpilot::CommandOptions::Clear;
@@ -415,6 +417,25 @@ namespace xpilot
 								else
 								{
 									ShowErrorMessage("Invalid command parameters. Expected .rx com<n> on|off. For example, .rx com1 on");
+								}
+								break;
+							case xpilot::CommandOptions::SetTransponderCode:
+								if (args.size() == 2)
+								{
+									std::string code = args.at(1);
+									if (std::regex_match(code, std::regex("^[0-7]{4}$")))
+									{
+										m_env->setTransponderCode(std::stoi(code));
+										m_inputValue = "";
+									}
+									else
+									{
+										ShowErrorMessage("Invalid transponder code format.");
+									}
+								}
+								else
+								{
+									ShowErrorMessage("Invalid command parameters. Expected .x 1234");
 								}
 								break;
 							case xpilot::CommandOptions::Clear:

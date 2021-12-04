@@ -77,6 +77,7 @@ namespace xpilot
 		void setCom2Frequency(float frequency);
 		void setAudioComSelection(int radio);
 		void setAudioSelection(int radio, bool on);
+		void setTransponderCode(int code);
 
 		void SendReply(const std::string& message);
 
@@ -118,6 +119,7 @@ namespace xpilot
 		DataRefAccess<int> m_audioComSelection;
 		DataRefAccess<int> m_audioSelectionCom1;
 		DataRefAccess<int> m_audioSelectionCom2;
+		DataRefAccess<int> m_transponderCode;
 
 	private:
 		static float DeferredStartup(float, float, int, void* ref);

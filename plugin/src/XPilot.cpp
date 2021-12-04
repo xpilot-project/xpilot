@@ -53,7 +53,8 @@ namespace xpilot
 		m_com2Frequency("sim/cockpit2/radios/actuators/com2_frequency_hz_833", ReadWrite),
 		m_audioComSelection("sim/cockpit2/radios/actuators/audio_com_selection", ReadWrite),
 		m_audioSelectionCom1("sim/cockpit2/radios/actuators/audio_selection_com1", ReadWrite),
-		m_audioSelectionCom2("sim/cockpit2/radios/actuators/audio_selection_com2", ReadWrite)
+		m_audioSelectionCom2("sim/cockpit2/radios/actuators/audio_selection_com2", ReadWrite),
+		m_transponderCode("sim/cockpit/radios/transponder_code", ReadWrite)
 	{
 		ThisThreadIsXplane();
 
@@ -587,6 +588,14 @@ namespace xpilot
 					m_audioSelectionCom2 = (int)on;
 					break;
 				}
+			});
+	}
+
+	void XPilot::setTransponderCode(int code)
+	{
+		QueueCallback([=]
+			{
+				m_transponderCode = code;
 			});
 	}
 
