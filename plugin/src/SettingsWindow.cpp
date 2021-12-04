@@ -228,7 +228,7 @@ namespace xpilot
 					ImGui::SameLine();
 					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Specify how far away (nautical miles) you want aircraft labels to be visible.");
 					ImGui::TableSetColumnIndex(1);
-					if (ImGui::SliderInt("##MaxDist", &labelMaxDistance, 1, 10, "%d nm"))
+					if (ImGui::SliderInt("##MaxDist", &labelMaxDistance, 1, 20, "%d nm"))
 					{
 						XPMPSetAircraftLabelDist(float(labelMaxDistance), labelVisibilityCutoff);
 						xpilot::Config::Instance().setMaxLabelDistance(labelMaxDistance);

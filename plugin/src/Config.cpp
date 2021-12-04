@@ -125,7 +125,7 @@ namespace xpilot
                 }
                 if (jf.contains("MaxLabelDist"))
                 {
-                    int dist = std::max(1, std::min(jf.at("MaxLabelDist").get<int>(), 10));
+                    int dist = std::max(1, std::min(jf.at("MaxLabelDist").get<int>(), 20));
                     setMaxLabelDistance(dist);
                 }
                 if (jf.contains("LabelCutoffVis"))
