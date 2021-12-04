@@ -76,6 +76,7 @@ Window {
         switchAlertPrivateMessage.checked = AppConfig.AlertPrivateMessage;
         switchAlertSelcal.checked = AppConfig.AlertSelcal;
         switchAlertDisconnect.checked = AppConfig.AlertDisconnect;
+        switchKeepWindowVisible.checked = AppConfig.KeepWindowVisible
     }
 
     onAfterRendering: {
@@ -336,6 +337,17 @@ Window {
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
                         AppConfig.AlertDisconnect = switchAlertDisconnect.checked
+                    }
+                }
+
+                CustomSwitch {
+                    id: switchKeepWindowVisible
+                    text: "Keep xPilot window visible"
+                    font.pixelSize: 13
+                    Layout.preferredHeight: 32
+                    Layout.preferredWidth: 287
+                    onCheckedChanged: {
+                        AppConfig.KeepWindowVisible = switchKeepWindowVisible.checked
                     }
                 }
             }

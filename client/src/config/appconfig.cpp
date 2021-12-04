@@ -68,6 +68,7 @@ void AppConfig::loadConfig()
         XplaneUdpPort = XPLANE_UDP_PORT;
         VelocityEnabled = false;
         SilenceModelInstall = false;
+        KeepWindowVisible = false;
 
         saveConfig();
         loadConfig();
@@ -110,6 +111,7 @@ void AppConfig::loadConfig()
     VelocityEnabled = jsonMap["VelocityEnabled"].toBool();
     SilenceModelInstall = jsonMap["SilenceModelInstall"].toBool();
     VisualMachines = jsonMap["VisualMachines"].toStringList();
+    KeepWindowVisible = jsonMap["KeepWindowVisible"].toBool();
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
     for(const auto & value : cachedServers) {
@@ -168,6 +170,7 @@ void AppConfig::saveConfig()
     jsonObj["XplaneUdpPort"] = XplaneUdpPort == 0 ? XPLANE_UDP_PORT : XplaneUdpPort;
     jsonObj["VelocityEnabled"] = VelocityEnabled;
     jsonObj["SilenceModelInstall"] = SilenceModelInstall;
+    jsonObj["KeepWindowVisible"] = KeepWindowVisible;
 
     QJsonArray cachedServers;
     for(auto & server : CachedServers) {
@@ -207,6 +210,8 @@ void AppConfig::saveConfig()
 
     configFile.write(jsonDoc.toJson());
     configFile.close();
+
+    emit settingsChanged();
 }
 
 bool AppConfig::configRequired()

@@ -65,6 +65,7 @@ namespace xpilot
         bool VelocityEnabled;
         bool SilenceModelInstall;
         QStringList VisualMachines;
+        bool KeepWindowVisible;
 
         QVariant VariantCachedServers() const
         {
@@ -105,6 +106,7 @@ namespace xpilot
         Q_PROPERTY(bool AlertDisconnect MEMBER AlertDisconnect NOTIFY alertDisconnectChanged);
         Q_PROPERTY(bool SilenceModelInstall MEMBER SilenceModelInstall)
         Q_PROPERTY(QStringList VisualMachines MEMBER VisualMachines)
+        Q_PROPERTY(bool KeepWindowVisible MEMBER KeepWindowVisible)
 
     signals:
         void alertPrivateMessageChanged();
@@ -113,6 +115,7 @@ namespace xpilot
         void alertSelcalChanged();
         void alertNetworkBroadcastChanged();
         void alertDisconnectChanged();
+        void settingsChanged();
 
     private:
         static AppConfig* instance;

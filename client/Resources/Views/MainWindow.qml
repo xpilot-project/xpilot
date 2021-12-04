@@ -118,6 +118,18 @@ Window {
         id: confirmClose
     }
 
+    Connections {
+        target: AppConfig
+
+        function onSettingsChanged() {
+            if(AppConfig.KeepWindowVisible) {
+                mainWindow.flags |= Qt.WindowStaysOnTopHint
+            } else {
+                mainWindow.flags &= ~Qt.WindowStaysOnTopHint
+            }
+        }
+    }
+
     Component.onCompleted: {
         if(isVelocityEnabled) {
             appendMessage(`Welcome to xPilot v${appVersion} (Velocity Enabled)`, colorYellow)
@@ -129,6 +141,10 @@ Window {
 
         if(!AppConfig.SilenceModelInstall) {
             modal_downloadModels.open()
+        }
+
+        if(AppConfig.KeepWindowVisible) {
+            mainWindow.flags |= Qt.WindowStaysOnTopHint
         }
 
         if(AppConfig.WindowConfig.Maximized) {
