@@ -266,6 +266,12 @@ namespace xpilot
                 if(m_mapAtisMessages.contains(pdu.From.toUpper()))
                 {
                     emit controllerAtisReceived(pdu.From.toUpper(), m_mapAtisMessages[pdu.From.toUpper()]);
+
+                    m_xplaneAdapter.NotificationPosted(pdu.From.toUpper() + " ATIS:", COLOR_BRIGHT_GREEN);
+                    for(const auto& line : std::as_const(m_mapAtisMessages[pdu.From.toUpper()])) {
+                        m_xplaneAdapter.NotificationPosted(line, COLOR_BRIGHT_GREEN);
+                    }
+
                     m_mapAtisMessages.remove(pdu.From.toUpper());
                 }
             }
