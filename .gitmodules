@@ -13,3 +13,4 @@
 [submodule "plugin/externals/imgui"]
 	path = plugin/externals/imgui
 	url = git@github.com:xpilot-project/imgui.git
+	branch = xpilot
