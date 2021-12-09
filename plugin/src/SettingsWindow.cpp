@@ -47,10 +47,10 @@ namespace xpilot
 	static int currentNode = -1;
 
 	SettingsWindow::SettingsWindow(WndMode _mode) :
-		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 325, 600, 0))
+		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 305, 600, 0))
 	{
 		SetWindowTitle(string_format("xPilot %s Settings", PLUGIN_VERSION_STRING));
-		SetWindowResizingLimits(600, 325, 600, 325);
+		SetWindowResizingLimits(600, 305, 600, 305);
 
 		fileBrowser.SetTitle("Browse...");
 		fileBrowser.SetWindowSize(450, 250);
@@ -153,11 +153,11 @@ namespace xpilot
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text("Enable Aircraft Labels");
+					ImGui::Text("Show Callsign Labels");
 					ImGui::SameLine();
-					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Enable this option to show the callsign above all aircraft.");
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Check this option to show callsign above other aircraft.");
 					ImGui::TableSetColumnIndex(1);
-					if (ImGui::Checkbox("##EnableAircraftLabels", &showHideLabels))
+					if (ImGui::Checkbox("##ShowAircraftLabels", &showHideLabels))
 					{
 						XPMPEnableAircraftLabels(showHideLabels);
 						xpilot::Config::Instance().setShowHideLabels(showHideLabels);
@@ -167,9 +167,9 @@ namespace xpilot
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text("Aircraft Label Color");
+					ImGui::Text("Callsign Label Color");
 					ImGui::SameLine();
-					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Specify the color of the aircraft labels. Choose a custom color or a pre-defined color.");
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "The color of the aircraft callsign labels, if enabled. Choose a custom or pre-defined color.");
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::ColorButton("Click to Pick Label Color", ImVec4(lblCol[0], lblCol[1], lblCol[2], lblCol[3]), ImGuiColorEditFlags_NoAlpha))
 					{
@@ -224,9 +224,9 @@ namespace xpilot
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text("Max Label Distance (nm)");
+					ImGui::Text("Max Callsign Label Distance");
 					ImGui::SameLine();
-					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Specify how far away (nautical miles) you want aircraft labels to be visible.");
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Specify how far away (in nautical miles) you want aircraft callsigns labels to be visible.");
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::SliderInt("##MaxDist", &labelMaxDistance, 1, 20, "%d nm"))
 					{
@@ -238,55 +238,14 @@ namespace xpilot
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text("Hide Labels at Visibility Distance");
+					ImGui::Text("Hide Callsign Labels at Visibility Distance");
 					ImGui::SameLine();
-					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Visibility can oftentimes be less than the \"Max Label Distance\" due to weather conditions.\n\nIf enabled, aircraft labels will not be visible for planes beyond the current visibility range.\n\nIf disabled, labels will show even if the plane is hidden behind fog or clouds.");
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Visibility can oftentimes be less than the \"Max Label Distance\" due to weather conditions.\n\nIf enabled, aircraft callsign labels will not be visible for planes beyond the current visibility range.\n\nIf disabled, callsign labels will show even if the plane is hidden behind fog or clouds.");
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##HideLabelsVisibility", &labelVisibilityCutoff))
 					{
 						XPMPSetAircraftLabelDist(float(labelMaxDistance), labelVisibilityCutoff);
 						xpilot::Config::Instance().setLabelCutoffVis(labelVisibilityCutoff);
-						Save();
-					}
-
-					ImGui::TableNextRow();
-					ImGui::TableSetColumnIndex(0);
-					ImGui::AlignTextToFramePadding();
-					ImGui::Text("Log.txt Log Level");
-					ImGui::SameLine();
-					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "This option manages the amount of information that is written to the X-Plane Log.txt.\n\n\"Debug\" will write the most information.\n\"Fatal\" will write the least amount of information.\n\nIt is recommended you only change this if you experience odd behavior and need to log additional information to provide to the developer.");
-					ImGui::TableSetColumnIndex(1);
-					const float logCbWidth = ImGui::CalcTextSize("Warning (default)_____").x;
-					ImGui::SetNextItemWidth(logCbWidth);
-					if (ImGui::Combo("##LogLevel", &logLevel, "Debug\0Info\0Warning (default)\0Error\0Fatal\0", 5))
-					{
-						xpilot::Config::Instance().setLogLevel(logLevel);
-						Save();
-					}
-
-					ImGui::TableNextRow();
-					ImGui::TableSetColumnIndex(0);
-					ImGui::AlignTextToFramePadding();
-					ImGui::Text("Log Model Matching Results");
-					ImGui::SameLine();
-					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "If enabled, debug information will be logged to the X-Plane Log.txt about how a CSL model was chosen.\n\nOnly enable this option if you need to determine why planes aren't rendering as expected.");
-					ImGui::TableSetColumnIndex(1);
-					if (ImGui::Checkbox("##ModelMatchingLog", &debugModelMatching))
-					{
-						xpilot::Config::Instance().setDebugModelMatching(debugModelMatching);
-						Save();
-					}
-
-					ImGui::TableNextRow();
-					ImGui::TableSetColumnIndex(0);
-					ImGui::AlignTextToFramePadding();
-					ImGui::Text("Override \"Contact ATC\" Command");
-					ImGui::SameLine();
-					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "If this option is enabled, xPilot will ignore the \"Contact ATC\" X-Plane Command. This is generally only useful for those who also use PilotEdge.");
-					ImGui::TableSetColumnIndex(1);
-					if (ImGui::Checkbox("##OverrideContactATC", &overrideContactAtcCommand))
-					{
-						xpilot::Config::Instance().setOverrideContactAtcCommand(overrideContactAtcCommand);
 						Save();
 					}
 
@@ -318,6 +277,7 @@ namespace xpilot
 			ImGui::SetNextItemOpen(false, ImGuiCond_Always);
 			nodeToClose = -1;
 		}
+
 		if (ImGui::CollapsingHeader("CSL Configuration"))
 		{
 			if (currentNode == 1)
@@ -406,6 +366,71 @@ namespace xpilot
 			{
 				nodeToClose = currentNode;
 				currentNode = 1;
+			}
+		}
+
+		if (nodeToClose == 2)
+		{
+			ImGui::SetNextItemOpen(false, ImGuiCond_Always);
+			nodeToClose = -1;
+		}
+
+		if(ImGui::CollapsingHeader("Advanced Options"))
+		{
+			if(currentNode == 2)
+			{
+				if (ImGui::BeginTable("##Settings", 2, ImGuiTableFlags_BordersInnerH))
+				{
+					ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoSort, 315);
+					ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoSort);
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Override \"Contact ATC\" Command");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "If this option is enabled, xPilot will ignore the \"Contact ATC\" X-Plane Command. This is generally only useful for those who also use PilotEdge.");
+					ImGui::TableSetColumnIndex(1);
+					if (ImGui::Checkbox("##OverrideContactATC", &overrideContactAtcCommand))
+					{
+						xpilot::Config::Instance().setOverrideContactAtcCommand(overrideContactAtcCommand);
+						Save();
+					}
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Log.txt Log Level");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "This option manages the amount of information that is written to the X-Plane Log.txt.\n\n\"Debug\" will write the most information.\n\"Fatal\" will write the least amount of information.\n\nIt is recommended you only change this if you experience odd behavior and need to log additional information to provide to the developer.");
+					ImGui::TableSetColumnIndex(1);
+					const float logCbWidth = ImGui::CalcTextSize("Warning (default)_____").x;
+					ImGui::SetNextItemWidth(logCbWidth);
+					if (ImGui::Combo("##LogLevel", &logLevel, "Debug\0Info\0Warning (default)\0Error\0Fatal\0", 5))
+					{
+						xpilot::Config::Instance().setLogLevel(logLevel);
+						Save();
+					}
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Log Model Matching Results");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "If enabled, debug information will be logged to the X-Plane Log.txt about how a CSL model was chosen.\n\nOnly enable this option if you need to determine why planes aren't rendering as expected.");
+					ImGui::TableSetColumnIndex(1);
+					if (ImGui::Checkbox("##ModelMatchingLog", &debugModelMatching))
+					{
+						xpilot::Config::Instance().setDebugModelMatching(debugModelMatching);
+						Save();
+					}
+				}
+				ImGui::EndTable();
+			}
+			else
+			{
+				nodeToClose = currentNode;
+				currentNode = 2;
 			}
 		}
 
