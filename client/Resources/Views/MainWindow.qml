@@ -352,7 +352,7 @@ Window {
         }
 
         function onInvalidCslConfiguration() {
-            appendMessage("No valid CSL paths are configured or enabled, or you have no CSL models installed. Please verify the CSL configuration in X-Plane (Plugins > xPilot > Preferences). If you need assistance configuring your CSL paths, see the \"CSL Model Configuration\" section in the xPilot Documentation (http://docs.xpilot-project.org). Restart X-Plane and xPilot after you have properly configured your CSL models.", colorRed)
+            appendMessage("No valid CSL paths are configured or enabled, or you have no CSL models installed. Please verify the CSL configuration in X-Plane (Plugins > xPilot > Preferences). If you need assistance configuring your CSL paths, see the \"CSL Configuration\" section in the xPilot Documentation (http://beta.xpilot-project.org). Restart X-Plane and xPilot after you have properly configured your CSL models.", colorRed)
             errorSound.play()
             mainWindow.alert(0)
         }
