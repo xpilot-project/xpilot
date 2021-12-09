@@ -111,9 +111,9 @@ set(Source_Files
   externals/imgui/imgui_tables.cpp
   externals/imgui/imgui_widgets.cpp
   externals/imgui-stdlib/imgui_stdlib.cpp
-  ${CMAKE_SOURCE_DIR}/externals/ImgWindow/XPImgWindow.cpp
-  ${CMAKE_SOURCE_DIR}/externals/ImgWindow/ImgFontAtlas.cpp
-  ${CMAKE_SOURCE_DIR}/externals/ImgWindow/ImgWindow.cpp)
+  externals/ImgWindow/XPImgWindow.cpp
+  externals/ImgWindow/ImgFontAtlas.cpp
+  externals/ImgWindow/ImgWindow.cpp)
 
 source_group("Source Files" FILES ${Source_Files})
 
