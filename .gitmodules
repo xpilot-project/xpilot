@@ -10,3 +10,6 @@
 [submodule "client/3rdparty/qtpromise"]
 	path = client/3rdparty/qtpromise
 	url = git@github.com:simonbrunel/qtpromise.git
+[submodule "plugin/externals/imgui"]
+	path = plugin/externals/imgui
+	url = git@github.com:xpilot-project/imgui.git

@@ -47,7 +47,8 @@ endif ()
 include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${CMAKE_SOURCE_DIR}/externals/Font")
 include_directories("${CMAKE_SOURCE_DIR}/externals/gmath")
-include_directories("${CMAKE_SOURCE_DIR}/externals/ImGui")
+include_directories("${CMAKE_SOURCE_DIR}/externals/imgui")
+include_directories("${CMAKE_SOURCE_DIR}/externals/imgui-stdlib")
 include_directories("${CMAKE_SOURCE_DIR}/externals/ImgWindow")
 include_directories("${CMAKE_SOURCE_DIR}/externals/XPMP2")
 include_directories("${CMAKE_SOURCE_DIR}/externals/SDK/CHeaders/XPLM")
@@ -73,7 +74,10 @@ set(Header_Files
   include/XPilot.h
   include/XPilotAPI.h
   include/XplaneCommand.h
-  externals/ImGui/imgui_stdlib.h
+  externals/imgui/imconfig.h
+  externals/imgui/imgui.h
+  externals/imgui/imgui_internal.h
+  externals/imgui-stdlib/imgui_stdlib.h
   externals/ImgWindow/ImgFontAtlas.h
   externals/ImgWindow/ImgWindow.h
   externals/ImgWindow/SystemGL.h
@@ -102,10 +106,14 @@ set(Source_Files
   src/TerrainProbe.cpp
   src/TextMessageConsole.cpp
   src/XPilot.cpp
+  externals/imgui/imgui.cpp
+  externals/imgui/imgui_draw.cpp
+  externals/imgui/imgui_tables.cpp
+  externals/imgui/imgui_widgets.cpp
+  externals/imgui-stdlib/imgui_stdlib.cpp
   ${CMAKE_SOURCE_DIR}/externals/ImgWindow/XPImgWindow.cpp
   ${CMAKE_SOURCE_DIR}/externals/ImgWindow/ImgFontAtlas.cpp
-  ${CMAKE_SOURCE_DIR}/externals/ImgWindow/ImgWindow.cpp
-  ${CMAKE_SOURCE_DIR}/externals/ImGui/imgui_stdlib.cpp)
+  ${CMAKE_SOURCE_DIR}/externals/ImgWindow/ImgWindow.cpp)
 
 source_group("Source Files" FILES ${Source_Files})
 
@@ -135,7 +143,6 @@ target_link_libraries(
 	CONAN_PKG::nlohmann_json
 	CONAN_PKG::zeromq
 	CONAN_PKG::cppzmq
-	CONAN_PKG::imgui
 	${XPMP2_LIBRARY})
 
 if (WIN32 OR APPLE)
