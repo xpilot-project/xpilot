@@ -537,6 +537,14 @@ Advanced Users: If X-Plane is not installed on this computer, leave the folder p
                         <platformTest type="linux"/>
                     </ruleList>
                 </throwError>
+                <substitute>
+                    <files>${xplanepath}/Output/preferences/X-Plane.prf</files>
+                    <type>regexp</type>
+                    <substitutionList>
+                        <substitution pattern="^_rcv_port\s+(?!49000).*$" value="_rcv_port 49000"/>
+                        <substitution pattern="^_disable_incoming_networking\s+1$" value="_disable_incoming_networking 0"/>
+                    </substitutionList>
+                </substitute>
             </validationActionList>
         </directoryParameter>
         <directoryParameter>
