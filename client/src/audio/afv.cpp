@@ -116,6 +116,7 @@ namespace xpilot
             }
             else
             {
+                setAudioApi(m_audioApi);
                 configureAudioDevices();
             }
         });
