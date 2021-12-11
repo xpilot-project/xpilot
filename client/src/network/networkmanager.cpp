@@ -184,7 +184,7 @@ namespace xpilot
         }
         else {
             m_fsd.SendPDU(PDUAddPilot(m_connectInfo.Callsign, AppConfig::getInstance()->VatsimId, AppConfig::getInstance()->VatsimPasswordDecrypted,
-                                      NetworkRating::OBS, ProtocolRevision::VatsimAuth, SimulatorType::XPlane, AppConfig::getInstance()->Name));
+                                      NetworkRating::OBS, ProtocolRevision::VatsimAuth, SimulatorType::XPlane, AppConfig::getInstance()->NameWithHomeAirport()));
         }
 
         m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, "SERVER", ClientQueryType::PublicIP));
@@ -223,7 +223,7 @@ namespace xpilot
         case ClientQueryType::RealName:
         {
             QStringList realName;
-            realName.append(AppConfig::getInstance()->Name);
+            realName.append(AppConfig::getInstance()->NameWithHomeAirport());
             realName.append("");
             realName.append(QString::number((int)NetworkRating::OBS));
             m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, pdu.From, ClientQueryType::RealName, realName));
@@ -233,7 +233,7 @@ namespace xpilot
             QString inf = QString("xPilot %1 PID=%2 (%3) IP=%4 SYS_UID=%5 FS_VER=XPlane LT=%6 LO=%7 AL=%8")
                     .arg(BuildConfig::getVersionString(),
                          AppConfig::getInstance()->VatsimId,
-                         AppConfig::getInstance()->Name,
+                         AppConfig::getInstance()->NameWithHomeAirport(),
                          m_publicIp,
                          GetSystemUid(),
                          QString::number(m_userAircraftData.Latitude),

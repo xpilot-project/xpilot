@@ -67,6 +67,15 @@ namespace xpilot
         QStringList VisualMachines;
         bool KeepWindowVisible;
 
+        QString NameWithHomeAirport() const
+        {
+            if(!HomeAirport.isEmpty())
+            {
+                return QString("%1 %2").arg(Name).arg(HomeAirport);
+            }
+            return Name;
+        }
+
         QVariant VariantCachedServers() const
         {
             QVariantList itemList;
