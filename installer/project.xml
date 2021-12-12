@@ -4,6 +4,7 @@
     <version>2.0.0</version>
     <licenseFile>${root_prefix}/LICENSE</licenseFile>
     <singleInstanceCheck>1</singleInstanceCheck>
+    <installationType>normal</installationType>
     <functionDefinitionList>
         <actionDefinition>
             <name>checkXpilotWindows</name>
@@ -376,6 +377,16 @@
             <name>lastXplanePath</name>
             <value></value>
         </setInstallerVariable>
+        <!-- detect existing installation, then switch to upgrade mode. -->
+        <actionGroup>
+            <actionList>
+                <setInstallerVariable name="project.allowComponentSelection" value="0"/>
+                <setInstallerVariable name="project.installationType" value="upgrade"/>
+            </actionList>
+            <ruleList>
+                <fileTest condition="exists" path="${installdir}"/>
+            </ruleList>
+        </actionGroup>
         <!-- windows -->
         <actionGroup>
             <actionList>
