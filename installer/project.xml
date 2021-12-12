@@ -5,13 +5,13 @@
     <licenseFile>${root_prefix}/LICENSE</licenseFile>
     <functionDefinitionList>
         <actionDefinition>
-            <name>checkXpilotOpen</name>
+            <name>checkXpilotWindows</name>
             <actionList>
                 <showProgressDialog>
-                    <title>Waiting for xPilot to be closed</title>
+                    <title>Waiting for xPilot to exit</title>
                     <actionList>
                         <while>
-                            <progressText>The xPilot client is still opened and must be closed before the installation can proceed.</progressText>
+                            <progressText>xPilot must be closed before the installation can proceed.</progressText>
                             <actionList>
                                 <wait>
                                     <ms>50</ms>
@@ -24,11 +24,168 @@
                                             <logic>is_running</logic>
                                             <name>xPilot.exe</name>
                                         </processTest>
+                                        <platformTest>
+                                            <type>windows</type>
+                                        </platformTest>
                                     </ruleList>
                                 </ruleGroup>
-                                <platformTest>
-                                    <type>windows</type>
-                                </platformTest>
+                            </conditionRuleList>
+                        </while>
+                    </actionList>
+                </showProgressDialog>
+            </actionList>
+        </actionDefinition>
+        <actionDefinition>
+            <name>checkXplaneWindows</name>
+            <actionList>
+                <showProgressDialog>
+                    <title>Waiting for X-Plane to be closed</title>
+                    <actionList>
+                        <while>
+                            <progressText>X-Plane must be closed before the installation can proceed.</progressText>
+                            <actionList>
+                                <wait>
+                                    <ms>50</ms>
+                                </wait>
+                            </actionList>
+                            <conditionRuleList>
+                                <ruleGroup>
+                                    <ruleList>
+                                        <processTest>
+                                            <logic>is_running</logic>
+                                            <name>X-Plane.exe</name>
+                                        </processTest>
+                                        <platformTest>
+                                            <type>windows</type>
+                                        </platformTest>
+                                    </ruleList>
+                                </ruleGroup>
+                            </conditionRuleList>
+                        </while>
+                    </actionList>
+                </showProgressDialog>
+            </actionList>
+        </actionDefinition>
+        <!-- macOS -->
+        <actionDefinition>
+            <name>checkXpilotOsx</name>
+            <actionList>
+                <showProgressDialog>
+                    <title>Waiting for xPilot to exit</title>
+                    <actionList>
+                        <while>
+                            <progressText>xPilot must be closed before the installation can proceed.</progressText>
+                            <actionList>
+                                <wait>
+                                    <ms>50</ms>
+                                </wait>
+                            </actionList>
+                            <conditionRuleList>
+                                <ruleGroup>
+                                    <ruleList>
+                                        <processTest>
+                                            <logic>is_running</logic>
+                                            <name>xPilot.app</name>
+                                        </processTest>
+                                        <platformTest>
+                                            <type>osx</type>
+                                        </platformTest>
+                                    </ruleList>
+                                </ruleGroup>
+                            </conditionRuleList>
+                        </while>
+                    </actionList>
+                </showProgressDialog>
+            </actionList>
+        </actionDefinition>
+        <actionDefinition>
+            <name>checkXplaneOsx</name>
+            <actionList>
+                <showProgressDialog>
+                    <title>Waiting for X-Plane to be closed</title>
+                    <actionList>
+                        <while>
+                            <progressText>X-Plane must be closed before the installation can proceed.</progressText>
+                            <actionList>
+                                <wait>
+                                    <ms>50</ms>
+                                </wait>
+                            </actionList>
+                            <conditionRuleList>
+                                <ruleGroup>
+                                    <ruleList>
+                                        <processTest>
+                                            <logic>is_running</logic>
+                                            <name>X-Plane.app</name>
+                                        </processTest>
+                                        <platformTest>
+                                            <type>osx</type>
+                                        </platformTest>
+                                    </ruleList>
+                                </ruleGroup>
+                            </conditionRuleList>
+                        </while>
+                    </actionList>
+                </showProgressDialog>
+            </actionList>
+        </actionDefinition>
+         <!-- Linux -->
+        <actionDefinition>
+            <name>checkXpilotLinux</name>
+            <actionList>
+                <showProgressDialog>
+                    <title>Waiting for xPilot to exit</title>
+                    <actionList>
+                        <while>
+                            <progressText>xPilot must be closed before the installation can proceed.</progressText>
+                            <actionList>
+                                <wait>
+                                    <ms>50</ms>
+                                </wait>
+                            </actionList>
+                            <conditionRuleList>
+                                <ruleGroup>
+                                    <ruleList>
+                                        <processTest>
+                                            <logic>is_running</logic>
+                                            <name>xPilot.AppImage</name>
+                                        </processTest>
+                                        <platformTest>
+                                            <type>linux</type>
+                                        </platformTest>
+                                    </ruleList>
+                                </ruleGroup>
+                            </conditionRuleList>
+                        </while>
+                    </actionList>
+                </showProgressDialog>
+            </actionList>
+        </actionDefinition>
+        <actionDefinition>
+            <name>checkXplaneLinux</name>
+            <actionList>
+                <showProgressDialog>
+                    <title>Waiting for X-Plane to be closed</title>
+                    <actionList>
+                        <while>
+                            <progressText>X-Plane must be closed before the installation can proceed.</progressText>
+                            <actionList>
+                                <wait>
+                                    <ms>50</ms>
+                                </wait>
+                            </actionList>
+                            <conditionRuleList>
+                                <ruleGroup>
+                                    <ruleList>
+                                        <processTest>
+                                            <logic>is_running</logic>
+                                            <name>X-Plane-x86_64</name>
+                                        </processTest>
+                                        <platformTest>
+                                            <type>linux</type>
+                                        </platformTest>
+                                    </ruleList>
+                                </ruleGroup>
                             </conditionRuleList>
                         </while>
                     </actionList>
@@ -204,7 +361,12 @@
         </runProgram>
     </preBuildActionList>
     <preInstallationActionList>
-        <checkXpilotOpen/>
+        <checkXpilotWindows/>
+        <checkXplaneWindows/>
+        <checkXpilotOsx/>
+        <checkXplaneOsx/>
+        <checkXpilotLinux/>
+        <checkXplaneLinux/>
         <setInstallerVariable>
             <name>lastInstallDir</name>
             <value>${platform_install_prefix}/${product_shortname}</value>
@@ -561,4 +723,3 @@ Advanced Users: If X-Plane is not installed on this computer, leave the folder p
         </directoryParameter>
     </parameterList>
 </project>
-
