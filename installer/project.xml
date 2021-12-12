@@ -3,6 +3,7 @@
     <fullName>xPilot</fullName>
     <version>2.0.0</version>
     <licenseFile>${root_prefix}/LICENSE</licenseFile>
+    <singleInstanceCheck>1</singleInstanceCheck>
     <functionDefinitionList>
         <actionDefinition>
             <name>checkXpilotWindows</name>
@@ -39,7 +40,7 @@
             <name>checkXplaneWindows</name>
             <actionList>
                 <showProgressDialog>
-                    <title>Waiting for X-Plane to be closed</title>
+                    <title>Waiting for X-Plane to exit</title>
                     <actionList>
                         <while>
                             <progressText>X-Plane must be closed before the installation can proceed.</progressText>
@@ -85,7 +86,7 @@
                                     <ruleList>
                                         <processTest>
                                             <logic>is_running</logic>
-                                            <name>xPilot.app</name>
+                                            <name>xPilot</name>
                                         </processTest>
                                         <platformTest>
                                             <type>osx</type>
@@ -102,7 +103,7 @@
             <name>checkXplaneOsx</name>
             <actionList>
                 <showProgressDialog>
-                    <title>Waiting for X-Plane to be closed</title>
+                    <title>Waiting for X-Plane to exit</title>
                     <actionList>
                         <while>
                             <progressText>X-Plane must be closed before the installation can proceed.</progressText>
@@ -116,7 +117,7 @@
                                     <ruleList>
                                         <processTest>
                                             <logic>is_running</logic>
-                                            <name>X-Plane.app</name>
+                                            <name>X-Plane</name>
                                         </processTest>
                                         <platformTest>
                                             <type>osx</type>
@@ -165,7 +166,7 @@
             <name>checkXplaneLinux</name>
             <actionList>
                 <showProgressDialog>
-                    <title>Waiting for X-Plane to be closed</title>
+                    <title>Waiting for X-Plane to exit</title>
                     <actionList>
                         <while>
                             <progressText>X-Plane must be closed before the installation can proceed.</progressText>
