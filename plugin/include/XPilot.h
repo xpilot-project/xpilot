@@ -84,6 +84,7 @@ namespace xpilot
 		std::string ourCallsign() const { return m_networkCallsign;  }
 		bool isNetworkConnected() const { return m_networkLoginStatus; }
 		void setPttActive(bool active) { m_pttPressed = active;  }
+		int getTxRadio() const { return m_audioComSelection; }
 
 		void DisableXplaneAtis(bool disabled);
 		bool IsXplaneAtisDisabled() const { return !m_xplaneAtisEnabled; }

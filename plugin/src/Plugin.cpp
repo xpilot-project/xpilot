@@ -24,14 +24,75 @@
 #include "XPMPMultiplayer.h"
 #include "XPLMPlugin.h"
 
+#if APL == 1
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/glu.h>
+#elif IBM == 1
+#include <GL/GLU.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#elif LIN == 1
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#endif
+
+#include <XPLMGraphics.h>
+
 #include <memory>
 #include <thread>
+
+# define M_PI 3.14159265358979323846
 
 #if !defined(XPLM200) || !defined(XPLM210) || !defined(XPLM300) || !defined(XPLM301)
 #error xPilot requires XPLM301 SDK or newer
 #endif
 
 std::unique_ptr<XPilot> environment;
+
+static int DrawTransmitIndicator(XPLMDrawingPhase inPhase, int inIsBefore, void* inRefcon)
+{
+    XPLMSetGraphicsState(0, 0, 0, 0, 1, 0, 0);
+
+    static float color[3] = { 0.19f, 0.80f, 0.19f }; // lime green
+
+    int sx, sy;
+    XPLMGetScreenSize(&sx, &sy);
+
+    int triangleAmount = 100;
+    float twicePi = 2.0f * M_PI;
+    int x = 15;
+    int y = sy - 15;
+    int radius = 5;
+
+    glBegin(GL_LINES);
+    glLineWidth(5.0);
+    glColor3f(color[0], color[1], color[2]);
+    for (unsigned int i = 0; i <= triangleAmount; i++)
+    {
+        glVertex2f(x, y);
+        glVertex2f(x + (radius * cos(i * twicePi / triangleAmount)), y + (radius * sin(i * twicePi / triangleAmount)));
+    }
+    glEnd();
+
+    if (environment != nullptr) {
+        XPLMDrawString(color, 28, sy - 18, environment->getTxRadio() == 6 ? "COM1" : "COM2", NULL, xplmFont_Proportional);
+    }
+
+    return 1;
+}
+
+void ShowTransmitIndicator()
+{
+    if (Config::Instance().getEnableTransmitIndicator() && environment->isNetworkConnected()) {
+        XPLMRegisterDrawCallback(DrawTransmitIndicator, xplm_Phase_Window, 1, nullptr);
+    }
+}
+
+void HideTransmitIndicator()
+{
+    XPLMUnregisterDrawCallback(DrawTransmitIndicator, xplm_Phase_Window, 1, nullptr);
+}
 
 PLUGIN_API int XPluginStart(char* outName, char* outSignature, char* outDescription)
 {
@@ -141,10 +202,12 @@ int  PttCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void*
 {
     if (inPhase == xplm_CommandContinue)
     {
+        ShowTransmitIndicator();
         environment->setPttActive(1);
     }
     if (inPhase == xplm_CommandEnd)
     {
+        HideTransmitIndicator();
         environment->setPttActive(0);
     }
     return 0;

@@ -136,6 +136,10 @@ namespace xpilot
                 {
                     setLogLevel(jf["LogLevel"]);
                 }
+                if (jf.contains("EnableTransmitIndicator"))
+                {
+                    setEnableTransmitIndicator(jf["EnableTransmitIndicator"]);
+                }
                 if (jf.contains("CSL"))
                 {
                     json cslpackages = jf["CSL"];
@@ -183,6 +187,7 @@ namespace xpilot
         j["MaxLabelDist"] = getMaxLabelDistance();
         j["LabelCutoffVis"] = getLabelCutoffVis();
         j["LogLevel"] = getLogLevel();
+        j["EnableTransmitIndicator"] = getEnableTransmitIndicator();
 
         if (!m_cslPackages.empty())
         {
@@ -377,6 +382,11 @@ namespace xpilot
         if (lvl > 5) lvl = 5;
         if (lvl < 0) lvl = 0;
         m_logLevel = lvl;
+        return true;
+    }
+    bool Config::setEnableTransmitIndicator(bool b)
+    {
+        m_transmitIndicator = b;
         return true;
     }
 }

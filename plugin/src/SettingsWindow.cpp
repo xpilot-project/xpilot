@@ -40,6 +40,7 @@ namespace xpilot
 	static int notificationPanelTimeout = 2;
 	static int labelMaxDistance = 3;
 	static bool labelVisibilityCutoff = true;
+	static bool enableTransmitIndicator = false;
 	static float lblCol[4];
 	ImGui::FileBrowser fileBrowser(ImGuiFileBrowserFlags_SelectDirectory);
 
@@ -80,6 +81,7 @@ namespace xpilot
 		labelMaxDistance = xpilot::Config::Instance().getMaxLabelDistance();
 		labelVisibilityCutoff = xpilot::Config::Instance().getLabelCutoffVis();
 		logLevel = xpilot::Config::Instance().getLogLevel();
+		enableTransmitIndicator = xpilot::Config::Instance().getEnableTransmitIndicator();
 		HexToRgb(xpilot::Config::Instance().getAircraftLabelColor(), lblCol);
 	}
 
@@ -259,6 +261,19 @@ namespace xpilot
 					if (ImGui::InputTextStd("##Fallback", &fallbackTypeCode, ImGuiInputTextFlags_CharsUppercase))
 					{
 						xpilot::Config::Instance().setDefaultAcIcaoType(fallbackTypeCode);
+						Save();
+					}
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Enable Transmit Indicator");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Enable this option to see a green transmit indicator at the top left corner of your X-Plane window when you press your PTT.");
+					ImGui::TableSetColumnIndex(1);
+					if (ImGui::Checkbox("##EnableTransmitIndicator", &enableTransmitIndicator))
+					{
+						xpilot::Config::Instance().setEnableTransmitIndicator(enableTransmitIndicator);
 						Save();
 					}
 
