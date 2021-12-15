@@ -247,6 +247,10 @@ void InstallModels::validatePath(QString path)
             }
         }
     }
+    else
+    {
+        emit invalidXplanePath("The X-Plane folder is not readable. Verify the folder permissions and try again.");
+    }
 
     bool pluginValid = false;
     QString pluginError = "xPilot plugin not found. Please re-run the xPilot installer and make sure to choose the correct X-Plane folder path.";
@@ -277,6 +281,11 @@ void InstallModels::validatePath(QString path)
                 return;
             }
         }
+    }
+    else
+    {
+        QString err("The xPilot plugin resources folder (%1) is not readable. Verify the folder permissions and try again.");
+        emit invalidXplanePath(err.arg(xpilotPath.path()));
     }
 
     if(pathValid && pluginValid) {
