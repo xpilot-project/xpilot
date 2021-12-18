@@ -76,8 +76,8 @@ namespace xpilot
     NetworkAircraft::NetworkAircraft(
         const std::string& _callsign,
         const AircraftVisualState& _visualState,
-        const std::string& _icaoType, 
-        const std::string& _icaoAirline, 
+        const std::string& _icaoType,
+        const std::string& _icaoAirline,
         const std::string& _livery,
         XPMPPlaneID _modeS_id = 0,
         const std::string& _modelName = "") :
@@ -142,7 +142,7 @@ namespace xpilot
                     CHECKERR("Can't buffer sound data.");
                 }
                 // prop
-                else if (model.doc8643Classification[3] == 'P') {
+                else if (model.doc8643Classification[2] == 'P') {
                     m_engineClass = EngineClass::PistonProp;
                     ALuint sound = AircraftSoundManager::get()->pistonProp();
                     alSourcei(m_soundSource, AL_BUFFER, sound);
@@ -414,6 +414,7 @@ namespace xpilot
     {
         if (m_soundThread) {
             m_soundThread->join();
+            m_soundThread.reset();
         }
     }
 
