@@ -81,7 +81,14 @@ namespace xpilot
 
 	AircraftManager::AircraftManager(XPilot* instance) : mEnv(instance)
 	{
-		
+		StartAudio();
+		XPLMRegisterFlightLoopCallback(&AircraftManager::UpdateListenerPosition, -1.0f, this);
+	}
+
+	AircraftManager::~AircraftManager()
+	{
+		StopAudio();
+		XPLMUnregisterFlightLoopCallback(&AircraftManager::UpdateListenerPosition, nullptr);
 	}
 
 	void AircraftManager::HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState, const std::string& airline, const std::string& typeCode)
@@ -199,6 +206,68 @@ namespace xpilot
 	void AircraftManager::RemoveAllPlanes()
 	{
 		mapPlanes.clear();
+	}
+
+	void AircraftManager::StartAudio()
+	{
+		audioDevice = alcOpenDevice(nullptr);
+		if (!audioDevice) {
+			LOG_MSG(logERROR, "Failed to open default sound device.");
+			return;
+		}
+
+		audioContext = alcCreateContext(audioDevice, nullptr);
+		if (!audioContext) {
+			LOG_MSG(logERROR, "Failed to create sound context.");
+			return;
+		}
+
+		if (!alcMakeContextCurrent(audioContext)) {
+			LOG_MSG(logERROR, "Failed to make the audio context current.");
+			return;
+		}
+
+		ALCint major_version, minor_version;
+		const char* al_hw = alcGetString(audioDevice, ALC_DEVICE_SPECIFIER);
+		const char* al_ex = alcGetString(audioDevice, ALC_EXTENSIONS);
+		alcGetIntegerv(nullptr, ALC_MAJOR_VERSION, sizeof(major_version), &major_version);
+		alcGetIntegerv(nullptr, ALC_MINOR_VERSION, sizeof(minor_version), &minor_version);
+
+		LOG_MSG(logDEBUG, "OpenAL version       : %d.%d", major_version, minor_version);
+		LOG_MSG(logDEBUG, "OpenAL hardware      : %s", al_hw ? al_hw : "none");
+		LOG_MSG(logDEBUG, "OpenAL extensions    : %s", al_ex ? al_ex : "none");
+
+		ALfloat	listenerOri[] = { 0, 0, -1, 0, 1, 0 };
+		alListener3f(AL_POSITION, 0, 0, 1.0f);
+		alListener3f(AL_VELOCITY, 0, 0, 0);
+		alListenerfv(AL_ORIENTATION, listenerOri);
+	}
+
+	void AircraftManager::StopAudio()
+	{
+		if (!alcMakeContextCurrent(nullptr)) {
+			LOG_MSG(logINFO, "Failed to clear the active audio context.");
+		}
+
+		alcDestroyContext(audioContext);
+
+		if (!alcCloseDevice(audioDevice)) {
+			LOG_MSG(logERROR, "Failed to close audio playback device.");
+		}
+	}
+
+	float AircraftManager::UpdateListenerPosition(float, float, int, void* ref)
+	{
+		XPLMCameraPosition_t camera;
+		XPLMReadCameraPosition(&camera);
+		ALfloat	zero[3] = { 0,0,0 };
+		ALfloat	listenerOri[] = { (ALfloat)sin(camera.heading * M_PI / 180.0f), 0.0f, (ALfloat)cos(camera.heading * M_PI / 180.0f), 0.0f, -1.0f, 0.0f };
+
+		alListenerfv(AL_VELOCITY, zero);
+		alListenerfv(AL_POSITION, zero);
+		alListenerfv(AL_ORIENTATION, listenerOri);
+
+		return -1.0f;
 	}
 
 	void AircraftManager::HandleSlowPositionUpdate(const std::string& callsign, AircraftVisualState visualState, double speed)

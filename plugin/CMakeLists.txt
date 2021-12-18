@@ -72,6 +72,7 @@ set(Header_Files
   include/TextMessageConsole.h
   include/Utilities.h
   include/XPilot.h
+  include/AircraftSoundManager.h
   include/XPilotAPI.h
   include/XplaneCommand.h
   externals/imgui/imconfig.h
@@ -106,6 +107,7 @@ set(Source_Files
   src/TerrainProbe.cpp
   src/TextMessageConsole.cpp
   src/XPilot.cpp
+  src/AircraftSoundManager.cpp
   externals/imgui/imgui.cpp
   externals/imgui/imgui_draw.cpp
   externals/imgui/imgui_tables.cpp
@@ -143,6 +145,8 @@ target_link_libraries(
 	CONAN_PKG::nlohmann_json
 	CONAN_PKG::zeromq
 	CONAN_PKG::cppzmq
+    CONAN_PKG::openal
+    CONAN_PKG::libsndfile
 	${XPMP2_LIBRARY})
 
 if (WIN32 OR APPLE)

@@ -20,17 +20,22 @@
 #define NetworkAircraft_h
 
 #include <deque>
+#include <optional>
+#include <thread>
+#include <atomic>
 
 #include "XPilotAPI.h"
 #include "InterpolatedState.h"
 #include "TerrainProbe.h"
+#include "Utilities.h"
+#include "Vector3.hpp"
 
 #include "XPCAircraft.h"
 #include "XPMPAircraft.h"
 #include "XPMPMultiplayer.h"
 
-#include "Vector3.hpp"
-#include <optional>
+#include "AircraftSoundManager.h"
+#include "AL/al.h"
 
 namespace xpilot
 {
@@ -44,10 +49,19 @@ namespace xpilot
         double Bank;
     };
 
+    enum class EngineClass
+    {
+        Helicopter,
+        PistonProp,
+        TurboProp,
+        JetEngine
+    };
+
     class NetworkAircraft : public XPMP2::Aircraft
     {
     public:
         NetworkAircraft(const std::string& _callsign, const AircraftVisualState& _visualState, const std::string& _icaoType, const std::string& _icaoAirline, const std::string& _livery, XPMPPlaneID _modeS_id, const std::string& _modelName);
+        virtual ~NetworkAircraft();
 
         void copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const;
         void copyBulkData(XPilotAPIAircraft::XPilotAPIBulkInfoTexts* pOut, size_t size) const;
@@ -96,6 +110,23 @@ namespace xpilot
         void Extrapolate(Vector3 velocityVector, Vector3 rotationVector, double interval);
         void AutoLevel(float frameRate);
         static double NormalizeDegrees(double value, double lowerBound, double upperBound);
+
+        ALuint m_soundSource;
+        ALuint m_soundBuffer = 0;
+        float m_pitch = 1.0f;
+        float m_gain = 1.0f;
+        bool m_loopSound = true;
+        bool m_soundLoaded = false;
+
+        void audioLoop();
+        void startSoundThread();
+        void stopSoundThread();
+        std::unique_ptr<std::thread> m_soundThread;
+
+        EngineClass m_engineClass;
+        vect m_velocity;
+        vect m_position;
+        float m_dist;
     };
 }
 

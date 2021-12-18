@@ -30,6 +30,7 @@
 #include <vector>
 #include <cstring>
 #include <cstdarg>
+#include <cmath>
 
 #include "Constants.h"
 #include "Config.h"
@@ -284,5 +285,25 @@ inline void Log(logLevel level, const char* msg, ...)
 }
 
 #define MY_DEBUG(...) {char cad[512]; sprintf(cad, __VA_ARGS__);  OutputDebugString(cad);}
+
+typedef int i;
+typedef float f;
+
+struct vect {
+	f x, y, z;
+	vect operator+(vect r) { return vect(x + r.x, y + r.y, z + r.z); }
+	vect operator*(f r) { return vect(x * r, y * r, z * r); }
+	f operator%(vect r) { return x * r.x + y * r.y + z * r.z; }
+	vect() {}
+	vect operator^(vect r) { return vect(y * r.z - z * r.y, z * r.x - x * r.z, x * r.y - y * r.x); }
+	vect(f a, f b, f c) { x = a; y = b; z = c; }
+	vect operator!() { return *this * (1 / sqrt(*this % *this)); }
+	f operator/(vect r) {
+		return sqrt(x * x + y * y + z * z);
+	}
+	vect operator-(vect r) {
+		return vect(x - r.x, y - r.y, z - r.z);
+	}
+};
 
 #endif // !Utilities_h

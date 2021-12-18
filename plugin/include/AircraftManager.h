@@ -23,6 +23,10 @@
 #include <map>
 #include <mutex>
 
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/alext.h>
+
 #include "XPilot.h"
 #include "NetworkAircraft.h"
 #include "NetworkAircraftConfig.h"
@@ -55,7 +59,7 @@ namespace xpilot
 	{
 	public:
 		AircraftManager(XPilot* instance);
-		~AircraftManager() {};
+		virtual ~AircraftManager();
 
 		void HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState, const std::string& airline, const std::string& typeCode);
 		void HandleAircraftConfig(const std::string& callsign, const NetworkAircraftConfig& config);
@@ -65,11 +69,18 @@ namespace xpilot
 		void HandleRemovePlane(const std::string& callsign);
 		void RemoveAllPlanes();
 
+		void StartAudio();
+		void StopAudio();
+		static float UpdateListenerPosition(float, float, int, void* ref);
+
 	private:
 		XPilot* mEnv;
 		NetworkAircraft* GetAircraft(const std::string& callsign);
 		bool ReceivingFastPositionUpdates(NetworkAircraft* aircraft);
 		Vector3 DerivePositionalVelocityVector(AircraftVisualState previousVisualState, AircraftVisualState newVisualState, long intervalMs);
+
+		ALCdevice* audioDevice = nullptr;
+		ALCcontext* audioContext = nullptr;
 	};
 }
 

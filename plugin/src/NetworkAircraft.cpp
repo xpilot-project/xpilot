@@ -20,10 +20,13 @@
 #include "Config.h"
 #include "GeoCalc.hpp"
 #include "Quaternion.hpp"
+#include <alext.h>
 
 namespace xpilot
 {
     const double TERRAIN_HEIGHT_TOLERANCE = 200.0;
+
+#define CHECKERR(msg) { ALuint e = alGetError(); if (e != AL_NO_ERROR) LOG_MSG(logERROR, msg); }
 
     double CalculateNormalizedDelta(double start, double end, double lowerBound, double upperBound)
     {
@@ -108,6 +111,72 @@ namespace xpilot
         rotational_velocity_vector = Vector3::Zero();
 
         SetVisible(false);
+
+        float zero[3] = { 0,0,0 };
+        alGenSources(1, &m_soundSource);
+        CHECKERR("Can't create sound source");
+
+        auto model = GetModelInfo();
+
+        if (model.doc8643Classification.size() > 0) {
+            // helicoptor or gyrocopter
+            if (model.doc8643Classification[0] == 'H' || model.doc8643Classification[0] == 'G') {
+                m_engineClass = EngineClass::Helicopter;
+                ALuint sound = AircraftSoundManager::get()->helicopter();
+                alSourcei(m_soundSource, AL_BUFFER, sound);
+                CHECKERR("Can't buffer sound data.");
+            }
+            else {
+                // jet
+                if (model.doc8643Classification[2] == 'J') {
+                    m_engineClass = EngineClass::JetEngine;
+                    ALuint sound = AircraftSoundManager::get()->jetEngine();
+                    alSourcei(m_soundSource, AL_BUFFER, sound);
+                    CHECKERR("Can't buffer sound data.");
+                }
+                // turboprop
+                else if (model.doc8643Classification[2] == 'T') {
+                    m_engineClass = EngineClass::TurboProp;
+                    ALuint sound = AircraftSoundManager::get()->turboProp();
+                    alSourcei(m_soundSource, AL_BUFFER, sound);
+                    CHECKERR("Can't buffer sound data.");
+                }
+                // prop
+                else if (model.doc8643Classification[3] == 'P') {
+                    m_engineClass = EngineClass::PistonProp;
+                    ALuint sound = AircraftSoundManager::get()->pistonProp();
+                    alSourcei(m_soundSource, AL_BUFFER, sound);
+                    CHECKERR("Can't buffer sound data.");
+                }
+                else {
+                    // don't know... default to jet
+                    m_engineClass = EngineClass::JetEngine;
+                    ALuint sound = AircraftSoundManager::get()->jetEngine();
+                    alSourcei(m_soundSource, AL_BUFFER, sound);
+                    CHECKERR("Can't buffer sound data.");
+                }
+            }
+        }
+
+        alSourcef(m_soundSource, AL_PITCH, m_pitch);
+        alSourcef(m_soundSource, AL_GAIN, m_gain);
+        alSourcei(m_soundSource, AL_LOOPING, m_loopSound);
+        alSourcei(m_soundSource, AL_SOURCE_RELATIVE, AL_FALSE);
+        alSourcefv(m_soundSource, AL_VELOCITY, zero);
+        zero[2] = 5.0f;
+        alSourcefv(m_soundSource, AL_POSITION, zero);
+        CHECKERR("Can't set sound source");
+
+        // initialize
+        m_velocity = vect(0, 0, 0);
+        m_position = vect(0, 0, 0);
+        m_dist = 3000.0f;
+    }
+
+    NetworkAircraft::~NetworkAircraft()
+    {
+        stopSoundThread();
+        alDeleteSources(1, &m_soundSource);
     }
 
     void NetworkAircraft::Extrapolate(
@@ -329,6 +398,30 @@ namespace xpilot
         return value;
     }
 
+    void NetworkAircraft::startSoundThread()
+    {
+        if (m_soundLoaded) return;
+
+        m_soundThread = std::make_unique<std::thread>([&]()
+            {
+                audioLoop();
+            });
+
+        m_soundLoaded = true;
+    }
+
+    void NetworkAircraft::stopSoundThread()
+    {
+        if (m_soundThread) {
+            m_soundThread->join();
+        }
+    }
+
+    void NetworkAircraft::audioLoop()
+    {
+        alSourcePlay(m_soundSource);
+    }
+
     void NetworkAircraft::UpdatePosition(float _elapsedSinceLastCall, int)
     {
         Extrapolate(
@@ -336,7 +429,7 @@ namespace xpilot
             rotational_velocity_vector + rotational_velocity_vector_error,
             _elapsedSinceLastCall
         );
-        
+
         if (on_ground)
         {
             double rpm = (60 / (2 * M_PI * 3.2)) * positional_velocity_vector.X * -1;
@@ -412,7 +505,7 @@ namespace xpilot
         SetSlatRatio(GetFlapRatio());
         SetSpoilerRatio(surfaces.spoilerRatio);
         SetSpeedbrakeRatio(surfaces.spoilerRatio);
-        
+
         if (engines_running)
         {
             SetEngineRotRpm(1200);
@@ -441,6 +534,80 @@ namespace xpilot
         HexToRgb(Config::Instance().getAircraftLabelColor(), colLabel);
 
         first_render_pending = false;
+
+        XPLMCameraPosition_t camera;
+        XPLMReadCameraPosition(&camera);
+
+        auto& pos = GetLocation();
+
+        vect apos(pos.z, pos.y, pos.x);
+        vect user(camera.z, camera.y, camera.x);
+
+        vect diff = apos - user;
+
+        float dist = (diff / diff);
+        if (!engines_running) {
+            dist = 6000.0f;
+        }
+
+        m_position = diff;
+        const float networkTime = GetNetworkTime();
+        const float d_ts = networkTime - prev_ts;
+        m_velocity = vect((pos.z - prev_z) / d_ts, (pos.y - prev_y) / d_ts, (pos.x - prev_x) / d_ts);
+        m_dist = dist;
+
+        if (m_engineClass == EngineClass::JetEngine && m_dist < 3000.0f) {
+            ALfloat pos[3] = { m_position.x / 50.0f, m_position.y / 50.0f, m_position.z / 50.0f };
+            ALfloat vel[3] = { m_velocity.x / 50.0f, m_velocity.y / 50.0f, m_velocity.z / 50.0f };
+
+            alSourcefv(m_soundSource, AL_POSITION, pos);
+            alSourcefv(m_soundSource, AL_VELOCITY, vel);
+
+            if ((m_velocity / m_velocity) < 0.0f) {
+                alSourcef(m_soundSource, AL_PITCH, 0.8f);
+            }
+
+            if (IsVisible()) {
+                startSoundThread();
+            }
+        }
+        else if ((m_engineClass == EngineClass::PistonProp || m_engineClass == EngineClass::TurboProp) && m_dist < 3000.0f) {
+            ALfloat pos[3] = { m_position.x / 50.0f, m_position.y / 50.0f, m_position.z / 50.0f };
+            ALfloat vel[3] = { m_velocity.x / 50.0f, m_velocity.y / 50.0f, m_velocity.z / 50.0f };
+
+            alSourcefv(m_soundSource, AL_POSITION, pos);
+            alSourcefv(m_soundSource, AL_VELOCITY, vel);
+
+            if ((m_velocity / m_velocity) < 0.1f) {
+                alSourcef(m_soundSource, AL_PITCH, 0.7f);
+            }
+
+            if (IsVisible()) {
+                startSoundThread();
+            }
+        }
+        else if (m_engineClass == EngineClass::Helicopter && m_dist < 3000.0f) {
+            ALfloat pos[3] = { m_position.x / 50.0f, m_position.y / 50.0f, m_position.z / 50.0f };
+            ALfloat vel[3] = { m_velocity.x / 50.0f, m_velocity.y / 50.0f, m_velocity.z / 50.0f };
+
+            alSourcefv(m_soundSource, AL_POSITION, pos);
+            alSourcefv(m_soundSource, AL_VELOCITY, vel);
+
+            if ((m_velocity / m_velocity) < 0.1f) {
+                alSourcef(m_soundSource, AL_PITCH, 0.80f);
+            }
+            else {
+                alSourcef(m_soundSource, AL_PITCH, 0.85f);
+            }
+
+            if (IsVisible()) {
+                startSoundThread();
+            }
+        }
+        else {
+            alSourceStop(m_soundSource);
+            alSourceRewind(m_soundSource);
+        }
     }
 
     void NetworkAircraft::copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const
