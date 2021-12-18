@@ -28,6 +28,7 @@ namespace xpilot
 	constexpr long FAST_POSITION_INTERVAL_TOLERANCE = 300;
 	constexpr double ERROR_CORRECTION_INTERVAL_FAST = 2.0;
 	constexpr double ERROR_CORRECTION_INTERVAL_SLOW = 5.0;
+	constexpr float CLOSED_SPACE_VOLUME_SCALAR = 0.5f;
 
 	static double NormalizeDegrees(double value, double lowerBound, double upperBound)
 	{
@@ -79,7 +80,18 @@ namespace xpilot
 		return mapPlanes.end();
 	}
 
-	AircraftManager::AircraftManager(XPilot* instance) : mEnv(instance)
+	AircraftManager::AircraftManager(XPilot* instance) : 
+		mEnv(instance),
+		m_soundOn("sim/operation/sound/sound_on", ReadOnly),
+		m_simPaused("sim/time/paused", ReadOnly),
+		m_masterVolumeRatio("sim/operation/sound/master_volume_ratio", ReadOnly),
+		m_engineVolumeRatio("sim/operation/sound/engine_volume_ratio", ReadOnly),
+		m_exteriorVolumeRatio("sim/operation/sound/exterior_volume_ratio", ReadOnly),
+		m_propVolumeRatio("sim/operation/sound/prop_volume_ratio", ReadOnly),
+		m_environmentVolumeRatio("sim/operation/sound/enviro_volume_ratio", ReadOnly),
+		m_isViewExternal("sim/graphics/view/view_is_external", ReadOnly),
+		m_canopyOpenRatio("sim/operation/sound/users_canopy_open_ratio", ReadOnly),
+		m_userDoorOpenRatio("sim/operation/sound/users_door_open_ratio", ReadOnly)
 	{
 		StartAudio();
 		XPLMRegisterFlightLoopCallback(&AircraftManager::UpdateListenerPosition, -1.0f, this);
@@ -266,6 +278,38 @@ namespace xpilot
 		alListenerfv(AL_VELOCITY, zero);
 		alListenerfv(AL_POSITION, zero);
 		alListenerfv(AL_ORIENTATION, listenerOri);
+
+		float soundVolume = 1.0f;
+		float doorSum = 0;
+		bool anyDoorOpen = false;
+
+		auto* instance = static_cast<AircraftManager*>(ref);
+		if (instance) {
+			for (int i = 0; i < 10; i++) {
+				doorSum += instance->m_userDoorOpenRatio[i];
+			}
+
+			if (doorSum >= 0.075) {
+				anyDoorOpen = true;
+			}
+
+			if (instance->m_soundOn && !instance->m_simPaused) {
+				if (instance->m_isViewExternal == 0 && instance->m_canopyOpenRatio == 0 && anyDoorOpen == false) {
+					// internal view
+					soundVolume = instance->m_masterVolumeRatio * instance->m_exteriorVolumeRatio * CLOSED_SPACE_VOLUME_SCALAR;
+				}
+				else {
+					// external view
+					soundVolume = instance->m_masterVolumeRatio * instance->m_exteriorVolumeRatio;
+				}
+			}
+			else {
+				// sounds disable or sim is paused
+				soundVolume = 0.0f;
+			}
+
+			alListenerf(AL_GAIN, soundVolume);
+		}
 
 		return -1.0f;
 	}

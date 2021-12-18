@@ -30,6 +30,7 @@
 #include "XPilot.h"
 #include "NetworkAircraft.h"
 #include "NetworkAircraftConfig.h"
+#include "DataRefAccess.h"
 
 namespace xpilot
 {
@@ -72,6 +73,18 @@ namespace xpilot
 		void StartAudio();
 		void StopAudio();
 		static float UpdateListenerPosition(float, float, int, void* ref);
+
+	protected:
+		DataRefAccess<int> m_soundOn;
+		DataRefAccess<int> m_simPaused;
+		DataRefAccess<float> m_masterVolumeRatio;
+		DataRefAccess<float> m_engineVolumeRatio;
+		DataRefAccess<float> m_exteriorVolumeRatio;
+		DataRefAccess<float> m_propVolumeRatio;
+		DataRefAccess<float> m_environmentVolumeRatio;
+		DataRefAccess<int> m_isViewExternal;
+		DataRefAccess<float> m_canopyOpenRatio;
+		DataRefAccess<std::vector<float>> m_userDoorOpenRatio;
 
 	private:
 		XPilot* mEnv;
