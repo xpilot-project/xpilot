@@ -93,13 +93,11 @@ namespace xpilot
 		m_canopyOpenRatio("sim/operation/sound/users_canopy_open_ratio", ReadOnly),
 		m_userDoorOpenRatio("sim/operation/sound/users_door_open_ratio", ReadOnly)
 	{
-		StartAudio();
 		XPLMRegisterFlightLoopCallback(&AircraftManager::UpdateListenerPosition, -1.0f, this);
 	}
 
 	AircraftManager::~AircraftManager()
 	{
-		StopAudio();
 		XPLMUnregisterFlightLoopCallback(&AircraftManager::UpdateListenerPosition, nullptr);
 	}
 

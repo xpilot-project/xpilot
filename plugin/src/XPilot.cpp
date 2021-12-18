@@ -128,6 +128,8 @@ namespace xpilot
 
 	void XPilot::Initialize()
 	{
+		m_aircraftManager->StartAudio();
+
 		InitializeXPMP();
 		TryGetTcasControl();
 
@@ -190,6 +192,8 @@ namespace xpilot
 			m_zmqThread->join();
 			m_zmqThread.reset();
 		}
+
+		m_aircraftManager->StopAudio();
 	}
 
 	void XPilot::ZmqWorker()
