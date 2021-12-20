@@ -122,15 +122,14 @@ namespace xpilot
         static double NormalizeDegrees(double value, double lowerBound, double upperBound);
 
         ALuint m_soundBuffer = 0;
+        ALuint m_soundSources[8]; // max 8 engine sounds
+
         float m_pitch = 1.0f;
         float m_gain = 1.0f;
-        bool m_loopSound = true;
+        float m_currentGain = 0.0f;
         bool m_soundLoaded = false;
         bool m_soundsPlaying = false;
-
-        bool firstSoundInitialized = false;
-
-        ALuint m_soundSources[8];
+        bool m_soundsInitialized = false;
 
         void audioLoop();
         void startSoundThread();
@@ -138,14 +137,13 @@ namespace xpilot
         void setEngineState(EngineState state);
         void stopSounds();
         std::unique_ptr<std::thread> m_soundThread;
-        std::atomic_bool m_shouldEndSoundThread = { false };
-        std::chrono::system_clock::time_point prev_update_time;
-        std::chrono::system_clock::time_point starterBegun;
-        float currentGain = 0.0f;
+        std::chrono::system_clock::time_point m_previousGainUpdateTime;
+        std::chrono::system_clock::time_point m_starterSoundBegan;
 
-        const float PistonStarterTime = 2.0f;
-        const float JetStarterTime = 19.0f;
-        const float TurboStarterTime = 13.0f;
+        // length (in seconds) of engine starter sounds, used for transition between starter and engine sound
+        const float PistonStarterTime = 1.5f;
+        const float JetStarterTime = 18.5f;
+        const float TurboStarterTime = 12.5f;
 
         EngineClass m_engineClass;
         EngineState m_engineState;
