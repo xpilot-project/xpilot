@@ -21,6 +21,7 @@
 #include "GeoCalc.hpp"
 #include "Quaternion.hpp"
 #include <alext.h>
+#include <chrono>
 
 namespace xpilot
 {
@@ -139,7 +140,7 @@ namespace xpilot
             }
         }
 
-        setSoundState(EngineState::Normal);
+        setEngineState(EngineState::Normal);
 
         m_velocity = vect(0, 0, 0);
         m_position = vect(0, 0, 0);
@@ -147,9 +148,11 @@ namespace xpilot
 
     NetworkAircraft::~NetworkAircraft()
     {
+        m_shouldEndSoundThread = true;
         stopSoundThread();
+
         for (int i = 0; i < m_engineCount; i++) {
-            alDeleteSources(1, &m_soundSource[i]);
+            alDeleteSources(1, &m_soundSources[i]);
         }
     }
 
@@ -374,7 +377,11 @@ namespace xpilot
 
     void NetworkAircraft::startSoundThread()
     {
-        if (m_soundLoaded) return;
+        if (m_soundLoaded) {
+            return;
+        }
+
+        stopSoundThread();
 
         m_soundThread = std::make_unique<std::thread>([&]()
             {
@@ -390,22 +397,27 @@ namespace xpilot
         }
     }
 
-    void NetworkAircraft::setSoundState(EngineState state)
+    void NetworkAircraft::setEngineState(EngineState state)
     {
-        ALuint normalSound = -1;
-        ALuint starterSound = -1;
+        ALuint normalSound;
+        ALuint starterSound;
+
+        currentGain = 0.0f;
+
+        if (firstSoundInitialized) {
+            alDeleteSources(m_engineCount, m_soundSources);
+        }
+
+        alGenSources(m_engineCount, m_soundSources);
 
         float zero[3] = { 0,0,0 };
         for (int i = 0; i < m_engineCount; i++) {
-            alDeleteSources(1, &m_soundSource[i]);
-            alGenSources(1, &m_soundSource[i]);
-            alSourcef(m_soundSource[i], AL_PITCH, m_pitch);
-            alSourcef(m_soundSource[i], AL_GAIN, m_gain);
-            alSourcei(m_soundSource[i], AL_LOOPING, 0);
-            alSourcei(m_soundSource[i], AL_SOURCE_RELATIVE, AL_FALSE);
-            alSourcefv(m_soundSource[i], AL_VELOCITY, zero);
+            alSourcef(m_soundSources[i], AL_PITCH, m_pitch);
+            alSourcei(m_soundSources[i], AL_LOOPING, (state == EngineState::Starter) ? AL_FALSE : AL_TRUE);
+            alSourcei(m_soundSources[i], AL_SOURCE_RELATIVE, AL_FALSE);
+            alSourcefv(m_soundSources[i], AL_VELOCITY, zero);
             zero[2] = 5.0f;
-            alSourcefv(m_soundSource[i], AL_POSITION, zero);
+            alSourcefv(m_soundSources[i], AL_POSITION, zero);
             CHECKERR("Can't set sound source");
         }
 
@@ -430,28 +442,36 @@ namespace xpilot
         }
 
         for (int i = 0; i < m_engineCount; i++) {
-            if (state == EngineState::Starter) {
-                alSourcei(m_soundSource[i], AL_BUFFER, starterSound);
+            if (state == EngineState::Starter && m_engineClass != EngineClass::Helicopter) {
+                alSourcei(m_soundSources[i], AL_BUFFER, starterSound);
+                starterBegun = std::chrono::system_clock::now();
             }
             else {
-                alSourcei(m_soundSource[i], AL_BUFFER, normalSound);
+                alSourcei(m_soundSources[i], AL_BUFFER, normalSound);
             }
         }
+
+        LOG_MSG(logDEBUG, "setEngineState: %s", state == EngineState::Starter ? "Starter" : "Normal");
+
+        m_soundLoaded = false;
+        m_engineState = state;
+        firstSoundInitialized = true;
     }
 
     void NetworkAircraft::stopSounds()
     {
         for (int i = 0; i < m_engineCount; i++) {
-            alSourceStop(m_soundSource[i]);
-            alSourceRewind(m_soundSource[i]);
+            alSourceStop(m_soundSources[i]);
+            alSourceRewind(m_soundSources[i]);
         }
     }
 
     void NetworkAircraft::audioLoop()
     {
         for (int i = 0; i < m_engineCount; i++) {
-            alSourcePlay(m_soundSource[i]);
+            alSourcePlay(m_soundSources[i]);
         }
+
         m_soundLoaded = true;
         m_soundsPlaying = true;
     }
@@ -602,37 +622,64 @@ namespace xpilot
         else {
             if (first_render_pending) {
                 LOG_MSG(logDEBUG, "Sound: FirstRender,Normal");
-                setSoundState(EngineState::Normal);
+                setEngineState(EngineState::Normal);
             }
             else {
                 if (engines_running != was_engines_running) {
                     if (!was_engines_running && engines_running) {
                         LOG_MSG(logDEBUG, "Sound: Starter");
-                        setSoundState(EngineState::Starter);
+                        setEngineState(EngineState::Starter);
                     }
                     else {
                         LOG_MSG(logDEBUG, "Sound: Normal");
-                        setSoundState(EngineState::Normal);
+                        setEngineState(EngineState::Normal);
                     }
                 }
             }
 
             for (int i = 0; i < m_engineCount; i++) {
-                alSourcefv(m_soundSource[i], AL_POSITION, soundPos);
-                alSourcefv(m_soundSource[i], AL_VELOCITY, soundVel);
+                alSourcefv(m_soundSources[i], AL_POSITION, soundPos);
+                alSourcefv(m_soundSources[i], AL_VELOCITY, soundVel);
+                alSourcef(m_soundSources[i], AL_PITCH, 1.0f);
             }
 
-            if ((m_velocity / m_velocity) > 0.1f) {
+            float idleGain = 0.80f;
+            float normalGain = 1.0f;
+            auto now = std::chrono::system_clock::now();
+
+            bool idle = (m_velocity / m_velocity) < 0.1f;
+            float targetGain = idle ? idleGain : normalGain;
+
+            if (currentGain < targetGain) {
+                const auto diffMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_update_time);
+
+                currentGain += 0.01f;
+
                 for (int i = 0; i < m_engineCount; i++) {
-                    alSourcef(m_soundSource[i], AL_PITCH, 1.0f);
-                    alSourcef(m_soundSource[i], AL_GAIN, 1.0f);
+                    alSourcef(m_soundSources[i], AL_GAIN, currentGain);
                 }
+
+                prev_update_time = now;
             }
-            else {
-                // idle
-                for (int i = 0; i < m_engineCount; i++) {
-                    alSourcef(m_soundSource[i], AL_PITCH, 0.80f);
-                    alSourcef(m_soundSource[i], AL_GAIN, 0.80f);
+
+            if (m_engineState == EngineState::Starter) {
+                const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - starterBegun);
+                float starterTime = 0.0f;
+
+                switch (m_engineClass) {
+                case EngineClass::JetEngine:
+                    starterTime = JetStarterTime;
+                    break;
+                case EngineClass::PistonProp:
+                    starterTime = PistonStarterTime;
+                    break;
+                case EngineClass::TurboProp:
+                    starterTime = TurboStarterTime;
+                    break;
+                }
+
+                if (elapsed.count() > starterTime) {
+                    setEngineState(EngineState::Normal);
                 }
             }
 

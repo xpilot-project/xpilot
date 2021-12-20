@@ -128,16 +128,27 @@ namespace xpilot
         bool m_soundLoaded = false;
         bool m_soundsPlaying = false;
 
-        ALuint m_soundSource[8];
+        bool firstSoundInitialized = false;
+
+        ALuint m_soundSources[8];
 
         void audioLoop();
         void startSoundThread();
         void stopSoundThread();
-        void setSoundState(EngineState state);
+        void setEngineState(EngineState state);
         void stopSounds();
         std::unique_ptr<std::thread> m_soundThread;
+        std::atomic_bool m_shouldEndSoundThread = { false };
+        std::chrono::system_clock::time_point prev_update_time;
+        std::chrono::system_clock::time_point starterBegun;
+        float currentGain = 0.0f;
+
+        const float PistonStarterTime = 2.0f;
+        const float JetStarterTime = 19.0f;
+        const float TurboStarterTime = 13.0f;
 
         EngineClass m_engineClass;
+        EngineState m_engineState;
         int m_engineCount;
         vect m_velocity;
         vect m_position;
