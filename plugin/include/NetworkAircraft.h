@@ -23,6 +23,8 @@
 #include <optional>
 #include <thread>
 #include <atomic>
+#include <queue>
+#include <mutex>
 
 #include "XPilotAPI.h"
 #include "InterpolatedState.h"
@@ -54,7 +56,14 @@ namespace xpilot
         Helicopter,
         PistonProp,
         TurboProp,
-        JetEngine
+        JetEngine,
+        Unknown
+    };
+
+    enum class EngineState
+    {
+        Starter,
+        Normal
     };
 
     class NetworkAircraft : public XPMP2::Aircraft
@@ -70,7 +79,8 @@ namespace xpilot
 
         bool on_ground;
         bool gear_down;
-        bool engines_running;
+        bool engines_running = false;
+        bool was_engines_running = false;
         bool reverse_thrust;
         float ground_speed;
         float target_gear_position;
@@ -111,22 +121,26 @@ namespace xpilot
         void AutoLevel(float frameRate);
         static double NormalizeDegrees(double value, double lowerBound, double upperBound);
 
-        ALuint m_soundSource;
         ALuint m_soundBuffer = 0;
         float m_pitch = 1.0f;
         float m_gain = 1.0f;
         bool m_loopSound = true;
         bool m_soundLoaded = false;
+        bool m_soundsPlaying = false;
+
+        ALuint m_soundSource[8];
 
         void audioLoop();
         void startSoundThread();
         void stopSoundThread();
+        void setSoundState(EngineState state);
+        void stopSounds();
         std::unique_ptr<std::thread> m_soundThread;
 
         EngineClass m_engineClass;
+        int m_engineCount;
         vect m_velocity;
         vect m_position;
-        float m_dist;
     };
 }
 

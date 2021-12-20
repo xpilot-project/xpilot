@@ -28,7 +28,7 @@ namespace xpilot
 	constexpr long FAST_POSITION_INTERVAL_TOLERANCE = 300;
 	constexpr double ERROR_CORRECTION_INTERVAL_FAST = 2.0;
 	constexpr double ERROR_CORRECTION_INTERVAL_SLOW = 5.0;
-	constexpr float CLOSED_SPACE_VOLUME_SCALAR = 0.5f;
+	constexpr float CLOSED_SPACE_VOLUME_SCALAR = 0.25f;
 
 	static double NormalizeDegrees(double value, double lowerBound, double upperBound)
 	{
@@ -256,7 +256,7 @@ namespace xpilot
 	void AircraftManager::StopAudio()
 	{
 		if (!alcMakeContextCurrent(nullptr)) {
-			LOG_MSG(logINFO, "Failed to clear the active audio context.");
+			LOG_MSG(logERROR, "Failed to clear the active audio context.");
 		}
 
 		alcDestroyContext(audioContext);

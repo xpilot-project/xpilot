@@ -9,14 +9,23 @@ AircraftSoundManager* AircraftSoundManager::instance = nullptr;
 
 AircraftSoundManager::AircraftSoundManager()
 {
-	std::string pathJetEngine(GetPluginPath() + "/Resources/Sounds/JetEngine.wav");
-	m_jetEngine = addSound(pathJetEngine.c_str());
+	std::string jet(GetPluginPath() + "/Resources/Sounds/JetEngine.wav");
+	m_jetEngine = addSound(jet.c_str());
 
-	std::string pathPistonProp(GetPluginPath() + "/Resources/Sounds/PistonProp.wav");
-	m_pistonProp = addSound(pathPistonProp.c_str());
+	std::string jetStarter(GetPluginPath() + "/Resources/Sounds/JetStarter.wav");
+	m_jetStarter = addSound(jetStarter.c_str());
+
+	std::string pistionProp(GetPluginPath() + "/Resources/Sounds/PistonProp.wav");
+	m_pistonProp = addSound(pistionProp.c_str());
+
+	std::string pistonStarter(GetPluginPath() + "/Resources/Sounds/PistonStarter.wav");
+	m_pistonStarter = addSound(pistonStarter.c_str());
 
 	std::string pathTurboProp(GetPluginPath() + "/Resources/Sounds/TurboProp.wav");
 	m_turboProp = addSound(pathTurboProp.c_str());
+
+	std::string turboStarter(GetPluginPath() + "/Resources/Sounds/TurboStarter.wav");
+	m_turboStarter = addSound(turboStarter.c_str());
 
 	std::string pathHeli(GetPluginPath() + "/Resources/Sounds/Helicopter.wav");
 	m_helicopter = addSound(pathHeli.c_str());
@@ -25,8 +34,11 @@ AircraftSoundManager::AircraftSoundManager()
 AircraftSoundManager::~AircraftSoundManager()
 {
 	alDeleteBuffers(1, &m_jetEngine);
+	alDeleteBuffers(1, &m_jetStarter);
 	alDeleteBuffers(1, &m_pistonProp);
+	alDeleteBuffers(1, &m_pistonStarter);
 	alDeleteBuffers(1, &m_turboProp);
+	alDeleteBuffers(1, &m_turboStarter);
 	alDeleteBuffers(1, &m_helicopter);
 }
 
