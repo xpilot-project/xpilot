@@ -4,6 +4,7 @@
 #include <sndfile.h>
 #include <iostream>
 #include <functional>
+#include <climits>
 
 AircraftSoundManager* AircraftSoundManager::instance = nullptr;
 
