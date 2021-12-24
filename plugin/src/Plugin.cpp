@@ -84,7 +84,7 @@ static int DrawTransmitIndicator(XPLMDrawingPhase inPhase, int inIsBefore, void*
 
 void ShowTransmitIndicator()
 {
-    if (Config::Instance().getEnableTransmitIndicator() && environment->isNetworkConnected()) {
+    if (Config::Instance().getEnableTransmitIndicator() && environment->isNetworkConnected() && environment->radiosPowered()) {
         XPLMRegisterDrawCallback(DrawTransmitIndicator, xplm_Phase_Window, 1, nullptr);
     }
 }

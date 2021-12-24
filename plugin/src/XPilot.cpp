@@ -54,7 +54,8 @@ namespace xpilot
 		m_audioComSelection("sim/cockpit2/radios/actuators/audio_com_selection", ReadWrite),
 		m_audioSelectionCom1("sim/cockpit2/radios/actuators/audio_selection_com1", ReadWrite),
 		m_audioSelectionCom2("sim/cockpit2/radios/actuators/audio_selection_com2", ReadWrite),
-		m_transponderCode("sim/cockpit/radios/transponder_code", ReadWrite)
+		m_transponderCode("sim/cockpit/radios/transponder_code", ReadWrite),
+		m_avionicsPower("sim/cockpit2/switches/avionics_power_on", ReadOnly)
 	{
 		ThisThreadIsXplane();
 

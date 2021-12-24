@@ -85,6 +85,7 @@ namespace xpilot
 		bool isNetworkConnected() const { return m_networkLoginStatus; }
 		void setPttActive(bool active) { m_pttPressed = active;  }
 		int getTxRadio() const { return m_audioComSelection; }
+		bool radiosPowered() const { return m_avionicsPower && (m_audioComSelection == 6 || m_audioComSelection == 7); }
 
 		void DisableXplaneAtis(bool disabled);
 		bool IsXplaneAtisDisabled() const { return !m_xplaneAtisEnabled; }
@@ -121,6 +122,7 @@ namespace xpilot
 		DataRefAccess<int> m_audioSelectionCom1;
 		DataRefAccess<int> m_audioSelectionCom2;
 		DataRefAccess<int> m_transponderCode;
+		DataRefAccess<int> m_avionicsPower;
 
 	private:
 		static float DeferredStartup(float, float, int, void* ref);
