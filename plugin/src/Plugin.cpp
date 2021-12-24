@@ -73,7 +73,7 @@ static int DrawTransmitIndicator(XPLMDrawingPhase inPhase, int inIsBefore, void*
     glEnd();
 
     if (environment != nullptr) {
-        XPLMDrawString(color, 28, sy - 18, environment->getTxRadio() == 6 ? "COM1" : "COM2", NULL, xplmFont_Proportional);
+        XPLMDrawString(color, 28, sy - 18, environment->getTxRadio() == 6 ? (char*)"COM1" : (char*)"COM2", NULL, xplmFont_Proportional);
     }
 
     return 1;
