@@ -227,4 +227,6 @@ QString AppConfig::getNetworkServer()
             return server.Address;
         }
     }
+
+    return "";
 }

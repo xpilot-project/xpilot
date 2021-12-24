@@ -84,7 +84,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     m_zmqSocket->set(zmq::sockopt::linger, 0);
     m_zmqSocket->connect(QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
 
-    for(const QString &machine : AppConfig::getInstance()->VisualMachines) {
+    for(const QString &machine : std::as_const(AppConfig::getInstance()->VisualMachines)) {
         auto socket = new zmq::socket_t(*m_zmqContext, ZMQ_DEALER);
         socket->set(zmq::sockopt::routing_id, "xpilot");
         socket->set(zmq::sockopt::linger, 0);
@@ -97,7 +97,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
         {
             try {
                 zmq::message_t msg;
-                m_zmqSocket->recv(msg, zmq::recv_flags::none);
+                static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::none));
                 QString data(std::string(static_cast<char*>(msg.data()), msg.size()).c_str());
 
                 if(!data.isEmpty())
