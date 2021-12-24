@@ -576,6 +576,25 @@ Window {
                         audio.setCom2Volume(volume)
                     }
                 }
+
+                Text {
+                    id: name
+                    text: "Your Push to Talk (PTT) must be assigned in X-Plane using the joystick or keyboard command bindings. <a href='https://vats.im/xpilot-ptt'>Learn more about how to set your PTT</a>"
+                    onLinkActivated: Qt.openUrlExternally(link)
+                    renderType: Text.NativeRendering
+                    wrapMode: Text.WordWrap
+                    Layout.maximumWidth: parent.width
+                    linkColor: "#0164AD"
+                    font.pixelSize: 13
+                    color: "#333333"
+                    topPadding: 10
+
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.NoButton
+                        cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    }
+                }
             }
         }
     }
