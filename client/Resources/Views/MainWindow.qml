@@ -1295,6 +1295,11 @@ Window {
                                                         }
                                                         cliTextField.clear()
                                                         break;
+                                                    case ".velocity":
+                                                        AppConfig.VelocityEnabled = true
+                                                        appendMessage("Velocity is now enabled. You will be automatically joined to the Velocity test servers after connecting. Restart xPilot to disable Velocity and connect to the network normally.", colorYellow)
+                                                        cliTextField.clear()
+                                                        break;
                                                     default:
                                                         throw `Unknown command: ${cmd[0].toLowerCase()}`
                                                     }

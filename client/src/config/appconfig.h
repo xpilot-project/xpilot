@@ -62,10 +62,10 @@ namespace xpilot
         QString XplaneNetworkAddress;
         int XplanePluginPort;
         int XplaneUdpPort;
-        bool VelocityEnabled;
         bool SilenceModelInstall;
         QStringList VisualMachines;
         bool KeepWindowVisible;
+        bool VelocityEnabled;
 
         QString NameWithHomeAirport() const
         {
@@ -116,6 +116,7 @@ namespace xpilot
         Q_PROPERTY(bool SilenceModelInstall MEMBER SilenceModelInstall)
         Q_PROPERTY(QStringList VisualMachines MEMBER VisualMachines)
         Q_PROPERTY(bool KeepWindowVisible MEMBER KeepWindowVisible)
+        Q_PROPERTY(bool VelocityEnabled MEMBER VelocityEnabled)
 
     signals:
         void alertPrivateMessageChanged();

@@ -14,6 +14,7 @@ AppConfig* AppConfig::instance = nullptr;
 AppConfig::AppConfig(QObject* parent) :
     QObject(parent)
 {
+    VelocityEnabled = false;
     loadConfig();
 }
 
@@ -66,7 +67,6 @@ void AppConfig::loadConfig()
         XplaneNetworkAddress = DEFAULT_XPLANE_NETWORK_ADDRESS;
         XplanePluginPort = DEFAULT_PLUGIN_PORT;
         XplaneUdpPort = XPLANE_UDP_PORT;
-        VelocityEnabled = false;
         SilenceModelInstall = false;
         KeepWindowVisible = false;
 
@@ -108,7 +108,6 @@ void AppConfig::loadConfig()
     XplaneNetworkAddress = jsonMap["XplaneNetworkAddress"].toString();
     XplanePluginPort = jsonMap["XplanePluginPort"].toInt();
     XplaneUdpPort = jsonMap["XplaneUdpPort"].toInt();
-    VelocityEnabled = jsonMap["VelocityEnabled"].toBool();
     SilenceModelInstall = jsonMap["SilenceModelInstall"].toBool();
     VisualMachines = jsonMap["VisualMachines"].toStringList();
     KeepWindowVisible = jsonMap["KeepWindowVisible"].toBool();
@@ -168,7 +167,6 @@ void AppConfig::saveConfig()
     jsonObj["XplaneNetworkAddress"] = XplaneNetworkAddress.isEmpty() ? DEFAULT_XPLANE_NETWORK_ADDRESS : XplaneNetworkAddress;
     jsonObj["XplanePluginPort"] = XplanePluginPort == 0 ? DEFAULT_PLUGIN_PORT : XplanePluginPort;
     jsonObj["XplaneUdpPort"] = XplaneUdpPort == 0 ? XPLANE_UDP_PORT : XplaneUdpPort;
-    jsonObj["VelocityEnabled"] = VelocityEnabled;
     jsonObj["SilenceModelInstall"] = SilenceModelInstall;
     jsonObj["KeepWindowVisible"] = KeepWindowVisible;
 
