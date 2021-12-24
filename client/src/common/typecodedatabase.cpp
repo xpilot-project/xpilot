@@ -165,8 +165,11 @@ void TypeCodeDatabase::searchTypeCodes(QString predicate)
                 || info.Manufacturer.toUpper().contains(predicate.toUpper());
     });
 
+    // limit results to no more than 10 type codes
+    QList<TypeCodeInfo> limitedResults(results.begin(), std::next(results.begin(), std::min(10, results.size())));
+
     QVariantList variantList;
-    for(const auto& v : std::as_const(results))
+    for(const auto& v : std::as_const(limitedResults))
     {
         QVariantMap mapItem;
         mapItem.insert("name", v.Name);
