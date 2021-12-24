@@ -115,6 +115,8 @@ namespace xpilot
         std::chrono::steady_clock::time_point last_fast_position_timestamp;
         std::chrono::steady_clock::time_point last_slow_position_timestamp;
 
+        void stopSounds();
+
     protected:
         virtual void UpdatePosition(float, int);
         void Extrapolate(Vector3 velocityVector, Vector3 rotationVector, double interval);
@@ -135,7 +137,6 @@ namespace xpilot
         void startSoundThread();
         void stopSoundThread();
         void setEngineState(EngineState state);
-        void stopSounds();
         std::unique_ptr<std::thread> m_soundThread;
         std::chrono::system_clock::time_point m_previousGainUpdateTime;
         std::chrono::system_clock::time_point m_starterSoundBegan;

@@ -72,6 +72,7 @@ namespace xpilot
 
 		void StartAudio();
 		void StopAudio();
+		void DisableAircraftSounds();
 		static float UpdateListenerPosition(float, float, int, void* ref);
 
 	protected:

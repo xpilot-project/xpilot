@@ -93,7 +93,7 @@ namespace xpilot
 		m_canopyOpenRatio("sim/operation/sound/users_canopy_open_ratio", ReadOnly),
 		m_userDoorOpenRatio("sim/operation/sound/users_door_open_ratio", ReadOnly)
 	{
-		XPLMRegisterFlightLoopCallback(&AircraftManager::UpdateListenerPosition, -1.0f, this);
+		
 	}
 
 	AircraftManager::~AircraftManager()
@@ -220,6 +220,8 @@ namespace xpilot
 
 	void AircraftManager::StartAudio()
 	{
+		XPLMRegisterFlightLoopCallback(&AircraftManager::UpdateListenerPosition, -1.0f, this);
+
 		audioDevice = alcOpenDevice(nullptr);
 		if (!audioDevice) {
 			LOG_MSG(logERROR, "Failed to open default sound device.");
@@ -263,6 +265,13 @@ namespace xpilot
 
 		if (!alcCloseDevice(audioDevice)) {
 			LOG_MSG(logERROR, "Failed to close audio playback device.");
+		}
+	}
+
+	void AircraftManager::DisableAircraftSounds()
+	{
+		for (auto& plane : mapPlanes) {
+			plane.second->stopSounds();
 		}
 	}
 

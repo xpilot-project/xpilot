@@ -168,6 +168,12 @@ namespace xpilot
             return m_transmitIndicator;
         }
 
+        bool setEnableAircraftSounds(bool b);
+        bool getEnableAircraftSounds()const
+        {
+            return m_aircraftSounds;
+        }
+
     private:
         Config() = default;
         std::vector<CslPackage> m_cslPackages;
@@ -184,6 +190,7 @@ namespace xpilot
         int m_maxLabelDist = 3;
         bool m_labelCutoffVis = true;
         bool m_transmitIndicator = false;
+        bool m_aircraftSounds = true;
         int m_logLevel = 2; // 0=Debug, 1=Info, 2=Warning, 3=Error, 4=Fatal, 5=Msg
     };
 }

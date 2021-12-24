@@ -774,6 +774,11 @@ namespace xpilot
 		m_aircraftManager->RemoveAllPlanes();
 	}
 
+	void XPilot::DisableAircraftSounds()
+	{
+		m_aircraftManager->DisableAircraftSounds();
+	}
+
 	int XPilot::GetBulkData(void* inRefcon, void* outData, int inStartPos, int inNumBytes)
 	{
 		dataRefs dr = (dataRefs)reinterpret_cast<long long>(inRefcon);

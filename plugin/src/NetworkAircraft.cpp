@@ -461,6 +461,8 @@ namespace xpilot
 
     void NetworkAircraft::stopSounds()
     {
+        m_soundLoaded = false;
+
         for (int i = 0; i < m_engineCount; i++) {
             alSourceStop(m_soundSources[i]);
             CHECKERR("Error stopping source");
@@ -689,8 +691,11 @@ namespace xpilot
                 }
             }
 
-            if (IsVisible()) {
+            if (IsVisible() && Config::Instance().getEnableAircraftSounds()) {
                 startSoundThread();
+            }
+            else {
+                stopSounds();
             }
         }
 
