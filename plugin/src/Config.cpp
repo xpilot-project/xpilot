@@ -140,6 +140,10 @@ namespace xpilot
                 {
                     setEnableTransmitIndicator(jf["EnableTransmitIndicator"]);
                 }
+                if (jf.contains("EnableAircraftSounds"))
+                {
+                    setEnableAircraftSounds(jf["EnableAircraftSounds"]);
+                }
                 if (jf.contains("CSL"))
                 {
                     json cslpackages = jf["CSL"];
@@ -188,6 +192,7 @@ namespace xpilot
         j["LabelCutoffVis"] = getLabelCutoffVis();
         j["LogLevel"] = getLogLevel();
         j["EnableTransmitIndicator"] = getEnableTransmitIndicator();
+        j["EnableAircraftSounds"] = getEnableAircraftSounds();
 
         if (!m_cslPackages.empty())
         {
@@ -388,5 +393,10 @@ namespace xpilot
     {
         m_transmitIndicator = b;
         return true;
+    }
+    bool Config::setEnableAircraftSounds(bool b)
+    {
+        m_aircraftSounds = b;
+        return false;
     }
 }

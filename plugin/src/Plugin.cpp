@@ -23,6 +23,7 @@
 #include "Constants.h"
 #include "XPMPMultiplayer.h"
 #include "XPLMPlugin.h"
+#include "XPLMGraphics.h"
 
 #if APL == 1
 #include <OpenGL/OpenGL.h>
@@ -37,12 +38,10 @@
 #include <GL/glu.h>
 #endif
 
-#include <XPLMGraphics.h>
-
 #include <memory>
 #include <thread>
 
-# define M_PI 3.14159265358979323846
+#define M_PI 3.14159265358979323846
 
 #if !defined(XPLM200) || !defined(XPLM210) || !defined(XPLM300) || !defined(XPLM301)
 #error xPilot requires XPLM301 SDK or newer
@@ -164,7 +163,7 @@ PLUGIN_API void XPluginDisable(void)
 PLUGIN_API void XPluginStop(void)
 {
     try
-    {
+    {        
         XPImgWindowCleanup();
         XPLMDestroyMenu(PluginMenu);
         XPLMUnregisterCommandHandler(PttCommand, PttCommandHandler, 0, 0);

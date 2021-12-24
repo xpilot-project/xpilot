@@ -41,6 +41,7 @@ namespace xpilot
 	static int labelMaxDistance = 3;
 	static bool labelVisibilityCutoff = true;
 	static bool enableTransmitIndicator = false;
+	static bool enableAircraftSounds = true;
 	static float lblCol[4];
 	ImGui::FileBrowser fileBrowser(ImGuiFileBrowserFlags_SelectDirectory);
 
@@ -48,10 +49,10 @@ namespace xpilot
 	static int currentNode = -1;
 
 	SettingsWindow::SettingsWindow(WndMode _mode) :
-		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 305, 600, 0))
+		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 320, 600, 0))
 	{
 		SetWindowTitle(string_format("xPilot %s Settings", PLUGIN_VERSION_STRING));
-		SetWindowResizingLimits(600, 305, 600, 305);
+		SetWindowResizingLimits(600, 320, 600, 320);
 
 		fileBrowser.SetTitle("Browse...");
 		fileBrowser.SetWindowSize(450, 250);
@@ -82,6 +83,7 @@ namespace xpilot
 		labelVisibilityCutoff = xpilot::Config::Instance().getLabelCutoffVis();
 		logLevel = xpilot::Config::Instance().getLogLevel();
 		enableTransmitIndicator = xpilot::Config::Instance().getEnableTransmitIndicator();
+		enableAircraftSounds = xpilot::Config::Instance().getEnableAircraftSounds();
 		HexToRgb(xpilot::Config::Instance().getAircraftLabelColor(), lblCol);
 	}
 
@@ -157,7 +159,7 @@ namespace xpilot
 					ImGui::AlignTextToFramePadding();
 					ImGui::Text("Show Callsign Labels");
 					ImGui::SameLine();
-					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Check this option to show callsign above other aircraft.");
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Enable this option to show callsign above other aircraft.");
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##ShowAircraftLabels", &showHideLabels))
 					{
@@ -274,6 +276,19 @@ namespace xpilot
 					if (ImGui::Checkbox("##EnableTransmitIndicator", &enableTransmitIndicator))
 					{
 						xpilot::Config::Instance().setEnableTransmitIndicator(enableTransmitIndicator);
+						Save();
+					}
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Enable Aircraft Engine Sounds");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Enable this option to add ambient engine sounds to other aircraft.");
+					ImGui::TableSetColumnIndex(1);
+					if (ImGui::Checkbox("##EnableAircraftSounds", &enableAircraftSounds))
+					{
+						xpilot::Config::Instance().setEnableAircraftSounds(enableAircraftSounds);
 						Save();
 					}
 

@@ -20,17 +20,24 @@
 #define NetworkAircraft_h
 
 #include <deque>
+#include <optional>
+#include <thread>
+#include <atomic>
+#include <queue>
+#include <mutex>
 
 #include "XPilotAPI.h"
 #include "InterpolatedState.h"
 #include "TerrainProbe.h"
+#include "Utilities.h"
+#include "Vector3.hpp"
 
 #include "XPCAircraft.h"
 #include "XPMPAircraft.h"
 #include "XPMPMultiplayer.h"
 
-#include "Vector3.hpp"
-#include <optional>
+#include "AircraftSoundManager.h"
+#include "AL/al.h"
 
 namespace xpilot
 {
@@ -44,10 +51,26 @@ namespace xpilot
         double Bank;
     };
 
+    enum class EngineClass
+    {
+        Helicopter,
+        PistonProp,
+        TurboProp,
+        JetEngine,
+        Unknown
+    };
+
+    enum class EngineState
+    {
+        Starter,
+        Normal
+    };
+
     class NetworkAircraft : public XPMP2::Aircraft
     {
     public:
         NetworkAircraft(const std::string& _callsign, const AircraftVisualState& _visualState, const std::string& _icaoType, const std::string& _icaoAirline, const std::string& _livery, XPMPPlaneID _modeS_id, const std::string& _modelName);
+        virtual ~NetworkAircraft();
 
         void copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const;
         void copyBulkData(XPilotAPIAircraft::XPilotAPIBulkInfoTexts* pOut, size_t size) const;
@@ -56,7 +79,8 @@ namespace xpilot
 
         bool on_ground;
         bool gear_down;
-        bool engines_running;
+        bool engines_running = false;
+        bool was_engines_running = false;
         bool reverse_thrust;
         float ground_speed;
         float target_gear_position;
@@ -91,11 +115,42 @@ namespace xpilot
         std::chrono::steady_clock::time_point last_fast_position_timestamp;
         std::chrono::steady_clock::time_point last_slow_position_timestamp;
 
+        void stopSounds();
+
     protected:
         virtual void UpdatePosition(float, int);
         void Extrapolate(Vector3 velocityVector, Vector3 rotationVector, double interval);
         void AutoLevel(float frameRate);
         static double NormalizeDegrees(double value, double lowerBound, double upperBound);
+
+        ALuint m_soundBuffer = 0;
+        ALuint m_soundSources[8]; // max 8 engine sounds
+
+        float m_pitch = 1.0f;
+        float m_gain = 1.0f;
+        float m_currentGain = 0.0f;
+        bool m_soundLoaded = false;
+        bool m_soundsPlaying = false;
+        bool m_soundsInitialized = false;
+
+        void audioLoop();
+        void startSoundThread();
+        void stopSoundThread();
+        void setEngineState(EngineState state);
+        std::unique_ptr<std::thread> m_soundThread;
+        std::chrono::system_clock::time_point m_previousGainUpdateTime;
+        std::chrono::system_clock::time_point m_starterSoundBegan;
+
+        // length (in seconds) of engine starter sounds, used for transition between starter and engine sound
+        const float PistonStarterTime = 1.5f;
+        const float JetStarterTime = 18.5f;
+        const float TurboStarterTime = 12.5f;
+
+        EngineClass m_engineClass;
+        EngineState m_engineState;
+        int m_engineCount;
+        vect m_velocity;
+        vect m_position;
     };
 }
 

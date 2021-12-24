@@ -129,6 +129,8 @@ namespace xpilot
 
 	void XPilot::Initialize()
 	{
+		m_aircraftManager->StartAudio();
+
 		InitializeXPMP();
 		TryGetTcasControl();
 
@@ -191,6 +193,8 @@ namespace xpilot
 			m_zmqThread->join();
 			m_zmqThread.reset();
 		}
+
+		m_aircraftManager->StopAudio();
 	}
 
 	void XPilot::ZmqWorker()
@@ -769,6 +773,11 @@ namespace xpilot
 	void XPilot::DeleteAllAircraft()
 	{
 		m_aircraftManager->RemoveAllPlanes();
+	}
+
+	void XPilot::DisableAircraftSounds()
+	{
+		m_aircraftManager->DisableAircraftSounds();
 	}
 
 	int XPilot::GetBulkData(void* inRefcon, void* outData, int inStartPos, int inNumBytes)
