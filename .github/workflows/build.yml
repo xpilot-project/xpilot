@@ -217,7 +217,7 @@ jobs:
       - name: Install plugin conan packages
         working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
-          conan install .. -s compiler.runtime=MT --build=missing
+          conan install .. -s compiler.runtime=MT -o openal:shared=True --build=missing
 
       - name: Plugin CMake
         working-directory: ${{ env.PLUGIN_DIR }}/build

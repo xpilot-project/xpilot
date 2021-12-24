@@ -7,6 +7,3 @@ libsndfile/1.0.31
 
 [generators]
 cmake
-
-[options]
-openal:shared=True
