@@ -310,9 +310,9 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/flightmodel/position/theta", DataRef::Pitch, 5);
     SubscribeDataRef("sim/flightmodel/position/psi", DataRef::Heading, 5);
     SubscribeDataRef("sim/flightmodel/position/phi", DataRef::Bank, 5);
-    SubscribeDataRef("sim/flightmodel/position/local_vx", DataRef::LatitudeVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/local_vx", DataRef::LongitudeVelocity, 5);
     SubscribeDataRef("sim/flightmodel/position/local_vy", DataRef::AltitudeVelocity, 5);
-    SubscribeDataRef("sim/flightmodel/position/local_vz", DataRef::LongitudeVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/local_vz", DataRef::LatitudeVelocity, 5);
     SubscribeDataRef("sim/flightmodel/position/Qrad", DataRef::PitchVelocity, 5);
     SubscribeDataRef("sim/flightmodel/position/Rrad", DataRef::HeadingVelocity, 5);
     SubscribeDataRef("sim/flightmodel/position/Prad", DataRef::BankVelocity, 5);
@@ -491,7 +491,7 @@ void XplaneAdapter::OnDataReceived()
                     m_userAircraftData.AltitudePressure = value;
                     break;
                 case DataRef::LatitudeVelocity:
-                    m_userAircraftData.LatitudeVelocity = value;
+                    m_userAircraftData.LatitudeVelocity = value * -1.0;
                     break;
                 case DataRef::AltitudeVelocity:
                     m_userAircraftData.AltitudeVelocity = value;
@@ -500,13 +500,13 @@ void XplaneAdapter::OnDataReceived()
                     m_userAircraftData.LongitudeVelocity = value;
                     break;
                 case DataRef::PitchVelocity:
-                    m_userAircraftData.PitchVelocity = value;
+                    m_userAircraftData.PitchVelocity = value * -1.0;
                     break;
                 case DataRef::HeadingVelocity:
                     m_userAircraftData.HeadingVelocity = value;
                     break;
                 case DataRef::BankVelocity:
-                    m_userAircraftData.BankVelocity = value;
+                    m_userAircraftData.BankVelocity = value * -1.0;
                     break;
                 case DataRef::GroundSpeed:
                     m_userAircraftData.GroundSpeed = value * 1.94384; // mps -> knots

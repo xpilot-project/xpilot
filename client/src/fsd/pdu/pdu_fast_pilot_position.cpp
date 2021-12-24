@@ -11,7 +11,7 @@ PDUFastPilotPosition::PDUFastPilotPosition(QString from, double lat, double lon,
     Pitch = pitch;
     Heading = heading;
     Bank = bank;
-    Bank = velocityLongitude;
+    VelocityLongitude = velocityLongitude;
     VelocityAltitude = velocityAltitude;
     VelocityLatitude = velocityLatitude;
     VelocityPitch = velocityPitch;
@@ -27,7 +27,7 @@ QStringList PDUFastPilotPosition::toTokens() const
     tokens.append(QString::number(Lon, 'f', 6));
     tokens.append(QString::number(Altitude, 'f', 2));
     tokens.append(QString::number(PackPitchBankHeading(Pitch, Bank, Heading)));
-    tokens.append(QString::number(Bank, 'f', 4));
+    tokens.append(QString::number(VelocityLongitude, 'f', 4));
     tokens.append(QString::number(VelocityAltitude, 'f', 4));
     tokens.append(QString::number(VelocityLatitude, 'f', 4));
     tokens.append(QString::number(VelocityPitch, 'f', 4));

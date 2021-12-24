@@ -67,6 +67,7 @@ namespace xpilot
         void realNameReceived(QString callsign, QString name);
         void controllerAtisReceived(QString callsign, QStringList atis);
         void slowPositionUpdateReceived(QString callsign, AircraftVisualState visualState, double groundSpeed);
+        void fastPositionUpdateReceived(QString callsign, AircraftVisualState visualState, VelocityVector positionalVelocityVector, VelocityVector rotationalVelocityVector);
         void aircraftInfoReceived(QString callsign, QString equipment, QString airline);
 
     private:

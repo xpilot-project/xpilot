@@ -14,6 +14,7 @@ namespace xpilot
         connect(&m_networkManager, &NetworkManager::capabilitiesResponseReceived, this, &AircraftManager::OnCapabilitiessResponseReceived);
         connect(&m_networkManager, &NetworkManager::capabilitiesRequestReceived, this, &AircraftManager::OnCapabilitiesRequestReceived);
         connect(&m_networkManager, &NetworkManager::slowPositionUpdateReceived, this, &AircraftManager::OnSlowPositionUpdateReceived);
+        connect(&m_networkManager, &NetworkManager::fastPositionUpdateReceived, this, &AircraftManager::OnFastPositionUpdateReceived);
         connect(&m_networkManager, &NetworkManager::aircraftConfigurationInfoReceived, this, &AircraftManager::OnAircraftConfigurationReceived);
         connect(&m_networkManager, &NetworkManager::aircraftInfoReceived, this, &AircraftManager::OnAircraftInfoReceived);
         connect(&m_networkManager, &NetworkManager::pilotDeleted, this, &AircraftManager::OnPilotDeleted);

@@ -327,7 +327,7 @@ namespace xpilot
         visualState.Bank = pdu.Bank;
 
         VelocityVector positionalVelocityVector {};
-        positionalVelocityVector.X = pdu.Bank;
+        positionalVelocityVector.X = pdu.VelocityLongitude;
         positionalVelocityVector.Y = pdu.VelocityAltitude;
         positionalVelocityVector.Z = pdu.VelocityLatitude;
 
@@ -335,6 +335,8 @@ namespace xpilot
         rotationalVelocityVector.X = pdu.VelocityPitch;
         rotationalVelocityVector.Y = pdu.VelocityHeading;
         rotationalVelocityVector.Z = pdu.VelocityBank;
+
+        emit fastPositionUpdateReceived(pdu.From, visualState, positionalVelocityVector, rotationalVelocityVector);
     }
 
     void NetworkManager::OnATCPositionReceived(PDUATCPosition pdu)
