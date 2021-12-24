@@ -34,8 +34,8 @@ namespace xpilot
 		m_gaveDisconnectWarning(false),
 		m_gaveHealthyWarning(false)
 	{
-			// give 30 second "warm-up" period after loading sim
-			XPLMRegisterFlightLoopCallback(flightLoopCallback, 30.0f, this);
+		// give 30 second "warm-up" period after loading sim
+		XPLMRegisterFlightLoopCallback(flightLoopCallback, 30.0f, this);
 	}
 
 	FrameRateMonitor::~FrameRateMonitor()
@@ -57,7 +57,7 @@ namespace xpilot
 	{
 		auto* monitor = static_cast<FrameRateMonitor*>(ref);
 
-		if (monitor->skipMonitoring()) {
+		if (!monitor->m_environment->isNetworkConnected() || monitor->skipMonitoring()) {
 			monitor->resetFrameRateDetection();
 			return -1.0f;
 		}
