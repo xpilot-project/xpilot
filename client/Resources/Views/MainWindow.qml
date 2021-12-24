@@ -659,8 +659,8 @@ Window {
         }
     }
 
-    function appendMessage(message, color = colorGray) {
-        var model = cliModel.get(0)
+    function appendMessage(message, color = colorGray, tabIdx = 0) {
+        var model = cliModel.get(tabIdx)
         model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message.linkify()}`, msgColor: color})
     }
 
@@ -679,13 +679,8 @@ Window {
         model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`})
     }
 
-    function clearNotes() {
-        var model = cliModel.get(1)
-        model.attributes.clear()
-    }
-
-    function clearMessages() {
-        var model = cliModel.get(0)
+    function clearMessages(tabIdx) {
+        var model = cliModel.get(tabIdx)
         model.attributes.clear()
     }
 
@@ -1131,180 +1126,180 @@ Window {
                                                 throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
                                             }
 
-                                            if(currentTab == 0) {
-                                                if(cliTextField.text.startsWith(".")) {
-                                                    // radio messages
-                                                    switch(cmd[0].toLowerCase())
-                                                    {
-                                                    case ".clear":
-                                                        clearMessages()
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".chat":
-                                                        if(cmd.length < 2) {
-                                                            throw "Not enough parameters. Expected .chat CALLSIGN"
-                                                        }
-                                                        if(cmd[1].length > 10) {
-                                                            throw "Callsign too long."
-                                                        }
-                                                        focusOrCreateTab(cmd[1])
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".msg":
-                                                        if(cmd.length < 3) {
-                                                            throw "Not enough parameters. Expected .msg CALLSIGN MESSAGE"
-                                                        }
-                                                        if(!networkConnected) {
-                                                            throw "Not connected to network."
-                                                        }
-                                                        if(cmd[1].length > 10) {
-                                                            throw "Callsign too long."
-                                                        }
-                                                        focusOrCreateTab(cmd[1])
-                                                        networkManager.sendPrivateMessage(cmd[1], cmd.slice(2).join(" "))
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".wallop":
-                                                        if(cmd.length < 2) {
-                                                            throw "Not enough parameters. Expected .wallop MESSAGE"
-                                                        }
-                                                        networkManager.sendWallop(cmd.slice(1).join(" "))
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".wx":
-                                                    case ".metar":
-                                                        if(cmd.length < 2) {
-                                                            throw `Not enough parameters. Expected ${cmd[0]} STATION-ID`
-                                                        }
-                                                        networkManager.requestMetar(cmd[1])
-                                                        cliTextField.clear();
-                                                        break;
-                                                    case ".atis":
-                                                        if(cmd.length < 2) {
-                                                            throw `Not enough parameters. Expected .atis CALLSIGN`
-                                                        }
-                                                        networkManager.requestControllerAtis(cmd[1])
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".com1":
-                                                    case ".com2":
-                                                        if (!/^1\d\d[\.\,]\d{1,3}$/.test(cmd[1])) {
-                                                            throw "Invalid frequency format.";
-                                                        }
-                                                        var freq = FrequencyUtils.frequencyToInt(cmd[1])
-                                                        var radio = cmd[0].toLowerCase() === ".com1" ? 1 : 2
-                                                        if(radio === 1) {
-                                                            xplaneAdapter.setCom1Frequency(freq);
-                                                        }
-                                                        else {
-                                                            xplaneAdapter.setCom2Frequency(freq);
-                                                        }
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".tx":
-                                                        if(cmd.length < 2) {
-                                                            throw `Not enough parameters. Expected .tx com1 or .tx com2`
-                                                        }
-                                                        var radio = cmd[1].toLowerCase() === "com1" ? 1 : 2
-                                                        xplaneAdapter.setAudioComSelection(radio)
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".rx":
-                                                        if(cmd.length < 3) {
-                                                            throw `Not enough parameters. Expected .rx com<n> on|off`
-                                                        }
-                                                        if(cmd[1].toLowerCase() !== "com1" && cmd[1].toLowerCase() !== "com2") {
-                                                            throw `Invalid parameters. Expected .rx com<n> on|off`
-                                                        }
-                                                        if(cmd[2].toLowerCase() !== "on" && cmd[2].toLowerCase() !== "off") {
-                                                            throw `Invalid parameters. Expected .rx com<n> on|off`
-                                                        }
-                                                        var radio = cmd[1].toLowerCase() === "com1" ? 1 : 2
-                                                        var status = cmd[2].toLowerCase() === "on" ? 1 : 0
-                                                        xplaneAdapter.setAudioSelection(radio, status)
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".x":
-                                                    case ".xpndr":
-                                                    case ".xpdr":
-                                                    case ".squawk":
-                                                    case ".sq":
-                                                        if(cmd.length < 2) {
-                                                            throw `Not enough parameters. Expected ${cmd[0]} SQUAWK-CODE`
-                                                        }
-                                                        if (!/^[0-7]{4}$/.test(cmd[1])) {
-                                                            throw "Invalid transponder code format.";
-                                                        }
-                                                        var code = parseInt(cmd[1])
-                                                        xplaneAdapter.setTransponderCode(code)
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".towerview":
-                                                        if(!simConnected)
-                                                        {
-                                                            throw "xPilot is unable to connect to X-Plane. Please make sure X-Plane is running and a flight is loaded."
-                                                        }
-                                                        if(networkConnected)
-                                                        {
-                                                            throw "You must first disconnect from the network before using TowerView"
-                                                        }
-                                                        var tvServerAddress = "localhost"
-                                                        var tvCallsign = "TOWER"
-                                                        if(cmd.length >= 2)
-                                                        {
-                                                            tvServerAddress = cmd[1]
-                                                            if(cmd.length >= 3)
-                                                            {
-                                                                tvCallsign = cmd[2].toUpperCase()
-                                                            }
-                                                        }
-                                                        networkManager.connectTowerView(tvCallsign, tvServerAddress)
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".ignore":
-                                                        if(cmd.length < 2) {
-                                                            throw `Not enough parameters. Expected .ignore CALLSIGN`
-                                                        }
-                                                        xplaneAdapter.ignoreAircraft(cmd[1])
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".ignorelist":
-                                                        xplaneAdapter.showIgnoreList()
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".unignore":
-                                                        if(cmd.length < 2) {
-                                                            throw `Not enough parameters. Expected .unignore CALLSIGN`
-                                                        }
-                                                        xplaneAdapter.unignoreAircraft(cmd[1])
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".visualip":
-                                                        if(cmd.length < 2) {
-                                                            AppConfig.VisualMachines = []
-                                                            AppConfig.saveConfig()
-                                                            appendMessage("X-Plane visual machine addresses cleared", colorYellow);
-                                                        }
-                                                        else {
-                                                            AppConfig.VisualMachines = []
-                                                            for(var x = 1; x < cmd.length; x++) {
-                                                                AppConfig.VisualMachines.push(cmd[x])
-                                                            }
-                                                            AppConfig.saveConfig()
-                                                            appendMessage(`X-Plane visual machine(s) set to ${AppConfig.VisualMachines.join(", ")}. You must restart xPilot for the changes to take effect.`, colorYellow)
-                                                        }
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".velocity":
-                                                        AppConfig.VelocityEnabled = true
-                                                        appendMessage("Velocity is now enabled. You will be automatically joined to the Velocity test servers after connecting. Restart xPilot to disable Velocity and connect to the network normally.", colorYellow)
-                                                        cliTextField.clear()
-                                                        break;
-                                                    default:
-                                                        throw `Unknown command: ${cmd[0].toLowerCase()}`
+                                            if(cliTextField.text.startsWith(".")) {
+                                                // radio messages
+                                                switch(cmd[0].toLowerCase())
+                                                {
+                                                case ".clear":
+                                                    clearMessages(currentTab)
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".chat":
+                                                    if(cmd.length < 2) {
+                                                        throw "Not enough parameters. Expected .chat CALLSIGN"
                                                     }
+                                                    if(cmd[1].length > 10) {
+                                                        throw "Callsign too long."
+                                                    }
+                                                    focusOrCreateTab(cmd[1])
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".msg":
+                                                    if(cmd.length < 3) {
+                                                        throw "Not enough parameters. Expected .msg CALLSIGN MESSAGE"
+                                                    }
+                                                    if(!networkConnected) {
+                                                        throw "Not connected to network."
+                                                    }
+                                                    if(cmd[1].length > 10) {
+                                                        throw "Callsign too long."
+                                                    }
+                                                    focusOrCreateTab(cmd[1])
+                                                    networkManager.sendPrivateMessage(cmd[1], cmd.slice(2).join(" "))
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".wallop":
+                                                    if(cmd.length < 2) {
+                                                        throw "Not enough parameters. Expected .wallop MESSAGE"
+                                                    }
+                                                    networkManager.sendWallop(cmd.slice(1).join(" "))
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".wx":
+                                                case ".metar":
+                                                    if(cmd.length < 2) {
+                                                        throw `Not enough parameters. Expected ${cmd[0]} STATION-ID`
+                                                    }
+                                                    networkManager.requestMetar(cmd[1])
+                                                    cliTextField.clear();
+                                                    break;
+                                                case ".atis":
+                                                    if(cmd.length < 2) {
+                                                        throw `Not enough parameters. Expected .atis CALLSIGN`
+                                                    }
+                                                    networkManager.requestControllerAtis(cmd[1])
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".com1":
+                                                case ".com2":
+                                                    if (!/^1\d\d[\.\,]\d{1,3}$/.test(cmd[1])) {
+                                                        throw "Invalid frequency format.";
+                                                    }
+                                                    var freq = FrequencyUtils.frequencyToInt(cmd[1])
+                                                    var radio = cmd[0].toLowerCase() === ".com1" ? 1 : 2
+                                                    if(radio === 1) {
+                                                        xplaneAdapter.setCom1Frequency(freq);
+                                                    }
+                                                    else {
+                                                        xplaneAdapter.setCom2Frequency(freq);
+                                                    }
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".tx":
+                                                    if(cmd.length < 2) {
+                                                        throw `Not enough parameters. Expected .tx com1 or .tx com2`
+                                                    }
+                                                    var radio = cmd[1].toLowerCase() === "com1" ? 1 : 2
+                                                    xplaneAdapter.setAudioComSelection(radio)
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".rx":
+                                                    if(cmd.length < 3) {
+                                                        throw `Not enough parameters. Expected .rx com<n> on|off`
+                                                    }
+                                                    if(cmd[1].toLowerCase() !== "com1" && cmd[1].toLowerCase() !== "com2") {
+                                                        throw `Invalid parameters. Expected .rx com<n> on|off`
+                                                    }
+                                                    if(cmd[2].toLowerCase() !== "on" && cmd[2].toLowerCase() !== "off") {
+                                                        throw `Invalid parameters. Expected .rx com<n> on|off`
+                                                    }
+                                                    var radio = cmd[1].toLowerCase() === "com1" ? 1 : 2
+                                                    var status = cmd[2].toLowerCase() === "on" ? 1 : 0
+                                                    xplaneAdapter.setAudioSelection(radio, status)
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".x":
+                                                case ".xpndr":
+                                                case ".xpdr":
+                                                case ".squawk":
+                                                case ".sq":
+                                                    if(cmd.length < 2) {
+                                                        throw `Not enough parameters. Expected ${cmd[0]} SQUAWK-CODE`
+                                                    }
+                                                    if (!/^[0-7]{4}$/.test(cmd[1])) {
+                                                        throw "Invalid transponder code format.";
+                                                    }
+                                                    var code = parseInt(cmd[1])
+                                                    xplaneAdapter.setTransponderCode(code)
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".towerview":
+                                                    if(!simConnected)
+                                                    {
+                                                        throw "xPilot is unable to connect to X-Plane. Please make sure X-Plane is running and a flight is loaded."
+                                                    }
+                                                    if(networkConnected)
+                                                    {
+                                                        throw "You must first disconnect from the network before using TowerView"
+                                                    }
+                                                    var tvServerAddress = "localhost"
+                                                    var tvCallsign = "TOWER"
+                                                    if(cmd.length >= 2)
+                                                    {
+                                                        tvServerAddress = cmd[1]
+                                                        if(cmd.length >= 3)
+                                                        {
+                                                            tvCallsign = cmd[2].toUpperCase()
+                                                        }
+                                                    }
+                                                    networkManager.connectTowerView(tvCallsign, tvServerAddress)
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".ignore":
+                                                    if(cmd.length < 2) {
+                                                        throw `Not enough parameters. Expected .ignore CALLSIGN`
+                                                    }
+                                                    xplaneAdapter.ignoreAircraft(cmd[1])
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".ignorelist":
+                                                    xplaneAdapter.showIgnoreList()
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".unignore":
+                                                    if(cmd.length < 2) {
+                                                        throw `Not enough parameters. Expected .unignore CALLSIGN`
+                                                    }
+                                                    xplaneAdapter.unignoreAircraft(cmd[1])
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".visualip":
+                                                    if(cmd.length < 2) {
+                                                        AppConfig.VisualMachines = []
+                                                        AppConfig.saveConfig()
+                                                        appendMessage("X-Plane visual machine addresses cleared", colorYellow, currentTab);
+                                                    }
+                                                    else {
+                                                        AppConfig.VisualMachines = []
+                                                        for(var x = 1; x < cmd.length; x++) {
+                                                            AppConfig.VisualMachines.push(cmd[x])
+                                                        }
+                                                        AppConfig.saveConfig()
+                                                        appendMessage(`X-Plane visual machine(s) set to ${AppConfig.VisualMachines.join(", ")}. You must restart xPilot for the changes to take effect.`, colorYellow, currentTab)
+                                                    }
+                                                    cliTextField.clear()
+                                                    break;
+                                                case ".velocity":
+                                                    AppConfig.VelocityEnabled = true
+                                                    appendMessage("Velocity is now enabled. You will be automatically joined to the Velocity test servers after connecting. Restart xPilot to disable Velocity and connect to the network normally.", colorYellow, currentTab)
+                                                    cliTextField.clear()
+                                                    break;
+                                                default:
+                                                    throw `Unknown command: ${cmd[0].toLowerCase()}`
                                                 }
-                                                else {
+                                            }
+                                            else {
+                                                if(currentTab == 0) {
                                                     if(!networkConnected) {
                                                         throw "Not connected to network."
                                                     }
@@ -1312,35 +1307,26 @@ Window {
                                                     appendMessage(cliTextField.text, colorCyan)
                                                     cliTextField.clear()
                                                 }
-                                            }
-                                            else if(currentTab == 1) {
-                                                // notes
-                                                switch(cmd[0].toLowerCase())
-                                                {
-                                                case ".clear":
-                                                    clearNotes()
-                                                    cliTextField.clear()
-                                                    break;
-                                                default:
+                                                else if(currentTab == 1) {
+                                                    // notes
                                                     appendNote(cliTextField.text)
                                                     cliTextField.clear()
-                                                    break;
-                                                }
-                                            }
-                                            else {
-                                                if(!networkConnected) {
-                                                    appendPrivateMessage(currentTab, "Not connected to network.", "", colorRed)
-                                                    errorSound.play()
                                                 }
                                                 else {
-                                                    var callsign = tabModel.get(currentTab).title;
-                                                    networkManager.sendPrivateMessage(callsign, cliTextField.text)
-                                                    cliTextField.clear()
+                                                    if(!networkConnected) {
+                                                        appendPrivateMessage(currentTab, "Not connected to network.", "", colorRed)
+                                                        errorSound.play()
+                                                    }
+                                                    else {
+                                                        var callsign = tabModel.get(currentTab).title;
+                                                        networkManager.sendPrivateMessage(callsign, cliTextField.text)
+                                                        cliTextField.clear()
+                                                    }
                                                 }
                                             }
                                         }
                                         catch(err) {
-                                            appendMessage(err, colorRed)
+                                            appendMessage(err, colorRed, currentTab)
                                         }
                                     }
                                     historyIndex = -1
