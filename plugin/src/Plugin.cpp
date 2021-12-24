@@ -29,11 +29,9 @@
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/glu.h>
 #elif IBM == 1
-#include <GL/GLU.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #elif LIN == 1
-#include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #endif
