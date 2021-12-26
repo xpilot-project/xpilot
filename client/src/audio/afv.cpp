@@ -10,6 +10,11 @@ using namespace afv_native::afv;
 
 namespace xpilot
 {
+    float ScaleVolume(float v)
+    {
+        return 1.0f - sqrt(1.0f - (v * v));
+    }
+
     AudioForVatsim::AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, ControllerManager& controllerManager, QObject* parent) :
         QObject(parent),
         m_xplaneAdapter(xplaneAdapter),
@@ -146,8 +151,10 @@ namespace xpilot
                     m_client->setTxRadio(1);
                 }
 
-                m_client->setRadioGain(0, m_radioStackState.Com1Volume / 100.0);
-                m_client->setRadioGain(1, m_radioStackState.Com2Volume / 100.0);
+                qDebug() << ScaleVolume(m_radioStackState.Com1Volume / 100.0f);
+
+                m_client->setRadioGain(0, ScaleVolume(m_radioStackState.Com1Volume / 100.0f));
+                m_client->setRadioGain(1, ScaleVolume(m_radioStackState.Com2Volume / 100.0f));
 
                 updateTransceivers();
             }
@@ -262,7 +269,8 @@ namespace xpilot
         double v = volume;
         if(v < 0) v = 0;
         if(v > 100) v = 100;
-        m_client->setRadioGain(0, v / 100.0f);
+
+        m_client->setRadioGain(0, ScaleVolume(v / 100.0f));
 
         AppConfig::getInstance()->Com1Volume = v;
         AppConfig::getInstance()->saveConfig();
@@ -273,7 +281,8 @@ namespace xpilot
         double v = volume;
         if(v < 0) v = 0;
         if(v > 100) v = 100;
-        m_client->setRadioGain(1, v / 100.0f);
+
+        m_client->setRadioGain(1, ScaleVolume(v / 100.0f));
 
         AppConfig::getInstance()->Com2Volume = v;
         AppConfig::getInstance()->saveConfig();
