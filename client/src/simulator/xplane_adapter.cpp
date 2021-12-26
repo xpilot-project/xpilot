@@ -11,6 +11,7 @@
 using namespace xpilot;
 
 constexpr int MIN_PLUGIN_VERSION = 200;
+constexpr int HEARTBEAT_TIMEOUT_SECS = 15;
 
 enum DataRef
 {
@@ -76,7 +77,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
         m_rawDataStream.setDevice(&m_pluginLog);
     }
 
-    m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch() - 5; // default to 5 seconds ago to prevent ghost X-Plane connection status
+    m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch() - HEARTBEAT_TIMEOUT_SECS; // initialize timestamp in the past to prevent ghost connection status
 
     m_zmqContext = new zmq::context_t(1);
     m_zmqSocket = new zmq::socket_t(*m_zmqContext, ZMQ_DEALER);
@@ -236,7 +237,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     connect(heartbeatTimer, &QTimer::timeout, this, [=] {
         qint64 now = QDateTime::currentSecsSinceEpoch();
 
-        if(!m_initialHandshake || (now - m_lastUdpTimestamp) > 5) {
+        if(!m_initialHandshake || (now - m_lastUdpTimestamp) > HEARTBEAT_TIMEOUT_SECS) {
             emit simConnectionStateChanged(false);
             m_simConnected = false;
             m_radioStackState = {};
