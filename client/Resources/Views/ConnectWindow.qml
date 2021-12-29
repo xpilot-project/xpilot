@@ -19,6 +19,10 @@ Popup {
 
     signal closeWindow()
 
+    function trimLineBreaks(value) {
+        return value.replace(/[\n\r]/g, "")
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: typeCodeResults.visible = false
@@ -55,16 +59,16 @@ Popup {
     }
 
     Component.onCompleted: {
-        txtCallsign.text = AppConfig.RecentConnection.Callsign;
-        txtTypeCode.text = AppConfig.RecentConnection.TypeCode;
-        txtSelcal.text = AppConfig.RecentConnection.SelcalCode;
+        txtCallsign.text = trimLineBreaks(AppConfig.RecentConnection.Callsign);
+        txtTypeCode.text = trimLineBreaks(AppConfig.RecentConnection.TypeCode);
+        txtSelcal.text = trimLineBreaks(AppConfig.RecentConnection.SelcalCode);
     }
 
     function connectToNetwork() {
-        networkManager.connectToNetwork(txtCallsign.text, txtTypeCode.text, txtSelcal.text, observerMode.checked);
-        AppConfig.RecentConnection.Callsign = txtCallsign.text;
-        AppConfig.RecentConnection.TypeCode = txtTypeCode.text;
-        AppConfig.RecentConnection.SelcalCode = txtSelcal.text;
+        networkManager.connectToNetwork(trimLineBreaks(txtCallsign.text), trimLineBreaks(txtTypeCode.text), trimLineBreaks(txtSelcal.text), observerMode.checked);
+        AppConfig.RecentConnection.Callsign = trimLineBreaks(txtCallsign.text);
+        AppConfig.RecentConnection.TypeCode = trimLineBreaks(txtTypeCode.text);
+        AppConfig.RecentConnection.SelcalCode = trimLineBreaks(txtSelcal.text);
         AppConfig.saveConfig();
         closeWindow()
     }
