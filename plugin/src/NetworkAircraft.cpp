@@ -120,22 +120,25 @@ namespace xpilot
         if (model.doc8643Classification.size() > 0) {
 
             std::string engineCount(1, model.doc8643Classification[1]);
-            m_engineCount = std::stoi(engineCount);
+            try {
+                m_engineCount = std::stoi(engineCount);
+            }
+            catch (...) { /* catch the exception and default to 2 engines */ }
 
             // helicopter or gyrocopter
             if (model.doc8643Classification[0] == 'H' || model.doc8643Classification[0] == 'G') {
                 m_engineClass = EngineClass::Helicopter;
             }
             // jet
-            else if (model.doc8643Classification[2] == 'J') {
+            else if (model.doc8643Classification.size() >= 2 && model.doc8643Classification[2] == 'J') {
                 m_engineClass = EngineClass::JetEngine;
             }
             // piston prop
-            else if (model.doc8643Classification[2] == 'P') {
+            else if (model.doc8643Classification.size() >= 2 && model.doc8643Classification[2] == 'P') {
                 m_engineClass = EngineClass::PistonProp;
             }
             // turbo prop
-            else if (model.doc8643Classification[2] == 'T') {
+            else if (model.doc8643Classification.size() >= 2 && model.doc8643Classification[2] == 'T') {
                 m_engineClass = EngineClass::TurboProp;
             }
         }
