@@ -71,10 +71,16 @@ jobs:
         run: |
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
+      - name: Extract debug symbols
+        working-directory: ${{ env.PLUGIN_DIR }}/build/lin_x64
+        run: |
+          objcopy --only-keep-debug xPilot.xpl xPilot.debug
+
       - name: Package plugin
         run: |
           mkdir -p ${{ github.workspace }}/xPilot/lin_x64
           cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.xpl ${{ github.workspace }}/xPilot/lin_x64
+          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.debug ${{ github.workspace }}/xPilot/lin_x64
           cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
       ### Build Client ###
@@ -233,6 +239,7 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/xPilot/win_x64
           cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.xpl ${{ github.workspace }}/xPilot/win_x64
+          cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.pdb ${{ github.workspace }}/xPilot/win_x64
           cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
       ### Build Client ###
@@ -372,10 +379,16 @@ jobs:
         run: |
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
+      - name: Extract debug symbols
+        working-directory: ${{ env.PLUGIN_DIR }}/build/mac_x64
+        run: |
+          dsymutil xPilot.xpl -o xPilot.dSYM
+
       - name: Package plugin
         run: |
           mkdir -p ${{ github.workspace }}/xPilot/mac_x64
           cp ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.xpl ${{ github.workspace }}/xPilot/mac_x64
+          cp ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.dSYM ${{ github.workspace }}/xPilot/mac_x64
           cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
       ### Build Client ###
