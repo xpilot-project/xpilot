@@ -111,7 +111,6 @@ namespace xpilot
         QTimer* m_transceiverTimer;
         QTimer* m_eventTimer;
         QTimer* m_rxTxQueryTimer;
-        QTimer* m_vuTimer;
         QThread *m_workerThread;
 
         bool m_com1Rx = false;
