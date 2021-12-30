@@ -88,7 +88,11 @@ void VersionCheck::PerformVersionCheck()
             }
             else
             {
-                if(v > BuildConfig::getVersion())
+                if((BuildConfig::isBetaVersion() && betaIdentifier.isEmpty()) && v >= BuildConfig::getVersion())
+                {
+                    isNewVersion = true;
+                }
+                else if(v > BuildConfig::getVersion())
                 {
                     isNewVersion = true;
                 }
