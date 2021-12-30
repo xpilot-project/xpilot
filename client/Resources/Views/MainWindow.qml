@@ -530,7 +530,7 @@ Window {
                     freqString = `${FrequencyUtils.formatFromFsd(args.Frequencies[0])} & ${FrequencyUtils.formatFromFsd(args.Frequencies[1])}`;
                 }
                 else {
-                    freqString = FrequencyUtils.formatFromFsd(args.Frequencies[0]);
+                    freqString = FrequencyUtils.fromNetworkFormat(args.Frequencies[0]);
                 }
                 message = `${args.From} on ${freqString}: ${args.Message}`;
             }
