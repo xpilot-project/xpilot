@@ -12,7 +12,7 @@ Window {
     id: formSettings
     title: "Settings"
     width: 650
-    height: 590
+    height: 560
     minimumHeight: height
     minimumWidth: width
     maximumHeight: height
@@ -49,10 +49,6 @@ Window {
                 outputDeviceList.model = audio.OutputDevices;
                 outputDeviceList.currentIndex = -1;
             }
-        }
-
-        function onInputVuChanged(vu) {
-            peakLevel.value = vu
         }
     }
 
@@ -485,38 +481,12 @@ Window {
             Layout.fillWidth: true
 
             ColumnLayout {
-                id: columnLayout2
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.topMargin: 0
-                anchors.rightMargin: 0
-                anchors.leftMargin: 0
-
-                PeakLevelControl {
-                    id: peakLevel
-                    width: 300
-                    height: 13
-                }
-
-                Text {
-                    id: text10
-                    color: "#333333"
-                    text: qsTr("Adjust your system's microphone level so the volume peak indicator remains green when speaking normally.")
-                    font.pixelSize: 13
-                    Layout.fillWidth: true
-                    wrapMode: Text.WordWrap
-                    renderType: Text.NativeRendering
-                }
-            }
-
-            ColumnLayout {
                 id: columnLayout3
                 height: 65
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.topMargin: 75
+                anchors.topMargin: 0
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
                 spacing: 0
@@ -540,9 +510,27 @@ Window {
                         audio.disableAudioEffects(switchDisableRadioEffects.checked)
                     }
                 }
+
+                Text {
+                    id: name
+                    text: "Your Push to Talk (PTT) must be assigned in X-Plane using the joystick or keyboard command bindings. <a href='https://vats.im/xpilot-ptt'>Learn more about how to set your PTT</a>"
+                    onLinkActivated: Qt.openUrlExternally(link)
+                    renderType: Text.NativeRendering
+                    wrapMode: Text.WordWrap
+                    Layout.maximumWidth: 600
+                    linkColor: "#0164AD"
+                    font.pixelSize: 13
+                    color: "#333333"
+                    topPadding: 10
+
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.NoButton
+                        cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    }
+                }
             }
         }
-
 
         Item {
             id: volumeLevels
@@ -574,25 +562,6 @@ Window {
                     comLabel: "COM2"
                     onVolumeValueChanged: {
                         audio.setCom2Volume(volume)
-                    }
-                }
-
-                Text {
-                    id: name
-                    text: "Your Push to Talk (PTT) must be assigned in X-Plane using the joystick or keyboard command bindings. <a href='https://vats.im/xpilot-ptt'>Learn more about how to set your PTT</a>"
-                    onLinkActivated: Qt.openUrlExternally(link)
-                    renderType: Text.NativeRendering
-                    wrapMode: Text.WordWrap
-                    Layout.maximumWidth: parent.width
-                    linkColor: "#0164AD"
-                    font.pixelSize: 13
-                    color: "#333333"
-                    topPadding: 10
-
-                    MouseArea {
-                        anchors.fill: parent
-                        acceptedButtons: Qt.NoButton
-                        cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
                     }
                 }
             }
