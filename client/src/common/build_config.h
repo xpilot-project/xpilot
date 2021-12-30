@@ -21,6 +21,7 @@ namespace xpilot
         static const QString versionCheckUrl();
 
         static const QVersionNumber getVersion();
+        static const int getVersionInt();
         static const QString getVersionString();
         static const QString getShortVersionString();
         static const QString getVersionStringPlatform();

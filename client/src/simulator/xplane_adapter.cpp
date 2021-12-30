@@ -1,5 +1,6 @@
 #include "xplane_adapter.h"
 #include "src/config/appconfig.h"
+#include "src/common/build_config.h"
 #include "src/common/utils.h"
 
 #include <QTimer>
@@ -10,7 +11,6 @@
 
 using namespace xpilot;
 
-constexpr int MIN_PLUGIN_VERSION = 200;
 constexpr int HEARTBEAT_TIMEOUT_SECS = 15;
 
 enum DataRef
@@ -123,7 +123,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
                             QJsonObject data = obj["data"].toObject();
                             if(data.contains("version"))
                             {
-                                if(data["version"].toInt() < MIN_PLUGIN_VERSION)
+                                if(data["version"].toInt() < BuildConfig::getVersionInt())
                                 {
                                     m_validPluginVersion = false;
                                     emit invalidPluginVersion();
