@@ -20,6 +20,7 @@
 #define TextMessageConsole_h
 
 #include <list>
+#include <mutex>
 #include "XPImgWindow.h"
 
 namespace xpilot {
@@ -68,11 +69,15 @@ namespace xpilot {
 		void RadioMessageReceived(std::string message, double red = 255, double green = 255, double blue = 255);
 		void SendRadioMessage(const std::string& msg);
 		void SendPrivateMessage(const std::string& tabName, const std::string& msg);
+		void PrivateMessageError(std::string tabName, std::string error);
+		void CloseTab(const std::string& tabName);
 	protected:
 		void buildInterface() override;
 		void ShowErrorMessage(std::string error);
 	private:
 		bool m_scrollToBottom;
+		std::mutex m_tabMutex;
+		std::mutex m_messageMutex;
 		XPilot* m_env;
 	};
 

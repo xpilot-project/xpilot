@@ -87,30 +87,36 @@ namespace xpilot
 
 	void TextMessageConsole::RadioMessageReceived(std::string msg, double red, double green, double blue)
 	{
-		if (!msg.empty())
+		std::lock_guard<std::mutex> lock(m_messageMutex);
 		{
-			ConsoleMessage m;
-			m.setMessage(string_format("[%s] %s", UtcTimestamp().c_str(), msg.c_str()));
-			m.setRed(red);
-			m.setGreen(green);
-			m.setBlue(blue);
-			m_messageHistory.push_back(m);
-			m_scrollToBottom = true;
+			if (!msg.empty())
+			{
+				ConsoleMessage m;
+				m.setMessage(string_format("[%s] %s", UtcTimestamp().c_str(), msg.c_str()));
+				m.setRed(red);
+				m.setGreen(green);
+				m.setBlue(blue);
+				m_messageHistory.push_back(m);
+				m_scrollToBottom = true;
+			}
 		}
 	}
 
 	void TextMessageConsole::ShowErrorMessage(std::string error)
 	{
-		ConsoleMessage m;
-		m.setMessage(string_format("[%s] %s", UtcTimestamp().c_str(), error.c_str()));
-		m.setRed(192);
-		m.setGreen(57);
-		m.setBlue(43);
-		m_messageHistory.push_back(m);
-		m_scrollToBottom = true;
+		std::lock_guard<std::mutex> lock(m_messageMutex);
+		{
+			ConsoleMessage m;
+			m.setMessage(string_format("[%s] %s", UtcTimestamp().c_str(), error.c_str()));
+			m.setRed(192);
+			m.setGreen(57);
+			m.setBlue(43);
+			m_messageHistory.push_back(m);
+			m_scrollToBottom = true;
+		}
 	}
 
-	void PrivateMessageError(std::string tabName, std::string error)
+	void TextMessageConsole::PrivateMessageError(std::string tabName, std::string error)
 	{
 		ConsoleMessage m;
 		m.setMessage(string_format("[%s] %s", UtcTimestamp().c_str(), error.c_str()));
@@ -118,14 +124,17 @@ namespace xpilot
 		m.setGreen(57);
 		m.setBlue(43);
 
-		auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
+		std::lock_guard<std::mutex> lock(m_tabMutex);
 		{
-			return t.tabName == tabName;
-		});
+			auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
+				{
+					return t.tabName == tabName;
+				});
 
-		if (it != m_tabs.end())
-		{
-			it->scrollToBottom = true;
+			if (it != m_tabs.end())
+			{
+				it->scrollToBottom = true;
+			}
 		}
 	}
 
@@ -144,20 +153,38 @@ namespace xpilot
 		}
 	}
 
+	void TextMessageConsole::CloseTab(const std::string& tabName)
+	{
+		std::lock_guard<std::mutex> lock(m_tabMutex);
+		{
+			auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
+				{
+					return t.tabName == tabName;
+				});
+			if (it != m_tabs.end())
+			{
+				m_tabs.erase(it);
+			}
+		}
+	}
+
 	void TextMessageConsole::CreateNonExistingTab(const std::string& tabName)
 	{
-		auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
+		std::lock_guard<std::mutex> lock(m_tabMutex);
 		{
-			return t.tabName == tabName;
-		});
+			auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
+				{
+					return t.tabName == tabName;
+				});
 
-		if (it == m_tabs.end())
-		{
-			Tab tab;
-			tab.tabName = tabName;
-			tab.isOpen = true;
-			tab.messageHistory = std::list<ConsoleMessage>();
-			m_tabs.push_back(tab);
+			if (it == m_tabs.end())
+			{
+				Tab tab;
+				tab.tabName = tabName;
+				tab.isOpen = true;
+				tab.messageHistory = std::list<ConsoleMessage>();
+				m_tabs.push_back(tab);
+			}
 		}
 	}
 
@@ -173,20 +200,23 @@ namespace xpilot
 			m.setGreen(255);
 			m.setBlue(255);
 
-			auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t)
-				{
-					return t.tabName == recipient;
-				});
+			std::lock_guard<std::mutex> lock(m_tabMutex);
+			{
+				auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t)
+					{
+						return t.tabName == recipient;
+					});
 
-			if (it != m_tabs.end())
-			{
-				it->messageHistory.push_back(m);
-				it->scrollToBottom = true;
-			}
-			else
-			{
-				CreateNonExistingTab(recipient);
-				HandlePrivateMessage(recipient, msg, ConsoleTabType::Sent);
+				if (it != m_tabs.end())
+				{
+					it->messageHistory.push_back(m);
+					it->scrollToBottom = true;
+				}
+				else
+				{
+					CreateNonExistingTab(recipient);
+					HandlePrivateMessage(recipient, msg, ConsoleTabType::Sent);
+				}
 			}
 		}
 		break;
@@ -198,35 +228,26 @@ namespace xpilot
 			m.setGreen(255);
 			m.setBlue(255);
 
-			auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t)
-				{
-					return t.tabName == recipient;
-				});
+			std::lock_guard<std::mutex> lock(m_tabMutex);
+			{
+				auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t)
+					{
+						return t.tabName == recipient;
+					});
 
-			if (it != m_tabs.end())
-			{
-				it->messageHistory.push_back(m);
-				it->scrollToBottom = true;
-			}
-			else
-			{
-				CreateNonExistingTab(recipient);
-				HandlePrivateMessage(recipient, msg, ConsoleTabType::Received);
+				if (it != m_tabs.end())
+				{
+					it->messageHistory.push_back(m);
+					it->scrollToBottom = true;
+				}
+				else
+				{
+					CreateNonExistingTab(recipient);
+					HandlePrivateMessage(recipient, msg, ConsoleTabType::Received);
+				}
 			}
 		}
 		break;
-		}
-	}
-
-	void CloseTab(const std::string& tabName)
-	{
-		auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
-		{
-			return t.tabName == tabName;
-		});
-		if (it != m_tabs.end())
-		{
-			m_tabs.erase(it);
 		}
 	}
 
@@ -440,12 +461,22 @@ namespace xpilot
 								}
 								break;
 							case xpilot::CommandOptions::Clear:
-								m_messageHistory.clear();
+							{
+								std::lock_guard<std::mutex> lock(m_messageMutex);
+								{
+									m_messageHistory.clear();
+								}
 								m_inputValue = "";
+							}
 								break;
 							case xpilot::CommandOptions::CloseAll:
-								m_tabs.clear();
+							{
+								std::lock_guard<std::mutex> lock(m_tabMutex);
+								{
+									m_tabs.clear();
+								}
 								m_inputValue = "";
+							}
 								break;
 							case xpilot::CommandOptions::Close:
 							default:
@@ -473,11 +504,14 @@ namespace xpilot
 				ImGui::EndTabItem();
 			}
 
-			for (auto it = m_tabs.begin(); it != m_tabs.end(); ++it)
+			std::lock_guard<std::mutex> lock(m_tabMutex);
 			{
-				if (!it->isOpen)
+				for (auto it = m_tabs.begin(); it != m_tabs.end(); ++it)
 				{
-					m_tabs.erase(it);
+					if (!it->isOpen)
+					{
+						m_tabs.erase(it);
+					}
 				}
 			}
 
@@ -516,9 +550,14 @@ namespace xpilot
 								switch (resolveOption(args.at(0)))
 								{
 								case xpilot::CommandOptions::Clear:
-									it->messageHistory.clear();
+								{
+									std::lock_guard<std::mutex> lock(m_tabMutex);
+									{
+										it->messageHistory.clear();
+									}
 									it->textInput = "";
-									break;
+								}
+								break;
 								case xpilot::CommandOptions::Close:
 									it->textInput = "";
 									CloseTab(key);
@@ -542,7 +581,7 @@ namespace xpilot
 					if (ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
 						it->textInput = "";
 
-					if(ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0))
+					if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0))
 						ImGui::SetKeyboardFocusHere(-1);
 
 					ImGui::PopID();
