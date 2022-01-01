@@ -664,13 +664,22 @@ Window {
         model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message.linkify()}`, msgColor: color})
     }
 
-    function appendPrivateMessage(tab, message, from, color = colorCyan) {
-        var model = cliModel.get(tab)
-        if(from) {
-            model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${from}: ${message}`, msgColor: color})
-        }
-        else {
-            model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: color})
+    function appendPrivateMessage(tabIdx, message, from, color = colorCyan) {
+        for(var i = 0; i < tabModel.count; i++) {
+            var tab = tabModel.get(i)
+            if(tabIdx === i) {
+                for(var j = 0; j < cliModel.count; j++) {
+                    var cli = cliModel.get(j)
+                    if(cli.tabName.toLowerCase() === tab.title.toLowerCase()) {
+                        if(from) {
+                            cli.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${from}: ${message}`, msgColor: color})
+                        }
+                        else {
+                            cli.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: color})
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -696,7 +705,7 @@ Window {
     function createChatTab(callsign) {
         tabModel.append({title: callsign.toUpperCase(), disposable: true, hasUnread: false})
         var idx = getChatTabIndex(callsign)
-        cliModel.append({tabId: idx, attributes: [], realName: false})
+        cliModel.append({tabName: callsign.toLowerCase(), tabId: idx, attributes: [], realName: false})
         tabListView.currentIndex = idx
         currentTab = idx
         networkManager.requestRealName(callsign)
@@ -934,6 +943,11 @@ Window {
                                 currentTab = 0
                                 cliModel.remove(itemIndex)
                                 tabModel.remove(itemIndex)
+
+                                for(var i = 0; i < cliModel.count; i++) {
+                                    var cli = cliModel.get(i)
+                                    cli.tabId = i
+                                }
                             }
                         }
                     }
@@ -965,10 +979,12 @@ Window {
             ListModel {
                 id: cliModel
                 ListElement {
+                    tabName: "messages"
                     tabId: 0 // messages
                     attributes: []
                 }
                 ListElement {
+                    tabName: "notes"
                     tabId: 1 // notes
                     attributes: []
                 }
