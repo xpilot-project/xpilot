@@ -133,6 +133,23 @@ void AppConfig::loadConfig()
     WindowConfig.Height = qMax(window["Height"].toInt(), DefaultHeight);
     WindowConfig.Maximized = window["Maximized"].toBool();
 
+    QJsonObject flightPlan = jsonMap["LastFlightPlan"].toJsonObject();
+    LastFlightPlan.AltAirport = flightPlan["AltAirport"].toString();
+    LastFlightPlan.CruiseAlt = flightPlan["CruiseAlt"].toInt();
+    LastFlightPlan.DepAirport = flightPlan["DepAirport"].toString();
+    LastFlightPlan.DestAirport = flightPlan["DestAirport"].toString();
+    LastFlightPlan.Equipment = flightPlan["Equipment"].toString();
+    LastFlightPlan.EstimatedDepTime = flightPlan["EstimatedDepTime"].toString();
+    LastFlightPlan.FlightRules = flightPlan["FlightRules"].toString();
+    LastFlightPlan.FuelAvailHours = flightPlan["FuelAvailHours"].toInt();
+    LastFlightPlan.FuelAvailMinutes = flightPlan["FuelAvailMinutes"].toInt();
+    LastFlightPlan.HoursEnroute = flightPlan["HoursEnroute"].toInt();
+    LastFlightPlan.MinutesEnroute = flightPlan["MinutesEnroute"].toInt();
+    LastFlightPlan.Remarks = flightPlan["Remarks"].toString();
+    LastFlightPlan.Route = flightPlan["Route"].toString();
+    LastFlightPlan.TAS = flightPlan["TAS"].toInt();
+    LastFlightPlan.VoiceCapability = flightPlan["VoiceCapability"].toString();
+
     if(!VatsimPassword.isEmpty()) {
         VatsimPasswordDecrypted = crypto.decryptToString(VatsimPassword);
     }
@@ -198,6 +215,24 @@ void AppConfig::saveConfig()
     window["Height"] = qMax(WindowConfig.Height, DefaultHeight);
     window["Maximized"] = WindowConfig.Maximized;
     jsonObj["WindowConfig"] = window;
+
+    QJsonObject flightPlan;
+    flightPlan["AltAirport"] = LastFlightPlan.AltAirport;
+    flightPlan["CruiseAlt"] = LastFlightPlan.CruiseAlt;
+    flightPlan["DepAirport"] = LastFlightPlan.DepAirport;
+    flightPlan["DestAirport"] = LastFlightPlan.DestAirport;
+    flightPlan["Equipment"] = LastFlightPlan.Equipment;
+    flightPlan["EstimatedDepTime"] = LastFlightPlan.EstimatedDepTime;
+    flightPlan["FlightRules"] = LastFlightPlan.FlightRules;
+    flightPlan["FuelAvailHours"] = LastFlightPlan.FuelAvailHours;
+    flightPlan["FuelAvailMinutes"] = LastFlightPlan.FuelAvailMinutes;
+    flightPlan["HoursEnroute"] = LastFlightPlan.HoursEnroute;
+    flightPlan["MinutesEnroute"] = LastFlightPlan.MinutesEnroute;
+    flightPlan["Remarks"] = LastFlightPlan.Remarks;
+    flightPlan["Route"] = LastFlightPlan.Route;
+    flightPlan["TAS"] = LastFlightPlan.TAS;
+    flightPlan["VoiceCapability"] = LastFlightPlan.VoiceCapability;
+    jsonObj["LastFlightPlan"] = flightPlan;
 
     QJsonDocument jsonDoc(jsonObj);
     QFile configFile(dataRoot() + "AppConfig.json");

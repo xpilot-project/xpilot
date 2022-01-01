@@ -99,12 +99,18 @@ GridLayout {
         ToolbarButton {
             id: btnFlightPlan
             text: "Flight Plan"
+            enabled: simConnected
             MouseArea {
                 id: btnFlightPlanMouseArea
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    Qt.openUrlExternally("https://my.vatsim.net/pilots/flightplan")
+                    var comp = Qt.createComponent("qrc:/Resources/Views/FlightPlanWindow.qml")
+                    if(comp.status === Component.Ready) {
+                        flightPlanWindow = comp.createObject(mainWindow)
+                        flightPlanWindow.networkConnected = networkConnected
+                        flightPlanWindow.show()
+                    }
                 }
             }
         }

@@ -421,8 +421,9 @@ QString toQString(const FlightRules &value)
         return "I";
     case FlightRules::VFR:
     case FlightRules::DVFR:
-    case FlightRules::SVFR:
         return "V";
+    case FlightRules::SVFR:
+        return "S";
     default:
         return "";
     }

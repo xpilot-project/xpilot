@@ -36,6 +36,9 @@ namespace xpilot
         Q_INVOKABLE void requestControllerAtis(QString callsign);
         Q_INVOKABLE void requestMetar(QString station);
         Q_INVOKABLE void sendWallop(QString message);
+        Q_INVOKABLE void sendFlightPlan(QString flightPlan);
+        Q_INVOKABLE void requestFlightPlan();
+        Q_INVOKABLE void loadLastFlightPlan();
 
         void RequestMetar(QString station);
         void RequestIsValidATC(QString callsign);
@@ -69,6 +72,8 @@ namespace xpilot
         void slowPositionUpdateReceived(QString callsign, AircraftVisualState visualState, double groundSpeed);
         void fastPositionUpdateReceived(QString callsign, AircraftVisualState visualState, VelocityVector positionalVelocityVector, VelocityVector rotationalVelocityVector);
         void aircraftInfoReceived(QString callsign, QString equipment, QString airline);
+        void remoteFlightPlanReceived(QString flightPlan);
+        void lastFlightPlanReceived(QString flightPlan);
 
     private:
         FsdClient m_fsd { this };
@@ -110,6 +115,7 @@ namespace xpilot
         void OnPlaneInfoRequestReceived(PDUPlaneInfoRequest pdu);
         void OnPlaneInfoResponseReceived(PDUPlaneInfoResponse pdu);
         void OnKillRequestReceived(PDUKillRequest pdu);
+        void OnFlightPlanReceived(PDUFlightPlan pdu);
         void OnRawDataSent(QString data);
         void OnRawDataReceived(QString data);
 

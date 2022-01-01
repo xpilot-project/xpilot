@@ -50,5 +50,8 @@
         <file>Resources/Components/VersionCheck/DownloadingUpdate.qml</file>
         <file>Resources/Components/DisconnectDialog.qml</file>
         <file>Resources/Components/InvalidTypeCodeDialog.qml</file>
+        <file>Resources/Views/FlightPlanWindow.qml</file>
+        <file>Resources/Views/ImportIcaoFpl.qml</file>
+        <file>Resources/Components/ErrorDialog.qml</file>
     </qresource>
 </RCC>

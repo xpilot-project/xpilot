@@ -110,4 +110,11 @@ enum class NetworkError
     UnauthorizedSoftware
 };
 
+enum class VoiceCapability
+{
+    Voice,
+    ReceiveOnly,
+    TextOnly
+};
+
 #endif

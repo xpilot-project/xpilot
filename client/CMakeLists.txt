@@ -60,8 +60,8 @@ include_directories(${CMAKE_BINARY_DIR}/generated)
 
 configure_file(xpilot.rc.in ${CMAKE_SOURCE_DIR}/xpilot.rc @ONLY)
 
-find_package(QT NAMES Qt5 COMPONENTS Core Quick Network Svg REQUIRED)
-find_package(Qt5 COMPONENTS Core Quick Network Svg REQUIRED)
+find_package(QT NAMES Qt5 COMPONENTS Core Quick Network Svg Multimedia REQUIRED)
+find_package(Qt5 COMPONENTS Core Quick Network Svg Multimedia REQUIRED)
 find_package(Qt5QuickCompiler)
 
 qtquick_compiler_add_resources(RESOURCES qml.qrc)
@@ -101,6 +101,8 @@ set(FSD_SOURCES
     src/fsd/pdu/pdu_delete_pilot.cpp
     src/fsd/pdu/pdu_fast_pilot_position.h
     src/fsd/pdu/pdu_fast_pilot_position.cpp
+    src/fsd/pdu/pdu_flight_plan.h
+    src/fsd/pdu/pdu_flight_plan.cpp
     src/fsd/pdu/pdu_kill_request.h
     src/fsd/pdu/pdu_kill_request.cpp
     src/fsd/pdu/pdu_metar_request.h
@@ -151,6 +153,7 @@ set(PROJECT_SOURCES
     src/config/appconfig.h
     src/config/appconfig.cpp
     src/config/windowconfig.h
+    src/config/flightplan.h
     src/appcore.h
     src/appcore.cpp
     src/audio/afv.cpp
@@ -335,7 +338,7 @@ target_include_directories(${PROJECT_NAME}
     ${CMAKE_SOURCE_DIR}/afv-native/include)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core Qt5::Quick Qt5::Network Qt5::Svg)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core Qt5::Quick Qt5::Network Qt5::Svg Qt5::Multimedia)
 
 if (WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32.lib)

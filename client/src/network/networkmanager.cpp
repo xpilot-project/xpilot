@@ -3,6 +3,7 @@
 #include <random>
 #include <QRandomGenerator>
 #include <QDateTime>
+#include <QRegularExpression>
 
 #include "networkmanager.h"
 #include "serverlistmanager.h"
@@ -60,6 +61,7 @@ namespace xpilot
         connect(&m_fsd, &FsdClient::RaisePlaneInfoRequestReceived, this, &NetworkManager::OnPlaneInfoRequestReceived);
         connect(&m_fsd, &FsdClient::RaisePlaneInfoResponseReceived, this, &NetworkManager::OnPlaneInfoResponseReceived);
         connect(&m_fsd, &FsdClient::RaiseKillRequestReceived, this, &NetworkManager::OnKillRequestReceived);
+        connect(&m_fsd, &FsdClient::RaiseFlightPlanReceived, this, &NetworkManager::OnFlightPlanReceived);
         connect(&m_fsd, &FsdClient::RaiseRawDataSent, this, &NetworkManager::OnRawDataSent);
         connect(&m_fsd, &FsdClient::RaiseRawDataReceived, this, &NetworkManager::OnRawDataReceived);
 
@@ -79,19 +81,19 @@ namespace xpilot
             {
             case NotificationType::Error:
                 m_xplaneAdapter.NotificationPosted(message, COLOR_RED);
-                break;
+            break;
             case NotificationType::Info:
                 m_xplaneAdapter.NotificationPosted(message, COLOR_YELLOW);
-                break;
+            break;
             case NotificationType::RadioMessageSent:
                 m_xplaneAdapter.NotificationPosted(message, COLOR_CYAN);
-                break;
+            break;
             case NotificationType::ServerMessage:
                 m_xplaneAdapter.NotificationPosted(message, COLOR_GREEN);
-                break;
+            break;
             case NotificationType::Warning:
                 m_xplaneAdapter.NotificationPosted(message, COLOR_ORANGE);
-                break;
+            break;
             }
         });
 
@@ -204,14 +206,14 @@ namespace xpilot
         {
         case ClientQueryType::AircraftConfiguration:
             emit aircraftConfigurationInfoReceived(pdu.From, pdu.Payload.join(":"));
-            break;
+        break;
         case ClientQueryType::Capabilities:
             if(pdu.From.toUpper() != "SERVER")
             {
                 emit capabilitiesRequestReceived(pdu.From);
             }
             SendCapabilities(pdu.From);
-            break;
+        break;
         case ClientQueryType::COM1Freq:
         {
             QStringList payload;
@@ -219,7 +221,7 @@ namespace xpilot
             payload.append(freq);
             m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, pdu.From, ClientQueryType::COM1Freq, payload));
         }
-            break;
+        break;
         case ClientQueryType::RealName:
         {
             QStringList realName;
@@ -228,7 +230,7 @@ namespace xpilot
             realName.append(QString::number((int)NetworkRating::OBS));
             m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, pdu.From, ClientQueryType::RealName, realName));
         }
-            break;
+        break;
         case ClientQueryType::INF:
             QString inf = QString("xPilot %1 PID=%2 (%3) IP=%4 SYS_UID=%5 FS_VER=XPlane LT=%6 LO=%7 AL=%8")
                     .arg(BuildConfig::getVersionString(),
@@ -240,7 +242,7 @@ namespace xpilot
                          QString::number(m_userAircraftData.Longitude),
                          QString::number(m_userAircraftData.AltitudeMslM * 3.28084));
             m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, pdu.From, inf));
-            break;
+        break;
         }
     }
 
@@ -250,15 +252,15 @@ namespace xpilot
         {
         case ClientQueryType::PublicIP:
             m_publicIp = pdu.Payload.size() > 0 ? pdu.Payload[0] : "";
-            break;
+        break;
         case ClientQueryType::IsValidATC:
             if(pdu.Payload.at(0).toUpper() == "Y") {
                 emit isValidAtcReceived(pdu.Payload.at(1).toUpper());
             }
-            break;
+        break;
         case ClientQueryType::RealName:
             emit realNameReceived(pdu.From, pdu.Payload.at(0));
-            break;
+        break;
         case ClientQueryType::ATIS:
             if(pdu.Payload.at(0) == "E")
             {
@@ -291,10 +293,10 @@ namespace xpilot
                     m_mapAtisMessages[pdu.From.toUpper()].push_back(pdu.Payload[1]);
                 }
             }
-            break;
+        break;
         case ClientQueryType::Capabilities:
             emit capabilitiesResponseReceived(pdu.From, pdu.Payload.join(":"));
-            break;
+        break;
         }
     }
 
@@ -456,6 +458,57 @@ namespace xpilot
     {
         m_forcedDisconnect = true;
         m_forcedDisconnectReason = pdu.Reason;
+    }
+
+    void NetworkManager::OnFlightPlanReceived(PDUFlightPlan pdu)
+    {
+        QJsonObject json;
+        json.insert("flight_rules", toQString(pdu.Rules).mid(0, 1));
+        json.insert("departure", pdu.DepAirport);
+        json.insert("arrival", pdu.DestAirport);
+        json.insert("alternate", pdu.AltAirport);
+        json.insert("off_block", pdu.EstimatedDepTime);
+        json.insert("enroute_hours", pdu.HoursEnroute);
+        json.insert("enroute_minutes", pdu.MinutesEnroute);
+        json.insert("airspeed", pdu.TAS);
+        json.insert("fuel_hours", pdu.FuelAvailHours);
+        json.insert("fuel_minutes", pdu.FuelAvailMinutes);
+
+        QString route = pdu.Route;
+        if(route.startsWith("+")) {
+            route = route.remove(0, 1);
+        }
+
+        json.insert("route", route.trimmed().toUpper());
+
+        QString voiceCapability;
+        QString remarks = pdu.Remarks;
+        if(remarks.toLower().contains("/v/")) {
+            voiceCapability = "V";
+        }
+        else if(remarks.toLower().contains("/r/")) {
+            voiceCapability = "R";
+        }
+        else if(remarks.toLower().contains("/t/")) {
+            voiceCapability = "T";
+        }
+        json.insert("voice_capability", voiceCapability);
+
+        remarks = remarks.toLower().replace("/v/", "");
+        remarks = remarks.toLower().replace("/t/", "");
+        remarks = remarks.toLower().replace("/r/", "");
+
+        json.insert("remarks", remarks.trimmed().toUpper());
+        json.insert("equipment", pdu.Equipment);
+
+        if(pdu.CruiseAlt.toInt()) {
+            int alt = pdu.CruiseAlt.toInt();
+            if(alt < 1000) alt *= 100;
+            json.insert("altitude", alt);
+        }
+
+        QJsonDocument doc(json);
+        emit remoteFlightPlanReceived(doc.toJson(QJsonDocument::Compact));
     }
 
     void NetworkManager::OnUserAircraftDataUpdated(UserAircraftData data)
@@ -629,6 +682,137 @@ namespace xpilot
     void NetworkManager::sendWallop(QString message)
     {
         m_fsd.SendPDU(PDUWallop(m_connectInfo.Callsign, message));
+    }
+
+    void NetworkManager::sendFlightPlan(QString flightPlan)
+    {
+        if(flightPlan.isEmpty()) return;
+
+        const QJsonDocument doc = QJsonDocument::fromJson(flightPlan.toUtf8());
+
+        QString aircraftType;
+        QString equipmentSuffix;
+        aircraftType.append(m_connectInfo.TypeCode);
+        if(!doc.object()["equipment_suffix"].isNull()) {
+            equipmentSuffix = doc.object()["equipment_suffix"].toString();
+            aircraftType.append("/");
+            aircraftType.append(equipmentSuffix);
+        }
+
+        QString remarks = doc.object()["remarks"].toString();
+        remarks = remarks.toLower().replace("/v/", "");
+        remarks = remarks.toLower().replace("/t/", "");
+        remarks = remarks.toLower().replace("/r/", "");
+
+        if(!doc.object()["voice_capability"].isNull()) {
+            QString voiceCaps = doc.object()["voice_capability"].toString().toUpper();
+            if(voiceCaps == "V") {
+                remarks = QString("%1 /v/").arg(remarks.trimmed());
+            }
+            else if(voiceCaps == "R") {
+                remarks = QString("%1 /r/").arg(remarks.trimmed());
+            }
+            else if(voiceCaps == "T") {
+                remarks = QString("%1 /t/").arg(remarks.trimmed());
+            }
+        }
+
+        QString selcal;
+        QRegularExpression re("SEL/([A-Z][A-Z])([A-Z][A-Z])");
+        QRegularExpressionMatch match = re.match(remarks);
+        if(match.hasMatch()) {
+            selcal = QString("%1-%2").arg(match.captured(0)).arg(match.captured(1));
+        }
+
+        if(!selcal.isEmpty()) {
+            m_connectInfo.SelcalCode = selcal;
+        }
+        else if(!m_connectInfo.SelcalCode.isEmpty()) {
+            remarks = QString("%1 SEL/%2").arg(remarks.trimmed()).arg(m_connectInfo.SelcalCode.replace("-",""));
+        }
+
+        remarks = remarks.trimmed().toUpper();
+
+        FlightRules flightRules = FlightRules::Unknown;
+        QString flightRulesString = doc.object()["flight_rules"].toString().toUpper();
+        if(!flightRulesString.isNull()) {
+            if(flightRulesString == "IFR" || flightRulesString == "I") {
+                flightRules = FlightRules::IFR;
+            }
+            else if(flightRulesString == "VFR" || flightRulesString == "V") {
+                flightRules = FlightRules::VFR;
+            }
+            else if(flightRulesString == "SVFR" || flightRulesString == "S") {
+                flightRules = FlightRules::SVFR;
+            }
+        }
+
+        QString trueAirSpeed = doc.object()["airspeed"].toString();
+        QString departure = doc.object()["departure"].toString();
+        QString departureTime = doc.object()["off_block"].toString();
+        QString altitude = doc.object()["altitude"].toString();
+        QString arrival = doc.object()["arrival"].toString();
+        QString enrouteHours = doc.object()["enroute_hours"].toString();
+        QString enrouteMinutes = doc.object()["enroute_minutes"].toString();
+        QString fuelHours = doc.object()["fuel_hours"].toString();
+        QString fuelMinutes = doc.object()["fuel_minutes"].toString();
+        QString alternate = doc.object()["alternate"].toString();
+        QString route = doc.object()["route"].toString();
+
+        m_fsd.SendPDU(PDUFlightPlan(m_connectInfo.Callsign, "SERVER", flightRules, aircraftType, trueAirSpeed, departure,
+                                    departureTime, "", altitude, arrival, enrouteHours, enrouteMinutes, fuelHours, fuelMinutes,
+                                    alternate, remarks, route));
+
+        AppConfig::getInstance()->LastFlightPlan.AltAirport = alternate;
+        AppConfig::getInstance()->LastFlightPlan.CruiseAlt = altitude.toInt();
+        AppConfig::getInstance()->LastFlightPlan.DepAirport = departure;
+        AppConfig::getInstance()->LastFlightPlan.DestAirport = arrival;
+        AppConfig::getInstance()->LastFlightPlan.Equipment = equipmentSuffix;
+        AppConfig::getInstance()->LastFlightPlan.EstimatedDepTime = departureTime;
+        AppConfig::getInstance()->LastFlightPlan.FlightRules = flightRulesString;
+        AppConfig::getInstance()->LastFlightPlan.FuelAvailHours = fuelHours.toInt();
+        AppConfig::getInstance()->LastFlightPlan.FuelAvailMinutes = fuelMinutes.toInt();
+        AppConfig::getInstance()->LastFlightPlan.HoursEnroute = enrouteHours.toInt();
+        AppConfig::getInstance()->LastFlightPlan.MinutesEnroute = enrouteMinutes.toInt();
+        AppConfig::getInstance()->LastFlightPlan.Remarks = remarks;
+        AppConfig::getInstance()->LastFlightPlan.Route = route;
+        AppConfig::getInstance()->LastFlightPlan.TAS = trueAirSpeed.toInt();
+        AppConfig::getInstance()->LastFlightPlan.VoiceCapability = doc.object()["voice_capability"].toString();
+        AppConfig::getInstance()->saveConfig();
+    }
+
+    void NetworkManager::requestFlightPlan()
+    {
+        m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, "SERVER", ClientQueryType::FlightPlan, {m_connectInfo.Callsign}));
+    }
+
+    void NetworkManager::loadLastFlightPlan()
+    {
+        QJsonObject json;
+        json.insert("flight_rules", AppConfig::getInstance()->LastFlightPlan.FlightRules);
+        json.insert("departure", AppConfig::getInstance()->LastFlightPlan.DepAirport);
+        json.insert("arrival", AppConfig::getInstance()->LastFlightPlan.DestAirport);
+        json.insert("alternate", AppConfig::getInstance()->LastFlightPlan.AltAirport);
+        json.insert("off_block", AppConfig::getInstance()->LastFlightPlan.EstimatedDepTime);
+        json.insert("enroute_hours", AppConfig::getInstance()->LastFlightPlan.HoursEnroute);
+        json.insert("enroute_minutes", AppConfig::getInstance()->LastFlightPlan.MinutesEnroute);
+        json.insert("airspeed", AppConfig::getInstance()->LastFlightPlan.TAS);
+        json.insert("fuel_hours", AppConfig::getInstance()->LastFlightPlan.FuelAvailHours);
+        json.insert("fuel_minutes", AppConfig::getInstance()->LastFlightPlan.FuelAvailMinutes);
+        json.insert("route", AppConfig::getInstance()->LastFlightPlan.Route);
+
+        QString remarks = AppConfig::getInstance()->LastFlightPlan.Remarks;
+        remarks = remarks.toLower().replace("/v/", "");
+        remarks = remarks.toLower().replace("/t/", "");
+        remarks = remarks.toLower().replace("/r/", "");
+        json.insert("remarks", remarks.trimmed());
+
+        json.insert("equipment", AppConfig::getInstance()->LastFlightPlan.Equipment);
+        json.insert("voice_capability", AppConfig::getInstance()->LastFlightPlan.VoiceCapability);
+        json.insert("altitude", AppConfig::getInstance()->LastFlightPlan.CruiseAlt);
+
+        QJsonDocument doc(json);
+        emit lastFlightPlanReceived(doc.toJson(QJsonDocument::Compact));
     }
 
     void NetworkManager::RequestIsValidATC(QString callsign)
