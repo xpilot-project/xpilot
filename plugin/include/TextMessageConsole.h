@@ -77,7 +77,6 @@ namespace xpilot {
 	private:
 		bool m_scrollToBottom;
 		std::mutex m_tabMutex;
-		std::mutex m_messageMutex;
 		XPilot* m_env;
 	};
 
