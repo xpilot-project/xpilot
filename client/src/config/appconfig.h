@@ -13,7 +13,6 @@
 #include <QJsonObject>
 
 #include "windowconfig.h"
-#include "flightplan.h"
 #include "src/common/simplecrypt.h"
 #include "src/network/serverlistmanager.h"
 #include "src/network/connectinfo.h"
@@ -45,7 +44,6 @@ namespace xpilot
         QString ServerName;
         QVector<NetworkServerInfo> CachedServers;
         ConnectInfo RecentConnection;
-        FlightPlan LastFlightPlan;
         ClientWindowConfig WindowConfig;
         QString AudioApi;
         QString OutputDevice;
@@ -102,7 +100,6 @@ namespace xpilot
         Q_PROPERTY(QVariant CachedServers READ VariantCachedServers)
         Q_PROPERTY(ConnectInfo RecentConnection MEMBER RecentConnection)
         Q_PROPERTY(ClientWindowConfig WindowConfig MEMBER WindowConfig)
-        Q_PROPERTY(FlightPlan LastFlightPlan MEMBER LastFlightPlan)
         Q_PROPERTY(QString AudioApi MEMBER AudioApi)
         Q_PROPERTY(QString InputDevice MEMBER InputDevice)
         Q_PROPERTY(QString OutputDevice MEMBER OutputDevice)

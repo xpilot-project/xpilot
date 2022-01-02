@@ -17,5 +17,4 @@ TextField {
     selectedTextColor: "#ffffff"
     selectByMouse: true
     renderType: Text.NativeRendering
-    leftPadding: 5
 }

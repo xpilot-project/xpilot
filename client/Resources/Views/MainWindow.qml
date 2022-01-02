@@ -4,6 +4,7 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls 2.12
 import QtQuick.Window 2.12
 import QtQuick.Layouts 1.12
+import QtWebSockets 1.2
 import QtMultimedia 5.12
 import QtQuick.Dialogs 1.2
 
@@ -32,7 +33,6 @@ Window {
 
     property QtObject connectWindow
     property QtObject settingsWindow
-    property QtObject flightPlanWindow
     property int currentTab
     property bool closing: false
     property bool networkConnected: false
@@ -127,13 +127,6 @@ Window {
             } else {
                 mainWindow.flags &= ~Qt.WindowStaysOnTopHint
             }
-        }
-    }
-
-    Connections {
-        target: flightPlanWindow
-        function onCloseWindow() {
-            flightPlanWindow.destroy()
         }
     }
 

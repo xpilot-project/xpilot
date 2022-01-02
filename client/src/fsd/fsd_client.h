@@ -41,7 +41,6 @@
 #include "pdu/pdu_pilot_position.h"
 #include "pdu/pdu_metar_response.h"
 #include "pdu/pdu_metar_request.h"
-#include "pdu/pdu_flight_plan.h"
 
 namespace xpilot
 {
@@ -85,7 +84,6 @@ namespace xpilot
         void RaiseMetarResponseReceived(PDUMetarResponse pdu);
         void RaisePlaneInfoRequestReceived(PDUPlaneInfoRequest pdu);
         void RaisePlaneInfoResponseReceived(PDUPlaneInfoResponse pdu);
-        void RaiseFlightPlanReceived(PDUFlightPlan pdu);
         void RaisePingReceived(PDUPing pdu);
         void RaisePongReceived(PDUPong pdu);
         void RaiseClientQueryReceived(PDUClientQuery pdu);

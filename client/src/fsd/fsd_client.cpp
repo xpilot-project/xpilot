@@ -150,12 +150,6 @@ namespace xpilot
                         }
                     }
                 }
-                else if(pduTypeId == "$FP")
-                {
-                    try {
-                        emit RaiseFlightPlanReceived(PDUFlightPlan::fromTokens(fields));
-                    }  catch (...) {}
-                }
                 else if(pduTypeId == "$PI")
                 {
                     emit RaisePingReceived(PDUPing::fromTokens(fields));
@@ -237,10 +231,10 @@ namespace xpilot
         {
         case QAbstractSocket::RemoteHostClosedError:
             this->Disconnect();
-        break;
+            break;
         default:
             emit RaiseNetworkError(error);
-        break;
+            break;
         }
     }
 
