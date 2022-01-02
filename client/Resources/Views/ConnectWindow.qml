@@ -11,8 +11,8 @@ Popup {
     id: popup
     width: 500
     height: 180
-    x: (parent.width - width) / 2
-    y: (parent.height - height) / 2
+    x: Math.round((parent.width - width) / 2)
+    y: Math.round((parent.height - height) / 2)
     modal: true
     focus: true
     closePolicy: Popup.NoAutoClose
