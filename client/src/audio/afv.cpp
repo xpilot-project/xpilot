@@ -144,8 +144,10 @@ namespace xpilot
                     m_client->setTxRadio(1);
                 }
 
-                m_client->setRadioGain(0, ScaleVolume(m_radioStackState.Com1Volume / 100.0f));
-                m_client->setRadioGain(1, ScaleVolume(m_radioStackState.Com2Volume / 100.0f));
+                if(AppConfig::getInstance()->AircraftRadioStackControlsVolume) {
+                    m_client->setRadioGain(0, ScaleVolume(m_radioStackState.Com1Volume / 100.0f));
+                    m_client->setRadioGain(1, ScaleVolume(m_radioStackState.Com2Volume / 100.0f));
+                }
 
                 updateTransceivers();
             }

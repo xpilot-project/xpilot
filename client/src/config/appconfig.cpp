@@ -69,6 +69,7 @@ void AppConfig::loadConfig()
         XplaneUdpPort = XPLANE_UDP_PORT;
         SilenceModelInstall = false;
         KeepWindowVisible = false;
+        AircraftRadioStackControlsVolume = true;
 
         saveConfig();
         loadConfig();
@@ -111,6 +112,7 @@ void AppConfig::loadConfig()
     SilenceModelInstall = jsonMap["SilenceModelInstall"].toBool();
     VisualMachines = jsonMap["VisualMachines"].toStringList();
     KeepWindowVisible = jsonMap["KeepWindowVisible"].toBool();
+    AircraftRadioStackControlsVolume = jsonMap["AircraftRadioStackControlsVolume"].toBool();
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
     for(const auto & value : cachedServers) {
@@ -186,6 +188,7 @@ void AppConfig::saveConfig()
     jsonObj["XplaneUdpPort"] = XplaneUdpPort == 0 ? XPLANE_UDP_PORT : XplaneUdpPort;
     jsonObj["SilenceModelInstall"] = SilenceModelInstall;
     jsonObj["KeepWindowVisible"] = KeepWindowVisible;
+    jsonObj["AircraftRadioStackControlsVolume"] = AircraftRadioStackControlsVolume;
 
     QJsonArray cachedServers;
     for(auto & server : CachedServers) {

@@ -11,8 +11,8 @@ import AppConfig 1.0
 Window {
     id: formSettings
     title: "Settings"
-    width: 650
-    height: 560
+    width: 670
+    height: 580
     minimumHeight: height
     minimumWidth: width
     maximumHeight: height
@@ -73,6 +73,7 @@ Window {
         switchAlertSelcal.checked = AppConfig.AlertSelcal;
         switchAlertDisconnect.checked = AppConfig.AlertDisconnect;
         switchKeepWindowVisible.checked = AppConfig.KeepWindowVisible
+        switchAircraftVolumeKnobs.checked = AppConfig.AircraftRadioStackControlsVolume
     }
 
     onAfterRendering: {
@@ -517,7 +518,7 @@ Window {
                     onLinkActivated: Qt.openUrlExternally(link)
                     renderType: Text.NativeRendering
                     wrapMode: Text.WordWrap
-                    Layout.maximumWidth: 600
+                    Layout.maximumWidth: 300
                     linkColor: "#0164AD"
                     font.pixelSize: 13
                     color: "#333333"
@@ -562,6 +563,20 @@ Window {
                     comLabel: "COM2"
                     onVolumeValueChanged: {
                         audio.setCom2Volume(volume)
+                    }
+                }
+
+                CustomSwitch {
+                    id: switchAircraftVolumeKnobs
+                    text: "Allow aircraft radio stack volume knobs to control radio volume"
+                    font.pixelSize: 13
+                    clip: false
+                    Layout.preferredHeight: 35
+                    Layout.preferredWidth: 300
+                    leftPadding: 0
+                    topPadding: 20
+                    onCheckedChanged: {
+                        AppConfig.AircraftRadioStackControlsVolume = switchAircraftVolumeKnobs.checked
                     }
                 }
             }
