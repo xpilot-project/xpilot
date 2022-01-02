@@ -74,6 +74,7 @@ namespace xpilot
         void aircraftInfoReceived(QString callsign, QString equipment, QString airline);
         void remoteFlightPlanReceived(QString flightPlan);
         void lastFlightPlanReceived(QString flightPlan);
+        void noFlightPlanFound();
 
     private:
         FsdClient m_fsd { this };

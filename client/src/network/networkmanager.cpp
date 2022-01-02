@@ -750,7 +750,7 @@ namespace xpilot
         QString trueAirSpeed = doc.object()["airspeed"].toString();
         QString departure = doc.object()["departure"].toString();
         QString departureTime = doc.object()["off_block"].toString();
-        QString altitude = doc.object()["altitude"].toString();
+        QString altitude = QString::number(doc.object()["altitude"].toInt());
         QString arrival = doc.object()["arrival"].toString();
         QString enrouteHours = doc.object()["enroute_hours"].toString();
         QString enrouteMinutes = doc.object()["enroute_minutes"].toString();
@@ -933,7 +933,14 @@ namespace xpilot
 
     void NetworkManager::OnProtocolErrorReceived(PDUProtocolError error)
     {
-        emit notificationPosted((int)NotificationType::Error, QString("Network Error: %1").arg(error.Message));
+        if(error.ErrorType == NetworkError::NoFlightPlan)
+        {
+            emit noFlightPlanFound();
+        }
+        else
+        {
+            emit notificationPosted((int)NotificationType::Error, QString("Network Error: %1").arg(error.Message));
+        }
     }
 
     void NetworkManager::OnRawDataSent(QString data)

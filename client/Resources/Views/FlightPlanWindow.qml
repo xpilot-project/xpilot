@@ -64,6 +64,11 @@ Window {
         function onRemoteFlightPlanReceived(flightPlan) {
             populateFlightPlan(flightPlan)
         }
+
+        function onNoFlightPlanFound() {
+            errorDialog.errorText = "No flight plan found on the server."
+            errorDialog.open()
+        }
     }
 
     ErrorDialog {
@@ -261,7 +266,11 @@ Window {
         json["enroute_hours"] = txtEnrouteHours.text
         json["enroute_minutes"] = txtEnrouteMinutes.text
         json["airspeed"] = txtAirspeed.text
-        json["altitude"] = txtAltitude.text
+
+        var alt = parseInt(txtAltitude.text)
+        if(alt < 1000) alt *= 100
+        json["altitude"] = alt
+
         json["fuel_hours"] = txtFuelHours.text
         json["fuel_minutes"] = txtFuelMinutes.text
         json["route"] = txtRoute.text.toUpperCase()
