@@ -28,6 +28,10 @@ namespace xpilot
             QJsonObject reply;
             reply.insert("type", "NearbyAtc");
 
+            std::sort(m_controllers.begin(), m_controllers.end(), [](const Controller& a, const Controller &b){
+                return a.Callsign < b.Callsign;
+            });
+
             QJsonArray data_array;
             for(const auto &atc : std::as_const(m_controllers))
             {

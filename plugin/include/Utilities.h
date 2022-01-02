@@ -53,6 +53,12 @@ inline bool begins_with(const TContainer& input, const TContainer& match)
 	return input.size() >= match.size() && std::equal(match.cbegin(), match.cend(), input.cbegin());
 }
 
+template<class TContainer>
+inline bool ends_with(const TContainer& input, const TContainer& match) 
+{
+	return input.size() >= match.size() && input.compare(input.size() - match.size(), match.size(), match) == 0;
+}
+
 inline char* strScpy(char* dest, const char* src, size_t size)
 {
 	strncpy(dest, src, size);
