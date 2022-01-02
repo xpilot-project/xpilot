@@ -226,6 +226,7 @@ namespace xpilot
 
         if (!ground_altitude.has_value())
         {
+            adjusted_altitude = {};
             return;
         }
 
