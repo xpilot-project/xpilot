@@ -88,10 +88,14 @@ namespace xpilot
             }
                 break;
             case afv_native::ClientEventType::VoiceServerConnected:
-                emit notificationPosted((int)NotificationType::Info, "Connected to voice server.");
+                if(m_userInitiatedConnect) {
+                    emit notificationPosted((int)NotificationType::Info, "Connected to voice server.");
+                    m_userInitiatedConnect = false;
+                }
                 break;
             case afv_native::ClientEventType::VoiceServerDisconnected:
                 emit notificationPosted((int)NotificationType::Info, "Disconnected from voice server.");
+                m_userInitiatedConnect = true;
                 break;
             default:
                 break;

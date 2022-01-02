@@ -107,6 +107,7 @@ namespace xpilot
         XplaneAdapter& m_xplaneAdapter;
         struct event_base* ev_base;
         bool m_keepAlive = false;
+        bool m_userInitiatedConnect = true;
         std::shared_ptr<afv_native::Client> m_client;
         QTimer* m_transceiverTimer;
         QTimer* m_eventTimer;
