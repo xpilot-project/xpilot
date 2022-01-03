@@ -109,7 +109,7 @@ namespace xpilot {
 
 								ImGui::TableSetColumnIndex(0);
 								char buf[32];
-								sprintf(buf, " %s", station.getCallsign());
+								sprintf(buf, " %s", station.getCallsign().c_str());
 								ImGui::AlignTextToFramePadding();
 								ImGui::Text(buf);
 
@@ -171,7 +171,7 @@ namespace xpilot {
 
 								ImGui::TableSetColumnIndex(0);
 								char buf[32];
-								sprintf(buf, " %s", station.getCallsign());
+								sprintf(buf, " %s", station.getCallsign().c_str());
 								ImGui::AlignTextToFramePadding();
 								ImGui::Text(buf);
 
@@ -233,7 +233,7 @@ namespace xpilot {
 
 								ImGui::TableSetColumnIndex(0);
 								char buf[32];
-								sprintf(buf, " %s", station.getCallsign());
+								sprintf(buf, " %s", station.getCallsign().c_str());
 								ImGui::AlignTextToFramePadding();
 								ImGui::Text(buf);
 
@@ -295,7 +295,7 @@ namespace xpilot {
 
 								ImGui::TableSetColumnIndex(0);
 								char buf[32];
-								sprintf(buf, " %s", station.getCallsign());
+								sprintf(buf, " %s", station.getCallsign().c_str());
 								ImGui::AlignTextToFramePadding();
 								ImGui::Text(buf);
 
@@ -357,7 +357,7 @@ namespace xpilot {
 
 								ImGui::TableSetColumnIndex(0);
 								char buf[32];
-								sprintf(buf, " %s", station.getCallsign());
+								sprintf(buf, " %s", station.getCallsign().c_str());
 								ImGui::AlignTextToFramePadding();
 								ImGui::Text(buf);
 
@@ -419,7 +419,7 @@ namespace xpilot {
 
 								ImGui::TableSetColumnIndex(0);
 								char buf[32];
-								sprintf(buf, " %s", station.getCallsign());
+								sprintf(buf, " %s", station.getCallsign().c_str());
 								ImGui::AlignTextToFramePadding();
 								ImGui::Text(buf);
 
