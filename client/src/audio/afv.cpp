@@ -33,7 +33,9 @@ namespace xpilot
         WSAStartup(wVersionRequested, &wsaData);
 #endif
 
+#ifndef QT_DEBUG
         afv_native::setLogger(nullptr);
+#endif
 
         ev_base = event_base_new();
         m_client = std::make_shared<afv_native::Client>(ev_base, 2, "xPilot");
