@@ -25,6 +25,14 @@ namespace xpilot
             m_nearbyAtcTimer->stop();
         });
         connect(m_nearbyAtcTimer, &QTimer::timeout, this, [&]{
+
+            for(const auto &controller : std::as_const(m_controllers)) {
+                if(QDateTime::currentSecsSinceEpoch() - controller.LastUpdate > 60) {
+                    emit controllerDeleted(controller);
+                    m_controllers.removeAll(controller);
+                }
+            }
+
             QJsonObject reply;
             reply.insert("type", "NearbyAtc");
 
