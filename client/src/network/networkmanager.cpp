@@ -325,6 +325,7 @@ namespace xpilot
         visualState.Pitch = pdu.Pitch;
         visualState.Heading = pdu.Heading;
         visualState.Bank = pdu.Bank;
+        visualState.NoseWheelAngle = pdu.NoseWheelAngle;
 
         VelocityVector positionalVelocityVector {};
         positionalVelocityVector.X = pdu.VelocityLongitude;
@@ -544,7 +545,8 @@ namespace xpilot
                                                m_userAircraftData.LatitudeVelocity,
                                                m_userAircraftData.PitchVelocity,
                                                m_userAircraftData.HeadingVelocity,
-                                               m_userAircraftData.BankVelocity));
+                                               m_userAircraftData.BankVelocity,
+                                               m_userAircraftData.NoseWheelAngle));
         }
     }
 
@@ -559,6 +561,7 @@ namespace xpilot
                                                m_userAircraftData.Pitch,
                                                m_userAircraftData.Heading,
                                                m_userAircraftData.Bank,
+                                               0.0,
                                                0.0,
                                                0.0,
                                                0.0,

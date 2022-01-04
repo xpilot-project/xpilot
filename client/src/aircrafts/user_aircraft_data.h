@@ -21,6 +21,7 @@ public:
     double PitchVelocity;
     double HeadingVelocity;
     double BankVelocity;
+    double NoseWheelAngle;
 
     bool operator!=(const UserAircraftData& other) const
     {
@@ -37,7 +38,8 @@ public:
                 LongitudeVelocity != other.LongitudeVelocity ||
                 PitchVelocity != other.PitchVelocity ||
                 HeadingVelocity != other.HeadingVelocity ||
-                BankVelocity != other.BankVelocity;
+                BankVelocity != other.BankVelocity ||
+                NoseWheelAngle != other.NoseWheelAngle;
     }
 
     bool operator==(const UserAircraftData& other) const
@@ -55,6 +57,7 @@ public:
                 LongitudeVelocity == other.LongitudeVelocity &&
                 PitchVelocity == other.PitchVelocity &&
                 HeadingVelocity == other.HeadingVelocity &&
-                BankVelocity == other.BankVelocity;
+                BankVelocity == other.BankVelocity &&
+                NoseWheelAngle == other.NoseWheelAngle;
     }
 };

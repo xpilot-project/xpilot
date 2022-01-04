@@ -2,7 +2,7 @@
 
 PDUFastPilotPosition::PDUFastPilotPosition() : PDUBase() {}
 
-PDUFastPilotPosition::PDUFastPilotPosition(QString from, double lat, double lon, double alt, double pitch, double heading, double bank, double velocityLongitude, double velocityAltitude, double velocityLatitude, double velocityPitch, double velocityHeading, double velocityBank) :
+PDUFastPilotPosition::PDUFastPilotPosition(QString from, double lat, double lon, double alt, double pitch, double heading, double bank, double velocityLongitude, double velocityAltitude, double velocityLatitude, double velocityPitch, double velocityHeading, double velocityBank, double noseWheelAngle) :
     PDUBase(from, "")
 {
     Lat = lat;
@@ -17,6 +17,7 @@ PDUFastPilotPosition::PDUFastPilotPosition(QString from, double lat, double lon,
     VelocityPitch = velocityPitch;
     VelocityHeading = velocityHeading;
     VelocityBank = velocityBank;
+    NoseWheelAngle = noseWheelAngle;
 }
 
 QStringList PDUFastPilotPosition::toTokens() const
@@ -33,6 +34,7 @@ QStringList PDUFastPilotPosition::toTokens() const
     tokens.append(QString::number(VelocityPitch, 'f', 4));
     tokens.append(QString::number(VelocityHeading, 'f', 4));
     tokens.append(QString::number(VelocityBank, 'f', 4));
+    tokens.append(QString::number(NoseWheelAngle, 'f', 2));
     return tokens;
 }
 
@@ -49,5 +51,6 @@ PDUFastPilotPosition PDUFastPilotPosition::fromTokens(const QStringList &tokens)
 
     return PDUFastPilotPosition(tokens[0], tokens[1].toDouble(), tokens[2].toDouble(), tokens[3].toDouble(),
             pitch, heading, bank, tokens[5].toDouble(), tokens[6].toDouble(), tokens[7].toDouble(),
-            tokens[8].toDouble(), tokens[9].toDouble(), tokens[10].toDouble());
+            tokens[8].toDouble(), tokens[9].toDouble(), tokens[10].toDouble(),
+            tokens.length() < 11 ? 0 : tokens[11].toDouble());
 }

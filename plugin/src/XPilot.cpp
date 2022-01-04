@@ -304,6 +304,7 @@ namespace xpilot
 								double velocityPitch = static_cast<double>(j["data"]["vp"]);
 								double velocityHeading = static_cast<double>(j["data"]["vh"]);
 								double velocityBank = static_cast<double>(j["data"]["vb"]);
+								double noseWheelAngle = static_cast<double>(j["data"]["nosewheel"]);
 
 								AircraftVisualState visualState{};
 								visualState.Lat = latitude;
@@ -312,6 +313,7 @@ namespace xpilot
 								visualState.Pitch = pitch;
 								visualState.Bank = bank;
 								visualState.Heading = heading;
+								visualState.NoseWheelAngle = noseWheelAngle;
 
 								Vector3 positionalVector{};
 								positionalVector.X = velocityLongitude;

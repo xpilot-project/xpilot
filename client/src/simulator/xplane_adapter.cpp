@@ -50,6 +50,7 @@ enum DataRef
     GearDown,
     FlapRatio,
     SpeedbrakeRatio,
+    NoseWheelAngle,
     ReplayMode,
     PushToTalk
 };
@@ -323,6 +324,7 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/cockpit/switches/gear_handle_status", DataRef::GearDown, 5);
     SubscribeDataRef("sim/flightmodel/controls/flaprat", DataRef::FlapRatio, 5);
     SubscribeDataRef("sim/cockpit2/controls/speedbrake_ratio", DataRef::SpeedbrakeRatio, 5);
+    SubscribeDataRef("sim/flightmodel2/gear/tire_steer_actual_deg[0]", DataRef::NoseWheelAngle, 15);
     SubscribeDataRef("sim/operation/prefs/replay_mode", DataRef::ReplayMode, 5);
     SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 15);
 }
@@ -541,6 +543,9 @@ void XplaneAdapter::OnDataReceived()
                     break;
                 case DataRef::SpeedbrakeRatio:
                     m_userAircraftConfigData.SpeedbrakeRatio = value;
+                    break;
+                case DataRef::NoseWheelAngle:
+                    m_userAircraftData.NoseWheelAngle = value;
                     break;
                 case DataRef::ReplayMode:
                     if(value > 0) {
@@ -808,6 +813,7 @@ void XplaneAdapter::SendFastPositionUpdate(const NetworkAircraft &aircraft, cons
     data.insert("vp", rotationalVelocityVector.X);
     data.insert("vh", rotationalVelocityVector.Y);
     data.insert("vb", rotationalVelocityVector.Z);
+    data.insert("nosewheel", visualState.NoseWheelAngle);
 
     reply.insert("data", data);
     QJsonDocument doc(reply);

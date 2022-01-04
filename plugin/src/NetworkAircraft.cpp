@@ -569,6 +569,7 @@ namespace xpilot
         SetSlatRatio(GetFlapRatio());
         SetSpoilerRatio(surfaces.spoilerRatio);
         SetSpeedbrakeRatio(surfaces.spoilerRatio);
+        SetNoseWheelAngle(remote_visual_state.NoseWheelAngle);
 
         if (engines_running)
         {

@@ -49,6 +49,7 @@ namespace xpilot
         double Pitch;
         double Heading;
         double Bank;
+        double NoseWheelAngle;
     };
 
     enum class EngineClass
