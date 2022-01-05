@@ -452,6 +452,7 @@ namespace xpilot {
 						ImGui::EndTable();
 					}
 				}
+				ImGui::EndChild();
 			}
 		}
 	}
