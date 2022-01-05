@@ -633,8 +633,10 @@ namespace xpilot
                     m_currentGain -= 0.01f;
 
                     for (int i = 0; i < m_engineCount; i++) {
-                        alSourcef(m_soundSources[i], AL_GAIN, m_currentGain);
-                        CHECKERR("Error setting source gain");
+                        if (m_soundSources[i]) {
+                            alSourcef(m_soundSources[i], AL_GAIN, m_currentGain);
+                            CHECKERR("Error setting source gain");
+                        }
                     }
 
                     m_previousGainUpdateTime = now;
@@ -667,12 +669,14 @@ namespace xpilot
             m_currentGain = targetGain;
 
             for (int i = 0; i < m_engineCount; i++) {
-                alSourcefv(m_soundSources[i], AL_POSITION, soundPos);
-                CHECKERR("Error setting source position");
-                alSourcefv(m_soundSources[i], AL_VELOCITY, soundVel);
-                CHECKERR("Error setting source velocity");
-                alSourcef(m_soundSources[i], AL_GAIN, targetGain);
-                CHECKERR("Error setting source gain");
+                if (m_soundSources[i]) {
+                    alSourcefv(m_soundSources[i], AL_POSITION, soundPos);
+                    CHECKERR("Error setting source position");
+                    alSourcefv(m_soundSources[i], AL_VELOCITY, soundVel);
+                    CHECKERR("Error setting source velocity");
+                    alSourcef(m_soundSources[i], AL_GAIN, targetGain);
+                    CHECKERR("Error setting source gain");
+                }
             }
 
             if (m_engineState == EngineState::Starter) {
