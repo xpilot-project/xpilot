@@ -581,6 +581,7 @@ namespace xpilot
                 SetEngineRotAngle(GetEngineRotAngle() - 360.0f);
             }
             SetPropRotAngle(GetEngineRotAngle());
+            SetThrustRatio(1.0f);
         }
         else
         {
@@ -588,6 +589,7 @@ namespace xpilot
             SetPropRotRpm(0.0f);
             SetEngineRotAngle(0.0f);
             SetPropRotAngle(0.0f);
+            SetThrustRatio(0.0f);
         }
 
         SetLightsTaxi(surfaces.lights.taxiLights);
