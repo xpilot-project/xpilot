@@ -634,7 +634,7 @@ namespace xpilot
 
                     for (int i = 0; i < m_engineCount; i++) {
                         if (m_soundSources[i]) {
-                            alSourcef(m_soundSources[i], AL_GAIN, m_currentGain);
+                            alSourcef(m_soundSources[i], AL_GAIN, std::max(m_currentGain, 0.0f));
                             CHECKERR("Error setting source gain");
                         }
                     }
@@ -664,8 +664,11 @@ namespace xpilot
 
             float idleGain = 0.80f;
             float normalGain = 1.0f;
+            float idlePitch = 0.75f;
+            float normalPitch = 1.0f;
             bool isIdle = (m_velocity / m_velocity) < 0.1f;
             float targetGain = isIdle ? idleGain : normalGain;
+            float targetPitch = isIdle ? idlePitch : normalPitch;
             m_currentGain = targetGain;
 
             for (int i = 0; i < m_engineCount; i++) {
@@ -676,6 +679,8 @@ namespace xpilot
                     CHECKERR("Error setting source velocity");
                     alSourcef(m_soundSources[i], AL_GAIN, targetGain);
                     CHECKERR("Error setting source gain");
+                    alSourcef(m_soundSources[i], AL_PITCH, targetPitch);
+                    CHECKERR("Error setting source pitch");
                 }
             }
 
