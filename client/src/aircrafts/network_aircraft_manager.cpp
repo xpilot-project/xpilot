@@ -274,7 +274,7 @@ namespace xpilot
             {
                 m_xplaneAdapter.AddPlaneToSimulator(aircraft);
                 m_xplaneAdapter.PlaneConfigChanged(aircraft);
-                aircraft.Status = AircraftStatus::Pending;
+                aircraft.Status = AircraftStatus::Active;
             }
         }
     }
