@@ -124,6 +124,14 @@ namespace xpilot
 
         void OnSlowPositionTimerElapsed();
         void OnFastPositionTimerElapsed();
+
+        const double POSITIONAL_VELOCITY_ZERO_TOLERANCE = 0.005;
+        bool PositionalVelocityIsZero(UserAircraftData data)
+        {
+            return (abs(data.LongitudeVelocity) < POSITIONAL_VELOCITY_ZERO_TOLERANCE &&
+                    abs(data.AltitudeVelocity) < POSITIONAL_VELOCITY_ZERO_TOLERANCE &&
+                    abs(data.LatitudeVelocity) < POSITIONAL_VELOCITY_ZERO_TOLERANCE);
+        }
     };
 }
 

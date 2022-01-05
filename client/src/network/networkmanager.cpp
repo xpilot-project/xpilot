@@ -533,6 +533,10 @@ namespace xpilot
     {
         if(AppConfig::getInstance()->VelocityEnabled && !m_connectInfo.ObserverMode)
         {
+            if(PositionalVelocityIsZero(m_userAircraftData)) {
+                return;
+            }
+
             m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign,
                                                m_userAircraftData.Latitude,
                                                m_userAircraftData.Longitude,
