@@ -46,6 +46,10 @@ enum DataRef
     HeadingVelocity,
     BankVelocity,
     EngineCount,
+    Engine1Running,
+    Engine2Running,
+    Engine3Running,
+    Engine4Running,
     OnGround,
     GearDown,
     FlapRatio,
@@ -320,6 +324,10 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/flightmodel/position/Prad", DataRef::BankVelocity, 5);
     SubscribeDataRef("sim/flightmodel/position/groundspeed", DataRef::GroundSpeed, 5);
     SubscribeDataRef("sim/aircraft/engine/acf_num_engines", DataRef::EngineCount, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_running[0]", DataRef::Engine1Running, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_running[1]", DataRef::Engine2Running, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_running[2]", DataRef::Engine3Running, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_running[3]", DataRef::Engine4Running, 5);
     SubscribeDataRef("sim/flightmodel/failures/onground_any", DataRef::OnGround, 5);
     SubscribeDataRef("sim/cockpit/switches/gear_handle_status", DataRef::GearDown, 5);
     SubscribeDataRef("sim/flightmodel/controls/flaprat", DataRef::FlapRatio, 5);
@@ -531,6 +539,18 @@ void XplaneAdapter::OnDataReceived()
                     break;
                 case DataRef::EngineCount:
                     m_userAircraftConfigData.EngineCount = value;
+                    break;
+                case DataRef::Engine1Running:
+                    m_userAircraftConfigData.Engine1Running = value;
+                    break;
+                case DataRef::Engine2Running:
+                    m_userAircraftConfigData.Engine2Running = value;
+                    break;
+                case DataRef::Engine3Running:
+                    m_userAircraftConfigData.Engine3Running = value;
+                    break;
+                case DataRef::Engine4Running:
+                    m_userAircraftConfigData.Engine4Running = value;
                     break;
                 case DataRef::OnGround:
                     m_userAircraftConfigData.OnGround = value;
