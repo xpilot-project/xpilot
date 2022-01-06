@@ -373,13 +373,16 @@ namespace xpilot
 			return;
 		}
 
-		aircraft->positional_velocity_vector = positionalVector;
-		aircraft->rotational_velocity_vector = rotationalVector;
-		aircraft->remote_visual_state = visualState;
+		if (ReceivingFastPositionUpdates(aircraft))
+		{
+			aircraft->positional_velocity_vector = positionalVector;
+			aircraft->rotational_velocity_vector = rotationalVector;
+			aircraft->remote_visual_state = visualState;
+			aircraft->UpdateErrorVectors(ERROR_CORRECTION_INTERVAL_FAST);
+		}
+
 		aircraft->last_fast_position_timestamp = std::chrono::steady_clock::now();
 		aircraft->fast_positions_received_count++;
-
-		aircraft->UpdateErrorVectors(ERROR_CORRECTION_INTERVAL_FAST);
 	}
 
 	NetworkAircraft* AircraftManager::GetAircraft(const std::string& callsign)
