@@ -86,6 +86,7 @@ namespace xpilot
         QList<uint> m_transmitFreqs;
         QFile m_networkLog;
         QTextStream m_rawDataStream;
+        bool m_sendEmptyFastPosition = false;
 
         QMap<QString, QStringList> m_mapAtisMessages;
 
