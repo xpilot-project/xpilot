@@ -41,6 +41,7 @@
 #include "pdu/pdu_pilot_position.h"
 #include "pdu/pdu_metar_response.h"
 #include "pdu/pdu_metar_request.h"
+#include "pdu/pdu_send_fast.h"
 
 namespace xpilot
 {
@@ -90,6 +91,7 @@ namespace xpilot
         void RaiseClientQueryResponseReceived(PDUClientQueryResponse pdu);
         void RaiseKillRequestReceived(PDUKillRequest pdu);
         void RaiseProtocolErrorReceived(PDUProtocolError pdu);
+        void RaiseSendFastReceived(PDUSendFast pdu);
         void RaiseRawDataSent(QString data);
         void RaiseRawDataReceived(QString data);
 

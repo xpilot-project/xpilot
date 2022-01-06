@@ -60,6 +60,7 @@ namespace xpilot
         connect(&m_fsd, &FsdClient::RaisePlaneInfoRequestReceived, this, &NetworkManager::OnPlaneInfoRequestReceived);
         connect(&m_fsd, &FsdClient::RaisePlaneInfoResponseReceived, this, &NetworkManager::OnPlaneInfoResponseReceived);
         connect(&m_fsd, &FsdClient::RaiseKillRequestReceived, this, &NetworkManager::OnKillRequestReceived);
+        connect(&m_fsd, &FsdClient::RaiseSendFastReceived, this, &NetworkManager::OnSendFastReceived);
         connect(&m_fsd, &FsdClient::RaiseRawDataSent, this, &NetworkManager::OnRawDataSent);
         connect(&m_fsd, &FsdClient::RaiseRawDataReceived, this, &NetworkManager::OnRawDataReceived);
 
@@ -79,19 +80,19 @@ namespace xpilot
             {
             case NotificationType::Error:
                 m_xplaneAdapter.NotificationPosted(message, COLOR_RED);
-                break;
+            break;
             case NotificationType::Info:
                 m_xplaneAdapter.NotificationPosted(message, COLOR_YELLOW);
-                break;
+            break;
             case NotificationType::RadioMessageSent:
                 m_xplaneAdapter.NotificationPosted(message, COLOR_CYAN);
-                break;
+            break;
             case NotificationType::ServerMessage:
                 m_xplaneAdapter.NotificationPosted(message, COLOR_GREEN);
-                break;
+            break;
             case NotificationType::Warning:
                 m_xplaneAdapter.NotificationPosted(message, COLOR_ORANGE);
-                break;
+            break;
             }
         });
 
@@ -192,10 +193,6 @@ namespace xpilot
         SendEmptyFastPositionPacket();
         m_slowPositionTimer->setInterval(m_connectInfo.ObserverMode ? 15000 : 5000);
         m_slowPositionTimer->start();
-        if(AppConfig::getInstance()->VelocityEnabled && !m_connectInfo.ObserverMode)
-        {
-            m_fastPositionTimer->start();
-        }
     }
 
     void NetworkManager::OnClientQueryReceived(PDUClientQuery pdu)
@@ -204,14 +201,14 @@ namespace xpilot
         {
         case ClientQueryType::AircraftConfiguration:
             emit aircraftConfigurationInfoReceived(pdu.From, pdu.Payload.join(":"));
-            break;
+        break;
         case ClientQueryType::Capabilities:
             if(pdu.From.toUpper() != "SERVER")
             {
                 emit capabilitiesRequestReceived(pdu.From);
             }
             SendCapabilities(pdu.From);
-            break;
+        break;
         case ClientQueryType::COM1Freq:
         {
             QStringList payload;
@@ -219,7 +216,7 @@ namespace xpilot
             payload.append(freq);
             m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, pdu.From, ClientQueryType::COM1Freq, payload));
         }
-            break;
+        break;
         case ClientQueryType::RealName:
         {
             QStringList realName;
@@ -228,7 +225,7 @@ namespace xpilot
             realName.append(QString::number((int)NetworkRating::OBS));
             m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, pdu.From, ClientQueryType::RealName, realName));
         }
-            break;
+        break;
         case ClientQueryType::INF:
             QString inf = QString("xPilot %1 PID=%2 (%3) IP=%4 SYS_UID=%5 FS_VER=XPlane LT=%6 LO=%7 AL=%8")
                     .arg(BuildConfig::getVersionString(),
@@ -240,7 +237,7 @@ namespace xpilot
                          QString::number(m_userAircraftData.Longitude),
                          QString::number(m_userAircraftData.AltitudeMslM * 3.28084));
             m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, pdu.From, inf));
-            break;
+        break;
         }
     }
 
@@ -250,15 +247,15 @@ namespace xpilot
         {
         case ClientQueryType::PublicIP:
             m_publicIp = pdu.Payload.size() > 0 ? pdu.Payload[0] : "";
-            break;
+        break;
         case ClientQueryType::IsValidATC:
             if(pdu.Payload.at(0).toUpper() == "Y") {
                 emit isValidAtcReceived(pdu.Payload.at(1).toUpper());
             }
-            break;
+        break;
         case ClientQueryType::RealName:
             emit realNameReceived(pdu.From, pdu.Payload.at(0));
-            break;
+        break;
         case ClientQueryType::ATIS:
             if(pdu.Payload.at(0) == "E")
             {
@@ -291,10 +288,10 @@ namespace xpilot
                     m_mapAtisMessages[pdu.From.toUpper()].push_back(pdu.Payload[1]);
                 }
             }
-            break;
+        break;
         case ClientQueryType::Capabilities:
             emit capabilitiesResponseReceived(pdu.From, pdu.Payload.join(":"));
-            break;
+        break;
         }
     }
 
@@ -459,6 +456,21 @@ namespace xpilot
         m_forcedDisconnectReason = pdu.Reason;
     }
 
+    void NetworkManager::OnSendFastReceived(PDUSendFast pdu)
+    {
+        if(pdu.To.toUpper() == m_connectInfo.Callsign.toUpper())
+        {
+            if(pdu.DoSendFast)
+            {
+                m_fastPositionTimer->start();
+            }
+            else
+            {
+                m_fastPositionTimer->stop();
+            }
+        }
+    }
+
     void NetworkManager::OnUserAircraftDataUpdated(UserAircraftData data)
     {
         if(m_userAircraftData != data)
@@ -533,10 +545,6 @@ namespace xpilot
     {
         if(AppConfig::getInstance()->VelocityEnabled && !m_connectInfo.ObserverMode)
         {
-            if(PositionalVelocityIsZero(m_userAircraftData)) {
-                return;
-            }
-
             m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign,
                                                m_userAircraftData.Latitude,
                                                m_userAircraftData.Longitude,
@@ -578,11 +586,14 @@ namespace xpilot
     void NetworkManager::OnSlowPositionTimerElapsed()
     {
         SendSlowPositionPacket();
+        SendFastPositionPacket();
     }
 
     void NetworkManager::OnFastPositionTimerElapsed()
     {
-        SendFastPositionPacket();
+        if(!PositionalVelocityIsZero(m_userAircraftData)) {
+            SendFastPositionPacket();
+        }
     }
 
     void NetworkManager::SendAircraftConfigurationUpdate(AircraftConfiguration config)

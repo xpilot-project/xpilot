@@ -183,6 +183,10 @@ namespace xpilot
                 {
                     emit RaiseProtocolErrorReceived(PDUProtocolError::fromTokens(fields));
                 }
+                else if(pduTypeId == "$SF")
+                {
+                    emit RaiseSendFastReceived(PDUSendFast::fromTokens(fields));
+                }
             }
         }
     }

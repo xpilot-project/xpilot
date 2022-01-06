@@ -110,6 +110,7 @@ namespace xpilot
         void OnPlaneInfoRequestReceived(PDUPlaneInfoRequest pdu);
         void OnPlaneInfoResponseReceived(PDUPlaneInfoResponse pdu);
         void OnKillRequestReceived(PDUKillRequest pdu);
+        void OnSendFastReceived(PDUSendFast pdu);
         void OnRawDataSent(QString data);
         void OnRawDataReceived(QString data);
 

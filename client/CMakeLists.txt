@@ -121,6 +121,8 @@ set(FSD_SOURCES
     src/fsd/pdu/pdu_protocol_error.cpp
     src/fsd/pdu/pdu_radio_message.h
     src/fsd/pdu/pdu_radio_message.cpp
+    src/fsd/pdu/pdu_send_fast.h
+    src/fsd/pdu/pdu_send_fast.cpp
     src/fsd/pdu/pdu_text_message.h
     src/fsd/pdu/pdu_text_message.cpp
     src/fsd/pdu/pdu_wallop.h
