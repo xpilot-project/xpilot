@@ -108,8 +108,11 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 
                 if(!data.isEmpty())
                 {
-                    m_rawDataStream << QString("[%1] <<< %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), data);
-                    m_rawDataStream.flush();
+                    QMutexLocker lock(&mutex);
+                    {
+                        m_rawDataStream << QString("[%1] <<< %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), data);
+                        m_rawDataStream.flush();
+                    }
 
                     QByteArray json_bytes = data.toUtf8();
                     auto json_doc = QJsonDocument::fromJson(json_bytes);
@@ -433,7 +436,7 @@ void XplaneAdapter::OnDataReceived()
                 switch(id) {
                 case DataRef::AvionicsPower:
                     m_radioStackState.AvionicsPowerOn = value;
-                    break;
+                break;
                 case DataRef::AudioComSelection:
                     if(value == 6) {
                         m_radioStackState.Com1TransmitEnabled = true;
@@ -442,19 +445,19 @@ void XplaneAdapter::OnDataReceived()
                         m_radioStackState.Com1TransmitEnabled = false;
                         m_radioStackState.Com2TransmitEnabled = true;
                     }
-                    break;
+                break;
                 case DataRef::Com1AudioSelection:
                     m_radioStackState.Com1ReceiveEnabled = value;
-                    break;
+                break;
                 case DataRef::Com2AudioSelection:
                     m_radioStackState.Com2ReceiveEnabled = value;
-                    break;
+                break;
                 case DataRef::Com1Frequency:
                     m_radioStackState.Com1Frequency = value;
-                    break;
+                break;
                 case DataRef::Com2Frequency:
                     m_radioStackState.Com2Frequency = value;
-                    break;
+                break;
                 case DataRef::Com1Volume:
                 {
                     int volume = qRound(value * 100);
@@ -462,7 +465,7 @@ void XplaneAdapter::OnDataReceived()
                     volume = (volume < 0) ? 0 : volume;
                     m_radioStackState.Com1Volume = volume;
                 }
-                    break;
+                break;
                 case DataRef::Com2Volume:
                 {
                     int volume = qRound(value * 100);
@@ -470,111 +473,111 @@ void XplaneAdapter::OnDataReceived()
                     volume = (volume < 0) ? 0 : volume;
                     m_radioStackState.Com2Volume = volume;
                 }
-                    break;
+                break;
                 case DataRef::TransponderIdent:
                     m_radioStackState.SquawkingIdent = value;
-                    break;
+                break;
                 case DataRef::TransponderMode:
                     m_radioStackState.SquawkingModeC = value >= 2;
-                    break;
+                break;
                 case DataRef::TransponderCode:
                     m_radioStackState.TransponderCode = value;
-                    break;
+                break;
                 case DataRef::Latitude:
                     m_userAircraftData.Latitude = value;
-                    break;
+                break;
                 case DataRef::Longitude:
                     m_userAircraftData.Longitude = value;
-                    break;
+                break;
                 case DataRef::Heading:
                     m_userAircraftData.Heading = value;
-                    break;
+                break;
                 case DataRef::Pitch:
                     m_userAircraftData.Pitch = value;
-                    break;
+                break;
                 case DataRef::Bank:
                     m_userAircraftData.Bank = value;
-                    break;
+                break;
                 case DataRef::AltitudeMsl:
                     m_userAircraftData.AltitudeMslM = value;
-                    break;
+                break;
                 case DataRef::AltitudePressure:
                     m_userAircraftData.AltitudePressure = value;
-                    break;
+                break;
                 case DataRef::LatitudeVelocity:
                     m_userAircraftData.LatitudeVelocity = value * -1.0;
-                    break;
+                break;
                 case DataRef::AltitudeVelocity:
                     m_userAircraftData.AltitudeVelocity = value;
-                    break;
+                break;
                 case DataRef::LongitudeVelocity:
                     m_userAircraftData.LongitudeVelocity = value;
-                    break;
+                break;
                 case DataRef::PitchVelocity:
                     m_userAircraftData.PitchVelocity = value * -1.0;
-                    break;
+                break;
                 case DataRef::HeadingVelocity:
                     m_userAircraftData.HeadingVelocity = value;
-                    break;
+                break;
                 case DataRef::BankVelocity:
                     m_userAircraftData.BankVelocity = value * -1.0;
-                    break;
+                break;
                 case DataRef::GroundSpeed:
                     m_userAircraftData.GroundSpeed = value * 1.94384; // mps -> knots
-                    break;
+                break;
                 case DataRef::BeaconLights:
                     m_userAircraftConfigData.BeaconOn = value;
-                    break;
+                break;
                 case DataRef::LandingLights:
                     m_userAircraftConfigData.LandingLightsOn = value;
-                    break;
+                break;
                 case DataRef::TaxiLights:
                     m_userAircraftConfigData.TaxiLightsOn = value;
-                    break;
+                break;
                 case DataRef::NavLights:
                     m_userAircraftConfigData.NavLightsOn = value;
-                    break;
+                break;
                 case DataRef::StrobeLights:
                     m_userAircraftConfigData.StrobesOn = value;
-                    break;
+                break;
                 case DataRef::EngineCount:
                     m_userAircraftConfigData.EngineCount = value;
-                    break;
+                break;
                 case DataRef::Engine1Running:
                     m_userAircraftConfigData.Engine1Running = value;
-                    break;
+                break;
                 case DataRef::Engine2Running:
                     m_userAircraftConfigData.Engine2Running = value;
-                    break;
+                break;
                 case DataRef::Engine3Running:
                     m_userAircraftConfigData.Engine3Running = value;
-                    break;
+                break;
                 case DataRef::Engine4Running:
                     m_userAircraftConfigData.Engine4Running = value;
-                    break;
+                break;
                 case DataRef::OnGround:
                     m_userAircraftConfigData.OnGround = value;
-                    break;
+                break;
                 case DataRef::GearDown:
                     m_userAircraftConfigData.GearDown = value;
-                    break;
+                break;
                 case DataRef::FlapRatio:
                     m_userAircraftConfigData.FlapsRatio = value;
-                    break;
+                break;
                 case DataRef::SpeedbrakeRatio:
                     m_userAircraftConfigData.SpeedbrakeRatio = value;
-                    break;
+                break;
                 case DataRef::NoseWheelAngle:
                     m_userAircraftData.NoseWheelAngle = value;
-                    break;
+                break;
                 case DataRef::ReplayMode:
                     if(value > 0) {
                         emit replayModeDetected();
                     }
-                    break;
+                break;
                 case DataRef::PushToTalk:
                     (value > 0) ? emit pttPressed() : emit pttReleased();
-                    break;
+                break;
                 }
             }
         }
@@ -584,6 +587,12 @@ void XplaneAdapter::OnDataReceived()
 void XplaneAdapter::sendSocketMessage(const QString &message)
 {
     if(message.isEmpty()) return;
+
+    QMutexLocker lock(&mutex);
+    {
+        m_rawDataStream << QString("[%1] >>> %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), message);
+        m_rawDataStream.flush();
+    }
 
     if(m_zmqSocket != nullptr)
     {
@@ -606,9 +615,6 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
             std::memcpy(msg.data(), message.toStdString().data(), message.size());
             visualSocket->send(msg, zmq::send_flags::none);
         }
-
-        m_rawDataStream << QString("[%1] >>> %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), message);
-        m_rawDataStream.flush();
     }
 }
 
@@ -618,10 +624,10 @@ void XplaneAdapter::setAudioComSelection(int radio)
     {
     case 1:
         setDataRefValue("sim/cockpit2/radios/actuators/audio_com_selection", 6);
-        break;
+    break;
     case 2:
         setDataRefValue("sim/cockpit2/radios/actuators/audio_com_selection", 7);
-        break;
+    break;
     }
 }
 
@@ -631,10 +637,10 @@ void XplaneAdapter::setAudioSelection(int radio, bool status)
     {
     case 1:
         setDataRefValue("sim/cockpit2/radios/actuators/audio_selection_com1", (int)status);
-        break;
+    break;
     case 2:
         setDataRefValue("sim/cockpit2/radios/actuators/audio_selection_com2", (int)status);
-        break;
+    break;
     }
 }
 

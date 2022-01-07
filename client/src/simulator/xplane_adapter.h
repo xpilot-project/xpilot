@@ -19,6 +19,7 @@
 #include <QList>
 #include <QFile>
 #include <QTextStream>
+#include <QMutex>
 
 #include "zmq.hpp"
 
@@ -113,6 +114,7 @@ private:
 
     QFile m_pluginLog;
     QTextStream m_rawDataStream;
+    QMutex mutex;
 };
 
 #endif
