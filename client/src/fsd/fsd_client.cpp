@@ -58,7 +58,7 @@ namespace xpilot
 
         QStringList packets = data.split(PDUBase::PacketDelimeter);
 
-        // If he last packet has content, it's an incomplete packet.
+        // If the last packet has content, it's an incomplete packet.
         int topIndex = packets.length() - 1;
         if(packets[topIndex].length() > 0)
         {
