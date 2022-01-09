@@ -1311,6 +1311,9 @@ Window {
                                                     cliTextField.clear()
                                                     break;
                                                 case ".velocity":
+                                                    if(networkConnected) {
+                                                        throw "You must disconnect from the network to enable Velocity."
+                                                    }
                                                     AppConfig.VelocityEnabled = true
                                                     appendMessage("Velocity is now enabled. You will be automatically joined to the Velocity test servers after connecting. Restart xPilot to disable Velocity and connect to the network normally.", colorYellow, currentTab)
                                                     cliTextField.clear()
