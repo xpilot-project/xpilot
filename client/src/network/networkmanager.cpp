@@ -182,7 +182,6 @@ namespace xpilot
         if(AppConfig::getInstance()->VelocityEnabled)
         {
             GetJwtToken().then([&](const QByteArray &response){
-                qDebug() << response;
                 auto json = QJsonDocument::fromJson(response).object();
                 if(json.contains("success") && json["success"].toBool()) {
                     if(json.contains("token")) {
