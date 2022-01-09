@@ -125,7 +125,7 @@ namespace xpilot
         static double NormalizeDegrees(double value, double lowerBound, double upperBound);
 
         ALuint m_soundBuffer = 0;
-        ALuint m_soundSources[8]; // max 8 engine sounds
+        ALuint m_soundSources[2];
 
         float m_pitch = 1.0f;
         float m_gain = 1.0f;

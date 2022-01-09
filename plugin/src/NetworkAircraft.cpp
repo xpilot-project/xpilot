@@ -27,8 +27,6 @@ namespace xpilot
 {
     const double TERRAIN_HEIGHT_TOLERANCE = 200.0;
 
-#define CHECKERR(msg) { ALuint e = alGetError(); if (e != AL_NO_ERROR) LOG_MSG(logERROR, "%s: %s", alGetString(e), msg); }
-
     double CalculateNormalizedDelta(double start, double end, double lowerBound, double upperBound)
     {
         double range = upperBound - lowerBound;
@@ -121,7 +119,7 @@ namespace xpilot
 
             std::string engineCount(1, model.doc8643Classification[1]);
             try {
-                m_engineCount = std::stoi(engineCount);
+                m_engineCount = std::min(std::stoi(engineCount), 2); // limit to 2 engines
             }
             catch (...) { /* catch the exception and default to 2 engines */ }
 
@@ -409,11 +407,9 @@ namespace xpilot
 
         if (m_soundsInitialized) {
             alDeleteSources(m_engineCount, m_soundSources);
-            CHECKERR("Error deleting source objects");
         }
 
         alGenSources(m_engineCount, m_soundSources);
-        CHECKERR("Error creating source objects");
 
         float zero[3] = { 0,0,0 };
         for (int i = 0; i < m_engineCount; i++) {
@@ -423,7 +419,6 @@ namespace xpilot
             alSourcefv(m_soundSources[i], AL_VELOCITY, zero);
             zero[2] = 5.0f;
             alSourcefv(m_soundSources[i], AL_POSITION, zero);
-            CHECKERR("Error setting sound source");
         }
 
         switch (m_engineClass) {
@@ -449,12 +444,10 @@ namespace xpilot
         for (int i = 0; i < m_engineCount; i++) {
             if (state == EngineState::Starter && m_engineClass != EngineClass::Helicopter) {
                 alSourcei(m_soundSources[i], AL_BUFFER, starterSound);
-                CHECKERR("Error setting sound buffer");
                 m_starterSoundBegan = std::chrono::system_clock::now();
             }
             else {
                 alSourcei(m_soundSources[i], AL_BUFFER, normalSound);
-                CHECKERR("Error setting sound buffer");
             }
         }
 
@@ -469,9 +462,7 @@ namespace xpilot
 
         for (int i = 0; i < m_engineCount; i++) {
             alSourceStop(m_soundSources[i]);
-            CHECKERR("Error stopping source");
             alSourceRewind(m_soundSources[i]);
-            CHECKERR("Error rewinding source");
         }
     }
 
@@ -479,7 +470,6 @@ namespace xpilot
     {
         for (int i = 0; i < m_engineCount; i++) {
             alSourcePlay(m_soundSources[i]);
-            CHECKERR("Error playing source");
         }
 
         m_soundLoaded = true;
@@ -637,7 +627,6 @@ namespace xpilot
                     for (int i = 0; i < m_engineCount; i++) {
                         if (m_soundSources[i]) {
                             alSourcef(m_soundSources[i], AL_GAIN, std::max(m_currentGain, 0.0f));
-                            CHECKERR("Error setting source gain");
                         }
                     }
 
@@ -676,13 +665,9 @@ namespace xpilot
             for (int i = 0; i < m_engineCount; i++) {
                 if (m_soundSources[i]) {
                     alSourcefv(m_soundSources[i], AL_POSITION, soundPos);
-                    CHECKERR("Error setting source position");
                     alSourcefv(m_soundSources[i], AL_VELOCITY, soundVel);
-                    CHECKERR("Error setting source velocity");
                     alSourcef(m_soundSources[i], AL_GAIN, targetGain);
-                    CHECKERR("Error setting source gain");
                     alSourcef(m_soundSources[i], AL_PITCH, targetPitch);
-                    CHECKERR("Error setting source pitch");
                 }
             }
 
