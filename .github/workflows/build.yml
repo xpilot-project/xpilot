@@ -17,6 +17,7 @@ env:
   VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
   VATSIM_CLIENT_KEY: ${{ secrets.VATSIM_CLIENT_KEY }}
   CONFIG_ENCRYPTION_KEY: ${{ secrets.CONFIG_ENCRYPTION_KEY }}
+  SENTRY_TOKEN: ${{ secrets.SENTRY_TOKEN }}
   CLIENT_DIR: ${{ github.workspace }}/client
   PLUGIN_DIR: ${{ github.workspace }}/plugin
   IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
@@ -111,6 +112,7 @@ jobs:
             -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
             -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
             -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
+            -DSENTRY_TOKEN=${{ env.SENTRY_TOKEN }} \
             -DSENTRY_BACKEND=crashpad \
             -DSENTRY_INTEGRATION_QT=YES
 
@@ -265,7 +267,7 @@ jobs:
       - name: Client CMake
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
-          cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} -DSENTRY_BACKEND=crashpad -DSENTRY_INTEGRATION_QT=YES
+          cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} -DSENTRY_TOKEN=${{ env.SENTRY_TOKEN }} -DSENTRY_BACKEND=crashpad -DSENTRY_INTEGRATION_QT=YES
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}/build
@@ -413,6 +415,7 @@ jobs:
             -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
             -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
             -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
+            -DSENTRY_TOKEN=${{ env.SENTRY_TOKEN }} \
             -DSENTRY_BACKEND=crashpad \
             -DSENTRY_INTEGRATION_QT=YES
 

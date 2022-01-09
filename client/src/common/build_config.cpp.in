@@ -90,5 +90,5 @@ const QString xpilot::BuildConfig::getShortVersionString()
 
 const QString xpilot::BuildConfig::getSentryDsn()
 {
-    return "@SENTRY_DSN@";
+    return "@SENTRY_TOKEN@";
 }
