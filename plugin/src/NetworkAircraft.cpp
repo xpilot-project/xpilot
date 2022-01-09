@@ -501,7 +501,7 @@ namespace xpilot
         static const float epsilon = std::numeric_limits<float>::epsilon();
         const auto diffMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_surface_update_time);
 
-        target_gear_position = gear_down ? 1.0f : 0.0f;
+        target_gear_position = gear_down || on_ground ? 1.0f : 0.0f;
         target_spoiler_position = spoilers_deployed ? 1.0f : 0.0f;
 
         if (fast_positions_received_count <= 2)
