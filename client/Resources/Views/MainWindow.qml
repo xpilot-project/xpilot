@@ -468,6 +468,10 @@ Window {
             }
         }
 
+        function onWallopSent(message) {
+            appendMessage(`[WALLOP] ${message}`, colorRed)
+        }
+
         function onSelcalAlertReceived(from, frequencies) {
             appendMessage(`SELCAL alert received on ${FrequencyUtils.fromNetworkFormat(frequencies[0])}`, colorYellow)
             if(AppConfig.AlertSelcal) {

@@ -57,6 +57,7 @@ namespace xpilot
         void privateMessageReceived(QString from, QString message);
         void privateMessageSent(QString from, QString message);
         void broadcastMessageReceived(QString from, QString message);
+        void wallopSent(QString message);
         void radioMessageReceived(RadioMessageReceived args);
         void selcalAlertReceived(QString from, QList<uint> frequencies);
         void aircraftConfigurationInfoReceived(QString from, QString json);

@@ -377,6 +377,7 @@ namespace xpilot
     void NetworkManager::OnBroadcastMessageReceived(PDUBroadcastMessage pdu)
     {
         emit broadcastMessageReceived(pdu.From.toUpper(), pdu.Message);
+        m_xplaneAdapter.NotificationPosted(QString("[BROADCAST] %1: %2").arg(pdu.From.toUpper()).arg(pdu.Message), COLOR_ORANGE);
     }
 
     void NetworkManager::OnRadioMessageReceived(PDURadioMessage pdu)
@@ -653,6 +654,8 @@ namespace xpilot
     void NetworkManager::sendWallop(QString message)
     {
         m_fsd.SendPDU(PDUWallop(m_connectInfo.Callsign, message));
+        emit wallopSent(message);
+        m_xplaneAdapter.NotificationPosted(QString("[WALLOP] %1").arg(message), COLOR_RED);
     }
 
     void NetworkManager::RequestIsValidATC(QString callsign)
