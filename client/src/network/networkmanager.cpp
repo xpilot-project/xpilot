@@ -186,7 +186,7 @@ namespace xpilot
                 auto json = QJsonDocument::fromJson(response).object();
                 if(json.contains("success") && json["success"].toBool()) {
                     if(json.contains("token")) {
-                        m_jwtToken = json["token"].toString();
+                        QString m_jwtToken = json["token"].toString();
                         LoginToNetwork(m_jwtToken);
                     }
                 }

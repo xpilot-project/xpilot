@@ -89,7 +89,6 @@ namespace xpilot
         RadioStackState m_radioStackState;
         ConnectInfo m_connectInfo{};
         QString m_publicIp;
-        QString m_jwtToken;
         bool m_intentionalDisconnect =  false;
         bool m_forcedDisconnect = false;
         QString m_forcedDisconnectReason = "";
