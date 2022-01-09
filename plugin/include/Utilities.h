@@ -127,6 +127,15 @@ inline void join(const std::vector<std::string>& v, char c, std::string& s)
 	}
 }
 
+inline std::string joinSkipFirst(const std::vector<std::string>& v, const std::string& delimiter = " ") {
+	std::string out;
+	if (auto i = std::next(v.begin()), e = v.end(); i != e) {
+		out += *i++;
+		for (; i != e; ++i) out.append(delimiter).append(*i);
+	}
+	return out;
+}
+
 inline bool is_number(const std::string& s)
 {
 	return !s.empty() && std::find_if(s.begin(),

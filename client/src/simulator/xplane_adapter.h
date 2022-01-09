@@ -92,6 +92,7 @@ signals:
     void aircraftUnignored(QString callsign);
     void aircraftNotIgnored(QString callsign);
     void ignoreList(QStringList list);
+    void sendWallop(QString message);
 
 private:
     QUdpSocket* socket;

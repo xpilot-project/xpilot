@@ -115,6 +115,7 @@ namespace xpilot
         void OnSendFastReceived(PDUSendFast pdu);
         void OnRawDataSent(QString data);
         void OnRawDataReceived(QString data);
+        void OnSendWallop(QString message);
 
         void OnUserAircraftDataUpdated(UserAircraftData data);
         void OnUserAircraftConfigDataUpdated(UserAircraftConfigData data);

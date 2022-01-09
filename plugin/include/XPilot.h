@@ -78,6 +78,7 @@ namespace xpilot
 		void setAudioComSelection(int radio);
 		void setAudioSelection(int radio, bool on);
 		void setTransponderCode(int code);
+		void sendWallop(std::string message);
 
 		void SendReply(const std::string& message);
 

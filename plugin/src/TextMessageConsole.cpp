@@ -46,6 +46,7 @@ namespace xpilot
 		Close,
 		CloseAll,
 		Clear,
+		Wallop,
 		None
 	};
 
@@ -59,6 +60,7 @@ namespace xpilot
 		if (v == ".x" || v == ".xpdr" || v == ".xpndr" || v == ".squawk" || v == ".sq") return xpilot::CommandOptions::SetTransponderCode;
 		if (v == ".tx") return xpilot::CommandOptions::OverrideTx;
 		if (v == ".rx") return xpilot::CommandOptions::OverrideRx;
+		if (v == ".wallop") return xpilot::CommandOptions::Wallop;
 		if (v == ".clear") return xpilot::CommandOptions::Clear;
 		if (v == ".close") return xpilot::CommandOptions::Close;
 		if (v == ".closeall") return xpilot::CommandOptions::CloseAll;
@@ -437,6 +439,24 @@ namespace xpilot
 								else
 								{
 									ShowErrorMessage("Invalid command parameters. Expected .x 1234");
+								}
+								break;
+							case xpilot::CommandOptions::Wallop:
+								if (!m_env->isNetworkConnected())
+								{
+									ShowErrorMessage("Not connected to the network.");
+								}
+								else
+								{
+									if (args.size() >= 2)
+									{
+										m_env->sendWallop(joinSkipFirst(args));
+										m_inputValue = "";
+									}
+									else
+									{
+										ShowErrorMessage("Invalid parameters. To send a wallop request, use the command .wallop Your Message Here");
+									}
 								}
 								break;
 							case xpilot::CommandOptions::Clear:

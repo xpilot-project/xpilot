@@ -72,6 +72,7 @@ namespace xpilot
         connect(&xplaneAdapter, &XplaneAdapter::privateMessageSent, this, &NetworkManager::sendPrivateMessage);
         connect(&xplaneAdapter, &XplaneAdapter::requestMetar, this, &NetworkManager::RequestMetar);
         connect(&xplaneAdapter, &XplaneAdapter::forceDisconnect, this, &NetworkManager::OnForceDisconnected);
+        connect(&xplaneAdapter, &XplaneAdapter::sendWallop, this, &NetworkManager::OnSendWallop);
 
         connect(this, &NetworkManager::notificationPosted, this, [&](int type, QString message)
         {
@@ -653,9 +654,7 @@ namespace xpilot
 
     void NetworkManager::sendWallop(QString message)
     {
-        m_fsd.SendPDU(PDUWallop(m_connectInfo.Callsign, message));
-        emit wallopSent(message);
-        m_xplaneAdapter.NotificationPosted(QString("[WALLOP] %1").arg(message), COLOR_RED);
+        OnSendWallop(message);
     }
 
     void NetworkManager::RequestIsValidATC(QString callsign)
@@ -790,5 +789,12 @@ namespace xpilot
     {
         m_rawDataStream << QString("[%1] <<< %2").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), data);
         m_rawDataStream.flush();
+    }
+
+    void NetworkManager::OnSendWallop(QString message)
+    {
+        m_fsd.SendPDU(PDUWallop(m_connectInfo.Callsign, message));
+        emit wallopSent(message);
+        m_xplaneAdapter.NotificationPosted(QString("[WALLOP] %1").arg(message), COLOR_RED);
     }
 }

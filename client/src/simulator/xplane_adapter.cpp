@@ -204,6 +204,18 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
                             }
                         }
 
+                        else if(obj["type"] == "Wallop")
+                        {
+                            if(obj.contains("data"))
+                            {
+                                QJsonObject data = obj["data"].toObject();
+                                if(!data["message"].toString().isEmpty())
+                                {
+                                    emit sendWallop(data["message"].toString());
+                                }
+                            }
+                        }
+
                         else if(obj["type"] == "ForceDisconnect")
                         {
                             QString reason;

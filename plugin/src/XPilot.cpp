@@ -606,6 +606,14 @@ namespace xpilot
 			});
 	}
 
+	void XPilot::sendWallop(std::string message)
+	{
+		json msg;
+		msg["type"] = "Wallop";
+		msg["data"]["message"] = message;
+		SendReply(msg.dump());
+	}
+
 	void XPilot::setAudioComSelection(int radio)
 	{
 		QueueCallback([=]
