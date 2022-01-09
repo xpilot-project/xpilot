@@ -19,7 +19,8 @@ namespace xpilot
 {
     NetworkManager::NetworkManager(XplaneAdapter &xplaneAdapter, QObject *owner) :
         QObject(owner),
-        m_xplaneAdapter(xplaneAdapter)
+        m_xplaneAdapter(xplaneAdapter),
+        nam(new QNetworkAccessManager)
     {
         QDir networkLogPath(pathAppend(AppConfig::getInstance()->dataRoot(), "NetworkLogs"));
         if(!networkLogPath.exists()) {
@@ -175,15 +176,47 @@ namespace xpilot
 
     void NetworkManager::OnServerIdentificationReceived(PDUServerIdentification pdu)
     {
-        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, BuildConfig::VatsimClientId(), "xPilot", 1, 2, AppConfig::getInstance()->VatsimId, GetSystemUid(), ""));
+        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, BuildConfig::VatsimClientId(), "xPilot", 1, 2,
+                                              AppConfig::getInstance()->VatsimId, GetSystemUid(), ""));
 
-        if(m_connectInfo.ObserverMode) {
-            m_fsd.SendPDU(PDUAddATC(m_connectInfo.Callsign, AppConfig::getInstance()->Name, AppConfig::getInstance()->VatsimId,
-                                    AppConfig::getInstance()->VatsimPasswordDecrypted, NetworkRating::OBS, ProtocolRevision::VatsimAuth));
+        if(AppConfig::getInstance()->VelocityEnabled)
+        {
+            GetJwtToken().then([&](const QByteArray &response){
+                qDebug() << response;
+                auto json = QJsonDocument::fromJson(response).object();
+                if(json.contains("success") && json["success"].toBool()) {
+                    if(json.contains("token")) {
+                        m_jwtToken = json["token"].toString();
+                        LoginToNetwork(m_jwtToken);
+                    }
+                }
+                else {
+                    QString jwtError = json["error_msg"].toString();
+                    emit notificationPosted((int)NotificationType::Error, QString("Network authentication error: %1").arg(jwtError));
+                    emit networkDisconnected(true);
+                    m_fsd.Disconnect();
+                }
+            }).fail([&](const QString &err){
+                emit notificationPosted((int)NotificationType::Error, QString("Network authentication error: %1").arg(err));
+                emit networkDisconnected(true);
+                m_fsd.Disconnect();
+            });
         }
         else {
-            m_fsd.SendPDU(PDUAddPilot(m_connectInfo.Callsign, AppConfig::getInstance()->VatsimId, AppConfig::getInstance()->VatsimPasswordDecrypted,
-                                      NetworkRating::OBS, ProtocolRevision::VatsimAuth, SimulatorType::XPlane, AppConfig::getInstance()->NameWithHomeAirport()));
+            LoginToNetwork(AppConfig::getInstance()->VatsimPasswordDecrypted);
+        }
+    }
+
+    void NetworkManager::LoginToNetwork(QString password)
+    {
+        if(m_connectInfo.ObserverMode) {
+            m_fsd.SendPDU(PDUAddATC(m_connectInfo.Callsign, AppConfig::getInstance()->Name, AppConfig::getInstance()->VatsimId,
+                                    password, NetworkRating::OBS, ProtocolRevision::VatsimAuth));
+        }
+        else {
+            m_fsd.SendPDU(PDUAddPilot(m_connectInfo.Callsign, AppConfig::getInstance()->VatsimId, password,
+                                      NetworkRating::OBS, ProtocolRevision::VatsimAuth, SimulatorType::XPlane,
+                                      AppConfig::getInstance()->NameWithHomeAirport()));
         }
 
         m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, "SERVER", ClientQueryType::PublicIP));
@@ -604,6 +637,7 @@ namespace xpilot
         }
     }
 
+
     void NetworkManager::SendAircraftConfigurationUpdate(AircraftConfiguration config)
     {
         SendAircraftConfigurationUpdate("@94836", config);
@@ -626,6 +660,35 @@ namespace xpilot
         caps.append("ACCONFIG=1");
         caps.append("VISUPDATE=1");
         m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, to, ClientQueryType::Capabilities, caps));
+    }
+
+    QPromise<QByteArray> NetworkManager::GetJwtToken()
+    {
+        return QPromise<QByteArray>{[&](const auto resolve, const auto reject)
+            {
+                QJsonObject obj;
+                obj["cid"] = AppConfig::getInstance()->VatsimId;
+                obj["password"] = AppConfig::getInstance()->VatsimPasswordDecrypted;
+                QJsonDocument doc(obj);
+                QByteArray data = doc.toJson();
+
+                const QUrl url(QStringLiteral("https://auth.vatsim.net/api/fsd-jwt"));
+                QNetworkRequest request(url);
+                request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+                m_reply = nam->post(request, data);
+
+                QObject::connect(m_reply, &QNetworkReply::finished, [=]() {
+                    if(m_reply->error() == QNetworkReply::NoError)
+                    {
+                        resolve(m_reply->readAll());
+                    }
+                    else
+                    {
+                        reject(QString{m_reply->errorString()});
+                    }
+                });
+            }};
     }
 
     void NetworkManager::RequestMetar(QString station)

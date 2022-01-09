@@ -6,6 +6,12 @@
 #include <QVector>
 #include <QTextStream>
 #include <QFile>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QPointer>
+#include <QtPromise>
+
+using namespace QtPromise;
 
 #include "connectinfo.h"
 #include "src/fsd/fsd_client.h"
@@ -46,6 +52,8 @@ namespace xpilot
         void SendAircraftConfigurationUpdate(AircraftConfiguration config);
         void SendCapabilities(QString to);
 
+        QPromise<QByteArray> GetJwtToken();
+
     signals:
         void networkConnected(QString callsign, bool enableVoice);
         void networkDisconnected(bool forced);
@@ -81,6 +89,7 @@ namespace xpilot
         RadioStackState m_radioStackState;
         ConnectInfo m_connectInfo{};
         QString m_publicIp;
+        QString m_jwtToken;
         bool m_intentionalDisconnect =  false;
         bool m_forcedDisconnect = false;
         QString m_forcedDisconnectReason = "";
@@ -88,6 +97,9 @@ namespace xpilot
         QFile m_networkLog;
         QTextStream m_rawDataStream;
         bool m_sendEmptyFastPosition = false;
+
+        QNetworkAccessManager *nam = nullptr;
+        QPointer<QNetworkReply> m_reply;
 
         QMap<QString, QStringList> m_mapAtisMessages;
 
@@ -128,6 +140,8 @@ namespace xpilot
 
         void OnSlowPositionTimerElapsed();
         void OnFastPositionTimerElapsed();
+
+        void LoginToNetwork(QString password);
 
         const double POSITIONAL_VELOCITY_ZERO_TOLERANCE = 0.005;
         bool PositionalVelocityIsZero(UserAircraftData data)
