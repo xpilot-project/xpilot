@@ -109,9 +109,9 @@ namespace xpilot
         bool m_keepAlive = false;
         bool m_userInitiatedConnect = true;
         std::shared_ptr<afv_native::Client> m_client;
-        QTimer* m_transceiverTimer;
-        QTimer* m_eventTimer;
-        QTimer* m_rxTxQueryTimer;
+        QTimer m_transceiverTimer;
+        QTimer m_eventTimer;
+        QTimer m_rxTxQueryTimer;
         QThread *m_workerThread;
 
         bool m_com1Rx = false;

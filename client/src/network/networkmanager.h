@@ -73,8 +73,8 @@ namespace xpilot
     private:
         FsdClient m_fsd { this };
         XplaneAdapter& m_xplaneAdapter;
-        QTimer* m_slowPositionTimer;
-        QTimer* m_fastPositionTimer;
+        QTimer m_slowPositionTimer;
+        QTimer m_fastPositionTimer;
         UserAircraftData m_userAircraftData;
         UserAircraftConfigData m_userAircraftConfigData;
         RadioStackState m_radioStackState;

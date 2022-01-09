@@ -20,6 +20,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMutex>
+#include <QTimer>
 
 #include "zmq.hpp"
 
@@ -111,6 +112,8 @@ private:
     zmq::context_t* m_zmqContext;
     zmq::socket_t* m_zmqSocket;
     QList<zmq::socket_t*> m_visualSockets;
+    QTimer m_heartbeatTimer;
+    QTimer m_xplaneDataTimer;
 
     QFile m_pluginLog;
     QTextStream m_rawDataStream;

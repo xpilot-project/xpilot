@@ -96,12 +96,9 @@ namespace xpilot
             }
         });
 
-        m_slowPositionTimer = new QTimer(this);
-        connect(m_slowPositionTimer, &QTimer::timeout, this, &NetworkManager::OnSlowPositionTimerElapsed);
-
-        m_fastPositionTimer = new QTimer(this);
-        m_fastPositionTimer->setInterval(200);
-        connect(m_fastPositionTimer, &QTimer::timeout, this, &NetworkManager::OnFastPositionTimerElapsed);
+        connect(&m_slowPositionTimer, &QTimer::timeout, this, &NetworkManager::OnSlowPositionTimerElapsed);
+        connect(&m_fastPositionTimer, &QTimer::timeout, this, &NetworkManager::OnFastPositionTimerElapsed);
+        m_fastPositionTimer.setInterval(200);
     }
 
     NetworkManager::~NetworkManager()
@@ -134,8 +131,8 @@ namespace xpilot
 
     void NetworkManager::OnNetworkDisconnected()
     {
-        m_fastPositionTimer->stop();
-        m_slowPositionTimer->stop();
+        m_fastPositionTimer.stop();
+        m_slowPositionTimer.stop();
 
         if(m_connectInfo.TowerViewMode) {
             emit notificationPosted((int)NotificationType::Info, "Disconnected from TowerView proxy.");
@@ -191,8 +188,8 @@ namespace xpilot
         m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, "SERVER", ClientQueryType::PublicIP));
         SendSlowPositionPacket();
         SendEmptyFastPositionPacket();
-        m_slowPositionTimer->setInterval(m_connectInfo.ObserverMode ? 15000 : 5000);
-        m_slowPositionTimer->start();
+        m_slowPositionTimer.setInterval(m_connectInfo.ObserverMode ? 15000 : 5000);
+        m_slowPositionTimer.start();
     }
 
     void NetworkManager::OnClientQueryReceived(PDUClientQuery pdu)
@@ -265,7 +262,7 @@ namespace xpilot
                     emit controllerAtisReceived(pdu.From.toUpper(), m_mapAtisMessages[pdu.From.toUpper()]);
 
                     m_xplaneAdapter.NotificationPosted(pdu.From.toUpper() + " ATIS:", COLOR_BRIGHT_GREEN);
-                    for(const auto& line : std::as_const(m_mapAtisMessages[pdu.From.toUpper()])) {
+                    for(const auto& line : qAsConst(m_mapAtisMessages[pdu.From.toUpper()])) {
                         m_xplaneAdapter.NotificationPosted(line, COLOR_BRIGHT_GREEN);
                     }
 
@@ -462,11 +459,11 @@ namespace xpilot
         {
             if(pdu.DoSendFast)
             {
-                m_fastPositionTimer->start();
+                m_fastPositionTimer.start();
             }
             else
             {
-                m_fastPositionTimer->stop();
+                m_fastPositionTimer.stop();
             }
         }
     }

@@ -20,28 +20,25 @@ namespace xpilot
         connect(&m_networkManager, &NetworkManager::pilotDeleted, this, &AircraftManager::OnPilotDeleted);
         connect(&m_xplaneAdapter, &XplaneAdapter::aircraftIgnored, this, &AircraftManager::OnIgnoreAircraft);
         connect(&m_xplaneAdapter, &XplaneAdapter::aircraftUnignored, this, &AircraftManager::OnUnignoreAircraft);
-        connect(m_staleAircraftCheckTimer, &QTimer::timeout, this, &AircraftManager::OnStaleAircraftTimeoutTimeout);
-        connect(m_simulatorAircraftSyncTimer, &QTimer::timeout, this, &AircraftManager::OnSimulatorAircraftSyncTimeout);
+        connect(&m_staleAircraftCheckTimer, &QTimer::timeout, this, &AircraftManager::OnStaleAircraftTimeoutTimeout);
+        connect(&m_simulatorAircraftSyncTimer, &QTimer::timeout, this, &AircraftManager::OnSimulatorAircraftSyncTimeout);
     }
 
     void AircraftManager::InitializeTimers()
     {
-        m_staleAircraftCheckTimer = new QTimer(this);
-        m_staleAircraftCheckTimer->setInterval(StaleAircraftTimeout);
-
-        m_simulatorAircraftSyncTimer = new QTimer(this);
-        m_simulatorAircraftSyncTimer->setInterval(SimulatorAircraftSyncInterval);
+        m_staleAircraftCheckTimer.setInterval(StaleAircraftTimeout);
+        m_simulatorAircraftSyncTimer.setInterval(SimulatorAircraftSyncInterval);
     }
 
     void AircraftManager::OnNetworkConnected()
     {
-        m_staleAircraftCheckTimer->start();
+        m_staleAircraftCheckTimer.start();
     }
 
     void AircraftManager::OnNetworkDisconnected()
     {
         DeleteAllPlanes();
-        m_staleAircraftCheckTimer->stop();
+        m_staleAircraftCheckTimer.stop();
     }
 
     void AircraftManager::OnStaleAircraftTimeoutTimeout()

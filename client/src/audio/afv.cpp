@@ -20,11 +20,8 @@ namespace xpilot
         m_xplaneAdapter(xplaneAdapter),
         m_client()
     {
-        m_transceiverTimer = new QTimer(this);
-        m_transceiverTimer->setInterval(5000);
-
-        m_rxTxQueryTimer = new QTimer(this);
-        m_rxTxQueryTimer->setInterval(50);
+        m_transceiverTimer.setInterval(5000);
+        m_rxTxQueryTimer.setInterval(50);
 
 #ifdef Q_OS_WIN
         WORD wVersionRequested;
@@ -128,8 +125,8 @@ namespace xpilot
             }
         });
 
-        connect(m_transceiverTimer, &QTimer::timeout, this, &AudioForVatsim::OnTransceiverTimer);
-        connect(m_rxTxQueryTimer, &QTimer::timeout, this, [=]{
+        connect(&m_transceiverTimer, &QTimer::timeout, this, &AudioForVatsim::OnTransceiverTimer);
+        connect(&m_rxTxQueryTimer, &QTimer::timeout, this, [&]{
             emit radioRxChanged(0, m_radioStackState.Com1ReceiveEnabled && m_client->getRxActive(0));
             emit radioRxChanged(1, m_radioStackState.Com2ReceiveEnabled && m_client->getRxActive(1));
         });
@@ -309,8 +306,8 @@ namespace xpilot
         m_client->setCallsign(callsign.toStdString());
         m_client->setCredentials(AppConfig::getInstance()->VatsimId.toStdString(), AppConfig::getInstance()->VatsimPasswordDecrypted.toStdString());
         m_client->connect();
-        m_transceiverTimer->start();
-        m_rxTxQueryTimer->start();
+        m_transceiverTimer.start();
+        m_rxTxQueryTimer.start();
     }
 
     void AudioForVatsim::OnNetworkDisconnected()
@@ -319,8 +316,8 @@ namespace xpilot
         emit radioRxChanged(1, false);
 
         m_client->disconnect();
-        m_transceiverTimer->stop();
-        m_rxTxQueryTimer->stop();
+        m_transceiverTimer.stop();
+        m_rxTxQueryTimer.stop();
     }
 
     void AudioForVatsim::OnTransceiverTimer()
@@ -385,7 +382,8 @@ namespace xpilot
                                 m_radioStackState.AvionicsPowerOn ? (com1Alias > 0 ? com1Alias : m_radioStackState.Com1Frequency * 1000) : 0);
         m_client->setRadioState(1, m_radioStackState.Com2ReceiveEnabled &&
                                 m_radioStackState.AvionicsPowerOn ? (com2Alias > 0 ? com2Alias : m_radioStackState.Com2Frequency * 1000) : 0);
-        m_client->setClientPosition(m_userAircraftData.Latitude, m_userAircraftData.Longitude, m_userAircraftData.AltitudeMslM, m_userAircraftData.AltitudePressure * 0.3048);
+        m_client->setClientPosition(m_userAircraftData.Latitude, m_userAircraftData.Longitude, m_userAircraftData.AltitudeMslM,
+                                    m_userAircraftData.AltitudePressure * 0.3048);
     }
 
     bool AudioForVatsim::fuzzyMatchCallsign(const QString &callsign, const QString &compareTo) const

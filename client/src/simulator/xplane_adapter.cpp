@@ -90,7 +90,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     m_zmqSocket->set(zmq::sockopt::linger, 0);
     m_zmqSocket->connect(QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
 
-    for(const QString &machine : std::as_const(AppConfig::getInstance()->VisualMachines)) {
+    for(const QString &machine : qAsConst(AppConfig::getInstance()->VisualMachines)) {
         auto socket = new zmq::socket_t(*m_zmqContext, ZMQ_DEALER);
         socket->set(zmq::sockopt::routing_id, "xpilot");
         socket->set(zmq::sockopt::linger, 0);
@@ -241,8 +241,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 
     connect(socket, &QUdpSocket::readyRead, this, &XplaneAdapter::OnDataReceived);
 
-    QTimer *heartbeatTimer = new QTimer(this);
-    connect(heartbeatTimer, &QTimer::timeout, this, [=] {
+    connect(&m_heartbeatTimer, &QTimer::timeout, this, [&] {
         qint64 now = QDateTime::currentSecsSinceEpoch();
 
         if(!m_initialHandshake || (now - m_lastUdpTimestamp) > HEARTBEAT_TIMEOUT_SECS) {
@@ -281,15 +280,14 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
             m_requestsSent = false;
         }
     });
-    heartbeatTimer->start(1000);
+    m_heartbeatTimer.start(1000);
 
-    QTimer *xplaneDataTimer = new QTimer(this);
-    connect(xplaneDataTimer, &QTimer::timeout, this, [=]{
+    connect(&m_xplaneDataTimer, &QTimer::timeout, this, [&]{
         emit userAircraftDataChanged(m_userAircraftData);
         emit userAircraftConfigDataChanged(m_userAircraftConfigData);
         emit radioStackStateChanged(m_radioStackState);
     });
-    xplaneDataTimer->start(50);
+    m_xplaneDataTimer.start(50);
 
     Subscribe();
 }

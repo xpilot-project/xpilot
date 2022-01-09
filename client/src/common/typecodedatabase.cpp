@@ -169,7 +169,7 @@ void TypeCodeDatabase::searchTypeCodes(QString predicate)
     QList<TypeCodeInfo> limitedResults(results.begin(), std::next(results.begin(), std::min(10, results.size())));
 
     QVariantList variantList;
-    for(const auto& v : std::as_const(limitedResults))
+    for(const auto& v : qAsConst(limitedResults))
     {
         QVariantMap mapItem;
         mapItem.insert("name", v.Name);

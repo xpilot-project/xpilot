@@ -9,8 +9,7 @@ namespace xpilot
     ControllerManager::ControllerManager(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, QObject *parent) :
         QObject(parent),
         m_networkManager(networkManager),
-        m_xplaneAdapter(xplaneAdapter),
-        m_nearbyAtcTimer(new QTimer(this))
+        m_xplaneAdapter(xplaneAdapter)
     {
         connect(&m_networkManager, &NetworkManager::controllerUpdateReceived, this, &ControllerManager::OnControllerUpdateReceived);
         connect(&m_networkManager, &NetworkManager::isValidAtcReceived, this, &ControllerManager::IsValidATCReceived);
@@ -18,15 +17,14 @@ namespace xpilot
         connect(&m_networkManager, &NetworkManager::controllerDeleted, this, &ControllerManager::OnControllerDeleted);
         connect(&m_networkManager, &NetworkManager::networkConnected, this, [&] {
             m_controllers.clear();
-            m_nearbyAtcTimer->start(1000);
+            m_nearbyAtcTimer.start(1000);
         });
         connect(&m_networkManager, &NetworkManager::networkDisconnected, this, [&] {
             m_controllers.clear();
-            m_nearbyAtcTimer->stop();
+            m_nearbyAtcTimer.stop();
         });
-        connect(m_nearbyAtcTimer, &QTimer::timeout, this, [&]{
-
-            for(const auto &controller : std::as_const(m_controllers)) {
+        connect(&m_nearbyAtcTimer, &QTimer::timeout, this, [&]{
+            for(const auto &controller : qAsConst(m_controllers)) {
                 if(QDateTime::currentSecsSinceEpoch() - controller.LastUpdate > 60) {
                     emit controllerDeleted(controller);
                     m_controllers.removeAll(controller);
@@ -41,7 +39,7 @@ namespace xpilot
             });
 
             QJsonArray data_array;
-            for(const auto &atc : std::as_const(m_controllers))
+            for(const auto &atc : qAsConst(m_controllers))
             {
                 if(!atc.IsValidATC) continue;
 

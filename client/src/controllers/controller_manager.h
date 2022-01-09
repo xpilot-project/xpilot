@@ -35,7 +35,7 @@ namespace xpilot
         NetworkManager &m_networkManager;
         XplaneAdapter &m_xplaneAdapter;
         QList<Controller> m_controllers;
-        QTimer *m_nearbyAtcTimer;
+        QTimer m_nearbyAtcTimer;
     };
 }
 

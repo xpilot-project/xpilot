@@ -2,6 +2,7 @@
 #define USER_AIRCRAFT_MANAGER_H
 
 #include <QObject>
+#include <QTimer>
 #include <optional>
 
 #include "src/network/networkmanager.h"
@@ -28,6 +29,7 @@ private:
     NetworkManager& m_networkManager;
     XplaneAdapter& m_xplaneAdapter;
 
+    QTimer m_tokenRefreshTimer;
     const int AcconfigTokenRefreshInterval = 5000;
     const int AcconfigMaxTokens = 10;
     int m_tokensAvailable = AcconfigMaxTokens;

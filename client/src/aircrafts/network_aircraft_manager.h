@@ -26,8 +26,8 @@ namespace xpilot
         static constexpr int StaleAircraftTimeout = 10000;
         static constexpr int SimulatorAircraftSyncInterval = 5000;
 
-        QTimer* m_staleAircraftCheckTimer;
-        QTimer* m_simulatorAircraftSyncTimer;
+        QTimer m_staleAircraftCheckTimer;
+        QTimer m_simulatorAircraftSyncTimer;
 
         QList<NetworkAircraft> m_aircraft;
         QList<QString> m_ignoredAircraft;

@@ -12,22 +12,18 @@ UserAircraftManager::UserAircraftManager(XplaneAdapter& xplaneAdapter, NetworkMa
 {
     connect(&xplaneAdapter, &XplaneAdapter::userAircraftConfigDataChanged, this, &UserAircraftManager::OnUserAircraftConfigDataUpdated);
     connect(&xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, &UserAircraftManager::OnRadioStackUpdated);
-    connect(&xplaneAdapter, &XplaneAdapter::simConnectionStateChanged, this, [&](bool connected)
-    {
-        if(!connected)
-        {
+    connect(&xplaneAdapter, &XplaneAdapter::simConnectionStateChanged, this, [&](bool connected) {
+        if(!connected) {
             m_initialAircraftDataReceived = false;
         }
     });
     connect(&m_networkManager, &NetworkManager::aircraftConfigurationInfoReceived, this, &UserAircraftManager::OnAircraftConfigurationInfoReceived);
-
-    QTimer* tokenRefreshTimer = new QTimer(this);
-    connect(tokenRefreshTimer, &QTimer::timeout, this, [=] {
+    connect(&m_tokenRefreshTimer, &QTimer::timeout, this, [&] {
         if(m_tokensAvailable < AcconfigMaxTokens) {
             m_tokensAvailable++;
         }
     });
-    tokenRefreshTimer->start(AcconfigTokenRefreshInterval);
+    m_tokenRefreshTimer.start(AcconfigTokenRefreshInterval);
 }
 
 void UserAircraftManager::OnUserAircraftConfigDataUpdated(UserAircraftConfigData data)
