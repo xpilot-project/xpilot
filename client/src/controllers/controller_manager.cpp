@@ -18,7 +18,7 @@ namespace xpilot
         connect(&m_networkManager, &NetworkManager::controllerDeleted, this, &ControllerManager::OnControllerDeleted);
         connect(&m_networkManager, &NetworkManager::networkConnected, this, [&] {
             m_controllers.clear();
-            m_nearbyAtcTimer->start(5000);
+            m_nearbyAtcTimer->start(1000);
         });
         connect(&m_networkManager, &NetworkManager::networkDisconnected, this, [&] {
             m_controllers.clear();
