@@ -2,6 +2,8 @@ name: Build xPilot
 
 on:
   push:
+    branches:
+      - 'dev/*'
     tags:
       - 'v*'
 
