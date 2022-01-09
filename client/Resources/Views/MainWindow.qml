@@ -1094,6 +1094,7 @@ Window {
                                 Layout.fillHeight: true
                                 Layout.fillWidth: true
                                 selectByMouse: true
+                                visible: tabId === currentTab
 
                                 property var commandHistory: []
                                 property int historyIndex: -1
