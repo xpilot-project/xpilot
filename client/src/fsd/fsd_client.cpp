@@ -1,5 +1,6 @@
 #include "fsd_client.h"
 #include "src/common/build_config.h"
+#include "src/config/appconfig.h"
 
 namespace xpilot
 {
@@ -82,8 +83,11 @@ namespace xpilot
             }
             else if(prefixChar == '^')
             {
-                fields[0] = fields[0].mid(1);
-                emit RaiseFastPilotPositionReceived(PDUFastPilotPosition::fromTokens(fields));
+                if(AppConfig::getInstance()->VelocityEnabled)
+                {
+                    fields[0] = fields[0].mid(1);
+                    emit RaiseFastPilotPositionReceived(PDUFastPilotPosition::fromTokens(fields));
+                }
             }
             else if(prefixChar == '%')
             {
