@@ -210,11 +210,11 @@ namespace xpilot
     {
         if(m_connectInfo.ObserverMode) {
             m_fsd.SendPDU(PDUAddATC(m_connectInfo.Callsign, AppConfig::getInstance()->Name, AppConfig::getInstance()->VatsimId,
-                                    password, NetworkRating::OBS, ProtocolRevision::VatsimAuth));
+                                    password, NetworkRating::OBS, ProtocolRevision::Vatsim2022));
         }
         else {
             m_fsd.SendPDU(PDUAddPilot(m_connectInfo.Callsign, AppConfig::getInstance()->VatsimId, password,
-                                      NetworkRating::OBS, ProtocolRevision::VatsimAuth, SimulatorType::XPlane,
+                                      NetworkRating::OBS, ProtocolRevision::Vatsim2022, SimulatorType::XPlane,
                                       AppConfig::getInstance()->NameWithHomeAirport()));
         }
 

@@ -44,7 +44,8 @@ enum class ProtocolRevision
     Unknown = 0,
     Classic = 9,
     VatsimNoAuth = 10,
-    VatsimAuth = 100
+    VatsimAuth = 100,
+    Vatsim2022 = 101
 };
 
 enum class ClientQueryType
