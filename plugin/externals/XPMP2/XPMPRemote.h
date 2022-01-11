@@ -390,12 +390,12 @@ struct RemoteMsgAcRemoveTy : public RemoteMsgBaseTy {
 // A few static validations just to make sure that no compiler fiddles with my network message layout.
 static_assert(sizeof(RemoteMsgBaseTy)       ==   8,     "RemoteMsgBaseTy doesn't have expected size");
 static_assert(sizeof(RemoteMsgSettingsTy)   ==  40,     "RemoteMsgSettingsTy doesn't have expected size");
-static_assert(sizeof(RemoteAcDetailTy)      == 246+42,  "RemoteAcDetailTy doesn't have expected size");
-static_assert(sizeof(RemoteMsgAcDetailTy)   == 254+42,  "RemoteMsgAcDetailTy doesn't have expected size");
+static_assert(sizeof(RemoteAcDetailTy)      == 246+43,  "RemoteAcDetailTy doesn't have expected size");
+static_assert(sizeof(RemoteMsgAcDetailTy)   == 254+43,  "RemoteMsgAcDetailTy doesn't have expected size");
 static_assert(sizeof(RemoteAcPosUpdateTy)   ==  20,     "RemoteAcPosUpdateTy doesn't have expected size");
 static_assert(sizeof(RemoteMsgAcPosUpdateTy)==  28,     "RemoteMsgAcPosUpdateTy doesn't have expected size");
 static_assert(sizeof(RemoteAcAnimTy)        ==   8,     "RemoteAcAnimTy doesn't have expected size");
-static_assert(RemoteAcAnimTy::msgSize(V_COUNT) == 90,   "RemoteAcAnimTy for V_COUNT dataRefs doesn't have expected size");
+static_assert(RemoteAcAnimTy::msgSize(V_COUNT) == 92,   "RemoteAcAnimTy for V_COUNT dataRefs doesn't have expected size");
 static_assert(sizeof(RemoteMsgAcAnimTy)     ==  16,     "RemoteMsgAcAnimTy doesn't have expected size");
 static_assert(sizeof(RemoteMsgAcRemoveTy)   ==  12,     "RemoteMsgAcRemoveTy doesn't have expected size");
 

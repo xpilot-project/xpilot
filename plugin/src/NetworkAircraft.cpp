@@ -587,6 +587,8 @@ namespace xpilot
         SetLightsBeacon(surfaces.lights.bcnLights);
         SetLightsStrobe(surfaces.lights.strbLights);
         SetLightsNav(surfaces.lights.navLights);
+        SetWeightOnWheels(on_ground);
+
 
         HexToRgb(Config::Instance().getAircraftLabelColor(), colLabel);
 

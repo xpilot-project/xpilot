@@ -98,6 +98,8 @@ enum DR_VALS : std::uint8_t {
 
     
     V_MISC_TOUCH_DOWN,                          ///< `libxplanemp/misc/touch_down`
+
+    V_MISC_WEIGHT_ON_WHEELS,                    ///< `libxplanemp/misc/weight_on_wheels`
     
     V_COUNT                                     ///< always last, number of dataRefs XPMP2 pre-defines
 };
@@ -474,6 +476,9 @@ public:
 
     bool  GetTouchDown () const          { return v[V_MISC_TOUCH_DOWN] > 0.5f; }                ///< Moment of touch down
     void  SetTouchDown (bool _b)         { v[V_MISC_TOUCH_DOWN] = float(_b);   }                ///< Moment of touch down
+
+    float GetWeightOnWheel() const { return v[V_MISC_WEIGHT_ON_WHEELS]; }
+    void SetWeightOnWheels(bool _b) { v[V_MISC_WEIGHT_ON_WHEELS] = float(_b); }
 
     // The following is implemented in Map.cpp:
     /// Determine which map icon to use for this aircraft

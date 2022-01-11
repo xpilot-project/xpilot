@@ -170,6 +170,8 @@ struct XPMPPlaneSurfaces_t {
     float                 reversRatio       = 0.0f;             ///< thrust reversers ratio
     
     bool                  touchDown = false;                    ///< just now is moment of touch down?
+
+    float                 weightOnWheels = 0.0f;
 };
 
 
