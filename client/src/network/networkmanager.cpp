@@ -27,9 +27,9 @@ namespace xpilot
             networkLogPath.mkpath(".");
         }
 
-        // keep only the last 5 log files
+        // keep only the last 10 log files
         QFileInfoList files = networkLogPath.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Time);
-        const int MAX_LOGS_TO_RETAIN = 5;
+        const int MAX_LOGS_TO_RETAIN = 10;
         for(int index = files.size(); index >= MAX_LOGS_TO_RETAIN; --index) {
             const QFileInfo &info = files.at(index - 1);
             QFile::remove(info.absoluteFilePath());
