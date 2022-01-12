@@ -384,7 +384,7 @@ jobs:
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
       - name: Extract debug symbols
-        working-directory: ${{ env.CLIENT_DIR }}/build/mac_x64
+        working-directory: ${{ env.PLUGIN_DIR }}/build/mac_x64
         run: |
           dsymutil xPilot.xpl -o xPilot.dSYM
 
@@ -392,7 +392,7 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/xPilot/mac_x64
           cp ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.xpl ${{ github.workspace }}/xPilot/mac_x64
-          cp ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.dSYM ${{ github.workspace }}/xPilot/mac_x64
+          cp -R ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.dSYM ${{ github.workspace }}/xPilot/mac_x64
           cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
       ### Build Client ###
