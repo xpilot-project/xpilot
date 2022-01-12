@@ -15,11 +15,38 @@ namespace xpilot
         return 1.0f - sqrt(1.0f - (v * v));
     }
 
+    static void defaultLogger(const char *subsystem, const char *file, int line, const char *outputLine, void* ref)
+    {
+        auto *self = reinterpret_cast<AudioForVatsim *>(ref);
+        self->afvLogger(QString("%1: %2: %3\r\n").arg(QDateTime::currentDateTimeUtc().toString("MMM dd HH:mm:ss yyyy")).arg(subsystem).arg(outputLine));
+    }
+
+    static afv_native::log_fn gLogger = defaultLogger;
+
     AudioForVatsim::AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, ControllerManager& controllerManager, QObject* parent) :
         QObject(parent),
         m_xplaneAdapter(xplaneAdapter),
         m_client()
     {
+        QDir afvLogPath(pathAppend(AppConfig::getInstance()->dataRoot(), "AfvLogs"));
+        if(!afvLogPath.exists()) {
+            afvLogPath.mkpath(".");
+        }
+
+        // keep only the last 10 log files
+        QFileInfoList files = afvLogPath.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Time);
+        const int MAX_LOGS_TO_RETAIN = 10;
+        for(int index = files.size(); index >= MAX_LOGS_TO_RETAIN; --index) {
+            const QFileInfo &info = files.at(index - 1);
+            QFile::remove(info.absoluteFilePath());
+        }
+
+        m_afvLog.setFileName(pathAppend(afvLogPath.path(), QString("AfvLog-%1.txt").arg(QDateTime::currentDateTimeUtc().toString("yyyyMMdd-hhmmss"))));
+        if(m_afvLog.open(QFile::WriteOnly))
+        {
+            m_logDataStream.setDevice(&m_afvLog);
+        }
+
         m_transceiverTimer.setInterval(5000);
         m_rxTxQueryTimer.setInterval(50);
         m_vuTimer.setInterval(50);
@@ -32,6 +59,7 @@ namespace xpilot
         WSAStartup(wVersionRequested, &wsaData);
 #endif
 
+        afv_native::setLogger(gLogger, this);
 
         ev_base = event_base_new();
         m_client = std::make_shared<afv_native::Client>(ev_base, 2, "xPilot");
@@ -239,6 +267,12 @@ namespace xpilot
 #ifdef Q_OS_WIN
         WSACleanup();
 #endif
+    }
+
+    void AudioForVatsim::afvLogger(QString message)
+    {
+        m_logDataStream << message;
+        m_logDataStream.flush();
     }
 
     void AudioForVatsim::setAudioApi(int api)

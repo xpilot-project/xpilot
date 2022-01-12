@@ -7,6 +7,8 @@
 #include <QThread>
 #include <QList>
 #include <QVariantList>
+#include <QFile>
+#include <QTextStream>
 
 #include <thread>
 #include <memory>
@@ -31,6 +33,8 @@ namespace xpilot
     public:
         AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, ControllerManager& controllerManager, QObject* parent = nullptr);
         ~AudioForVatsim();
+
+        void afvLogger(QString message);
 
         QVariant getOutputDevices() const
         {
@@ -114,6 +118,9 @@ namespace xpilot
         QTimer m_rxTxQueryTimer;
         QTimer m_vuTimer;
         QThread *m_workerThread;
+
+        QFile m_afvLog;
+        QTextStream m_logDataStream;
 
         bool m_com1Rx = false;
         bool m_com2Rx = false;
