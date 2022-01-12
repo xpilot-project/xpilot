@@ -154,7 +154,7 @@ namespace xpilot
 			});
 		if (it != m_tabs.end())
 		{
-			m_tabs.erase(it);
+			it->isOpen = false;
 		}
 	}
 
@@ -489,21 +489,14 @@ namespace xpilot
 
 				ImGui::EndTabItem();
 			}
-
-			std::lock_guard lock(m_tabMutex);
-			{
-				for (auto it = m_tabs.begin(); it != m_tabs.end(); ++it)
-				{
-					if (!it->isOpen)
-					{
-						m_tabs.erase(it);
-					}
+            
+			std::list<Tab>::iterator it = m_tabs.begin();
+			while(it != m_tabs.end()) {
+				if(!it->isOpen) {
+					it = m_tabs.erase(it);
 				}
-
-				for (auto it = m_tabs.begin(); it != m_tabs.end(); ++it)
-				{
+				else {
 					std::string key = it->tabName;
-
 					if (ImGui::BeginTabItem(key.c_str(), &it->isOpen))
 					{
 						ImGui::BeginChild(key.c_str(), ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), false);
@@ -569,8 +562,10 @@ namespace xpilot
 						ImGui::PopID();
 						ImGui::EndTabItem();
 					}
+					it++;
 				}
 			}
+            
 			ImGui::EndTabBar();
 			ImGui::PopFont();
 		}

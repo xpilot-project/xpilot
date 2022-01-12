@@ -20,7 +20,6 @@
 #define TextMessageConsole_h
 
 #include <list>
-#include <mutex>
 #include "XPImgWindow.h"
 
 namespace xpilot {
@@ -76,7 +75,6 @@ namespace xpilot {
 		void ShowErrorMessage(std::string error);
 	private:
 		bool m_scrollToBottom;
-		std::mutex m_tabMutex;
 		XPilot* m_env;
 	};
 
