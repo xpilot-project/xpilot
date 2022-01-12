@@ -12,7 +12,7 @@ Window {
     id: formSettings
     title: "Settings"
     width: 670
-    height: 580
+    height: 600
     minimumHeight: height
     minimumWidth: width
     maximumHeight: height
@@ -49,6 +49,10 @@ Window {
                 outputDeviceList.model = audio.OutputDevices;
                 outputDeviceList.currentIndex = -1;
             }
+        }
+
+        function onInputVuChanged(vu) {
+            peakLevel.value = vu
         }
     }
 
@@ -482,12 +486,28 @@ Window {
             Layout.fillWidth: true
 
             ColumnLayout {
+                id: columnLayout2
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.topMargin: 0
+                anchors.rightMargin: 0
+                anchors.leftMargin: 0
+
+                PeakLevelControl {
+                    id: peakLevel
+                    width: 310
+                    height: 13
+                }
+            }
+
+            ColumnLayout {
                 id: columnLayout3
                 height: 65
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.topMargin: 0
+                anchors.topMargin: 20
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
                 spacing: 0
@@ -522,7 +542,7 @@ Window {
                     linkColor: "#0164AD"
                     font.pixelSize: 13
                     color: "#333333"
-                    topPadding: 10
+                    topPadding: 5
 
                     MouseArea {
                         anchors.fill: parent
