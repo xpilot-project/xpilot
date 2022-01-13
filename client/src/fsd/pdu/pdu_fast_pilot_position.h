@@ -7,7 +7,7 @@
 class PDUFastPilotPosition : public PDUBase
 {
 public:
-    PDUFastPilotPosition(QString from, double lat, double lon, double alt, double pitch, double heading, double bank, double velocityLongitude, double velocityAltitude, double velocityLatitude, double velocityPitch, double velocityHeading, double velocityBank, double noseWheelAngle);
+    PDUFastPilotPosition(QString from, double lat, double lon, double altTrue, double altAgl, double pitch, double heading, double bank, double velocityLongitude, double velocityAltitude, double velocityLatitude, double velocityPitch, double velocityHeading, double velocityBank, double noseGearAngle);
 
     QStringList toTokens() const;
 
@@ -17,7 +17,8 @@ public:
 
     double Lat;
     double Lon;
-    double Altitude;
+    double AltitudeTrue;
+    double AltitudeAgl;
     double Pitch;
     double Heading;
     double Bank;
@@ -27,7 +28,7 @@ public:
     double VelocityPitch;
     double VelocityHeading;
     double VelocityBank;
-    double NoseWheelAngle;
+    double NoseGearAngle;
 
 private:
     PDUFastPilotPosition();

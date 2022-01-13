@@ -37,11 +37,25 @@ QJsonObject AircraftConfiguration::ToJson() const
             engines.insert("1", running);
         }
 
+        if(Engines->Engine1Reversing.has_value())
+        {
+            QJsonObject reversing;
+            reversing.insert("is_reversing", Engines->Engine1Reversing.value());
+            engines.insert("1", reversing);
+        }
+
         if(Engines->Engine2Running.has_value())
         {
             QJsonObject running;
             running.insert("on", Engines->Engine2Running.value());
             engines.insert("2", running);
+        }
+
+        if(Engines->Engine2Reversing.has_value())
+        {
+            QJsonObject reversing;
+            reversing.insert("is_reversing", Engines->Engine2Reversing.value());
+            engines.insert("2", reversing);
         }
 
         if(Engines->Engine3Running.has_value())
@@ -51,11 +65,25 @@ QJsonObject AircraftConfiguration::ToJson() const
             engines.insert("3", running);
         }
 
+        if(Engines->Engine3Reversing.has_value())
+        {
+            QJsonObject reversing;
+            reversing.insert("is_reversing", Engines->Engine3Reversing.value());
+            engines.insert("3", reversing);
+        }
+
         if(Engines->Engine4Running.has_value())
         {
             QJsonObject running;
             running.insert("on", Engines->Engine4Running.value());
             engines.insert("4", running);
+        }
+
+        if(Engines->Engine4Reversing.has_value())
+        {
+            QJsonObject reversing;
+            reversing.insert("is_reversing", Engines->Engine4Reversing.value());
+            engines.insert("4", reversing);
         }
 
         cfg["engines"] = engines;
@@ -194,6 +222,10 @@ AircraftConfigurationInfo AircraftConfigurationInfo::FromJson(const QString &jso
                 {
                     info.Config->Engines->Engine1Running = engine["on"].toBool();
                 }
+                if(engine.contains("is_reversing"))
+                {
+                    info.Config->Engines->Engine1Reversing = engine["is_reversing"].toBool();
+                }
             }
             if(engines.contains("2"))
             {
@@ -201,6 +233,10 @@ AircraftConfigurationInfo AircraftConfigurationInfo::FromJson(const QString &jso
                 if(engine.contains("on"))
                 {
                     info.Config->Engines->Engine2Running = engine["on"].toBool();
+                }
+                if(engine.contains("is_reversing"))
+                {
+                    info.Config->Engines->Engine2Reversing = engine["is_reversing"].toBool();
                 }
             }
             if(engines.contains("3"))
@@ -210,6 +246,10 @@ AircraftConfigurationInfo AircraftConfigurationInfo::FromJson(const QString &jso
                 {
                     info.Config->Engines->Engine3Running = engine["on"].toBool();
                 }
+                if(engine.contains("is_reversing"))
+                {
+                    info.Config->Engines->Engine3Reversing = engine["is_reversing"].toBool();
+                }
             }
             if(engines.contains("4"))
             {
@@ -217,6 +257,10 @@ AircraftConfigurationInfo AircraftConfigurationInfo::FromJson(const QString &jso
                 if(engine.contains("on"))
                 {
                     info.Config->Engines->Engine4Running = engine["on"].toBool();
+                }
+                if(engine.contains("is_reversing"))
+                {
+                    info.Config->Engines->Engine4Reversing = engine["is_reversing"].toBool();
                 }
             }
         }
@@ -281,6 +325,10 @@ AircraftConfigurationEngines AircraftConfigurationEngines::FromUserAircraftData(
     if(config.EngineCount >= 2) cfg.Engine2Running = config.Engine2Running;
     if(config.EngineCount >= 3) cfg.Engine3Running = config.Engine3Running;
     if(config.EngineCount >= 4) cfg.Engine4Running = config.Engine4Running;
+    if(config.EngineCount >= 1) cfg.Engine1Reversing = config.Engine1Reversing;
+    if(config.EngineCount >= 2) cfg.Engine2Reversing = config.Engine2Reversing;
+    if(config.EngineCount >= 3) cfg.Engine3Reversing = config.Engine3Reversing;
+    if(config.EngineCount >= 4) cfg.Engine4Reversing = config.Engine4Reversing;
     return cfg;
 }
 
@@ -291,5 +339,9 @@ AircraftConfigurationEngines AircraftConfigurationEngines::CreateIncremental(Air
     if(config.Engine2Running != Engine2Running) inc.Engine2Running = config.Engine2Running;
     if(config.Engine3Running != Engine3Running) inc.Engine3Running = config.Engine3Running;
     if(config.Engine4Running != Engine4Running) inc.Engine4Running = config.Engine4Running;
+    if(config.Engine1Reversing != Engine1Reversing) inc.Engine1Reversing = config.Engine1Reversing;
+    if(config.Engine2Reversing != Engine2Reversing) inc.Engine2Reversing = config.Engine2Reversing;
+    if(config.Engine3Reversing != Engine3Reversing) inc.Engine3Reversing = config.Engine3Reversing;
+    if(config.Engine4Reversing != Engine4Reversing) inc.Engine4Reversing = config.Engine4Reversing;
     return inc;
 }

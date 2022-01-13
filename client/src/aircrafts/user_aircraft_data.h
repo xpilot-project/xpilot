@@ -10,6 +10,7 @@ public:
     double Latitude;
     double Longitude;
     double AltitudeMslM;
+    double AltitudeAglM;
     double AltitudePressure;
     double GroundSpeed;
     double Pitch;
@@ -28,6 +29,7 @@ public:
         return Latitude != other.Latitude ||
                 Longitude != other.Longitude ||
                 AltitudeMslM != other.AltitudeMslM ||
+                AltitudeAglM != other.AltitudeAglM ||
                 AltitudePressure != other.AltitudePressure ||
                 GroundSpeed != other.GroundSpeed ||
                 Pitch != other.Pitch ||
@@ -47,6 +49,7 @@ public:
         return Latitude == other.Latitude &&
                 Longitude == other.Longitude &&
                 AltitudeMslM == other.AltitudeMslM &&
+                AltitudeAglM == other.AltitudeAglM &&
                 AltitudePressure == other.AltitudePressure &&
                 GroundSpeed == other.GroundSpeed &&
                 Pitch == other.Pitch &&

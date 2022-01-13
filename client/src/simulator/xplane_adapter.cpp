@@ -34,6 +34,7 @@ enum DataRef
     Latitude,
     Longitude,
     AltitudeMsl,
+    AltitudeAgl,
     AltitudePressure,
     GroundSpeed,
     Pitch,
@@ -50,6 +51,10 @@ enum DataRef
     Engine2Running,
     Engine3Running,
     Engine4Running,
+    Engine1Reversing,
+    Engine2Reversing,
+    Engine3Reversing,
+    Engine4Reversing,
     OnGround,
     GearDown,
     FlapRatio,
@@ -325,6 +330,7 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/flightmodel/position/latitude", DataRef::Latitude, 5);
     SubscribeDataRef("sim/flightmodel/position/longitude", DataRef::Longitude, 5);
     SubscribeDataRef("sim/flightmodel/position/elevation", DataRef::AltitudeMsl, 5);
+    SubscribeDataRef("sim/flightmodel/position/y_agl", DataRef::AltitudeAgl, 5);
     SubscribeDataRef("sim/cockpit2/gauges/indicators/altitude_ft_pilot", DataRef::AltitudePressure, 5);
     SubscribeDataRef("sim/flightmodel/position/theta", DataRef::Pitch, 5);
     SubscribeDataRef("sim/flightmodel/position/psi", DataRef::Heading, 5);
@@ -341,6 +347,10 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/flightmodel/engine/ENGN_running[1]", DataRef::Engine2Running, 5);
     SubscribeDataRef("sim/flightmodel/engine/ENGN_running[2]", DataRef::Engine3Running, 5);
     SubscribeDataRef("sim/flightmodel/engine/ENGN_running[3]", DataRef::Engine4Running, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_propmode[0]", DataRef::Engine1Reversing, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_propmode[1]", DataRef::Engine2Reversing, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_propmode[2]", DataRef::Engine3Reversing, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_propmode[3]", DataRef::Engine4Reversing, 5);
     SubscribeDataRef("sim/flightmodel/failures/onground_any", DataRef::OnGround, 5);
     SubscribeDataRef("sim/cockpit/switches/gear_handle_status", DataRef::GearDown, 5);
     SubscribeDataRef("sim/flightmodel/controls/flaprat", DataRef::FlapRatio, 5);
@@ -511,6 +521,9 @@ void XplaneAdapter::OnDataReceived()
                 case DataRef::AltitudeMsl:
                     m_userAircraftData.AltitudeMslM = value;
                 break;
+                case DataRef::AltitudeAgl:
+                    m_userAircraftData.AltitudeAglM = value;
+                break;
                 case DataRef::AltitudePressure:
                     m_userAircraftData.AltitudePressure = value;
                 break;
@@ -564,6 +577,18 @@ void XplaneAdapter::OnDataReceived()
                 break;
                 case DataRef::Engine4Running:
                     m_userAircraftConfigData.Engine4Running = value;
+                break;
+                case DataRef::Engine1Reversing:
+                    m_userAircraftConfigData.Engine1Reversing = (value == 3);
+                break;
+                case DataRef::Engine2Reversing:
+                    m_userAircraftConfigData.Engine2Reversing = (value == 3);
+                break;
+                case DataRef::Engine3Reversing:
+                    m_userAircraftConfigData.Engine3Reversing = (value == 3);
+                break;
+                case DataRef::Engine4Reversing:
+                    m_userAircraftConfigData.Engine4Reversing = (value == 3);
                 break;
                 case DataRef::OnGround:
                     m_userAircraftConfigData.OnGround = value;
@@ -840,6 +865,7 @@ void XplaneAdapter::SendFastPositionUpdate(const NetworkAircraft &aircraft, cons
     data.insert("latitude", visualState.Latitude);
     data.insert("longitude", visualState.Longitude);
     data.insert("altitude", visualState.Altitude);
+    data.insert("agl", visualState.AltitudeAgl);
     data.insert("heading", visualState.Heading);
     data.insert("bank", visualState.Bank);
     data.insert("pitch", visualState.Pitch);

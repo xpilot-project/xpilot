@@ -15,15 +15,25 @@ public:
     std::optional<bool> Engine3Running;
     std::optional<bool> Engine4Running;
 
-    bool HasEngines() const { return Engine1Running.has_value() || Engine2Running.has_value() || Engine3Running.has_value() || Engine4Running.has_value(); }
+    std::optional<bool> Engine1Reversing;
+    std::optional<bool> Engine2Reversing;
+    std::optional<bool> Engine3Reversing;
+    std::optional<bool> Engine4Reversing;
+
+    bool HasEngines() const {
+        return Engine1Running.has_value() || Engine2Running.has_value() || Engine3Running.has_value() || Engine4Running.has_value() ||
+                Engine1Reversing.has_value() || Engine2Reversing.has_value() || Engine3Reversing.has_value() || Engine4Reversing.has_value();
+    }
 
     static AircraftConfigurationEngines FromUserAircraftData(UserAircraftConfigData config);
 
     AircraftConfigurationEngines CreateIncremental(AircraftConfigurationEngines config);
 
-    bool operator!=(const AircraftConfigurationEngines& rhs)
-    {
-        return Engine1Running != rhs.Engine1Running || Engine2Running != rhs.Engine2Running || Engine3Running != rhs.Engine3Running || Engine4Running != rhs.Engine4Running;
+    bool operator!=(const AircraftConfigurationEngines& rhs) {
+        return Engine1Running != rhs.Engine1Running || Engine2Running != rhs.Engine2Running ||
+                Engine3Running != rhs.Engine3Running || Engine4Running != rhs.Engine4Running ||
+                Engine1Reversing != rhs.Engine1Reversing || Engine2Reversing != rhs.Engine2Reversing ||
+                Engine3Reversing != rhs.Engine3Reversing || Engine4Reversing != rhs.Engine4Reversing;
     }
 };
 

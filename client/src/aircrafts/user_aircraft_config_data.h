@@ -17,6 +17,10 @@ public:
     bool Engine2Running;
     bool Engine3Running;
     bool Engine4Running;
+    bool Engine1Reversing;
+    bool Engine2Reversing;
+    bool Engine3Reversing;
+    bool Engine4Reversing;
     bool GearDown;
     double FlapsRatio;
     double SpeedbrakeRatio;
@@ -34,6 +38,10 @@ public:
                 Engine2Running != other.Engine2Running ||
                 Engine3Running != other.Engine3Running ||
                 Engine4Running != other.Engine4Running ||
+                Engine1Reversing != other.Engine1Reversing ||
+                Engine2Reversing != other.Engine2Reversing ||
+                Engine3Reversing != other.Engine3Reversing ||
+                Engine4Reversing != other.Engine4Reversing ||
                 GearDown != other.GearDown ||
                 FlapsRatio != other.FlapsRatio ||
                 SpeedbrakeRatio != other.SpeedbrakeRatio ||
@@ -52,6 +60,10 @@ public:
                 Engine2Running == other.Engine2Running &&
                 Engine3Running == other.Engine3Running &&
                 Engine4Running == other.Engine4Running &&
+                Engine1Reversing == other.Engine1Reversing &&
+                Engine2Reversing == other.Engine2Reversing &&
+                Engine3Reversing == other.Engine3Reversing &&
+                Engine4Reversing == other.Engine4Reversing &&
                 GearDown == other.GearDown &&
                 FlapsRatio == other.FlapsRatio &&
                 SpeedbrakeRatio == other.SpeedbrakeRatio &&
