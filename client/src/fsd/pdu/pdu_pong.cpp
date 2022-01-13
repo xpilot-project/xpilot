@@ -20,7 +20,7 @@ QStringList PDUPong::toTokens() const
 PDUPong PDUPong::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 3) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     return PDUPong(tokens[0], tokens[1], tokens[2]);

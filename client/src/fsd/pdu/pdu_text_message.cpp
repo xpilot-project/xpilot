@@ -21,7 +21,7 @@ QStringList PDUTextMessage::toTokens() const
 PDUTextMessage PDUTextMessage::fromTokens(const QStringList &tokens)
 {
     if(tokens.size() < 3) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     QStringList msgTokens = tokens.mid(2);

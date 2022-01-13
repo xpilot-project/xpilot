@@ -32,7 +32,7 @@ QStringList PDUAddPilot::toTokens() const
 PDUAddPilot PDUAddPilot::fromTokens(const QStringList &tokens)
 {
     if(tokens.size() < 8) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     return PDUAddPilot(tokens[0], tokens[2], tokens[3], fromQString<NetworkRating>(tokens[4]),

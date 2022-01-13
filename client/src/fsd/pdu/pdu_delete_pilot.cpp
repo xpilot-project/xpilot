@@ -19,7 +19,7 @@ QStringList PDUDeletePilot::toTokens() const
 PDUDeletePilot PDUDeletePilot::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 1) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     return PDUDeletePilot(tokens[0], tokens.length() >= 2 ? tokens[1] : "");

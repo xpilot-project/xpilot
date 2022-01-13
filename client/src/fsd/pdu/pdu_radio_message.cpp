@@ -29,7 +29,7 @@ QStringList PDURadioMessage::toTokens() const
 PDURadioMessage PDURadioMessage::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 3) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     QStringList freqs = tokens[1].split("&");

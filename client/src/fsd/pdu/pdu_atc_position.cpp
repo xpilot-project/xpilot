@@ -31,7 +31,7 @@ QStringList PDUATCPosition::toTokens() const
 PDUATCPosition PDUATCPosition::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 7) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     return PDUATCPosition(tokens[0], tokens[1].toInt() + 100000, fromQString<NetworkFacility>(tokens[2]),

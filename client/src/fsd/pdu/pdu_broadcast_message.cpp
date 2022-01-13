@@ -20,7 +20,7 @@ QStringList PDUBroadcastMessage::toTokens() const
 PDUBroadcastMessage PDUBroadcastMessage::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 3) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     QStringList messageTokens = tokens.mid(2);

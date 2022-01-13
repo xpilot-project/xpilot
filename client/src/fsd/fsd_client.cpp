@@ -73,124 +73,131 @@ namespace xpilot
 
             emit RaiseRawDataReceived(packet + PDUBase::PacketDelimeter);
 
-            QStringList fields = packet.split(PDUBase::Delimeter);
-            const QCharRef prefixChar = fields[0][0];
+            try {
+                QStringList fields = packet.split(PDUBase::Delimeter);
+                const QCharRef prefixChar = fields[0][0];
 
-            if(prefixChar == '@')
-            {
-                fields[0] = fields[0].mid(1);
-                emit RaisePilotPositionReceived(PDUPilotPosition::fromTokens(fields));
-            }
-            else if(prefixChar == '^')
-            {
-                if(AppConfig::getInstance()->VelocityEnabled)
+                if(prefixChar == '@')
                 {
                     fields[0] = fields[0].mid(1);
-                    emit RaiseFastPilotPositionReceived(PDUFastPilotPosition::fromTokens(fields));
+                    emit RaisePilotPositionReceived(PDUPilotPosition::fromTokens(fields));
                 }
-            }
-            else if(prefixChar == '%')
-            {
-                fields[0] = fields[0].mid(1);
-                emit RaiseATCPositionReceived(PDUATCPosition::fromTokens(fields));
-            }
-            else if(prefixChar == '#' || prefixChar == '$')
-            {
-                if(fields[0].length() < 3) break;
-
-                QString pduTypeId = fields[0].mid(0, 3);
-                fields[0] = fields[0].mid(3);
-
-                if(pduTypeId == "$DI")
+                else if(prefixChar == '^')
                 {
-                    auto pdu = PDUServerIdentification::fromTokens(fields);
-                    m_clientAuthSessionKey = GenerateAuthResponse(pdu.InitialChallengeKey.toStdString().c_str(), BuildConfig::VatsimClientId(),
-                                                                  BuildConfig::VatsimClientKey().toStdString().c_str());
-                    m_clientAuthChallengeKey = m_clientAuthSessionKey;
-                    emit RaiseServerIdentificationReceived(pdu);
-                }
-                else if(pduTypeId == "$ID")
-                {
-                    emit RaiseClientIdentificationReceived(PDUClientIdentification::fromTokens(fields));
-                }
-                else if(pduTypeId == "#AA")
-                {
-                    emit RaiseAddATCReceived(PDUAddATC::fromTokens(fields));
-                }
-                else if(pduTypeId == "#DA")
-                {
-                    emit RaiseDeleteATCReceived(PDUDeleteATC::fromTokens(fields));
-                }
-                else if(pduTypeId == "#AP")
-                {
-                    emit RaiseAddPilotReceived(PDUAddPilot::fromTokens(fields));
-                }
-                else if(pduTypeId == "#DP")
-                {
-                    emit RaiseDeletePilotReceived(PDUDeletePilot::fromTokens(fields));
-                }
-                else if(pduTypeId == "#TM")
-                {
-                    processTM(fields);
-                }
-                else if(pduTypeId == "$AR")
-                {
-                    emit RaiseMetarResponseReceived(PDUMetarResponse::fromTokens(fields));
-                }
-                else if(pduTypeId == "#SB")
-                {
-                    if(fields.length() >= 3)
+                    if(AppConfig::getInstance()->VelocityEnabled)
                     {
-                        if(fields[2] == "PIR")
+                        fields[0] = fields[0].mid(1);
+                        emit RaiseFastPilotPositionReceived(PDUFastPilotPosition::fromTokens(fields));
+                    }
+                }
+                else if(prefixChar == '%')
+                {
+                    fields[0] = fields[0].mid(1);
+                    emit RaiseATCPositionReceived(PDUATCPosition::fromTokens(fields));
+                }
+                else if(prefixChar == '#' || prefixChar == '$')
+                {
+                    if(fields[0].length() < 3) {
+                        throw new PDUFormatException("Invalid PDU type.", packet);
+                    }
+
+                    QString pduTypeId = fields[0].mid(0, 3);
+                    fields[0] = fields[0].mid(3);
+
+                    if(pduTypeId == "$DI")
+                    {
+                        auto pdu = PDUServerIdentification::fromTokens(fields);
+                        m_clientAuthSessionKey = GenerateAuthResponse(pdu.InitialChallengeKey.toStdString().c_str(), BuildConfig::VatsimClientId(),
+                                                                      BuildConfig::VatsimClientKey().toStdString().c_str());
+                        m_clientAuthChallengeKey = m_clientAuthSessionKey;
+                        emit RaiseServerIdentificationReceived(pdu);
+                    }
+                    else if(pduTypeId == "$ID")
+                    {
+                        emit RaiseClientIdentificationReceived(PDUClientIdentification::fromTokens(fields));
+                    }
+                    else if(pduTypeId == "#AA")
+                    {
+                        emit RaiseAddATCReceived(PDUAddATC::fromTokens(fields));
+                    }
+                    else if(pduTypeId == "#DA")
+                    {
+                        emit RaiseDeleteATCReceived(PDUDeleteATC::fromTokens(fields));
+                    }
+                    else if(pduTypeId == "#AP")
+                    {
+                        emit RaiseAddPilotReceived(PDUAddPilot::fromTokens(fields));
+                    }
+                    else if(pduTypeId == "#DP")
+                    {
+                        emit RaiseDeletePilotReceived(PDUDeletePilot::fromTokens(fields));
+                    }
+                    else if(pduTypeId == "#TM")
+                    {
+                        processTM(fields);
+                    }
+                    else if(pduTypeId == "$AR")
+                    {
+                        emit RaiseMetarResponseReceived(PDUMetarResponse::fromTokens(fields));
+                    }
+                    else if(pduTypeId == "#SB")
+                    {
+                        if(fields.length() >= 3)
                         {
-                            emit RaisePlaneInfoRequestReceived(PDUPlaneInfoRequest::fromTokens(fields));
-                        }
-                        else if(fields[2] == "PI" && fields.length() >= 4)
-                        {
-                            if(fields[3] == "GEN")
+                            if(fields[2] == "PIR")
                             {
-                                emit RaisePlaneInfoResponseReceived(PDUPlaneInfoResponse::fromTokens(fields));
+                                emit RaisePlaneInfoRequestReceived(PDUPlaneInfoRequest::fromTokens(fields));
+                            }
+                            else if(fields[2] == "PI" && fields.length() >= 4)
+                            {
+                                if(fields[3] == "GEN")
+                                {
+                                    emit RaisePlaneInfoResponseReceived(PDUPlaneInfoResponse::fromTokens(fields));
+                                }
                             }
                         }
                     }
+                    else if(pduTypeId == "$PI")
+                    {
+                        emit RaisePingReceived(PDUPing::fromTokens(fields));
+                    }
+                    else if(pduTypeId == "$PO")
+                    {
+                        emit RaisePongReceived(PDUPong::fromTokens(fields));
+                    }
+                    else if(pduTypeId == "$CQ")
+                    {
+                        emit RaiseClientQueryReceived(PDUClientQuery::fromTokens(fields));
+                    }
+                    else if(pduTypeId == "$CR")
+                    {
+                        emit RaiseClientQueryResponseReceived(PDUClientQueryResponse::fromTokens(fields));
+                    }
+                    else if(pduTypeId == "$ZC")
+                    {
+                        auto pdu = PDUAuthChallenge::fromTokens(fields);
+                        QString response = GenerateAuthResponse(pdu.ChallengeKey.toStdString().c_str(), BuildConfig::VatsimClientId(),
+                                                                m_clientAuthChallengeKey.toStdString().c_str());
+                        std::string combined = m_clientAuthSessionKey.toStdString() + response.toStdString();
+                        m_clientAuthChallengeKey = toMd5(combined.c_str());
+                        SendPDU(PDUAuthResponse(pdu.To, pdu.From, response));
+                    }
+                    else if(pduTypeId == "$!!")
+                    {
+                        emit RaiseKillRequestReceived(PDUKillRequest::fromTokens(fields));
+                    }
+                    else if(pduTypeId == "$ER")
+                    {
+                        emit RaiseProtocolErrorReceived(PDUProtocolError::fromTokens(fields));
+                    }
+                    else if(pduTypeId == "$SF")
+                    {
+                        emit RaiseSendFastReceived(PDUSendFast::fromTokens(fields));
+                    }
                 }
-                else if(pduTypeId == "$PI")
-                {
-                    emit RaisePingReceived(PDUPing::fromTokens(fields));
-                }
-                else if(pduTypeId == "$PO")
-                {
-                    emit RaisePongReceived(PDUPong::fromTokens(fields));
-                }
-                else if(pduTypeId == "$CQ")
-                {
-                    emit RaiseClientQueryReceived(PDUClientQuery::fromTokens(fields));
-                }
-                else if(pduTypeId == "$CR")
-                {
-                    emit RaiseClientQueryResponseReceived(PDUClientQueryResponse::fromTokens(fields));
-                }
-                else if(pduTypeId == "$ZC")
-                {
-                    auto pdu = PDUAuthChallenge::fromTokens(fields);
-                    QString response = GenerateAuthResponse(pdu.ChallengeKey.toStdString().c_str(), BuildConfig::VatsimClientId(),
-                                                            m_clientAuthChallengeKey.toStdString().c_str());
-                    std::string combined = m_clientAuthSessionKey.toStdString() + response.toStdString();
-                    m_clientAuthChallengeKey = toMd5(combined.c_str());
-                    SendPDU(PDUAuthResponse(pdu.To, pdu.From, response));
-                }
-                else if(pduTypeId == "$!!")
-                {
-                    emit RaiseKillRequestReceived(PDUKillRequest::fromTokens(fields));
-                }
-                else if(pduTypeId == "$ER")
-                {
-                    emit RaiseProtocolErrorReceived(PDUProtocolError::fromTokens(fields));
-                }
-                else if(pduTypeId == "$SF")
-                {
-                    emit RaiseSendFastReceived(PDUSendFast::fromTokens(fields));
-                }
+            }
+            catch(PDUFormatException &e) {
+                emit RaiseNetworkError(QString("%1 (Raw packet: %2)").arg(e.getError()).arg(e.getRawMessage()));
             }
         }
     }
@@ -208,7 +215,9 @@ namespace xpilot
 
     void FsdClient::processTM(QStringList &fields)
     {
-        if(fields.length() < 3) return;
+        if(fields.length() < 3) {
+            throw PDUFormatException("Invalid field count.", PDUBase::Reassemble(fields));
+        }
 
         if(fields[1] == "*")
         {
@@ -239,10 +248,10 @@ namespace xpilot
         {
         case QAbstractSocket::RemoteHostClosedError:
             this->Disconnect();
-            break;
+        break;
         default:
             emit RaiseNetworkError(error);
-            break;
+        break;
         }
     }
 

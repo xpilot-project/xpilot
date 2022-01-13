@@ -19,7 +19,7 @@ QStringList PDUSendFast::toTokens() const
 PDUSendFast PDUSendFast::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 3) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     return PDUSendFast(tokens[0], tokens[1], static_cast<bool>(tokens[2].toInt()));

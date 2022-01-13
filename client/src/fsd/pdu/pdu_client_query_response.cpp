@@ -22,7 +22,7 @@ QStringList PDUClientQueryResponse::toTokens() const
 PDUClientQueryResponse PDUClientQueryResponse::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 3) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     QStringList responseData;

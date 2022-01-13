@@ -33,7 +33,7 @@ QStringList PDUClientIdentification::toTokens() const
 PDUClientIdentification PDUClientIdentification::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 8) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     return PDUClientIdentification(tokens[0],tokens[2].toUShort(nullptr, 16),tokens[3], tokens[4].toInt(),

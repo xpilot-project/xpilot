@@ -20,7 +20,7 @@ QStringList PDUKillRequest::toTokens() const
 PDUKillRequest PDUKillRequest::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 2) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     return PDUKillRequest(tokens[0], tokens[1], tokens.length() > 2 ? tokens[2] : "");

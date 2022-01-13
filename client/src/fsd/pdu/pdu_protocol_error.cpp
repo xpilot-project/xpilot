@@ -25,7 +25,7 @@ QStringList PDUProtocolError::toTokens() const
 PDUProtocolError PDUProtocolError::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 5) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     NetworkError err = static_cast<NetworkError>(tokens[2].toInt());

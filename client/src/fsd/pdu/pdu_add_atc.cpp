@@ -27,7 +27,7 @@ QStringList PDUAddATC::toTokens() const
 PDUAddATC PDUAddATC::fromTokens(const QStringList &tokens)
 {
     if(tokens.size() < 6) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     return PDUAddATC(tokens[0], tokens[2], tokens[3], tokens[4], fromQString<NetworkRating>(tokens[5]), fromQString<ProtocolRevision>(tokens[6]));

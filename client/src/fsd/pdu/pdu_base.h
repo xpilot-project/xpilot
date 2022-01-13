@@ -6,6 +6,7 @@
 #include <QStringBuilder>
 #include <QDebug>
 
+#include "pdu_format_exception.h"
 #include "../serializer.h"
 
 class PDUBase
@@ -22,6 +23,11 @@ public:
     inline static const QChar Delimeter = ':';
     inline static const QString PacketDelimeter = "\r\n";
     inline static const QString ServerCallsign = "SERVER";
+
+    static QString Reassemble(QStringList fields)
+    {
+        return fields.join(Delimeter);
+    }
 
     QString From;
     QString To;

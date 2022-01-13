@@ -43,7 +43,7 @@ QStringList PDUFastPilotPosition::toTokens() const
 PDUFastPilotPosition PDUFastPilotPosition::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 12) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     double pitch;

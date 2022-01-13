@@ -73,6 +73,7 @@ set(FSD_SOURCES
     src/fsd/fsd_client.h
     src/fsd/serializer.h
     src/fsd/serializer.cpp
+    src/fsd/pdu/pdu_format_exception.h
     src/fsd/pdu/pdu_base.cpp
     src/fsd/pdu/pdu_base.h
     src/fsd/pdu/pdu_server_identification.cpp

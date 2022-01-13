@@ -20,7 +20,7 @@ QStringList PDUMetarResponse::toTokens() const
 PDUMetarResponse PDUMetarResponse::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 4) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     return PDUMetarResponse(tokens[1], tokens[3]);

@@ -38,7 +38,7 @@ QStringList PDUPilotPosition::toTokens() const
 PDUPilotPosition PDUPilotPosition::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 10) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     double pitch;

@@ -20,7 +20,7 @@ QStringList PDUPlaneInfoRequest::toTokens() const
 PDUPlaneInfoRequest PDUPlaneInfoRequest::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 3) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     return PDUPlaneInfoRequest(tokens[0], tokens[1]);

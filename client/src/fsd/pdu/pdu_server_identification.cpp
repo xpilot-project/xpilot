@@ -22,7 +22,7 @@ QStringList PDUServerIdentification::toTokens() const
 PDUServerIdentification PDUServerIdentification::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 4) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
     return PDUServerIdentification(tokens[0], tokens[1], tokens[2], tokens[3]);

@@ -34,8 +34,9 @@ QStringList PDUPlaneInfoResponse::toTokens() const
 PDUPlaneInfoResponse PDUPlaneInfoResponse::fromTokens(const QStringList &tokens)
 {
     if(tokens.length() < 5) {
-        return {};
+        throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
-    return PDUPlaneInfoResponse(tokens[0], tokens[1], FindValue(tokens, "EQUIPMENT"), FindValue(tokens, "AIRLINE"), FindValue(tokens, "LIVERY"), FindValue(tokens, "CSL"));
+    return PDUPlaneInfoResponse(tokens[0], tokens[1], FindValue(tokens, "EQUIPMENT"),
+            FindValue(tokens, "AIRLINE"), FindValue(tokens, "LIVERY"), FindValue(tokens, "CSL"));
 }
