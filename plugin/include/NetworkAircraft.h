@@ -46,6 +46,7 @@ namespace xpilot
         double Lat;
         double Lon;
         double Altitude;
+        double AltitudeAgl;
         double Pitch;
         double Heading;
         double Bank;
@@ -79,14 +80,18 @@ namespace xpilot
         void UpdateErrorVectors(double interval);
 
         bool on_ground;
+        bool was_on_ground = false;
+        bool terrain_offset_finished = false;
         bool gear_down;
         bool engines_running = false;
         bool was_engines_running = false;
-        bool reverse_thrust;
+        bool engines_reversing = false;
         float ground_speed;
+        float target_reverser_position;
         float target_gear_position;
         float target_flaps_position;
         float target_spoiler_position;
+        float target_deflection;
         bool spoilers_deployed;
         XPMPPlaneSurfaces_t surfaces;
         std::string origin;

@@ -43,11 +43,11 @@ namespace xpilot
 		if (j.find("engines_on") != j.end())
 			j.at("engines_on").get_to(data.enginesRunning);
 
+		if (j.find("engines_reversing") != j.end())
+			j.at("engines_reversing").get_to(data.enginesReversing);
+
 		if (j.find("spoilers_deployed") != j.end())
 			j.at("spoilers_deployed").get_to(data.spoilersDeployed);
-
-		if (j.find("reverse_thrust") != j.end())
-			j.at("reverse_thrust").get_to(data.reverseThrust);
 	}
 
 	void from_json(const json& j, NetworkAircraftConfigLights& lights)

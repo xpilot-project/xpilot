@@ -72,7 +72,7 @@ namespace xpilot
         std::string callsign;
         std::optional<NetworkAircraftConfigLights> lights;
         std::optional<bool> enginesRunning;
-        std::optional<bool> reverseThrust;
+        std::optional<bool> enginesReversing;
         std::optional<bool> onGround;
         std::optional<bool> spoilersDeployed;
         std::optional<bool> gearDown;

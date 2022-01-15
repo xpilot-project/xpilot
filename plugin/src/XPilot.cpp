@@ -295,6 +295,7 @@ namespace xpilot
 								double latitude = static_cast<double>(j["data"]["latitude"]);
 								double longitude = static_cast<double>(j["data"]["longitude"]);
 								double altitude = static_cast<double>(j["data"]["altitude"]);
+								double agl = static_cast<double>(j["data"]["agl"]);
 								double heading = static_cast<double>(j["data"]["heading"]);
 								double bank = static_cast<double>(j["data"]["bank"]);
 								double pitch = static_cast<double>(j["data"]["pitch"]);
@@ -310,6 +311,7 @@ namespace xpilot
 								visualState.Lat = latitude;
 								visualState.Lon = longitude;
 								visualState.Altitude = altitude;
+								visualState.AltitudeAgl = agl;
 								visualState.Pitch = pitch;
 								visualState.Bank = bank;
 								visualState.Heading = heading;

@@ -189,11 +189,11 @@ namespace xpilot
 				plane->engines_running = config.data.enginesRunning.value();
 			}
 		}
-		if (config.data.reverseThrust.has_value())
+		if (config.data.enginesReversing.has_value())
 		{
-			if (config.data.reverseThrust.value() != plane->reverse_thrust)
+			if (config.data.enginesReversing.value() != plane->engines_reversing)
 			{
-				plane->reverse_thrust = config.data.reverseThrust.value();
+				plane->engines_reversing = config.data.enginesReversing.value();
 			}
 		}
 		if (config.data.onGround.has_value())
@@ -201,6 +201,9 @@ namespace xpilot
 			if (config.data.onGround.value() != plane->on_ground)
 			{
 				plane->on_ground = config.data.onGround.value();
+				if (!plane->on_ground) {
+					plane->terrain_offset_finished = false;
+				}
 			}
 		}
 	}

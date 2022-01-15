@@ -73,6 +73,11 @@ public:
     bool IsAnyEngineRunning() const { return Engines.has_value() && (Engines->Engine1Running.value_or(false) || Engines->Engine2Running.value_or(false) ||
                                                                      Engines->Engine3Running.value_or(false) || Engines->Engine4Running.value_or(false)); }
 
+    bool IsAnyEngineReversing() const { return Engines.has_value() && (Engines->Engine1Reversing.value_or(false) ||
+                                                                       Engines->Engine2Reversing.value_or(false) ||
+                                                                       Engines->Engine3Reversing.value_or(false) ||
+                                                                       Engines->Engine4Reversing.value_or(false)); }
+
     AircraftConfiguration()
     {
         Lights = AircraftConfigurationLights();

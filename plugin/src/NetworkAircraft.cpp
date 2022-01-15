@@ -85,11 +85,12 @@ namespace xpilot
         gear_down(false),
         on_ground(false),
         fast_positions_received_count(0),
-        reverse_thrust(false),
+        engines_reversing(false),
         spoilers_deployed(false),
         target_flaps_position(0.0f),
         target_gear_position(0.0f),
         target_spoiler_position(0.0f),
+        target_reverser_position(0.0f),
         ground_speed(0.0),
         first_render_pending(true)
     {
@@ -484,25 +485,13 @@ namespace xpilot
             _elapsedSinceLastCall
         );
 
-        if (on_ground)
-        {
-            double rpm = (60 / (2 * M_PI * 3.2)) * positional_velocity_vector.X * -1;
-            double rpmDeg = RpmToDegree(GetTireRotRpm(), _elapsedSinceLastCall);
-
-            SetTireRotRpm(rpm);
-            SetTireRotAngle(GetTireRotAngle() + rpmDeg);
-            while (GetTireRotAngle() >= 360.0f)
-            {
-                SetTireRotAngle(GetTireRotAngle() - 360.0f);
-            }
-        }
-
         const auto now = std::chrono::system_clock::now();
         static const float epsilon = std::numeric_limits<float>::epsilon();
         const auto diffMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_surface_update_time);
 
         target_gear_position = gear_down || on_ground ? 1.0f : 0.0f;
         target_spoiler_position = spoilers_deployed ? 1.0f : 0.0f;
+        target_reverser_position = engines_reversing ? 1.0f : 0.0f;
 
         if (fast_positions_received_count <= 2)
         {
@@ -551,6 +540,30 @@ namespace xpilot
                 surfaces.spoilerRatio = (std::max)(0.0f, (std::min)(surfaces.spoilerRatio, 1.0f));
             }
 
+            const float f4 = surfaces.tireDeflect - target_deflection;
+            if (std::abs(f4) > epsilon)
+            {
+                // interpolate gear position
+                constexpr float moveTimeMs = 3000;
+                const auto diffRemaining = target_deflection - surfaces.tireDeflect;
+
+                const auto diffThisFrame = (diffMs.count()) / moveTimeMs;
+                surfaces.tireDeflect += std::copysign(diffThisFrame, diffRemaining);
+                surfaces.tireDeflect = (std::max)(0.0f, (std::min)(surfaces.tireDeflect, 1.0f));
+            }
+
+            const float f5 = surfaces.reversRatio - target_reverser_position;
+            if (std::abs(f5) > epsilon)
+            {
+                // interpolate gear position
+                constexpr float moveTimeMs = 3000;
+                const auto diffRemaining = target_reverser_position - surfaces.reversRatio;
+
+                const auto diffThisFrame = (diffMs.count()) / moveTimeMs;
+                surfaces.reversRatio += std::copysign(diffThisFrame, diffRemaining);
+                surfaces.reversRatio = (std::max)(0.0f, (std::min)(surfaces.reversRatio, 1.0f));
+            }
+
             prev_surface_update_time = now;
         }
 
@@ -560,6 +573,41 @@ namespace xpilot
         SetSpoilerRatio(surfaces.spoilerRatio);
         SetSpeedbrakeRatio(surfaces.spoilerRatio);
         SetNoseWheelAngle(remote_visual_state.NoseWheelAngle);
+
+        if (on_ground && !was_on_ground) {
+            was_on_ground = true;
+        }
+
+        if (target_terrain_offset.has_value() && std::abs(target_terrain_offset.value()) > 0) {
+            double v = std::abs(terrain_offset) / std::abs(target_terrain_offset.value());
+            if (v > 0.75) {
+                target_deflection = 0.70f; // aircraft is touching down, level off main landing gear tilt angle
+            }
+
+            if (v >= 0.95f) {
+                terrain_offset_finished = true; // terrain offset is nearly finished; this boolean is used trigger when the aircraft wheels can begin spinning
+            }
+        }
+
+        if (!on_ground && was_on_ground) {
+            target_deflection = 0.0f; // aircraft just lifted off, set target deflection to tilt main gear
+        }
+
+        SetTireDeflection(surfaces.tireDeflect);
+        SetReversDeployRatio(surfaces.reversRatio);
+
+        if (on_ground && terrain_offset_finished)
+        {
+            double rpm = (60 / (2 * M_PI * 3.2)) * positional_velocity_vector.X * -1;
+            double rpmDeg = RpmToDegree(GetTireRotRpm(), _elapsedSinceLastCall);
+
+            SetTireRotRpm(rpm);
+            SetTireRotAngle(GetTireRotAngle() + rpmDeg);
+            while (GetTireRotAngle() >= 360.0f)
+            {
+                SetTireRotAngle(GetTireRotAngle() - 360.0f);
+            }
+        }
 
         if (engines_running)
         {
@@ -588,7 +636,6 @@ namespace xpilot
         SetLightsStrobe(surfaces.lights.strbLights);
         SetLightsNav(surfaces.lights.navLights);
         SetWeightOnWheels(on_ground);
-
 
         HexToRgb(Config::Instance().getAircraftLabelColor(), colLabel);
 
