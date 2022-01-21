@@ -142,6 +142,13 @@ namespace xpilot
 
         void LoginToNetwork(QString password);
 
+        double CalculatePressureAltitude() const
+        {
+            const double deltaPressure = 1013.25 - m_userAircraftData.BarometerSeaLevel;
+            const double deltaAltitudeV = deltaPressure * 30.0; // 30.0 ft per millibar
+            return (m_userAircraftData.AltitudeMslM * 3.28084) + deltaAltitudeV;
+        }
+
         const double POSITIONAL_VELOCITY_ZERO_TOLERANCE = 0.005;
         bool PositionalVelocityIsZero(UserAircraftData data)
         {

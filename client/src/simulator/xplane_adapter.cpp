@@ -35,7 +35,7 @@ enum DataRef
     Longitude,
     AltitudeMsl,
     AltitudeAgl,
-    AltitudePressure,
+    BarometerSeaLevel,
     GroundSpeed,
     Pitch,
     Heading,
@@ -331,7 +331,7 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/flightmodel/position/longitude", DataRef::Longitude, 5);
     SubscribeDataRef("sim/flightmodel/position/elevation", DataRef::AltitudeMsl, 5);
     SubscribeDataRef("sim/flightmodel/position/y_agl", DataRef::AltitudeAgl, 5);
-    SubscribeDataRef("sim/cockpit2/gauges/indicators/altitude_ft_pilot", DataRef::AltitudePressure, 5);
+    SubscribeDataRef("sim/weather/barometer_sealevel_inhg", DataRef::BarometerSeaLevel, 5);
     SubscribeDataRef("sim/flightmodel/position/theta", DataRef::Pitch, 5);
     SubscribeDataRef("sim/flightmodel/position/psi", DataRef::Heading, 5);
     SubscribeDataRef("sim/flightmodel/position/phi", DataRef::Bank, 5);
@@ -524,8 +524,8 @@ void XplaneAdapter::OnDataReceived()
                 case DataRef::AltitudeAgl:
                     m_userAircraftData.AltitudeAglM = value;
                 break;
-                case DataRef::AltitudePressure:
-                    m_userAircraftData.AltitudePressure = value;
+                case DataRef::BarometerSeaLevel:
+                    m_userAircraftData.BarometerSeaLevel = value * 33.8639; // inHg to millibar
                 break;
                 case DataRef::LatitudeVelocity:
                     m_userAircraftData.LatitudeVelocity = value * -1.0;

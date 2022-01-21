@@ -553,7 +553,7 @@ namespace xpilot
     void NetworkManager::SendSlowPositionPacket()
     {
         if(m_connectInfo.ObserverMode) {
-            m_fsd.SendPDU(PDUATCPosition(m_connectInfo.Callsign,99998, NetworkFacility::OBS, 40, NetworkRating::OBS,
+            m_fsd.SendPDU(PDUATCPosition(m_connectInfo.Callsign, 99998, NetworkFacility::OBS, 40, NetworkRating::OBS,
                                          m_userAircraftData.Latitude, m_userAircraftData.Longitude));
         }
         else {
@@ -565,7 +565,7 @@ namespace xpilot
                                            m_userAircraftData.Latitude,
                                            m_userAircraftData.Longitude,
                                            m_userAircraftData.AltitudeMslM * 3.28084,
-                                           m_userAircraftData.AltitudePressure,
+                                           CalculatePressureAltitude(),
                                            m_userAircraftData.GroundSpeed,
                                            m_userAircraftData.Pitch,
                                            m_userAircraftData.Heading,

@@ -34,7 +34,6 @@ private:
     const int AcconfigMaxTokens = 10;
     int m_tokensAvailable = AcconfigMaxTokens;
 
-    UserAircraftData m_userAircraftData;
     UserAircraftConfigData m_userAircraftConfigData;
     RadioStackState m_radioStackState;
     std::optional<AircraftConfiguration> m_lastBroadcastConfig;
