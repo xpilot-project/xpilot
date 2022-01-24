@@ -45,12 +45,26 @@ namespace xpilot
     {
         double Lat;
         double Lon;
-        double Altitude;
-        double AltitudeAgl;
+        double AltitudeTrue;
+        std::optional<double> AltitudeAgl;
         double Pitch;
         double Heading;
         double Bank;
         double NoseWheelAngle;
+    };
+
+    struct WorldPoint
+    {
+        double Latitude;
+        double Longitude;
+    };
+
+    struct TerrainElevationData
+    {
+        std::chrono::steady_clock::time_point Timestamp;
+        WorldPoint Location;
+        double RemoteValue;
+        double LocalValue;
     };
 
     enum class EngineClass
@@ -79,7 +93,7 @@ namespace xpilot
 
         void UpdateErrorVectors(double interval);
 
-        bool on_ground;
+        bool IsReportedOnGround;
         bool was_on_ground = false;
         bool terrain_offset_finished = false;
         bool gear_down;
@@ -98,20 +112,22 @@ namespace xpilot
         std::string destination;
         std::chrono::system_clock::time_point prev_surface_update_time;
         int fast_positions_received_count;
-        bool first_render_pending;
+        bool IsFirstRenderPending;
 
         XPMPPlanePosition_t position;
         XPMPPlaneRadar_t radar;
 
-        double terrain_offset;
-        double previous_terrain_offset;
-        std::optional<double> ground_altitude = {};
-        std::optional<double> target_terrain_offset = {};
-        std::optional<double> adjusted_altitude = {};
         TerrainProbe terrain_probe;
+        std::optional<double> LocalTerrainElevation = {};
+        std::optional<double> AdjustedAltitude = {};
+        double TargetTerrainOffset = 0.0;
+        double TerrainOffset = 0.0;
+        double TerrainOffsetMagnitude = 0.0;
+        std::list<TerrainElevationData> TerrainElevationHistory;
+        bool HasUsableTerrainElevationData;
 
-        AircraftVisualState remote_visual_state;
-        AircraftVisualState predicted_visual_state;
+        AircraftVisualState RemoteVisualState;
+        AircraftVisualState PredictedVisualState;
 
         Vector3 positional_velocity_vector;
         Vector3 positional_velocity_vector_error;
@@ -127,6 +143,7 @@ namespace xpilot
         virtual void UpdatePosition(float, int);
         void Extrapolate(Vector3 velocityVector, Vector3 rotationVector, double interval);
         void AutoLevel(float frameRate);
+        void EnsureAboveGround();
         static double NormalizeDegrees(double value, double lowerBound, double upperBound);
 
         ALuint m_soundBuffer = 0;

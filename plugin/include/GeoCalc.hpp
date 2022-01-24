@@ -97,4 +97,15 @@ static double NormalizeHeading(double heading)
 	return heading;
 }
 
+static double GreatCircleDistance(double lon1, double lat1, double lon2, double lat2)
+{
+	double num = DegreesToRadians(lat1);
+	double num2 = DegreesToRadians(lon1);
+	double num3 = DegreesToRadians(lat2);
+	double num4 = DegreesToRadians(lon2) - num2;
+	double num5 = pow(sin((num3 - num) / 2.0), 2.0) + cos(num) * cos(num3) * pow(sin(num4 / 2.0), 2.0);
+	double num6 = 2.0 * atan2(sqrt(num5), sqrt(1.0 - num5));
+	return 3437.670013352 * num6;
+}
+
 #endif // !GeoCalc_h

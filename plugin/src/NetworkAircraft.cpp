@@ -26,6 +26,10 @@
 namespace xpilot
 {
     const double TERRAIN_HEIGHT_TOLERANCE = 200.0;
+    constexpr double MIN_AGL_FOR_CLIMBOUT = 50.0;
+    constexpr double TERRAIN_OFFSET_WINDOW_LANDING = 2.0;
+    constexpr double TERRAIN_OFFSET_WINDOW_CLIMBOUT = 10.0;
+    constexpr double MIN_TERRAIN_OFFSET_MAGNITUDE = 0.1;
 
     double CalculateNormalizedDelta(double start, double end, double lowerBound, double upperBound)
     {
@@ -83,7 +87,7 @@ namespace xpilot
         XPMP2::Aircraft(_icaoType, _icaoAirline, _livery, _modeS_id, _modelName),
         engines_running(false),
         gear_down(false),
-        on_ground(false),
+        IsReportedOnGround(false),
         fast_positions_received_count(0),
         engines_reversing(false),
         spoilers_deployed(false),
@@ -92,21 +96,21 @@ namespace xpilot
         target_spoiler_position(0.0f),
         target_reverser_position(0.0f),
         ground_speed(0.0),
-        first_render_pending(true)
+        IsFirstRenderPending(true)
     {
         label = _callsign;
         strScpy(acInfoTexts.tailNum, _callsign.c_str(), sizeof(acInfoTexts.tailNum));
         strScpy(acInfoTexts.icaoAcType, acIcaoType.c_str(), sizeof(acInfoTexts.icaoAcType));
         strScpy(acInfoTexts.icaoAirline, acIcaoAirline.c_str(), sizeof(acInfoTexts.icaoAirline));
 
-        SetLocation(_visualState.Lat, _visualState.Lon, _visualState.Altitude);
+        SetLocation(_visualState.Lat, _visualState.Lon, _visualState.AltitudeTrue);
         SetHeading(_visualState.Heading);
         SetPitch(_visualState.Pitch);
         SetRoll(_visualState.Bank);
 
         last_slow_position_timestamp = std::chrono::steady_clock::now();
-        predicted_visual_state = _visualState;
-        remote_visual_state = _visualState;
+        PredictedVisualState = _visualState;
+        RemoteVisualState = _visualState;
         positional_velocity_vector = Vector3::Zero();
         rotational_velocity_vector = Vector3::Zero();
 
@@ -163,16 +167,16 @@ namespace xpilot
         double interval)
     {
         double lat_change = MetersToDegrees(velocityVector.Z * interval);
-        double new_lat = NormalizeDegrees(predicted_visual_state.Lat + lat_change, -90.0, 90.0);
+        double new_lat = NormalizeDegrees(PredictedVisualState.Lat + lat_change, -90.0, 90.0);
 
-        double lon_change = MetersToDegrees(velocityVector.X * interval / LongitudeScalingFactor(predicted_visual_state.Lat));
-        double new_lon = NormalizeDegrees(predicted_visual_state.Lon + lon_change, -180.0, 180.0);
+        double lon_change = MetersToDegrees(velocityVector.X * interval / LongitudeScalingFactor(PredictedVisualState.Lat));
+        double new_lon = NormalizeDegrees(PredictedVisualState.Lon + lon_change, -180.0, 180.0);
 
         double alt_change = velocityVector.Y * interval * 3.28084;
-        double new_alt = predicted_visual_state.Altitude + alt_change;
+        double new_alt = PredictedVisualState.AltitudeTrue + alt_change;
 
         AutoLevel(1.0 / interval);
-        SetLocation(new_lat, new_lon, adjusted_altitude.has_value() ? adjusted_altitude.value() : new_alt);
+        SetLocation(new_lat, new_lon, AdjustedAltitude.has_value() ? AdjustedAltitude.value() : new_alt);
 
         Quaternion current_orientation = Quaternion::FromEuler(
             DegreesToRadians(GetPitch()),
@@ -200,12 +204,12 @@ namespace xpilot
         double new_heading = RadiansToDegrees(new_orientation.Y);
         double new_roll = RadiansToDegrees(new_orientation.Z);
 
-        predicted_visual_state.Lat = new_lat;
-        predicted_visual_state.Lon = new_lon;
-        predicted_visual_state.Altitude = new_alt;
-        predicted_visual_state.Pitch = new_pitch;
-        predicted_visual_state.Bank = new_roll;
-        predicted_visual_state.Heading = new_heading;
+        PredictedVisualState.Lat = new_lat;
+        PredictedVisualState.Lon = new_lon;
+        PredictedVisualState.AltitudeTrue = new_alt;
+        PredictedVisualState.Pitch = new_pitch;
+        PredictedVisualState.Bank = new_roll;
+        PredictedVisualState.Heading = new_heading;
 
         SetPitch(new_pitch);
         SetHeading(new_heading);
@@ -214,101 +218,82 @@ namespace xpilot
 
     void NetworkAircraft::AutoLevel(float frameRate)
     {
-        ground_altitude = {};
-        if (predicted_visual_state.Altitude < 18000.0)
+        LocalTerrainElevation = {};
+        if (PredictedVisualState.AltitudeTrue < 18000.0)
         {
-            ground_altitude = terrain_probe.getTerrainElevation(
-                predicted_visual_state.Lat,
-                predicted_visual_state.Lon
+            LocalTerrainElevation = terrain_probe.getTerrainElevation(
+                PredictedVisualState.Lat,
+                PredictedVisualState.Lon
             );
         }
 
-        if (!ground_altitude.has_value())
+        if (!LocalTerrainElevation.has_value())
         {
-            adjusted_altitude = {};
+            AdjustedAltitude = {};
             return;
         }
 
-        // Clear the target terrain offset if the aircraft no longer appears to be on the ground.
-        // This will cause the autoleveler to smoothly take out the terrain offset.
-        if (target_terrain_offset.has_value() && !on_ground)
-        {
-            previous_terrain_offset = terrain_offset;
-            target_terrain_offset = {};
+        if (!RemoteVisualState.AltitudeAgl.has_value()) {
+            AdjustedAltitude = {};
+            return;
         }
 
-        double smoothedTerrainOffset = 0.0;
-
-        if (!target_terrain_offset.has_value() && on_ground)
+        // Check if we can bail out early.
+        if (!HasUsableTerrainElevationData
+            && !IsReportedOnGround
+            && (TargetTerrainOffset == 0.0)
+            && (TerrainOffset == 0.0))
         {
-            // The aircraft just touched down. Calculate the necessary terrain offset.
-            double agl = remote_visual_state.Altitude - ground_altitude.value();
-            if (std::abs(agl) < TERRAIN_HEIGHT_TOLERANCE)
-            {
-                target_terrain_offset = ground_altitude.value() - remote_visual_state.Altitude;
-                terrain_offset = first_render_pending ? target_terrain_offset.value() : 0.0;
-                smoothedTerrainOffset = terrain_offset;
-            }
-        }
-        else if (target_terrain_offset.has_value())
-        {
-            // Update the target terrain offset as the aircraft moves around on the ground, 
-            // since it may have uneven terrain.
-            if (on_ground)
-            {
-                target_terrain_offset = ground_altitude.value() - remote_visual_state.Altitude;
-            }
-
-            // Aircraft is transitioning to local terrain height. 
-            // Interpolate the terrain offset so that the altitude doesn't jump.
-            if (terrain_offset != target_terrain_offset.value())
-            {
-                if (target_terrain_offset.value() == 0.0)
-                {
-                    terrain_offset = 0.0;
-                    smoothedTerrainOffset = 0.0;
-                }
-                else
-                {
-                    terrain_offset += target_terrain_offset.value() / (frameRate * 5.0);
-                    if (std::abs(terrain_offset) > std::abs(target_terrain_offset.value()))
-                    {
-                        terrain_offset = target_terrain_offset.value();
-                    }
-                    smoothedTerrainOffset = SmoothStepInterpolate(0.0, target_terrain_offset.value(), terrain_offset / target_terrain_offset.value());
-                }
-            }
-            else
-            {
-                smoothedTerrainOffset = terrain_offset;
-            }
-        }
-        else if (!target_terrain_offset.has_value() && (terrain_offset != 0.0))
-        {
-            // Aircraft is climbing out. Slowly interpolate the terrain offset back to zero.
-            terrain_offset -= previous_terrain_offset / (frameRate * 5.0);
-            if (previous_terrain_offset > 0.0)
-            {
-                if (terrain_offset < 0.0)
-                {
-                    terrain_offset = 0.0;
-                }
-            }
-            else
-            {
-                if (terrain_offset > 0.0)
-                {
-                    terrain_offset = 0.0;
-                }
-            }
-            smoothedTerrainOffset = terrain_offset;
+            AdjustedAltitude = PredictedVisualState.AltitudeTrue;
+            EnsureAboveGround();
+            return;
         }
 
-        adjusted_altitude = predicted_visual_state.Altitude + smoothedTerrainOffset;
+        double newTargetOffset;
+        if (HasUsableTerrainElevationData || IsReportedOnGround) {
+            double remoteTerrainElevation = RemoteVisualState.AltitudeTrue - RemoteVisualState.AltitudeAgl.value();
+            newTargetOffset = roundf((LocalTerrainElevation.value() - remoteTerrainElevation) * 100) / 100;
+            //double diff = RemoteVisualState.AltitudeTrue - newTargetOffset;
+            //newTargetOffset += -diff;
+        }
+        else {
+            newTargetOffset = 0.0;
+        }
 
-        if (adjusted_altitude < ground_altitude.value())
-        {
-            adjusted_altitude = ground_altitude.value();
+        if (newTargetOffset != TargetTerrainOffset) {
+            TargetTerrainOffset = newTargetOffset;
+            TerrainOffsetMagnitude = (TargetTerrainOffset - TerrainOffset);
+            TerrainOffsetMagnitude = std::max(TerrainOffsetMagnitude, MIN_TERRAIN_OFFSET_MAGNITUDE);
+        }
+
+        if (TerrainOffset != TargetTerrainOffset) {
+            if (IsFirstRenderPending) {
+                TerrainOffset = TargetTerrainOffset;
+                IsFirstRenderPending = false;
+            }
+            else {
+                double window = !IsReportedOnGround
+                    && (RemoteVisualState.AltitudeAgl.value() >= MIN_AGL_FOR_CLIMBOUT)
+                    && (TargetTerrainOffset == 0.0) ? TERRAIN_OFFSET_WINDOW_CLIMBOUT : TERRAIN_OFFSET_WINDOW_LANDING;
+                double step = TerrainOffsetMagnitude / (frameRate * window);
+                if (step >= abs(TargetTerrainOffset - TerrainOffset)) {
+                    TerrainOffset = TargetTerrainOffset;
+                }
+                else {
+                    TerrainOffset += TargetTerrainOffset > TerrainOffset ? step : -step;
+                }
+            }
+        }
+
+        AdjustedAltitude = PredictedVisualState.AltitudeTrue + TerrainOffset;
+        EnsureAboveGround();
+    }
+
+    void NetworkAircraft::EnsureAboveGround()
+    {
+        if (AdjustedAltitude < LocalTerrainElevation.value()) {
+            LOG_MSG(logDEBUG, "EnsureAboveGround: %f", LocalTerrainElevation.value());
+            AdjustedAltitude = LocalTerrainElevation.value();
         }
     }
 
@@ -322,21 +307,21 @@ namespace xpilot
         }
 
         double latDelta = DegreesToMeters(CalculateNormalizedDelta(
-            predicted_visual_state.Lat,
-            remote_visual_state.Lat,
+            PredictedVisualState.Lat,
+            RemoteVisualState.Lat,
             -90.0,
             90.0
         ));
 
         double lonDelta = DegreesToMeters(CalculateNormalizedDelta(
-            predicted_visual_state.Lon,
-            remote_visual_state.Lon,
+            PredictedVisualState.Lon,
+            RemoteVisualState.Lon,
             -180.0,
             180.0
         ));
-        lonDelta *= LongitudeScalingFactor(remote_visual_state.Lat);
+        lonDelta *= LongitudeScalingFactor(RemoteVisualState.Lat);
 
-        double altDelta = (remote_visual_state.Altitude - predicted_visual_state.Altitude) * 0.3048;
+        double altDelta = (RemoteVisualState.AltitudeTrue - PredictedVisualState.AltitudeTrue) * 0.3048;
 
         positional_velocity_vector_error = Vector3(
             lonDelta / interval,
@@ -351,9 +336,9 @@ namespace xpilot
         );
 
         Quaternion targetOrientation = Quaternion::FromEuler(
-            DegreesToRadians(remote_visual_state.Pitch),
-            DegreesToRadians(remote_visual_state.Heading),
-            DegreesToRadians(remote_visual_state.Bank)
+            DegreesToRadians(RemoteVisualState.Pitch),
+            DegreesToRadians(RemoteVisualState.Heading),
+            DegreesToRadians(RemoteVisualState.Bank)
         );
 
         Quaternion delta = Quaternion::Inverse(currentOrientation) * targetOrientation;
@@ -489,7 +474,7 @@ namespace xpilot
         static const float epsilon = std::numeric_limits<float>::epsilon();
         const auto diffMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_surface_update_time);
 
-        target_gear_position = gear_down || on_ground ? 1.0f : 0.0f;
+        target_gear_position = gear_down || IsReportedOnGround ? 1.0f : 0.0f;
         target_spoiler_position = spoilers_deployed ? 1.0f : 0.0f;
         target_reverser_position = engines_reversing ? 1.0f : 0.0f;
 
@@ -572,31 +557,31 @@ namespace xpilot
         SetSlatRatio(GetFlapRatio());
         SetSpoilerRatio(surfaces.spoilerRatio);
         SetSpeedbrakeRatio(surfaces.spoilerRatio);
-        SetNoseWheelAngle(remote_visual_state.NoseWheelAngle);
+        SetNoseWheelAngle(RemoteVisualState.NoseWheelAngle);
 
-        if (on_ground && !was_on_ground) {
+        if (IsReportedOnGround && !was_on_ground) {
             was_on_ground = true;
         }
 
-        if (target_terrain_offset.has_value() && std::abs(target_terrain_offset.value()) > 0) {
-            double v = std::abs(terrain_offset) / std::abs(target_terrain_offset.value());
-            if (v > 0.75) {
-                target_deflection = 0.70f; // aircraft is touching down, level off main landing gear tilt angle
-            }
+        //if (target_terrain_offset.has_value() && std::abs(target_terrain_offset.value()) > 0) {
+        //    double v = std::abs(terrain_offset) / std::abs(target_terrain_offset.value());
+        //    if (v > 0.75) {
+        //        target_deflection = 0.70f; // aircraft is touching down, level off main landing gear tilt angle
+        //    }
 
-            if (v >= 0.95f) {
-                terrain_offset_finished = true; // terrain offset is nearly finished; this boolean is used trigger when the aircraft wheels can begin spinning
-            }
-        }
+        //    if (v >= 0.95f) {
+        //        terrain_offset_finished = true; // terrain offset is nearly finished; this boolean is used trigger when the aircraft wheels can begin spinning
+        //    }
+        //}
 
-        if (!on_ground && was_on_ground) {
-            target_deflection = 0.0f; // aircraft just lifted off, set target deflection to tilt main gear
-        }
+        //if (!IsReportedOnGround && was_on_ground) {
+        //    target_deflection = 0.0f; // aircraft just lifted off, set target deflection to tilt main gear
+        //}
 
         SetTireDeflection(surfaces.tireDeflect);
         SetReversDeployRatio(surfaces.reversRatio);
 
-        if (on_ground && terrain_offset_finished)
+        if (IsReportedOnGround && terrain_offset_finished)
         {
             double rpm = (60 / (2 * M_PI * 3.2)) * positional_velocity_vector.X * -1;
             double rpmDeg = RpmToDegree(GetTireRotRpm(), _elapsedSinceLastCall);
@@ -635,7 +620,7 @@ namespace xpilot
         SetLightsBeacon(surfaces.lights.bcnLights);
         SetLightsStrobe(surfaces.lights.strbLights);
         SetLightsNav(surfaces.lights.navLights);
-        SetWeightOnWheels(on_ground);
+        SetWeightOnWheels(IsReportedOnGround);
 
         HexToRgb(Config::Instance().getAircraftLabelColor(), colLabel);
 
@@ -688,7 +673,7 @@ namespace xpilot
             }
         }
         else {
-            if (first_render_pending) {
+            if (IsFirstRenderPending) {
                 setEngineState(EngineState::Normal);
             }
             else {
@@ -750,7 +735,6 @@ namespace xpilot
         }
 
         was_engines_running = engines_running;
-        first_render_pending = false;
     }
 
     void NetworkAircraft::copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const
@@ -764,7 +748,7 @@ namespace xpilot
         pOut->alt_ft = alt;
         pOut->pitch = GetPitch();
         pOut->roll = GetRoll();
-        pOut->terrainAlt_ft = (float)ground_altitude.value_or(0.0f);
+        pOut->terrainAlt_ft = (float)LocalTerrainElevation.value_or(0.0f);
         pOut->speed_kt = (float)ground_speed;
         pOut->heading = GetHeading();
         pOut->flaps = (float)surfaces.flapRatio;
@@ -776,7 +760,7 @@ namespace xpilot
         pOut->bits.bcn = GetLightsBeacon();
         pOut->bits.strb = GetLightsStrobe();
         pOut->bits.nav = GetLightsNav();
-        pOut->bits.onGnd = on_ground;
+        pOut->bits.onGnd = IsReportedOnGround;
         pOut->bits.filler1 = 0;
         pOut->bits.multiIdx = GetTcasTargetIdx();
         pOut->bits.filler2 = 0;

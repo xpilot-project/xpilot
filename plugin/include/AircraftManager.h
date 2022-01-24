@@ -93,6 +93,8 @@ namespace xpilot
 		bool ReceivingFastPositionUpdates(NetworkAircraft* aircraft);
 		Vector3 DerivePositionalVelocityVector(AircraftVisualState previousVisualState, AircraftVisualState newVisualState, long intervalMs);
 
+		void UpdateAircraft(NetworkAircraft* aircraft);
+
 		ALCdevice* audioDevice = nullptr;
 		ALCcontext* audioContext = nullptr;
 	};

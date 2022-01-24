@@ -30,6 +30,10 @@ namespace xpilot
 	constexpr double ERROR_CORRECTION_INTERVAL_SLOW = 5.0;
 	constexpr float CLOSED_SPACE_VOLUME_SCALAR = 0.25f;
 
+	constexpr long TERRAIN_ELEVATION_DATA_USABLE_AGE = 2000;
+	constexpr double MAX_USABLE_ALTITUDE_AGL = 100.0;
+	constexpr double TERRAIN_ELEVATION_MAX_SLOPE = 3.0;
+
 	static double NormalizeDegrees(double value, double lowerBound, double upperBound)
 	{
 		double range = upperBound - lowerBound;
@@ -198,10 +202,10 @@ namespace xpilot
 		}
 		if (config.data.onGround.has_value())
 		{
-			if (config.data.onGround.value() != plane->on_ground)
+			if (config.data.onGround.value() != plane->IsReportedOnGround)
 			{
-				plane->on_ground = config.data.onGround.value();
-				if (!plane->on_ground) {
+				plane->IsReportedOnGround = config.data.onGround.value();
+				if (!plane->IsReportedOnGround) {
 					plane->terrain_offset_finished = false;
 				}
 			}
@@ -345,22 +349,22 @@ namespace xpilot
 			auto intervalMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastUpdateTimeStamp).count();
 
 			aircraft->positional_velocity_vector = DerivePositionalVelocityVector(
-				aircraft->remote_visual_state,
+				aircraft->RemoteVisualState,
 				visualState,
 				intervalMs
 			);
 			aircraft->rotational_velocity_vector = Vector3::Zero();
 
 			AircraftVisualState newVisualState{};
-			newVisualState.Lat = aircraft->predicted_visual_state.Lat;
-			newVisualState.Lon = aircraft->predicted_visual_state.Lon;
-			newVisualState.Altitude = aircraft->predicted_visual_state.Altitude;
+			newVisualState.Lat = aircraft->PredictedVisualState.Lat;
+			newVisualState.Lon = aircraft->PredictedVisualState.Lon;
+			newVisualState.AltitudeTrue = aircraft->PredictedVisualState.AltitudeTrue;
 			newVisualState.Pitch = visualState.Pitch;
 			newVisualState.Heading = visualState.Heading;
 			newVisualState.Bank = visualState.Bank;
 
-			aircraft->predicted_visual_state = newVisualState;
-			aircraft->remote_visual_state = visualState;
+			aircraft->PredictedVisualState = newVisualState;
+			aircraft->RemoteVisualState = visualState;
 			aircraft->UpdateErrorVectors(ERROR_CORRECTION_INTERVAL_SLOW);
 		}
 
@@ -380,8 +384,10 @@ namespace xpilot
 		{
 			aircraft->positional_velocity_vector = positionalVector;
 			aircraft->rotational_velocity_vector = rotationalVector;
-			aircraft->remote_visual_state = visualState;
+			aircraft->RemoteVisualState = visualState;
+			aircraft->RemoteVisualState.AltitudeAgl = visualState.AltitudeAgl;
 			aircraft->UpdateErrorVectors(ERROR_CORRECTION_INTERVAL_FAST);
+			UpdateAircraft(aircraft);
 		}
 
 		aircraft->last_fast_position_timestamp = std::chrono::steady_clock::now();
@@ -422,7 +428,7 @@ namespace xpilot
 			180.0
 		)) * LongitudeScalingFactor(newVisualState.Lat);
 
-		double altDelta = newVisualState.Altitude - previousVisualState.Altitude;
+		double altDelta = newVisualState.AltitudeTrue - previousVisualState.AltitudeTrue;
 
 		double intervalSec = intervalMs / 1000.0;
 
@@ -431,6 +437,64 @@ namespace xpilot
 			altDelta / intervalSec,
 			latDelta / intervalSec
 		);
+	}
+
+	void AircraftManager::UpdateAircraft(NetworkAircraft* aircraft)
+	{
+		if (!aircraft->LocalTerrainElevation.has_value()) {
+			return;
+		}
+
+		aircraft->HasUsableTerrainElevationData = false;
+
+		auto now = std::chrono::steady_clock::now();
+
+		aircraft->TerrainElevationHistory.remove_if([&](TerrainElevationData& meta) {
+			return meta.Timestamp < (now - std::chrono::milliseconds(TERRAIN_ELEVATION_DATA_USABLE_AGE + 250));
+		});
+
+		if (aircraft->RemoteVisualState.AltitudeAgl.has_value() && (aircraft->RemoteVisualState.AltitudeAgl.value() <= MAX_USABLE_ALTITUDE_AGL)) {
+			TerrainElevationData data{};
+			data.Timestamp = now;
+			data.Location.Latitude = aircraft->RemoteVisualState.Lat;
+			data.Location.Longitude = aircraft->RemoteVisualState.Lon;
+			data.LocalValue = aircraft->LocalTerrainElevation.value();
+			aircraft->TerrainElevationHistory.push_back(data);
+		}
+		else {
+			LOG_MSG(logDEBUG, "Missing AGL");
+			return;
+		}
+
+		if (aircraft->TerrainElevationHistory.size() < 2) {
+			LOG_MSG(logDEBUG, "TerrainElevationHistory.size() < 2");
+			return;
+		}
+
+		auto startSample = aircraft->TerrainElevationHistory.front();
+		auto endSample = aircraft->TerrainElevationHistory.back();
+		auto age = std::chrono::duration_cast<std::chrono::milliseconds>(endSample.Timestamp - startSample.Timestamp).count();
+		if (age < TERRAIN_ELEVATION_DATA_USABLE_AGE) {
+			return;
+		}
+
+		double distance = DegreesToFeet(GreatCircleDistance(
+			startSample.Location.Longitude, startSample.Location.Latitude,
+			endSample.Location.Longitude, endSample.Location.Latitude));
+		double remoteElevationDelta = abs(startSample.RemoteValue - endSample.RemoteValue);
+		double localElevationDelta = abs(startSample.LocalValue - endSample.LocalValue);
+		double remoteSlope = RadiansToDegrees(atan(remoteElevationDelta / distance));
+		if (remoteSlope > TERRAIN_ELEVATION_MAX_SLOPE) {
+			LOG_MSG(logDEBUG, "remoteSlope > %i", TERRAIN_ELEVATION_MAX_SLOPE);
+			return;
+		}
+		double localSlope = RadiansToDegrees(atan(localElevationDelta / distance));
+		if (localSlope > TERRAIN_ELEVATION_MAX_SLOPE) {
+			LOG_MSG(logDEBUG, "localSlope > %i", TERRAIN_ELEVATION_MAX_SLOPE);
+			return;
+		}
+
+		aircraft->HasUsableTerrainElevationData = true;
 	}
 
 	void AircraftManager::HandleChangePlaneModel(const std::string& callsign, const std::string& typeIcao, const std::string& airlineIcao)

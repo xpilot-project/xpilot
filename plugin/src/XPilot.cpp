@@ -233,7 +233,7 @@ namespace xpilot
 								visualState.Lat = latitude;
 								visualState.Lon = longitude;
 								visualState.Heading = heading;
-								visualState.Altitude = altitude;
+								visualState.AltitudeTrue = altitude;
 								visualState.Pitch = pitch;
 								visualState.Bank = bank;
 
@@ -276,7 +276,7 @@ namespace xpilot
 								visualState.Lat = latitude;
 								visualState.Lon = longitude;
 								visualState.Heading = heading;
-								visualState.Altitude = altitude;
+								visualState.AltitudeTrue = altitude;
 								visualState.Pitch = pitch;
 								visualState.Bank = bank;
 
@@ -310,7 +310,7 @@ namespace xpilot
 								AircraftVisualState visualState{};
 								visualState.Lat = latitude;
 								visualState.Lon = longitude;
-								visualState.Altitude = altitude;
+								visualState.AltitudeTrue = altitude;
 								visualState.AltitudeAgl = agl;
 								visualState.Pitch = pitch;
 								visualState.Bank = bank;
