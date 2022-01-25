@@ -74,8 +74,6 @@ namespace xpilot
         const std::string& _modelName = "") :
         XPMP2::Aircraft(_icaoType, _icaoAirline, _livery, _modeS_id, _modelName)
     {
-        SetRender(false);
-
         label = _callsign;
         strScpy(acInfoTexts.tailNum, _callsign.c_str(), sizeof(acInfoTexts.tailNum));
         strScpy(acInfoTexts.icaoAcType, acIcaoType.c_str(), sizeof(acInfoTexts.icaoAcType));
@@ -210,6 +208,11 @@ namespace xpilot
         }
 
         if (!RemoteVisualState.AltitudeAgl.has_value()) {
+            if (IsReportedOnGround && (RemoteVisualState.AltitudeTrue - LocalTerrainElevation.value() > LocalTerrainElevation.value())) {
+                AdjustedAltitude = LocalTerrainElevation.value() - PredictedVisualState.AltitudeTrue;
+                EnsureAboveGround();
+                return;
+            }
             AdjustedAltitude = {};
             return;
         }
@@ -464,253 +467,251 @@ namespace xpilot
             Surfaces.flapRatio = TargetFlapsPosition;
             Surfaces.spoilerRatio = TargetSpoilerPosition;
         }
-        else if(FastPositionsReceivedCount > 1)
-        {
-            SetRender(true);
+        else if (FastPositionsReceivedCount > 1) {
             IsFirstRenderPending = false;
+        }
 
-            const float f = Surfaces.gearPosition - TargetGearPosition;
-            if (std::abs(f) > epsilon)
+        const float f = Surfaces.gearPosition - TargetGearPosition;
+        if (std::abs(f) > epsilon)
+        {
+            // interpolate gear position
+            constexpr float gearMoveTimeMs = 10000;
+            const auto gearPositionDiffRemaining = TargetGearPosition - Surfaces.gearPosition;
+
+            const auto gearPositionDiffThisFrame = (diffMs.count()) / gearMoveTimeMs;
+            Surfaces.gearPosition += std::copysign(gearPositionDiffThisFrame, gearPositionDiffRemaining);
+            Surfaces.gearPosition = (std::max)(0.0f, (std::min)(Surfaces.gearPosition, 1.0f));
+        }
+
+        const float f2 = Surfaces.flapRatio - TargetFlapsPosition;
+        if (std::abs(f2) > epsilon)
+        {
+            // interpolate flap position
+            constexpr float flapMoveTimeMs = 10000;
+            const auto flapPositionDiffRemaining = TargetFlapsPosition - Surfaces.flapRatio;
+
+            const auto flapPositionDiffThisFrame = (diffMs.count()) / flapMoveTimeMs;
+            Surfaces.flapRatio += std::copysign(flapPositionDiffThisFrame, flapPositionDiffRemaining);
+            Surfaces.flapRatio = (std::max)(0.0f, (std::min)(Surfaces.flapRatio, 1.0f));
+        }
+
+        const float f3 = Surfaces.spoilerRatio - TargetSpoilerPosition;
+        if (std::abs(f3) > epsilon)
+        {
+            // interpolate spoiler position
+            constexpr float spoilerMoveTimeMs = 2000;
+            const auto spoilerPositionDiffRemaining = TargetSpoilerPosition - Surfaces.spoilerRatio;
+
+            const auto spoilerPositionDiffThisFrame = (diffMs.count()) / spoilerMoveTimeMs;
+            Surfaces.spoilerRatio += std::copysign(spoilerPositionDiffThisFrame, spoilerPositionDiffRemaining);
+            Surfaces.spoilerRatio = (std::max)(0.0f, (std::min)(Surfaces.spoilerRatio, 1.0f));
+        }
+
+        const float f4 = Surfaces.tireDeflect - TargetGearDeflection;
+        if (std::abs(f4) > epsilon)
+        {
+            // interpolate gear position
+            constexpr float moveTimeMs = 2000;
+            const auto diffRemaining = TargetGearDeflection - Surfaces.tireDeflect;
+
+            const auto diffThisFrame = (diffMs.count()) / moveTimeMs;
+            Surfaces.tireDeflect += std::copysign(diffThisFrame, diffRemaining);
+            Surfaces.tireDeflect = (std::max)(0.0f, (std::min)(Surfaces.tireDeflect, 1.0f));
+        }
+
+        const float f5 = Surfaces.reversRatio - TargetReverserPosition;
+        if (std::abs(f5) > epsilon)
+        {
+            // interpolate gear position
+            constexpr float moveTimeMs = 3000;
+            const auto diffRemaining = TargetReverserPosition - Surfaces.reversRatio;
+
+            const auto diffThisFrame = (diffMs.count()) / moveTimeMs;
+            Surfaces.reversRatio += std::copysign(diffThisFrame, diffRemaining);
+            Surfaces.reversRatio = (std::max)(0.0f, (std::min)(Surfaces.reversRatio, 1.0f));
+        }
+
+        PreviousSurfaceUpdateTime = now;
+
+        SetGearRatio(Surfaces.gearPosition);
+        SetFlapRatio(Surfaces.flapRatio);
+        SetSlatRatio(GetFlapRatio());
+        SetSpoilerRatio(Surfaces.spoilerRatio);
+        SetSpeedbrakeRatio(Surfaces.spoilerRatio);
+        SetNoseWheelAngle(RemoteVisualState.NoseWheelAngle);
+
+        if (IsReportedOnGround && !WasReportedOnGround) {
+            WasReportedOnGround = true;
+        }
+
+        if (abs(TerrainOffset) > 0.0f) {
+            double v = TerrainOffset / TargetTerrainOffset;
+            if (v >= 0.95f) {
+                TerrainOffsetFinished = true; // terrain offset is nearly finished; this boolean is used trigger when the aircraft wheels can begin spinning
+            }
+        }
+        else
+        {
+            TerrainOffsetFinished = false;
+        }
+
+        //SetTireDeflection(0.60f);
+        SetReversDeployRatio(Surfaces.reversRatio);
+
+        if (IsReportedOnGround || TerrainOffsetFinished)
+        {
+            double rpm = (60 / (2 * M_PI * 3.2)) * PositionalVelocityVector.X * -1;
+            double rpmDeg = RpmToDegree(GetTireRotRpm(), _elapsedSinceLastCall);
+
+            SetTireRotRpm(rpm);
+            SetTireRotAngle(GetTireRotAngle() + rpmDeg);
+            while (GetTireRotAngle() >= 360.0f)
             {
-                // interpolate gear position
-                constexpr float gearMoveTimeMs = 10000;
-                const auto gearPositionDiffRemaining = TargetGearPosition - Surfaces.gearPosition;
-
-                const auto gearPositionDiffThisFrame = (diffMs.count()) / gearMoveTimeMs;
-                Surfaces.gearPosition += std::copysign(gearPositionDiffThisFrame, gearPositionDiffRemaining);
-                Surfaces.gearPosition = (std::max)(0.0f, (std::min)(Surfaces.gearPosition, 1.0f));
+                SetTireRotAngle(GetTireRotAngle() - 360.0f);
             }
+        }
 
-            const float f2 = Surfaces.flapRatio - TargetFlapsPosition;
-            if (std::abs(f2) > epsilon)
+        if (IsEnginesRunning)
+        {
+            SetEngineRotRpm(1200);
+            SetPropRotRpm(GetEngineRotRpm());
+            SetEngineRotAngle(GetEngineRotAngle() + RpmToDegree(GetEngineRotRpm(), _elapsedSinceLastCall));
+            while (GetEngineRotAngle() >= 360.0f)
             {
-                // interpolate flap position
-                constexpr float flapMoveTimeMs = 10000;
-                const auto flapPositionDiffRemaining = TargetFlapsPosition - Surfaces.flapRatio;
-
-                const auto flapPositionDiffThisFrame = (diffMs.count()) / flapMoveTimeMs;
-                Surfaces.flapRatio += std::copysign(flapPositionDiffThisFrame, flapPositionDiffRemaining);
-                Surfaces.flapRatio = (std::max)(0.0f, (std::min)(Surfaces.flapRatio, 1.0f));
+                SetEngineRotAngle(GetEngineRotAngle() - 360.0f);
             }
+            SetPropRotAngle(GetEngineRotAngle());
+            SetThrustRatio(1.0f);
+        }
+        else
+        {
+            SetEngineRotRpm(0.0f);
+            SetPropRotRpm(0.0f);
+            SetEngineRotAngle(0.0f);
+            SetPropRotAngle(0.0f);
+            SetThrustRatio(0.0f);
+        }
 
-            const float f3 = Surfaces.spoilerRatio - TargetSpoilerPosition;
-            if (std::abs(f3) > epsilon)
-            {
-                // interpolate spoiler position
-                constexpr float spoilerMoveTimeMs = 2000;
-                const auto spoilerPositionDiffRemaining = TargetSpoilerPosition - Surfaces.spoilerRatio;
+        SetLightsTaxi(Surfaces.lights.taxiLights);
+        SetLightsLanding(Surfaces.lights.landLights);
+        SetLightsBeacon(Surfaces.lights.bcnLights);
+        SetLightsStrobe(Surfaces.lights.strbLights);
+        SetLightsNav(Surfaces.lights.navLights);
+        SetWeightOnWheels(IsReportedOnGround);
 
-                const auto spoilerPositionDiffThisFrame = (diffMs.count()) / spoilerMoveTimeMs;
-                Surfaces.spoilerRatio += std::copysign(spoilerPositionDiffThisFrame, spoilerPositionDiffRemaining);
-                Surfaces.spoilerRatio = (std::max)(0.0f, (std::min)(Surfaces.spoilerRatio, 1.0f));
-            }
+        HexToRgb(Config::Instance().getAircraftLabelColor(), colLabel);
 
-            const float f4 = Surfaces.tireDeflect - TargetGearDeflection;
-            if (std::abs(f4) > epsilon)
-            {
-                // interpolate gear position
-                constexpr float moveTimeMs = 2000;
-                const auto diffRemaining = TargetGearDeflection - Surfaces.tireDeflect;
+        // Sounds
 
-                const auto diffThisFrame = (diffMs.count()) / moveTimeMs;
-                Surfaces.tireDeflect += std::copysign(diffThisFrame, diffRemaining);
-                Surfaces.tireDeflect = (std::max)(0.0f, (std::min)(Surfaces.tireDeflect, 1.0f));
-            }
+        XPLMCameraPosition_t camera;
+        XPLMReadCameraPosition(&camera);
 
-            const float f5 = Surfaces.reversRatio - TargetReverserPosition;
-            if (std::abs(f5) > epsilon)
-            {
-                // interpolate gear position
-                constexpr float moveTimeMs = 3000;
-                const auto diffRemaining = TargetReverserPosition - Surfaces.reversRatio;
+        auto& pos = GetLocation();
 
-                const auto diffThisFrame = (diffMs.count()) / moveTimeMs;
-                Surfaces.reversRatio += std::copysign(diffThisFrame, diffRemaining);
-                Surfaces.reversRatio = (std::max)(0.0f, (std::min)(Surfaces.reversRatio, 1.0f));
-            }
+        vect apos(pos.x, pos.y, pos.z);
+        vect user(camera.x, camera.y, camera.z);
 
-            PreviousSurfaceUpdateTime = now;
+        vect diff = apos - user;
 
-            SetGearRatio(Surfaces.gearPosition);
-            SetFlapRatio(Surfaces.flapRatio);
-            SetSlatRatio(GetFlapRatio());
-            SetSpoilerRatio(Surfaces.spoilerRatio);
-            SetSpeedbrakeRatio(Surfaces.spoilerRatio);
-            SetNoseWheelAngle(RemoteVisualState.NoseWheelAngle);
+        float dist = (diff / diff);
 
-            if (IsReportedOnGround && !WasReportedOnGround) {
-                WasReportedOnGround = true;
-            }
+        m_position = diff;
+        const float networkTime = GetNetworkTime();
+        const float d_ts = networkTime - prev_ts;
+        m_velocity = vect((pos.x - prev_x) / d_ts, (pos.y - prev_y) / d_ts, (pos.z - prev_z) / d_ts);
 
-            if (abs(TerrainOffset) > 0.0f) {
-                double v = TerrainOffset / TargetTerrainOffset;
-                if (v >= 0.95f) {
-                    TerrainOffsetFinished = true; // terrain offset is nearly finished; this boolean is used trigger when the aircraft wheels can begin spinning
-                }
-            }
-            else
-            {
-                TerrainOffsetFinished = false;
-            }
+        constexpr float minDistance = 3000.0f;
+        constexpr float positionAdj = 25.0f;
 
-            //SetTireDeflection(0.60f);
-            SetReversDeployRatio(Surfaces.reversRatio);
+        ALfloat soundPos[3] = { m_position.x / positionAdj, m_position.y / positionAdj, m_position.z / positionAdj };
+        ALfloat soundVel[3] = { m_velocity.x / positionAdj, m_velocity.y / positionAdj, m_velocity.z / positionAdj };
 
-            if (IsReportedOnGround || TerrainOffsetFinished)
-            {
-                double rpm = (60 / (2 * M_PI * 3.2)) * PositionalVelocityVector.X * -1;
-                double rpmDeg = RpmToDegree(GetTireRotRpm(), _elapsedSinceLastCall);
+        if (!IsEnginesRunning || dist > minDistance) {
+            if (m_soundsPlaying) {
+                // fade out engine sound when stopping sound
+                if (m_currentGain > 0.0f) {
+                    auto now = std::chrono::system_clock::now();
+                    const auto diffMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_previousGainUpdateTime);
 
-                SetTireRotRpm(rpm);
-                SetTireRotAngle(GetTireRotAngle() + rpmDeg);
-                while (GetTireRotAngle() >= 360.0f)
-                {
-                    SetTireRotAngle(GetTireRotAngle() - 360.0f);
-                }
-            }
+                    m_currentGain -= 0.01f;
 
-            if (IsEnginesRunning)
-            {
-                SetEngineRotRpm(1200);
-                SetPropRotRpm(GetEngineRotRpm());
-                SetEngineRotAngle(GetEngineRotAngle() + RpmToDegree(GetEngineRotRpm(), _elapsedSinceLastCall));
-                while (GetEngineRotAngle() >= 360.0f)
-                {
-                    SetEngineRotAngle(GetEngineRotAngle() - 360.0f);
-                }
-                SetPropRotAngle(GetEngineRotAngle());
-                SetThrustRatio(1.0f);
-            }
-            else
-            {
-                SetEngineRotRpm(0.0f);
-                SetPropRotRpm(0.0f);
-                SetEngineRotAngle(0.0f);
-                SetPropRotAngle(0.0f);
-                SetThrustRatio(0.0f);
-            }
-
-            SetLightsTaxi(Surfaces.lights.taxiLights);
-            SetLightsLanding(Surfaces.lights.landLights);
-            SetLightsBeacon(Surfaces.lights.bcnLights);
-            SetLightsStrobe(Surfaces.lights.strbLights);
-            SetLightsNav(Surfaces.lights.navLights);
-            SetWeightOnWheels(IsReportedOnGround);
-
-            HexToRgb(Config::Instance().getAircraftLabelColor(), colLabel);
-
-            // Sounds
-
-            XPLMCameraPosition_t camera;
-            XPLMReadCameraPosition(&camera);
-
-            auto& pos = GetLocation();
-
-            vect apos(pos.x, pos.y, pos.z);
-            vect user(camera.x, camera.y, camera.z);
-
-            vect diff = apos - user;
-
-            float dist = (diff / diff);
-
-            m_position = diff;
-            const float networkTime = GetNetworkTime();
-            const float d_ts = networkTime - prev_ts;
-            m_velocity = vect((pos.x - prev_x) / d_ts, (pos.y - prev_y) / d_ts, (pos.z - prev_z) / d_ts);
-
-            constexpr float minDistance = 3000.0f;
-            constexpr float positionAdj = 25.0f;
-
-            ALfloat soundPos[3] = { m_position.x / positionAdj, m_position.y / positionAdj, m_position.z / positionAdj };
-            ALfloat soundVel[3] = { m_velocity.x / positionAdj, m_velocity.y / positionAdj, m_velocity.z / positionAdj };
-
-            if (!IsEnginesRunning || dist > minDistance) {
-                if (m_soundsPlaying) {
-                    // fade out engine sound when stopping sound
-                    if (m_currentGain > 0.0f) {
-                        auto now = std::chrono::system_clock::now();
-                        const auto diffMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_previousGainUpdateTime);
-
-                        m_currentGain -= 0.01f;
-
-                        for (int i = 0; i < m_engineCount; i++) {
-                            if (m_soundSources[i]) {
-                                alSourcef(m_soundSources[i], AL_GAIN, std::max(m_currentGain, 0.0f));
-                            }
-                        }
-
-                        m_previousGainUpdateTime = now;
-                    }
-                    else {
-                        stopSounds();
-                        m_soundsPlaying = false;
-                    }
-                }
-            }
-            else {
-                if (IsFirstRenderPending) {
-                    setEngineState(EngineState::Normal);
-                }
-                else {
-                    if (IsEnginesRunning != WasEnginesRunning) {
-                        if (!WasEnginesRunning && IsEnginesRunning) {
-                            setEngineState(EngineState::Starter);
-                        }
-                        else {
-                            setEngineState(EngineState::Normal);
+                    for (int i = 0; i < m_engineCount; i++) {
+                        if (m_soundSources[i]) {
+                            alSourcef(m_soundSources[i], AL_GAIN, std::max(m_currentGain, 0.0f));
                         }
                     }
-                }
 
-                float idleGain = 0.80f;
-                float normalGain = 1.0f;
-                float idlePitch = 0.75f;
-                float normalPitch = 1.0f;
-                bool isIdle = (m_velocity / m_velocity) < 0.1f;
-                float targetGain = isIdle ? idleGain : normalGain;
-                float targetPitch = isIdle ? idlePitch : normalPitch;
-                m_currentGain = targetGain;
-
-                for (int i = 0; i < m_engineCount; i++) {
-                    if (m_soundSources[i]) {
-                        alSourcefv(m_soundSources[i], AL_POSITION, soundPos);
-                        alSourcefv(m_soundSources[i], AL_VELOCITY, soundVel);
-                        alSourcef(m_soundSources[i], AL_GAIN, targetGain);
-                        alSourcef(m_soundSources[i], AL_PITCH, targetPitch);
-                    }
-                }
-
-                if (m_engineState == EngineState::Starter) {
-                    const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - m_starterSoundBegan);
-                    float starterTime = 0.0f;
-
-                    switch (m_engineClass) {
-                    case EngineClass::JetEngine:
-                        starterTime = JetStarterTime;
-                        break;
-                    case EngineClass::PistonProp:
-                        starterTime = PistonStarterTime;
-                        break;
-                    case EngineClass::TurboProp:
-                        starterTime = TurboStarterTime;
-                        break;
-                    }
-
-                    if (elapsed.count() > starterTime) {
-                        setEngineState(EngineState::Normal);
-                    }
-                }
-
-                if (IsVisible() && Config::Instance().getEnableAircraftSounds()) {
-                    startSoundThread();
+                    m_previousGainUpdateTime = now;
                 }
                 else {
                     stopSounds();
+                    m_soundsPlaying = false;
+                }
+            }
+        }
+        else {
+            if (IsFirstRenderPending) {
+                setEngineState(EngineState::Normal);
+            }
+            else {
+                if (IsEnginesRunning != WasEnginesRunning) {
+                    if (!WasEnginesRunning && IsEnginesRunning) {
+                        setEngineState(EngineState::Starter);
+                    }
+                    else {
+                        setEngineState(EngineState::Normal);
+                    }
                 }
             }
 
-            WasEnginesRunning = IsEnginesRunning;
+            float idleGain = 0.80f;
+            float normalGain = 1.0f;
+            float idlePitch = 0.75f;
+            float normalPitch = 1.0f;
+            bool isIdle = (m_velocity / m_velocity) < 0.1f;
+            float targetGain = isIdle ? idleGain : normalGain;
+            float targetPitch = isIdle ? idlePitch : normalPitch;
+            m_currentGain = targetGain;
+
+            for (int i = 0; i < m_engineCount; i++) {
+                if (m_soundSources[i]) {
+                    alSourcefv(m_soundSources[i], AL_POSITION, soundPos);
+                    alSourcefv(m_soundSources[i], AL_VELOCITY, soundVel);
+                    alSourcef(m_soundSources[i], AL_GAIN, targetGain);
+                    alSourcef(m_soundSources[i], AL_PITCH, targetPitch);
+                }
+            }
+
+            if (m_engineState == EngineState::Starter) {
+                const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - m_starterSoundBegan);
+                float starterTime = 0.0f;
+
+                switch (m_engineClass) {
+                case EngineClass::JetEngine:
+                    starterTime = JetStarterTime;
+                    break;
+                case EngineClass::PistonProp:
+                    starterTime = PistonStarterTime;
+                    break;
+                case EngineClass::TurboProp:
+                    starterTime = TurboStarterTime;
+                    break;
+                }
+
+                if (elapsed.count() > starterTime) {
+                    setEngineState(EngineState::Normal);
+                }
+            }
+
+            if (IsRendered() && Config::Instance().getEnableAircraftSounds()) {
+                startSoundThread();
+            }
+            else {
+                stopSounds();
+            }
         }
+
+        WasEnginesRunning = IsEnginesRunning;
     }
 
     void NetworkAircraft::copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const

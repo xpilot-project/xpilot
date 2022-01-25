@@ -26,6 +26,7 @@ struct NetworkAircraft
     QDateTime LastSlowPositionUpdateReceived;
     AircraftStatus Status;
     bool HaveVelocities;
+    double Speed;
 
     bool operator==(const NetworkAircraft& rhs) const
     {
@@ -35,7 +36,8 @@ struct NetworkAircraft
                  && RemoteVisualState == rhs.RemoteVisualState
                  && LastSlowPositionUpdateReceived == rhs.LastSlowPositionUpdateReceived
                  && Status == rhs.Status
-                 && HaveVelocities == rhs.HaveVelocities;
+                 && HaveVelocities == rhs.HaveVelocities
+                 && Speed == rhs.Speed;
     }
 };
 

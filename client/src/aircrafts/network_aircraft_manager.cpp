@@ -260,6 +260,11 @@ namespace xpilot
             return false;
         }
 
+        if(aircraft.Speed > 0.5 && !aircraft.HaveVelocities)
+        {
+            return false;
+        }
+
         return true;
     }
 
