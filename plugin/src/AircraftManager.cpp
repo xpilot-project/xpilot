@@ -129,75 +129,75 @@ namespace xpilot
 
 		if (config.data.flapsPct.has_value())
 		{
-			if (config.data.flapsPct.value() != plane->target_flaps_position)
+			if (config.data.flapsPct.value() != plane->TargetFlapsPosition)
 			{
-				plane->target_flaps_position = config.data.flapsPct.value();
+				plane->TargetFlapsPosition = config.data.flapsPct.value();
 			}
 		}
 		if (config.data.gearDown.has_value())
 		{
-			if (config.data.gearDown.value() != plane->gear_down)
+			if (config.data.gearDown.value() != plane->IsGearDown)
 			{
-				plane->gear_down = config.data.gearDown.value();
+				plane->IsGearDown = config.data.gearDown.value();
 			}
 		}
 		if (config.data.spoilersDeployed.has_value())
 		{
-			if (config.data.spoilersDeployed.value() != plane->spoilers_deployed)
+			if (config.data.spoilersDeployed.value() != plane->IsSpoilersDeployed)
 			{
-				plane->spoilers_deployed = config.data.spoilersDeployed.value();
+				plane->IsSpoilersDeployed = config.data.spoilersDeployed.value();
 			}
 		}
 		if (config.data.lights.has_value())
 		{
 			if (config.data.lights.value().strobesOn.has_value())
 			{
-				if (config.data.lights.value().strobesOn.value() != plane->surfaces.lights.strbLights)
+				if (config.data.lights.value().strobesOn.value() != plane->Surfaces.lights.strbLights)
 				{
-					plane->surfaces.lights.strbLights = config.data.lights.value().strobesOn.value();
+					plane->Surfaces.lights.strbLights = config.data.lights.value().strobesOn.value();
 				}
 			}
 			if (config.data.lights.value().taxiOn.has_value())
 			{
-				if (config.data.lights.value().taxiOn.value() != plane->surfaces.lights.taxiLights)
+				if (config.data.lights.value().taxiOn.value() != plane->Surfaces.lights.taxiLights)
 				{
-					plane->surfaces.lights.taxiLights = config.data.lights.value().taxiOn.value();
+					plane->Surfaces.lights.taxiLights = config.data.lights.value().taxiOn.value();
 				}
 			}
 			if (config.data.lights.value().navOn.has_value())
 			{
-				if (config.data.lights.value().navOn.value() != plane->surfaces.lights.navLights)
+				if (config.data.lights.value().navOn.value() != plane->Surfaces.lights.navLights)
 				{
-					plane->surfaces.lights.navLights = config.data.lights.value().navOn.value();
+					plane->Surfaces.lights.navLights = config.data.lights.value().navOn.value();
 				}
 			}
 			if (config.data.lights.value().landingOn.has_value())
 			{
-				if (config.data.lights.value().landingOn.value() != plane->surfaces.lights.landLights)
+				if (config.data.lights.value().landingOn.value() != plane->Surfaces.lights.landLights)
 				{
-					plane->surfaces.lights.landLights = config.data.lights.value().landingOn.value();
+					plane->Surfaces.lights.landLights = config.data.lights.value().landingOn.value();
 				}
 			}
 			if (config.data.lights.value().beaconOn.has_value())
 			{
-				if (config.data.lights.value().beaconOn.value() != plane->surfaces.lights.bcnLights)
+				if (config.data.lights.value().beaconOn.value() != plane->Surfaces.lights.bcnLights)
 				{
-					plane->surfaces.lights.bcnLights = config.data.lights.value().beaconOn.value();
+					plane->Surfaces.lights.bcnLights = config.data.lights.value().beaconOn.value();
 				}
 			}
 		}
 		if (config.data.enginesRunning.has_value())
 		{
-			if (config.data.enginesRunning.value() != plane->engines_running)
+			if (config.data.enginesRunning.value() != plane->IsEnginesRunning)
 			{
-				plane->engines_running = config.data.enginesRunning.value();
+				plane->IsEnginesRunning = config.data.enginesRunning.value();
 			}
 		}
 		if (config.data.enginesReversing.has_value())
 		{
-			if (config.data.enginesReversing.value() != plane->engines_reversing)
+			if (config.data.enginesReversing.value() != plane->IsEnginesReversing)
 			{
-				plane->engines_reversing = config.data.enginesReversing.value();
+				plane->IsEnginesReversing = config.data.enginesReversing.value();
 			}
 		}
 		if (config.data.onGround.has_value())
@@ -206,7 +206,7 @@ namespace xpilot
 			{
 				plane->IsReportedOnGround = config.data.onGround.value();
 				if (!plane->IsReportedOnGround) {
-					plane->terrain_offset_finished = false;
+					plane->TerrainOffsetFinished = false;
 				}
 			}
 		}
@@ -344,16 +344,16 @@ namespace xpilot
 		// newly-reported rotation rather than trying to derive rotational velocities.
 		if (!ReceivingFastPositionUpdates(aircraft))
 		{
-			auto lastUpdateTimeStamp = (aircraft->last_slow_position_timestamp < aircraft->last_fast_position_timestamp) ? aircraft->last_slow_position_timestamp : aircraft->last_fast_position_timestamp;
+			auto lastUpdateTimeStamp = (aircraft->LastSlowPositionTimestamp < aircraft->LastFastPositionTimestamp) ? aircraft->LastSlowPositionTimestamp : aircraft->LastFastPositionTimestamp;
 
 			auto intervalMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastUpdateTimeStamp).count();
 
-			aircraft->positional_velocity_vector = DerivePositionalVelocityVector(
+			aircraft->PositionalVelocityVector = DerivePositionalVelocityVector(
 				aircraft->RemoteVisualState,
 				visualState,
 				intervalMs
 			);
-			aircraft->rotational_velocity_vector = Vector3::Zero();
+			aircraft->RotationalVelocityVector = Vector3::Zero();
 
 			AircraftVisualState newVisualState{};
 			newVisualState.Lat = aircraft->PredictedVisualState.Lat;
@@ -368,8 +368,8 @@ namespace xpilot
 			aircraft->UpdateErrorVectors(ERROR_CORRECTION_INTERVAL_SLOW);
 		}
 
-		aircraft->last_slow_position_timestamp = now;
-		aircraft->ground_speed = speed;
+		aircraft->LastSlowPositionTimestamp = now;
+		aircraft->GroundSpeed = speed;
 	}
 
 	void AircraftManager::HandleFastPositionUpdate(const std::string& callsign, const AircraftVisualState& visualState, Vector3 positionalVector, Vector3 rotationalVector)
@@ -382,16 +382,16 @@ namespace xpilot
 
 		if (ReceivingFastPositionUpdates(aircraft))
 		{
-			aircraft->positional_velocity_vector = positionalVector;
-			aircraft->rotational_velocity_vector = rotationalVector;
+			aircraft->PositionalVelocityVector = positionalVector;
+			aircraft->RotationalVelocityVector = rotationalVector;
 			aircraft->RemoteVisualState = visualState;
 			aircraft->RemoteVisualState.AltitudeAgl = visualState.AltitudeAgl;
 			aircraft->UpdateErrorVectors(ERROR_CORRECTION_INTERVAL_FAST);
 			UpdateAircraft(aircraft);
 		}
 
-		aircraft->last_fast_position_timestamp = std::chrono::steady_clock::now();
-		aircraft->fast_positions_received_count++;
+		aircraft->LastFastPositionTimestamp = std::chrono::steady_clock::now();
+		aircraft->FastPositionsReceivedCount++;
 	}
 
 	NetworkAircraft* AircraftManager::GetAircraft(const std::string& callsign)
@@ -404,7 +404,7 @@ namespace xpilot
 	bool AircraftManager::ReceivingFastPositionUpdates(NetworkAircraft* aircraft)
 	{
 		const auto now = std::chrono::steady_clock::now();
-		const auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - aircraft->last_fast_position_timestamp);
+		const auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - aircraft->LastFastPositionTimestamp);
 		return diff.count() < FAST_POSITION_INTERVAL_TOLERANCE;
 	}
 
@@ -462,12 +462,10 @@ namespace xpilot
 			aircraft->TerrainElevationHistory.push_back(data);
 		}
 		else {
-			LOG_MSG(logDEBUG, "Missing AGL");
 			return;
 		}
 
 		if (aircraft->TerrainElevationHistory.size() < 2) {
-			LOG_MSG(logDEBUG, "TerrainElevationHistory.size() < 2");
 			return;
 		}
 
@@ -485,12 +483,10 @@ namespace xpilot
 		double localElevationDelta = abs(startSample.LocalValue - endSample.LocalValue);
 		double remoteSlope = RadiansToDegrees(atan(remoteElevationDelta / distance));
 		if (remoteSlope > TERRAIN_ELEVATION_MAX_SLOPE) {
-			LOG_MSG(logDEBUG, "remoteSlope > %i", TERRAIN_ELEVATION_MAX_SLOPE);
 			return;
 		}
 		double localSlope = RadiansToDegrees(atan(localElevationDelta / distance));
 		if (localSlope > TERRAIN_ELEVATION_MAX_SLOPE) {
-			LOG_MSG(logDEBUG, "localSlope > %i", TERRAIN_ELEVATION_MAX_SLOPE);
 			return;
 		}
 

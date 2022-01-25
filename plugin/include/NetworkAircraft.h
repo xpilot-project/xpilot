@@ -93,31 +93,29 @@ namespace xpilot
 
         void UpdateErrorVectors(double interval);
 
-        bool IsReportedOnGround;
-        bool was_on_ground = false;
-        bool terrain_offset_finished = false;
-        bool gear_down;
-        bool engines_running = false;
-        bool was_engines_running = false;
-        bool engines_reversing = false;
-        float ground_speed;
-        float target_reverser_position;
-        float target_gear_position;
-        float target_flaps_position;
-        float target_spoiler_position;
-        float target_deflection;
-        bool spoilers_deployed;
-        XPMPPlaneSurfaces_t surfaces;
-        std::string origin;
-        std::string destination;
-        std::chrono::system_clock::time_point prev_surface_update_time;
-        int fast_positions_received_count;
-        bool IsFirstRenderPending;
+        int FastPositionsReceivedCount = 0;
+        bool IsFirstRenderPending = true;
+        bool IsReportedOnGround = false;
+        bool WasReportedOnGround = false;
+        bool TerrainOffsetFinished = false;
+        bool IsGearDown = false;
+        bool IsEnginesRunning = false;
+        bool WasEnginesRunning = false;
+        bool IsEnginesReversing = false;
+        bool IsSpoilersDeployed = false;
+        float GroundSpeed = 0.0f;
+        float TargetReverserPosition = 0.0f;
+        float TargetGearPosition = 0.0f;
+        float TargetFlapsPosition = 0.0f;
+        float TargetSpoilerPosition = 0.0f;
+        float TargetGearDeflection = 0.0f;
+        std::string Origin;
+        std::string Destination;
+        std::chrono::system_clock::time_point PreviousSurfaceUpdateTime;
+        XPMPPlaneSurfaces_t Surfaces;
+        XPMPPlaneRadar_t Radar;
 
-        XPMPPlanePosition_t position;
-        XPMPPlaneRadar_t radar;
-
-        TerrainProbe terrain_probe;
+        TerrainProbe TerrainProbe;
         std::optional<double> LocalTerrainElevation = {};
         std::optional<double> AdjustedAltitude = {};
         double TargetTerrainOffset = 0.0;
@@ -129,13 +127,13 @@ namespace xpilot
         AircraftVisualState RemoteVisualState;
         AircraftVisualState PredictedVisualState;
 
-        Vector3 positional_velocity_vector;
-        Vector3 positional_velocity_vector_error;
-        Vector3 rotational_velocity_vector;
-        Vector3 rotational_velocity_vector_error;
+        Vector3 PositionalVelocityVector;
+        Vector3 PositionalVelocityVectorError;
+        Vector3 RotationalVelocityVector;
+        Vector3 RotationalVelocityVectorError;
 
-        std::chrono::steady_clock::time_point last_fast_position_timestamp;
-        std::chrono::steady_clock::time_point last_slow_position_timestamp;
+        std::chrono::steady_clock::time_point LastFastPositionTimestamp;
+        std::chrono::steady_clock::time_point LastSlowPositionTimestamp;
 
         void stopSounds();
 
