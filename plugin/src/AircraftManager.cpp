@@ -84,7 +84,7 @@ namespace xpilot
 		return mapPlanes.end();
 	}
 
-	AircraftManager::AircraftManager(XPilot* instance) : 
+	AircraftManager::AircraftManager(XPilot* instance) :
 		mEnv(instance),
 		m_soundOn("sim/operation/sound/sound_on", ReadOnly),
 		m_simPaused("sim/time/paused", ReadOnly),
@@ -97,7 +97,7 @@ namespace xpilot
 		m_canopyOpenRatio("sim/operation/sound/users_canopy_open_ratio", ReadOnly),
 		m_userDoorOpenRatio("sim/operation/sound/users_door_open_ratio", ReadOnly)
 	{
-		
+		FlightModel::InitializeModels();
 	}
 
 	AircraftManager::~AircraftManager()

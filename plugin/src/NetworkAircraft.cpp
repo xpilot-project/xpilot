@@ -22,6 +22,7 @@
 #include "Quaternion.hpp"
 #include <alext.h>
 #include <chrono>
+#include <regex>
 
 namespace xpilot
 {
@@ -43,25 +44,34 @@ namespace xpilot
         return end - start;
     }
 
-    double HeadingDiff(double head1, double head2)
-    {
-        if (std::abs(head2 - head1) > 180)
-        {
-            if (head1 < head2)
-            {
-                head1 += 360;
-            }
-            else
-            {
-                head2 += 360;
-            }
-        }
-        return head2 - head1;
-    }
-
     inline float RpmToDegree(float rpm, double s)
     {
         return rpm / 60.0f * float(s) * 360.0f;
+    }
+
+    void Interpolate(float& value, float& target, float _diffMs, float _moveTime)
+    {
+        const float f = value - target;
+        if (std::abs(f) > std::numeric_limits<float>::epsilon())
+        {
+            const auto diffRemaining = target - value;
+            const auto diffThisFrame = _diffMs / _moveTime;
+            value += std::copysign(diffThisFrame, diffRemaining);
+            value = (std::max)(0.0f, (std::min)(value, 1.0f));
+        }
+    }
+
+    template<typename T>
+    void InterpolateSurface(T& surface, const float& target, float _diffMs, float _moveTime, float _max = 1.0f)
+    {
+        const float f = surface - target;
+        if (std::abs(f) > std::numeric_limits<float>::epsilon())
+        {
+            const auto diffRemaining = target - surface;
+            const auto diffThisFrame = _diffMs / _moveTime;
+            surface += std::copysign(diffThisFrame, diffRemaining);
+            surface = (std::max)(0.0f, (std::min)(surface, _max));
+        }
     }
 
     NetworkAircraft::NetworkAircraft(
@@ -91,6 +101,8 @@ namespace xpilot
         RotationalVelocityVector = Vector3::Zero();
 
         auto model = GetModelInfo();
+        pMdl = GetFlightModel(model);
+
         m_engineClass = EngineClass::JetEngine;
         m_engineCount = 2;
 
@@ -149,7 +161,7 @@ namespace xpilot
         double alt_change = velocityVector.Y * interval * 3.28084;
         double new_alt = PredictedVisualState.AltitudeTrue + alt_change;
 
-        AutoLevel(1.0 / interval);
+        GroundClamping(1.0 / interval);
         SetLocation(new_lat, new_lon, AdjustedAltitude.has_value() ? AdjustedAltitude.value() : new_alt);
 
         Quaternion current_orientation = Quaternion::FromEuler(
@@ -190,7 +202,7 @@ namespace xpilot
         SetRoll(new_roll);
     }
 
-    void NetworkAircraft::AutoLevel(float frameRate)
+    void NetworkAircraft::GroundClamping(float frameRate)
     {
         LocalTerrainElevation = {};
         if (PredictedVisualState.AltitudeTrue < 18000.0)
@@ -233,8 +245,8 @@ namespace xpilot
             double remoteTerrainElevation = RemoteVisualState.AltitudeTrue - RemoteVisualState.AltitudeAgl.value();
             newTargetOffset = LocalTerrainElevation.value() - remoteTerrainElevation;
 
+            // correct for terrain elevation differences in X-Plane
             if (RemoteVisualState.AltitudeTrue + newTargetOffset > LocalTerrainElevation.value()) {
-                // correct for terrain elevation differences in X-Plane
                 newTargetOffset += -LocalTerrainElevation.value() + newTargetOffset;
             }
         }
@@ -422,6 +434,58 @@ namespace xpilot
         m_soundsInitialized = true;
     }
 
+    FlightModel NetworkAircraft::GetFlightModel(const XPMP2::CSLModelInfo_t model)
+    {
+        std::string classification = string_format("%s;%s;%s;", model.doc8643WTC, model.doc8643Classification, model.icaoType);
+        std::string category = "MediumJets";
+
+        for (const auto& mapIt : FlightModel::modelMatches) {
+            std::smatch m;
+            std::regex re(mapIt.regex.c_str());
+            std::regex_search(classification, m, re);
+            if (m.size() > 0) {
+                category = mapIt.category;
+                break;
+            }
+        }
+
+        FlightModel flightModel = {};
+        flightModel.modelCategory = category;
+
+        if (category == "HugeJets") {
+            flightModel.FLAPS_DURATION = 10000;
+            flightModel.GEAR_DURATION = 10000;
+            flightModel.GEAR_DEFLECTION = 1.4;
+        }
+        else if (category == "BizJet") {
+            flightModel.FLAPS_DURATION = 5000;
+            flightModel.GEAR_DURATION = 0.25;
+            flightModel.GEAR_DEFLECTION = 0.5;
+        }
+        else if (category == "GA") {
+            flightModel.FLAPS_DURATION = 5000;
+            flightModel.GEAR_DURATION = 10000;
+            flightModel.GEAR_DEFLECTION = 0.25;
+        }
+        else if (category == "LightAC") {
+            flightModel.FLAPS_DURATION = 5000;
+            flightModel.GEAR_DURATION = 10000;
+            flightModel.GEAR_DEFLECTION = 0.25;
+        }
+        else if (category == "Heli") {
+            flightModel.FLAPS_DURATION = 5000;
+            flightModel.GEAR_DURATION = 10000;
+            flightModel.GEAR_DEFLECTION = 0.25;
+        }
+        else {
+            flightModel.FLAPS_DURATION = 5000;
+            flightModel.GEAR_DURATION = 10000;
+            flightModel.GEAR_DEFLECTION = 0.5;
+        }
+
+        return flightModel;
+    }
+
     void NetworkAircraft::stopSounds()
     {
         m_soundLoaded = false;
@@ -451,7 +515,6 @@ namespace xpilot
         );
 
         const auto now = std::chrono::system_clock::now();
-        static const float epsilon = std::numeric_limits<float>::epsilon();
         const auto diffMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - PreviousSurfaceUpdateTime);
 
         TargetGearPosition = IsGearDown || IsReportedOnGround ? 1.0f : 0.0f;
@@ -466,71 +529,37 @@ namespace xpilot
             Surfaces.gearPosition = TargetGearPosition;
             Surfaces.flapRatio = TargetFlapsPosition;
             Surfaces.spoilerRatio = TargetSpoilerPosition;
+            Surfaces.tireDeflect = IsReportedOnGround ? pMdl.GEAR_DEFLECTION / 2.0f : pMdl.GEAR_DEFLECTION;
         }
         else if (FastPositionsReceivedCount > 1) {
             IsFirstRenderPending = false;
         }
 
-        const float f = Surfaces.gearPosition - TargetGearPosition;
-        if (std::abs(f) > epsilon)
-        {
-            // interpolate gear position
-            constexpr float gearMoveTimeMs = 10000;
-            const auto gearPositionDiffRemaining = TargetGearPosition - Surfaces.gearPosition;
-
-            const auto gearPositionDiffThisFrame = (diffMs.count()) / gearMoveTimeMs;
-            Surfaces.gearPosition += std::copysign(gearPositionDiffThisFrame, gearPositionDiffRemaining);
-            Surfaces.gearPosition = (std::max)(0.0f, (std::min)(Surfaces.gearPosition, 1.0f));
+        if (IsReportedOnGround) {
+            TargetGearDeflection = pMdl.GEAR_DEFLECTION / 2.0f;
+        }
+        else if (abs(TerrainOffset) > 0.0f) {
+            double v = TerrainOffset / TargetTerrainOffset;
+            if (v >= 0.95f) {
+                TargetGearDeflection = pMdl.GEAR_DEFLECTION / 2.0f;
+                TerrainOffsetFinished = true; // terrain offset is nearly finished; this boolean is used trigger when the aircraft wheels can begin spinning
+            }
+        }
+        else {
+            TerrainOffsetFinished = false;
         }
 
-        const float f2 = Surfaces.flapRatio - TargetFlapsPosition;
-        if (std::abs(f2) > epsilon)
-        {
-            // interpolate flap position
-            constexpr float flapMoveTimeMs = 10000;
-            const auto flapPositionDiffRemaining = TargetFlapsPosition - Surfaces.flapRatio;
+        SetLightsTaxi(Surfaces.lights.taxiLights);
+        SetLightsLanding(Surfaces.lights.landLights);
+        SetLightsBeacon(Surfaces.lights.bcnLights);
+        SetLightsStrobe(Surfaces.lights.strbLights);
+        SetLightsNav(Surfaces.lights.navLights);
 
-            const auto flapPositionDiffThisFrame = (diffMs.count()) / flapMoveTimeMs;
-            Surfaces.flapRatio += std::copysign(flapPositionDiffThisFrame, flapPositionDiffRemaining);
-            Surfaces.flapRatio = (std::max)(0.0f, (std::min)(Surfaces.flapRatio, 1.0f));
-        }
-
-        const float f3 = Surfaces.spoilerRatio - TargetSpoilerPosition;
-        if (std::abs(f3) > epsilon)
-        {
-            // interpolate spoiler position
-            constexpr float spoilerMoveTimeMs = 2000;
-            const auto spoilerPositionDiffRemaining = TargetSpoilerPosition - Surfaces.spoilerRatio;
-
-            const auto spoilerPositionDiffThisFrame = (diffMs.count()) / spoilerMoveTimeMs;
-            Surfaces.spoilerRatio += std::copysign(spoilerPositionDiffThisFrame, spoilerPositionDiffRemaining);
-            Surfaces.spoilerRatio = (std::max)(0.0f, (std::min)(Surfaces.spoilerRatio, 1.0f));
-        }
-
-        const float f4 = Surfaces.tireDeflect - TargetGearDeflection;
-        if (std::abs(f4) > epsilon)
-        {
-            // interpolate gear position
-            constexpr float moveTimeMs = 2000;
-            const auto diffRemaining = TargetGearDeflection - Surfaces.tireDeflect;
-
-            const auto diffThisFrame = (diffMs.count()) / moveTimeMs;
-            Surfaces.tireDeflect += std::copysign(diffThisFrame, diffRemaining);
-            Surfaces.tireDeflect = (std::max)(0.0f, (std::min)(Surfaces.tireDeflect, 1.0f));
-        }
-
-        const float f5 = Surfaces.reversRatio - TargetReverserPosition;
-        if (std::abs(f5) > epsilon)
-        {
-            // interpolate gear position
-            constexpr float moveTimeMs = 3000;
-            const auto diffRemaining = TargetReverserPosition - Surfaces.reversRatio;
-
-            const auto diffThisFrame = (diffMs.count()) / moveTimeMs;
-            Surfaces.reversRatio += std::copysign(diffThisFrame, diffRemaining);
-            Surfaces.reversRatio = (std::max)(0.0f, (std::min)(Surfaces.reversRatio, 1.0f));
-        }
-
+        InterpolateSurface(Surfaces.gearPosition, TargetGearPosition, diffMs.count(), pMdl.GEAR_DURATION);
+        InterpolateSurface(Surfaces.flapRatio, TargetFlapsPosition, diffMs.count(), pMdl.FLAPS_DURATION);
+        InterpolateSurface(Surfaces.spoilerRatio, TargetSpoilerPosition, diffMs.count(), pMdl.FLAPS_DURATION);
+        InterpolateSurface(Surfaces.tireDeflect, TargetGearDeflection, diffMs.count(), 2000, 1.5f);
+        InterpolateSurface(Surfaces.reversRatio, TargetReverserPosition, diffMs.count(), 3000);
         PreviousSurfaceUpdateTime = now;
 
         SetGearRatio(Surfaces.gearPosition);
@@ -538,37 +567,19 @@ namespace xpilot
         SetSlatRatio(GetFlapRatio());
         SetSpoilerRatio(Surfaces.spoilerRatio);
         SetSpeedbrakeRatio(Surfaces.spoilerRatio);
-        SetNoseWheelAngle(RemoteVisualState.NoseWheelAngle);
-
-        if (IsReportedOnGround && !WasReportedOnGround) {
-            WasReportedOnGround = true;
-        }
-
-        if (abs(TerrainOffset) > 0.0f) {
-            double v = TerrainOffset / TargetTerrainOffset;
-            if (v >= 0.95f) {
-                TerrainOffsetFinished = true; // terrain offset is nearly finished; this boolean is used trigger when the aircraft wheels can begin spinning
-            }
-        }
-        else
-        {
-            TerrainOffsetFinished = false;
-        }
-
-        //SetTireDeflection(0.60f);
+        SetTireDeflection(Surfaces.tireDeflect);
         SetReversDeployRatio(Surfaces.reversRatio);
+        SetNoseWheelAngle(RemoteVisualState.NoseWheelAngle);
+        SetWeightOnWheels(IsReportedOnGround);
 
         if (IsReportedOnGround || TerrainOffsetFinished)
         {
             double rpm = (60 / (2 * M_PI * 3.2)) * PositionalVelocityVector.X * -1;
             double rpmDeg = RpmToDegree(GetTireRotRpm(), _elapsedSinceLastCall);
-
             SetTireRotRpm(rpm);
             SetTireRotAngle(GetTireRotAngle() + rpmDeg);
             while (GetTireRotAngle() >= 360.0f)
-            {
                 SetTireRotAngle(GetTireRotAngle() - 360.0f);
-            }
         }
 
         if (IsEnginesRunning)
@@ -592,13 +603,6 @@ namespace xpilot
             SetThrustRatio(0.0f);
         }
 
-        SetLightsTaxi(Surfaces.lights.taxiLights);
-        SetLightsLanding(Surfaces.lights.landLights);
-        SetLightsBeacon(Surfaces.lights.bcnLights);
-        SetLightsStrobe(Surfaces.lights.strbLights);
-        SetLightsNav(Surfaces.lights.navLights);
-        SetWeightOnWheels(IsReportedOnGround);
-
         HexToRgb(Config::Instance().getAircraftLabelColor(), colLabel);
 
         // Sounds
@@ -610,11 +614,8 @@ namespace xpilot
 
         vect apos(pos.x, pos.y, pos.z);
         vect user(camera.x, camera.y, camera.z);
-
         vect diff = apos - user;
-
         float dist = (diff / diff);
-
         m_position = diff;
         const float networkTime = GetNetworkTime();
         const float d_ts = networkTime - prev_ts;
@@ -664,21 +665,23 @@ namespace xpilot
                 }
             }
 
-            float idleGain = 0.80f;
+            float idleGain = 0.70f;
             float normalGain = 1.0f;
-            float idlePitch = 0.75f;
+            float idlePitch = 0.70f;
             float normalPitch = 1.0f;
-            bool isIdle = (m_velocity / m_velocity) < 0.1f;
+            bool isIdle = (m_velocity / m_velocity) < 1.0f;
             float targetGain = isIdle ? idleGain : normalGain;
             float targetPitch = isIdle ? idlePitch : normalPitch;
-            m_currentGain = targetGain;
+            
+            Interpolate(m_currentGain, targetGain, diffMs.count(), isIdle ? 5000 : 10000);
+            Interpolate(m_currentPitch, targetPitch, diffMs.count(), isIdle ? 5000 : 10000);
 
             for (int i = 0; i < m_engineCount; i++) {
                 if (m_soundSources[i]) {
                     alSourcefv(m_soundSources[i], AL_POSITION, soundPos);
                     alSourcefv(m_soundSources[i], AL_VELOCITY, soundVel);
-                    alSourcef(m_soundSources[i], AL_GAIN, targetGain);
-                    alSourcef(m_soundSources[i], AL_PITCH, targetPitch);
+                    alSourcef(m_soundSources[i], AL_GAIN, m_currentGain);
+                    alSourcef(m_soundSources[i], AL_PITCH, m_currentPitch);
                 }
             }
 
@@ -761,4 +764,34 @@ namespace xpilot
         STRCPY_ATMOST(pOut->origin, Origin);
         STRCPY_ATMOST(pOut->destination, Destination);
     }
+
+    void FlightModel::InitializeModels()
+    {
+        // Huge Jets
+        modelMatches.push_back({ "HugeJets","^(H|J);L\\dJ;" });
+        modelMatches.push_back({ "HugeJets","^M;L4J;" });
+
+        // Biz Jets
+        modelMatches.push_back({ "BizJet","^M;L\\dJ;*BEECH*" });     // Beech, Beechcraft
+        modelMatches.push_back({ "BizJet","^M;L\\dJ;GLF" });         // Grumman Gulfstream
+        modelMatches.push_back({ "BizJet","^M;L\\dJ;LJ" });          // Learjet
+        modelMatches.push_back({ "BizJet","^M;L\\dJ;*BEECH*" });     // Beech, Beechcraft
+        modelMatches.push_back({ "BizJet","^M;L\\dJ;.*;CESSNA" });   // Cessna
+        modelMatches.push_back({ "BizJet","^M;L\\dJ;.*;DASSAULT" }); // Dassault (Falcon)
+
+        // Medium Jets
+        modelMatches.push_back({ "MediumJets","^M;L\\dJ;" });
+        modelMatches.push_back({ "MediumProps","^M;L\\dT;" });
+        modelMatches.push_back({ "BizJet","^L;L\\dJ;" });
+        modelMatches.push_back({ "Glider",";(GLID|A20J|A33P|A33E|A34E|ARCE|ARCP|AS14|AS16|AS20|AS21|AS22|AS24|AS25|AS26|AS28|AS29|AS30|AS31|DG1T|DG40|DG50|DG60|DG80|DIMO|DISC|DUOD|G103|G109|HU1|HU2|JANU|L13M|LAE1|LK17|LK19|LK20|LS8|LS9|NIMB|PISI|PITE|PITA|PIT4|PK15|PK20|S10S|S32M|S32E|SF24|SF25|SF27|SF28|SF31|SZ45|SZ9M|TS1J|VENT);" });
+        modelMatches.push_back({ "LightAC", "^-" });
+        modelMatches.push_back({ "TurboProps", "^L;L\\dT;" });
+        modelMatches.push_back({ "GA", "^L;L\\dP;" });
+        modelMatches.push_back({ "Heli", "^.;H" });
+
+        // Fallback
+        modelMatches.push_back({ "MediumJets", ".*" });
+    }
+
+    std::vector<FlightModelInfo> FlightModel::modelMatches;
 }

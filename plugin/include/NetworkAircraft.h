@@ -82,6 +82,25 @@ namespace xpilot
         Normal
     };
 
+    struct FlightModelInfo
+    {
+        std::string category;
+        std::string regex;
+    };
+
+    class FlightModel
+    {
+    public:
+        std::string modelCategory;
+        double GEAR_DURATION = 10000;       // [ms] time for gear up/down
+        double GEAR_DEFLECTION = 0.5;       // [m]  main gear deflection on meters during touchdown
+        double FLAPS_DURATION = 5000;       // [ms] time for full flaps extension from 0% to 100%
+
+    public:
+        static void InitializeModels();
+        static std::vector<FlightModelInfo> modelMatches;
+    };
+
     class NetworkAircraft : public XPMP2::Aircraft
     {
     public:
@@ -93,10 +112,11 @@ namespace xpilot
 
         void UpdateErrorVectors(double interval);
 
+        FlightModel GetFlightModel(const XPMP2::CSLModelInfo_t model);
+
         int FastPositionsReceivedCount = 0;
         bool IsFirstRenderPending = true;
         bool IsReportedOnGround = false;
-        bool WasReportedOnGround = false;
         bool TerrainOffsetFinished = false;
         bool IsGearDown = false;
         bool IsEnginesRunning = false;
@@ -114,6 +134,8 @@ namespace xpilot
         std::chrono::system_clock::time_point PreviousSurfaceUpdateTime;
         XPMPPlaneSurfaces_t Surfaces;
         XPMPPlaneRadar_t Radar;
+
+        FlightModel pMdl;
 
         TerrainProbe TerrainProbe;
         std::optional<double> LocalTerrainElevation = {};
@@ -140,7 +162,7 @@ namespace xpilot
     protected:
         virtual void UpdatePosition(float, int);
         void Extrapolate(Vector3 velocityVector, Vector3 rotationVector, double interval);
-        void AutoLevel(float frameRate);
+        void GroundClamping(float frameRate);
         void EnsureAboveGround();
         static double NormalizeDegrees(double value, double lowerBound, double upperBound);
 
@@ -150,6 +172,7 @@ namespace xpilot
         float m_pitch = 1.0f;
         float m_gain = 1.0f;
         float m_currentGain = 0.0f;
+        float m_currentPitch = 0.0f;
         bool m_soundLoaded = false;
         bool m_soundsPlaying = false;
         bool m_soundsInitialized = false;
