@@ -207,7 +207,7 @@ namespace xpilot
         LocalTerrainElevation = {};
         if (PredictedVisualState.AltitudeTrue < 18000.0)
         {
-            LocalTerrainElevation = TerrainProbe.getTerrainElevation(
+            LocalTerrainElevation = LocalTerrainProbe.getTerrainElevation(
                 PredictedVisualState.Lat,
                 PredictedVisualState.Lon
             );
@@ -436,7 +436,7 @@ namespace xpilot
 
     FlightModel NetworkAircraft::GetFlightModel(const XPMP2::CSLModelInfo_t model)
     {
-        std::string classification = string_format("%s;%s;%s;", model.doc8643WTC, model.doc8643Classification, model.icaoType);
+        std::string classification = string_format("%s;%s;%s;", model.doc8643WTC.c_str(), model.doc8643Classification.c_str(), model.icaoType.c_str());
         std::string category = "MediumJets";
 
         for (const auto& mapIt : FlightModel::modelMatches) {

@@ -137,7 +137,7 @@ namespace xpilot
 
         FlightModel pMdl;
 
-        TerrainProbe TerrainProbe;
+        TerrainProbe LocalTerrainProbe;
         std::optional<double> LocalTerrainElevation = {};
         std::optional<double> AdjustedAltitude = {};
         double TargetTerrainOffset = 0.0;
