@@ -159,6 +159,8 @@ QString toQString(const ProtocolRevision &value)
         return "10";
     case ProtocolRevision::VatsimAuth:
         return "100";
+    case ProtocolRevision::Vatsim2022:
+        return "101";
     default:
         return "0";
     }
