@@ -742,8 +742,14 @@ void XplaneAdapter::PlaneConfigChanged(const NetworkAircraft &aircraft)
 
     if(aircraft.Configuration->Engines.has_value())
     {
-        data.insert("engines_on", aircraft.Configuration->IsAnyEngineRunning());
-        data.insert("engines_reversing", aircraft.Configuration->IsAnyEngineReversing());
+        if(aircraft.Configuration->HasEnginesRunning())
+        {
+            data.insert("engines_on", aircraft.Configuration->IsAnyEngineRunning());
+        }
+        if(aircraft.Configuration->HasEnginesReversing())
+        {
+            data.insert("engines_reversing", aircraft.Configuration->IsAnyEngineReversing());
+        }
     }
 
     if(aircraft.Configuration->OnGround.has_value())

@@ -35,6 +35,18 @@ public:
                 Engine1Reversing != rhs.Engine1Reversing || Engine2Reversing != rhs.Engine2Reversing ||
                 Engine3Reversing != rhs.Engine3Reversing || Engine4Reversing != rhs.Engine4Reversing;
     }
+
+    bool operator==(const AircraftConfigurationEngines& rhs)
+    {
+        return Engine1Running == rhs.Engine1Running &&
+                Engine1Reversing == rhs.Engine1Reversing &&
+                Engine2Running == rhs.Engine2Running &&
+                Engine2Reversing == rhs.Engine2Reversing &&
+                Engine3Running == rhs.Engine3Running &&
+                Engine3Reversing == rhs.Engine3Reversing &&
+                Engine4Running == rhs.Engine4Running &&
+                Engine4Reversing == rhs.Engine4Reversing;
+    }
 };
 
 class AircraftConfigurationLights
@@ -55,6 +67,11 @@ public:
     {
         return StrobeOn != rhs.StrobeOn || LandingOn != rhs.LandingOn || TaxiOn != rhs.TaxiOn || BeaconOn != rhs.BeaconOn || NavOn != rhs.NavOn;
     }
+
+    bool operator==(const AircraftConfigurationLights& rhs)
+    {
+        return StrobeOn == rhs.StrobeOn && LandingOn == rhs.LandingOn && TaxiOn == rhs.TaxiOn && BeaconOn == rhs.BeaconOn && NavOn == rhs.NavOn;
+    }
 };
 
 class AircraftConfiguration
@@ -70,13 +87,25 @@ public:
     std::optional<bool> SpoilersDeployed;
     std::optional<bool> OnGround;
 
-    bool IsAnyEngineRunning() const { return Engines.has_value() && (Engines->Engine1Running.value_or(false) || Engines->Engine2Running.value_or(false) ||
-                                                                     Engines->Engine3Running.value_or(false) || Engines->Engine4Running.value_or(false)); }
+    bool HasEnginesRunning() const { return Engines.has_value() && (Engines->Engine1Running.has_value() ||
+                                                                Engines->Engine2Running.has_value() ||
+                                                                Engines->Engine3Running.has_value() ||
+                                                                Engines->Engine4Running.has_value()); }
+
+    bool IsAnyEngineRunning() const { return Engines.has_value() && (Engines->Engine1Running.value_or(false) ||
+                                                                     Engines->Engine2Running.value_or(false) ||
+                                                                     Engines->Engine3Running.value_or(false) ||
+                                                                     Engines->Engine4Running.value_or(false)); }
 
     bool IsAnyEngineReversing() const { return Engines.has_value() && (Engines->Engine1Reversing.value_or(false) ||
                                                                        Engines->Engine2Reversing.value_or(false) ||
                                                                        Engines->Engine3Reversing.value_or(false) ||
                                                                        Engines->Engine4Reversing.value_or(false)); }
+
+    bool HasEnginesReversing() const { return Engines.has_value() && (Engines->Engine1Reversing.has_value() ||
+                                                                      Engines->Engine2Reversing.has_value() ||
+                                                                      Engines->Engine3Reversing.has_value() ||
+                                                                      Engines->Engine4Reversing.has_value()); }
 
     AircraftConfiguration()
     {
@@ -98,6 +127,16 @@ public:
                 OnGround != rhs.OnGround ||
                 Lights.value() != rhs.Lights.value() ||
                 Engines.value() != rhs.Engines.value();
+    }
+
+    bool operator==(const AircraftConfiguration& rhs)
+    {
+        return GearDown == rhs.GearDown &&
+                FlapsPercent == rhs.GearDown &&
+                SpoilersDeployed == rhs.SpoilersDeployed &&
+                OnGround == rhs.OnGround &&
+                Lights.value() == rhs.Lights.value() &&
+                Engines.value() == rhs.Engines.value();
     }
 };
 
