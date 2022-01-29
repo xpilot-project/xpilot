@@ -247,7 +247,8 @@ namespace xpilot
 
             // correct for terrain elevation differences in X-Plane
             if (RemoteVisualState.AltitudeTrue + newTargetOffset > LocalTerrainElevation.value()) {
-                newTargetOffset += -LocalTerrainElevation.value() + newTargetOffset;
+                double adj = LocalTerrainElevation.value() - (RemoteVisualState.AltitudeTrue + newTargetOffset);
+                newTargetOffset += adj;
             }
         }
         else {
