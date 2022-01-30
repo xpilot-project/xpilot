@@ -223,6 +223,7 @@ namespace xpilot
 								double latitude = static_cast<double>(j["data"]["latitude"]);
 								double longitude = static_cast<double>(j["data"]["longitude"]);
 								double altitude = static_cast<double>(j["data"]["altitude"]);
+								double agl = static_cast<double>(j["data"]["agl"]);
 								double heading = static_cast<double>(j["data"]["heading"]);
 								double bank = static_cast<double>(j["data"]["bank"]);
 								double pitch = static_cast<double>(j["data"]["pitch"]);
@@ -232,6 +233,7 @@ namespace xpilot
 								visualState.Lon = longitude;
 								visualState.Heading = heading;
 								visualState.AltitudeTrue = altitude;
+								visualState.AltitudeAgl = agl;
 								visualState.Pitch = pitch;
 								visualState.Bank = bank;
 
@@ -783,11 +785,6 @@ namespace xpilot
 	void XPilot::DeleteAllAircraft()
 	{
 		m_aircraftManager->RemoveAllPlanes();
-	}
-
-	void XPilot::DisableAircraftSounds()
-	{
-		m_aircraftManager->DisableAircraftSounds();
 	}
 
 	int XPilot::GetBulkData(void* inRefcon, void* outData, int inStartPos, int inNumBytes)

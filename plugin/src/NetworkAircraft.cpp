@@ -107,6 +107,7 @@ namespace xpilot
         SetPitch(_visualState.Pitch);
         SetRoll(_visualState.Bank);
 
+        IsFirstRenderPending = true;
         LastSlowPositionTimestamp = std::chrono::steady_clock::now();
         PredictedVisualState = _visualState;
         RemoteVisualState = _visualState;
@@ -116,24 +117,24 @@ namespace xpilot
         auto model = GetModelInfo();
         flightModel = GetFlightModel(model);
 
-        m_engineClass = EngineClass::JetEngine;
+        mEngineClass = EngineClass::JetEngine;
         if (model.doc8643Classification.size() > 0) 
         {
             // helicopter or gyrocopter
             if (model.doc8643Classification[0] == 'H' || model.doc8643Classification[0] == 'G') {
-                m_engineClass = EngineClass::Helicopter;
+                mEngineClass = EngineClass::Helicopter;
             }
             // jet
             else if (model.doc8643Classification.size() >= 2 && model.doc8643Classification[2] == 'J') {
-                m_engineClass = EngineClass::JetEngine;
+                mEngineClass = EngineClass::JetEngine;
             }
             // piston prop
             else if (model.doc8643Classification.size() >= 2 && model.doc8643Classification[2] == 'P') {
-                m_engineClass = EngineClass::PistonProp;
+                mEngineClass = EngineClass::PistonProp;
             }
             // turbo prop
             else if (model.doc8643Classification.size() >= 2 && model.doc8643Classification[2] == 'T') {
-                m_engineClass = EngineClass::TurboProp;
+                mEngineClass = EngineClass::TurboProp;
             }
         }
 
@@ -407,7 +408,7 @@ namespace xpilot
 
         if (IsReportedOnGround || TerrainOffsetFinished)
         {
-            double rpm = (60 / (2 * M_PI * 3.2)) * PositionalVelocityVector.X * -1;
+            double rpm = (60 / (2 * M_PI * 3.2)) * abs(PositionalVelocityVector.X);
             double rpmDeg = RpmToDegree(GetTireRotRpm(), _elapsedSinceLastCall);
             SetTireRotRpm(rpm);
             SetTireRotAngle(GetTireRotAngle() + rpmDeg);
@@ -437,8 +438,6 @@ namespace xpilot
         }
 
         HexToRgb(Config::Instance().getAircraftLabelColor(), colLabel);
-
-        first_render_pending = false;
 
         // Sounds
         XPLMCameraPosition_t camera;

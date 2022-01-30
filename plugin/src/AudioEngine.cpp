@@ -27,7 +27,6 @@ void Implementation::Update()
 	}
 	for (auto& it : stoppedChannels)
 	{
-		LOG_MSG(logDEBUG, "stoppedChannel, erase: %i", it->first);
 		mChannels.erase(it);
 	}
 }
@@ -87,7 +86,6 @@ int CAudioEngine::PlaySounds(const string& soundName, float volumeDb)
 	int mChannelId = sImplementation->mNextChannelId++;
 	auto foundIt = sImplementation->mSounds.find(soundName);
 	if (foundIt == sImplementation->mSounds.end()) {
-		LOG_MSG(logERROR, "PlaySounds, sound not found");
 		return mChannelId;
 	}
 
@@ -106,7 +104,6 @@ void CAudioEngine::SetChannel3dPosition(int channelId, const AudioVector3& _pos,
 
 	auto foundIt = sImplementation->mChannels.find(channelId);
 	if (foundIt == sImplementation->mChannels.end()) {
-		LOG_MSG(logDEBUG, "SetChannel3dPosition, channel %i not found", channelId);
 		return;
 	}
 
@@ -115,7 +112,7 @@ void CAudioEngine::SetChannel3dPosition(int channelId, const AudioVector3& _pos,
 	CAudioEngine::ErrorCheck("SetChannel3dPosition", foundIt->second->set3DAttributes(&position, &velocity));
 }
 
-void CAudioEngine::SetChannelVolume(int channelId, float volumeDb)
+void CAudioEngine::SetChannelVolume(int channelId, float volume)
 {
 	if (sImplementation == nullptr)
 		return;
@@ -124,7 +121,7 @@ void CAudioEngine::SetChannelVolume(int channelId, float volumeDb)
 	if (tFoundIt == sImplementation->mChannels.end())
 		return;
 
-	CAudioEngine::ErrorCheck("SetChannelVolume", tFoundIt->second->setVolume(dbToVolume(volumeDb)));
+	CAudioEngine::ErrorCheck("SetChannelVolume", tFoundIt->second->setVolume(volume));
 }
 
 void CAudioEngine::SetChannelPaused(int channel, bool paused)

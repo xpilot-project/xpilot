@@ -34,8 +34,7 @@ namespace xpilot
 	constexpr double MAX_USABLE_ALTITUDE_AGL_HIGH_ELEVATION = 50.0;
 	constexpr double TERRAIN_ELEVATION_MAX_SLOPE = 3.0;
 
-	constexpr float CLOSED_SPACE_VOLUME_SCALAR = 0.25f;
-	constexpr float OUTSIDE_VOLUME_SCALAR = 0.60f;
+	constexpr float CLOSED_SPACE_VOLUME_SCALAR = 0.60f;
 
 	static double NormalizeDegrees(double value, double lowerBound, double upperBound)
 	{
@@ -120,8 +119,26 @@ namespace xpilot
 		mapPlanes.emplace(callsign, std::move(plane));
 
 		if (plane) {
-			plane->soundChannelId = audioEngine->PlaySounds("JetEngine", 1.0f);
-			LOG_MSG(logDEBUG, "Channel Id: %i", plane->soundChannelId);
+			std::string engineSound = "JetEngine";
+			switch (plane->GetEngineClass())
+			{
+			case EngineClass::JetEngine:
+				engineSound = "JetEngine";
+				break;
+			case EngineClass::PistonProp:
+				engineSound = "PistonProp";
+				break;
+			case EngineClass::TurboProp:
+				engineSound = "TurboProp";
+				break;
+			case EngineClass::Helicopter:
+				engineSound = "Heli";
+				break;
+			default:
+				engineSound = "JetEngine";
+				break;
+			}
+			plane->soundChannelId = audioEngine->PlaySounds(engineSound, 1.0f);
 		}
 	}
 
@@ -245,13 +262,6 @@ namespace xpilot
 		XPLMRegisterFlightLoopCallback(&AircraftManager::UpdateAircraftSounds, -1.0f, this);
 	}
 
-	void AircraftManager::DisableAircraftSounds()
-	{
-		for (auto& plane : mapPlanes) {
-			plane.second->stopSounds();
-		}
-	}
-
 	float AircraftManager::UpdateAircraftSounds(float, float inElapsedTimeSinceLastFlightLoop, int, void* ref)
 	{
 		auto* instance = static_cast<AircraftManager*>(ref);
@@ -270,19 +280,15 @@ namespace xpilot
 				anyDoorOpen = true;
 			}
 
-			if (instance->m_soundOn && !instance->m_simPaused) {
-				if (instance->m_isViewExternal == 0 && instance->m_canopyOpenRatio == 0 && anyDoorOpen == false) {
-					// internal view
-					soundVolume = Config::Instance().getAircraftSoundVolume() / 100.0f * CLOSED_SPACE_VOLUME_SCALAR;
-				}
-				else {
-					// external view
-					soundVolume = Config::Instance().getAircraftSoundVolume() / 100.0f * OUTSIDE_VOLUME_SCALAR;
-				}
+			bool ShouldPauseSound = !Config::Instance().getEnableAircraftSounds() || !instance->m_soundOn || instance->m_simPaused;
+
+			if (instance->m_isViewExternal == 0 && instance->m_canopyOpenRatio == 0 && anyDoorOpen == false) {
+				// internal view
+				soundVolume = Config::Instance().getAircraftSoundVolume() / 100.0f * CLOSED_SPACE_VOLUME_SCALAR;
 			}
 			else {
-				// sounds disabled or sim is paused
-				soundVolume = 0.0f;
+				// external view
+				soundVolume = Config::Instance().getAircraftSoundVolume() / 100.0f;
 			}
 
 			XPLMCameraPosition_t camera;
@@ -301,7 +307,7 @@ namespace xpilot
 
 				if (soundPos.isNonZero()) {
 					instance->audioEngine->SetChannel3dPosition(channel, { soundPos.x, soundPos.y, soundPos.z }, { soundVel.x, soundVel.y, soundVel.z });
-					instance->audioEngine->SetChannelPaused(channel, !iter->second->engines_running);
+					instance->audioEngine->SetChannelPaused(channel, ShouldPauseSound || !iter->second->IsEnginesRunning);
 					instance->audioEngine->SetChannelVolume(channel, soundVolume);
 				}
 			}
@@ -435,7 +441,7 @@ namespace xpilot
 
 		aircraft->TerrainElevationHistory.remove_if([&](TerrainElevationData& meta) {
 			return meta.Timestamp < (now - std::chrono::milliseconds(TERRAIN_ELEVATION_DATA_USABLE_AGE + 250));
-			});
+		});
 
 		double MAX_AGL_ALTITUDE = aircraft->LocalTerrainElevation.has_value() ? (aircraft->LocalTerrainElevation.value() <= 1000.0f) ?
 			MAX_USABLE_ALTITUDE_AGL_LOW_ELEVATION : MAX_USABLE_ALTITUDE_AGL_HIGH_ELEVATION : MAX_USABLE_ALTITUDE_AGL_LOW_ELEVATION;

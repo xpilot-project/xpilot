@@ -102,8 +102,6 @@ namespace xpilot
 
 		void DeleteAllAircraft();
 
-		void DisableAircraftSounds();
-
 		void Initialize();
 		void Shutdown();
 

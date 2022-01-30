@@ -166,14 +166,18 @@ namespace xpilot
             return mSoundPosition;
         }
 
+        EngineClass GetEngineClass() const
+        {
+            return mEngineClass;
+        }
+
     protected:
         virtual void UpdatePosition(float, int);
         void Extrapolate(Vector3 velocityVector, Vector3 rotationVector, double interval);
         void GroundClamping(float frameRate);
         void EnsureAboveGround();
-        void UpdateSounds();
 
-        EngineClass m_engineClass;
+        EngineClass mEngineClass;
         vect mSoundVelocity;
         vect mSoundPosition;
     };

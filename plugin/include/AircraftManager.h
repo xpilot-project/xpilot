@@ -68,7 +68,6 @@ namespace xpilot
 		void RemoveAllPlanes();
 
 		void StartAudio();
-		void DisableAircraftSounds();
 		static float UpdateAircraftSounds(float, float, int, void* ref);
 
 	protected:
@@ -88,6 +87,7 @@ namespace xpilot
 		NetworkAircraft* GetAircraft(const std::string& callsign);
 		bool ReceivingFastPositionUpdates(NetworkAircraft* aircraft);
 		Vector3 DerivePositionalVelocityVector(AircraftVisualState previousVisualState, AircraftVisualState newVisualState, long intervalMs);
+		void UpdateAircraft(NetworkAircraft* aircraft);
 		CAudioEngine* audioEngine = nullptr;
 	};
 }
