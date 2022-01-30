@@ -20,7 +20,6 @@
 #include "Config.h"
 #include "GeoCalc.hpp"
 #include "Quaternion.hpp"
-#include <alext.h>
 #include <chrono>
 #include <regex>
 
@@ -138,16 +137,12 @@ namespace xpilot
             }
         }
 
-        setEngineState(EngineState::Normal);
-
-        m_velocity = vect(0, 0, 0);
-        m_position = vect(0, 0, 0);
+        mSoundVelocity = vect(0, 0, 0);
+        mSoundPosition = vect(0, 0, 0);
     }
 
     NetworkAircraft::~NetworkAircraft()
     {
-        stopSoundThread();
-        alDeleteSources(1, &m_soundSource);
     }
 
     void NetworkAircraft::Extrapolate(
@@ -344,79 +339,6 @@ namespace xpilot
         RotationalVelocityVectorError = Vector3(result.X / interval, result.Y / interval, result.Z / interval);
     }
 
-    void NetworkAircraft::startSoundThread()
-    {
-        if (m_soundLoaded) {
-            return;
-        }
-
-        stopSoundThread();
-
-        m_soundThread = std::make_unique<std::thread>([&]()
-        {
-            audioLoop();
-        });
-    }
-
-    void NetworkAircraft::stopSoundThread()
-    {
-        if (m_soundThread) {
-            m_soundThread->join();
-            m_soundThread.reset();
-        }
-    }
-
-    void NetworkAircraft::setEngineState(EngineState state)
-    {
-        ALuint normalSound;
-        ALuint starterSound;
-
-        if (m_soundsInitialized) {
-            alDeleteSources(1, &m_soundSource);
-        }
-
-        alGenSources(1, &m_soundSource);
-
-        float zero[3] = { 0,0,0 };
-        alSourcef(m_soundSource, AL_PITCH, m_pitch);
-        alSourcei(m_soundSource, AL_LOOPING, (state == EngineState::Starter) ? AL_FALSE : AL_TRUE);
-        alSourcefv(m_soundSource, AL_VELOCITY, zero);
-        zero[2] = 5.0f;
-        alSourcefv(m_soundSource, AL_POSITION, zero);
-
-        switch (m_engineClass) {
-        case EngineClass::Helicopter:
-            normalSound = AircraftSoundManager::get()->helicopter();
-            starterSound = AircraftSoundManager::get()->helicopter();
-            break;
-        case EngineClass::PistonProp:
-            normalSound = AircraftSoundManager::get()->pistonProp();
-            starterSound = AircraftSoundManager::get()->pistonStarter();
-            break;
-        case EngineClass::TurboProp:
-            normalSound = AircraftSoundManager::get()->turboProp();
-            starterSound = AircraftSoundManager::get()->turboStarter();
-            break;
-        case EngineClass::JetEngine:
-        default:
-            normalSound = AircraftSoundManager::get()->jetEngine();
-            starterSound = AircraftSoundManager::get()->jetStarter();
-            break;
-        }
-
-        if (state == EngineState::Starter && m_engineClass != EngineClass::Helicopter) {
-            alSourcei(m_soundSource, AL_BUFFER, starterSound);
-            m_starterSoundBegan = std::chrono::system_clock::now();
-        }
-        else {
-            alSourcei(m_soundSource, AL_BUFFER, normalSound);
-        }
-
-        m_soundLoaded = false;
-        m_engineState = state;
-        m_soundsInitialized = true;
-    }
-
     void NetworkAircraft::UpdatePosition(float _elapsedSinceLastCall, int)
     {
         Extrapolate(
@@ -516,121 +438,24 @@ namespace xpilot
 
         HexToRgb(Config::Instance().getAircraftLabelColor(), colLabel);
 
-        UpdateSounds();
-    }
+        first_render_pending = false;
 
-    void NetworkAircraft::UpdateSounds()
-    {
-        //XPLMCameraPosition_t camera;
-      //XPLMReadCameraPosition(&camera);
+        // Sounds
+        XPLMCameraPosition_t camera;
+        XPLMReadCameraPosition(&camera);
 
-      //auto& pos = GetLocation();
+        auto& pos = GetLocation();
 
-      //vect apos(pos.x, pos.y, pos.z);
-      //vect user(camera.x, camera.y, camera.z);
-      //vect diff = apos - user;
-      //float dist = (diff / diff);
-      //m_position = diff;
-      //const float networkTime = GetNetworkTime();
-      //const float d_ts = networkTime - prev_ts;
-      //m_velocity = vect((pos.x - prev_x) / d_ts, (pos.y - prev_y) / d_ts, (pos.z - prev_z) / d_ts);
+        vect apos(pos.x, pos.y, pos.z);
+        vect user(camera.x, camera.y, camera.z);
+        vect diff = apos - user;
 
-      //constexpr float minDistance = 500.0f;
-      //constexpr float positionAdj = 25.0f;
+        float dist = (diff / diff);
 
-      //ALfloat soundPos[3] = { m_position.x / positionAdj, m_position.y / positionAdj, m_position.z / positionAdj };
-      //ALfloat soundVel[3] = { m_velocity.x / positionAdj, m_velocity.y / positionAdj, m_velocity.z / positionAdj };
-
-      ////if (m_currentGain > 0.0f) {
-      ////    alSourcef(m_soundSource, AL_GAIN, std::max(m_currentGain, 0.0f));
-      ////}
-      ////else {
-      ////    stopSounds();
-      ////    m_soundsPlaying = false;
-      ////}
-
-      //if (!IsEnginesRunning || dist > minDistance) {
-      //    if (m_soundsPlaying) {
-      //        m_currentGain = 0.0f;
-      //    }
-      //}
-      //else {
-      //    setEngineState(EngineState::Normal);
-
-      //    //if (IsFirstRenderPending) {
-      //    //    setEngineState(EngineState::Normal);
-      //    //}
-      //    //else {
-      //    //    if (IsEnginesRunning != WasEnginesRunning) {
-      //    //        if (!WasEnginesRunning && IsEnginesRunning) {
-      //    //            setEngineState(EngineState::Starter);
-      //    //        }
-      //    //        else {
-      //    //            setEngineState(EngineState::Normal);
-      //    //        }
-      //    //    }
-      //    //}
-
-      //    float idleGain = 0.70f;
-      //    float normalGain = 1.0f;
-      //    float idlePitch = 0.70f;
-      //    float normalPitch = 1.0f;
-      //    bool isIdle = (m_velocity / m_velocity) < 1.0f;
-      //    float targetGain = isIdle ? idleGain : normalGain;
-      //    float targetPitch = isIdle ? idlePitch : normalPitch;
-      //    
-      //    Interpolate(m_currentGain, targetGain, _elapsedSinceLastCall, isIdle ? 5000 : 10000);
-      //    Interpolate(m_currentPitch, targetPitch, _elapsedSinceLastCall, isIdle ? 5000 : 10000);
-
-      //    alSourcefv(m_soundSource, AL_POSITION, soundPos);
-      //    alSourcefv(m_soundSource, AL_VELOCITY, soundVel);
-      //    alSourcef(m_soundSource, AL_GAIN, m_currentGain);
-      //    alSourcef(m_soundSource, AL_PITCH, m_currentPitch);
-
-      //    //if (m_engineState == EngineState::Starter) {
-      //    //    const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - m_starterSoundBegan);
-      //    //    float starterTime = 0.0f;
-
-      //    //    switch (m_engineClass) {
-      //    //    case EngineClass::JetEngine:
-      //    //        starterTime = JetStarterTime;
-      //    //        break;
-      //    //    case EngineClass::PistonProp:
-      //    //        starterTime = PistonStarterTime;
-      //    //        break;
-      //    //    case EngineClass::TurboProp:
-      //    //        starterTime = TurboStarterTime;
-      //    //        break;
-      //    //    }
-
-      //    //    if (elapsed.count() > starterTime) {
-      //    //        setEngineState(EngineState::Normal);
-      //    //    }
-      //    //}
-
-      //    if (IsRendered() && Config::Instance().getEnableAircraftSounds()) {
-      //        startSoundThread();
-      //    }
-      //    else {
-      //        stopSounds();
-      //    }
-      //}
-
-      ////WasEnginesRunning = IsEnginesRunning;
-    }
-
-    void NetworkAircraft::stopSounds()
-    {
-        m_soundLoaded = false;
-        alSourceStop(m_soundSource);
-        alSourceRewind(m_soundSource);
-    }
-
-    void NetworkAircraft::audioLoop()
-    {
-        alSourcePlay(m_soundSource);
-        m_soundLoaded = true;
-        m_soundsPlaying = true;
+        mSoundPosition = diff;
+        const float networkTime = GetNetworkTime();
+        const float d_ts = networkTime - prev_ts;
+        mSoundVelocity = vect((pos.x - prev_x) / d_ts, (pos.y - prev_y) / d_ts, (pos.z - prev_z) / d_ts);
     }
 
     void NetworkAircraft::copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const

@@ -36,9 +36,6 @@
 #include "XPMPAircraft.h"
 #include "XPMPMultiplayer.h"
 
-#include "AircraftSoundManager.h"
-#include "AL/al.h"
-
 namespace xpilot
 {
     struct AircraftVisualState
@@ -157,7 +154,17 @@ namespace xpilot
         std::chrono::steady_clock::time_point LastFastPositionTimestamp;
         std::chrono::steady_clock::time_point LastSlowPositionTimestamp;
 
-        void stopSounds();
+        int soundChannelId;
+
+        vect SoundVelocity() const
+        {
+            return mSoundVelocity;
+        }
+
+        vect SoundPosition() const
+        {
+            return mSoundPosition;
+        }
 
     protected:
         virtual void UpdatePosition(float, int);
@@ -166,33 +173,9 @@ namespace xpilot
         void EnsureAboveGround();
         void UpdateSounds();
 
-        ALuint m_soundBuffer = 0;
-        ALuint m_soundSource = 0;
-
-        float m_pitch = 1.0f;
-        float m_gain = 1.0f;
-        float m_currentGain = 0.0f;
-        float m_currentPitch = 0.0f;
-        bool m_soundLoaded = false;
-        bool m_soundsPlaying = false;
-        bool m_soundsInitialized = false;
-
-        void audioLoop();
-        void startSoundThread();
-        void stopSoundThread();
-        void setEngineState(EngineState state);
-        std::unique_ptr<std::thread> m_soundThread;
-        std::chrono::system_clock::time_point m_starterSoundBegan;
-
-        // length (in seconds) of engine starter sounds, used for transition between starter and engine sound
-        const float PistonStarterTime = 1.5f;
-        const float JetStarterTime = 18.5f;
-        const float TurboStarterTime = 12.5f;
-
         EngineClass m_engineClass;
-        EngineState m_engineState;
-        vect m_velocity;
-        vect m_position;
+        vect mSoundVelocity;
+        vect mSoundPosition;
     };
 }
 

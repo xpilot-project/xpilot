@@ -23,14 +23,11 @@
 #include <map>
 #include <mutex>
 
-#include <AL/al.h>
-#include <AL/alc.h>
-#include <AL/alext.h>
-
 #include "XPilot.h"
 #include "NetworkAircraft.h"
 #include "NetworkAircraftConfig.h"
 #include "DataRefAccess.h"
+#include "AudioEngine.h"
 
 namespace xpilot
 {
@@ -71,9 +68,8 @@ namespace xpilot
 		void RemoveAllPlanes();
 
 		void StartAudio();
-		void StopAudio();
 		void DisableAircraftSounds();
-		static float UpdateListenerPosition(float, float, int, void* ref);
+		static float UpdateAircraftSounds(float, float, int, void* ref);
 
 	protected:
 		DataRefAccess<int> m_soundOn;
@@ -92,11 +88,7 @@ namespace xpilot
 		NetworkAircraft* GetAircraft(const std::string& callsign);
 		bool ReceivingFastPositionUpdates(NetworkAircraft* aircraft);
 		Vector3 DerivePositionalVelocityVector(AircraftVisualState previousVisualState, AircraftVisualState newVisualState, long intervalMs);
-
-		void UpdateAircraft(NetworkAircraft* aircraft);
-
-		ALCdevice* audioDevice = nullptr;
-		ALCcontext* audioContext = nullptr;
+		CAudioEngine* audioEngine = nullptr;
 	};
 }
 

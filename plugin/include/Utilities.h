@@ -325,6 +325,7 @@ struct vect {
 	vect operator-(vect r) {
 		return vect(x - r.x, y - r.y, z - r.z);
 	}
+	bool isNonZero() { return abs(x) > 0.0f || abs(y) > 0.0f || abs(z) > 0.0f; }
 };
 
 #endif // !Utilities_h

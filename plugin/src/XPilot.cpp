@@ -193,8 +193,6 @@ namespace xpilot
 			m_zmqThread->join();
 			m_zmqThread.reset();
 		}
-
-		m_aircraftManager->StopAudio();
 	}
 
 	void XPilot::ZmqWorker()
