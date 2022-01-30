@@ -19,22 +19,20 @@
 #ifndef NetworkAircraft_h
 #define NetworkAircraft_h
 
+#include "XPilotAPI.h"
+#include "TerrainProbe.h"
+#include "Utilities.h"
+#include "Vector3.hpp"
+#include "XPCAircraft.h"
+#include "XPMPAircraft.h"
+#include "XPMPMultiplayer.h"
+
 #include <deque>
 #include <optional>
 #include <thread>
 #include <atomic>
 #include <queue>
 #include <mutex>
-
-#include "XPilotAPI.h"
-#include "InterpolatedState.h"
-#include "TerrainProbe.h"
-#include "Utilities.h"
-#include "Vector3.hpp"
-
-#include "XPCAircraft.h"
-#include "XPMPAircraft.h"
-#include "XPMPMultiplayer.h"
 
 namespace xpilot
 {

@@ -19,13 +19,13 @@
 #ifndef FrameRateMonitor_h
 #define FrameRateMonitor_h
 
-#include <atomic>
-#include <vector>
-#include <sstream>
-
 #include "DataRefAccess.h"
 #include "Stopwatch.h"
 #include "XPLMProcessing.h"
+
+#include <atomic>
+#include <vector>
+#include <sstream>
 
 namespace xpilot
 {

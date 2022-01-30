@@ -19,10 +19,10 @@
 #ifndef Plugin_h
 #define Plugin_h
 
-#include <stddef.h>
-
 #include "XPLMPlugin.h"
 #include "XPLMMenus.h"
+
+#include <stddef.h>
 
 void RegisterMenuItems();
 void UpdateMenuItems();

@@ -19,15 +19,15 @@
 #ifndef AircraftManager_h
 #define AircraftManager_h
 
-#include <string>
-#include <map>
-#include <mutex>
-
 #include "XPilot.h"
 #include "NetworkAircraft.h"
 #include "NetworkAircraftConfig.h"
 #include "DataRefAccess.h"
 #include "AudioEngine.h"
+
+#include <string>
+#include <map>
+#include <mutex>
 
 namespace xpilot
 {

@@ -19,11 +19,11 @@
 #ifndef NotificationPanel_h
 #define NotificationPanel_h
 
-#include <list>
-#include <chrono>
-
 #include "ImgWindow.h"
 #include "XplaneCommand.h"
+
+#include <list>
+#include <chrono>
 
 namespace xpilot
 {

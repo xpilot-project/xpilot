@@ -19,8 +19,9 @@
 #ifndef XplaneCommand_h
 #define XplaneCommand_h
 
-#include <functional>
 #include "XPLMUtilities.h"
+
+#include <functional>
 
 namespace xpilot
 {

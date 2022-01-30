@@ -19,6 +19,12 @@
 #ifndef Utilities_h
 #define Utilities_h
 
+#include "Constants.h"
+#include "Config.h"
+#include "XPLMPlugin.h"
+#include "XPLMUtilities.h"
+#include "XPLMDataAccess.h"
+
 #include <ctime>
 #include <string>
 #include <memory>
@@ -31,12 +37,6 @@
 #include <cstring>
 #include <cstdarg>
 #include <cmath>
-
-#include "Constants.h"
-#include "Config.h"
-#include "XPLMPlugin.h"
-#include "XPLMUtilities.h"
-#include "XPLMDataAccess.h"
 
 template<typename ... Args>
 inline std::string string_format(const std::string& format, Args ... args)

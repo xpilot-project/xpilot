@@ -19,9 +19,10 @@
 #ifndef Config_h
 #define Config_h
 
+#include "Constants.h"
+
 #include <string>
 #include <vector>
-#include "Constants.h"
 
 namespace xpilot
 {

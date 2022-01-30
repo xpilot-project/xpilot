@@ -27,14 +27,14 @@
 #ifndef XPilotAPI_h
 #define XPilotAPI_h
 
+#include "XPLMDataAccess.h"
+
 #include <cstring>
 #include <memory>
 #include <string>
 #include <list>
 #include <map>
 #include <chrono>
-
-#include "XPLMDataAccess.h"
 
 class XPilotDataRef;
 

@@ -56,11 +56,11 @@ include_directories("${CMAKE_SOURCE_DIR}/externals/fmod/include")
 
 set(Header_Files
   include/AircraftManager.h
+  include/AudioEngine.h
   include/Config.h
   include/Constants.h
   include/DataRefAccess.h
   include/FrameRateMonitor.h
-  include/InterpolatedState.h
   include/NearbyATCWindow.h
   include/NetworkAircraft.h
   include/NetworkAircraftConfig.h
@@ -74,26 +74,13 @@ set(Header_Files
   include/Utilities.h
   include/XPilot.h
   include/XPilotAPI.h
-  include/XplaneCommand.h
-  include/AudioEngine.h
-  externals/imgui/imconfig.h
-  externals/imgui/imgui.h
-  externals/imgui/imgui_internal.h
-  externals/imgui-stdlib/imgui_stdlib.h
-  externals/ImgWindow/ImgFontAtlas.h
-  externals/ImgWindow/ImgWindow.h
-  externals/ImgWindow/SystemGL.h
-  externals/ImgWindow/XPImgWindow.h
-  externals/Font/IconsFontAwesome5.h
-  externals/Font/fa-solid-900.inc
-  externals/XPMP2/XPCAircraft.h
-  externals/XPMP2/XPMPMultiplayer.h
-  externals/XPMP2/XPMPPlaneRenderer.h)
+  include/XplaneCommand.h)
 
 source_group("Header Files" FILES ${Header_Files})
 
 set(Source_Files
   src/AircraftManager.cpp
+  src/AudioEngine.cpp
   src/Config.cpp
   src/DataRefAccess.cpp
   src/FrameRateMonitor.cpp
@@ -108,7 +95,6 @@ set(Source_Files
   src/TerrainProbe.cpp
   src/TextMessageConsole.cpp
   src/XPilot.cpp
-  src/AudioEngine.cpp
   externals/imgui/imgui.cpp
   externals/imgui/imgui_draw.cpp
   externals/imgui/imgui_tables.cpp
@@ -147,8 +133,6 @@ target_link_libraries(
 	CONAN_PKG::nlohmann_json
 	CONAN_PKG::zeromq
 	CONAN_PKG::cppzmq
-    #CONAN_PKG::openal
-    CONAN_PKG::libsndfile
 	${XPMP2_LIBRARY})
 
 if (WIN32 OR APPLE)

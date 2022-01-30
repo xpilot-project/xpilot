@@ -19,8 +19,9 @@
 #ifndef TextMessageConsole_h
 #define TextMessageConsole_h
 
-#include <list>
 #include "XPImgWindow.h"
+
+#include <list>
 
 namespace xpilot {
 

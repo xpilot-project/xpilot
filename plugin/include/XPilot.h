@@ -19,15 +19,6 @@
 #ifndef XPilot_h
 #define XPilot_h
 
-#include <deque>
-#include <thread>
-#include <mutex>
-#include <functional>
-#include <map>
-#include <atomic>
-#include <algorithm>
-#include <iostream>
-
 #include "imgui.h"
 #include "imgui_stdlib.h"
 #include "imfilebrowser.h"
@@ -38,8 +29,16 @@
 #include "XPLMMenus.h"
 #include "XPLMUtilities.h"
 #include "XPLMProcessing.h"
-
 #include "zmq.hpp"
+
+#include <deque>
+#include <thread>
+#include <mutex>
+#include <functional>
+#include <map>
+#include <atomic>
+#include <algorithm>
+#include <iostream>
 
 namespace xpilot
 {

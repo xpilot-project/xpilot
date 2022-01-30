@@ -2,8 +2,6 @@
 zeromq/4.3.4
 cppzmq/4.8.1
 nlohmann_json/3.10.3
-openal/1.21.1
-libsndfile/1.0.31
 
 [generators]
 cmake

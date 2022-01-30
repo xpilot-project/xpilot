@@ -19,10 +19,11 @@
 #ifndef NetworkAircraftConfig_h
 #define NetworkAircraftConfig_h
 
+#include <nlohmann/json.hpp>
+
 #include <string>
 #include <optional>
 
-#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
 namespace nlohmann

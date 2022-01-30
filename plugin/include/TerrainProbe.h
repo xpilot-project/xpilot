@@ -19,9 +19,10 @@
 #ifndef TerrainProbe_h
 #define TerrainProbe_h
 
-#include <array>
 #include <XPLMScenery.h>
 #include <XPLMGraphics.h>
+
+#include <array>
 
 namespace xpilot
 {
