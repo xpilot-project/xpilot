@@ -14,7 +14,6 @@ AppConfig* AppConfig::instance = nullptr;
 AppConfig::AppConfig(QObject* parent) :
     QObject(parent)
 {
-    VelocityEnabled = true;
     loadConfig();
 }
 

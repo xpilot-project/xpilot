@@ -131,12 +131,7 @@ Window {
     }
 
     Component.onCompleted: {
-        if(isVelocityEnabled) {
-            appendMessage(`Welcome to xPilot v${appVersion} (Velocity Enabled)`, colorYellow)
-        } else {
-            appendMessage(`Welcome to xPilot v${appVersion}`, colorYellow)
-        }
-
+        appendMessage(`Welcome to xPilot v${appVersion}`, colorYellow)
         appendMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.", colorYellow);
 
         if(!AppConfig.SilenceModelInstall) {
@@ -1308,14 +1303,6 @@ Window {
                                                         AppConfig.saveConfig()
                                                         appendMessage(`X-Plane visual machine(s) set to ${AppConfig.VisualMachines.join(", ")}. You must restart xPilot for the changes to take effect.`, colorYellow, currentTab)
                                                     }
-                                                    cliTextField.clear()
-                                                    break;
-                                                case ".velocity":
-                                                    if(networkConnected) {
-                                                        throw "You must disconnect from the network to enable Velocity."
-                                                    }
-                                                    AppConfig.VelocityEnabled = true
-                                                    appendMessage("Velocity is now enabled. You will be automatically joined to the Velocity test servers after connecting. Restart xPilot to disable Velocity and connect to the network normally.", colorYellow, currentTab)
                                                     cliTextField.clear()
                                                     break;
                                                 default:

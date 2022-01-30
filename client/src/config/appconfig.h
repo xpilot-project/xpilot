@@ -66,7 +66,6 @@ namespace xpilot
         QStringList VisualMachines;
         bool KeepWindowVisible;
         bool AircraftRadioStackControlsVolume;
-        bool VelocityEnabled;
 
         QString NameWithHomeAirport() const
         {
@@ -118,7 +117,6 @@ namespace xpilot
         Q_PROPERTY(QStringList VisualMachines MEMBER VisualMachines)
         Q_PROPERTY(bool KeepWindowVisible MEMBER KeepWindowVisible)
         Q_PROPERTY(bool AircraftRadioStackControlsVolume MEMBER AircraftRadioStackControlsVolume)
-        Q_PROPERTY(bool VelocityEnabled MEMBER VelocityEnabled)
 
     signals:
         void alertPrivateMessageChanged();

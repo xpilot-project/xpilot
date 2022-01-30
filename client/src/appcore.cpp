@@ -107,7 +107,6 @@ int xpilot::Main(int argc, char* argv[])
     context->setContextProperty("controllerManager", &controllerManager);
     context->setContextProperty("audio", &audio);
     context->setContextProperty("appVersion", BuildConfig::getVersionString());
-    context->setContextProperty("isVelocityEnabled", AppConfig::getInstance()->VelocityEnabled);
     context->setContextProperty("installModels", &installModels);
     context->setContextProperty("versionCheck", &versionCheck);
     context->setContextProperty("serverListManager", &serverListManager);

@@ -118,7 +118,7 @@ namespace xpilot
         } else {
             emit notificationPosted((int)NotificationType::Info, "Connected to network.");
         }
-        emit networkConnected(m_connectInfo.Callsign, !m_connectInfo.TowerViewMode && !AppConfig::getInstance()->VelocityEnabled);
+        emit networkConnected(m_connectInfo.Callsign, !m_connectInfo.TowerViewMode);
 
         if(!m_connectInfo.TowerViewMode) {
             QJsonObject reply;
@@ -176,34 +176,28 @@ namespace xpilot
 
     void NetworkManager::OnServerIdentificationReceived(PDUServerIdentification pdu)
     {
-        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, BuildConfig::VatsimClientId(), "xPilot", 1, 2,
+        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, BuildConfig::VatsimClientId(), "xPilot", 2,0,
                                               AppConfig::getInstance()->VatsimId, GetSystemUid(), ""));
 
-        if(AppConfig::getInstance()->VelocityEnabled)
-        {
-            GetJwtToken().then([&](const QByteArray &response){
-                auto json = QJsonDocument::fromJson(response).object();
-                if(json.contains("success") && json["success"].toBool()) {
-                    if(json.contains("token")) {
-                        QString m_jwtToken = json["token"].toString();
-                        LoginToNetwork(m_jwtToken);
-                    }
+        GetJwtToken().then([&](const QByteArray &response){
+            auto json = QJsonDocument::fromJson(response).object();
+            if(json.contains("success") && json["success"].toBool()) {
+                if(json.contains("token")) {
+                    QString m_jwtToken = json["token"].toString();
+                    LoginToNetwork(m_jwtToken);
                 }
-                else {
-                    QString jwtError = json["error_msg"].toString();
-                    emit notificationPosted((int)NotificationType::Error, QString("Network authentication error: %1").arg(jwtError));
-                    emit networkDisconnected(true);
-                    m_fsd.Disconnect();
-                }
-            }).fail([&](const QString &err){
-                emit notificationPosted((int)NotificationType::Error, QString("Network authentication error: %1").arg(err));
+            }
+            else {
+                QString jwtError = json["error_msg"].toString();
+                emit notificationPosted((int)NotificationType::Error, QString("Network authentication error: %1").arg(jwtError));
                 emit networkDisconnected(true);
                 m_fsd.Disconnect();
-            });
-        }
-        else {
-            LoginToNetwork(AppConfig::getInstance()->VatsimPasswordDecrypted);
-        }
+            }
+        }).fail([&](const QString &err){
+            emit notificationPosted((int)NotificationType::Error, QString("Network authentication error: %1").arg(err));
+            emit networkDisconnected(true);
+            m_fsd.Disconnect();
+        });
     }
 
     void NetworkManager::LoginToNetwork(QString password)
@@ -575,7 +569,7 @@ namespace xpilot
 
     void NetworkManager::SendFastPositionPacket()
     {
-        if(AppConfig::getInstance()->VelocityEnabled && !m_connectInfo.ObserverMode)
+        if(!m_connectInfo.ObserverMode)
         {
             m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign,
                                                m_userAircraftData.Latitude,
@@ -597,7 +591,7 @@ namespace xpilot
 
     void NetworkManager::SendEmptyFastPositionPacket()
     {
-        if(!m_connectInfo.ObserverMode && AppConfig::getInstance()->VelocityEnabled)
+        if(!m_connectInfo.ObserverMode)
         {
             m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign,
                                                m_userAircraftData.Latitude,
@@ -765,21 +759,8 @@ namespace xpilot
             connectInfo.ObserverMode = observer;
             m_connectInfo = connectInfo;
 
-            if(AppConfig::getInstance()->VelocityEnabled)
-            {
-                QStringList serverList{"vps.downstairsgeek.com", "c.downstairsgeek.com"};
-                unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-                std::default_random_engine e(seed);
-                std::shuffle(serverList.begin(), serverList.end(), e);
-
-                emit notificationPosted((int)NotificationType::Info, "Connecting to network (Velocity Beta)...");
-                m_fsd.Connect(serverList.first(), 6809);
-            }
-            else
-            {
-                emit notificationPosted((int)NotificationType::Info, "Connecting to network...");
-                m_fsd.Connect(AppConfig::getInstance()->getNetworkServer(), 6809);
-            }
+            emit notificationPosted((int)NotificationType::Info, "Connecting to network...");
+            m_fsd.Connect(AppConfig::getInstance()->getNetworkServer(), 6809);
         }
         else
         {
