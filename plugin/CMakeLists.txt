@@ -52,6 +52,7 @@ include_directories("${CMAKE_SOURCE_DIR}/externals/imgui-stdlib")
 include_directories("${CMAKE_SOURCE_DIR}/externals/ImgWindow")
 include_directories("${CMAKE_SOURCE_DIR}/externals/XPMP2")
 include_directories("${CMAKE_SOURCE_DIR}/externals/SDK/CHeaders/XPLM")
+include_directories("${CMAKE_SOURCE_DIR}/externals/fmod/include")
 
 set(Header_Files
   include/AircraftManager.h
@@ -72,9 +73,9 @@ set(Header_Files
   include/TextMessageConsole.h
   include/Utilities.h
   include/XPilot.h
-  include/AircraftSoundManager.h
   include/XPilotAPI.h
   include/XplaneCommand.h
+  include/AudioEngine.h
   externals/imgui/imconfig.h
   externals/imgui/imgui.h
   externals/imgui/imgui_internal.h
@@ -107,7 +108,7 @@ set(Source_Files
   src/TerrainProbe.cpp
   src/TextMessageConsole.cpp
   src/XPilot.cpp
-  src/AircraftSoundManager.cpp
+  src/AudioEngine.cpp
   externals/imgui/imgui.cpp
   externals/imgui/imgui_draw.cpp
   externals/imgui/imgui_tables.cpp
@@ -133,6 +134,7 @@ elseif (UNIX)
 elseif (WIN32)
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/XPMP2/win")
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/sdk/Libraries/Win")
+	list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/fmod/win")
 endif()
 
 # Link the XPMP2 library
@@ -145,13 +147,17 @@ target_link_libraries(
 	CONAN_PKG::nlohmann_json
 	CONAN_PKG::zeromq
 	CONAN_PKG::cppzmq
-    CONAN_PKG::openal
+    #CONAN_PKG::openal
     CONAN_PKG::libsndfile
 	${XPMP2_LIBRARY})
 
 if (WIN32 OR APPLE)
     find_library(XPLM_LIBRARY NAMES XPLM XPLM_64.lib)
     target_link_libraries(${PROJECT_NAME} ${XPLM_LIBRARY})
+	
+	find_library(FMOD_LIBRARY NAMES fmod_vc.lib REQUIRED)
+	message ("FMOD_LIBRARY = ${FMOD_LIBRARY}")
+	target_link_libraries(${PROJECT_NAME} ${FMOD_LIBRARY})
 endif()
 
 if (WIN32)

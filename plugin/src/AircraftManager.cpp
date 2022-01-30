@@ -80,7 +80,7 @@ namespace xpilot
 		return mapPlanes.end();
 	}
 
-	AircraftManager::AircraftManager(XPilot* instance) : 
+	AircraftManager::AircraftManager(XPilot* instance) :
 		mEnv(instance),
 		m_soundOn("sim/operation/sound/sound_on", ReadOnly),
 		m_simPaused("sim/time/paused", ReadOnly),
@@ -93,12 +93,20 @@ namespace xpilot
 		m_canopyOpenRatio("sim/operation/sound/users_canopy_open_ratio", ReadOnly),
 		m_userDoorOpenRatio("sim/operation/sound/users_door_open_ratio", ReadOnly)
 	{
+		audioEngine = new CAudioEngine();
 		
+		audioEngine->Init();
+
+		audioEngine->LoadSound("JetEngine", GetPluginPath() + "/Resources/Sounds/JetEngine.wav");
+		audioEngine->LoadSound("PistonProp", GetPluginPath() + "/Resources/Sounds/PistonProp.wav");
+		audioEngine->LoadSound("TurboProp", GetPluginPath() + "/Resources/Sounds/TurboProp.wav");
+		audioEngine->LoadSound("Heli", GetPluginPath() + "/Resources/Sounds/Helicopter.wav");
 	}
 
 	AircraftManager::~AircraftManager()
 	{
-		XPLMUnregisterFlightLoopCallback(&AircraftManager::UpdateListenerPosition, nullptr);
+		audioEngine->Shutdown();
+		XPLMUnregisterFlightLoopCallback(&AircraftManager::UpdateAircraftSounds, nullptr);
 	}
 
 	void AircraftManager::HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState, const std::string& airline, const std::string& typeCode)
@@ -108,6 +116,11 @@ namespace xpilot
 
 		NetworkAircraft* plane = new NetworkAircraft(callsign.c_str(), visualState, typeCode.c_str(), airline.c_str(), "", 0, "");
 		mapPlanes.emplace(callsign, std::move(plane));
+
+		if (plane) {
+			plane->soundChannelId = audioEngine->PlaySounds("JetEngine", 1.0f);
+			LOG_MSG(logDEBUG, "Channel Id: %i", plane->soundChannelId);
+		}
 	}
 
 	void AircraftManager::HandleAircraftConfig(const std::string& callsign, const NetworkAircraftConfig& config)
@@ -213,62 +226,21 @@ namespace xpilot
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft) return;
 
+		audioEngine->StopChannel(aircraft->soundChannelId);
+
 		mapPlanes.erase(callsign);
 	}
 
 	void AircraftManager::RemoveAllPlanes()
 	{
+		audioEngine->StopAllChannels();
+
 		mapPlanes.clear();
 	}
 
 	void AircraftManager::StartAudio()
 	{
-		XPLMRegisterFlightLoopCallback(&AircraftManager::UpdateListenerPosition, -1.0f, this);
-
-		audioDevice = alcOpenDevice(nullptr);
-		if (!audioDevice) {
-			LOG_MSG(logERROR, "Failed to open default sound device.");
-			return;
-		}
-
-		audioContext = alcCreateContext(audioDevice, nullptr);
-		if (!audioContext) {
-			LOG_MSG(logERROR, "Failed to create sound context.");
-			return;
-		}
-
-		if (!alcMakeContextCurrent(audioContext)) {
-			LOG_MSG(logERROR, "Failed to make the audio context current.");
-			return;
-		}
-
-		ALCint major_version, minor_version;
-		const char* al_hw = alcGetString(audioDevice, ALC_DEVICE_SPECIFIER);
-		const char* al_ex = alcGetString(audioDevice, ALC_EXTENSIONS);
-		alcGetIntegerv(nullptr, ALC_MAJOR_VERSION, sizeof(major_version), &major_version);
-		alcGetIntegerv(nullptr, ALC_MINOR_VERSION, sizeof(minor_version), &minor_version);
-
-		LOG_MSG(logDEBUG, "OpenAL version       : %d.%d", major_version, minor_version);
-		LOG_MSG(logDEBUG, "OpenAL hardware      : %s", al_hw ? al_hw : "none");
-		LOG_MSG(logDEBUG, "OpenAL extensions    : %s", al_ex ? al_ex : "none");
-
-		ALfloat	listenerOri[] = { 0, 0, -1, 0, 1, 0 };
-		alListener3f(AL_POSITION, 0, 0, 1.0f);
-		alListener3f(AL_VELOCITY, 0, 0, 0);
-		alListenerfv(AL_ORIENTATION, listenerOri);
-	}
-
-	void AircraftManager::StopAudio()
-	{
-		if (!alcMakeContextCurrent(nullptr)) {
-			LOG_MSG(logERROR, "Failed to clear the active audio context.");
-		}
-
-		alcDestroyContext(audioContext);
-
-		if (!alcCloseDevice(audioDevice)) {
-			LOG_MSG(logERROR, "Failed to close audio playback device.");
-		}
+		XPLMRegisterFlightLoopCallback(&AircraftManager::UpdateAircraftSounds, -1.0f, this);
 	}
 
 	void AircraftManager::DisableAircraftSounds()
@@ -278,23 +250,16 @@ namespace xpilot
 		}
 	}
 
-	float AircraftManager::UpdateListenerPosition(float, float, int, void* ref)
+	float AircraftManager::UpdateAircraftSounds(float, float inElapsedTimeSinceLastFlightLoop, int, void* ref)
 	{
-		XPLMCameraPosition_t camera;
-		XPLMReadCameraPosition(&camera);
-		ALfloat	zero[3] = { 0,0,0 };
-		ALfloat	listenerOri[] = { (ALfloat)sin(camera.heading * M_PI / 180.0f), 0.0f, (ALfloat)cos(camera.heading * M_PI / 180.0f), 0.0f, -1.0f, 0.0f };
-
-		alListenerfv(AL_VELOCITY, zero);
-		alListenerfv(AL_POSITION, zero);
-		alListenerfv(AL_ORIENTATION, listenerOri);
-
-		float soundVolume = 1.0f;
-		float doorSum = 0;
-		bool anyDoorOpen = false;
-
 		auto* instance = static_cast<AircraftManager*>(ref);
-		if (instance) {
+		
+		if (instance)
+		{
+			float soundVolume = 1.0f;
+			float doorSum = 0;
+			bool anyDoorOpen = false;
+
 			for (int i = 0; i < 10; i++) {
 				doorSum += instance->m_userDoorOpenRatio[i];
 			}
@@ -305,20 +270,41 @@ namespace xpilot
 
 			if (instance->m_soundOn && !instance->m_simPaused) {
 				if (instance->m_isViewExternal == 0 && instance->m_canopyOpenRatio == 0 && anyDoorOpen == false) {
-					// internal view
+					// internal
 					soundVolume = instance->m_masterVolumeRatio * instance->m_exteriorVolumeRatio * CLOSED_SPACE_VOLUME_SCALAR;
 				}
 				else {
-					// external view
+					// external
 					soundVolume = instance->m_masterVolumeRatio * instance->m_exteriorVolumeRatio;
 				}
 			}
 			else {
-				// sounds disable or sim is paused
+				// sounds disabled or sim is paused
 				soundVolume = 0.0f;
 			}
 
-			alListenerf(AL_GAIN, soundVolume);
+			XPLMCameraPosition_t camera;
+			XPLMReadCameraPosition(&camera);
+
+			AudioVector3 zero{ 0,0,0 };
+			AudioVector3 forward{ sin(camera.heading * M_PI / 180.0f), 0.0f, cos(camera.heading * M_PI / 180.0f) };
+
+			instance->audioEngine->SetListenerPosition(zero, zero, forward, { 0.0f, -1.0f, 0.0f });
+
+			for (mapPlanesTy::iterator iter = mapPlanes.begin(); iter != mapPlanes.end(); ++iter)
+			{
+				int channel = iter->second->soundChannelId;
+				vect soundPos = iter->second->SoundPosition();
+				vect soundVel = iter->second->SoundVelocity();
+
+				if (soundPos.isNonZero()) {
+					instance->audioEngine->SetChannel3dPosition(channel, { soundPos.x, soundPos.y, soundPos.z }, { soundVel.x, soundVel.y, soundVel.z });
+					instance->audioEngine->SetChannelPaused(channel, !iter->second->engines_running);
+					instance->audioEngine->SetChannelVolume(channel, soundVolume);
+				}
+			}
+
+			instance->audioEngine->Update();
 		}
 
 		return -1.0f;

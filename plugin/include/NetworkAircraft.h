@@ -36,9 +36,6 @@
 #include "XPMPAircraft.h"
 #include "XPMPMultiplayer.h"
 
-#include "AircraftSoundManager.h"
-#include "AL/al.h"
-
 namespace xpilot
 {
     struct AircraftVisualState
@@ -84,7 +81,6 @@ namespace xpilot
         bool terrain_offset_finished = false;
         bool gear_down;
         bool engines_running = false;
-        bool was_engines_running = false;
         bool engines_reversing = false;
         float ground_speed;
         float target_reverser_position;
@@ -99,6 +95,8 @@ namespace xpilot
         std::chrono::system_clock::time_point prev_surface_update_time;
         int fast_positions_received_count;
         bool first_render_pending;
+
+        int soundChannelId;
 
         XPMPPlanePosition_t position;
         XPMPPlaneRadar_t radar;
@@ -121,7 +119,15 @@ namespace xpilot
         std::chrono::steady_clock::time_point last_fast_position_timestamp;
         std::chrono::steady_clock::time_point last_slow_position_timestamp;
 
-        void stopSounds();
+        vect SoundVelocity() const
+        {
+            return mSoundVelocity;
+        }
+
+        vect SoundPosition() const
+        {
+            return mSoundPosition;
+        }
 
     protected:
         virtual void UpdatePosition(float, int);
@@ -129,34 +135,9 @@ namespace xpilot
         void AutoLevel(float frameRate);
         static double NormalizeDegrees(double value, double lowerBound, double upperBound);
 
-        ALuint m_soundBuffer = 0;
-        ALuint m_soundSources[2];
-
-        float m_pitch = 1.0f;
-        float m_gain = 1.0f;
-        float m_currentGain = 0.0f;
-        bool m_soundLoaded = false;
-        bool m_soundsPlaying = false;
-        bool m_soundsInitialized = false;
-
-        void audioLoop();
-        void startSoundThread();
-        void stopSoundThread();
-        void setEngineState(EngineState state);
-        std::unique_ptr<std::thread> m_soundThread;
-        std::chrono::system_clock::time_point m_previousGainUpdateTime;
-        std::chrono::system_clock::time_point m_starterSoundBegan;
-
-        // length (in seconds) of engine starter sounds, used for transition between starter and engine sound
-        const float PistonStarterTime = 1.5f;
-        const float JetStarterTime = 18.5f;
-        const float TurboStarterTime = 12.5f;
-
         EngineClass m_engineClass;
-        EngineState m_engineState;
-        int m_engineCount;
-        vect m_velocity;
-        vect m_position;
+        vect mSoundVelocity;
+        vect mSoundPosition;
     };
 }
 
