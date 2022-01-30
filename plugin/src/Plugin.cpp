@@ -45,7 +45,9 @@
 #error xPilot requires XPLM301 SDK or newer
 #endif
 
-std::unique_ptr<XPilot> environment;
+using namespace std;
+
+unique_ptr<XPilot> environment;
 
 static int DrawTransmitIndicator(XPLMDrawingPhase inPhase, int inIsBefore, void* inRefcon)
 {
@@ -104,7 +106,7 @@ PLUGIN_API int XPluginStart(char* outName, char* outSignature, char* outDescript
         RegisterMenuItems();
         LOG_MSG(logMSG, "xPilot version %s initialized", PLUGIN_VERSION_STRING);
     }
-    catch (const std::exception& e)
+    catch (const exception& e)
     {
         LOG_MSG(logERROR, "Exception in XPluginStart: %s", e.what());
         return 0;
@@ -123,10 +125,10 @@ PLUGIN_API int XPluginEnable(void)
     {
         XPImgWindowInit();
         Config::Instance().loadConfig();
-        environment = std::make_unique<xpilot::XPilot>();
+        environment = make_unique<xpilot::XPilot>();
         LOG_MSG(logMSG, "xPilot plugin enabled");
     }
-    catch (std::exception& e)
+    catch (exception& e)
     {
         LOG_MSG(logERROR, "Exception in XPluginEnable: %s", e.what());
         return 0;
@@ -149,7 +151,7 @@ PLUGIN_API void XPluginDisable(void)
         XPMPMultiplayerCleanup();
         LOG_MSG(logMSG, "xPilot plugin disabled");
     }
-    catch (std::exception& e)
+    catch (exception& e)
     {
         LOG_MSG(logERROR, "Exception in XPluginDisable: %s", e.what());
     }
@@ -172,7 +174,7 @@ PLUGIN_API void XPluginStop(void)
         XPLMUnregisterCommandHandler(ToggleDefaultAtisCommand, ToggleDefaultAtisCommandHandler, 0, 0);
         XPLMUnregisterCommandHandler(ToggleTcasCommand, ToggleTcasCommandHandler, 0, 0);
     }
-    catch (const std::exception& e)
+    catch (const exception& e)
     {
         LOG_MSG(logERROR, "Exception in XPluginStop: %s", e.what());
     }

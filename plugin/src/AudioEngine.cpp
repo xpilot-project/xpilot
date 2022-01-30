@@ -96,7 +96,7 @@ void CAudioEngine::UnloadSound(const string& soundName)
 	sImplementation->mSounds.erase(foundIt);
 }
 
-int CAudioEngine::PlaySounds(const string& soundName, float volumeDb)
+int CAudioEngine::CreateSoundChannel(const string& soundName, float volumeDb)
 {
 	if (sImplementation == nullptr)
 		return 1;
@@ -108,7 +108,7 @@ int CAudioEngine::PlaySounds(const string& soundName, float volumeDb)
 	}
 
 	FMOD::Channel* pChannel = nullptr;
-	CAudioEngine::ErrorCheck("PlaySounds::playSound", sImplementation->mSystem->playSound(foundIt->second, nullptr, true, &pChannel));
+	CAudioEngine::ErrorCheck("CreateSoundChannel::playSound", sImplementation->mSystem->playSound(foundIt->second, nullptr, true, &pChannel));
 	if (pChannel)
 		sImplementation->mChannels[mChannelId] = pChannel;
 
@@ -211,14 +211,4 @@ FMOD_VECTOR CAudioEngine::VectorToFmod(const AudioVector3& vPosition)
 	fVec.y = vPosition.y;
 	fVec.z = vPosition.z;
 	return fVec;
-}
-
-float CAudioEngine::dbToVolume(float dB)
-{
-	return powf(10.0f, 0.05 * dB);
-}
-
-float CAudioEngine::VolumeTodB(float volume)
-{
-	return 20.0f * log10f(volume);
 }

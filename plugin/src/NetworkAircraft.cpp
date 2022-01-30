@@ -24,6 +24,8 @@
 #include <chrono>
 #include <regex>
 
+using namespace std;
+
 namespace xpilot
 {
     constexpr double MIN_AGL_FOR_CLIMBOUT = 50.0;
@@ -66,12 +68,12 @@ namespace xpilot
     void Interpolate(float& value, float& target, float _diffMs, float _moveTime)
     {
         const float f = value - target;
-        if (std::abs(f) > std::numeric_limits<float>::epsilon())
+        if (abs(f) > numeric_limits<float>::epsilon())
         {
             const auto diffRemaining = target - value;
             const auto diffThisFrame = _diffMs / _moveTime;
-            value += std::copysign(diffThisFrame, diffRemaining);
-            value = (std::max)(0.0f, (std::min)(value, 1.0f));
+            value += copysign(diffThisFrame, diffRemaining);
+            value = (max)(0.0f, (min)(value, 1.0f));
         }
     }
 
@@ -79,23 +81,23 @@ namespace xpilot
     void InterpolateSurface(T& surface, const float& target, float _diffMs, float _moveTime, float _max = 1.0f)
     {
         const float f = surface - target;
-        if (std::abs(f) > std::numeric_limits<float>::epsilon())
+        if (abs(f) > numeric_limits<float>::epsilon())
         {
             const auto diffRemaining = target - surface;
             const auto diffThisFrame = _diffMs / _moveTime;
-            surface += std::copysign(diffThisFrame, diffRemaining);
-            surface = (std::max)(0.0f, (std::min)(surface, _max));
+            surface += copysign(diffThisFrame, diffRemaining);
+            surface = (max)(0.0f, (min)(surface, _max));
         }
     }
 
     NetworkAircraft::NetworkAircraft(
-        const std::string& _callsign,
+        const string& _callsign,
         const AircraftVisualState& _visualState,
-        const std::string& _icaoType,
-        const std::string& _icaoAirline,
-        const std::string& _livery,
+        const string& _icaoType,
+        const string& _icaoAirline,
+        const string& _livery,
         XPMPPlaneID _modeS_id = 0,
-        const std::string& _modelName = "") :
+        const string& _modelName = "") :
         XPMP2::Aircraft(_icaoType, _icaoAirline, _livery, _modeS_id, _modelName)
     {
         label = _callsign;
@@ -109,7 +111,7 @@ namespace xpilot
         SetRoll(_visualState.Bank);
 
         IsFirstRenderPending = true;
-        LastSlowPositionTimestamp = std::chrono::steady_clock::now();
+        LastSlowPositionTimestamp = chrono::steady_clock::now();
         PredictedVisualState = _visualState;
         RemoteVisualState = _visualState;
         PositionalVelocityVector = Vector3::Zero();
@@ -258,7 +260,7 @@ namespace xpilot
         if (newTargetOffset != TargetTerrainOffset) {
             TargetTerrainOffset = newTargetOffset;
             TerrainOffsetMagnitude = abs(TargetTerrainOffset - TerrainOffset);
-            TerrainOffsetMagnitude = std::max(TerrainOffsetMagnitude, MIN_TERRAIN_OFFSET_MAGNITUDE);
+            TerrainOffsetMagnitude = max(TerrainOffsetMagnitude, MIN_TERRAIN_OFFSET_MAGNITUDE);
         }
 
         if (TerrainOffset != TargetTerrainOffset) {
@@ -349,8 +351,8 @@ namespace xpilot
             _elapsedSinceLastCall
         );
 
-        const auto now = std::chrono::system_clock::now();
-        const auto diffMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - PreviousSurfaceUpdateTime);
+        const auto now = chrono::system_clock::now();
+        const auto diffMs = chrono::duration_cast<chrono::milliseconds>(now - PreviousSurfaceUpdateTime);
 
         TargetGearPosition = IsGearDown || IsReportedOnGround ? 1.0f : 0.0f;
         TargetSpoilerPosition = IsSpoilersDeployed ? 1.0f : 0.0f;
@@ -500,7 +502,7 @@ namespace xpilot
         {
             char s[10];
             snprintf(s, sizeof(s), "%04ld", Radar.code);
-            STRCPY_ATMOST(pOut->squawk, std::string(s));
+            STRCPY_ATMOST(pOut->squawk, string(s));
         }
         STRCPY_ATMOST(pOut->origin, Origin);
         STRCPY_ATMOST(pOut->destination, Destination);
@@ -536,13 +538,13 @@ namespace xpilot
 
     FlightModel NetworkAircraft::GetFlightModel(const XPMP2::CSLModelInfo_t model)
     {
-        std::string classification = string_format("%s;%s;%s;", model.doc8643WTC.c_str(), model.doc8643Classification.c_str(), model.icaoType.c_str());
-        std::string category = "MediumJets";
+        string classification = string_format("%s;%s;%s;", model.doc8643WTC.c_str(), model.doc8643Classification.c_str(), model.icaoType.c_str());
+        string category = "MediumJets";
 
         for (const auto& mapIt : FlightModel::modelMatches) {
-            std::smatch m;
-            std::regex re(mapIt.regex.c_str());
-            std::regex_search(classification, m, re);
+            smatch m;
+            regex re(mapIt.regex.c_str());
+            regex_search(classification, m, re);
             if (m.size() > 0) {
                 category = mapIt.category;
                 break;
@@ -586,5 +588,5 @@ namespace xpilot
         return flightModel;
     }
 
-    std::vector<FlightModelInfo> FlightModel::modelMatches;
+    vector<FlightModelInfo> FlightModel::modelMatches;
 }

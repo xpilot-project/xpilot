@@ -23,6 +23,8 @@
 #include "Quaternion.hpp"
 #include "XPilot.h"
 
+using namespace std;
+
 namespace xpilot
 {
 	constexpr long FAST_POSITION_INTERVAL_TOLERANCE = 300;
@@ -95,31 +97,31 @@ namespace xpilot
 	{
 		FlightModel::InitializeModels();
 
-		audioEngine = new CAudioEngine();
-		audioEngine->Init();
+		m_audioEngine = new CAudioEngine();
+		m_audioEngine->Init();
 
-		audioEngine->LoadSound("JetEngine", GetPluginPath() + "/Resources/Sounds/JetEngine.wav");
-		audioEngine->LoadSound("PistonProp", GetPluginPath() + "/Resources/Sounds/PistonProp.wav");
-		audioEngine->LoadSound("TurboProp", GetPluginPath() + "/Resources/Sounds/TurboProp.wav");
-		audioEngine->LoadSound("Heli", GetPluginPath() + "/Resources/Sounds/Helicopter.wav");
+		m_audioEngine->LoadSound("JetEngine", GetPluginPath() + "/Resources/Sounds/JetEngine.wav");
+		m_audioEngine->LoadSound("PistonProp", GetPluginPath() + "/Resources/Sounds/PistonProp.wav");
+		m_audioEngine->LoadSound("TurboProp", GetPluginPath() + "/Resources/Sounds/TurboProp.wav");
+		m_audioEngine->LoadSound("Heli", GetPluginPath() + "/Resources/Sounds/Helicopter.wav");
 	}
 
 	AircraftManager::~AircraftManager()
 	{
-		audioEngine->Shutdown();
+		m_audioEngine->Shutdown();
 		XPLMUnregisterFlightLoopCallback(&AircraftManager::UpdateAircraftSounds, nullptr);
 	}
 
-	void AircraftManager::HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState, const std::string& airline, const std::string& typeCode)
+	void AircraftManager::HandleAddPlane(const string& callsign, const AircraftVisualState& visualState, const string& airline, const string& typeCode)
 	{
 		auto planeIt = mapPlanes.find(callsign);
 		if (planeIt != mapPlanes.end()) return;
 
 		NetworkAircraft* plane = new NetworkAircraft(callsign.c_str(), visualState, typeCode.c_str(), airline.c_str(), "", 0, "");
-		mapPlanes.emplace(callsign, std::move(plane));
+		mapPlanes.emplace(callsign, move(plane));
 
 		if (plane) {
-			std::string engineSound = "JetEngine";
+			string engineSound = "JetEngine";
 			switch (plane->GetEngineClass())
 			{
 			case EngineClass::JetEngine:
@@ -138,11 +140,11 @@ namespace xpilot
 				engineSound = "JetEngine";
 				break;
 			}
-			plane->soundChannelId = audioEngine->PlaySounds(engineSound, 1.0f);
+			plane->SoundChannelId = m_audioEngine->CreateSoundChannel(engineSound, 1.0f);
 		}
 	}
 
-	void AircraftManager::HandleAircraftConfig(const std::string& callsign, const NetworkAircraftConfig& config)
+	void AircraftManager::HandleAircraftConfig(const string& callsign, const NetworkAircraftConfig& config)
 	{
 		auto planeIt = mapPlanes.find(callsign);
 		if (planeIt == mapPlanes.end()) return;
@@ -240,19 +242,19 @@ namespace xpilot
 		}
 	}
 
-	void AircraftManager::HandleRemovePlane(const std::string& callsign)
+	void AircraftManager::HandleRemovePlane(const string& callsign)
 	{
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft) return;
 
-		audioEngine->StopChannel(aircraft->soundChannelId);
+		m_audioEngine->StopChannel(aircraft->SoundChannelId);
 
 		mapPlanes.erase(callsign);
 	}
 
 	void AircraftManager::RemoveAllPlanes()
 	{
-		audioEngine->StopAllChannels();
+		m_audioEngine->StopAllChannels();
 
 		mapPlanes.clear();
 	}
@@ -297,36 +299,34 @@ namespace xpilot
 			AudioVector3 zero{ 0,0,0 };
 			AudioVector3 forward{ sin(camera.heading * M_PI / 180.0f), 0.0f, cos(camera.heading * M_PI / 180.0f) };
 
-			instance->audioEngine->SetListenerPosition(zero, zero, forward, { 0.0f, -1.0f, 0.0f });
+			instance->m_audioEngine->SetListenerPosition(zero, zero, forward, { 0.0f, -1.0f, 0.0f });
 
 			for (mapPlanesTy::iterator iter = mapPlanes.begin(); iter != mapPlanes.end(); ++iter)
 			{
-				int channel = iter->second->soundChannelId;
+				int channel = iter->second->SoundChannelId;
 				vect soundPos = iter->second->SoundPosition();
 				vect soundVel = iter->second->SoundVelocity();
 
 				if (soundPos.isNonZero()) {
-					instance->audioEngine->SetChannel3dPosition(channel, { soundPos.x, soundPos.y, soundPos.z }, { soundVel.x, soundVel.y, soundVel.z });
-					instance->audioEngine->SetChannelPaused(channel, ShouldPauseSound || !iter->second->IsEnginesRunning);
-					instance->audioEngine->SetChannelVolume(channel, soundVolume);
+					instance->m_audioEngine->SetChannel3dPosition(channel, { soundPos.x, soundPos.y, soundPos.z }, { soundVel.x, soundVel.y, soundVel.z });
+					instance->m_audioEngine->SetChannelPaused(channel, ShouldPauseSound || !iter->second->IsEnginesRunning);
+					instance->m_audioEngine->SetChannelVolume(channel, soundVolume);
 				}
 			}
 
-			instance->audioEngine->Update();
+			instance->m_audioEngine->Update();
 		}
 
 		return -1.0f;
 	}
 
-	void AircraftManager::HandleSlowPositionUpdate(const std::string& callsign, AircraftVisualState visualState, double speed)
+	void AircraftManager::HandleSlowPositionUpdate(const string& callsign, AircraftVisualState visualState, double speed)
 	{
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft)
-		{
 			return;
-		}
 
-		auto now = std::chrono::steady_clock::now();
+		auto now = chrono::steady_clock::now();
 
 		// The logic here is that if we have not received a fast position packet recently, then
 		// we need to derive positional velocities from the last position that we received (either
@@ -336,7 +336,7 @@ namespace xpilot
 		{
 			auto lastUpdateTimeStamp = (aircraft->LastSlowPositionTimestamp < aircraft->LastFastPositionTimestamp) ? aircraft->LastSlowPositionTimestamp : aircraft->LastFastPositionTimestamp;
 
-			auto intervalMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastUpdateTimeStamp).count();
+			auto intervalMs = chrono::duration_cast<chrono::milliseconds>(now - lastUpdateTimeStamp).count();
 
 			aircraft->PositionalVelocityVector = DerivePositionalVelocityVector(
 				aircraft->RemoteVisualState,
@@ -362,7 +362,7 @@ namespace xpilot
 		aircraft->GroundSpeed = speed;
 	}
 
-	void AircraftManager::HandleFastPositionUpdate(const std::string& callsign, const AircraftVisualState& visualState, Vector3 positionalVector, Vector3 rotationalVector)
+	void AircraftManager::HandleFastPositionUpdate(const string& callsign, const AircraftVisualState& visualState, Vector3 positionalVector, Vector3 rotationalVector)
 	{
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft)
@@ -380,11 +380,11 @@ namespace xpilot
 			UpdateAircraft(aircraft);
 		}
 
-		aircraft->LastFastPositionTimestamp = std::chrono::steady_clock::now();
+		aircraft->LastFastPositionTimestamp = chrono::steady_clock::now();
 		aircraft->FastPositionsReceivedCount++;
 	}
 
-	NetworkAircraft* AircraftManager::GetAircraft(const std::string& callsign)
+	NetworkAircraft* AircraftManager::GetAircraft(const string& callsign)
 	{
 		auto planeIt = mapPlanes.find(callsign);
 		if (planeIt == mapPlanes.end()) return nullptr;
@@ -393,8 +393,8 @@ namespace xpilot
 
 	bool AircraftManager::ReceivingFastPositionUpdates(NetworkAircraft* aircraft)
 	{
-		const auto now = std::chrono::steady_clock::now();
-		const auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - aircraft->LastFastPositionTimestamp);
+		const auto now = chrono::steady_clock::now();
+		const auto diff = chrono::duration_cast<chrono::milliseconds>(now - aircraft->LastFastPositionTimestamp);
 		return diff.count() < FAST_POSITION_INTERVAL_TOLERANCE;
 	}
 
@@ -437,10 +437,10 @@ namespace xpilot
 
 		aircraft->HasUsableTerrainElevationData = false;
 
-		auto now = std::chrono::steady_clock::now();
+		auto now = chrono::steady_clock::now();
 
 		aircraft->TerrainElevationHistory.remove_if([&](TerrainElevationData& meta) {
-			return meta.Timestamp < (now - std::chrono::milliseconds(TERRAIN_ELEVATION_DATA_USABLE_AGE + 250));
+			return meta.Timestamp < (now - chrono::milliseconds(TERRAIN_ELEVATION_DATA_USABLE_AGE + 250));
 		});
 
 		double MAX_AGL_ALTITUDE = aircraft->LocalTerrainElevation.has_value() ? (aircraft->LocalTerrainElevation.value() <= 1000.0f) ?
@@ -464,7 +464,7 @@ namespace xpilot
 
 		auto startSample = aircraft->TerrainElevationHistory.front();
 		auto endSample = aircraft->TerrainElevationHistory.back();
-		auto age = std::chrono::duration_cast<std::chrono::milliseconds>(endSample.Timestamp - startSample.Timestamp).count();
+		auto age = chrono::duration_cast<chrono::milliseconds>(endSample.Timestamp - startSample.Timestamp).count();
 		if (age < TERRAIN_ELEVATION_DATA_USABLE_AGE) {
 			return;
 		}
@@ -486,7 +486,7 @@ namespace xpilot
 		aircraft->HasUsableTerrainElevationData = true;
 	}
 
-	void AircraftManager::HandleChangePlaneModel(const std::string& callsign, const std::string& typeIcao, const std::string& airlineIcao)
+	void AircraftManager::HandleChangePlaneModel(const string& callsign, const string& typeIcao, const string& airlineIcao)
 	{
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft) return;

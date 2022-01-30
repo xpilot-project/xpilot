@@ -60,15 +60,13 @@ public:
 
 	void LoadSound(const string& soundName, const string& soundFilePath, bool bLooping = true);
 	void UnloadSound(const string& soundName);
-	int PlaySounds(const string& soundName, float fVolumedB = 0.0f);
+	int CreateSoundChannel(const string& soundName, float fVolumedB = 0.0f);
 	void SetChannel3dPosition(int nChannelId, const AudioVector3& position, const AudioVector3& velocity);
 	void SetChannelVolume(int nChannelId, float fVolumedB);
 	void SetChannelPaused(int channel, bool paused);
 	void StopChannel(int channel);
 	void StopAllChannels();
 	void SetListenerPosition(const AudioVector3& vPos, const AudioVector3& velocity, const AudioVector3& forward, const AudioVector3& up);
-	float dbToVolume(float dB);
-	float VolumeTodB(float volume);
 	FMOD_VECTOR VectorToFmod(const AudioVector3& vPosition);
 };
 

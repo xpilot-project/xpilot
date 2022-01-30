@@ -29,29 +29,20 @@
 #include <map>
 #include <mutex>
 
+using namespace std;
+
 namespace xpilot
 {
-	typedef std::map<std::string, std::unique_ptr<NetworkAircraft>> mapPlanesTy;
+	typedef map<string, unique_ptr<NetworkAircraft>> mapPlanesTy;
 	extern mapPlanesTy mapPlanes;
 	inline mapPlanesTy::iterator mapGetNextAircraft(mapPlanesTy::iterator iter)
 	{
-		return std::find_if(std::next(iter), mapPlanes.end(), [](const mapPlanesTy::value_type& p)
+		return find_if(next(iter), mapPlanes.end(), [](const mapPlanesTy::value_type& p)
 		{
 			return p.second.get();
 		});
 	}
 	mapPlanesTy::iterator mapGetAircraftByIndex(int idx);
-
-	inline double NormalizeHeading(double heading)
-	{
-		if (heading <= 0.0) {
-			heading += 360.0;
-		}
-		else if (heading > 360.0) {
-			heading -= 360.0;
-		}
-		return heading;
-	}
 
 	class AircraftManager
 	{
@@ -59,16 +50,14 @@ namespace xpilot
 		AircraftManager(XPilot* instance);
 		virtual ~AircraftManager();
 
-		void HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState, const std::string& airline, const std::string& typeCode);
-		void HandleAircraftConfig(const std::string& callsign, const NetworkAircraftConfig& config);
-		void HandleChangePlaneModel(const std::string& callsign, const std::string& typeIcao, const std::string& airlineIcao);
-		void HandleSlowPositionUpdate(const std::string& callsign, AircraftVisualState visualState, double speed);
-		void HandleFastPositionUpdate(const std::string& callsign, const AircraftVisualState& visualState, Vector3 positionalVector, Vector3 rotationalVector);
-		void HandleRemovePlane(const std::string& callsign);
+		void HandleAddPlane(const string& callsign, const AircraftVisualState& visualState, const string& airline, const string& typeCode);
+		void HandleAircraftConfig(const string& callsign, const NetworkAircraftConfig& config);
+		void HandleChangePlaneModel(const string& callsign, const string& typeIcao, const string& airlineIcao);
+		void HandleSlowPositionUpdate(const string& callsign, AircraftVisualState visualState, double speed);
+		void HandleFastPositionUpdate(const string& callsign, const AircraftVisualState& visualState, Vector3 positionalVector, Vector3 rotationalVector);
+		void HandleRemovePlane(const string& callsign);
 		void RemoveAllPlanes();
-
 		void StartAudio();
-		static float UpdateAircraftSounds(float, float, int, void* ref);
 
 	protected:
 		DataRefAccess<int> m_soundOn;
@@ -80,15 +69,17 @@ namespace xpilot
 		DataRefAccess<float> m_environmentVolumeRatio;
 		DataRefAccess<int> m_isViewExternal;
 		DataRefAccess<float> m_canopyOpenRatio;
-		DataRefAccess<std::vector<float>> m_userDoorOpenRatio;
+		DataRefAccess<vector<float>> m_userDoorOpenRatio;
 
 	private:
 		XPilot* mEnv;
-		NetworkAircraft* GetAircraft(const std::string& callsign);
+		CAudioEngine* m_audioEngine = nullptr;
+
+		NetworkAircraft* GetAircraft(const string& callsign);
 		bool ReceivingFastPositionUpdates(NetworkAircraft* aircraft);
 		Vector3 DerivePositionalVelocityVector(AircraftVisualState previousVisualState, AircraftVisualState newVisualState, long intervalMs);
 		void UpdateAircraft(NetworkAircraft* aircraft);
-		CAudioEngine* audioEngine = nullptr;
+		static float UpdateAircraftSounds(float, float, int, void* ref);
 	};
 }
 

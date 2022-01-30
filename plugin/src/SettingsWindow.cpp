@@ -25,16 +25,17 @@
 #include "SettingsWindow.h"
 #include "XPMPMultiplayer.h"
 
+using namespace std;
+
 namespace xpilot
 {
-
-	static std::string cslPaths[7];
+	static string cslPaths[7];
 	static bool pathsEnabled[7];
 	static int selectedPathIdx;
 	static bool showHideLabels;
 	static bool debugModelMatching;
 	static int logLevel;
-	static std::string fallbackTypeCode;
+	static string fallbackTypeCode;
 	static bool overrideContactAtcCommand;
 	static bool showMessagePreview = true;
 	static int notificationPanelTimeout = 2;
@@ -187,9 +188,9 @@ namespace xpilot
 							ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoLabel |
 							ImGuiColorEditFlags_NoSmallPreview | ImGuiColorEditFlags_NoSidePreview))
 						{
-							const int col = (int)((std::lround(lblCol[0] * 255.0f) << 16)
-								+ (std::lround(lblCol[1] * 255.0f) << 8)
-								+ (std::lround(lblCol[2] * 255.0f) << 0));
+							const int col = (int)((lround(lblCol[0] * 255.0f) << 16)
+								+ (lround(lblCol[1] * 255.0f) << 8)
+								+ (lround(lblCol[2] * 255.0f) << 0));
 
 							xpilot::Config::Instance().setAircraftLabelColor(col);
 							Save();

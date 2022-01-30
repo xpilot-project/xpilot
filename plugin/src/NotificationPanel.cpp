@@ -24,13 +24,13 @@ namespace xpilot
 {
     struct NotificationTy
     {
-        std::string message;
+        string message;
         float red;
         float green;
         float blue;
     };
 
-    static std::list<NotificationTy> NotificationHistory;
+    static list<NotificationTy> NotificationHistory;
 
     NotificationPanel::NotificationPanel(int left, int top, int right, int bottom) :
         m_scrollToBottom(false),
@@ -76,11 +76,11 @@ namespace xpilot
 
         if (!isAlwaysVisible())
         {
-            if (m_disappearTime != std::chrono::system_clock::time_point()
-                && std::chrono::system_clock::now() > m_disappearTime)
+            if (m_disappearTime != chrono::system_clock::time_point()
+                && chrono::system_clock::now() > m_disappearTime)
             {
                 SetVisible(false);
-                m_disappearTime = std::chrono::system_clock::time_point();
+                m_disappearTime = chrono::system_clock::time_point();
             }
         }
     }
@@ -103,7 +103,7 @@ namespace xpilot
         return -1.0f;
     }
 
-    void NotificationPanel::AddNotificationPanelMessage(const std::string& message, float red, float green, float blue)
+    void NotificationPanel::AddNotificationPanelMessage(const string& message, float red, float green, float blue)
     {
         if (!message.empty())
         {
@@ -118,8 +118,8 @@ namespace xpilot
             if (Config::Instance().getNotificationPanelVisible())
             {
                 SetVisible(true);
-                m_disappearTime = std::chrono::system_clock::now() +
-                    std::chrono::milliseconds(Config::Instance().getActualMessagePreviewTime() * 1000);
+                m_disappearTime = chrono::system_clock::now() +
+                    chrono::milliseconds(Config::Instance().getActualMessagePreviewTime() * 1000);
             }
         }
     }
@@ -128,6 +128,6 @@ namespace xpilot
     {
         SetVisible(!GetVisible());
         m_alwaysVisible = !m_alwaysVisible;
-        m_disappearTime = std::chrono::system_clock::time_point();
+        m_disappearTime = chrono::system_clock::time_point();
     }
 }

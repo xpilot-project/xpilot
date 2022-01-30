@@ -23,6 +23,8 @@
 
 #include <list>
 
+using namespace std;
+
 namespace xpilot {
 
 	class XPilot;
@@ -30,16 +32,16 @@ namespace xpilot {
 	class ConsoleMessage
 	{
 	private:
-		std::string message;
+		string message;
 		double red;
 		double green;
 		double blue;
 	public:
-		std::string getMessage() { return message; }
+		string getMessage() { return message; }
 		float getRed() { return red / 255; }
 		float getGreen() { return green / 255; }
 		float getBlue() { return blue / 255; }
-		void setMessage(std::string value) { message = value; }
+		void setMessage(string value) { message = value; }
 		void setRed(double value) { red = value; }
 		void setGreen(double value) { green = value; }
 		void setBlue(double value) { blue = value; }
@@ -47,11 +49,11 @@ namespace xpilot {
 
 	struct Tab 
 	{
-		std::string tabName;
-		std::string textInput;
+		string tabName;
+		string textInput;
 		bool isOpen;
 		bool scrollToBottom;
-		std::list<ConsoleMessage> messageHistory;
+		list<ConsoleMessage> messageHistory;
 	};
 
 	enum class ConsoleTabType
@@ -64,16 +66,16 @@ namespace xpilot {
 	{
 	public:
 		TextMessageConsole(XPilot* instance);
-		void CreateNonExistingTab(const std::string& tabName);
-		void HandlePrivateMessage(const std::string& msg, const std::string& recipient, ConsoleTabType tabType);
-		void RadioMessageReceived(std::string message, double red = 255, double green = 255, double blue = 255);
-		void SendRadioMessage(const std::string& msg);
-		void SendPrivateMessage(const std::string& tabName, const std::string& msg);
-		void PrivateMessageError(std::string tabName, std::string error);
-		void CloseTab(const std::string& tabName);
+		void CreateNonExistingTab(const string& tabName);
+		void HandlePrivateMessage(const string& msg, const string& recipient, ConsoleTabType tabType);
+		void RadioMessageReceived(string message, double red = 255, double green = 255, double blue = 255);
+		void SendRadioMessage(const string& msg);
+		void SendPrivateMessage(const string& tabName, const string& msg);
+		void PrivateMessageError(string tabName, string error);
+		void CloseTab(const string& tabName);
 	protected:
 		void buildInterface() override;
-		void ShowErrorMessage(std::string error);
+		void ShowErrorMessage(string error);
 	private:
 		bool m_scrollToBottom;
 		XPilot* m_env;

@@ -38,19 +38,21 @@
 #include <cstdarg>
 #include <cmath>
 
+using namespace std;
+
 template<typename ... Args>
-inline std::string string_format(const std::string& format, Args ... args)
+inline string string_format(const string& format, Args ... args)
 {
 	size_t size = snprintf(nullptr, 0, format.c_str(), args ...) + 1;
-	std::unique_ptr<char[]> buf(new char[size]);
+	unique_ptr<char[]> buf(new char[size]);
 	snprintf(buf.get(), size, format.c_str(), args ...);
-	return std::string(buf.get(), buf.get() + size - 1);
+	return string(buf.get(), buf.get() + size - 1);
 }
 
 template<class TContainer>
 inline bool begins_with(const TContainer& input, const TContainer& match)
 {
-	return input.size() >= match.size() && std::equal(match.cbegin(), match.cend(), input.cbegin());
+	return input.size() >= match.size() && equal(match.cbegin(), match.cend(), input.cbegin());
 }
 
 template<class TContainer>
@@ -66,7 +68,7 @@ inline char* strScpy(char* dest, const char* src, size_t size)
 	return dest;
 }
 
-inline std::string strAtMost(const std::string s, size_t m) {
+inline string strAtMost(const string s, size_t m) {
 	return s.length() <= m ? s :
 		s.substr(0, m - 3) + "...";
 }
@@ -74,25 +76,25 @@ inline std::string strAtMost(const std::string s, size_t m) {
 #if APL == 1 || LIN == 1
 inline void strncpy_s(char * dest, size_t destsz, const char * src, size_t count)
 {
-    strncpy(dest, src, std::min(destsz,count)); dest[destsz - 1] = 0;
+    strncpy(dest, src, min(destsz,count)); dest[destsz - 1] = 0;
 }
 #endif
 
 #define STRCPY_ATMOST(dest,src) strncpy_s(dest,sizeof(dest),strAtMost(src,sizeof(dest)-1).c_str(),sizeof(dest)-1)
 
-inline const auto str_tolower = [](std::string s) {
-	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+inline const auto str_tolower = [](string s) {
+	transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return tolower(c); });
 	return s;
 };
-inline const auto str_toupper = [](std::string s) {
-	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return toupper(c); });
+inline const auto str_toupper = [](string s) {
+	transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return toupper(c); });
 	return s;
 };
 
 template < class ContainerT >
-inline void tokenize(const std::string& str, ContainerT& tokens, const std::string& delimiters = " ", bool trimEmpty = false)
+inline void tokenize(const string& str, ContainerT& tokens, const string& delimiters = " ", bool trimEmpty = false)
 {
-	std::string::size_type pos, lastPos = 0, length = str.length();
+	string::size_type pos, lastPos = 0, length = str.length();
 
 	using value_type = typename ContainerT::value_type;
 	using size_type = typename ContainerT::size_type;
@@ -100,7 +102,7 @@ inline void tokenize(const std::string& str, ContainerT& tokens, const std::stri
 	while (lastPos < length + 1)
 	{
 		pos = str.find_first_of(delimiters, lastPos);
-		if (pos == std::string::npos)
+		if (pos == string::npos)
 		{
 			pos = length;
 		}
@@ -113,7 +115,7 @@ inline void tokenize(const std::string& str, ContainerT& tokens, const std::stri
 	}
 }
 
-inline void join(const std::vector<std::string>& v, char c, std::string& s)
+inline void join(const vector<string>& v, char c, string& s)
 {
 	s.clear();
 	auto it = v.begin();
@@ -127,21 +129,21 @@ inline void join(const std::vector<std::string>& v, char c, std::string& s)
 	}
 }
 
-inline std::string joinSkipFirst(const std::vector<std::string>& v, const std::string& delimiter = " ") {
-	std::string out;
-	if (auto i = std::next(v.begin()), e = v.end(); i != e) {
+inline string joinSkipFirst(const vector<string>& v, const string& delimiter = " ") {
+	string out;
+	if (auto i = next(v.begin()), e = v.end(); i != e) {
 		out += *i++;
 		for (; i != e; ++i) out.append(delimiter).append(*i);
 	}
 	return out;
 }
 
-inline bool is_number(const std::string& s)
+inline bool is_number(const string& s)
 {
-	return !s.empty() && std::find_if(s.begin(),
+	return !s.empty() && find_if(s.begin(),
 		s.end(), [](unsigned char c)
 	{
-		return !std::isdigit(c);
+		return !isdigit(c);
 	}) == s.end();
 }
 
@@ -151,41 +153,41 @@ inline double Round(double value, int to)
 	return round(value * places) / places;
 }
 
-inline std::string GetXPlanePath()
+inline string GetXPlanePath()
 {
 	char buffer[2048];
 	XPLMGetSystemPath(buffer);
 	return buffer;
 }
 
-inline std::string GetPluginPath()
+inline string GetPluginPath()
 {
 	XPLMPluginID myId = XPLMGetMyID();
 	char buffer[2048];
 	XPLMGetPluginInfo(myId, nullptr, buffer, nullptr, nullptr);
 	char* path = XPLMExtractFileAndPath(buffer);
-	return std::string(buffer, 0, path - buffer) + "/../";
+	return string(buffer, 0, path - buffer) + "/../";
 }
 
-inline std::string GetTruePluginPath()
+inline string GetTruePluginPath()
 {
 	XPLMPluginID myId = XPLMGetMyID();
 	char buffer[2048];
 	XPLMGetPluginInfo(myId, nullptr, buffer, nullptr, nullptr);
 	
-	return std::string(buffer);
+	return string(buffer);
 }
 
-inline std::string RemoveSystemPath(std::string path)
+inline string RemoveSystemPath(string path)
 {
-	if (begins_with<std::string>(path, GetXPlanePath()))
+	if (begins_with<string>(path, GetXPlanePath()))
 	{
 		path.erase(0, GetXPlanePath().length());
 	}
 	return path;
 }
 
-inline int CountFilesInPath(const std::string& path)
+inline int CountFilesInPath(const string& path)
 {
 	char buffer[2048];
 	int fileCount = 0;
@@ -195,17 +197,17 @@ inline int CountFilesInPath(const std::string& path)
 
 inline uint64_t TimeSinceEpochSeconds()
 {
-	using namespace std::chrono;
+	using namespace chrono;
 	return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
 }
 
-inline std::string UtcTimestamp()
+inline string UtcTimestamp()
 {
-	auto tp = std::chrono::system_clock::now();
-	std::time_t current_time = std::chrono::system_clock::to_time_t(tp);
-	std::tm* timeInfo = std::gmtime(&current_time);
+	auto tp = chrono::system_clock::now();
+	time_t current_time = chrono::system_clock::to_time_t(tp);
+	tm* timeInfo = gmtime(&current_time);
 	char buffer[128];
-	return std::string(buffer, buffer + strftime(buffer, sizeof(buffer), "%H:%M:%S", timeInfo));
+	return string(buffer, buffer + strftime(buffer, sizeof(buffer), "%H:%M:%S", timeInfo));
 }
 
 inline float GetNetworkTime()

@@ -40,6 +40,8 @@
 #include <algorithm>
 #include <iostream>
 
+using namespace std;
+
 namespace xpilot
 {
 	enum class dataRefs
@@ -62,26 +64,26 @@ namespace xpilot
 		XPilot();
 		~XPilot();
 
-		void RadioMessageReceived(const std::string& msg, double red = 255, double green = 255, double blue = 255);
-		void AddPrivateMessage(const std::string& recipient, const std::string& msg, ConsoleTabType tabType);
-		void AddNotificationPanelMessage(const std::string& msg, double red = 255, double green = 255, double blue = 255);
-		void addNotification(const std::string& msg, double red = 255, double green = 255, double blue = 255);
+		void RadioMessageReceived(const string& msg, double red = 255, double green = 255, double blue = 255);
+		void AddPrivateMessage(const string& recipient, const string& msg, ConsoleTabType tabType);
+		void AddNotificationPanelMessage(const string& msg, double red = 255, double green = 255, double blue = 255);
+		void addNotification(const string& msg, double red = 255, double green = 255, double blue = 255);
 
 		void onNetworkDisconnected();
 		void onNetworkConnected();
-		void forceDisconnect(std::string reason = "");
-		void requestStationInfo(std::string callsign);
-		void requestMetar(std::string station);
+		void forceDisconnect(string reason = "");
+		void requestStationInfo(string callsign);
+		void requestMetar(string station);
 		void setCom1Frequency(float frequency);
 		void setCom2Frequency(float frequency);
 		void setAudioComSelection(int radio);
 		void setAudioSelection(int radio, bool on);
 		void setTransponderCode(int code);
-		void sendWallop(std::string message);
+		void sendWallop(string message);
 
-		void SendReply(const std::string& message);
+		void SendReply(const string& message);
 
-		std::string ourCallsign() const { return m_networkCallsign;  }
+		string ourCallsign() const { return m_networkCallsign;  }
 		bool isNetworkConnected() const { return m_networkLoginStatus; }
 		void setPttActive(bool active) { m_pttPressed = active;  }
 		int getTxRadio() const { return m_audioComSelection; }
@@ -107,7 +109,7 @@ namespace xpilot
 	protected:
 		OwnedDataRef<int> m_pttPressed;
 		OwnedDataRef<int> m_networkLoginStatus;
-		OwnedDataRef<std::string> m_networkCallsign;
+		OwnedDataRef<string> m_networkCallsign;
 		OwnedDataRef<int> m_rxCom1;
 		OwnedDataRef<int> m_rxCom2;
 		OwnedDataRef<float> m_volumeSignalLevel;
@@ -129,20 +131,20 @@ namespace xpilot
 		static float MainFlightLoop(float, float, int, void* ref);
 		bool InitializeXPMP();
 
-		std::thread::id m_xplaneThread;
+		thread::id m_xplaneThread;
 		void ThisThreadIsXplane()
 		{
-			m_xplaneThread = std::this_thread::get_id();
+			m_xplaneThread = this_thread::get_id();
 		}
 		bool IsXplaneThread()const
 		{
-			return std::this_thread::get_id() == m_xplaneThread;
+			return this_thread::get_id() == m_xplaneThread;
 		}
 
 		bool m_keepAlive;
-		std::unique_ptr<std::thread> m_zmqThread;
-		std::unique_ptr<zmq::context_t> m_zmqContext;
-		std::unique_ptr<zmq::socket_t> m_zmqSocket;
+		unique_ptr<thread> m_zmqThread;
+		unique_ptr<zmq::context_t> m_zmqContext;
+		unique_ptr<zmq::socket_t> m_zmqSocket;
 
 		void ZmqWorker();
 		
@@ -155,21 +157,21 @@ namespace xpilot
 			return m_keepAlive && IsSocketConnected();
 		}
 
-		std::mutex m_mutex;
-		std::deque<std::function<void()>> m_queuedCallbacks;
+		mutex m_mutex;
+		deque<function<void()>> m_queuedCallbacks;
 		void InvokeQueuedCallbacks();
-		void QueueCallback(const std::function<void()>& cb);
+		void QueueCallback(const function<void()>& cb);
 
 		XPLMDataRef m_bulkDataQuick{}, m_bulkDataExpensive{};
 		static int GetBulkData(void* inRefcon, void* outData, int inStartPos, int inNumBytes);
 		int m_currentAircraftCount = 1;
 
-		std::unique_ptr<FrameRateMonitor> m_frameRateMonitor;
-		std::unique_ptr<AircraftManager> m_aircraftManager;
-		std::unique_ptr<NotificationPanel> m_notificationPanel;
-		std::unique_ptr<TextMessageConsole> m_textMessageConsole;
-		std::unique_ptr<NearbyATCWindow> m_nearbyAtcWindow;
-		std::unique_ptr<SettingsWindow> m_settingsWindow;
+		unique_ptr<FrameRateMonitor> m_frameRateMonitor;
+		unique_ptr<AircraftManager> m_aircraftManager;
+		unique_ptr<NotificationPanel> m_notificationPanel;
+		unique_ptr<TextMessageConsole> m_textMessageConsole;
+		unique_ptr<NearbyATCWindow> m_nearbyAtcWindow;
+		unique_ptr<SettingsWindow> m_settingsWindow;
 	};
 }
 

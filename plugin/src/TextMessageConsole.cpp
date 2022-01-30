@@ -30,9 +30,9 @@ using json = nlohmann::json;
 
 namespace xpilot
 {
-	static std::string m_inputValue;
-	static std::list<ConsoleMessage> m_messageHistory;
-	static std::list<Tab> m_tabs;
+	static string m_inputValue;
+	static list<ConsoleMessage> m_messageHistory;
+	static list<Tab> m_tabs;
 
 	enum class CommandOptions
 	{
@@ -50,9 +50,9 @@ namespace xpilot
 		None
 	};
 
-	CommandOptions resolveOption(std::string input)
+	CommandOptions resolveOption(string input)
 	{
-		std::string v(str_tolower(input));
+		string v(str_tolower(input));
 		if (v == ".chat" || v == ".msg") return xpilot::CommandOptions::Chat;
 		if (v == ".atis") return xpilot::CommandOptions::RequestAtis;
 		if (v == ".metar" || v == ".wx") return xpilot::CommandOptions::MetarRequest;
@@ -76,7 +76,7 @@ namespace xpilot
 		SetWindowTitle("Text Message Console");
 	}
 
-	void TextMessageConsole::SendRadioMessage(const std::string& message)
+	void TextMessageConsole::SendRadioMessage(const string& message)
 	{
 		if (m_env->isNetworkConnected())
 		{
@@ -87,7 +87,7 @@ namespace xpilot
 		}
 	}
 
-	void TextMessageConsole::RadioMessageReceived(std::string msg, double red, double green, double blue)
+	void TextMessageConsole::RadioMessageReceived(string msg, double red, double green, double blue)
 	{
 		if (!msg.empty())
 		{
@@ -101,7 +101,7 @@ namespace xpilot
 		}
 	}
 
-	void TextMessageConsole::ShowErrorMessage(std::string error)
+	void TextMessageConsole::ShowErrorMessage(string error)
 	{
 		ConsoleMessage m;
 		m.setMessage(string_format("[%s] %s", UtcTimestamp().c_str(), error.c_str()));
@@ -112,7 +112,7 @@ namespace xpilot
 		m_scrollToBottom = true;
 	}
 
-	void TextMessageConsole::PrivateMessageError(std::string tabName, std::string error)
+	void TextMessageConsole::PrivateMessageError(string tabName, string error)
 	{
 		ConsoleMessage m;
 		m.setMessage(string_format("[%s] %s", UtcTimestamp().c_str(), error.c_str()));
@@ -120,7 +120,7 @@ namespace xpilot
 		m.setGreen(57);
 		m.setBlue(43);
 
-		auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
+		auto it = find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
 			{
 				return t.tabName == tabName;
 			});
@@ -131,7 +131,7 @@ namespace xpilot
 		}
 	}
 
-	void TextMessageConsole::SendPrivateMessage(const std::string& tabName, const std::string& message)
+	void TextMessageConsole::SendPrivateMessage(const string& tabName, const string& message)
 	{
 		if (!tabName.empty() && !message.empty())
 		{
@@ -146,9 +146,9 @@ namespace xpilot
 		}
 	}
 
-	void TextMessageConsole::CloseTab(const std::string& tabName)
+	void TextMessageConsole::CloseTab(const string& tabName)
 	{
-		auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
+		auto it = find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
 			{
 				return t.tabName == tabName;
 			});
@@ -158,9 +158,9 @@ namespace xpilot
 		}
 	}
 
-	void TextMessageConsole::CreateNonExistingTab(const std::string& tabName)
+	void TextMessageConsole::CreateNonExistingTab(const string& tabName)
 	{
-		auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
+		auto it = find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
 			{
 				return t.tabName == tabName;
 			});
@@ -170,12 +170,12 @@ namespace xpilot
 			Tab tab;
 			tab.tabName = tabName;
 			tab.isOpen = true;
-			tab.messageHistory = std::list<ConsoleMessage>();
+			tab.messageHistory = list<ConsoleMessage>();
 			m_tabs.push_back(tab);
 		}
 	}
 
-	void TextMessageConsole::HandlePrivateMessage(const std::string& recipient, const std::string& msg, ConsoleTabType tabType)
+	void TextMessageConsole::HandlePrivateMessage(const string& recipient, const string& msg, ConsoleTabType tabType)
 	{
 		switch (tabType)
 		{
@@ -187,7 +187,7 @@ namespace xpilot
 			m.setGreen(255);
 			m.setBlue(255);
 
-			auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t)
+			auto it = find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t)
 				{
 					return t.tabName == recipient;
 				});
@@ -212,7 +212,7 @@ namespace xpilot
 			m.setGreen(255);
 			m.setBlue(255);
 
-			auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t)
+			auto it = find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t)
 				{
 					return t.tabName == recipient;
 				});
@@ -262,7 +262,7 @@ namespace xpilot
 				{
 					if (!m_inputValue.empty())
 					{
-						std::vector<std::string> args;
+						vector<string> args;
 						tokenize(m_inputValue, args, " ", true);
 						if (args.size() > 0)
 						{
@@ -279,7 +279,7 @@ namespace xpilot
 									{
 										if (args.size() >= 3)
 										{
-											std::string m;
+											string m;
 											join(args, ' ', m);
 
 											CreateNonExistingTab(str_toupper(args.at(1)));
@@ -337,17 +337,17 @@ namespace xpilot
 							case xpilot::CommandOptions::SetRadioFrequency:
 								if (args.size() == 2)
 								{
-									const std::regex regex("^1\\d\\d[\\.\\,]\\d{1,3}$");
+									const regex regex("^1\\d\\d[\\.\\,]\\d{1,3}$");
 									if (args.at(0) == ".com1")
 									{
-										if (!std::regex_match(args.at(1), regex))
+										if (!regex_match(args.at(1), regex))
 										{
 											ShowErrorMessage("Invalid frequency format.");
 										}
 										else
 										{
-											std::string freq(args.at(1));
-											int freqInt = std::stod(freq) * 1000000;
+											string freq(args.at(1));
+											int freqInt = stod(freq) * 1000000;
 											if (freqInt < 118000000 || freqInt > 136975000)
 											{
 												ShowErrorMessage("Invalid frequency range.");
@@ -359,14 +359,14 @@ namespace xpilot
 									}
 									else if (args.at(0) == ".com2")
 									{
-										if (!std::regex_match(args.at(1), regex))
+										if (!regex_match(args.at(1), regex))
 										{
 											ShowErrorMessage("Invalid frequency format.");
 										}
 										else
 										{
-											std::string freq(args.at(1));
-											int freqInt = std::stod(freq) * 1000000;
+											string freq(args.at(1));
+											int freqInt = stod(freq) * 1000000;
 											if (freqInt < 118000000 || freqInt > 136975000)
 											{
 												ShowErrorMessage("Invalid frequency range.");
@@ -425,10 +425,10 @@ namespace xpilot
 							case xpilot::CommandOptions::SetTransponderCode:
 								if (args.size() == 2)
 								{
-									std::string code = args.at(1);
-									if (std::regex_match(code, std::regex("^[0-7]{4}$")))
+									string code = args.at(1);
+									if (regex_match(code, regex("^[0-7]{4}$")))
 									{
-										m_env->setTransponderCode(std::stoi(code));
+										m_env->setTransponderCode(stoi(code));
 										m_inputValue = "";
 									}
 									else
@@ -490,13 +490,13 @@ namespace xpilot
 				ImGui::EndTabItem();
 			}
             
-			std::list<Tab>::iterator it = m_tabs.begin();
+			list<Tab>::iterator it = m_tabs.begin();
 			while(it != m_tabs.end()) {
 				if(!it->isOpen) {
 					it = m_tabs.erase(it);
 				}
 				else {
-					std::string key = it->tabName;
+					string key = it->tabName;
 					if (ImGui::BeginTabItem(key.c_str(), &it->isOpen))
 					{
 						ImGui::BeginChild(key.c_str(), ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), false);
@@ -521,7 +521,7 @@ namespace xpilot
 						{
 							if (!it->textInput.empty())
 							{
-								std::vector<std::string> args;
+								vector<string> args;
 								tokenize(it->textInput, args, " ", true);
 								if (args.size() > 0)
 								{
