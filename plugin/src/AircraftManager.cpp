@@ -36,7 +36,7 @@ namespace xpilot
 	constexpr double MAX_USABLE_ALTITUDE_AGL_HIGH_ELEVATION = 50.0;
 	constexpr double TERRAIN_ELEVATION_MAX_SLOPE = 3.0;
 
-	constexpr float CLOSED_SPACE_VOLUME_SCALAR = 0.60f;
+	constexpr float CLOSED_SPACE_VOLUME_SCALAR = 0.50f;
 
 	static double NormalizeDegrees(double value, double lowerBound, double upperBound)
 	{
