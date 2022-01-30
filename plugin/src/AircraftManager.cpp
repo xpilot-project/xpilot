@@ -297,7 +297,7 @@ namespace xpilot
 			XPLMReadCameraPosition(&camera);
 
 			AudioVector3 zero{ 0,0,0 };
-			AudioVector3 forward{ sin(camera.heading * M_PI / 180.0f), 0.0f, cos(camera.heading * M_PI / 180.0f) };
+			AudioVector3 forward{ (float)sin(camera.heading * M_PI / 180.0f), 0.0f, (float)cos(camera.heading * M_PI / 180.0f) };
 
 			instance->m_audioEngine->SetListenerPosition(zero, zero, forward, { 0.0f, -1.0f, 0.0f });
 

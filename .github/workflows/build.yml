@@ -84,6 +84,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/xPilot/lin_x64
           cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.xpl ${{ github.workspace }}/xPilot/lin_x64
           cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.debug ${{ github.workspace }}/xPilot/lin_x64
+          cp -R ${{ github.workspace }}/plugin/externals/fmod/lin/libfmod* ${{ github.workspace }}/xPilot/lin_x64
           cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
       ### Build Client ###
@@ -244,6 +245,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/xPilot/win_x64
           cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.xpl ${{ github.workspace }}/xPilot/win_x64
           cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.pdb ${{ github.workspace }}/xPilot/win_x64
+          cp -R ${{ github.workspace }}/plugin/externals/fmod/win ${{ github.workspace }}/xPilot/win_x64
           cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
       ### Build Client ###
@@ -393,7 +395,14 @@ jobs:
           mkdir -p ${{ github.workspace }}/xPilot/mac_x64
           cp ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.xpl ${{ github.workspace }}/xPilot/mac_x64
           cp -R ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.dSYM ${{ github.workspace }}/xPilot/mac_x64
+          cp ${{ github.workspace }}/plugin/externals/fmod/mac/libfmod.dylib ${{ github.workspace }}/xPilot/mac_x64
           cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
+          
+      - name: Fix FMOD shared library install name
+        working-directory: ${{ github.workspace }}/xPilot/mac_x64
+        run: |
+          install_name_tool -id @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib libfmod.dylib
+          install_name_tool -change @rpath/libfmod.dylib @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib xPilot.xpl
 
       ### Build Client ###
 

@@ -13,6 +13,13 @@ set(CMAKE_CXX_STANDARD 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD_REQUIRED 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD 17)
 
+if(UNIX AND NOT APPLE)
+    # fix rpath on linux
+    SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    SET(CMAKE_INSTALL_RPATH "\$ORIGIN")
+endif()
+
 file(READ ${CMAKE_SOURCE_DIR}/../xpilot.json XPILOT_JSON)
 string(JSON IS_BETA_VERSION GET ${XPILOT_JSON} is_beta)
 string(JSON BETA_NUMBER GET ${XPILOT_JSON} beta_number)
@@ -115,8 +122,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/externals)
 if (APPLE)
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/XPMP2/macos")
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/sdk/Libraries/Mac")
+    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/fmod/mac")
 elseif (UNIX)
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/XPMP2/lin")
+    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/fmod/lin")
 elseif (WIN32)
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/XPMP2/win")
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/sdk/Libraries/Win")
@@ -128,6 +137,20 @@ find_library(XPMP2_LIBRARY XPMP2 REQUIRED)
 message ("XPMP2_LIBRARY = ${XPMP2_LIBRARY}")
 target_link_libraries(${PROJECT_NAME} ${XPMP2_LIBRARY})
 
+if(WIN32)
+    find_library(FMOD_LIBRARY NAMES fmod_vc.lib REQUIRED)
+    message ("FMOD_LIBRARY = ${FMOD_LIBRARY}")
+    target_link_libraries(${PROJECT_NAME} ${FMOD_LIBRARY})
+elseif(APPLE)
+    find_library(FMOD_LIBRARY NAMES libfmod.dylib REQUIRED)
+    message ("FMOD_LIBRARY = ${FMOD_LIBRARY}")
+    target_link_libraries(${PROJECT_NAME} ${FMOD_LIBRARY})
+elseif(UNIX AND NOT APPLE)
+    find_library(FMOD_LIBRARY NAMES libfmod.so REQUIRED)
+    message ("FMOD_LIBRARY = ${FMOD_LIBRARY}")
+    target_link_libraries(${PROJECT_NAME} ${FMOD_LIBRARY})
+endif()
+
 target_link_libraries(
   ${PROJECT_NAME}
 	CONAN_PKG::nlohmann_json
@@ -138,10 +161,6 @@ target_link_libraries(
 if (WIN32 OR APPLE)
     find_library(XPLM_LIBRARY NAMES XPLM XPLM_64.lib)
     target_link_libraries(${PROJECT_NAME} ${XPLM_LIBRARY})
-	
-	find_library(FMOD_LIBRARY NAMES fmod_vc.lib REQUIRED)
-	message ("FMOD_LIBRARY = ${FMOD_LIBRARY}")
-	target_link_libraries(${PROJECT_NAME} ${FMOD_LIBRARY})
 endif()
 
 if (WIN32)
