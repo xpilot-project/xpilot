@@ -110,7 +110,10 @@ int CAudioEngine::CreateSoundChannel(const string& soundName, float volumeDb)
 	FMOD::Channel* pChannel = nullptr;
 	CAudioEngine::ErrorCheck("CreateSoundChannel::playSound", sImplementation->mSystem->playSound(foundIt->second, nullptr, true, &pChannel));
 	if (pChannel)
+	{
+		CAudioEngine::ErrorCheck("CreateSoundChannel::set3DMinMaxDistance", pChannel->set3DMinMaxDistance(30.0f, 10000.0f));
 		sImplementation->mChannels[mChannelId] = pChannel;
+	}
 
 	return mChannelId;
 }
