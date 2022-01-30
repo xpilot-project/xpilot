@@ -174,6 +174,12 @@ namespace xpilot
             return m_aircraftSounds;
         }
 
+        bool setAircraftSoundVolume(int volume);
+        int getAircraftSoundVolume() const
+        {
+            return std::max(0, std::min(m_aircraftSoundVolume, 100));
+        }
+
     private:
         Config() = default;
         std::vector<CslPackage> m_cslPackages;
@@ -191,6 +197,7 @@ namespace xpilot
         bool m_labelCutoffVis = true;
         bool m_transmitIndicator = false;
         bool m_aircraftSounds = true;
+        int m_aircraftSoundVolume = 50;
         int m_logLevel = 2; // 0=Debug, 1=Info, 2=Warning, 3=Error, 4=Fatal, 5=Msg
     };
 }

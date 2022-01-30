@@ -64,12 +64,6 @@ namespace xpilot
 		return end - start;
 	}
 
-	static double Round(double value, int to)
-	{
-		double places = pow(10.0, to);
-		return round(value * places) / places;
-	}
-
 	mapPlanesTy mapPlanes;
 	mapPlanesTy::iterator mapGetAircraftByIndex(int idx)
 	{
@@ -313,11 +307,11 @@ namespace xpilot
 			if (instance->m_soundOn && !instance->m_simPaused) {
 				if (instance->m_isViewExternal == 0 && instance->m_canopyOpenRatio == 0 && anyDoorOpen == false) {
 					// internal view
-					soundVolume = instance->m_masterVolumeRatio * instance->m_exteriorVolumeRatio * CLOSED_SPACE_VOLUME_SCALAR;
+					soundVolume = Config::Instance().getAircraftSoundVolume() / 100.0f * CLOSED_SPACE_VOLUME_SCALAR;
 				}
 				else {
 					// external view
-					soundVolume = instance->m_masterVolumeRatio * instance->m_exteriorVolumeRatio;
+					soundVolume = Config::Instance().getAircraftSoundVolume() / 100.0f * OUTSIDE_VOLUME_SCALAR;
 				}
 			}
 			else {

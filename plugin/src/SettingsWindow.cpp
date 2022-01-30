@@ -42,6 +42,7 @@ namespace xpilot
 	static bool labelVisibilityCutoff = true;
 	static bool enableTransmitIndicator = false;
 	static bool enableAircraftSounds = true;
+	static int aircraftSoundVolume = 50;
 	static float lblCol[4];
 	ImGui::FileBrowser fileBrowser(ImGuiFileBrowserFlags_SelectDirectory);
 
@@ -49,10 +50,10 @@ namespace xpilot
 	static int currentNode = -1;
 
 	SettingsWindow::SettingsWindow(WndMode _mode) :
-		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 320, 600, 0))
+		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 345, 600, 0))
 	{
 		SetWindowTitle(string_format("xPilot %s Settings", PLUGIN_VERSION_STRING));
-		SetWindowResizingLimits(600, 320, 600, 320);
+		SetWindowResizingLimits(600, 345, 600, 345);
 
 		fileBrowser.SetTitle("Browse...");
 		fileBrowser.SetWindowSize(450, 250);
@@ -84,6 +85,7 @@ namespace xpilot
 		logLevel = xpilot::Config::Instance().getLogLevel();
 		enableTransmitIndicator = xpilot::Config::Instance().getEnableTransmitIndicator();
 		enableAircraftSounds = xpilot::Config::Instance().getEnableAircraftSounds();
+		aircraftSoundVolume = xpilot::Config::Instance().getAircraftSoundVolume();
 		HexToRgb(xpilot::Config::Instance().getAircraftLabelColor(), lblCol);
 	}
 
@@ -289,6 +291,19 @@ namespace xpilot
 					if (ImGui::Checkbox("##EnableAircraftSounds", &enableAircraftSounds))
 					{
 						xpilot::Config::Instance().setEnableAircraftSounds(enableAircraftSounds);
+						Save();
+					}
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Aircraft Engine Sound Volume");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Use this slider to adjust the engine volume of other aircraft.");
+					ImGui::TableSetColumnIndex(1);
+					if (ImGui::SliderInt("##AircraftEngineVolume", &aircraftSoundVolume, 0, 100, "%d%%"))
+					{
+						xpilot::Config::Instance().setAircraftSoundVolume(aircraftSoundVolume);
 						Save();
 					}
 

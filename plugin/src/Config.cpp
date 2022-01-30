@@ -144,6 +144,11 @@ namespace xpilot
                 {
                     setEnableAircraftSounds(jf["EnableAircraftSounds"]);
                 }
+                if (jf.contains("AircraftSoundVolume"))
+                {
+                    int vol = std::max(0, std::min(jf.at("AircraftSoundVolume").get<int>(), 100));
+                    setAircraftSoundVolume(vol);
+                }
                 if (jf.contains("CSL"))
                 {
                     json cslpackages = jf["CSL"];
@@ -193,6 +198,7 @@ namespace xpilot
         j["LogLevel"] = getLogLevel();
         j["EnableTransmitIndicator"] = getEnableTransmitIndicator();
         j["EnableAircraftSounds"] = getEnableAircraftSounds();
+        j["AircraftSoundVolume"] = getAircraftSoundVolume();
 
         if (!m_cslPackages.empty())
         {
@@ -397,6 +403,11 @@ namespace xpilot
     bool Config::setEnableAircraftSounds(bool b)
     {
         m_aircraftSounds = b;
+        return false;
+    }
+    bool Config::setAircraftSoundVolume(int volume)
+    {
+        m_aircraftSoundVolume = volume;
         return false;
     }
 }

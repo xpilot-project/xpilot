@@ -44,7 +44,21 @@ namespace xpilot
         return end - start;
     }
 
-    inline float RpmToDegree(float rpm, double s)
+    double NormalizeDegrees(double value, double lowerBound, double upperBound)
+    {
+        double range = upperBound - lowerBound;
+        if (value < lowerBound)
+        {
+            return value + range;
+        }
+        if (value > upperBound)
+        {
+            return value - range;
+        }
+        return value;
+    }
+
+    float RpmToDegree(float rpm, double s)
     {
         return rpm / 60.0f * float(s) * 360.0f;
     }
@@ -101,19 +115,11 @@ namespace xpilot
         RotationalVelocityVector = Vector3::Zero();
 
         auto model = GetModelInfo();
-        pMdl = GetFlightModel(model);
+        flightModel = GetFlightModel(model);
 
         m_engineClass = EngineClass::JetEngine;
-        m_engineCount = 2;
-
-        if (model.doc8643Classification.size() > 0) {
-
-            std::string engineCount(1, model.doc8643Classification[1]);
-            try {
-                m_engineCount = std::min(std::stoi(engineCount), 2); // limit to 2 engines
-            }
-            catch (...) { /* catch the exception and default to 2 engines */ }
-
+        if (model.doc8643Classification.size() > 0) 
+        {
             // helicopter or gyrocopter
             if (model.doc8643Classification[0] == 'H' || model.doc8643Classification[0] == 'G') {
                 m_engineClass = EngineClass::Helicopter;
@@ -141,10 +147,7 @@ namespace xpilot
     NetworkAircraft::~NetworkAircraft()
     {
         stopSoundThread();
-
-        for (int i = 0; i < m_engineCount; i++) {
-            alDeleteSources(1, &m_soundSources[i]);
-        }
+        alDeleteSources(1, &m_soundSource);
     }
 
     void NetworkAircraft::Extrapolate(
@@ -341,20 +344,6 @@ namespace xpilot
         RotationalVelocityVectorError = Vector3(result.X / interval, result.Y / interval, result.Z / interval);
     }
 
-    double NetworkAircraft::NormalizeDegrees(double value, double lowerBound, double upperBound)
-    {
-        double range = upperBound - lowerBound;
-        if (value < lowerBound)
-        {
-            return value + range;
-        }
-        if (value > upperBound)
-        {
-            return value - range;
-        }
-        return value;
-    }
-
     void NetworkAircraft::startSoundThread()
     {
         if (m_soundLoaded) {
@@ -364,9 +353,9 @@ namespace xpilot
         stopSoundThread();
 
         m_soundThread = std::make_unique<std::thread>([&]()
-            {
-                audioLoop();
-            });
+        {
+            audioLoop();
+        });
     }
 
     void NetworkAircraft::stopSoundThread()
@@ -382,23 +371,18 @@ namespace xpilot
         ALuint normalSound;
         ALuint starterSound;
 
-        m_currentGain = 0.0f;
-
         if (m_soundsInitialized) {
-            alDeleteSources(m_engineCount, m_soundSources);
+            alDeleteSources(1, &m_soundSource);
         }
 
-        alGenSources(m_engineCount, m_soundSources);
+        alGenSources(1, &m_soundSource);
 
         float zero[3] = { 0,0,0 };
-        for (int i = 0; i < m_engineCount; i++) {
-            alSourcef(m_soundSources[i], AL_PITCH, m_pitch);
-            alSourcei(m_soundSources[i], AL_LOOPING, (state == EngineState::Starter) ? AL_FALSE : AL_TRUE);
-            alSourcei(m_soundSources[i], AL_SOURCE_RELATIVE, AL_FALSE);
-            alSourcefv(m_soundSources[i], AL_VELOCITY, zero);
-            zero[2] = 5.0f;
-            alSourcefv(m_soundSources[i], AL_POSITION, zero);
-        }
+        alSourcef(m_soundSource, AL_PITCH, m_pitch);
+        alSourcei(m_soundSource, AL_LOOPING, (state == EngineState::Starter) ? AL_FALSE : AL_TRUE);
+        alSourcefv(m_soundSource, AL_VELOCITY, zero);
+        zero[2] = 5.0f;
+        alSourcefv(m_soundSource, AL_POSITION, zero);
 
         switch (m_engineClass) {
         case EngineClass::Helicopter:
@@ -420,91 +404,17 @@ namespace xpilot
             break;
         }
 
-        for (int i = 0; i < m_engineCount; i++) {
-            if (state == EngineState::Starter && m_engineClass != EngineClass::Helicopter) {
-                alSourcei(m_soundSources[i], AL_BUFFER, starterSound);
-                m_starterSoundBegan = std::chrono::system_clock::now();
-            }
-            else {
-                alSourcei(m_soundSources[i], AL_BUFFER, normalSound);
-            }
+        if (state == EngineState::Starter && m_engineClass != EngineClass::Helicopter) {
+            alSourcei(m_soundSource, AL_BUFFER, starterSound);
+            m_starterSoundBegan = std::chrono::system_clock::now();
+        }
+        else {
+            alSourcei(m_soundSource, AL_BUFFER, normalSound);
         }
 
         m_soundLoaded = false;
         m_engineState = state;
         m_soundsInitialized = true;
-    }
-
-    FlightModel NetworkAircraft::GetFlightModel(const XPMP2::CSLModelInfo_t model)
-    {
-        std::string classification = string_format("%s;%s;%s;", model.doc8643WTC.c_str(), model.doc8643Classification.c_str(), model.icaoType.c_str());
-        std::string category = "MediumJets";
-
-        for (const auto& mapIt : FlightModel::modelMatches) {
-            std::smatch m;
-            std::regex re(mapIt.regex.c_str());
-            std::regex_search(classification, m, re);
-            if (m.size() > 0) {
-                category = mapIt.category;
-                break;
-            }
-        }
-
-        FlightModel flightModel = {};
-        flightModel.modelCategory = category;
-
-        if (category == "HugeJets") {
-            flightModel.FLAPS_DURATION = 10000;
-            flightModel.GEAR_DURATION = 10000;
-            flightModel.GEAR_DEFLECTION = 1.4;
-        }
-        else if (category == "BizJet") {
-            flightModel.FLAPS_DURATION = 5000;
-            flightModel.GEAR_DURATION = 0.25;
-            flightModel.GEAR_DEFLECTION = 0.5;
-        }
-        else if (category == "GA") {
-            flightModel.FLAPS_DURATION = 5000;
-            flightModel.GEAR_DURATION = 10000;
-            flightModel.GEAR_DEFLECTION = 0.25;
-        }
-        else if (category == "LightAC") {
-            flightModel.FLAPS_DURATION = 5000;
-            flightModel.GEAR_DURATION = 10000;
-            flightModel.GEAR_DEFLECTION = 0.25;
-        }
-        else if (category == "Heli") {
-            flightModel.FLAPS_DURATION = 5000;
-            flightModel.GEAR_DURATION = 10000;
-            flightModel.GEAR_DEFLECTION = 0.25;
-        }
-        else {
-            flightModel.FLAPS_DURATION = 5000;
-            flightModel.GEAR_DURATION = 10000;
-            flightModel.GEAR_DEFLECTION = 0.5;
-        }
-
-        return flightModel;
-    }
-
-    void NetworkAircraft::stopSounds()
-    {
-        m_soundLoaded = false;
-
-        for (int i = 0; i < m_engineCount; i++) {
-            alSourceStop(m_soundSources[i]);
-            alSourceRewind(m_soundSources[i]);
-        }
-    }
-
-    void NetworkAircraft::audioLoop()
-    {
-        for (int i = 0; i < m_engineCount; i++) {
-            alSourcePlay(m_soundSources[i]);
-        }
-
-        m_soundLoaded = true;
-        m_soundsPlaying = true;
     }
 
     void NetworkAircraft::UpdatePosition(float _elapsedSinceLastCall, int)
@@ -530,19 +440,19 @@ namespace xpilot
             Surfaces.gearPosition = TargetGearPosition;
             Surfaces.flapRatio = TargetFlapsPosition;
             Surfaces.spoilerRatio = TargetSpoilerPosition;
-            Surfaces.tireDeflect = IsReportedOnGround ? pMdl.GEAR_DEFLECTION / 2.0f : pMdl.GEAR_DEFLECTION;
+            Surfaces.tireDeflect = IsReportedOnGround ? flightModel.GEAR_DEFLECTION / 2.0f : flightModel.GEAR_DEFLECTION;
         }
         else if (FastPositionsReceivedCount > 1) {
             IsFirstRenderPending = false;
         }
 
         if (IsReportedOnGround) {
-            TargetGearDeflection = pMdl.GEAR_DEFLECTION / 2.0f;
+            TargetGearDeflection = flightModel.GEAR_DEFLECTION / 2.0f;
         }
         else if (abs(TerrainOffset) > 0.0f) {
             double v = TerrainOffset / TargetTerrainOffset;
             if (v >= 0.95f) {
-                TargetGearDeflection = pMdl.GEAR_DEFLECTION / 2.0f;
+                TargetGearDeflection = flightModel.GEAR_DEFLECTION / 2.0f;
                 TerrainOffsetFinished = true; // terrain offset is nearly finished; this boolean is used trigger when the aircraft wheels can begin spinning
             }
         }
@@ -556,11 +466,11 @@ namespace xpilot
         SetLightsStrobe(Surfaces.lights.strbLights);
         SetLightsNav(Surfaces.lights.navLights);
 
-        InterpolateSurface(Surfaces.gearPosition, TargetGearPosition, diffMs.count(), pMdl.GEAR_DURATION);
-        InterpolateSurface(Surfaces.flapRatio, TargetFlapsPosition, diffMs.count(), pMdl.FLAPS_DURATION);
-        InterpolateSurface(Surfaces.spoilerRatio, TargetSpoilerPosition, diffMs.count(), pMdl.FLAPS_DURATION);
-        InterpolateSurface(Surfaces.tireDeflect, TargetGearDeflection, diffMs.count(), 2000, 1.5f);
-        InterpolateSurface(Surfaces.reversRatio, TargetReverserPosition, diffMs.count(), 3000);
+        InterpolateSurface(Surfaces.gearPosition, TargetGearPosition, diffMs.count(), flightModel.GEAR_DURATION);
+        InterpolateSurface(Surfaces.flapRatio, TargetFlapsPosition, diffMs.count(), flightModel.FLAPS_DURATION);
+        InterpolateSurface(Surfaces.spoilerRatio, TargetSpoilerPosition, diffMs.count(), flightModel.FLAPS_DURATION);
+        InterpolateSurface(Surfaces.tireDeflect, TargetGearDeflection, diffMs.count(), 1500, 1.5f);
+        InterpolateSurface(Surfaces.reversRatio, TargetReverserPosition, diffMs.count(), 1500);
         PreviousSurfaceUpdateTime = now;
 
         SetGearRatio(Surfaces.gearPosition);
@@ -606,116 +516,121 @@ namespace xpilot
 
         HexToRgb(Config::Instance().getAircraftLabelColor(), colLabel);
 
-        // Sounds
+        UpdateSounds();
+    }
 
-        XPLMCameraPosition_t camera;
-        XPLMReadCameraPosition(&camera);
+    void NetworkAircraft::UpdateSounds()
+    {
+        //XPLMCameraPosition_t camera;
+      //XPLMReadCameraPosition(&camera);
 
-        auto& pos = GetLocation();
+      //auto& pos = GetLocation();
 
-        vect apos(pos.x, pos.y, pos.z);
-        vect user(camera.x, camera.y, camera.z);
-        vect diff = apos - user;
-        float dist = (diff / diff);
-        m_position = diff;
-        const float networkTime = GetNetworkTime();
-        const float d_ts = networkTime - prev_ts;
-        m_velocity = vect((pos.x - prev_x) / d_ts, (pos.y - prev_y) / d_ts, (pos.z - prev_z) / d_ts);
+      //vect apos(pos.x, pos.y, pos.z);
+      //vect user(camera.x, camera.y, camera.z);
+      //vect diff = apos - user;
+      //float dist = (diff / diff);
+      //m_position = diff;
+      //const float networkTime = GetNetworkTime();
+      //const float d_ts = networkTime - prev_ts;
+      //m_velocity = vect((pos.x - prev_x) / d_ts, (pos.y - prev_y) / d_ts, (pos.z - prev_z) / d_ts);
 
-        constexpr float minDistance = 3000.0f;
-        constexpr float positionAdj = 25.0f;
+      //constexpr float minDistance = 500.0f;
+      //constexpr float positionAdj = 25.0f;
 
-        ALfloat soundPos[3] = { m_position.x / positionAdj, m_position.y / positionAdj, m_position.z / positionAdj };
-        ALfloat soundVel[3] = { m_velocity.x / positionAdj, m_velocity.y / positionAdj, m_velocity.z / positionAdj };
+      //ALfloat soundPos[3] = { m_position.x / positionAdj, m_position.y / positionAdj, m_position.z / positionAdj };
+      //ALfloat soundVel[3] = { m_velocity.x / positionAdj, m_velocity.y / positionAdj, m_velocity.z / positionAdj };
 
-        if (!IsEnginesRunning || dist > minDistance) {
-            if (m_soundsPlaying) {
-                // fade out engine sound when stopping sound
-                if (m_currentGain > 0.0f) {
-                    auto now = std::chrono::system_clock::now();
-                    const auto diffMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_previousGainUpdateTime);
+      ////if (m_currentGain > 0.0f) {
+      ////    alSourcef(m_soundSource, AL_GAIN, std::max(m_currentGain, 0.0f));
+      ////}
+      ////else {
+      ////    stopSounds();
+      ////    m_soundsPlaying = false;
+      ////}
 
-                    m_currentGain -= 0.01f;
+      //if (!IsEnginesRunning || dist > minDistance) {
+      //    if (m_soundsPlaying) {
+      //        m_currentGain = 0.0f;
+      //    }
+      //}
+      //else {
+      //    setEngineState(EngineState::Normal);
 
-                    for (int i = 0; i < m_engineCount; i++) {
-                        if (m_soundSources[i]) {
-                            alSourcef(m_soundSources[i], AL_GAIN, std::max(m_currentGain, 0.0f));
-                        }
-                    }
+      //    //if (IsFirstRenderPending) {
+      //    //    setEngineState(EngineState::Normal);
+      //    //}
+      //    //else {
+      //    //    if (IsEnginesRunning != WasEnginesRunning) {
+      //    //        if (!WasEnginesRunning && IsEnginesRunning) {
+      //    //            setEngineState(EngineState::Starter);
+      //    //        }
+      //    //        else {
+      //    //            setEngineState(EngineState::Normal);
+      //    //        }
+      //    //    }
+      //    //}
 
-                    m_previousGainUpdateTime = now;
-                }
-                else {
-                    stopSounds();
-                    m_soundsPlaying = false;
-                }
-            }
-        }
-        else {
-            if (IsFirstRenderPending) {
-                setEngineState(EngineState::Normal);
-            }
-            else {
-                if (IsEnginesRunning != WasEnginesRunning) {
-                    if (!WasEnginesRunning && IsEnginesRunning) {
-                        setEngineState(EngineState::Starter);
-                    }
-                    else {
-                        setEngineState(EngineState::Normal);
-                    }
-                }
-            }
+      //    float idleGain = 0.70f;
+      //    float normalGain = 1.0f;
+      //    float idlePitch = 0.70f;
+      //    float normalPitch = 1.0f;
+      //    bool isIdle = (m_velocity / m_velocity) < 1.0f;
+      //    float targetGain = isIdle ? idleGain : normalGain;
+      //    float targetPitch = isIdle ? idlePitch : normalPitch;
+      //    
+      //    Interpolate(m_currentGain, targetGain, _elapsedSinceLastCall, isIdle ? 5000 : 10000);
+      //    Interpolate(m_currentPitch, targetPitch, _elapsedSinceLastCall, isIdle ? 5000 : 10000);
 
-            float idleGain = 0.70f;
-            float normalGain = 1.0f;
-            float idlePitch = 0.70f;
-            float normalPitch = 1.0f;
-            bool isIdle = (m_velocity / m_velocity) < 1.0f;
-            float targetGain = isIdle ? idleGain : normalGain;
-            float targetPitch = isIdle ? idlePitch : normalPitch;
-            
-            Interpolate(m_currentGain, targetGain, diffMs.count(), isIdle ? 5000 : 10000);
-            Interpolate(m_currentPitch, targetPitch, diffMs.count(), isIdle ? 5000 : 10000);
+      //    alSourcefv(m_soundSource, AL_POSITION, soundPos);
+      //    alSourcefv(m_soundSource, AL_VELOCITY, soundVel);
+      //    alSourcef(m_soundSource, AL_GAIN, m_currentGain);
+      //    alSourcef(m_soundSource, AL_PITCH, m_currentPitch);
 
-            for (int i = 0; i < m_engineCount; i++) {
-                if (m_soundSources[i]) {
-                    alSourcefv(m_soundSources[i], AL_POSITION, soundPos);
-                    alSourcefv(m_soundSources[i], AL_VELOCITY, soundVel);
-                    alSourcef(m_soundSources[i], AL_GAIN, m_currentGain);
-                    alSourcef(m_soundSources[i], AL_PITCH, m_currentPitch);
-                }
-            }
+      //    //if (m_engineState == EngineState::Starter) {
+      //    //    const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - m_starterSoundBegan);
+      //    //    float starterTime = 0.0f;
 
-            if (m_engineState == EngineState::Starter) {
-                const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - m_starterSoundBegan);
-                float starterTime = 0.0f;
+      //    //    switch (m_engineClass) {
+      //    //    case EngineClass::JetEngine:
+      //    //        starterTime = JetStarterTime;
+      //    //        break;
+      //    //    case EngineClass::PistonProp:
+      //    //        starterTime = PistonStarterTime;
+      //    //        break;
+      //    //    case EngineClass::TurboProp:
+      //    //        starterTime = TurboStarterTime;
+      //    //        break;
+      //    //    }
 
-                switch (m_engineClass) {
-                case EngineClass::JetEngine:
-                    starterTime = JetStarterTime;
-                    break;
-                case EngineClass::PistonProp:
-                    starterTime = PistonStarterTime;
-                    break;
-                case EngineClass::TurboProp:
-                    starterTime = TurboStarterTime;
-                    break;
-                }
+      //    //    if (elapsed.count() > starterTime) {
+      //    //        setEngineState(EngineState::Normal);
+      //    //    }
+      //    //}
 
-                if (elapsed.count() > starterTime) {
-                    setEngineState(EngineState::Normal);
-                }
-            }
+      //    if (IsRendered() && Config::Instance().getEnableAircraftSounds()) {
+      //        startSoundThread();
+      //    }
+      //    else {
+      //        stopSounds();
+      //    }
+      //}
 
-            if (IsRendered() && Config::Instance().getEnableAircraftSounds()) {
-                startSoundThread();
-            }
-            else {
-                stopSounds();
-            }
-        }
+      ////WasEnginesRunning = IsEnginesRunning;
+    }
 
-        WasEnginesRunning = IsEnginesRunning;
+    void NetworkAircraft::stopSounds()
+    {
+        m_soundLoaded = false;
+        alSourceStop(m_soundSource);
+        alSourceRewind(m_soundSource);
+    }
+
+    void NetworkAircraft::audioLoop()
+    {
+        alSourcePlay(m_soundSource);
+        m_soundLoaded = true;
+        m_soundsPlaying = true;
     }
 
     void NetworkAircraft::copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const
@@ -792,6 +707,58 @@ namespace xpilot
 
         // Fallback
         modelMatches.push_back({ "MediumJets", ".*" });
+    }
+
+    FlightModel NetworkAircraft::GetFlightModel(const XPMP2::CSLModelInfo_t model)
+    {
+        std::string classification = string_format("%s;%s;%s;", model.doc8643WTC.c_str(), model.doc8643Classification.c_str(), model.icaoType.c_str());
+        std::string category = "MediumJets";
+
+        for (const auto& mapIt : FlightModel::modelMatches) {
+            std::smatch m;
+            std::regex re(mapIt.regex.c_str());
+            std::regex_search(classification, m, re);
+            if (m.size() > 0) {
+                category = mapIt.category;
+                break;
+            }
+        }
+
+        FlightModel flightModel = {};
+        flightModel.modelCategory = category;
+
+        if (category == "HugeJets") {
+            flightModel.FLAPS_DURATION = 10000;
+            flightModel.GEAR_DURATION = 10000;
+            flightModel.GEAR_DEFLECTION = 1.4;
+        }
+        else if (category == "BizJet") {
+            flightModel.FLAPS_DURATION = 5000;
+            flightModel.GEAR_DURATION = 0.25;
+            flightModel.GEAR_DEFLECTION = 0.5;
+        }
+        else if (category == "GA") {
+            flightModel.FLAPS_DURATION = 5000;
+            flightModel.GEAR_DURATION = 10000;
+            flightModel.GEAR_DEFLECTION = 0.25;
+        }
+        else if (category == "LightAC") {
+            flightModel.FLAPS_DURATION = 5000;
+            flightModel.GEAR_DURATION = 10000;
+            flightModel.GEAR_DEFLECTION = 0.25;
+        }
+        else if (category == "Heli") {
+            flightModel.FLAPS_DURATION = 5000;
+            flightModel.GEAR_DURATION = 10000;
+            flightModel.GEAR_DEFLECTION = 0.25;
+        }
+        else {
+            flightModel.FLAPS_DURATION = 5000;
+            flightModel.GEAR_DURATION = 10000;
+            flightModel.GEAR_DEFLECTION = 0.5;
+        }
+
+        return flightModel;
     }
 
     std::vector<FlightModelInfo> FlightModel::modelMatches;

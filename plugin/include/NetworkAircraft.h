@@ -135,7 +135,7 @@ namespace xpilot
         XPMPPlaneSurfaces_t Surfaces;
         XPMPPlaneRadar_t Radar;
 
-        FlightModel pMdl;
+        FlightModel flightModel;
 
         TerrainProbe LocalTerrainProbe;
         std::optional<double> LocalTerrainElevation = {};
@@ -164,10 +164,10 @@ namespace xpilot
         void Extrapolate(Vector3 velocityVector, Vector3 rotationVector, double interval);
         void GroundClamping(float frameRate);
         void EnsureAboveGround();
-        static double NormalizeDegrees(double value, double lowerBound, double upperBound);
+        void UpdateSounds();
 
         ALuint m_soundBuffer = 0;
-        ALuint m_soundSources[2];
+        ALuint m_soundSource = 0;
 
         float m_pitch = 1.0f;
         float m_gain = 1.0f;
@@ -182,7 +182,6 @@ namespace xpilot
         void stopSoundThread();
         void setEngineState(EngineState state);
         std::unique_ptr<std::thread> m_soundThread;
-        std::chrono::system_clock::time_point m_previousGainUpdateTime;
         std::chrono::system_clock::time_point m_starterSoundBegan;
 
         // length (in seconds) of engine starter sounds, used for transition between starter and engine sound
@@ -192,7 +191,6 @@ namespace xpilot
 
         EngineClass m_engineClass;
         EngineState m_engineState;
-        int m_engineCount;
         vect m_velocity;
         vect m_position;
     };

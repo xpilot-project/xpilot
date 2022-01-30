@@ -145,6 +145,12 @@ inline bool is_number(const std::string& s)
 	}) == s.end();
 }
 
+inline double Round(double value, int to)
+{
+	double places = pow(10.0, to);
+	return round(value * places) / places;
+}
+
 inline std::string GetXPlanePath()
 {
 	char buffer[2048];
