@@ -221,14 +221,12 @@ namespace xpilot
             return;
         }
 
-        if (!RemoteVisualState.AltitudeAgl.has_value()) {
-            if (IsReportedOnGround && (RemoteVisualState.AltitudeTrue - LocalTerrainElevation.value() > LocalTerrainElevation.value())) {
-                AdjustedAltitude = LocalTerrainElevation.value() - PredictedVisualState.AltitudeTrue;
-                EnsureAboveGround();
-                return;
-            }
-            AdjustedAltitude = {};
-            return;
+        double agl;
+        if (RemoteVisualState.AltitudeAgl.has_value()) {
+            agl = RemoteVisualState.AltitudeAgl.value();
+        }
+        else {
+            agl = PredictedVisualState.AltitudeTrue - LocalTerrainElevation.value();
         }
 
         // Check if we can bail out early.
@@ -244,11 +242,11 @@ namespace xpilot
 
         double newTargetOffset;
         if (HasUsableTerrainElevationData || IsReportedOnGround) {
-            double remoteTerrainElevation = RemoteVisualState.AltitudeTrue - RemoteVisualState.AltitudeAgl.value();
+            double remoteTerrainElevation = RemoteVisualState.AltitudeTrue - agl;
             newTargetOffset = LocalTerrainElevation.value() - remoteTerrainElevation;
 
             // correct for terrain elevation differences in X-Plane
-            if (RemoteVisualState.AltitudeTrue + newTargetOffset > LocalTerrainElevation.value()) {
+            if (IsReportedOnGround && (RemoteVisualState.AltitudeTrue + newTargetOffset > LocalTerrainElevation.value())) {
                 double adj = LocalTerrainElevation.value() - (RemoteVisualState.AltitudeTrue + newTargetOffset);
                 newTargetOffset += adj;
             }
@@ -351,9 +349,6 @@ namespace xpilot
             _elapsedSinceLastCall
         );
 
-        const auto now = chrono::system_clock::now();
-        const auto diffMs = chrono::duration_cast<chrono::milliseconds>(now - PreviousSurfaceUpdateTime);
-
         TargetGearPosition = IsGearDown || IsReportedOnGround ? 1.0f : 0.0f;
         TargetSpoilerPosition = IsSpoilersDeployed ? 1.0f : 0.0f;
         TargetReverserPosition = IsEnginesReversing ? 1.0f : 0.0f;
@@ -372,44 +367,28 @@ namespace xpilot
             IsFirstRenderPending = false;
         }
 
-        if (IsReportedOnGround) {
-            TargetGearDeflection = flightModel.GEAR_DEFLECTION / 2.0f;
-        }
-        else if (abs(TerrainOffset) > 0.0f) {
-            double v = TerrainOffset / TargetTerrainOffset;
-            if (v >= 0.95f) {
-                TargetGearDeflection = flightModel.GEAR_DEFLECTION / 2.0f;
-                TerrainOffsetFinished = true; // terrain offset is nearly finished; this boolean is used trigger when the aircraft wheels can begin spinning
-            }
-        }
-        else {
-            TerrainOffsetFinished = false;
-        }
-
         SetLightsTaxi(Surfaces.lights.taxiLights);
         SetLightsLanding(Surfaces.lights.landLights);
         SetLightsBeacon(Surfaces.lights.bcnLights);
         SetLightsStrobe(Surfaces.lights.strbLights);
         SetLightsNav(Surfaces.lights.navLights);
 
-        InterpolateSurface(Surfaces.gearPosition, TargetGearPosition, diffMs.count(), flightModel.GEAR_DURATION);
-        InterpolateSurface(Surfaces.flapRatio, TargetFlapsPosition, diffMs.count(), flightModel.FLAPS_DURATION);
-        InterpolateSurface(Surfaces.spoilerRatio, TargetSpoilerPosition, diffMs.count(), flightModel.FLAPS_DURATION);
-        InterpolateSurface(Surfaces.tireDeflect, TargetGearDeflection, diffMs.count(), 1500, 1.5f);
-        InterpolateSurface(Surfaces.reversRatio, TargetReverserPosition, diffMs.count(), 1500);
-        PreviousSurfaceUpdateTime = now;
+        InterpolateSurface(Surfaces.gearPosition, TargetGearPosition, _elapsedSinceLastCall, flightModel.GEAR_DURATION);
+        InterpolateSurface(Surfaces.flapRatio, TargetFlapsPosition, _elapsedSinceLastCall, flightModel.FLAPS_DURATION);
+        InterpolateSurface(Surfaces.spoilerRatio, TargetSpoilerPosition, _elapsedSinceLastCall, flightModel.FLAPS_DURATION);
+        InterpolateSurface(Surfaces.reversRatio, TargetReverserPosition, _elapsedSinceLastCall, 1500);
 
         SetGearRatio(Surfaces.gearPosition);
         SetFlapRatio(Surfaces.flapRatio);
         SetSlatRatio(GetFlapRatio());
         SetSpoilerRatio(Surfaces.spoilerRatio);
         SetSpeedbrakeRatio(Surfaces.spoilerRatio);
-        SetTireDeflection(Surfaces.tireDeflect);
+        SetTireDeflection(flightModel.GEAR_DEFLECTION / 2.0f);
         SetReversDeployRatio(Surfaces.reversRatio);
         SetNoseWheelAngle(RemoteVisualState.NoseWheelAngle);
         SetWeightOnWheels(IsReportedOnGround);
 
-        if (IsReportedOnGround || TerrainOffsetFinished)
+        if (IsReportedOnGround)
         {
             double rpm = (60 / (2 * M_PI * 3.2)) * abs(PositionalVelocityVector.X);
             double rpmDeg = RpmToDegree(GetTireRotRpm(), _elapsedSinceLastCall);

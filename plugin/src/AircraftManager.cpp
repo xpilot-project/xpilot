@@ -32,8 +32,7 @@ namespace xpilot
 	constexpr double ERROR_CORRECTION_INTERVAL_SLOW = 5.0;
 
 	constexpr long TERRAIN_ELEVATION_DATA_USABLE_AGE = 2000;
-	constexpr double MAX_USABLE_ALTITUDE_AGL_LOW_ELEVATION = 100.0;
-	constexpr double MAX_USABLE_ALTITUDE_AGL_HIGH_ELEVATION = 50.0;
+	constexpr double MAX_USABLE_ALTITUDE_AGL = 100.0;
 	constexpr double TERRAIN_ELEVATION_MAX_SLOPE = 3.0;
 
 	constexpr float CLOSED_SPACE_VOLUME_SCALAR = 0.50f;
@@ -443,10 +442,7 @@ namespace xpilot
 			return meta.Timestamp < (now - chrono::milliseconds(TERRAIN_ELEVATION_DATA_USABLE_AGE + 250));
 		});
 
-		double MAX_AGL_ALTITUDE = aircraft->LocalTerrainElevation.has_value() ? (aircraft->LocalTerrainElevation.value() <= 1000.0f) ?
-			MAX_USABLE_ALTITUDE_AGL_LOW_ELEVATION : MAX_USABLE_ALTITUDE_AGL_HIGH_ELEVATION : MAX_USABLE_ALTITUDE_AGL_LOW_ELEVATION;
-
-		if (aircraft->RemoteVisualState.AltitudeAgl.has_value() && (aircraft->RemoteVisualState.AltitudeAgl.value() <= MAX_AGL_ALTITUDE)) {
+		if (aircraft->RemoteVisualState.AltitudeAgl.has_value() && (aircraft->RemoteVisualState.AltitudeAgl.value() <= MAX_USABLE_ALTITUDE_AGL)) {
 			TerrainElevationData data{};
 			data.Timestamp = now;
 			data.Location.Latitude = aircraft->RemoteVisualState.Lat;

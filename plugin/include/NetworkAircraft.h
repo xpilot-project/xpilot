@@ -119,10 +119,8 @@ namespace xpilot
         float TargetGearPosition = 0.0f;
         float TargetFlapsPosition = 0.0f;
         float TargetSpoilerPosition = 0.0f;
-        float TargetGearDeflection = 0.0f;
         string Origin;
         string Destination;
-        chrono::system_clock::time_point PreviousSurfaceUpdateTime;
         XPMPPlaneSurfaces_t Surfaces;
         XPMPPlaneRadar_t Radar;
 
