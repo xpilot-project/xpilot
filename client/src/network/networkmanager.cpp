@@ -569,7 +569,7 @@ namespace xpilot
 
     void NetworkManager::SendFastPositionPacket()
     {
-        if(!m_connectInfo.ObserverMode)
+        if(!m_connectInfo.ObserverMode && !m_connectInfo.TowerViewMode)
         {
             m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign,
                                                m_userAircraftData.Latitude,
@@ -591,7 +591,7 @@ namespace xpilot
 
     void NetworkManager::SendEmptyFastPositionPacket()
     {
-        if(!m_connectInfo.ObserverMode)
+        if(!m_connectInfo.ObserverMode && !m_connectInfo.TowerViewMode)
         {
             m_fsd.SendPDU(PDUFastPilotPosition(m_connectInfo.Callsign,
                                                m_userAircraftData.Latitude,
