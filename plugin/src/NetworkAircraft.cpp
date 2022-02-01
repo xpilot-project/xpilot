@@ -23,6 +23,7 @@
 #include "Quaternion.hpp"
 #include <chrono>
 #include <regex>
+#include <cassert>
 
 using namespace std;
 
@@ -215,11 +216,9 @@ namespace xpilot
             );
         }
 
+        AdjustedAltitude = {};
         if (!LocalTerrainElevation.has_value())
-        {
-            AdjustedAltitude = {};
             return;
-        }
 
         double agl;
         if (RemoteVisualState.AltitudeAgl.has_value()) {
@@ -267,7 +266,7 @@ namespace xpilot
             }
             else {
                 double window = !IsReportedOnGround
-                    && (RemoteVisualState.AltitudeAgl.value() >= MIN_AGL_FOR_CLIMBOUT)
+                    && (agl >= MIN_AGL_FOR_CLIMBOUT)
                     && (TargetTerrainOffset == 0.0) ? TERRAIN_OFFSET_WINDOW_CLIMBOUT : TERRAIN_OFFSET_WINDOW_LANDING;
                 double step = TerrainOffsetMagnitude / (frameRate * window);
                 if (step >= abs(TargetTerrainOffset - TerrainOffset)) {
@@ -349,6 +348,9 @@ namespace xpilot
             _elapsedSinceLastCall
         );
 
+        const auto now = chrono::system_clock::now();
+        const auto diffMs = chrono::duration_cast<chrono::milliseconds>(now - PreviousSurfaceUpdateTime);
+
         TargetGearPosition = IsGearDown || IsReportedOnGround ? 1.0f : 0.0f;
         TargetSpoilerPosition = IsSpoilersDeployed ? 1.0f : 0.0f;
         TargetReverserPosition = IsEnginesReversing ? 1.0f : 0.0f;
@@ -361,7 +363,6 @@ namespace xpilot
             Surfaces.gearPosition = TargetGearPosition;
             Surfaces.flapRatio = TargetFlapsPosition;
             Surfaces.spoilerRatio = TargetSpoilerPosition;
-            Surfaces.tireDeflect = IsReportedOnGround ? flightModel.GEAR_DEFLECTION / 2.0f : flightModel.GEAR_DEFLECTION;
         }
         else if (FastPositionsReceivedCount > 1) {
             IsFirstRenderPending = false;
@@ -373,10 +374,11 @@ namespace xpilot
         SetLightsStrobe(Surfaces.lights.strbLights);
         SetLightsNav(Surfaces.lights.navLights);
 
-        InterpolateSurface(Surfaces.gearPosition, TargetGearPosition, _elapsedSinceLastCall, flightModel.GEAR_DURATION);
-        InterpolateSurface(Surfaces.flapRatio, TargetFlapsPosition, _elapsedSinceLastCall, flightModel.FLAPS_DURATION);
-        InterpolateSurface(Surfaces.spoilerRatio, TargetSpoilerPosition, _elapsedSinceLastCall, flightModel.FLAPS_DURATION);
-        InterpolateSurface(Surfaces.reversRatio, TargetReverserPosition, _elapsedSinceLastCall, 1500);
+        InterpolateSurface(Surfaces.gearPosition, TargetGearPosition, diffMs.count(), flightModel.GEAR_DURATION);
+        InterpolateSurface(Surfaces.flapRatio, TargetFlapsPosition, diffMs.count(), flightModel.FLAPS_DURATION);
+        InterpolateSurface(Surfaces.spoilerRatio, TargetSpoilerPosition, diffMs.count(), flightModel.FLAPS_DURATION);
+        InterpolateSurface(Surfaces.reversRatio, TargetReverserPosition, diffMs.count(), 1500);
+        PreviousSurfaceUpdateTime = now;
 
         SetGearRatio(Surfaces.gearPosition);
         SetFlapRatio(Surfaces.flapRatio);

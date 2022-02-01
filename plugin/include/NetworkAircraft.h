@@ -43,7 +43,7 @@ namespace xpilot
         double Lat;
         double Lon;
         double AltitudeTrue;
-        optional<double> AltitudeAgl;
+        optional<double> AltitudeAgl = {};
         double Pitch;
         double Heading;
         double Bank;
@@ -121,6 +121,7 @@ namespace xpilot
         float TargetSpoilerPosition = 0.0f;
         string Origin;
         string Destination;
+        chrono::system_clock::time_point PreviousSurfaceUpdateTime;
         XPMPPlaneSurfaces_t Surfaces;
         XPMPPlaneRadar_t Radar;
 

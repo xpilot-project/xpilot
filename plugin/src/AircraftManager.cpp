@@ -374,7 +374,6 @@ namespace xpilot
 			aircraft->PositionalVelocityVector = positionalVector;
 			aircraft->RotationalVelocityVector = rotationalVector;
 			aircraft->RemoteVisualState = visualState;
-			aircraft->RemoteVisualState.AltitudeAgl = visualState.AltitudeAgl;
 			aircraft->UpdateErrorVectors(ERROR_CORRECTION_INTERVAL_FAST);
 			UpdateAircraft(aircraft);
 		}

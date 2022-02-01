@@ -719,7 +719,6 @@ void XplaneAdapter::AddPlaneToSimulator(const NetworkAircraft &aircraft)
     data.insert("latitude", aircraft.RemoteVisualState.Latitude);
     data.insert("longitude", aircraft.RemoteVisualState.Longitude);
     data.insert("altitude", aircraft.RemoteVisualState.Altitude);
-    data.insert("agl", aircraft.RemoteVisualState.AltitudeAgl);
     data.insert("heading", aircraft.RemoteVisualState.Heading);
     data.insert("bank", aircraft.RemoteVisualState.Bank);
     data.insert("pitch", aircraft.RemoteVisualState.Pitch);
