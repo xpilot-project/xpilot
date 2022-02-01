@@ -8,6 +8,7 @@
 #include <QDateTime>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <cmath>
 
 using namespace xpilot;
 
@@ -760,7 +761,7 @@ void XplaneAdapter::PlaneConfigChanged(const NetworkAircraft &aircraft)
 
     if(aircraft.Configuration->FlapsPercent.has_value())
     {
-        data.insert("flaps", aircraft.Configuration->FlapsPercent.value() / 100.0f);
+        data.insert("flaps", std::round((aircraft.Configuration->FlapsPercent.value() / 100.0f) * 100.0) / 100.0);
     }
 
     if(aircraft.Configuration->GearDown.has_value())
