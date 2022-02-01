@@ -30,60 +30,61 @@ QJsonObject AircraftConfiguration::ToJson() const
     {
         QJsonObject engines;
 
-        if(Engines->Engine1Running.has_value())
+        if(Engines->Engine1Running.has_value() || Engines->Engine1Reversing.has_value())
         {
-            QJsonObject running;
-            running.insert("on", Engines->Engine1Running.value());
-            engines.insert("1", running);
+            QJsonObject engine1;
+            if(Engines->Engine1Running.has_value())
+            {
+                engine1.insert("on", Engines->Engine1Running.value());
+            }
+            if(Engines->Engine1Reversing.has_value())
+            {
+                engine1.insert("is_reversing", Engines->Engine1Reversing.value());
+            }
+            engines.insert("1", engine1);
         }
 
-        if(Engines->Engine1Reversing.has_value())
+        if(Engines->Engine2Running.has_value() || Engines->Engine2Reversing.has_value())
         {
-            QJsonObject reversing;
-            reversing.insert("is_reversing", Engines->Engine1Reversing.value());
-            engines.insert("1", reversing);
+            QJsonObject engine2;
+            if(Engines->Engine2Running.has_value())
+            {
+                engine2.insert("on", Engines->Engine2Running.value());
+            }
+            if(Engines->Engine2Reversing.has_value())
+            {
+                engine2.insert("is_reversing", Engines->Engine2Reversing.value());
+            }
+            engines.insert("2", engine2);
         }
 
-        if(Engines->Engine2Running.has_value())
+        if(Engines->Engine3Running.has_value() || Engines->Engine3Reversing.has_value())
         {
-            QJsonObject running;
-            running.insert("on", Engines->Engine2Running.value());
-            engines.insert("2", running);
+
+            QJsonObject engine3;
+            if(Engines->Engine3Running.has_value())
+            {
+                engine3.insert("on", Engines->Engine3Running.value());
+            }
+            if(Engines->Engine3Reversing.has_value())
+            {
+                engine3.insert("is_reversing", Engines->Engine3Reversing.value());
+            }
+            engines.insert("3", engine3);
         }
 
-        if(Engines->Engine2Reversing.has_value())
+        if(Engines->Engine4Running.has_value() || Engines->Engine4Reversing.has_value())
         {
-            QJsonObject reversing;
-            reversing.insert("is_reversing", Engines->Engine2Reversing.value());
-            engines.insert("2", reversing);
-        }
-
-        if(Engines->Engine3Running.has_value())
-        {
-            QJsonObject running;
-            running.insert("on", Engines->Engine3Running.value());
-            engines.insert("3", running);
-        }
-
-        if(Engines->Engine3Reversing.has_value())
-        {
-            QJsonObject reversing;
-            reversing.insert("is_reversing", Engines->Engine3Reversing.value());
-            engines.insert("3", reversing);
-        }
-
-        if(Engines->Engine4Running.has_value())
-        {
-            QJsonObject running;
-            running.insert("on", Engines->Engine4Running.value());
-            engines.insert("4", running);
-        }
-
-        if(Engines->Engine4Reversing.has_value())
-        {
-            QJsonObject reversing;
-            reversing.insert("is_reversing", Engines->Engine4Reversing.value());
-            engines.insert("4", reversing);
+            QJsonObject engine4;
+            if(Engines->Engine4Running.has_value())
+            {
+                engine4.insert("on", Engines->Engine4Running.value());
+            }
+            if(Engines->Engine4Reversing.has_value())
+            {
+                engine4.insert("is_reversing", Engines->Engine4Reversing.value());
+            }
+            engines.insert("4", engine4);
         }
 
         cfg["engines"] = engines;
