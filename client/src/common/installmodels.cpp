@@ -207,7 +207,7 @@ void InstallModels::DeleteTempDownload()
 
 void InstallModels::downloadModels()
 {
-    DownloadModels("https://cdn.xpilot-project.org/CSL/Bluebell.zip").then([&]{
+    DownloadModels("https://xpilot-project.org/api/v3/DownloadModels").then([&]{
         emit setXplanePath();
     }).fail([&](const QString &err){
         errorEncountered("Download error: " + err);
