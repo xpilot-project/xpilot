@@ -50,7 +50,10 @@ QPromise<void> InstallModels::DownloadModels(const QString &url)
                 return;
             }
 
-            m_reply = nam->get(QNetworkRequest{url});
+            QNetworkRequest networkRequest(url);
+            networkRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, true);
+
+            m_reply = nam->get(networkRequest);
             QObject::connect(m_reply, &QNetworkReply::downloadProgress, [&](qint64 read, qint64 total) {
                 double pct = ((double)read / (double)total);
                 emit downloadProgressChanged(pct);
