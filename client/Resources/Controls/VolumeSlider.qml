@@ -7,6 +7,7 @@ Rectangle {
     property real minValue: 0
     property real maxValue: 100
     property real volume: 50
+    property bool showPercent: true
     property string comLabel: "COM1"
     signal volumeValueChanged(real volume)
 
@@ -62,7 +63,7 @@ Rectangle {
 
         Label {
             id: label1
-            text: Math.round(control.value) + "%"
+            text: Math.round(control.value) + (showPercent ? "%" : "")
             anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: 13
             renderType: Text.NativeRendering

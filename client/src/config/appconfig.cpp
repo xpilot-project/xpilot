@@ -62,6 +62,7 @@ void AppConfig::loadConfig()
         AutoModeC = true;
         Com1Volume = 50;
         Com2Volume = 50;
+        MicrophoneVolume = 0;
         HFSquelchEnabled = false;
         XplaneNetworkAddress = DEFAULT_XPLANE_NETWORK_ADDRESS;
         XplanePluginPort = DEFAULT_PLUGIN_PORT;
@@ -97,6 +98,7 @@ void AppConfig::loadConfig()
     OutputDevice = jsonMap["OutputDevice"].toString();
     Com1Volume = qMin(qMax(jsonMap["Com1Volume"].toInt(), 0), 100);
     Com2Volume = qMin(qMax(jsonMap["Com2Volume"].toInt(), 0), 100);
+    MicrophoneVolume = qMin(qMax(jsonMap["MicrophoneVolume"].toInt(), -18), 18);
     AudioEffectsDisabled = jsonMap["AudioEffectsDisabled"].toBool();
     HFSquelchEnabled = jsonMap["HFSquelchEnabled"].toBool();
     AutoModeC = jsonMap["AutoModeC"].toBool();
@@ -157,6 +159,7 @@ void AppConfig::saveConfig()
     jsonObj["OutputDevice"] = OutputDevice;
     jsonObj["Com1Volume"] = qMin(qMax(Com1Volume, 0), 100);
     jsonObj["Com2Volume"] = qMin(qMax(Com2Volume, 0), 100);
+    jsonObj["MicrophoneVolume"] = qMin(qMax(MicrophoneVolume, -18), 18);
     jsonObj["AudioEffectsDisabled"] = AudioEffectsDisabled;
     jsonObj["HFSquelchEnabled"] = HFSquelchEnabled;
     jsonObj["AutoModeC"] = AutoModeC;

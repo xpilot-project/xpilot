@@ -12,7 +12,7 @@ Window {
     id: formSettings
     title: "Settings"
     width: 670
-    height: 600
+    height: 660
     minimumHeight: height
     minimumWidth: width
     maximumHeight: height
@@ -67,6 +67,7 @@ Window {
         audioApiList.model = audio.AudioApis;
         com1Slider.volume = AppConfig.Com1Volume;
         com2Slider.volume = AppConfig.Com2Volume;
+        microphoneVolume.volume = AppConfig.MicrophoneVolume;
         switchEnableHfSquelch.checked = AppConfig.HFSquelchEnabled;
         switchDisableRadioEffects.checked = AppConfig.AudioEffectsDisabled;
         switchAutoModeC.checked = AppConfig.AutoModeC;
@@ -268,7 +269,7 @@ Window {
                     text: "Automatically set transponder to Mode C on takeoff"
                     font.pixelSize: 13
                     clip: false
-                    Layout.preferredHeight: 32
+                    Layout.preferredHeight: 38
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
                         AppConfig.AutoModeC = switchAutoModeC.checked
@@ -279,7 +280,7 @@ Window {
                     id: switchAlertPrivateMessage
                     text: "Alert when new private message is received"
                     font.pixelSize: 13
-                    Layout.preferredHeight: 32
+                    Layout.preferredHeight: 38
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
                         AppConfig.AlertPrivateMessage = switchAlertPrivateMessage.checked
@@ -301,7 +302,7 @@ Window {
                     id: switchAlertDirectRadioMessage
                     text: "Alert when direct radio message is received"
                     font.pixelSize: 13
-                    Layout.preferredHeight: 32
+                    Layout.preferredHeight: 38
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
                         AppConfig.AlertDirectRadioMessage = switchAlertDirectRadioMessage.checked
@@ -312,7 +313,7 @@ Window {
                     id: switchAlertBroadcast
                     text: "Alert when network broadcast message is received"
                     font.pixelSize: 13
-                    Layout.preferredHeight: 32
+                    Layout.preferredHeight: 38
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
                         AppConfig.AlertNetworkBroadcast = switchAlertBroadcast.checked
@@ -323,7 +324,7 @@ Window {
                     id: switchAlertSelcal
                     text: "Alert when SELCAL notification is received"
                     font.pixelSize: 13
-                    Layout.preferredHeight: 32
+                    Layout.preferredHeight: 38
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
                         AppConfig.AlertSelcal = switchAlertSelcal.checked
@@ -349,6 +350,28 @@ Window {
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
                         AppConfig.KeepWindowVisible = switchKeepWindowVisible.checked
+                    }
+                }
+
+                CustomSwitch {
+                    id: switchEnableHfSquelch
+                    text: "Enable HF Squelch"
+                    font.pixelSize: 13
+                    Layout.preferredHeight: 32
+                    Layout.preferredWidth: 287
+                    onCheckedChanged: {
+                        audio.enableHfSquelch(switchEnableHfSquelch.checked)
+                    }
+                }
+
+                CustomSwitch {
+                    id: switchDisableRadioEffects
+                    text: "Disable Realistic Radio Effects"
+                    font.pixelSize: 13
+                    Layout.preferredHeight: 32
+                    Layout.preferredWidth: 287
+                    onCheckedChanged: {
+                        audio.disableAudioEffects(switchDisableRadioEffects.checked)
                     }
                 }
             }
@@ -435,7 +458,6 @@ Window {
             }
         }
 
-
         Item {
             id: listenDevice
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
@@ -479,7 +501,6 @@ Window {
 
         Item {
             id: microphoneLevel
-            height: 130
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.column: 0
             Layout.row: 8
@@ -490,7 +511,7 @@ Window {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.topMargin: 0
+                anchors.topMargin: -10
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
 
@@ -502,33 +523,35 @@ Window {
             }
 
             ColumnLayout {
-                id: columnLayout3
-                height: 65
+                id: microphoneVolumeGroup
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.topMargin: 20
+                anchors.topMargin: 10
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
-                spacing: 0
 
-                CustomSwitch {
-                    id: switchEnableHfSquelch
-                    text: "Enable HF Squelch"
+                Text {
+                    id: microphoneVolumeInfo
+                    text: "Adjust the mic volume slider so that the peak level indicator remains green while speaking normally."
+                    renderType: Text.NativeRendering
+                    wrapMode: Text.WordWrap
+                    Layout.maximumWidth: 300
+                    linkColor: "#0164AD"
                     font.pixelSize: 13
-                    leftPadding: 0
-                    onCheckedChanged: {
-                        audio.enableHfSquelch(switchEnableHfSquelch.checked)
-                    }
+                    color: "#333333"
+                    topPadding: 5
                 }
 
-                CustomSwitch {
-                    id: switchDisableRadioEffects
-                    text: "Disable Radio Effects"
-                    font.pixelSize: 13
-                    leftPadding: 0
-                    onCheckedChanged: {
-                        audio.disableAudioEffects(switchDisableRadioEffects.checked)
+                VolumeSlider {
+                    id: microphoneVolume
+                    comLabel: "Mic Volume"
+                    minValue: -18
+                    maxValue: 18
+                    showPercent: false
+                    onVolumeValueChanged: {
+                        audio.setMicrophoneVolume(volume)
+                        AppConfig.MicrophoneVolume = volume
                     }
                 }
 
@@ -538,7 +561,7 @@ Window {
                     onLinkActivated: Qt.openUrlExternally(link)
                     renderType: Text.NativeRendering
                     wrapMode: Text.WordWrap
-                    Layout.maximumWidth: 300
+                    Layout.maximumWidth: 600
                     linkColor: "#0164AD"
                     font.pixelSize: 13
                     color: "#333333"
@@ -566,7 +589,7 @@ Window {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 spacing: 0
-                anchors.topMargin: 0
+                anchors.topMargin: -10
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
 

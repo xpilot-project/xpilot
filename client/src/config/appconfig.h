@@ -50,6 +50,7 @@ namespace xpilot
         QString InputDevice;
         int Com1Volume = 100;
         int Com2Volume = 100;
+        int MicrophoneVolume = 0;
         bool AudioEffectsDisabled;
         bool HFSquelchEnabled;
         bool AutoModeC;
@@ -104,6 +105,7 @@ namespace xpilot
         Q_PROPERTY(QString OutputDevice MEMBER OutputDevice)
         Q_PROPERTY(int Com1Volume MEMBER Com1Volume)
         Q_PROPERTY(int Com2Volume MEMBER Com2Volume)
+        Q_PROPERTY(int MicrophoneVolume MEMBER MicrophoneVolume)
         Q_PROPERTY(bool AudioEffectsDisabled MEMBER AudioEffectsDisabled)
         Q_PROPERTY(bool HFSquelchEnabled MEMBER HFSquelchEnabled)
         Q_PROPERTY(bool AutoModeC MEMBER AutoModeC)

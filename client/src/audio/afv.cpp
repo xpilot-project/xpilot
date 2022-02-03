@@ -114,14 +114,10 @@ namespace xpilot
             }
                 break;
             case afv_native::ClientEventType::VoiceServerConnected:
-                if(m_userInitiatedConnect) {
-                    emit notificationPosted((int)NotificationType::Info, "Connected to voice server.");
-                    m_userInitiatedConnect = false;
-                }
+                emit notificationPosted((int)NotificationType::Info, "Connected to voice server.");
                 break;
             case afv_native::ClientEventType::VoiceServerDisconnected:
                 emit notificationPosted((int)NotificationType::Info, "Disconnected from voice server.");
-                m_userInitiatedConnect = true;
                 break;
             default:
                 break;
@@ -424,6 +420,11 @@ namespace xpilot
                                 m_radioStackState.AvionicsPowerOn ? (com2Alias > 0 ? com2Alias : m_radioStackState.Com2Frequency * 1000) : 0);
         m_client->setClientPosition(m_userAircraftData.Latitude, m_userAircraftData.Longitude, m_userAircraftData.AltitudeMslM,
                                     m_userAircraftData.AltitudeAglM);
+    }
+
+    void AudioForVatsim::setMicrophoneVolume(int volume)
+    {
+        m_client->setMicrophoneVolume(volume);
     }
 
     bool AudioForVatsim::fuzzyMatchCallsign(const QString &callsign, const QString &compareTo) const
