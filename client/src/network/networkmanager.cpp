@@ -118,7 +118,7 @@ namespace xpilot
         } else {
             emit notificationPosted((int)NotificationType::Info, "Connected to network.");
         }
-        emit networkConnected(m_connectInfo.Callsign, !m_connectInfo.TowerViewMode);
+        emit networkConnected(m_connectInfo.Callsign, !m_connectInfo.TowerViewMode && !m_connectInfo.ObserverMode);
 
         if(!m_connectInfo.TowerViewMode) {
             QJsonObject reply;
