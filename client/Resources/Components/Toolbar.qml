@@ -11,6 +11,7 @@ GridLayout {
     property bool simConnected: false
     property bool networkConnected: false
     property var myCallsign: ""
+    property bool connectWindowOpen: false
 
     Connections {
         target: xplaneAdapter
@@ -42,6 +43,13 @@ GridLayout {
         }
     }
 
+    Connections {
+        target: connectWindow
+        function onCloseWindow() {
+            connectWindowOpen = false;
+        }
+    }
+
     Row {
         leftPadding: 10
         spacing: 5
@@ -56,6 +64,9 @@ GridLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
+                    if(connectWindowOpen) {
+                        return
+                    }
                     if(networkConnected) {
                         networkManager.disconnectFromNetwork();
                     }
@@ -64,6 +75,7 @@ GridLayout {
                         if(comp.status === Component.Ready) {
                             connectWindow = comp.createObject(mainWindow)
                             connectWindow.open()
+                            connectWindowOpen = true
                         }
                     }
                 }
