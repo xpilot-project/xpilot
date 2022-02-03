@@ -28,7 +28,10 @@ QtPromise::QPromise<QByteArray> VersionCheck::CheckForUpdates()
     return QPromise<QByteArray>{[&](const auto resolve, const auto reject)
         {
             QString url(BuildConfig::versionCheckUrl());
-            m_reply = nam->get(QNetworkRequest{url});
+
+            QNetworkRequest networkRequest(url);
+            networkRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, true);
+            m_reply = nam->get(networkRequest);
 
             QObject::connect(m_reply, &QNetworkReply::finished, [=]() {
                 if(m_reply->error() == QNetworkReply::NoError)
