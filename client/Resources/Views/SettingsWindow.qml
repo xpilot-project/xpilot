@@ -611,7 +611,7 @@ Window {
 
                 CustomSwitch {
                     id: switchAircraftVolumeKnobs
-                    text: "Allow aircraft radio stack volume knobs to control radio volume"
+                    text: "Allow aircraft radio stack volume knobs to control (and override) radio volume"
                     font.pixelSize: 13
                     clip: false
                     Layout.preferredHeight: 35
