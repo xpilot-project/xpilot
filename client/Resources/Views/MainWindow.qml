@@ -332,7 +332,7 @@ Window {
         function onReplayModeDetected() {
             if(networkConnected) {
                 networkManager.disconnectFromNetwork()
-                appendMessage("You have been disconnected from the network becasue Replay Mode is enabled.", colorRed)
+                appendMessage("You have been disconnected from the network because Replay Mode is enabled.", colorRed)
                 if(AppConfig.AlertDisconnect) {
                     mainWindow.alert(0)
                     errorSound.play()
