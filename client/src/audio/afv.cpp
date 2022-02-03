@@ -152,12 +152,16 @@ namespace xpilot
         connect(&m_rxTxQueryTimer, &QTimer::timeout, this, [&]{
             emit radioRxChanged(0, m_radioStackState.Com1ReceiveEnabled && m_client->getRxActive(0));
             emit radioRxChanged(1, m_radioStackState.Com2ReceiveEnabled && m_client->getRxActive(1));
+
+            m_xplaneAdapter.setComRxDataref(0, m_client->getRxActive(0));
+            m_xplaneAdapter.setComRxDataref(1, m_client->getRxActive(1));
         });
         connect(&m_vuTimer, &QTimer::timeout, this, [=]{
             if(!AppConfig::getInstance()->InputDevice.isEmpty())
             {
                 double vu = m_client->getInputPeak();
                 emit inputVuChanged(scaleValue(vu, 0, 100, -40, 0));
+                m_xplaneAdapter.setVuDataref(vu);
             }
         });
         connect(&networkManager, &NetworkManager::networkConnected, this, &AudioForVatsim::OnNetworkConnected);

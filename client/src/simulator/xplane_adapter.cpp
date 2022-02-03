@@ -680,6 +680,24 @@ void XplaneAdapter::setAudioSelection(int radio, bool status)
     }
 }
 
+void XplaneAdapter::setComRxDataref(int radio, bool active)
+{
+    switch(radio)
+    {
+    case 0:
+        setDataRefValue("xpilot/audio/com1_rx", (int)active);
+    break;
+    case 1:
+        setDataRefValue("xpilot/audio/com2_rx", (int)active);
+    break;
+    }
+}
+
+void XplaneAdapter::setVuDataref(float vu)
+{
+    setDataRefValue("xpilot/audio/vu", vu);
+}
+
 void XplaneAdapter::ignoreAircraft(QString callsign)
 {
     if(!m_ignoreList.contains(callsign.toUpper())) {

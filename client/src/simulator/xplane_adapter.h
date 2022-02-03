@@ -45,6 +45,8 @@ public:
     Q_INVOKABLE void sendSocketMessage(const QString& message);
     Q_INVOKABLE void setAudioComSelection(int radio);
     Q_INVOKABLE void setAudioSelection(int radio, bool status);
+    Q_INVOKABLE void setComRxDataref(int radio, bool active);
+    Q_INVOKABLE void setVuDataref(float vu);
     Q_INVOKABLE void ignoreAircraft(QString callsign);
     Q_INVOKABLE void unignoreAircraft(QString callsign);
     Q_INVOKABLE void showIgnoreList();
