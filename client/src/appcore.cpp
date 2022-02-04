@@ -52,8 +52,6 @@ int xpilot::Main(int argc, char* argv[])
     auto sentryClose = qScopeGuard([]{ sentry_close(); });
 
     QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
     QCoreApplication::setApplicationName("xPilot");
     QCoreApplication::setApplicationVersion(xpilot::BuildConfig::getVersionString());
     QCoreApplication::setOrganizationName("Justin Shannon");
