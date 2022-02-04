@@ -30,7 +30,7 @@ Button {
 
     contentItem: Text {
         id: label
-        color: active ? "#ffffff" : btnMouseArea.pressed || btnMouseArea.containsMouse ? "#ffffff" : "#6c757d"
+        color: (active || enabled) ? "#ffffff" : "#6c757d"
         text: button.text.toUpperCase()
         font.pixelSize: button.font.pixelSize
         horizontalAlignment: Text.AlignHCenter

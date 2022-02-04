@@ -30,7 +30,7 @@ Button {
 
     contentItem: Text {
         id: label
-        color: (isActive || mouseArea.pressed || mouseArea.containsMouse) ? "#ffffff" : "#6c757d"
+        color: (isActive || enabled || mouseArea.pressed || mouseArea.containsMouse) ? "#ffffff" : "#6c757d"
         text: button.text.toUpperCase()
         font.pixelSize: button.font.pixelSize
         font.family: robotoMono.name
