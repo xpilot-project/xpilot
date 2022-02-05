@@ -671,10 +671,10 @@ Window {
                     var cli = cliModel.get(j)
                     if(cli.tabName.toLowerCase() === tab.title.toLowerCase()) {
                         if(from) {
-                            cli.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${from}: ${message}`, msgColor: color})
+                            cli.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${from}: ${message.linkify()}`, msgColor: color})
                         }
                         else {
-                            cli.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`, msgColor: color})
+                            cli.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message.linkify()}`, msgColor: color})
                         }
                     }
                 }
