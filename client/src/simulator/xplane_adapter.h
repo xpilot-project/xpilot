@@ -70,6 +70,7 @@ private:
     void SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency);
     void setDataRefValue(std::string dataRef, float value);
     void sendCommand(std::string command);
+    void initZmq();
 
 public slots:
     void OnDataReceived();
@@ -103,7 +104,6 @@ private:
     bool m_initialHandshake = false;
     bool m_validPluginVersion = true;
     bool m_validCsl = true;
-    bool m_requestsSent = false;
 
     UserAircraftData m_userAircraftData{};
     UserAircraftConfigData m_userAircraftConfigData{};
@@ -111,9 +111,12 @@ private:
 
     QList<QString> m_ignoreList;
 
-    std::thread* m_zmqThread;
-    zmq::context_t* m_zmqContext;
-    zmq::socket_t* m_zmqSocket;
+    bool m_zmqInitialized = false;
+    int m_pluginPort = 0;
+    int m_lastPluginPort = 0;
+    std::unique_ptr<std::thread> m_zmqThread;
+    std::unique_ptr<zmq::context_t> m_zmqContext;
+    std::unique_ptr<zmq::socket_t> m_zmqSocket;
     QList<zmq::socket_t*> m_visualSockets;
     QTimer m_heartbeatTimer;
     QTimer m_xplaneDataTimer;

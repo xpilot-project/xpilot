@@ -48,6 +48,7 @@ namespace xpilot
 		m_aiControlled("xpilot/ai_controlled", ReadOnly),
 		m_aircraftCount("xpilot/num_aircraft", ReadOnly),
 		m_pluginVersion("xpilot/version", ReadOnly),
+		m_pluginPort("xpilot/port", ReadOnly),
 		m_frameRatePeriod("sim/operation/misc/frame_rate_period", ReadOnly),
 		m_com1Frequency("sim/cockpit2/radios/actuators/com1_frequency_hz_833", ReadWrite),
 		m_com2Frequency("sim/cockpit2/radios/actuators/com2_frequency_hz_833", ReadWrite),
@@ -145,7 +146,22 @@ namespace xpilot
 			m_zmqSocket = make_unique<zmq::socket_t>(*m_zmqContext.get(), ZMQ_ROUTER);
 			m_zmqSocket->setsockopt(ZMQ_IDENTITY, "xplane", 5);
 			m_zmqSocket->setsockopt(ZMQ_LINGER, 0);
-			m_zmqSocket->bind("tcp://*:" + Config::Instance().getTcpPort());
+			m_zmqSocket->bind("tcp://*:*");
+
+			char port[1024];
+			size_t size = sizeof(port);
+			m_zmqSocket->getsockopt(ZMQ_LAST_ENDPOINT, &port, &size);
+			std::string portStr(port);
+			if (begins_with<string>(portStr, "tcp://"))
+			{
+				portStr.erase(0, 6);
+			}
+			std::string randomPort(portStr.substr(portStr.find(":") + 1).c_str());
+			m_pluginPort = stoi(randomPort);
+
+			m_keepAlive = true;
+			m_zmqThread = make_unique<thread>(&XPilot::ZmqWorker, this);
+			LOG_MSG(logMSG, "Now listening on port %s", randomPort);
 		}
 		catch (zmq::error_t& e)
 		{
@@ -158,10 +174,6 @@ namespace xpilot
 		}
 
 		XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
-
-		m_keepAlive = true;
-		m_zmqThread = make_unique<thread>(&XPilot::ZmqWorker, this);
-		LOG_MSG(logMSG, "Now listening on port %s", Config::Instance().getTcpPort().c_str());
 	}
 
 	void XPilot::Shutdown()

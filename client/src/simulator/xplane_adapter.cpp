@@ -62,7 +62,8 @@ enum DataRef
     SpeedbrakeRatio,
     NoseWheelAngle,
     ReplayMode,
-    PushToTalk
+    PushToTalk,
+    PluginPort
 };
 
 QHostAddress m_hostAddress;
@@ -90,11 +91,194 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 
     m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch() - HEARTBEAT_TIMEOUT_SECS; // initialize timestamp in the past to prevent ghost connection status
 
-    m_zmqContext = new zmq::context_t(1);
-    m_zmqSocket = new zmq::socket_t(*m_zmqContext, ZMQ_DEALER);
+    socket = new QUdpSocket(this);
+
+    m_hostAddress = QHostAddress(AppConfig::getInstance()->XplaneNetworkAddress);
+    if(AppConfig::getInstance()->XplaneNetworkAddress.toLower() == "localhost")
+    {
+        // udp socket doesn't work if the address is "localhost" so we need to convert it
+        m_hostAddress = QHostAddress::LocalHost;
+    }
+    socket->bind(m_hostAddress);
+
+    connect(socket, &QUdpSocket::readyRead, this, &XplaneAdapter::OnDataReceived);
+
+    connect(&m_heartbeatTimer, &QTimer::timeout, this, [&] {
+        qint64 now = QDateTime::currentSecsSinceEpoch();
+
+        if((m_pluginPort > 0 && !m_zmqInitialized) || (m_pluginPort > 0 && m_pluginPort != m_lastPluginPort)) {
+            initZmq();
+            m_lastPluginPort = m_pluginPort;
+        }
+
+        if(!m_initialHandshake || (now - m_lastUdpTimestamp) > HEARTBEAT_TIMEOUT_SECS) {
+            m_radioStackState = {};
+            m_userAircraftData = {};
+            m_userAircraftConfigData = {};
+            Subscribe();
+
+            // request plugin version
+            {
+                QJsonObject reply;
+                reply.insert("type", "PluginVersion");
+                QJsonDocument doc(reply);
+                sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+            }
+
+            // validate csl
+            {
+                QJsonObject reply;
+                reply.insert("type", "ValidateCsl");
+                QJsonDocument doc(reply);
+                sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+            }
+
+            if(m_simConnected) {
+                emit simConnectionStateChanged(false);
+                m_initialHandshake = false;
+                m_simConnected = false;
+            }
+
+            if(m_zmqInitialized)
+            {
+                m_zmqInitialized = false;
+                m_pluginPort = 0;
+                m_lastPluginPort = 0;
+            }
+        } else {
+            if(!m_simConnected && m_validPluginVersion && m_validCsl) {
+                emit simConnectionStateChanged(true);
+                m_simConnected = true;
+            }
+        }
+    });
+    m_heartbeatTimer.start(1000);
+
+    connect(&m_xplaneDataTimer, &QTimer::timeout, this, [&]{
+        emit userAircraftDataChanged(m_userAircraftData);
+        emit userAircraftConfigDataChanged(m_userAircraftConfigData);
+        emit radioStackStateChanged(m_radioStackState);
+    });
+    m_xplaneDataTimer.start(50);
+
+    Subscribe();
+}
+
+void XplaneAdapter::Subscribe()
+{
+    SubscribeDataRef("sim/cockpit2/switches/avionics_power_on", DataRef::AvionicsPower, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_com_selection", DataRef::AudioComSelection, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_selection_com1", DataRef::Com1AudioSelection, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_selection_com2", DataRef::Com2AudioSelection, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/com1_frequency_hz_833", DataRef::Com1Frequency, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/com2_frequency_hz_833", DataRef::Com2Frequency, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_volume_com1", DataRef::Com1Volume, 5);
+    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_volume_com2", DataRef::Com2Volume, 5);
+    SubscribeDataRef("sim/cockpit/radios/transponder_mode", DataRef::TransponderMode, 5);
+    SubscribeDataRef("sim/cockpit/radios/transponder_id", DataRef::TransponderIdent, 5);
+    SubscribeDataRef("sim/cockpit/radios/transponder_code", DataRef::TransponderCode, 5);
+    SubscribeDataRef("sim/cockpit2/switches/beacon_on", DataRef::BeaconLights, 5);
+    SubscribeDataRef("sim/cockpit2/switches/landing_lights_on", DataRef::LandingLights, 5);
+    SubscribeDataRef("sim/cockpit2/switches/taxi_light_on", DataRef::TaxiLights, 5);
+    SubscribeDataRef("sim/cockpit2/switches/navigation_lights_on", DataRef::NavLights, 5);
+    SubscribeDataRef("sim/cockpit2/switches/strobe_lights_on", DataRef::StrobeLights, 5);
+    SubscribeDataRef("sim/flightmodel/position/latitude", DataRef::Latitude, 5);
+    SubscribeDataRef("sim/flightmodel/position/longitude", DataRef::Longitude, 5);
+    SubscribeDataRef("sim/flightmodel/position/elevation", DataRef::AltitudeMsl, 5);
+    SubscribeDataRef("sim/flightmodel/position/y_agl", DataRef::AltitudeAgl, 5);
+    SubscribeDataRef("sim/weather/barometer_sealevel_inhg", DataRef::BarometerSeaLevel, 5);
+    SubscribeDataRef("sim/flightmodel/position/theta", DataRef::Pitch, 5);
+    SubscribeDataRef("sim/flightmodel/position/psi", DataRef::Heading, 5);
+    SubscribeDataRef("sim/flightmodel/position/phi", DataRef::Bank, 5);
+    SubscribeDataRef("sim/flightmodel/position/local_vx", DataRef::LongitudeVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/local_vy", DataRef::AltitudeVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/local_vz", DataRef::LatitudeVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/Qrad", DataRef::PitchVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/Rrad", DataRef::HeadingVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/Prad", DataRef::BankVelocity, 5);
+    SubscribeDataRef("sim/flightmodel/position/groundspeed", DataRef::GroundSpeed, 5);
+    SubscribeDataRef("sim/aircraft/engine/acf_num_engines", DataRef::EngineCount, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_running[0]", DataRef::Engine1Running, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_running[1]", DataRef::Engine2Running, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_running[2]", DataRef::Engine3Running, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_running[3]", DataRef::Engine4Running, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_propmode[0]", DataRef::Engine1Reversing, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_propmode[1]", DataRef::Engine2Reversing, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_propmode[2]", DataRef::Engine3Reversing, 5);
+    SubscribeDataRef("sim/flightmodel/engine/ENGN_propmode[3]", DataRef::Engine4Reversing, 5);
+    SubscribeDataRef("sim/flightmodel/failures/onground_any", DataRef::OnGround, 5);
+    SubscribeDataRef("sim/cockpit/switches/gear_handle_status", DataRef::GearDown, 5);
+    SubscribeDataRef("sim/flightmodel/controls/flaprat", DataRef::FlapRatio, 5);
+    SubscribeDataRef("sim/cockpit2/controls/speedbrake_ratio", DataRef::SpeedbrakeRatio, 5);
+    SubscribeDataRef("sim/flightmodel2/gear/tire_steer_actual_deg[0]", DataRef::NoseWheelAngle, 15);
+    SubscribeDataRef("sim/operation/prefs/replay_mode", DataRef::ReplayMode, 5);
+    SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 15);
+    SubscribeDataRef("xpilot/port", DataRef::PluginPort, 1);
+}
+
+void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
+{
+    QByteArray data;
+
+    data.fill(0, 413);
+    data.insert(0, "RREF");
+    data.insert(5, (const char*)&frequency);
+    data.insert(9, (const char*)&id);
+    data.insert(13, dataRef.c_str());
+    data.resize(413);
+
+    socket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
+}
+
+void XplaneAdapter::setDataRefValue(std::string dataRef, float value)
+{
+    QByteArray data;
+
+    data.fill(0, 509);
+    data.insert(0, "DREF");
+    data.insert(5, QByteArray::fromRawData(reinterpret_cast<char*>(&value), sizeof(float)));
+    data.insert(9, dataRef.c_str());
+    data.resize(509);
+
+    socket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
+}
+
+void XplaneAdapter::sendCommand(std::string command)
+{
+    QByteArray data;
+
+    data.fill(0, command.length() + 6);
+    data.insert(0, "CMND");
+    data.insert(5, command.c_str());
+    data.resize(command.length() + 6);
+
+    socket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
+}
+
+void XplaneAdapter::initZmq()
+{
+    if(m_zmqSocket) {
+        m_zmqSocket->close();
+        m_zmqSocket.reset();
+    }
+    if(m_zmqContext) {
+        m_zmqContext->close();
+        m_zmqContext.reset();
+    }
+    if(m_zmqThread) {
+        m_zmqThread->join();
+        m_zmqThread.reset();
+    }
+
+    m_zmqContext = std::make_unique<zmq::context_t>(1);
+    m_zmqSocket = std::make_unique<zmq::socket_t>(*m_zmqContext, ZMQ_DEALER);
     m_zmqSocket->set(zmq::sockopt::routing_id, "xpilot");
     m_zmqSocket->set(zmq::sockopt::linger, 0);
-    m_zmqSocket->connect(QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
+    m_zmqSocket->connect(QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(m_pluginPort).toStdString());
+
+    if(m_zmqSocket) {
+        m_zmqInitialized = true;
+    }
 
     for(const QString &machine : qAsConst(AppConfig::getInstance()->VisualMachines)) {
         auto socket = new zmq::socket_t(*m_zmqContext, ZMQ_DEALER);
@@ -104,8 +288,8 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
         m_visualSockets.push_back(socket);
     }
 
-    m_zmqThread = new std::thread([&]{
-        while(m_zmqSocket)
+    m_zmqThread = std::make_unique<std::thread>([&]{
+        while(m_zmqSocket != nullptr)
         {
             try {
                 zmq::message_t msg;
@@ -246,158 +430,6 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
             }
         }
     });
-
-    socket = new QUdpSocket(this);
-
-    m_hostAddress = QHostAddress(AppConfig::getInstance()->XplaneNetworkAddress);
-    if(AppConfig::getInstance()->XplaneNetworkAddress.toLower() == "localhost")
-    {
-        // udp socket doesn't work if the address is "localhost" so we need to convert it
-        m_hostAddress = QHostAddress::LocalHost;
-    }
-    socket->bind(m_hostAddress);
-
-    connect(socket, &QUdpSocket::readyRead, this, &XplaneAdapter::OnDataReceived);
-
-    connect(&m_heartbeatTimer, &QTimer::timeout, this, [&] {
-        qint64 now = QDateTime::currentSecsSinceEpoch();
-
-        if(!m_initialHandshake || (now - m_lastUdpTimestamp) > HEARTBEAT_TIMEOUT_SECS) {
-            emit simConnectionStateChanged(false);
-            m_simConnected = false;
-            m_radioStackState = {};
-            m_userAircraftData = {};
-            m_userAircraftConfigData = {};
-            Subscribe();
-
-            if(!m_requestsSent)
-            {
-                // request plugin version
-                {
-                    QJsonObject reply;
-                    reply.insert("type", "PluginVersion");
-                    QJsonDocument doc(reply);
-                    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
-                }
-
-                // validate csl
-                {
-                    QJsonObject reply;
-                    reply.insert("type", "ValidateCsl");
-                    QJsonDocument doc(reply);
-                    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
-                }
-
-                m_requestsSent = true;
-            }
-        } else {
-            if(!m_simConnected && m_validPluginVersion && m_validCsl) {
-                emit simConnectionStateChanged(true);
-                m_simConnected = true;
-            }
-            m_requestsSent = false;
-        }
-    });
-    m_heartbeatTimer.start(1000);
-
-    connect(&m_xplaneDataTimer, &QTimer::timeout, this, [&]{
-        emit userAircraftDataChanged(m_userAircraftData);
-        emit userAircraftConfigDataChanged(m_userAircraftConfigData);
-        emit radioStackStateChanged(m_radioStackState);
-    });
-    m_xplaneDataTimer.start(50);
-
-    Subscribe();
-}
-
-void XplaneAdapter::Subscribe()
-{
-    SubscribeDataRef("sim/cockpit2/switches/avionics_power_on", DataRef::AvionicsPower, 5);
-    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_com_selection", DataRef::AudioComSelection, 5);
-    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_selection_com1", DataRef::Com1AudioSelection, 5);
-    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_selection_com2", DataRef::Com2AudioSelection, 5);
-    SubscribeDataRef("sim/cockpit2/radios/actuators/com1_frequency_hz_833", DataRef::Com1Frequency, 5);
-    SubscribeDataRef("sim/cockpit2/radios/actuators/com2_frequency_hz_833", DataRef::Com2Frequency, 5);
-    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_volume_com1", DataRef::Com1Volume, 5);
-    SubscribeDataRef("sim/cockpit2/radios/actuators/audio_volume_com2", DataRef::Com2Volume, 5);
-    SubscribeDataRef("sim/cockpit/radios/transponder_mode", DataRef::TransponderMode, 5);
-    SubscribeDataRef("sim/cockpit/radios/transponder_id", DataRef::TransponderIdent, 5);
-    SubscribeDataRef("sim/cockpit/radios/transponder_code", DataRef::TransponderCode, 5);
-    SubscribeDataRef("sim/cockpit2/switches/beacon_on", DataRef::BeaconLights, 5);
-    SubscribeDataRef("sim/cockpit2/switches/landing_lights_on", DataRef::LandingLights, 5);
-    SubscribeDataRef("sim/cockpit2/switches/taxi_light_on", DataRef::TaxiLights, 5);
-    SubscribeDataRef("sim/cockpit2/switches/navigation_lights_on", DataRef::NavLights, 5);
-    SubscribeDataRef("sim/cockpit2/switches/strobe_lights_on", DataRef::StrobeLights, 5);
-    SubscribeDataRef("sim/flightmodel/position/latitude", DataRef::Latitude, 5);
-    SubscribeDataRef("sim/flightmodel/position/longitude", DataRef::Longitude, 5);
-    SubscribeDataRef("sim/flightmodel/position/elevation", DataRef::AltitudeMsl, 5);
-    SubscribeDataRef("sim/flightmodel/position/y_agl", DataRef::AltitudeAgl, 5);
-    SubscribeDataRef("sim/weather/barometer_sealevel_inhg", DataRef::BarometerSeaLevel, 5);
-    SubscribeDataRef("sim/flightmodel/position/theta", DataRef::Pitch, 5);
-    SubscribeDataRef("sim/flightmodel/position/psi", DataRef::Heading, 5);
-    SubscribeDataRef("sim/flightmodel/position/phi", DataRef::Bank, 5);
-    SubscribeDataRef("sim/flightmodel/position/local_vx", DataRef::LongitudeVelocity, 5);
-    SubscribeDataRef("sim/flightmodel/position/local_vy", DataRef::AltitudeVelocity, 5);
-    SubscribeDataRef("sim/flightmodel/position/local_vz", DataRef::LatitudeVelocity, 5);
-    SubscribeDataRef("sim/flightmodel/position/Qrad", DataRef::PitchVelocity, 5);
-    SubscribeDataRef("sim/flightmodel/position/Rrad", DataRef::HeadingVelocity, 5);
-    SubscribeDataRef("sim/flightmodel/position/Prad", DataRef::BankVelocity, 5);
-    SubscribeDataRef("sim/flightmodel/position/groundspeed", DataRef::GroundSpeed, 5);
-    SubscribeDataRef("sim/aircraft/engine/acf_num_engines", DataRef::EngineCount, 5);
-    SubscribeDataRef("sim/flightmodel/engine/ENGN_running[0]", DataRef::Engine1Running, 5);
-    SubscribeDataRef("sim/flightmodel/engine/ENGN_running[1]", DataRef::Engine2Running, 5);
-    SubscribeDataRef("sim/flightmodel/engine/ENGN_running[2]", DataRef::Engine3Running, 5);
-    SubscribeDataRef("sim/flightmodel/engine/ENGN_running[3]", DataRef::Engine4Running, 5);
-    SubscribeDataRef("sim/flightmodel/engine/ENGN_propmode[0]", DataRef::Engine1Reversing, 5);
-    SubscribeDataRef("sim/flightmodel/engine/ENGN_propmode[1]", DataRef::Engine2Reversing, 5);
-    SubscribeDataRef("sim/flightmodel/engine/ENGN_propmode[2]", DataRef::Engine3Reversing, 5);
-    SubscribeDataRef("sim/flightmodel/engine/ENGN_propmode[3]", DataRef::Engine4Reversing, 5);
-    SubscribeDataRef("sim/flightmodel/failures/onground_any", DataRef::OnGround, 5);
-    SubscribeDataRef("sim/cockpit/switches/gear_handle_status", DataRef::GearDown, 5);
-    SubscribeDataRef("sim/flightmodel/controls/flaprat", DataRef::FlapRatio, 5);
-    SubscribeDataRef("sim/cockpit2/controls/speedbrake_ratio", DataRef::SpeedbrakeRatio, 5);
-    SubscribeDataRef("sim/flightmodel2/gear/tire_steer_actual_deg[0]", DataRef::NoseWheelAngle, 15);
-    SubscribeDataRef("sim/operation/prefs/replay_mode", DataRef::ReplayMode, 5);
-    SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 15);
-}
-
-void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
-{
-    QByteArray data;
-
-    data.fill(0, 413);
-    data.insert(0, "RREF");
-    data.insert(5, (const char*)&frequency);
-    data.insert(9, (const char*)&id);
-    data.insert(13, dataRef.c_str());
-    data.resize(413);
-
-    socket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
-}
-
-void XplaneAdapter::setDataRefValue(std::string dataRef, float value)
-{
-    QByteArray data;
-
-    data.fill(0, 509);
-    data.insert(0, "DREF");
-    data.insert(5, QByteArray::fromRawData(reinterpret_cast<char*>(&value), sizeof(float)));
-    data.insert(9, dataRef.c_str());
-    data.resize(509);
-
-    socket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
-}
-
-void XplaneAdapter::sendCommand(std::string command)
-{
-    QByteArray data;
-
-    data.fill(0, command.length() + 6);
-    data.insert(0, "CMND");
-    data.insert(5, command.c_str());
-    data.resize(command.length() + 6);
-
-    socket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
 }
 
 void XplaneAdapter::setTransponderCode(int code)
@@ -455,6 +487,9 @@ void XplaneAdapter::OnDataReceived()
                 pos += 4;
 
                 switch(id) {
+                case DataRef::PluginPort:
+                    m_pluginPort = value;
+                break;
                 case DataRef::AvionicsPower:
                     m_radioStackState.AvionicsPowerOn = value;
                 break;
@@ -624,12 +659,6 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
 {
     if(message.isEmpty()) return;
 
-    QMutexLocker lock(&mutex);
-    {
-        m_rawDataStream << QString("[%1] >>> %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), message);
-        m_rawDataStream.flush();
-    }
-
     if(m_zmqSocket != nullptr)
     {
         std::string identity = "xpilot";
@@ -641,7 +670,17 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
         std::memcpy(msg.data(), message.toStdString().data(), message.size());
         m_zmqSocket->send(msg, zmq::send_flags::none);
 
-        for(auto &visualSocket : m_visualSockets) {
+        QMutexLocker lock(&mutex);
+        {
+            m_rawDataStream << QString("[%1] >>> %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), message);
+            m_rawDataStream.flush();
+        }
+    }
+
+    for(auto &visualSocket : m_visualSockets)
+    {
+        if(visualSocket != nullptr)
+        {
             std::string identity = "xpilot";
             zmq::message_t part1(identity.size());
             std::memcpy(part1.data(), identity.data(), identity.size());
