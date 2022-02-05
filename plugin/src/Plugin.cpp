@@ -123,6 +123,9 @@ PLUGIN_API int XPluginEnable(void)
 {
     try
     {
+        if (environment) {
+            environment.reset();
+        }
         XPImgWindowInit();
         Config::Instance().loadConfig();
         environment = make_unique<xpilot::XPilot>();
@@ -147,6 +150,7 @@ PLUGIN_API void XPluginDisable(void)
     {
         environment->DeleteAllAircraft();
         environment->Shutdown();
+        environment.reset();
         XPMPMultiplayerDisable();
         XPMPMultiplayerCleanup();
         LOG_MSG(logMSG, "xPilot plugin disabled");

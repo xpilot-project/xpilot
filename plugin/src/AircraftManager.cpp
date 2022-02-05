@@ -97,17 +97,19 @@ namespace xpilot
 		FlightModel::InitializeModels();
 
 		m_audioEngine = new CAudioEngine();
-		m_audioEngine->Init();
 
 		m_audioEngine->LoadSound("JetEngine", GetPluginPath() + "/Resources/Sounds/JetEngine.wav");
 		m_audioEngine->LoadSound("PistonProp", GetPluginPath() + "/Resources/Sounds/PistonProp.wav");
 		m_audioEngine->LoadSound("TurboProp", GetPluginPath() + "/Resources/Sounds/TurboProp.wav");
 		m_audioEngine->LoadSound("Heli", GetPluginPath() + "/Resources/Sounds/Helicopter.wav");
+
+		ThisThreadIsXplane();
+
+		XPLMRegisterFlightLoopCallback(&AircraftManager::UpdateAircraftSounds, -1.0f, this);
 	}
 
 	AircraftManager::~AircraftManager()
 	{
-		m_audioEngine->Shutdown();
 		XPLMUnregisterFlightLoopCallback(&AircraftManager::UpdateAircraftSounds, nullptr);
 	}
 
@@ -258,17 +260,16 @@ namespace xpilot
 		mapPlanes.clear();
 	}
 
-	void AircraftManager::StartAudio()
-	{
-		XPLMRegisterFlightLoopCallback(&AircraftManager::UpdateAircraftSounds, -1.0f, this);
-	}
-
 	float AircraftManager::UpdateAircraftSounds(float, float inElapsedTimeSinceLastFlightLoop, int, void* ref)
 	{
 		auto* instance = static_cast<AircraftManager*>(ref);
 		
 		if (instance)
 		{
+			if (!instance->IsXplaneThread()) {
+				return -1.0f;
+			}
+
 			float soundVolume = 1.0f;
 			float doorSum = 0;
 			bool anyDoorOpen = false;

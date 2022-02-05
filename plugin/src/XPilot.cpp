@@ -129,8 +129,6 @@ namespace xpilot
 
 	void XPilot::Initialize()
 	{
-		m_aircraftManager->StartAudio();
-
 		InitializeXPMP();
 		TryGetTcasControl();
 

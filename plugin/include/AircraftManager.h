@@ -57,7 +57,6 @@ namespace xpilot
 		void HandleFastPositionUpdate(const string& callsign, const AircraftVisualState& visualState, Vector3 positionalVector, Vector3 rotationalVector);
 		void HandleRemovePlane(const string& callsign);
 		void RemoveAllPlanes();
-		void StartAudio();
 
 	protected:
 		DataRefAccess<int> m_soundOn;
@@ -80,6 +79,16 @@ namespace xpilot
 		Vector3 DerivePositionalVelocityVector(AircraftVisualState previousVisualState, AircraftVisualState newVisualState, long intervalMs);
 		void UpdateAircraft(NetworkAircraft* aircraft);
 		static float UpdateAircraftSounds(float, float, int, void* ref);
+
+		thread::id m_xplaneThread;
+		void ThisThreadIsXplane()
+		{
+			m_xplaneThread = this_thread::get_id();
+		}
+		bool IsXplaneThread()const
+		{
+			return this_thread::get_id() == m_xplaneThread;
+		}
 	};
 }
 

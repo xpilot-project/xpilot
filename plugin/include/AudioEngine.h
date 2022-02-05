@@ -27,40 +27,22 @@
 #include <math.h>
 #include <iostream>
 
-using namespace std;
-
 struct AudioVector3 {
 	float x;
 	float y;
 	float z;
 };
 
-struct Implementation {
-	Implementation();
-	~Implementation();
-
-	void Update();
-
-	FMOD::System* mSystem;
-
-	int mNextChannelId;
-
-	typedef map<string, FMOD::Sound*> SoundMap;
-	typedef map<int, FMOD::Channel*> ChannelMap;
-	SoundMap mSounds;
-	ChannelMap mChannels;
-};
-
 class CAudioEngine {
 public:
-	static void Init();
-	static void Update();
-	static void Shutdown();
-	static int ErrorCheck(const string& method, FMOD_RESULT result);
+	CAudioEngine();
+	~CAudioEngine();
 
-	void LoadSound(const string& soundName, const string& soundFilePath, bool bLooping = true);
-	void UnloadSound(const string& soundName);
-	int CreateSoundChannel(const string& soundName, float fVolumedB = 0.0f);
+	void Update();
+	void Shutdown();
+	void LoadSound(const std::string& soundName, const std::string& soundFilePath, bool bLooping = true);
+	void UnloadSound(const std::string& soundName);
+	int CreateSoundChannel(const std::string& soundName, float fVolumedB = 0.0f);
 	void SetChannel3dPosition(int nChannelId, const AudioVector3& position, const AudioVector3& velocity);
 	void SetChannelVolume(int nChannelId, float fVolumedB);
 	void SetChannelPaused(int channel, bool paused);
@@ -68,6 +50,15 @@ public:
 	void StopAllChannels();
 	void SetListenerPosition(const AudioVector3& vPos, const AudioVector3& velocity, const AudioVector3& forward, const AudioVector3& up);
 	FMOD_VECTOR VectorToFmod(const AudioVector3& vPosition);
+
+	FMOD::System* SoundSystem;
+	std::map<std::string, FMOD::Sound*> SoundMap;
+	std::map<int, FMOD::Channel*> ChannelMap;
+
+	static int ErrorCheck(const std::string& method, FMOD_RESULT result);
+
+private:
+	int mNextChannelId;
 };
 
 #endif // !AUDIO_ENGINE_H
