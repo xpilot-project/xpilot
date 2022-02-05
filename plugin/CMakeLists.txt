@@ -4,11 +4,6 @@ project(xpilot LANGUAGES C CXX VERSION 2.0.0)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-if(APPLE)
-    add_compile_options(-mmacosx-version-min=10.15)
-    add_link_options(-mmacosx-version-min=10.15)
-endif()
-
 set(CMAKE_CXX_STANDARD 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD_REQUIRED 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD 17)
