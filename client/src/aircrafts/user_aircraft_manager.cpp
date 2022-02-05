@@ -16,6 +16,7 @@ UserAircraftManager::UserAircraftManager(XplaneAdapter& xplaneAdapter, NetworkMa
         if(!connected) {
             m_initialAircraftDataReceived = false;
         }
+        m_simConnected = connected;
     });
     connect(&m_networkManager, &NetworkManager::aircraftConfigurationInfoReceived, this, &UserAircraftManager::OnAircraftConfigurationInfoReceived);
     connect(&m_tokenRefreshTimer, &QTimer::timeout, this, [&] {
@@ -31,28 +32,34 @@ void UserAircraftManager::OnUserAircraftConfigDataUpdated(UserAircraftConfigData
     if(m_userAircraftConfigData != data)
     {
         m_userAircraftConfigData = data;
-        if(!m_lastBroadcastConfig.has_value())
-        {
-            m_lastBroadcastConfig = AircraftConfiguration::FromUserAircraftData(m_userAircraftConfigData);
+    }
+
+    if(!m_lastBroadcastConfig.has_value())
+    {
+        m_lastBroadcastConfig = AircraftConfiguration::FromUserAircraftData(m_userAircraftConfigData);
+    }
+    else if(m_tokensAvailable > 0)
+    {
+        AircraftConfiguration newCfg = AircraftConfiguration::FromUserAircraftData(m_userAircraftConfigData);
+        if(newCfg != m_lastBroadcastConfig.value()) {
+            AircraftConfiguration incremental = m_lastBroadcastConfig->CreateIncremental(newCfg);
+            m_networkManager.SendAircraftConfigurationUpdate(incremental);
+            m_lastBroadcastConfig = newCfg;
+            m_tokensAvailable--;
         }
-        else if(m_tokensAvailable > 0)
-        {
-            AircraftConfiguration newCfg = AircraftConfiguration::FromUserAircraftData(m_userAircraftConfigData);
-            if(newCfg != m_lastBroadcastConfig.value()) {
-                AircraftConfiguration incremental = m_lastBroadcastConfig->CreateIncremental(newCfg);
-                m_networkManager.SendAircraftConfigurationUpdate(incremental);
-                m_lastBroadcastConfig = newCfg;
-                m_tokensAvailable--;
-            }
-        }
+    }
+
+    if(m_simConnected && m_initialAircraftDataReceived)
+    {
         bool wasAirborne = m_airborne;
         m_airborne = !m_userAircraftConfigData.OnGround;
-        if(m_initialAircraftDataReceived && !wasAirborne && m_airborne && !m_radioStackState.SquawkingModeC && AppConfig::getInstance()->AutoModeC)
+        if(!wasAirborne && m_airborne && !m_radioStackState.SquawkingModeC && AppConfig::getInstance()->AutoModeC)
         {
             m_xplaneAdapter.transponderModeToggle();
         }
-        m_initialAircraftDataReceived = true;
     }
+
+    m_initialAircraftDataReceived = true;
 }
 
 void UserAircraftManager::OnRadioStackUpdated(RadioStackState radioStack)

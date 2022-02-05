@@ -38,6 +38,7 @@ private:
     RadioStackState m_radioStackState;
     std::optional<AircraftConfiguration> m_lastBroadcastConfig;
     bool m_airborne = false;
+    bool m_simConnected = false;
     bool m_initialAircraftDataReceived = false;
 };
 
