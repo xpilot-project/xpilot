@@ -161,7 +161,7 @@ namespace xpilot
 
 			m_keepAlive = true;
 			m_zmqThread = make_unique<thread>(&XPilot::ZmqWorker, this);
-			LOG_MSG(logMSG, "Now listening on port %s", randomPort);
+			LOG_MSG(logMSG, "Now listening on port %s", randomPort.c_str());
 		}
 		catch (zmq::error_t& e)
 		{
