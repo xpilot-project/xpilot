@@ -10,7 +10,7 @@ import "../../Controls"
 Popup {
     id: popup
     width: 650
-    height: 200
+    height: 220
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
     modal: true
@@ -23,7 +23,7 @@ Popup {
         id: labelAskDownload
         text: "It looks like this is your first time using xPilot. Before you can connect to the network, you must " +
               "install a CSL aircraft model set. Would you like to download and install one now?\r\n\r\nDownload size: Approximately 560MB.\r\n\r\n" +
-              "If you choose No, you will have to manually install a model set yourself.\r\n"
+              "If you choose No, you will have to manually install a model set yourself, or use an existing model set that you already have installed.\r\n"
         font.pixelSize: 14
         renderType: Text.NativeRendering
         width: 600
