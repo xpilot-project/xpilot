@@ -23,7 +23,7 @@ CAudioEngine::CAudioEngine() :
 	mNextChannelId(0)
 {
 	CAudioEngine::ErrorCheck("Implementation::System_Create", FMOD::System_Create(&SoundSystem));
-	CAudioEngine::ErrorCheck("Implementation::init", SoundSystem->init(100, FMOD_INIT_NORMAL, 0));
+	CAudioEngine::ErrorCheck("Implementation::init", SoundSystem->init(300, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED, 0));
 }
 
 CAudioEngine::~CAudioEngine()
@@ -95,7 +95,7 @@ int CAudioEngine::CreateSoundChannel(const string& soundName, float volumeDb)
 	CAudioEngine::ErrorCheck("CreateSoundChannel::playSound", SoundSystem->playSound(foundIt->second, nullptr, true, &pChannel));
 	if (pChannel)
 	{
-		CAudioEngine::ErrorCheck("CreateSoundChannel::set3DMinMaxDistance", pChannel->set3DMinMaxDistance(30.0f, 10000.0f));
+		CAudioEngine::ErrorCheck("CreateSoundChannel::set3DMinMaxDistance", pChannel->set3DMinMaxDistance(5.0f, 10000.0f));
 		ChannelMap[mChannelId] = pChannel;
 	}
 

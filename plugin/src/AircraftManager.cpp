@@ -35,7 +35,8 @@ namespace xpilot
 	constexpr double MAX_USABLE_ALTITUDE_AGL = 100.0;
 	constexpr double TERRAIN_ELEVATION_MAX_SLOPE = 3.0;
 
-	constexpr float CLOSED_SPACE_VOLUME_SCALAR = 0.50f;
+	constexpr float CLOSED_SPACE_VOLUME_SCALAR = 0.10f;
+	constexpr float OUTSIDE_SPACE_VOLUME_SCALAR = 0.60f;
 
 	static double NormalizeDegrees(double value, double lowerBound, double upperBound)
 	{
@@ -290,7 +291,7 @@ namespace xpilot
 			}
 			else {
 				// external view
-				soundVolume = Config::Instance().getAircraftSoundVolume() / 100.0f;
+				soundVolume = Config::Instance().getAircraftSoundVolume() / 100.0f * OUTSIDE_SPACE_VOLUME_SCALAR;
 			}
 
 			XPLMCameraPosition_t camera;
@@ -308,7 +309,7 @@ namespace xpilot
 				vect soundVel = iter->second->SoundVelocity();
 
 				if (soundPos.isNonZero()) {
-					instance->m_audioEngine->SetChannel3dPosition(channel, { soundPos.x, soundPos.y, soundPos.z }, { soundVel.x, soundVel.y, soundVel.z });
+					instance->m_audioEngine->SetChannel3dPosition(channel, { soundPos.z, soundPos.y, soundPos.x }, { soundVel.z, soundVel.y, soundVel.x });
 					instance->m_audioEngine->SetChannelPaused(channel, ShouldPauseSound || !iter->second->IsEnginesRunning);
 					instance->m_audioEngine->SetChannelVolume(channel, soundVolume);
 				}
