@@ -41,7 +41,7 @@ namespace xpilot
             QJsonArray data_array;
             for(const auto &atc : qAsConst(m_controllers))
             {
-                if(!atc.IsValidATC) continue;
+                if(!atc.IsValid) continue;
 
                 QJsonObject data;
                 data.insert("callsign", atc.Callsign);
