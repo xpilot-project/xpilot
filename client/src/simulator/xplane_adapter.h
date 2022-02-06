@@ -36,6 +36,7 @@ class XplaneAdapter : public QObject
 
 public:
     XplaneAdapter(QObject* parent = nullptr);
+    ~XplaneAdapter();
 
     Q_INVOKABLE void setTransponderCode(int code);
     Q_INVOKABLE void setCom1Frequency(float freq);

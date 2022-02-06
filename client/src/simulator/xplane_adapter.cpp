@@ -164,6 +164,26 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     Subscribe();
 }
 
+XplaneAdapter::~XplaneAdapter()
+{
+    if(m_zmqSocket) {
+        m_zmqSocket->close();
+        m_zmqSocket.reset();
+    }
+    if(m_zmqContext) {
+        m_zmqContext->close();
+        m_zmqContext.reset();
+    }
+    if(m_zmqThread) {
+        m_zmqThread->join();
+        m_zmqThread.reset();
+    }
+    for(auto &visualSocket : m_visualSockets) {
+        visualSocket->close();
+    }
+    m_visualSockets.clear();
+}
+
 void XplaneAdapter::Subscribe()
 {
     SubscribeDataRef("sim/cockpit2/switches/avionics_power_on", DataRef::AvionicsPower, 5);
@@ -276,8 +296,10 @@ void XplaneAdapter::initZmq()
     m_zmqSocket->set(zmq::sockopt::linger, 0);
     m_zmqSocket->connect(QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(m_pluginPort).toStdString());
 
-    if(m_zmqSocket) {
+    if(m_zmqSocket != nullptr && m_zmqSocket->handle() != nullptr) {
         m_zmqInitialized = true;
+    } else {
+        return;
     }
 
     for(const QString &machine : qAsConst(AppConfig::getInstance()->VisualMachines)) {
@@ -289,7 +311,7 @@ void XplaneAdapter::initZmq()
     }
 
     m_zmqThread = std::make_unique<std::thread>([&]{
-        while(m_zmqSocket != nullptr)
+        while(m_zmqSocket != nullptr && m_zmqSocket->handle() != nullptr)
         {
             try {
                 zmq::message_t msg;
@@ -659,7 +681,7 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
 {
     if(message.isEmpty()) return;
 
-    if(m_zmqSocket != nullptr)
+    if(m_zmqSocket != nullptr && m_zmqSocket->handle() != nullptr)
     {
         std::string identity = "xpilot";
         zmq::message_t part1(identity.size());
@@ -679,7 +701,7 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
 
     for(auto &visualSocket : m_visualSockets)
     {
-        if(visualSocket != nullptr)
+        if(visualSocket != nullptr && visualSocket->handle() != nullptr)
         {
             std::string identity = "xpilot";
             zmq::message_t part1(identity.size());
