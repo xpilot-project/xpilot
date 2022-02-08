@@ -36,7 +36,10 @@ void AppConfig::loadConfig()
 {
     QDir dir(dataRoot());
     if(!dir.exists()) {
-        dir.mkpath(dataRoot());
+        if(!dir.mkpath(dataRoot())) {
+            emit permissionError("Failed to write configuration file. Please make sure you have correct read/write permissions to " + dataRoot());
+            return;
+        }
     }
 
     QFile configFile(dataRoot() + "AppConfig.json");
@@ -71,7 +74,11 @@ void AppConfig::loadConfig()
         KeepWindowVisible = false;
         AircraftRadioStackControlsVolume = true;
 
-        saveConfig();
+        if(!saveConfig()) {
+            emit permissionError("Failed to write configuration file. Please make sure you have correct read/write permissions to " + dataRoot());
+            return;
+        }
+
         loadConfig();
         return;
     }
@@ -142,7 +149,7 @@ void AppConfig::loadConfig()
     }
 }
 
-void AppConfig::saveConfig()
+bool AppConfig::saveConfig()
 {
     QJsonObject jsonObj;
     jsonObj["VatsimId"] = VatsimId;
@@ -208,14 +215,16 @@ void AppConfig::saveConfig()
     QJsonDocument jsonDoc(jsonObj);
     QFile configFile(dataRoot() + "AppConfig.json");
     if(!configFile.open(QIODevice::WriteOnly)) {
-        qDebug() << "Failed to write config file";
-        return;
+        return false;
     }
 
-    configFile.write(jsonDoc.toJson());
+    if(configFile.write(jsonDoc.toJson()) == -1) {
+        return false;
+    }
     configFile.close();
 
     emit settingsChanged();
+    return true;
 }
 
 bool AppConfig::configRequired()

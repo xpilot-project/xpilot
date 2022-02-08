@@ -32,8 +32,8 @@ namespace xpilot
         static AppConfig *getInstance();
         const static QString &dataRoot();
 
-        Q_INVOKABLE void saveConfig();
-        void loadConfig();
+        Q_INVOKABLE bool saveConfig();
+        Q_INVOKABLE void loadConfig();
         bool configRequired();
         QString getNetworkServer();
 
@@ -128,6 +128,7 @@ namespace xpilot
         void alertNetworkBroadcastChanged();
         void alertDisconnectChanged();
         void settingsChanged();
+        void permissionError(QString error);
 
     private:
         static AppConfig* instance;

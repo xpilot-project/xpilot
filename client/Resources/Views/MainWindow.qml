@@ -121,6 +121,11 @@ Window {
     Connections {
         target: AppConfig
 
+        function onPermissionError(error) {
+            appendMessage("Configuration Error: " + error, colorRed)
+            errorSound.play()
+        }
+
         function onSettingsChanged() {
             if(AppConfig.KeepWindowVisible) {
                 mainWindow.flags |= Qt.WindowStaysOnTopHint
@@ -133,6 +138,9 @@ Window {
     Component.onCompleted: {
         appendMessage(`Welcome to xPilot v${appVersion}`, colorYellow)
         appendMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.", colorYellow);
+
+        // we call this again so we can present the permission error if applicable
+        AppConfig.loadConfig()
 
         if(!AppConfig.SilenceModelInstall) {
             modal_downloadModels.open()

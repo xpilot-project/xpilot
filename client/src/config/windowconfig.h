@@ -16,11 +16,11 @@ namespace xpilot
         Q_PROPERTY(bool Maximized MEMBER Maximized)
 
     public:
-        int X;
-        int Y;
-        int Width;
-        int Height;
-        bool Maximized;
+        int X = 10;
+        int Y = 10;
+        int Width = 800;
+        int Height = 250;
+        bool Maximized = false;
 
         bool operator==(ClientWindowConfig& rhs) const
         {
