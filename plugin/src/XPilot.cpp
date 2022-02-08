@@ -183,7 +183,13 @@ namespace xpilot
 			if (m_zmqSocket)
 			{
 				m_zmqSocket->close();
+				m_zmqSocket.reset();
+			}
+
+			if (m_zmqContext)
+			{
 				m_zmqContext->close();
+				m_zmqContext.reset();
 			}
 		}
 		catch (zmq::error_t& e)
