@@ -306,7 +306,7 @@ void XplaneAdapter::initZmq()
         auto socket = new zmq::socket_t(*m_zmqContext, ZMQ_DEALER);
         socket->set(zmq::sockopt::routing_id, "xpilot");
         socket->set(zmq::sockopt::linger, 0);
-        socket->connect(QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
+        socket->connect(QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplaneVisualPluginPort).toStdString());
         m_visualSockets.push_back(socket);
     }
 

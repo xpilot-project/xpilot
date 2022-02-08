@@ -61,7 +61,7 @@ namespace xpilot
         bool AlertSelcal;
         bool AlertDisconnect;
         QString XplaneNetworkAddress;
-        int XplanePluginPort;
+        int XplaneVisualPluginPort;
         int XplaneUdpPort;
         bool SilenceModelInstall;
         QStringList VisualMachines;
