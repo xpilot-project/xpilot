@@ -339,6 +339,16 @@ Popup {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
+                        if(txtCallsign.text == "") {
+                            validationPopup.errorMessage = "Callsign is required"
+                            validationPopup.open()
+                            return
+                        }
+                        if(txtTypeCode.text == "") {
+                            validationPopup.errorMessage = "Aircraft type code is required"
+                            validationPopup.open()
+                            return
+                        }
                         if(txtSelcal.text !== "") {
                             const prohibitedChars = ["I", "N", "O"]
                             var selcal = txtSelcal.text
