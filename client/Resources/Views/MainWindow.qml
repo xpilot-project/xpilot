@@ -133,6 +133,11 @@ Window {
                 mainWindow.flags &= ~Qt.WindowStaysOnTopHint
             }
         }
+
+        function onInputDeviceChanged() {
+            AppConfig.MicrophoneCalibrated = false
+            AppConfig.saveConfig()
+        }
     }
 
     Component.onCompleted: {

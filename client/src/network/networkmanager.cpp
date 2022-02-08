@@ -751,6 +751,13 @@ namespace xpilot
 "Some configuration items are required before you can connect to the network. Open Settings and verify your network credentials are saved.");
             return;
         }
+        if(!AppConfig::getInstance()->MicrophoneCalibrated)
+        {
+            emit notificationPosted((int)NotificationType::Error, "Please make sure you have calibrated your microphone volume in the xPilot Settings. Click Settings and verify the microphone level indicator stays in the green when you speak normally. Use the Mic Volume slider to adjust the microphone volume if necessary. After you've calibrated your microphone (or if you already have), click Connect again.");
+            AppConfig::getInstance()->MicrophoneCalibrated = true;
+            AppConfig::getInstance()->saveConfig();
+            return;
+        }
         if(!callsign.isEmpty() && !typeCode.isEmpty()) {
             ConnectInfo connectInfo{};
             connectInfo.Callsign = callsign;

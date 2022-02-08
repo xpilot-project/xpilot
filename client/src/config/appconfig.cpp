@@ -73,6 +73,7 @@ void AppConfig::loadConfig()
         SilenceModelInstall = false;
         KeepWindowVisible = false;
         AircraftRadioStackControlsVolume = true;
+        MicrophoneCalibrated = false;
 
         if(!saveConfig()) {
             emit permissionError("Failed to write configuration file. Please make sure you have correct read/write permissions to " + dataRoot());
@@ -122,6 +123,7 @@ void AppConfig::loadConfig()
     VisualMachines = jsonMap["VisualMachines"].toStringList();
     KeepWindowVisible = jsonMap["KeepWindowVisible"].toBool();
     AircraftRadioStackControlsVolume = jsonMap["AircraftRadioStackControlsVolume"].toBool();
+    MicrophoneCalibrated = jsonMap["MicrophoneCalibrated"].toBool();
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
     for(const auto & value : cachedServers) {
@@ -182,6 +184,7 @@ bool AppConfig::saveConfig()
     jsonObj["SilenceModelInstall"] = SilenceModelInstall;
     jsonObj["KeepWindowVisible"] = KeepWindowVisible;
     jsonObj["AircraftRadioStackControlsVolume"] = AircraftRadioStackControlsVolume;
+    jsonObj["MicrophoneCalibrated"] = MicrophoneCalibrated;
 
     QJsonArray cachedServers;
     for(auto & server : CachedServers) {

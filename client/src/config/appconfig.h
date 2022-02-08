@@ -67,6 +67,7 @@ namespace xpilot
         QStringList VisualMachines;
         bool KeepWindowVisible;
         bool AircraftRadioStackControlsVolume;
+        bool MicrophoneCalibrated;
 
         QString NameWithHomeAirport() const
         {
@@ -101,7 +102,7 @@ namespace xpilot
         Q_PROPERTY(ConnectInfo RecentConnection MEMBER RecentConnection)
         Q_PROPERTY(ClientWindowConfig WindowConfig MEMBER WindowConfig)
         Q_PROPERTY(QString AudioApi MEMBER AudioApi)
-        Q_PROPERTY(QString InputDevice MEMBER InputDevice)
+        Q_PROPERTY(QString InputDevice MEMBER InputDevice NOTIFY inputDeviceChanged)
         Q_PROPERTY(QString OutputDevice MEMBER OutputDevice)
         Q_PROPERTY(int Com1Volume MEMBER Com1Volume)
         Q_PROPERTY(int Com2Volume MEMBER Com2Volume)
@@ -119,6 +120,7 @@ namespace xpilot
         Q_PROPERTY(QStringList VisualMachines MEMBER VisualMachines)
         Q_PROPERTY(bool KeepWindowVisible MEMBER KeepWindowVisible)
         Q_PROPERTY(bool AircraftRadioStackControlsVolume MEMBER AircraftRadioStackControlsVolume)
+        Q_PROPERTY(bool MicrophoneCalibrated MEMBER MicrophoneCalibrated)
 
     signals:
         void alertPrivateMessageChanged();
@@ -128,6 +130,7 @@ namespace xpilot
         void alertNetworkBroadcastChanged();
         void alertDisconnectChanged();
         void settingsChanged();
+        void inputDeviceChanged();
         void permissionError(QString error);
 
     private:
