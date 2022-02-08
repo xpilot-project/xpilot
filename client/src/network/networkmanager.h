@@ -149,12 +149,15 @@ namespace xpilot
             return (m_userAircraftData.AltitudeMslM * 3.28084) + deltaAltitudeV;
         }
 
-        const double POSITIONAL_VELOCITY_ZERO_TOLERANCE = 0.005;
+        const double POSITIONAL_VELOCITY_ZERO_TOLERANCE = 0.0005;
         bool PositionalVelocityIsZero(UserAircraftData data)
         {
             return (abs(data.LongitudeVelocity) < POSITIONAL_VELOCITY_ZERO_TOLERANCE &&
                     abs(data.AltitudeVelocity) < POSITIONAL_VELOCITY_ZERO_TOLERANCE &&
-                    abs(data.LatitudeVelocity) < POSITIONAL_VELOCITY_ZERO_TOLERANCE);
+                    abs(data.LatitudeVelocity) < POSITIONAL_VELOCITY_ZERO_TOLERANCE &&
+                    abs(data.PitchVelocity) < POSITIONAL_VELOCITY_ZERO_TOLERANCE &&
+                    abs(data.AltitudeVelocity) < POSITIONAL_VELOCITY_ZERO_TOLERANCE &&
+                    abs(data.HeadingVelocity) < POSITIONAL_VELOCITY_ZERO_TOLERANCE);
         }
     };
 }
