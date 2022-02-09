@@ -97,6 +97,7 @@ signals:
     void aircraftNotIgnored(QString callsign);
     void ignoreList(QStringList list);
     void sendWallop(QString message);
+    void simPausedStateChanged(bool paused);
 
 private:
     QUdpSocket* socket;
@@ -105,6 +106,7 @@ private:
     bool m_initialHandshake = false;
     bool m_validPluginVersion = true;
     bool m_validCsl = true;
+    bool m_simPaused = false;
 
     UserAircraftData m_userAircraftData{};
     UserAircraftConfigData m_userAircraftConfigData{};

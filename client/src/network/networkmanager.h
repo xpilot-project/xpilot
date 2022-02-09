@@ -97,6 +97,7 @@ namespace xpilot
         QFile m_networkLog;
         QTextStream m_rawDataStream;
         bool m_sendEmptyFastPosition = false;
+        bool m_simPaused = false;
 
         QNetworkAccessManager *nam = nullptr;
         QPointer<QNetworkReply> m_reply;
@@ -128,6 +129,7 @@ namespace xpilot
         void OnRawDataSent(QString data);
         void OnRawDataReceived(QString data);
         void OnSendWallop(QString message);
+        void OnSimPaused(bool isPaused);
 
         void OnUserAircraftDataUpdated(UserAircraftData data);
         void OnUserAircraftConfigDataUpdated(UserAircraftConfigData data);
@@ -135,8 +137,9 @@ namespace xpilot
         void OnRequestControllerInfo(QString callsign);
 
         void SendSlowPositionPacket();
-        void SendFastPositionPacket(bool isSlowFast = false);
-        void SendEmptyFastPositionPacket();
+        void SendFastPositionPacket(bool sendSlowFast = false);
+        void SendZeroVelocityFastPositionPacket();
+        void SendStoppedFastPositionPacket();
 
         void OnSlowPositionTimerElapsed();
         void OnFastPositionTimerElapsed();

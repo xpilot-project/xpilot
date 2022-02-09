@@ -62,6 +62,7 @@ enum DataRef
     SpeedbrakeRatio,
     NoseWheelAngle,
     ReplayMode,
+    Paused,
     PushToTalk,
     PluginPort
 };
@@ -232,6 +233,7 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/cockpit2/controls/speedbrake_ratio", DataRef::SpeedbrakeRatio, 5);
     SubscribeDataRef("sim/flightmodel2/gear/tire_steer_actual_deg[0]", DataRef::NoseWheelAngle, 15);
     SubscribeDataRef("sim/operation/prefs/replay_mode", DataRef::ReplayMode, 5);
+    SubscribeDataRef("sim/time/paused", DataRef::Paused, 5);
     SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 15);
     SubscribeDataRef("xpilot/port", DataRef::PluginPort, 1);
 }
@@ -666,6 +668,12 @@ void XplaneAdapter::OnDataReceived()
                 case DataRef::ReplayMode:
                     if(value > 0) {
                         emit replayModeDetected();
+                    }
+                break;
+                case DataRef::Paused:
+                    if(value != m_simPaused) {
+                        emit simPausedStateChanged(value > 0);
+                        m_simPaused = value;
                     }
                 break;
                 case DataRef::PushToTalk:

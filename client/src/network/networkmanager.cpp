@@ -74,6 +74,7 @@ namespace xpilot
         connect(&xplaneAdapter, &XplaneAdapter::requestMetar, this, &NetworkManager::RequestMetar);
         connect(&xplaneAdapter, &XplaneAdapter::forceDisconnect, this, &NetworkManager::OnForceDisconnected);
         connect(&xplaneAdapter, &XplaneAdapter::sendWallop, this, &NetworkManager::OnSendWallop);
+        connect(&xplaneAdapter, &XplaneAdapter::simPausedStateChanged, this, &NetworkManager::OnSimPaused);
 
         connect(this, &NetworkManager::notificationPosted, this, [&](int type, QString message)
         {
@@ -214,7 +215,7 @@ namespace xpilot
 
         m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, "SERVER", ClientQueryType::PublicIP));
         SendSlowPositionPacket();
-        SendEmptyFastPositionPacket();
+        SendStoppedFastPositionPacket();
         m_slowPositionTimer.setInterval(m_connectInfo.ObserverMode ? 15000 : 5000);
         m_slowPositionTimer.start();
     }
@@ -339,27 +340,30 @@ namespace xpilot
 
     void NetworkManager::OnFastPilotPositionReceived(PDUFastPilotPosition pdu)
     {
-        AircraftVisualState visualState {};
-        visualState.Latitude = pdu.Lat;
-        visualState.Longitude = pdu.Lon;
-        visualState.Altitude = pdu.AltitudeTrue;
-        visualState.AltitudeAgl = pdu.AltitudeAgl;
-        visualState.Pitch = pdu.Pitch;
-        visualState.Heading = pdu.Heading;
-        visualState.Bank = pdu.Bank;
-        visualState.NoseWheelAngle = pdu.NoseGearAngle;
+        if(pdu.Type != FastPilotPositionType::Stopped)
+        {
+            AircraftVisualState visualState {};
+            visualState.Latitude = pdu.Lat;
+            visualState.Longitude = pdu.Lon;
+            visualState.Altitude = pdu.AltitudeTrue;
+            visualState.AltitudeAgl = pdu.AltitudeAgl;
+            visualState.Pitch = pdu.Pitch;
+            visualState.Heading = pdu.Heading;
+            visualState.Bank = pdu.Bank;
+            visualState.NoseWheelAngle = pdu.NoseGearAngle;
 
-        VelocityVector positionalVelocityVector {};
-        positionalVelocityVector.X = pdu.VelocityLongitude;
-        positionalVelocityVector.Y = pdu.VelocityAltitude;
-        positionalVelocityVector.Z = pdu.VelocityLatitude;
+            VelocityVector positionalVelocityVector {};
+            positionalVelocityVector.X = pdu.VelocityLongitude;
+            positionalVelocityVector.Y = pdu.VelocityAltitude;
+            positionalVelocityVector.Z = pdu.VelocityLatitude;
 
-        VelocityVector rotationalVelocityVector {};
-        rotationalVelocityVector.X = pdu.VelocityPitch;
-        rotationalVelocityVector.Y = pdu.VelocityHeading;
-        rotationalVelocityVector.Z = pdu.VelocityBank;
+            VelocityVector rotationalVelocityVector {};
+            rotationalVelocityVector.X = pdu.VelocityPitch;
+            rotationalVelocityVector.Y = pdu.VelocityHeading;
+            rotationalVelocityVector.Z = pdu.VelocityBank;
 
-        emit fastPositionUpdateReceived(pdu.From, visualState, positionalVelocityVector, rotationalVelocityVector);
+            emit fastPositionUpdateReceived(pdu.From, visualState, positionalVelocityVector, rotationalVelocityVector);
+        }
     }
 
     void NetworkManager::OnATCPositionReceived(PDUATCPosition pdu)
@@ -567,11 +571,11 @@ namespace xpilot
         }
     }
 
-    void NetworkManager::SendFastPositionPacket(bool isSlowFast)
+    void NetworkManager::SendFastPositionPacket(bool sendSlowFast)
     {
         if(!m_connectInfo.ObserverMode && !m_connectInfo.TowerViewMode)
         {
-            m_fsd.SendPDU(PDUFastPilotPosition(isSlowFast ? FastPilotPositionType::Slow : FastPilotPositionType::Fast,
+            m_fsd.SendPDU(PDUFastPilotPosition(sendSlowFast ? FastPilotPositionType::Slow : FastPilotPositionType::Fast,
                                                m_connectInfo.Callsign,
                                                m_userAircraftData.Latitude,
                                                m_userAircraftData.Longitude,
@@ -590,7 +594,29 @@ namespace xpilot
         }
     }
 
-    void NetworkManager::SendEmptyFastPositionPacket()
+    void NetworkManager::SendZeroVelocityFastPositionPacket()
+    {
+        if(!m_connectInfo.ObserverMode && !m_connectInfo.ObserverMode) {
+            m_fsd.SendPDU(PDUFastPilotPosition(FastPilotPositionType::Fast,
+                                               m_connectInfo.Callsign,
+                                               m_userAircraftData.Latitude,
+                                               m_userAircraftData.Longitude,
+                                               m_userAircraftData.AltitudeMslM * 3.28084,
+                                               m_userAircraftData.AltitudeAglM * 3.28084,
+                                               m_userAircraftData.Pitch,
+                                               m_userAircraftData.Heading,
+                                               m_userAircraftData.Bank,
+                                               0.0,
+                                               0.0,
+                                               0.0,
+                                               0.0,
+                                               0.0,
+                                               0.0,
+                                               0.0));
+        }
+    }
+
+    void NetworkManager::SendStoppedFastPositionPacket()
     {
         if(!m_connectInfo.ObserverMode && !m_connectInfo.TowerViewMode)
         {
@@ -616,25 +642,30 @@ namespace xpilot
     void NetworkManager::OnSlowPositionTimerElapsed()
     {
         SendSlowPositionPacket();
-        if(!PositionalVelocityIsZero(m_userAircraftData)) {
+        if(m_simPaused) {
+            SendZeroVelocityFastPositionPacket();
+        }
+        else if(!PositionalVelocityIsZero(m_userAircraftData)) {
             SendFastPositionPacket(true);
         }
     }
 
     void NetworkManager::OnFastPositionTimerElapsed()
     {
-        if(!PositionalVelocityIsZero(m_userAircraftData)) {
+        if(m_simPaused) {
+            SendZeroVelocityFastPositionPacket();
+        }
+        else if(!PositionalVelocityIsZero(m_userAircraftData)) {
             SendFastPositionPacket();
             m_sendEmptyFastPosition = true; // if during the next timer tick we have zero velocities, queue up an empty fast position packet
         }
         else {
             if(m_sendEmptyFastPosition) {
-                SendEmptyFastPositionPacket();
+                SendStoppedFastPositionPacket();
                 m_sendEmptyFastPosition = false;
             }
         }
     }
-
 
     void NetworkManager::SendAircraftConfigurationUpdate(AircraftConfiguration config)
     {
@@ -851,5 +882,10 @@ namespace xpilot
         m_fsd.SendPDU(PDUWallop(m_connectInfo.Callsign, message));
         emit wallopSent(message);
         m_xplaneAdapter.NotificationPosted(QString("[WALLOP] %1").arg(message), COLOR_RED);
+    }
+
+    void NetworkManager::OnSimPaused(bool isPaused)
+    {
+        m_simPaused = isPaused;
     }
 }
