@@ -135,7 +135,7 @@ namespace xpilot
         void OnRequestControllerInfo(QString callsign);
 
         void SendSlowPositionPacket();
-        void SendFastPositionPacket();
+        void SendFastPositionPacket(bool isSlowFast = false);
         void SendEmptyFastPositionPacket();
 
         void OnSlowPositionTimerElapsed();

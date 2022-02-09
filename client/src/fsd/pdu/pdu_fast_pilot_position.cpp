@@ -2,9 +2,10 @@
 
 PDUFastPilotPosition::PDUFastPilotPosition() : PDUBase() {}
 
-PDUFastPilotPosition::PDUFastPilotPosition(QString from, double lat, double lon, double altTrue, double altAgl, double pitch, double heading, double bank, double velocityLongitude, double velocityAltitude, double velocityLatitude, double velocityPitch, double velocityHeading, double velocityBank, double noseGearAngle) :
+PDUFastPilotPosition::PDUFastPilotPosition(FastPilotPositionType type, QString from, double lat, double lon, double altTrue, double altAgl, double pitch, double heading, double bank, double velocityLongitude, double velocityAltitude, double velocityLatitude, double velocityPitch, double velocityHeading, double velocityBank, double noseGearAngle) :
     PDUBase(from, "")
 {
+    Type = type;
     Lat = lat;
     Lon = lon;
     AltitudeTrue = altTrue;
@@ -30,19 +31,27 @@ QStringList PDUFastPilotPosition::toTokens() const
     tokens.append(QString::number(AltitudeTrue, 'f', 2));
     tokens.append(QString::number(AltitudeAgl, 'f', 2));
     tokens.append(QString::number(PackPitchBankHeading(Pitch, Bank, Heading)));
-    tokens.append(QString::number(VelocityLongitude, 'f', 4));
-    tokens.append(QString::number(VelocityAltitude, 'f', 4));
-    tokens.append(QString::number(VelocityLatitude, 'f', 4));
-    tokens.append(QString::number(VelocityPitch, 'f', 4));
-    tokens.append(QString::number(VelocityHeading, 'f', 4));
-    tokens.append(QString::number(VelocityBank, 'f', 4));
+    if(Type != FastPilotPositionType::Stopped)
+    {
+        tokens.append(QString::number(VelocityLongitude, 'f', 4));
+        tokens.append(QString::number(VelocityAltitude, 'f', 4));
+        tokens.append(QString::number(VelocityLatitude, 'f', 4));
+        tokens.append(QString::number(VelocityPitch, 'f', 4));
+        tokens.append(QString::number(VelocityHeading, 'f', 4));
+        tokens.append(QString::number(VelocityBank, 'f', 4));
+    }
     tokens.append(QString::number(NoseGearAngle, 'f', 2));
     return tokens;
 }
 
-PDUFastPilotPosition PDUFastPilotPosition::fromTokens(const QStringList &tokens)
+PDUFastPilotPosition PDUFastPilotPosition::fromTokens(FastPilotPositionType type, const QStringList &tokens)
 {
-    if(tokens.length() < 12) {
+    int fieldCount = 12;
+    if(type == FastPilotPositionType::Stopped) {
+        fieldCount = 6;
+    }
+
+    if(tokens.length() < fieldCount) {
         throw PDUFormatException("Invalid field count.", Reassemble(tokens));
     }
 
@@ -51,8 +60,32 @@ PDUFastPilotPosition PDUFastPilotPosition::fromTokens(const QStringList &tokens)
     double heading;
     UnpackPitchBankHeading(tokens[5].toUInt(), pitch, bank, heading);
 
-    return PDUFastPilotPosition(tokens[0], tokens[1].toDouble(), tokens[2].toDouble(), tokens[3].toDouble(),
-            tokens[4].toDouble(), pitch, heading, bank, tokens[6].toDouble(), tokens[7].toDouble(),
-            tokens[8].toDouble(), tokens[9].toDouble(), tokens[10].toDouble(), tokens[11].toDouble(),
-            tokens.length() < 13 ? 0 : tokens[12].toDouble());
+    QString from = tokens[0];
+    double lat = tokens[1].toDouble();
+    double lon = tokens[2].toDouble();
+    double altTrue = tokens[3].toDouble();
+    double altAgl = tokens[4].toDouble();
+    double velLon = 0.0;
+    double velAlt = 0.0;
+    double velLat = 0.0;
+    double velPitch = 0.0;
+    double velHeading = 0.0;
+    double velBank = 0.0;
+    double noseGearAngle = 0.0;
+
+    if(type != FastPilotPositionType::Stopped) {
+        velLon = tokens[6].toDouble();
+        velAlt = tokens[7].toDouble();
+        velLat = tokens[8].toDouble();
+        velPitch = tokens[9].toDouble();
+        velHeading = tokens[10].toDouble();
+        velBank = tokens[11].toDouble();
+        noseGearAngle = tokens.length() >= 13 ? tokens[12].toDouble() : 0.0;
+    }
+    else {
+        noseGearAngle = tokens.length() >= 7 ? tokens[6].toDouble() : 0.0;
+    }
+
+    return PDUFastPilotPosition(type, from, lat, lon, altTrue, altAgl, pitch, heading, bank,
+                                velLon, velAlt, velLat, velPitch, velHeading, velBank, noseGearAngle);
 }

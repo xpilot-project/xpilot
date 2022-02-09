@@ -85,7 +85,7 @@ namespace xpilot
                 else if(prefixChar == '^')
                 {
                     fields[0] = fields[0].mid(1);
-                    emit RaiseFastPilotPositionReceived(PDUFastPilotPosition::fromTokens(fields));
+                    emit RaiseFastPilotPositionReceived(PDUFastPilotPosition::fromTokens(FastPilotPositionType::Fast, fields));
                 }
                 else if(prefixChar == '%')
                 {
@@ -190,6 +190,14 @@ namespace xpilot
                     else if(pduTypeId == "$SF")
                     {
                         emit RaiseSendFastReceived(PDUSendFast::fromTokens(fields));
+                    }
+                    else if(pduTypeId == "#SL")
+                    {
+                        emit RaiseFastPilotPositionReceived(PDUFastPilotPosition::fromTokens(FastPilotPositionType::Slow, fields));
+                    }
+                    else if(pduTypeId == "#ST")
+                    {
+                        emit RaiseFastPilotPositionReceived(PDUFastPilotPosition::fromTokens(FastPilotPositionType::Stopped, fields));
                     }
                 }
             }
