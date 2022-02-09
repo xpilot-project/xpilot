@@ -242,7 +242,7 @@ namespace xpilot
         double newTargetOffset;
         if (HasUsableTerrainElevationData || IsReportedOnGround) {
             double remoteTerrainElevation = RemoteVisualState.AltitudeTrue - agl;
-            newTargetOffset = LocalTerrainElevation.value() - remoteTerrainElevation;
+            newTargetOffset = Round(LocalTerrainElevation.value() - remoteTerrainElevation, 2);
 
             // correct for terrain elevation differences in X-Plane
             if (IsReportedOnGround && (RemoteVisualState.AltitudeTrue + newTargetOffset > LocalTerrainElevation.value())) {
