@@ -42,10 +42,11 @@ void AppConfig::loadConfig()
         }
     }
 
+    QScreen *primaryScreen = QGuiApplication::primaryScreen();
+
     QFile configFile(dataRoot() + "AppConfig.json");
     if(!configFile.open(QIODevice::ReadOnly)) {
 
-        QScreen *primaryScreen = QGuiApplication::primaryScreen();
         int x = (primaryScreen->size().width() / 2) - (DefaultWidth / 2);
         int y = (primaryScreen->size().height() / 2) - (DefaultHeight / 2);
 
@@ -145,6 +146,36 @@ void AppConfig::loadConfig()
     WindowConfig.Width = qMax(window["Width"].toInt(), DefaultWidth);
     WindowConfig.Height = qMax(window["Height"].toInt(), DefaultHeight);
     WindowConfig.Maximized = window["Maximized"].toBool();
+
+    // make sure window is actually within the screen geometry bounds
+    QRect windowRect(WindowConfig.X, WindowConfig.Y, WindowConfig.Width, WindowConfig.Height);
+    auto screens = QGuiApplication::screens();
+
+    bool hasValidScreenPosition = false;
+    for(auto &screen : screens) {
+        int minX = screen->availableGeometry().x();
+        int minY = screen->availableGeometry().y();
+        int availableWidth = screen->availableGeometry().x() + screen->availableGeometry().width();
+        int availableHeight = screen->availableGeometry().y() + screen->availableGeometry().height();
+
+        // force the window to reposition if:
+        // - the window position is not within the screen geometory,
+        // - or if less than 1/4 of the window position within the screen geometry
+        if((abs(windowRect.x()) > minX && windowRect.x() < availableWidth - (DefaultWidth / 4)) &&
+                (abs(windowRect.y()) > minY && windowRect.y() < availableHeight - (DefaultHeight / 4)))
+        {
+            hasValidScreenPosition = true;
+        }
+    }
+
+    // reposition the window centered on the primary screen
+    if(!hasValidScreenPosition) {
+        WindowConfig.X = (primaryScreen->size().width() / 2) - (DefaultWidth / 2);
+        WindowConfig.Y = (primaryScreen->size().height() / 2) - (DefaultHeight / 2);
+        WindowConfig.Width = DefaultWidth;
+        WindowConfig.Height = DefaultHeight;
+        WindowConfig.Maximized = false;
+    }
 
     if(!VatsimPassword.isEmpty()) {
         VatsimPasswordDecrypted = crypto.decryptToString(VatsimPassword);
