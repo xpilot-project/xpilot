@@ -118,6 +118,10 @@ Window {
         id: confirmClose
     }
 
+    MicrophoneCalibrationRequired {
+        id: microphoneCalibrationRequired
+    }
+
     Connections {
         target: AppConfig
 
@@ -423,6 +427,10 @@ Window {
 
     Connections {
         target: networkManager
+
+        function onMicrophoneCalibrationRequired() {
+            microphoneCalibrationRequired.open()
+        }
 
         function onNetworkConnected(callsign) {
             ourCallsign = callsign

@@ -78,6 +78,7 @@ namespace xpilot
         void slowPositionUpdateReceived(QString callsign, AircraftVisualState visualState, double groundSpeed);
         void fastPositionUpdateReceived(QString callsign, AircraftVisualState visualState, VelocityVector positionalVelocityVector, VelocityVector rotationalVelocityVector);
         void aircraftInfoReceived(QString callsign, QString equipment, QString airline);
+        void microphoneCalibrationRequired();
 
     private:
         FsdClient m_fsd { this };
