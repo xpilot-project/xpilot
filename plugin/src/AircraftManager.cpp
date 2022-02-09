@@ -27,7 +27,7 @@ using namespace std;
 
 namespace xpilot
 {
-	constexpr long FAST_POSITION_INTERVAL_TOLERANCE = 300;
+	constexpr long FAST_POSITION_INTERVAL_TOLERANCE = 500;
 	constexpr double ERROR_CORRECTION_INTERVAL_FAST = 2.0;
 	constexpr double ERROR_CORRECTION_INTERVAL_SLOW = 5.0;
 
@@ -395,7 +395,7 @@ namespace xpilot
 	{
 		const auto now = chrono::steady_clock::now();
 		const auto diff = chrono::duration_cast<chrono::milliseconds>(now - aircraft->LastFastPositionTimestamp);
-		return diff.count() < FAST_POSITION_INTERVAL_TOLERANCE;
+		return diff.count() <= FAST_POSITION_INTERVAL_TOLERANCE;
 	}
 
 	Vector3 AircraftManager::DerivePositionalVelocityVector(AircraftVisualState previousVisualState, AircraftVisualState newVisualState, long intervalMs)
