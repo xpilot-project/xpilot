@@ -122,6 +122,13 @@ ColumnLayout {
                 id: com1MouseArea
                 anchors.fill: parent
                 hoverEnabled: true
+                propagateComposedEvents: true
+                onClicked: mouse.accepted = false
+                onPressed: mouse.accepted = false
+                onReleased: mouse.accepted = false
+                onDoubleClicked: mouse.accepted = false
+                onPositionChanged: mouse.accepted = false
+                onPressAndHold: mouse.accepted = false
             }
         }
         Text {
@@ -181,6 +188,13 @@ ColumnLayout {
                 id: com2MouseArea
                 anchors.fill: parent
                 hoverEnabled: true
+                propagateComposedEvents: true
+                onClicked: mouse.accepted = false
+                onPressed: mouse.accepted = false
+                onReleased: mouse.accepted = false
+                onDoubleClicked: mouse.accepted = false
+                onPositionChanged: mouse.accepted = false
+                onPressAndHold: mouse.accepted = false
             }
         }
         Text {
