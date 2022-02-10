@@ -49,7 +49,7 @@ namespace xpilot
 
         m_transceiverTimer.setInterval(5000);
         m_rxTxQueryTimer.setInterval(50);
-        m_vuTimer.setInterval(50);
+        m_vuTimer.setInterval(10);
         m_vuTimer.start();
 
 #ifdef Q_OS_WIN
@@ -160,7 +160,7 @@ namespace xpilot
             if(!AppConfig::getInstance()->InputDevice.isEmpty())
             {
                 double vu = m_client->getInputPeak();
-                emit inputVuChanged(scaleValue(vu, 0, 100, -40, 0));
+                emit inputVuChanged(vu);
                 m_xplaneAdapter.setVuDataref(vu);
             }
         });

@@ -107,7 +107,7 @@ void AppConfig::loadConfig()
     OutputDevice = jsonMap["OutputDevice"].toString();
     Com1Volume = qMin(qMax(jsonMap["Com1Volume"].toInt(), 0), 100);
     Com2Volume = qMin(qMax(jsonMap["Com2Volume"].toInt(), 0), 100);
-    MicrophoneVolume = qMin(qMax(jsonMap["MicrophoneVolume"].toInt(), -18), 18);
+    MicrophoneVolume = qMin(qMax(jsonMap["MicrophoneVolume"].toInt(), -60), 18);
     AudioEffectsDisabled = jsonMap["AudioEffectsDisabled"].toBool();
     HFSquelchEnabled = jsonMap["HFSquelchEnabled"].toBool();
     AutoModeC = jsonMap["AutoModeC"].toBool();
@@ -199,7 +199,7 @@ bool AppConfig::saveConfig()
     jsonObj["OutputDevice"] = OutputDevice;
     jsonObj["Com1Volume"] = qMin(qMax(Com1Volume, 0), 100);
     jsonObj["Com2Volume"] = qMin(qMax(Com2Volume, 0), 100);
-    jsonObj["MicrophoneVolume"] = qMin(qMax(MicrophoneVolume, -18), 18);
+    jsonObj["MicrophoneVolume"] = qMin(qMax(MicrophoneVolume, -60), 18);
     jsonObj["AudioEffectsDisabled"] = AudioEffectsDisabled;
     jsonObj["HFSquelchEnabled"] = HFSquelchEnabled;
     jsonObj["AutoModeC"] = AutoModeC;

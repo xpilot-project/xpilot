@@ -546,7 +546,7 @@ Window {
                 VolumeSlider {
                     id: microphoneVolume
                     comLabel: "Mic Volume"
-                    minValue: -18
+                    minValue: -60
                     maxValue: 18
                     showPercent: false
                     onVolumeValueChanged: {
