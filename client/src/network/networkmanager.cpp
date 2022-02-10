@@ -340,18 +340,18 @@ namespace xpilot
 
     void NetworkManager::OnFastPilotPositionReceived(PDUFastPilotPosition pdu)
     {
+        AircraftVisualState visualState {};
+        visualState.Latitude = pdu.Lat;
+        visualState.Longitude = pdu.Lon;
+        visualState.Altitude = pdu.AltitudeTrue;
+        visualState.AltitudeAgl = pdu.AltitudeAgl;
+        visualState.Pitch = pdu.Pitch;
+        visualState.Heading = pdu.Heading;
+        visualState.Bank = pdu.Bank;
+        visualState.NoseWheelAngle = pdu.NoseGearAngle;
+
         if(pdu.Type != FastPilotPositionType::Stopped)
         {
-            AircraftVisualState visualState {};
-            visualState.Latitude = pdu.Lat;
-            visualState.Longitude = pdu.Lon;
-            visualState.Altitude = pdu.AltitudeTrue;
-            visualState.AltitudeAgl = pdu.AltitudeAgl;
-            visualState.Pitch = pdu.Pitch;
-            visualState.Heading = pdu.Heading;
-            visualState.Bank = pdu.Bank;
-            visualState.NoseWheelAngle = pdu.NoseGearAngle;
-
             VelocityVector positionalVelocityVector {};
             positionalVelocityVector.X = pdu.VelocityLongitude;
             positionalVelocityVector.Y = pdu.VelocityAltitude;
@@ -363,6 +363,11 @@ namespace xpilot
             rotationalVelocityVector.Z = pdu.VelocityBank;
 
             emit fastPositionUpdateReceived(pdu.From, visualState, positionalVelocityVector, rotationalVelocityVector);
+        }
+        else
+        {
+            VelocityVector zero{0,0,0};
+            emit fastPositionUpdateReceived(pdu.From, visualState, zero, zero);
         }
     }
 
