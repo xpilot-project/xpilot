@@ -34,11 +34,7 @@ namespace xpilot
             QJsonObject reply;
             reply.insert("type", "NearbyAtc");
 
-            std::sort(m_controllers.begin(), m_controllers.end(), [](const Controller& a, const Controller &b){
-                return a.Callsign < b.Callsign;
-            });
-
-            QJsonArray data_array;
+            QJsonArray dataArray;
             for(const auto &atc : qAsConst(m_controllers))
             {
                 if(!atc.IsValid) continue;
@@ -48,10 +44,10 @@ namespace xpilot
                 data.insert("xplane_frequency", (qint32)atc.Frequency);
                 data.insert("frequency", QString::number(atc.Frequency / 1000.0, 'f', 3));
                 data.insert("real_name", atc.RealName);
-                data_array.push_back(data);
+                dataArray.push_back(data);
             }
 
-            reply.insert("data", data_array);
+            reply.insert("data", dataArray);
             QJsonDocument doc(reply);
             m_xplaneAdapter.sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
         });
@@ -82,7 +78,6 @@ namespace xpilot
         }
         else
         {
-            bool isValid = itr->IsValid;
             bool hasFrequencyChanged = (uint)frequency != itr->Frequency;
             bool hasLocationChanged = lat != itr->Latitude || lon != itr->Longitude;
             itr->Frequency = frequency;
@@ -93,12 +88,9 @@ namespace xpilot
             ValidateController(*itr);
             if(itr != m_controllers.end())
             {
-                if(isValid && itr->IsValid)
+                if(hasFrequencyChanged || hasLocationChanged)
                 {
-                    if(hasFrequencyChanged || hasLocationChanged)
-                    {
-                        RefreshController(*itr);
-                    }
+                    RefreshController(*itr);
                 }
             }
         }
@@ -151,16 +143,15 @@ namespace xpilot
 
     void ControllerManager::ValidateController(Controller &controller)
     {
-        bool isValid = controller.IsValid;
-        controller.IsValid = controller.IsValidATC && (controller.Frequency >= 118000 && controller.Frequency <= 136975);
-        if(isValid && !controller.IsValid)
-        {
+        bool isValid = controller.IsValidATC && (controller.Frequency >= 118000 && controller.Frequency <= 136975);
+        controller.IsValid = isValid;
+
+        if(controller.IsValid) {
+            emit controllerAdded(controller);
+        }
+        else {
             emit controllerDeleted(controller);
             m_controllers.removeAll(controller);
-        }
-        else if(!isValid && controller.IsValid)
-        {
-            emit controllerAdded(controller);
         }
     }
 }
