@@ -141,9 +141,6 @@ namespace xpilot
                 mEngineClass = EngineClass::TurboProp;
             }
         }
-
-        mSoundVelocity = vect(0, 0, 0);
-        mSoundPosition = vect(0, 0, 0);
     }
 
     NetworkAircraft::~NetworkAircraft()
@@ -422,23 +419,6 @@ namespace xpilot
         }
 
         HexToRgb(Config::Instance().getAircraftLabelColor(), colLabel);
-
-        // Sounds
-        XPLMCameraPosition_t camera;
-        XPLMReadCameraPosition(&camera);
-
-        auto& pos = GetLocation();
-
-        vect apos(pos.x, pos.y, pos.z);
-        vect user(camera.x, camera.y, camera.z);
-        vect diff = apos - user;
-
-        float dist = (diff / diff);
-
-        mSoundPosition = diff;
-        const float networkTime = GetNetworkTime();
-        const float d_ts = networkTime - prev_ts;
-        mSoundVelocity = vect((pos.x - prev_x) / d_ts, (pos.y - prev_y) / d_ts, (pos.z - prev_z) / d_ts);
     }
 
     void NetworkAircraft::copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const

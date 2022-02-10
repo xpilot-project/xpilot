@@ -23,7 +23,7 @@ CAudioEngine::CAudioEngine() :
 	mNextChannelId(0)
 {
 	CAudioEngine::ErrorCheck("Implementation::System_Create", FMOD::System_Create(&SoundSystem));
-	CAudioEngine::ErrorCheck("Implementation::init", SoundSystem->init(300, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED, 0));
+	CAudioEngine::ErrorCheck("Implementation::init", SoundSystem->init(300, FMOD_INIT_NORMAL, 0));
 }
 
 CAudioEngine::~CAudioEngine()
@@ -95,23 +95,22 @@ int CAudioEngine::CreateSoundChannel(const string& soundName, float volumeDb)
 	CAudioEngine::ErrorCheck("CreateSoundChannel::playSound", SoundSystem->playSound(foundIt->second, nullptr, true, &pChannel));
 	if (pChannel)
 	{
-		CAudioEngine::ErrorCheck("CreateSoundChannel::set3DMinMaxDistance", pChannel->set3DMinMaxDistance(5.0f, 10000.0f));
+		CAudioEngine::ErrorCheck("CreateSoundChannel::set3DMinMaxDistance", pChannel->set3DMinMaxDistance(3.0f, 10000.0f));
 		ChannelMap[mChannelId] = pChannel;
 	}
 
 	return mChannelId;
 }
 
-void CAudioEngine::SetChannel3dPosition(int channelId, const AudioVector3& _pos, const AudioVector3& _vel)
+void CAudioEngine::SetChannel3dPosition(int channelId, const AudioVector3& pos)
 {
 	auto foundIt = ChannelMap.find(channelId);
 	if (foundIt == ChannelMap.end()) {
 		return;
 	}
 
-	FMOD_VECTOR position = VectorToFmod(_pos);
-	FMOD_VECTOR velocity = VectorToFmod(_vel);
-	CAudioEngine::ErrorCheck("SetChannel3dPosition", foundIt->second->set3DAttributes(&position, &velocity));
+	FMOD_VECTOR position = VectorToFmod(pos);
+	CAudioEngine::ErrorCheck("SetChannel3dPosition", foundIt->second->set3DAttributes(&position, NULL));
 }
 
 void CAudioEngine::SetChannelVolume(int channelId, float volume)
@@ -149,13 +148,10 @@ void CAudioEngine::StopAllChannels()
 	}
 }
 
-void CAudioEngine::SetListenerPosition(const AudioVector3& _pos, const AudioVector3& _vel, const AudioVector3& _forward, const AudioVector3& _up)
+void CAudioEngine::SetListenerPosition()
 {
-	FMOD_VECTOR forward = VectorToFmod(_forward);
-	FMOD_VECTOR up = VectorToFmod(_up);
-	FMOD_VECTOR zero = { 0,0,0 };
-
-	CAudioEngine::ErrorCheck("SetListenerPosition", SoundSystem->set3DListenerAttributes(0, &zero, &zero, &forward, &up));
+	FMOD_VECTOR zero = { 0.0f,0.0f,0.0f };
+	CAudioEngine::ErrorCheck("SetListenerPosition", SoundSystem->set3DListenerAttributes(0, &zero, NULL, NULL, NULL));
 }
 
 int CAudioEngine::ErrorCheck(const string& method, FMOD_RESULT result)

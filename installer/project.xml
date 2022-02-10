@@ -521,6 +521,24 @@
         </setInstallerVariable>
     </readyToInstallActionList>
     <postInstallationActionList>
+        <deleteFile>
+            <path>${xplanepath}/Resources/plugins/xPilot/win_x64/fmod.dll</path>
+            <ruleList>
+                <platformTest type="windows"/>
+            </ruleList>
+        </deleteFile>
+        <deleteFile>
+            <path>${xplanepath}/Resources/plugins/xPilot/mac_x64/libfmod.dylib</path>
+            <ruleList>
+                <platformTest type="osx"/>
+            </ruleList>
+        </deleteFile>
+        <deleteFile>
+            <path>${xplanepath}/Resources/plugins/xPilot/lin_x64/libfmod.*</path>
+            <ruleList>
+                <platformTest type="linux"/>
+            </ruleList>
+        </deleteFile>
         <writeFile>
             <encoding>utf-8</encoding>
             <path>${desktop_prefix}/xPilot.desktop</path>

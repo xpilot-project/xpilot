@@ -149,16 +149,6 @@ namespace xpilot
 
         int SoundChannelId;
 
-        vect SoundVelocity() const
-        {
-            return mSoundVelocity;
-        }
-
-        vect SoundPosition() const
-        {
-            return mSoundPosition;
-        }
-
         EngineClass GetEngineClass() const
         {
             return mEngineClass;
@@ -170,9 +160,8 @@ namespace xpilot
         void GroundClamping(float frameRate);
         void EnsureAboveGround();
 
+    private:
         EngineClass mEngineClass;
-        vect mSoundVelocity;
-        vect mSoundPosition;
     };
 }
 

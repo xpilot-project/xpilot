@@ -1,19 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
 project(xpilot LANGUAGES C CXX VERSION 2.0.0)
 
+set(CONAN_DISABLE_CHECK_COMPILER TRUE)
+
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 set(CMAKE_CXX_STANDARD 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD_REQUIRED 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD 17)
-
-if(UNIX AND NOT APPLE)
-    # fix rpath on linux
-    SET(CMAKE_SKIP_BUILD_RPATH FALSE)
-    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-    SET(CMAKE_INSTALL_RPATH "\$ORIGIN")
-endif()
 
 file(READ ${CMAKE_SOURCE_DIR}/../xpilot.json XPILOT_JSON)
 string(JSON IS_BETA_VERSION GET ${XPILOT_JSON} is_beta)
@@ -133,7 +128,7 @@ message ("XPMP2_LIBRARY = ${XPMP2_LIBRARY}")
 target_link_libraries(${PROJECT_NAME} ${XPMP2_LIBRARY})
 
 if(WIN32)
-    find_library(FMOD_LIBRARY NAMES fmod_vc.lib REQUIRED)
+    find_library(FMOD_LIBRARY NAMES fmod64_vc.lib REQUIRED)
     message ("FMOD_LIBRARY = ${FMOD_LIBRARY}")
     target_link_libraries(${PROJECT_NAME} ${FMOD_LIBRARY})
 elseif(APPLE)

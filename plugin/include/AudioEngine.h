@@ -31,6 +31,10 @@ struct AudioVector3 {
 	float x;
 	float y;
 	float z;
+
+	bool isNonZero() const {
+		return abs(x) > 0.0f || abs(y) > 0.0f || abs(z) > 0.0f;
+	}
 };
 
 class CAudioEngine {
@@ -43,12 +47,12 @@ public:
 	void LoadSound(const std::string& soundName, const std::string& soundFilePath, bool bLooping = true);
 	void UnloadSound(const std::string& soundName);
 	int CreateSoundChannel(const std::string& soundName, float fVolumedB = 0.0f);
-	void SetChannel3dPosition(int nChannelId, const AudioVector3& position, const AudioVector3& velocity);
+	void SetChannel3dPosition(int nChannelId, const AudioVector3& pos);
 	void SetChannelVolume(int nChannelId, float fVolumedB);
 	void SetChannelPaused(int channel, bool paused);
 	void StopChannel(int channel);
 	void StopAllChannels();
-	void SetListenerPosition(const AudioVector3& vPos, const AudioVector3& velocity, const AudioVector3& forward, const AudioVector3& up);
+	void SetListenerPosition();
 	FMOD_VECTOR VectorToFmod(const AudioVector3& vPosition);
 
 	FMOD::System* SoundSystem;

@@ -297,19 +297,19 @@ namespace xpilot
 			XPLMCameraPosition_t camera;
 			XPLMReadCameraPosition(&camera);
 
-			AudioVector3 zero{ 0,0,0 };
-			AudioVector3 forward{ (float)sin(camera.heading * M_PI / 180.0f), 0.0f, (float)cos(camera.heading * M_PI / 180.0f) };
-
-			instance->m_audioEngine->SetListenerPosition(zero, zero, forward, { 0.0f, -1.0f, 0.0f });
+			instance->m_audioEngine->SetListenerPosition();
 
 			for (mapPlanesTy::iterator iter = mapPlanes.begin(); iter != mapPlanes.end(); ++iter)
 			{
 				int channel = iter->second->SoundChannelId;
-				vect soundPos = iter->second->SoundPosition();
-				vect soundVel = iter->second->SoundVelocity();
+
+				AudioVector3 soundPos{};
+				soundPos.x = camera.x - iter->second->drawInfo.x;
+				soundPos.y = camera.y - iter->second->drawInfo.y;
+				soundPos.z = camera.z - iter->second->drawInfo.z;
 
 				if (soundPos.isNonZero()) {
-					instance->m_audioEngine->SetChannel3dPosition(channel, { soundPos.z, soundPos.y, soundPos.x }, { soundVel.z, soundVel.y, soundVel.x });
+					instance->m_audioEngine->SetChannel3dPosition(channel, soundPos);
 					instance->m_audioEngine->SetChannelPaused(channel, ShouldPauseSound || !iter->second->IsEnginesRunning);
 					instance->m_audioEngine->SetChannelVolume(channel, soundVolume);
 				}
