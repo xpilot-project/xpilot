@@ -497,6 +497,7 @@ namespace xpilot
             else
             {
                 m_fastPositionTimer.stop();
+                SendStoppedFastPositionPacket();
             }
         }
     }
