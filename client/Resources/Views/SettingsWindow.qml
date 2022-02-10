@@ -25,13 +25,20 @@ Window {
     property var inputDeviceListLoaded: false
     property var outputDeviceListLoaded: false
     property var initialized: false
+    property var inputDeviceChanged: false
 
     signal closeWindow()
 
     // @disable-check M16
     onClosing: {
-        AppConfig.saveConfig();
-        closeWindow()
+        if(inputDeviceChanged) {
+            close.accepted = false
+            calibrationRequired.open()
+        }
+        else {
+            AppConfig.saveConfig();
+            closeWindow()
+        }
     }
 
     Connections {
@@ -90,6 +97,50 @@ Window {
             initialized = true
         }
     }
+
+    Popup {
+        id: calibrationRequired
+        width: 500
+        height: 220
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        modal: true
+        focus: true
+        closePolicy: Popup.NoAutoClose
+        margins: 20
+
+        Text {
+            id: calibrationInfo
+            text: "<strong>Microphone Calibration Required</strong><br/><br/>Because your microphone device changed, you must confirm your microphone volume is at an acceptable level.<br/><br/>Please verify that the microphone volume level indicator stays green when you speak normally. Use the Mic Volume slider to adjust the microphone volume if necessary."
+            font.pixelSize: 14
+            renderType: Text.NativeRendering
+            width: parent.width
+            wrapMode: Text.Wrap
+            verticalAlignment: Text.AlignVCenter
+            bottomPadding: 10
+            leftPadding: 10
+        }
+
+        GrayButton {
+            id: btnOK
+            text: "OK"
+            width: 80
+            height: 30
+            font.pixelSize: 14
+            anchors.top: calibrationInfo.bottom
+            x: 10
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    calibrationRequired.close()
+                    inputDeviceChanged = false
+                    AppConfig.MicrophoneCalibrated = true
+                }
+            }
+        }
+    }
+
 
     GridLayout {
         id: gridLayout
@@ -453,6 +504,7 @@ Window {
                         var device = inputDeviceList.textAt(currentIndex)
                         AppConfig.InputDevice = device
                         audio.setInputDevice(device)
+                        inputDeviceChanged = true
                     }
                 }
             }

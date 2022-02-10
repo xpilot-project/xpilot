@@ -10,7 +10,7 @@ import "../Controls"
 Popup {
     id: popup
     width: 550
-    height: 250
+    height: 240
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
     focus: true
@@ -35,7 +35,7 @@ Popup {
         font.pixelSize: 14
         anchors.top: lblAskDisconnect.bottom
         anchors.left: lblAskDisconnect.left
-        anchors.topMargin: 15
+        anchors.topMargin: 10
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
