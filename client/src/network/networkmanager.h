@@ -153,7 +153,7 @@ namespace xpilot
             return (m_userAircraftData.AltitudeMslM * 3.28084) + deltaAltitudeV;
         }
 
-        const double POSITIONAL_VELOCITY_ZERO_TOLERANCE = 0.0005;
+        const double POSITIONAL_VELOCITY_ZERO_TOLERANCE = 0.005;
         bool PositionalVelocityIsZero(UserAircraftData data)
         {
             return (abs(data.LongitudeVelocity) < POSITIONAL_VELOCITY_ZERO_TOLERANCE &&
