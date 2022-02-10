@@ -96,7 +96,6 @@ namespace xpilot
         QList<uint> m_transmitFreqs;
         QFile m_networkLog;
         QTextStream m_rawDataStream;
-        bool m_sendEmptyFastPosition = false;
         bool m_simPaused = false;
 
         QNetworkAccessManager *nam = nullptr;

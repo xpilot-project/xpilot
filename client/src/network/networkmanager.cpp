@@ -663,13 +663,9 @@ namespace xpilot
         }
         else if(!PositionalVelocityIsZero(m_userAircraftData)) {
             SendFastPositionPacket();
-            m_sendEmptyFastPosition = true; // if during the next timer tick we have zero velocities, queue up an empty fast position packet
         }
         else {
-            if(m_sendEmptyFastPosition) {
-                SendStoppedFastPositionPacket();
-                m_sendEmptyFastPosition = false;
-            }
+            SendStoppedFastPositionPacket();
         }
     }
 
