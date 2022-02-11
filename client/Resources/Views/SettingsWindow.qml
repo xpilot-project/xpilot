@@ -29,6 +29,10 @@ Window {
 
     signal closeWindow()
 
+    function trimLineBreaks(value) {
+        return value.replace(/[\n\r]/g, "")
+    }
+
     // @disable-check M16
     onClosing: {
         if(inputDeviceChanged) {
@@ -171,7 +175,7 @@ Window {
             CustomTextField {
                 id: txtVatsimId
                 onTextChanged: {
-                    AppConfig.VatsimId = txtVatsimId.text;
+                    AppConfig.VatsimId = trimLineBreaks(txtVatsimId.text.trim())
                 }
                 validator: RegularExpressionValidator {
                     regularExpression: /[0-9]+/
@@ -199,7 +203,7 @@ Window {
                 echoMode: TextInput.Password
                 y: 20
                 onTextChanged: {
-                    AppConfig.VatsimPasswordDecrypted = txtVatsimPassword.text.trim()
+                    AppConfig.VatsimPasswordDecrypted = trimLineBreaks(txtVatsimPassword.text.trim())
                 }
             }
         }
@@ -223,7 +227,7 @@ Window {
                 id: txtYourName
                 y: 20
                 onTextChanged: {
-                    AppConfig.Name = txtYourName.text;
+                    AppConfig.Name = trimLineBreaks(txtYourName.text.trim());
                 }
             }
         }
@@ -248,7 +252,7 @@ Window {
                 y: 20
                 onTextChanged: {
                     txtHomeAirport.text = txtHomeAirport.text.toUpperCase()
-                    AppConfig.HomeAirport = txtHomeAirport.text;
+                    AppConfig.HomeAirport = trimLineBreaks(txtHomeAirport.text.trim())
                 }
                 validator: RegularExpressionValidator {
                     regularExpression: /[a-zA-Z0-9]{4}/
