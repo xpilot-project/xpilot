@@ -47,7 +47,7 @@ namespace bip = boost::interprocess;
 
 #define OUTBOUND_QUEUE "xpilot.outbound"
 #define INBOUND_QUEUE "xpilot.inbound"
-#define MAX_MESSAGES 5000
+#define MAX_MESSAGES 500
 #define MAX_MESSAGE_SIZE 2048
 
 namespace xpilot
