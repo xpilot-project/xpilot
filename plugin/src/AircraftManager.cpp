@@ -304,14 +304,16 @@ namespace xpilot
 				soundPos.y = camera.y - iter->second->drawInfo.y;
 				soundPos.z = camera.z - iter->second->drawInfo.z;
 
-				if (soundPos.isNonZero()) {
+				if (instance->m_audioEngine != nullptr && soundPos.isNonZero()) {
 					instance->m_audioEngine->SetChannel3dPosition(channel, soundPos);
 					instance->m_audioEngine->SetChannelPaused(channel, ShouldPauseSound || !iter->second->IsEnginesRunning);
 					instance->m_audioEngine->SetChannelVolume(channel, soundVolume);
 				}
 			}
 
-			instance->m_audioEngine->Update();
+			if (instance->m_audioEngine != nullptr) {
+				instance->m_audioEngine->Update();
+			}
 		}
 
 		return -1.0f;
