@@ -26,7 +26,7 @@ Switch {
 
     contentItem: Text {
         text: control.text
-        font.pixelSize: 13
+        font.pointSize: 10
         opacity: enabled ? 1.0 : 0.3
         color: "#333333"
         verticalAlignment: Text.AlignVCenter

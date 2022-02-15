@@ -30,7 +30,7 @@ Popup {
         Label {
             id: lblXplanePath
             text: "Please browse to the folder where X-Plane 11 is installed:"
-            font.pixelSize: 14
+            font.pointSize: 10
             renderType: Text.NativeRendering
             wrapMode: Text.WordWrap
             x: 20
@@ -41,7 +41,7 @@ Popup {
             text: "Select Folder..."
             width: 120
             height: 30
-            font.pixelSize: 14
+            font.pointSize: 10
             anchors.left: lblXplanePath.right
             anchors.leftMargin: 10
             y: 25
@@ -71,7 +71,7 @@ Popup {
             anchors.top: lblXplanePath.bottom
             anchors.left: lblXplanePath.left
             anchors.topMargin: 20
-            font.pixelSize: 14
+            font.pointSize: 10
             renderType: Text.NativeRendering
             wrapMode: Text.WordWrap
             width: 480
@@ -82,7 +82,7 @@ Popup {
             text: "OK"
             width: 80
             height: 30
-            font.pixelSize: 14
+            font.pointSize: 10
             anchors.topMargin: 25
             anchors.top: xplanePathUrl.bottom
             anchors.left: xplanePathUrl.left
@@ -100,7 +100,7 @@ Popup {
             text: "Cancel"
             width: 80
             height: 30
-            font.pixelSize: 14
+            font.pointSize: 10
             anchors.topMargin: 25
             anchors.top: xplanePathUrl.bottom
             anchors.left: xplanePathBtnOk.right

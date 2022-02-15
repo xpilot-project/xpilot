@@ -938,7 +938,7 @@ Window {
                         text: title
                         color: itemIndex === view.currentIndex ? "white" : (hasUnread ? "yellow" : frameColor)
                         font.family: robotoMono.name
-                        font.pixelSize: 13
+                        font.pointSize: 10
                     }
 
                     WindowControlButton {
@@ -1065,7 +1065,7 @@ Window {
                                             wrapMode: Text.Wrap
                                             font.family: robotoMono.name
                                             renderType: Text.NativeRendering
-                                            font.pixelSize: 13
+                                            font.pointSize: 10
                                             color: msgColor || '#ffffff'
                                             linkColor: '#ffffff'
                                             onLinkActivated: Qt.openUrlExternally(link)
@@ -1096,7 +1096,7 @@ Window {
 
                             TextField {
                                 id: cliTextField
-                                font.pixelSize: 13
+                                font.pointSize: 10
                                 font.family: robotoMono.name
                                 renderType: Text.NativeRendering
                                 color: '#ffffff'

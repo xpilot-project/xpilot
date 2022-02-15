@@ -8,7 +8,7 @@ Button {
     text: qsTr("Button")
     checked: false
     checkable: false
-    font.pixelSize: 13
+    font.pointSize: 10
     anchors.verticalCenter: parent.verticalCenter
     anchors.verticalCenterOffset: 0
     width: metrics.advanceWidth + 20
@@ -32,7 +32,7 @@ Button {
         id: label
         color: (isActive || enabled || mouseArea.pressed || mouseArea.containsMouse) ? "#ffffff" : "#6c757d"
         text: button.text.toUpperCase()
-        font.pixelSize: button.font.pixelSize
+        font.pointSize: button.font.pointSize
         font.family: robotoMono.name
         font.styleName: Font.Normal
         opacity: button.enabled ? 1 : 0.5

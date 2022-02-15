@@ -65,7 +65,7 @@ Rectangle {
             id: label1
             text: Math.round(control.value) + (showPercent ? "%" : "")
             anchors.verticalCenter: parent.verticalCenter
-            font.pixelSize: 13
+            font.pointSize: 10
             renderType: Text.NativeRendering
         }
     }

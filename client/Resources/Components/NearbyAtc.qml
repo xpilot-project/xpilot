@@ -31,7 +31,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.top: parent.top
         font.family: robotoMono.name
-        font.pixelSize: 14
+        font.pointSize: 11
         font.bold: true
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter

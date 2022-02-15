@@ -8,7 +8,7 @@ CheckBox {
     padding: 0
     contentItem: Text {
         text: control.text
-        font.pixelSize: 13
+        font.pointSize: 10
         opacity: enabled ? 1.0 : 0.3
         color: "#0164AD"
         verticalAlignment: Text.AlignVCenter

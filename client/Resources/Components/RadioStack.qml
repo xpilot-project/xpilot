@@ -100,7 +100,7 @@ ColumnLayout {
             text: qsTr("COM1:")
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
-            font.pixelSize: 16
+            font.pointSize: 12
             font.bold: true
             font.family: robotoMono.name
             renderType: Text.NativeRendering
@@ -111,7 +111,7 @@ ColumnLayout {
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
             leftPadding: 5
-            font.pixelSize: 16
+            font.pointSize: 12
             font.family: robotoMono.name
             renderType: Text.NativeRendering
 
@@ -166,7 +166,7 @@ ColumnLayout {
             text: qsTr("COM2:")
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
-            font.pixelSize: 16
+            font.pointSize: 12
             font.bold: true
             font.family: robotoMono.name
             renderType: Text.NativeRendering
@@ -177,7 +177,7 @@ ColumnLayout {
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
             leftPadding: 5
-            font.pixelSize: 16
+            font.pointSize: 12
             font.family: robotoMono.name
             renderType: Text.NativeRendering
 
