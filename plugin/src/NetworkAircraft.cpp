@@ -149,6 +149,7 @@ namespace xpilot
         double alt_change = velocityVector.Y * interval * 3.28084;
         double new_alt = PredictedVisualState.AltitudeTrue + alt_change;
 
+        PerformGroundClamping(1.0 / interval);
         SetLocation(new_lat, new_lon, AdjustedAltitude.has_value() ? AdjustedAltitude.value() : new_alt);
 
         Quaternion current_orientation = Quaternion::FromEuler(
@@ -401,7 +402,6 @@ namespace xpilot
         }
 
         ExtrapolatePosition(positionalVelocities, rotationalVelocities, _elapsedSinceLastCall);
-        PerformGroundClamping(1.0 / _elapsedSinceLastCall);
 
         const auto diffMs = chrono::duration_cast<chrono::milliseconds>(now - PreviousSurfaceUpdateTime);
 
