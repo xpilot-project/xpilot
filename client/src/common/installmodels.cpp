@@ -224,71 +224,74 @@ void InstallModels::validatePath(QString path)
     QString localPath = QUrl(QDir::fromNativeSeparators(path)).toLocalFile();
     QDir xplanePath(localPath);
 
-    if(xplanePath.isReadable()) {
-        if(BuildConfig::isRunningOnWindowsPlatform()) {
-            QString xplaneExe = pathAppend(xplanePath.path(), "X-Plane.exe");
-            pathValid = QFileInfo::exists(xplaneExe) && QFileInfo(xplaneExe).isFile();
-            if(!pathValid) {
-                emit invalidXplanePath("Invalid X-Plane folder path. The path should be the root folder of where X-Plane.exe is installed.");
-                return;
-            }
-        }
-        else if(BuildConfig::isRunningOnMacOSPlatform()) {
-            QString xplaneExe = pathAppend(xplanePath.path(), "X-Plane.app");
-            pathValid = QFileInfo::exists(xplaneExe) && QFileInfo(xplaneExe).isDir();
-            if(!pathValid) {
-                emit invalidXplanePath("Invalid X-Plane folder path. The path should be the root folder of where X-Plane.app is installed.");
-                return;
-            }
-        }
-        else if(BuildConfig::isRunningOnLinuxPlatform()) {
-            QString xplaneExe = pathAppend(xplanePath.path(), "X-Plane-x86_64");
-            pathValid = QFileInfo::exists(xplaneExe) && QFileInfo(xplaneExe).isFile();
-            if(!pathValid) {
-                emit invalidXplanePath("Invalid X-Plane folder path. The path should be the root folder of where the X-Plane-x86_64 executable is installed.");
-                return;
-            }
+    // instead of checking if the directory is readable (because that's not a reliable method according to the qt docs), create a temporary file to verify permissions instead
+    QTemporaryFile temp(xplanePath.path() + "/");
+    if(!temp.open()) {
+        emit invalidXplanePath("The X-Plane folder is not readable. Verify the folder permissions and try again.");
+        return;
+    }
+
+    if(BuildConfig::isRunningOnWindowsPlatform()) {
+        QString xplaneExe = pathAppend(xplanePath.path(), "X-Plane.exe");
+        pathValid = QFileInfo::exists(xplaneExe) && QFileInfo(xplaneExe).isFile();
+        if(!pathValid) {
+            emit invalidXplanePath("Invalid X-Plane folder path. The path should be the root folder of where X-Plane.exe is installed.");
+            return;
         }
     }
-    else
-    {
-        emit invalidXplanePath("The X-Plane folder is not readable. Verify the folder permissions and try again.");
+    else if(BuildConfig::isRunningOnMacOSPlatform()) {
+        QString xplaneExe = pathAppend(xplanePath.path(), "X-Plane.app");
+        pathValid = QFileInfo::exists(xplaneExe) && QFileInfo(xplaneExe).isDir();
+        if(!pathValid) {
+            emit invalidXplanePath("Invalid X-Plane folder path. The path should be the root folder of where X-Plane.app is installed.");
+            return;
+        }
+    }
+    else if(BuildConfig::isRunningOnLinuxPlatform()) {
+        QString xplaneExe = pathAppend(xplanePath.path(), "X-Plane-x86_64");
+        pathValid = QFileInfo::exists(xplaneExe) && QFileInfo(xplaneExe).isFile();
+        if(!pathValid) {
+            emit invalidXplanePath("Invalid X-Plane folder path. The path should be the root folder of where the X-Plane-x86_64 executable is installed.");
+            return;
+        }
     }
 
     bool pluginValid = false;
     QString pluginError = "xPilot plugin not found. Please re-run the xPilot installer and make sure to choose the correct X-Plane folder path.";
 
     QDir xpilotPath(pathAppend(xplanePath.path(), "Resources/plugins/xPilot"));
-    if(xpilotPath.isReadable()) {
-        if(BuildConfig::isRunningOnWindowsPlatform()) {
-            QString pluginFile = pathAppend(xpilotPath.path(), "win_x64/xPilot.xpl");
-            pluginValid = QFileInfo::exists(pluginFile) && QFileInfo(pluginFile).isFile();
-            if(!pluginValid) {
-                emit invalidXplanePath(pluginError);
-                return;
-            }
-        }
-        else if(BuildConfig::isRunningOnMacOSPlatform()) {
-            QString pluginFile = pathAppend(xpilotPath.path(), "mac_x64/xPilot.xpl");
-            pluginValid = QFileInfo::exists(pluginFile) && QFileInfo(pluginFile).isFile();
-            if(!pluginValid) {
-                emit invalidXplanePath(pluginError);
-                return;
-            }
-        }
-        else if(BuildConfig::isRunningOnLinuxPlatform()) {
-            QString pluginFile = pathAppend(xpilotPath.path(), "lin_x64/xPilot.xpl");
-            pluginValid = QFileInfo::exists(pluginFile) && QFileInfo(pluginFile).isFile();
-            if(!pluginValid) {
-                emit invalidXplanePath(pluginError);
-                return;
-            }
-        }
-    }
-    else
-    {
+
+    // instead of checking if the directory is readable (because that's not a reliable method according to the qt docs), create a temporary file to verify permissions instead
+    QTemporaryFile temp2(xpilotPath.path() + "/");
+    if(!temp2.open()) {
         QString err("The xPilot plugin resources folder (%1) is not readable. Verify the folder permissions and try again.");
         emit invalidXplanePath(err.arg(xpilotPath.path()));
+        return;
+    }
+
+    if(BuildConfig::isRunningOnWindowsPlatform()) {
+        QString pluginFile = pathAppend(xpilotPath.path(), "win_x64/xPilot.xpl");
+        pluginValid = QFileInfo::exists(pluginFile) && QFileInfo(pluginFile).isFile();
+        if(!pluginValid) {
+            emit invalidXplanePath(pluginError);
+            return;
+        }
+    }
+    else if(BuildConfig::isRunningOnMacOSPlatform()) {
+        QString pluginFile = pathAppend(xpilotPath.path(), "mac_x64/xPilot.xpl");
+        pluginValid = QFileInfo::exists(pluginFile) && QFileInfo(pluginFile).isFile();
+        if(!pluginValid) {
+            emit invalidXplanePath(pluginError);
+            return;
+        }
+    }
+    else if(BuildConfig::isRunningOnLinuxPlatform()) {
+        QString pluginFile = pathAppend(xpilotPath.path(), "lin_x64/xPilot.xpl");
+        pluginValid = QFileInfo::exists(pluginFile) && QFileInfo(pluginFile).isFile();
+        if(!pluginValid) {
+            emit invalidXplanePath(pluginError);
+            return;
+        }
     }
 
     if(pathValid && pluginValid) {
