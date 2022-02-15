@@ -120,7 +120,7 @@ namespace xpilot
 
 		if (plane) {
 			string engineSound = "JetEngine";
-			switch (plane->GetEngineClass())
+			switch (plane->EngineClass)
 			{
 			case EngineClassType::JetEngine:
 				engineSound = "JetEngine";
