@@ -66,20 +66,8 @@ namespace xpilot
         return rpm / 60.0f * float(s) * 360.0f;
     }
 
-    void Interpolate(float& value, float& target, float _diffMs, float _moveTime)
-    {
-        const float f = value - target;
-        if (abs(f) > numeric_limits<float>::epsilon())
-        {
-            const auto diffRemaining = target - value;
-            const auto diffThisFrame = _diffMs / _moveTime;
-            value += copysign(diffThisFrame, diffRemaining);
-            value = (max)(0.0f, (min)(value, 1.0f));
-        }
-    }
-
     template<typename T>
-    void InterpolateSurface(T& surface, const float& target, float _diffMs, float _moveTime, float _max = 1.0f)
+    void Interpolate(T& surface, const float& target, float _diffMs, float _moveTime, float _max = 1.0f)
     {
         const float f = surface - target;
         if (abs(f) > numeric_limits<float>::epsilon())
@@ -114,31 +102,31 @@ namespace xpilot
         IsFirstRenderPending = true;
         LastSlowPositionTimestamp = chrono::steady_clock::now();
         PredictedVisualState = _visualState;
-        RemoteVisualState = _visualState;
-        PositionalVelocityVector = Vector3::Zero();
-        RotationalVelocityVector = Vector3::Zero();
+        VisualState = _visualState;
+        PositionalVelocities = Vector3::Zero();
+        RotationalVelocities = Vector3::Zero();
 
         auto model = GetModelInfo();
         flightModel = GetFlightModel(model);
 
-        mEngineClass = EngineClass::JetEngine;
+        EngineClass = EngineClassType::JetEngine;
         if (model.doc8643Classification.size() > 0) 
         {
             // helicopter or gyrocopter
             if (model.doc8643Classification[0] == 'H' || model.doc8643Classification[0] == 'G') {
-                mEngineClass = EngineClass::Helicopter;
+                EngineClass = EngineClassType::Helicopter;
             }
             // jet
             else if (model.doc8643Classification.size() >= 2 && model.doc8643Classification[2] == 'J') {
-                mEngineClass = EngineClass::JetEngine;
+                EngineClass = EngineClassType::JetEngine;
             }
             // piston prop
             else if (model.doc8643Classification.size() >= 2 && model.doc8643Classification[2] == 'P') {
-                mEngineClass = EngineClass::PistonProp;
+                EngineClass = EngineClassType::PistonProp;
             }
             // turbo prop
             else if (model.doc8643Classification.size() >= 2 && model.doc8643Classification[2] == 'T') {
-                mEngineClass = EngineClass::TurboProp;
+                EngineClass = EngineClassType::TurboProp;
             }
         }
     }
@@ -147,7 +135,7 @@ namespace xpilot
     {
     }
 
-    void NetworkAircraft::Extrapolate(
+    void NetworkAircraft::ExtrapolatePosition(
         Vector3 velocityVector,
         Vector3 rotationVector,
         double interval)
@@ -161,7 +149,6 @@ namespace xpilot
         double alt_change = velocityVector.Y * interval * 3.28084;
         double new_alt = PredictedVisualState.AltitudeTrue + alt_change;
 
-        GroundClamping(1.0 / interval);
         SetLocation(new_lat, new_lon, AdjustedAltitude.has_value() ? AdjustedAltitude.value() : new_alt);
 
         Quaternion current_orientation = Quaternion::FromEuler(
@@ -202,7 +189,61 @@ namespace xpilot
         SetRoll(new_roll);
     }
 
-    void NetworkAircraft::GroundClamping(float frameRate)
+    void NetworkAircraft::RecordTerrainElevationHistory()
+    {
+        if (!LocalTerrainElevation.has_value()) {
+            return;
+        }
+
+        HasUsableTerrainElevationData = false;
+
+        auto now = chrono::steady_clock::now();
+
+        TerrainElevationHistory.remove_if([&](TerrainElevationData& meta) {
+            return meta.Timestamp < (now - chrono::milliseconds(TERRAIN_ELEVATION_DATA_USABLE_AGE + 250));
+            });
+
+        if (VisualState.AltitudeAgl.has_value() && (VisualState.AltitudeAgl.value() <= MAX_USABLE_ALTITUDE_AGL)) {
+            TerrainElevationData data{};
+            data.Timestamp = now;
+            data.Location.Latitude = VisualState.Lat;
+            data.Location.Longitude = VisualState.Lon;
+            data.LocalValue = LocalTerrainElevation.value();
+            TerrainElevationHistory.push_back(data);
+        }
+        else {
+            return;
+        }
+
+        if (TerrainElevationHistory.size() < 2) {
+            return;
+        }
+
+        auto startSample = TerrainElevationHistory.front();
+        auto endSample = TerrainElevationHistory.back();
+        auto age = chrono::duration_cast<chrono::milliseconds>(endSample.Timestamp - startSample.Timestamp).count();
+        if (age < TERRAIN_ELEVATION_DATA_USABLE_AGE) {
+            return;
+        }
+
+        double distance = DegreesToFeet(GreatCircleDistance(
+            startSample.Location.Longitude, startSample.Location.Latitude,
+            endSample.Location.Longitude, endSample.Location.Latitude));
+        double remoteElevationDelta = abs(startSample.RemoteValue - endSample.RemoteValue);
+        double localElevationDelta = abs(startSample.LocalValue - endSample.LocalValue);
+        double remoteSlope = RadiansToDegrees(atan(remoteElevationDelta / distance));
+        if (remoteSlope > TERRAIN_ELEVATION_MAX_SLOPE) {
+            return;
+        }
+        double localSlope = RadiansToDegrees(atan(localElevationDelta / distance));
+        if (localSlope > TERRAIN_ELEVATION_MAX_SLOPE) {
+            return;
+        }
+
+        HasUsableTerrainElevationData = true;
+    }
+
+    void NetworkAircraft::PerformGroundClamping(float frameRate)
     {
         LocalTerrainElevation = {};
         if (PredictedVisualState.AltitudeTrue < 18000.0)
@@ -218,8 +259,8 @@ namespace xpilot
             return;
 
         double agl;
-        if (RemoteVisualState.AltitudeAgl.has_value()) {
-            agl = RemoteVisualState.AltitudeAgl.value();
+        if (VisualState.AltitudeAgl.has_value()) {
+            agl = VisualState.AltitudeAgl.value();
         }
         else {
             agl = PredictedVisualState.AltitudeTrue - LocalTerrainElevation.value();
@@ -238,12 +279,12 @@ namespace xpilot
 
         double newTargetOffset;
         if (HasUsableTerrainElevationData || IsReportedOnGround) {
-            double remoteTerrainElevation = RemoteVisualState.AltitudeTrue - agl;
+            double remoteTerrainElevation = VisualState.AltitudeTrue - agl;
             newTargetOffset = Round(LocalTerrainElevation.value() - remoteTerrainElevation, 2);
 
             // correct for terrain elevation differences in X-Plane
-            if (IsReportedOnGround && (RemoteVisualState.AltitudeTrue + newTargetOffset > LocalTerrainElevation.value())) {
-                double adj = LocalTerrainElevation.value() - (RemoteVisualState.AltitudeTrue + newTargetOffset);
+            if (IsReportedOnGround && (VisualState.AltitudeTrue + newTargetOffset > LocalTerrainElevation.value())) {
+                double adj = LocalTerrainElevation.value() - (VisualState.AltitudeTrue + newTargetOffset);
                 newTargetOffset += adj;
             }
         }
@@ -286,66 +327,82 @@ namespace xpilot
         }
     }
 
-    void NetworkAircraft::UpdateErrorVectors(double interval)
+    void NetworkAircraft::UpdateErrorVectors(double timestamp)
     {
-        if (PositionalVelocityVector == Vector3::Zero())
-        {
-            PositionalVelocityVectorError = Vector3::Zero();
-            RotationalVelocityVectorError = Vector3::Zero();
-            return;
-        }
-
         double latDelta = DegreesToMeters(CalculateNormalizedDelta(
             PredictedVisualState.Lat,
-            RemoteVisualState.Lat,
+            VisualState.Lat,
             -90.0,
             90.0
         ));
 
         double lonDelta = DegreesToMeters(CalculateNormalizedDelta(
             PredictedVisualState.Lon,
-            RemoteVisualState.Lon,
+            VisualState.Lon,
             -180.0,
             180.0
         ));
-        lonDelta *= LongitudeScalingFactor(RemoteVisualState.Lat);
+        lonDelta *= LongitudeScalingFactor(VisualState.Lat);
 
-        double altDelta = (RemoteVisualState.AltitudeTrue - PredictedVisualState.AltitudeTrue) * 0.3048;
+        double altDelta = (VisualState.AltitudeTrue - PredictedVisualState.AltitudeTrue) * 0.3048;
 
-        PositionalVelocityVectorError = Vector3(
-            lonDelta / interval,
-            altDelta / interval,
-            latDelta / interval
+        PositionalErrorVelocities = Vector3(
+            lonDelta / 2.0,
+            altDelta / 2.0,
+            latDelta / 2.0
         );
 
-        Quaternion currentOrientation = Quaternion::FromEuler(
-            DegreesToRadians(GetPitch()),
-            DegreesToRadians(GetHeading()),
-            DegreesToRadians(GetRoll())
-        );
+        if (PredictedVisualState.Pitch == GetPitch() &&
+            PredictedVisualState.Heading == GetHeading() &&
+            PredictedVisualState.Bank == GetRoll())
+        {
+            RotationalErrorVelocities = Vector3::Zero();
+        }
+        else
+        {
+            Quaternion currentOrientation = Quaternion::FromEuler(
+                DegreesToRadians(GetPitch()),
+                DegreesToRadians(GetHeading()),
+                DegreesToRadians(GetRoll())
+            );
 
-        Quaternion targetOrientation = Quaternion::FromEuler(
-            DegreesToRadians(RemoteVisualState.Pitch),
-            DegreesToRadians(RemoteVisualState.Heading),
-            DegreesToRadians(RemoteVisualState.Bank)
-        );
+            Quaternion targetOrientation = Quaternion::FromEuler(
+                DegreesToRadians(VisualState.Pitch),
+                DegreesToRadians(VisualState.Heading),
+                DegreesToRadians(VisualState.Bank)
+            );
 
-        Quaternion delta = Quaternion::Inverse(currentOrientation) * targetOrientation;
+            Quaternion delta = Quaternion::Inverse(currentOrientation) * targetOrientation;
 
-        Vector3 result = Quaternion::ToEuler(delta);
+            Vector3 result = Quaternion::ToEuler(delta);
 
-        RotationalVelocityVectorError = Vector3(result.X / interval, result.Y / interval, result.Z / interval);
+            RotationalErrorVelocities = Vector3(result.X / 2.0, result.Y / 2.0, result.Z / 2.0);
+        }
+
+        ApplyErrorVelocitiesUntil = timestamp + 2000;
     }
 
     void NetworkAircraft::UpdatePosition(float _elapsedSinceLastCall, int)
     {
-        Extrapolate(
-            PositionalVelocityVector + PositionalVelocityVectorError,
-            RotationalVelocityVector + RotationalVelocityVectorError,
-            _elapsedSinceLastCall
-        );
+        const auto now = chrono::steady_clock::now();
 
-        const auto now = chrono::system_clock::now();
+        if (chrono::duration_cast<chrono::milliseconds>(now - LastVelocityUpdate).count() > 500)
+        {
+            RotationalVelocities = Vector3::Zero();
+            RotationalErrorVelocities = Vector3::Zero();
+        }
+
+        Vector3 positionalVelocities = PositionalVelocities;
+        Vector3 rotationalVelocities = RotationalVelocities;
+        if (chrono::duration_cast<chrono::milliseconds>(now.time_since_epoch()).count() <= ApplyErrorVelocitiesUntil) 
+        {
+            positionalVelocities += PositionalErrorVelocities;
+            rotationalVelocities += RotationalErrorVelocities;
+        }
+
+        ExtrapolatePosition(positionalVelocities, rotationalVelocities, _elapsedSinceLastCall);
+        PerformGroundClamping(1.0 / _elapsedSinceLastCall);
+
         const auto diffMs = chrono::duration_cast<chrono::milliseconds>(now - PreviousSurfaceUpdateTime);
 
         TargetGearPosition = IsGearDown || IsReportedOnGround ? 1.0f : 0.0f;
@@ -371,10 +428,10 @@ namespace xpilot
         SetLightsStrobe(Surfaces.lights.strbLights);
         SetLightsNav(Surfaces.lights.navLights);
 
-        InterpolateSurface(Surfaces.gearPosition, TargetGearPosition, diffMs.count(), flightModel.GEAR_DURATION);
-        InterpolateSurface(Surfaces.flapRatio, TargetFlapsPosition, diffMs.count(), flightModel.FLAPS_DURATION);
-        InterpolateSurface(Surfaces.spoilerRatio, TargetSpoilerPosition, diffMs.count(), flightModel.FLAPS_DURATION);
-        InterpolateSurface(Surfaces.reversRatio, TargetReverserPosition, diffMs.count(), 1500);
+        Interpolate(Surfaces.gearPosition, TargetGearPosition, diffMs.count(), flightModel.GEAR_DURATION);
+        Interpolate(Surfaces.flapRatio, TargetFlapsPosition, diffMs.count(), flightModel.FLAPS_DURATION);
+        Interpolate(Surfaces.spoilerRatio, TargetSpoilerPosition, diffMs.count(), flightModel.FLAPS_DURATION);
+        Interpolate(Surfaces.reversRatio, TargetReverserPosition, diffMs.count(), 1500);
         PreviousSurfaceUpdateTime = now;
 
         SetGearRatio(Surfaces.gearPosition);
@@ -384,12 +441,12 @@ namespace xpilot
         SetSpeedbrakeRatio(Surfaces.spoilerRatio);
         SetTireDeflection(flightModel.GEAR_DEFLECTION / 2.0f);
         SetReversDeployRatio(Surfaces.reversRatio);
-        SetNoseWheelAngle(RemoteVisualState.NoseWheelAngle);
+        SetNoseWheelAngle(VisualState.NoseWheelAngle);
         SetWeightOnWheels(IsReportedOnGround);
 
         if (IsReportedOnGround)
         {
-            double rpm = (60 / (2 * M_PI * 3.2)) * abs(PositionalVelocityVector.X);
+            double rpm = (60 / (2 * M_PI * 3.2)) * abs(PositionalVelocities.X);
             double rpmDeg = RpmToDegree(GetTireRotRpm(), _elapsedSinceLastCall);
             SetTireRotRpm(rpm);
             SetTireRotAngle(GetTireRotAngle() + rpmDeg);

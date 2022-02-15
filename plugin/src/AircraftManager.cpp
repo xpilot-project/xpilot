@@ -31,10 +31,6 @@ namespace xpilot
 	constexpr double ERROR_CORRECTION_INTERVAL_FAST = 2.0;
 	constexpr double ERROR_CORRECTION_INTERVAL_SLOW = 5.0;
 
-	constexpr long TERRAIN_ELEVATION_DATA_USABLE_AGE = 2000;
-	constexpr double MAX_USABLE_ALTITUDE_AGL = 100.0;
-	constexpr double TERRAIN_ELEVATION_MAX_SLOPE = 3.0;
-
 	constexpr float CLOSED_SPACE_VOLUME_SCALAR = 0.10f;
 	constexpr float OUTSIDE_SPACE_VOLUME_SCALAR = 0.60f;
 
@@ -126,16 +122,16 @@ namespace xpilot
 			string engineSound = "JetEngine";
 			switch (plane->GetEngineClass())
 			{
-			case EngineClass::JetEngine:
+			case EngineClassType::JetEngine:
 				engineSound = "JetEngine";
 				break;
-			case EngineClass::PistonProp:
+			case EngineClassType::PistonProp:
 				engineSound = "PistonProp";
 				break;
-			case EngineClass::TurboProp:
+			case EngineClassType::TurboProp:
 				engineSound = "TurboProp";
 				break;
-			case EngineClass::Helicopter:
+			case EngineClassType::Helicopter:
 				engineSound = "Heli";
 				break;
 			default:
@@ -335,16 +331,16 @@ namespace xpilot
 		// newly-reported rotation rather than trying to derive rotational velocities.
 		if (!ReceivingFastPositionUpdates(aircraft))
 		{
-			auto lastUpdateTimeStamp = (aircraft->LastSlowPositionTimestamp < aircraft->LastFastPositionTimestamp) ? aircraft->LastSlowPositionTimestamp : aircraft->LastFastPositionTimestamp;
+			auto lastUpdateTimeStamp = (aircraft->LastSlowPositionTimestamp < aircraft->LastVelocityUpdate) ? aircraft->LastSlowPositionTimestamp : aircraft->LastVelocityUpdate;
 
 			auto intervalMs = chrono::duration_cast<chrono::milliseconds>(now - lastUpdateTimeStamp).count();
 
-			aircraft->PositionalVelocityVector = DerivePositionalVelocityVector(
-				aircraft->RemoteVisualState,
+			aircraft->PositionalVelocities = DerivePositionalVelocityVector(
+				aircraft->VisualState,
 				visualState,
 				intervalMs
 			);
-			aircraft->RotationalVelocityVector = Vector3::Zero();
+			aircraft->RotationalVelocities = Vector3::Zero();
 
 			AircraftVisualState newVisualState{};
 			newVisualState.Lat = aircraft->PredictedVisualState.Lat;
@@ -355,8 +351,7 @@ namespace xpilot
 			newVisualState.Bank = visualState.Bank;
 
 			aircraft->PredictedVisualState = newVisualState;
-			aircraft->RemoteVisualState = visualState;
-			aircraft->UpdateErrorVectors(ERROR_CORRECTION_INTERVAL_SLOW);
+			aircraft->VisualState = visualState;
 		}
 
 		aircraft->LastSlowPositionTimestamp = now;
@@ -367,20 +362,22 @@ namespace xpilot
 	{
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft)
-		{
 			return;
-		}
 
-		if (ReceivingFastPositionUpdates(aircraft))
+		aircraft->PositionalVelocities = positionalVector;
+		aircraft->RotationalVelocities = rotationalVector;
+		aircraft->VisualState = visualState;
+
+		const auto now = chrono::steady_clock::now();
+		if (chrono::duration_cast<chrono::milliseconds>(now - aircraft->LastVelocityUpdate).count() > 500)
 		{
-			aircraft->PositionalVelocityVector = positionalVector;
-			aircraft->RotationalVelocityVector = rotationalVector;
-			aircraft->RemoteVisualState = visualState;
-			aircraft->UpdateErrorVectors(ERROR_CORRECTION_INTERVAL_FAST);
-			UpdateAircraft(aircraft);
+			aircraft->RotationalVelocities = Vector3::Zero();
+			aircraft->RotationalErrorVelocities = Vector3::Zero();
 		}
 
-		aircraft->LastFastPositionTimestamp = chrono::steady_clock::now();
+		aircraft->LastVelocityUpdate = now;
+		aircraft->RecordTerrainElevationHistory();
+		aircraft->UpdateErrorVectors(chrono::duration_cast<chrono::milliseconds>(now.time_since_epoch()).count());
 		aircraft->FastPositionsReceivedCount++;
 	}
 
@@ -394,7 +391,7 @@ namespace xpilot
 	bool AircraftManager::ReceivingFastPositionUpdates(NetworkAircraft* aircraft)
 	{
 		const auto now = chrono::steady_clock::now();
-		const auto diff = chrono::duration_cast<chrono::milliseconds>(now - aircraft->LastFastPositionTimestamp);
+		const auto diff = chrono::duration_cast<chrono::milliseconds>(now - aircraft->LastVelocityUpdate);
 		return diff.count() <= FAST_POSITION_INTERVAL_TOLERANCE;
 	}
 
@@ -427,60 +424,6 @@ namespace xpilot
 			altDelta / intervalSec,
 			latDelta / intervalSec
 		);
-	}
-
-	void AircraftManager::UpdateAircraft(NetworkAircraft* aircraft)
-	{
-		if (!aircraft->LocalTerrainElevation.has_value()) {
-			return;
-		}
-
-		aircraft->HasUsableTerrainElevationData = false;
-
-		auto now = chrono::steady_clock::now();
-
-		aircraft->TerrainElevationHistory.remove_if([&](TerrainElevationData& meta) {
-			return meta.Timestamp < (now - chrono::milliseconds(TERRAIN_ELEVATION_DATA_USABLE_AGE + 250));
-		});
-
-		if (aircraft->RemoteVisualState.AltitudeAgl.has_value() && (aircraft->RemoteVisualState.AltitudeAgl.value() <= MAX_USABLE_ALTITUDE_AGL)) {
-			TerrainElevationData data{};
-			data.Timestamp = now;
-			data.Location.Latitude = aircraft->RemoteVisualState.Lat;
-			data.Location.Longitude = aircraft->RemoteVisualState.Lon;
-			data.LocalValue = aircraft->LocalTerrainElevation.value();
-			aircraft->TerrainElevationHistory.push_back(data);
-		}
-		else {
-			return;
-		}
-
-		if (aircraft->TerrainElevationHistory.size() < 2) {
-			return;
-		}
-
-		auto startSample = aircraft->TerrainElevationHistory.front();
-		auto endSample = aircraft->TerrainElevationHistory.back();
-		auto age = chrono::duration_cast<chrono::milliseconds>(endSample.Timestamp - startSample.Timestamp).count();
-		if (age < TERRAIN_ELEVATION_DATA_USABLE_AGE) {
-			return;
-		}
-
-		double distance = DegreesToFeet(GreatCircleDistance(
-			startSample.Location.Longitude, startSample.Location.Latitude,
-			endSample.Location.Longitude, endSample.Location.Latitude));
-		double remoteElevationDelta = abs(startSample.RemoteValue - endSample.RemoteValue);
-		double localElevationDelta = abs(startSample.LocalValue - endSample.LocalValue);
-		double remoteSlope = RadiansToDegrees(atan(remoteElevationDelta / distance));
-		if (remoteSlope > TERRAIN_ELEVATION_MAX_SLOPE) {
-			return;
-		}
-		double localSlope = RadiansToDegrees(atan(localElevationDelta / distance));
-		if (localSlope > TERRAIN_ELEVATION_MAX_SLOPE) {
-			return;
-		}
-
-		aircraft->HasUsableTerrainElevationData = true;
 	}
 
 	void AircraftManager::HandleChangePlaneModel(const string& callsign, const string& typeIcao, const string& airlineIcao)

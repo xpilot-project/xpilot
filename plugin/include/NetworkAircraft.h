@@ -64,7 +64,7 @@ namespace xpilot
         double LocalValue;
     };
 
-    enum class EngineClass
+    enum class EngineClassType
     {
         Helicopter,
         PistonProp,
@@ -92,6 +92,10 @@ namespace xpilot
         static vector<FlightModelInfo> modelMatches;
     };
 
+    constexpr long TERRAIN_ELEVATION_DATA_USABLE_AGE = 2000;
+    constexpr double MAX_USABLE_ALTITUDE_AGL = 100.0;
+    constexpr double TERRAIN_ELEVATION_MAX_SLOPE = 3.0;
+
     class NetworkAircraft : public XPMP2::Aircraft
     {
     public:
@@ -101,7 +105,8 @@ namespace xpilot
         void copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const;
         void copyBulkData(XPilotAPIAircraft::XPilotAPIBulkInfoTexts* pOut, size_t size) const;
 
-        void UpdateErrorVectors(double interval);
+        void UpdateErrorVectors(double timestamp);
+        void RecordTerrainElevationHistory();
 
         FlightModel GetFlightModel(const XPMP2::CSLModelInfo_t model);
 
@@ -121,7 +126,7 @@ namespace xpilot
         float TargetSpoilerPosition = 0.0f;
         string Origin;
         string Destination;
-        chrono::system_clock::time_point PreviousSurfaceUpdateTime;
+        chrono::steady_clock::time_point PreviousSurfaceUpdateTime;
         XPMPPlaneSurfaces_t Surfaces;
         XPMPPlaneRadar_t Radar;
 
@@ -136,32 +141,26 @@ namespace xpilot
         list<TerrainElevationData> TerrainElevationHistory;
         bool HasUsableTerrainElevationData;
 
-        AircraftVisualState RemoteVisualState;
+        AircraftVisualState VisualState;
         AircraftVisualState PredictedVisualState;
 
-        Vector3 PositionalVelocityVector;
-        Vector3 PositionalVelocityVectorError;
-        Vector3 RotationalVelocityVector;
-        Vector3 RotationalVelocityVectorError;
+        Vector3 PositionalVelocities;
+        Vector3 PositionalErrorVelocities;
+        Vector3 RotationalVelocities;
+        Vector3 RotationalErrorVelocities;
+        long ApplyErrorVelocitiesUntil;
 
-        chrono::steady_clock::time_point LastFastPositionTimestamp;
+        chrono::steady_clock::time_point LastVelocityUpdate;
         chrono::steady_clock::time_point LastSlowPositionTimestamp;
 
         int SoundChannelId;
-
-        EngineClass GetEngineClass() const
-        {
-            return mEngineClass;
-        }
+        EngineClassType EngineClass;
 
     protected:
         virtual void UpdatePosition(float, int);
-        void Extrapolate(Vector3 velocityVector, Vector3 rotationVector, double interval);
-        void GroundClamping(float frameRate);
+        void ExtrapolatePosition(Vector3 velocityVector, Vector3 rotationVector, double interval);
+        void PerformGroundClamping(float frameRate);
         void EnsureAboveGround();
-
-    private:
-        EngineClass mEngineClass;
     };
 }
 
