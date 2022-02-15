@@ -249,9 +249,12 @@ namespace xpilot
 		{
 			try {
 				zmq::message_t msg;
-				static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::none));
-				string data(static_cast<char*>(msg.data()), msg.size());
-				ProcessMessage(data);
+				static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::dontwait));
+				if (msg.size() > 0)
+				{
+					string data(static_cast<char*>(msg.data()), msg.size());
+					ProcessMessage(data);
+				}
 			}
 			catch (...) {}
 		}
