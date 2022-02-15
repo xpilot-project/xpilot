@@ -30,6 +30,15 @@
 #include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/radio_stack_state.h"
 
+#include <boost/interprocess/ipc/message_queue.hpp>
+
+namespace bip = boost::interprocess;
+
+#define OUTBOUND_QUEUE "xpilot.outbound"
+#define INBOUND_QUEUE "xpilot.inbound"
+#define MAX_MESSAGES 5000
+#define MAX_MESSAGE_SIZE 2048
+
 class XplaneAdapter : public QObject
 {
     Q_OBJECT
@@ -71,7 +80,9 @@ private:
     void SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency);
     void setDataRefValue(std::string dataRef, float value);
     void sendCommand(std::string command);
-    void initZmq();
+
+    void initializeMessageQueues();
+    void clearSimConnection();
 
 public slots:
     void OnDataReceived();
@@ -114,15 +125,16 @@ private:
 
     QList<QString> m_ignoreList;
 
-    bool m_zmqInitialized = false;
-    int m_pluginPort = 0;
-    int m_lastPluginPort = 0;
-    std::unique_ptr<std::thread> m_zmqThread;
     std::unique_ptr<zmq::context_t> m_zmqContext;
-    std::unique_ptr<zmq::socket_t> m_zmqSocket;
     QList<zmq::socket_t*> m_visualSockets;
     QTimer m_heartbeatTimer;
     QTimer m_xplaneDataTimer;
+
+    // message queue
+    bool m_keepMessageQueueAlive = false;
+    std::unique_ptr<std::thread> messageQueueThread;
+    std::unique_ptr<bip::message_queue> outboundQueue;  // xpilot -> xplane
+    std::unique_ptr<bip::message_queue> inboundQueue;   // xplane -> xpilot
 
     QFile m_pluginLog;
     QTextStream m_rawDataStream;

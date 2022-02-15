@@ -2,6 +2,7 @@
 zeromq/4.3.4
 cppzmq/4.8.1
 nlohmann_json/3.10.3
+boost/1.78.0
 
 [generators]
 cmake

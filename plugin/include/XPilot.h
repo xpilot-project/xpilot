@@ -31,6 +31,8 @@
 #include "XPLMProcessing.h"
 #include "zmq.hpp"
 
+#include <boost/interprocess/ipc/message_queue.hpp>
+
 #include <deque>
 #include <thread>
 #include <mutex>
@@ -41,6 +43,12 @@
 #include <iostream>
 
 using namespace std;
+namespace bip = boost::interprocess;
+
+#define OUTBOUND_QUEUE "xpilot.outbound"
+#define INBOUND_QUEUE "xpilot.inbound"
+#define MAX_MESSAGES 5000
+#define MAX_MESSAGE_SIZE 2048
 
 namespace xpilot
 {
@@ -142,12 +150,14 @@ namespace xpilot
 			return this_thread::get_id() == m_xplaneThread;
 		}
 
-		bool m_keepAlive;
+		bool m_zmqKeepAlive;
 		unique_ptr<thread> m_zmqThread;
 		unique_ptr<zmq::context_t> m_zmqContext;
 		unique_ptr<zmq::socket_t> m_zmqSocket;
 
 		void ZmqWorker();
+		void MessageQueueWorker();
+		void ProcessMessage(const std::string& msg);
 		
 		bool IsSocketConnected()const
 		{
@@ -155,7 +165,7 @@ namespace xpilot
 		}
 		bool IsSocketReady()const
 		{
-			return m_keepAlive && IsSocketConnected();
+			return m_zmqKeepAlive && IsSocketConnected();
 		}
 
 		mutex m_mutex;
@@ -173,6 +183,12 @@ namespace xpilot
 		unique_ptr<TextMessageConsole> m_textMessageConsole;
 		unique_ptr<NearbyATCWindow> m_nearbyAtcWindow;
 		unique_ptr<SettingsWindow> m_settingsWindow;
+
+		std::unique_ptr<bip::message_queue> m_outboundQueue;	// xpilot -> xplane
+		std::unique_ptr<bip::message_queue> m_inboundQueue;		// xplane -> xpilot
+		bool m_keepMessageQueueAlive = false;
+		std::unique_ptr<thread> m_messageQueueThread;
+		bool IsMessageQueueReady() const { return m_outboundQueue != nullptr && m_keepMessageQueueAlive; }
 	};
 }
 

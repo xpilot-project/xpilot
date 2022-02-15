@@ -414,6 +414,7 @@ target_link_libraries(${PROJECT_NAME}
     CONAN_PKG::sentry-native
     CONAN_PKG::sentry-crashpad
     CONAN_PKG::libzip
+    CONAN_PKG::boost
     ${OPUS_LIBRARY}
     ${PORTAUDIO_LIBRARY}
     ${SPEEX_LIBRARY}
