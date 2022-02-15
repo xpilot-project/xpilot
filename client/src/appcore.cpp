@@ -65,6 +65,11 @@ int xpilot::Main(int argc, char* argv[])
     }
 
     QGuiApplication app(argc, argv);
+
+    QCommandLineParser parser;
+    parser.addVersionOption();
+    parser.process(app);
+
     app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));
 
     QFontDatabase database;
@@ -118,10 +123,6 @@ int xpilot::Main(int argc, char* argv[])
         xplaneAdapter.DeleteAllControllers();
         AppConfig::getInstance()->saveConfig();
     });
-
-    QCommandLineParser parser;
-    parser.addVersionOption();
-    parser.process(app);
 
     const QUrl url(QStringLiteral("qrc:/Resources/Views/MainWindow.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app, [url](QObject *obj, const QUrl &objUrl) {
