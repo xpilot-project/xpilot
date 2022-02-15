@@ -39,14 +39,14 @@ void CAudioEngine::Update()
 	while (it != ChannelMap.end())
 	{
 		bool isPlaying = false;
-		it->second->isPlaying(&isPlaying);
-		if (!isPlaying)
+		if (it->second != nullptr)
 		{
-			it = ChannelMap.erase(it);
+			it->second->isPlaying(&isPlaying);
+			if (!isPlaying)
+				it = ChannelMap.erase(it);
 		}
 		it++;
 	}
-
 	SoundSystem->update();
 }
 
