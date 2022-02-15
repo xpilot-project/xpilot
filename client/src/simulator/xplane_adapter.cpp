@@ -178,14 +178,15 @@ XplaneAdapter::~XplaneAdapter()
         outboundQueue.reset();
     }
 
-    if(m_zmqContext) {
-        m_zmqContext->close();
-        m_zmqContext.reset();
-    }
     for(auto &visualSocket : m_visualSockets) {
         visualSocket->close();
     }
     m_visualSockets.clear();
+
+    if(m_zmqContext) {
+        m_zmqContext->close();
+        m_zmqContext.reset();
+    }
 }
 
 void XplaneAdapter::initializeMessageQueues()
