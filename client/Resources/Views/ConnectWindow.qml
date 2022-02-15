@@ -238,6 +238,7 @@ Popup {
                                     color: "#333333"
                                     renderType: Text.NativeRendering
                                     verticalAlignment: Text.AlignVCenter
+                                    font.pixelSize: 13
                                 }
                             }
                             MouseArea {
