@@ -185,6 +185,7 @@ XplaneAdapter::~XplaneAdapter()
     for(auto &visualSocket : m_visualSockets) {
         visualSocket->close();
     }
+    m_visualSockets.clear();
 }
 
 void XplaneAdapter::initializeMessageQueues()
