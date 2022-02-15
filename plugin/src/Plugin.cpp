@@ -196,6 +196,16 @@ int ContactAtcCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase,
 {
     if (xpilot::Config::Instance().getOverrideContactAtcCommand())
     {
+        if (inPhase == xplm_CommandContinue)
+        {
+            ShowTransmitIndicator();
+            environment->setPttActive(1);
+        }
+        else if (inPhase == xplm_CommandEnd)
+        {
+            HideTransmitIndicator();
+            environment->setPttActive(0);
+        }
         return 0;
     }
     return 1;
@@ -208,7 +218,7 @@ int  PttCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void*
         ShowTransmitIndicator();
         environment->setPttActive(1);
     }
-    if (inPhase == xplm_CommandEnd)
+    else if (inPhase == xplm_CommandEnd)
     {
         HideTransmitIndicator();
         environment->setPttActive(0);
