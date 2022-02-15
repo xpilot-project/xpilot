@@ -22,7 +22,7 @@ Popup {
         text: "You are still connected to the network. Are you sure you want to close xPilot?"
         width: 500
         wrapMode: Text.Wrap
-        font.pointSize: 10
+        font.pixelSize: 14
         renderType: Text.NativeRendering
         x: 20
         y: 20
@@ -33,7 +33,7 @@ Popup {
         text: "Yes"
         width: 50
         height: 30
-        font.pointSize: 10
+        font.pixelSize: 14
         anchors.top: lblAskDisconnect.bottom
         anchors.left: lblAskDisconnect.left
         anchors.topMargin: 15
@@ -51,7 +51,7 @@ Popup {
         text: "No"
         width: 50
         height: 30
-        font.pointSize: 10
+        font.pixelSize: 14
         anchors.top: lblAskDisconnect.bottom
         anchors.left: btnYes.right
         anchors.topMargin: 15

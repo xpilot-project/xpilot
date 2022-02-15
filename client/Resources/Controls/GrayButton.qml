@@ -7,7 +7,7 @@ Button {
     contentItem: Text {
         color: '#ffffff'
         text: btn.text
-        font.pointSize: btn.font.pointSize
+        font.pixelSize: btn.font.pixelSize
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         renderType: Text.NativeRendering

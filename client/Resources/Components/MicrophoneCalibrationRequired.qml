@@ -21,7 +21,7 @@ Popup {
         text: "<strong>Microphone Calibration Required</strong><br/><br/>Please make sure you have calibrated your microphone volume in the xPilot Settings. Click Settings and verify the microphone level indicator stays green when you speak normally. Use the Mic Volume slider to adjust the microphone volume if necessary.<br/><br/>After you've calibrated your microphone (or if you already have), click Connect again."
         width: 500
         wrapMode: Text.Wrap
-        font.pointSize: 10
+        font.pixelSize: 14
         renderType: Text.NativeRendering
         x: 10
         y: 10
@@ -32,7 +32,7 @@ Popup {
         text: "OK"
         width: 50
         height: 30
-        font.pointSize: 10
+        font.pixelSize: 14
         anchors.top: popupText.bottom
         anchors.left: popupText.left
         anchors.topMargin: 10

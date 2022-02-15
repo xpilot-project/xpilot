@@ -22,7 +22,7 @@ Popup {
     Label {
         id: lblUnzipping
         text: "Installing CSL aircraft model set. Please wait..."
-        font.pointSize: 10
+        font.pixelSize: 14
         renderType: Text.NativeRendering
         wrapMode: Text.WordWrap
         x: 20
@@ -60,7 +60,7 @@ Popup {
     Label {
         id: lblPercent
         text: (popup.pctProgress * 100).toFixed(0) + "%"
-        font.pointSize: 10
+        font.pixelSize: 14
         renderType: Text.NativeRendering
         wrapMode: Text.WordWrap
         anchors.top: progressBar.top
@@ -73,7 +73,7 @@ Popup {
         text: "Cancel"
         width: 80
         height: 30
-        font.pointSize: 10
+        font.pixelSize: 14
         anchors.topMargin: 10
         anchors.top: progressBar.bottom
         anchors.left: progressBar.left

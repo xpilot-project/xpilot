@@ -36,7 +36,7 @@ Popup {
         text: "Downloading xPilot update. Please wait..."
         width: 500
         wrapMode: Text.Wrap
-        font.pointSize: 10
+        font.pixelSize: 14
         renderType: Text.NativeRendering
         x: 20
         y: 20
@@ -73,7 +73,7 @@ Popup {
     Label {
         id: labelPercent
         text: (popup.pctProgress * 100).toFixed(0) + "%"
-        font.pointSize: 10
+        font.pixelSize: 14
         renderType: Text.NativeRendering
         wrapMode: Text.WordWrap
         anchors.top: progressBar.top
@@ -86,7 +86,7 @@ Popup {
         text: "xPilot will automatically close and the installer will launch after the download finishes."
         width: 500
         wrapMode: Text.Wrap
-        font.pointSize: 10
+        font.pixelSize: 14
         anchors.top: progressBar.bottom
         anchors.left: progressBar.left
         anchors.topMargin: 15
@@ -98,7 +98,7 @@ Popup {
         text: "Cancel"
         width: 80
         height: 30
-        font.pointSize: 10
+        font.pixelSize: 14
         anchors.top: prompt2.bottom
         anchors.left: prompt2.left
         anchors.topMargin: 15

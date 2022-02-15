@@ -17,7 +17,7 @@ Rectangle {
         id: txLabel
         text: label
         anchors.fill: parent
-        font.pointSize: 8
+        font.pixelSize: 10
         font.family: robotoMono.name
         font.bold: true
         horizontalAlignment: Text.AlignHCenter

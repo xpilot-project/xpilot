@@ -24,7 +24,7 @@ Popup {
         text: "The aircraft type code you entered appears to be invalid. Using an invalid type code can make your aircraft render incorrectly for other users.\n\nAre you sure you want to connect using an invalid type code?"
         width: 500
         wrapMode: Text.Wrap
-        font.pointSize: 10
+        font.pixelSize: 14
         renderType: Text.NativeRendering
         x: 20
         y: 20
@@ -35,7 +35,7 @@ Popup {
         text: "Yes"
         width: 50
         height: 30
-        font.pointSize: 10
+        font.pixelSize: 14
         anchors.top: lblAskDisconnect.bottom
         anchors.left: lblAskDisconnect.left
         anchors.topMargin: 15
@@ -54,7 +54,7 @@ Popup {
         text: "No"
         width: 50
         height: 30
-        font.pointSize: 10
+        font.pixelSize: 14
         anchors.top: lblAskDisconnect.bottom
         anchors.left: btnYes.right
         anchors.topMargin: 15

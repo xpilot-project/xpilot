@@ -15,7 +15,7 @@ Column {
     Label {
         color: "#6c757d"
         text: groupTitle
-        font.pointSize: 10
+        font.pixelSize: 14
         font.family: robotoMono.name
         renderType: Text.NativeRendering
     }
@@ -24,7 +24,7 @@ Column {
         model: internalModel
         Text {
             text: `${Callsign} - ${FrequencyUtils.printFrequency(Frequency)}`
-            font.pointSize: 10
+            font.pixelSize: 14
             font.family: robotoMono.name
             leftPadding: 15
             color: "#ffffff"
@@ -63,7 +63,7 @@ Column {
                         enabled: false
                         contentItem: Text {
                             text: Callsign
-                            font.pointSize: 12
+                            font.pixelSize: 16
                             font.family: robotoMono.name
                             verticalAlignment: Text.AlignVCenter
                             horizontalAlignment: Text.AlignHCenter
@@ -77,7 +77,7 @@ Column {
                     MenuItem {
                         contentItem: Text {
                             text: "Send Private Message"
-                            font.pointSize: 10
+                            font.pixelSize: 13
                             font.family: robotoMono.name
                             verticalAlignment: Text.AlignVCenter
                             renderType: Text.NativeRendering
@@ -95,7 +95,7 @@ Column {
                     MenuItem {
                         contentItem: Text {
                             text: "Request Controller Info"
-                            font.pointSize: 10
+                            font.pixelSize: 13
                             font.family: robotoMono.name
                             verticalAlignment: Text.AlignVCenter
                             renderType: Text.NativeRendering
@@ -113,7 +113,7 @@ Column {
                     MenuItem {
                         contentItem: Text {
                             text: "Tune COM1 Radio"
-                            font.pointSize: 10
+                            font.pixelSize: 13
                             font.family: robotoMono.name
                             verticalAlignment: Text.AlignVCenter
                             renderType: Text.NativeRendering
@@ -132,7 +132,7 @@ Column {
                     MenuItem {
                         contentItem: Text {
                             text: "Tune COM2 Radio"
-                            font.pointSize: 10
+                            font.pixelSize: 13
                             font.family: robotoMono.name
                             verticalAlignment: Text.AlignVCenter
                             renderType: Text.NativeRendering

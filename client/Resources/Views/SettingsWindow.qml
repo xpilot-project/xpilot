@@ -116,7 +116,7 @@ Window {
         Text {
             id: calibrationInfo
             text: "<strong>Microphone Calibration Required</strong><br/><br/>Because your microphone device changed, you must confirm your microphone volume is at an acceptable level.<br/><br/>Please verify that the microphone volume level indicator stays green when you speak normally. Use the Mic Volume slider to adjust the microphone volume if necessary."
-            font.pointSize: 10
+            font.pixelSize: 14
             renderType: Text.NativeRendering
             width: parent.width
             wrapMode: Text.Wrap
@@ -130,7 +130,7 @@ Window {
             text: "OK"
             width: 80
             height: 30
-            font.pointSize: 10
+            font.pixelSize: 14
             anchors.top: calibrationInfo.bottom
             x: 10
             MouseArea {
@@ -169,7 +169,7 @@ Window {
             Label {
                 color: "#333333"
                 text: qsTr("VATSIM ID")
-                font.pointSize: 10
+                font.pixelSize: 13
                 renderType: Text.NativeRendering
             }
             CustomTextField {
@@ -195,7 +195,7 @@ Window {
             Label {
                 color: "#333333"
                 text: qsTr("VATSIM Password")
-                font.pointSize: 10
+                font.pixelSize: 13
                 renderType: Text.NativeRendering
             }
             CustomTextField {
@@ -220,7 +220,7 @@ Window {
                 color: "#333333"
                 text: qsTr("Your Name")
                 renderType: Text.NativeRendering
-                font.pointSize: 10
+                font.pixelSize: 13
             }
 
             CustomTextField {
@@ -245,7 +245,7 @@ Window {
                 color: "#333333"
                 text: qsTr("Home Airport")
                 renderType: Text.NativeRendering
-                font.pointSize: 10
+                font.pixelSize: 13
             }
             CustomTextField {
                 id: txtHomeAirport
@@ -272,7 +272,7 @@ Window {
                 id: networkServerLabel
                 color: "#333333"
                 text: qsTr("VATSIM Server")
-                font.pointSize: 10
+                font.pixelSize: 13
                 renderType: Text.NativeRendering
             }
             CustomComboBox {
@@ -322,7 +322,7 @@ Window {
                 CustomSwitch {
                     id: switchAutoModeC
                     text: "Automatically set transponder to Mode C on takeoff"
-                    font.pointSize: 10
+                    font.pixelSize: 13
                     clip: false
                     Layout.preferredHeight: 38
                     Layout.preferredWidth: 287
@@ -334,7 +334,7 @@ Window {
                 CustomSwitch {
                     id: switchAlertPrivateMessage
                     text: "Alert when new private message is received"
-                    font.pointSize: 10
+                    font.pixelSize: 13
                     Layout.preferredHeight: 38
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
@@ -345,7 +345,7 @@ Window {
                 CustomSwitch {
                     id: switchAlertRadioMessage
                     text: "Alert when radio message is received"
-                    font.pointSize: 10
+                    font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
@@ -356,7 +356,7 @@ Window {
                 CustomSwitch {
                     id: switchAlertDirectRadioMessage
                     text: "Alert when direct radio message is received"
-                    font.pointSize: 10
+                    font.pixelSize: 13
                     Layout.preferredHeight: 38
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
@@ -367,7 +367,7 @@ Window {
                 CustomSwitch {
                     id: switchAlertBroadcast
                     text: "Alert when network broadcast message is received"
-                    font.pointSize: 10
+                    font.pixelSize: 13
                     Layout.preferredHeight: 38
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
@@ -378,7 +378,7 @@ Window {
                 CustomSwitch {
                     id: switchAlertSelcal
                     text: "Alert when SELCAL notification is received"
-                    font.pointSize: 10
+                    font.pixelSize: 13
                     Layout.preferredHeight: 38
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
@@ -389,7 +389,7 @@ Window {
                 CustomSwitch {
                     id: switchAlertDisconnect
                     text: "Alert when disconnected from network"
-                    font.pointSize: 10
+                    font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
@@ -400,7 +400,7 @@ Window {
                 CustomSwitch {
                     id: switchKeepWindowVisible
                     text: "Keep xPilot window visible"
-                    font.pointSize: 10
+                    font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
@@ -411,7 +411,7 @@ Window {
                 CustomSwitch {
                     id: switchEnableHfSquelch
                     text: "Enable HF Squelch"
-                    font.pointSize: 10
+                    font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
@@ -422,7 +422,7 @@ Window {
                 CustomSwitch {
                     id: switchDisableRadioEffects
                     text: "Disable Realistic Radio Effects"
-                    font.pointSize: 10
+                    font.pixelSize: 13
                     Layout.preferredHeight: 32
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
@@ -446,7 +446,7 @@ Window {
                 color: "#333333"
                 text: qsTr("Audio API")
                 renderType: Text.NativeRendering
-                font.pointSize: 10
+                font.pixelSize: 13
             }
 
             CustomComboBox {
@@ -486,7 +486,7 @@ Window {
                 color: "#333333"
                 text: qsTr("Microphone Device")
                 renderType: Text.NativeRendering
-                font.pointSize: 10
+                font.pixelSize: 13
             }
 
             CustomComboBox {
@@ -527,7 +527,7 @@ Window {
                 color: "#333333"
                 text: qsTr("Listen Device")
                 renderType: Text.NativeRendering
-                font.pointSize: 10
+                font.pixelSize: 13
             }
 
             CustomComboBox {
@@ -594,7 +594,7 @@ Window {
                     wrapMode: Text.WordWrap
                     Layout.maximumWidth: 300
                     linkColor: "#0164AD"
-                    font.pointSize: 10
+                    font.pixelSize: 13
                     color: "#333333"
                     topPadding: 5
                 }
@@ -619,7 +619,7 @@ Window {
                     wrapMode: Text.WordWrap
                     Layout.maximumWidth: 600
                     linkColor: "#0164AD"
-                    font.pointSize: 10
+                    font.pixelSize: 13
                     color: "#333333"
                     topPadding: 5
 
@@ -668,7 +668,7 @@ Window {
                 CustomSwitch {
                     id: switchAircraftVolumeKnobs
                     text: "Allow aircraft radio stack volume knobs to control (and override) radio volume"
-                    font.pointSize: 10
+                    font.pixelSize: 13
                     clip: false
                     Layout.preferredHeight: 35
                     Layout.preferredWidth: 300

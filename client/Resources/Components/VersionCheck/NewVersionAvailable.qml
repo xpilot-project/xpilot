@@ -22,7 +22,7 @@ Popup {
         text: "A new version of xPilot is available. Would you like to download and install it now?"
         width: 500
         wrapMode: Text.Wrap
-        font.pointSize: 10
+        font.pixelSize: 14
         renderType: Text.NativeRendering
         x: 20
         y: 20
@@ -33,7 +33,7 @@ Popup {
         text: "Yes"
         width: 50
         height: 30
-        font.pointSize: 10
+        font.pixelSize: 14
         anchors.top: labelAskDownload.bottom
         anchors.left: labelAskDownload.left
         anchors.topMargin: 15
@@ -52,7 +52,7 @@ Popup {
         text: "No"
         width: 50
         height: 30
-        font.pointSize: 10
+        font.pixelSize: 14
         anchors.top: labelAskDownload.bottom
         anchors.left: btnYes.right
         anchors.topMargin: 15

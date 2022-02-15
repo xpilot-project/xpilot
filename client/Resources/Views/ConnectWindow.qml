@@ -92,7 +92,7 @@ Popup {
         Text {
             id: errorLabel
             text: validationPopup.errorMessage
-            font.pointSize: 10
+            font.pixelSize: 14
             renderType: Text.NativeRendering
             width: parent.width
             height: 55
@@ -108,7 +108,7 @@ Popup {
             text: "OK"
             width: 80
             height: 30
-            font.pointSize: 10
+            font.pixelSize: 14
             anchors.top: errorLabel.bottom
             x: 10
             MouseArea {
@@ -142,7 +142,7 @@ Popup {
             Text {
                 color: "#000"
                 text: qsTr("Callsign")
-                font.pointSize: 10
+                font.pixelSize: 13
                 renderType: Text.NativeRendering
             }
 
@@ -173,7 +173,7 @@ Popup {
             Text {
                 color: "#000"
                 text: qsTr("Type Code")
-                font.pointSize: 10
+                font.pixelSize: 13
                 renderType: Text.NativeRendering
             }
 
@@ -238,7 +238,7 @@ Popup {
                                     color: "#333333"
                                     renderType: Text.NativeRendering
                                     verticalAlignment: Text.AlignVCenter
-                                    font.pointSize: 10
+                                    font.pixelSize: 13
                                 }
                             }
                             MouseArea {
@@ -271,7 +271,7 @@ Popup {
             Text {
                 color: "#000"
                 text: qsTr("SELCAL")
-                font.pointSize: 10
+                font.pixelSize: 13
                 renderType: Text.NativeRendering
             }
 
@@ -334,7 +334,7 @@ Popup {
                 anchors.topMargin: 0
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
-                font.pointSize: 10
+                font.pixelSize: 13
 
                 MouseArea {
                     anchors.fill: parent
@@ -410,7 +410,7 @@ Popup {
                 anchors.topMargin: 0
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
-                font.pointSize: 10
+                font.pixelSize: 13
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor

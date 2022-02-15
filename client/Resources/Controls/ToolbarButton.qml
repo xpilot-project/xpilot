@@ -7,7 +7,7 @@ Button {
     checked: false
     checkable: false
     text: qsTr("BUTTON")
-    font.pointSize: 10
+    font.pixelSize: 13
     anchors.verticalCenter: parent.verticalCenter
     anchors.verticalCenterOffset: 0
     width: textMetrics.advanceWidth + 20
@@ -32,7 +32,7 @@ Button {
         id: label
         color: (active || enabled) ? "#ffffff" : "#6c757d"
         text: button.text.toUpperCase()
-        font.pointSize: button.font.pointSize
+        font.pixelSize: button.font.pixelSize
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         fontSizeMode: Text.FixedSize
