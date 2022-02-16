@@ -5,30 +5,30 @@ QString toQString(const NetworkRating &value)
 {
     switch(value)
     {
-    case NetworkRating::OBS:
-        return "1";
-    case NetworkRating::S1:
-        return "2";
-    case NetworkRating::S2:
-        return "3";
-    case NetworkRating::S3:
-        return "4";
-    case NetworkRating::C1:
-        return "5";
-    case NetworkRating::C2:
-        return "6";
-    case NetworkRating::C3:
-        return "7";
-    case NetworkRating::I1:
-        return "8";
-    case NetworkRating::I2:
-        return "9";
-    case NetworkRating::I3:
-        return "10";
-    case NetworkRating::SUP:
-        return "11";
-    case NetworkRating::ADM:
-        return "12";
+        case NetworkRating::OBS:
+            return "1";
+        case NetworkRating::S1:
+            return "2";
+        case NetworkRating::S2:
+            return "3";
+        case NetworkRating::S3:
+            return "4";
+        case NetworkRating::C1:
+            return "5";
+        case NetworkRating::C2:
+            return "6";
+        case NetworkRating::C3:
+            return "7";
+        case NetworkRating::I1:
+            return "8";
+        case NetworkRating::I2:
+            return "9";
+        case NetworkRating::I3:
+            return "10";
+        case NetworkRating::SUP:
+            return "11";
+        case NetworkRating::ADM:
+            return "12";
     }
 }
 
@@ -94,20 +94,20 @@ QString toQString(const NetworkFacility &value)
 {
     switch(value)
     {
-    case NetworkFacility::OBS:
-        return "0";
-    case NetworkFacility::FSS:
-        return "1";
-    case NetworkFacility::DEL:
-        return "2";
-    case NetworkFacility::GND:
-        return "3";
-    case NetworkFacility::TWR:
-        return "4";
-    case NetworkFacility::APP:
-        return "5";
-    case NetworkFacility::CTR:
-        return "6";
+        case NetworkFacility::OBS:
+            return "0";
+        case NetworkFacility::FSS:
+            return "1";
+        case NetworkFacility::DEL:
+            return "2";
+        case NetworkFacility::GND:
+            return "3";
+        case NetworkFacility::TWR:
+            return "4";
+        case NetworkFacility::APP:
+            return "5";
+        case NetworkFacility::CTR:
+            return "6";
     }
 }
 
@@ -153,16 +153,16 @@ QString toQString(const ProtocolRevision &value)
 {
     switch(value)
     {
-    case ProtocolRevision::Classic:
-        return "9";
-    case ProtocolRevision::VatsimNoAuth:
-        return "10";
-    case ProtocolRevision::VatsimAuth:
-        return "100";
-    case ProtocolRevision::Vatsim2022:
-        return "101";
-    default:
-        return "0";
+        case ProtocolRevision::Classic:
+            return "9";
+        case ProtocolRevision::VatsimNoAuth:
+            return "10";
+        case ProtocolRevision::VatsimAuth:
+            return "100";
+        case ProtocolRevision::Vatsim2022:
+            return "101";
+        default:
+            return "0";
     }
 }
 
@@ -198,20 +198,20 @@ QString toQString(const SimulatorType &value)
 {
     switch(value)
     {
-    case SimulatorType::Unknown:
-        return "0";
-    case SimulatorType::MSFS95:
-        return "1";
-    case SimulatorType::MSFS98:
-        return "2";
-    case SimulatorType::MSCFS:
-        return "3";
-    case SimulatorType::AS2:
-        return "4";
-    case SimulatorType::PS1:
-        return "5";
-    case SimulatorType::XPlane:
-        return "6";
+        case SimulatorType::Unknown:
+            return "0";
+        case SimulatorType::MSFS95:
+            return "1";
+        case SimulatorType::MSFS98:
+            return "2";
+        case SimulatorType::MSCFS:
+            return "3";
+        case SimulatorType::AS2:
+            return "4";
+        case SimulatorType::PS1:
+            return "5";
+        case SimulatorType::XPlane:
+            return "6";
     }
 }
 
@@ -259,64 +259,64 @@ QString toQString(const ClientQueryType &value)
 {
     switch(value)
     {
-    case ClientQueryType::IsValidATC:
-        return "ATC";
-    case ClientQueryType::Capabilities:
-        return "CAPS";
-    case ClientQueryType::COM1Freq:
-        return "C?";
-    case ClientQueryType::RealName:
-        return "RN";
-    case ClientQueryType::Server:
-        return "SV";
-    case ClientQueryType::ATIS:
-        return "ATIS";
-    case ClientQueryType::PublicIP:
-        return "IP";
-    case ClientQueryType::INF:
-        return "INF";
-    case ClientQueryType::FlightPlan:
-        return "FP";
-    case ClientQueryType::IPC:
-        return "IPC";
-    case ClientQueryType::RequestRelief:
-        return "BY";
-    case ClientQueryType::CancelRequestRelief:
-        return "HI";
-    case ClientQueryType::RequestHelp:
-        return "HLP";
-    case ClientQueryType::CancelRequestHelp:
-        return "NOHLP";
-    case ClientQueryType::WhoHas:
-        return "WH";
-    case ClientQueryType::InitiateTrack:
-        return "IT";
-    case ClientQueryType::AcceptHandoff:
-        return "HT";
-    case ClientQueryType::DropTrack:
-        return "DR";
-    case ClientQueryType::SetFinalAltitude:
-        return "FA";
-    case ClientQueryType::SetTempAltitude:
-        return "TA";
-    case ClientQueryType::SetBeaconCode:
-        return "BC";
-    case ClientQueryType::SetScratchpad:
-        return "SC";
-    case ClientQueryType::SetVoiceType:
-        return "VT";
-    case ClientQueryType::AircraftConfiguration:
-        return "ACC";
-    case ClientQueryType::NewInfo:
-        return "NEWINFO";
-    case ClientQueryType::NewATIS:
-        return "NEWATIS";
-    case ClientQueryType::Estimate:
-        return "EST";
-    case ClientQueryType::SetGlobalData:
-        return "GD";
-    default:
-        return "";
+        case ClientQueryType::IsValidATC:
+            return "ATC";
+        case ClientQueryType::Capabilities:
+            return "CAPS";
+        case ClientQueryType::COM1Freq:
+            return "C?";
+        case ClientQueryType::RealName:
+            return "RN";
+        case ClientQueryType::Server:
+            return "SV";
+        case ClientQueryType::ATIS:
+            return "ATIS";
+        case ClientQueryType::PublicIP:
+            return "IP";
+        case ClientQueryType::INF:
+            return "INF";
+        case ClientQueryType::FlightPlan:
+            return "FP";
+        case ClientQueryType::IPC:
+            return "IPC";
+        case ClientQueryType::RequestRelief:
+            return "BY";
+        case ClientQueryType::CancelRequestRelief:
+            return "HI";
+        case ClientQueryType::RequestHelp:
+            return "HLP";
+        case ClientQueryType::CancelRequestHelp:
+            return "NOHLP";
+        case ClientQueryType::WhoHas:
+            return "WH";
+        case ClientQueryType::InitiateTrack:
+            return "IT";
+        case ClientQueryType::AcceptHandoff:
+            return "HT";
+        case ClientQueryType::DropTrack:
+            return "DR";
+        case ClientQueryType::SetFinalAltitude:
+            return "FA";
+        case ClientQueryType::SetTempAltitude:
+            return "TA";
+        case ClientQueryType::SetBeaconCode:
+            return "BC";
+        case ClientQueryType::SetScratchpad:
+            return "SC";
+        case ClientQueryType::SetVoiceType:
+            return "VT";
+        case ClientQueryType::AircraftConfiguration:
+            return "ACC";
+        case ClientQueryType::NewInfo:
+            return "NEWINFO";
+        case ClientQueryType::NewATIS:
+            return "NEWATIS";
+        case ClientQueryType::Estimate:
+            return "EST";
+        case ClientQueryType::SetGlobalData:
+            return "GD";
+        default:
+            return "";
     }
 }
 
@@ -419,14 +419,14 @@ QString toQString(const FlightRules &value)
 {
     switch(value)
     {
-    case FlightRules::IFR:
-        return "I";
-    case FlightRules::VFR:
-    case FlightRules::DVFR:
-    case FlightRules::SVFR:
-        return "V";
-    default:
-        return "";
+        case FlightRules::IFR:
+            return "I";
+        case FlightRules::VFR:
+        case FlightRules::DVFR:
+        case FlightRules::SVFR:
+            return "V";
+        default:
+            return "";
     }
 }
 

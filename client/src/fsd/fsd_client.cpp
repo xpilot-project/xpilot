@@ -251,12 +251,12 @@ namespace xpilot
 
         switch(socketError)
         {
-        case QAbstractSocket::RemoteHostClosedError:
-            this->Disconnect();
-        break;
-        default:
-            emit RaiseNetworkError(error);
-        break;
+            case QAbstractSocket::RemoteHostClosedError:
+                this->Disconnect();
+                break;
+            default:
+                emit RaiseNetworkError(error);
+                break;
         }
     }
 

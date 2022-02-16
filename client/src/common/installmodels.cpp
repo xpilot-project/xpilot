@@ -302,7 +302,7 @@ void InstallModels::validatePath(QString path)
             DeleteTempDownload();
             emit unzipFinished();
         })
-        .fail([&](const QString &err){
+                .fail([&](const QString &err){
             emit errorEncountered("Unzip error: " + err);
         });
     }
