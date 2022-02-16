@@ -24,10 +24,12 @@ namespace xpilot
             m_nearbyAtcTimer.stop();
         });
         connect(&m_nearbyAtcTimer, &QTimer::timeout, this, [&]{
-            for(const auto &controller : qAsConst(m_controllers)) {
-                if(QDateTime::currentSecsSinceEpoch() - controller.LastUpdate > 60) {
-                    emit controllerDeleted(controller);
-                    m_controllers.removeAll(controller);
+
+            for(auto it = m_controllers.begin(), next_it = it; it != m_controllers.end(); it = next_it)
+            {
+                ++next_it;
+                if((QDateTime::currentSecsSinceEpoch() - it->LastUpdate) > 60) {
+                    m_controllers.erase(it);
                 }
             }
 
@@ -35,16 +37,17 @@ namespace xpilot
             reply.insert("type", "NearbyAtc");
 
             QJsonArray dataArray;
-            for(const auto &atc : qAsConst(m_controllers))
+            for(auto &atc : m_controllers)
             {
-                if(!atc.IsValid) continue;
-
-                QJsonObject data;
-                data.insert("callsign", atc.Callsign);
-                data.insert("xplane_frequency", (qint32)atc.Frequency);
-                data.insert("frequency", QString::number(atc.Frequency / 1000.0, 'f', 3));
-                data.insert("real_name", atc.RealName);
-                dataArray.push_back(data);
+                if(atc.IsValid)
+                {
+                    QJsonObject data;
+                    data.insert("callsign", atc.Callsign);
+                    data.insert("xplane_frequency", (qint32)atc.Frequency);
+                    data.insert("frequency", QString::number(atc.Frequency / 1000.0, 'f', 3));
+                    data.insert("real_name", atc.RealName);
+                    dataArray.push_back(data);
+                }
             }
 
             reply.insert("data", dataArray);
@@ -59,7 +62,22 @@ namespace xpilot
             return n.Callsign == from;
         });
 
-        if(itr == m_controllers.end())
+        if(itr != m_controllers.end())
+        {
+            bool hasFrequencyChanged = (uint)frequency != itr->Frequency;
+            bool hasLocationChanged = lat != itr->Latitude || lon != itr->Longitude;
+            itr->Frequency = frequency;
+            itr->FrequencyHz = frequency * 1000;
+            itr->Latitude = lat;
+            itr->Longitude = lon;
+            itr->LastUpdate = QDateTime::currentSecsSinceEpoch();
+
+            ValidateController(*itr);
+
+            if(hasFrequencyChanged || hasLocationChanged)
+                RefreshController(*itr);
+        }
+        else
         {
             Controller controller {};
             controller.Callsign = from.toUpper();
@@ -76,24 +94,6 @@ namespace xpilot
             m_networkManager.RequestIsValidATC(from);
             m_networkManager.RequestCapabilities(from);
         }
-        else
-        {
-            bool hasFrequencyChanged = (uint)frequency != itr->Frequency;
-            bool hasLocationChanged = lat != itr->Latitude || lon != itr->Longitude;
-            itr->Frequency = frequency;
-            itr->FrequencyHz = frequency * 1000;
-            itr->Latitude = lat;
-            itr->Longitude = lon;
-            itr->LastUpdate = QDateTime::currentSecsSinceEpoch();
-            ValidateController(*itr);
-            if(itr != m_controllers.end())
-            {
-                if(hasFrequencyChanged || hasLocationChanged)
-                {
-                    RefreshController(*itr);
-                }
-            }
-        }
     }
 
     void ControllerManager::IsValidATCReceived(QString callsign)
@@ -101,11 +101,11 @@ namespace xpilot
         auto itr = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
             return n.Callsign == callsign;
         });
+
         if(itr != m_controllers.end())
-        {
             itr->IsValidATC = true;
-            ValidateController(*itr);
-        }
+
+        ValidateController(*itr);
     }
 
     void ControllerManager::OnRealNameReceived(QString callsign, QString realName)
@@ -116,10 +116,9 @@ namespace xpilot
         if(itr != m_controllers.end())
         {
             itr->RealName = realName;
+
             if(itr->IsValid)
-            {
                 RefreshController(*itr);
-            }
         }
     }
 
@@ -145,13 +144,5 @@ namespace xpilot
     {
         bool isValid = controller.IsValidATC && (controller.Frequency >= 118000 && controller.Frequency <= 136975);
         controller.IsValid = isValid;
-
-        if(controller.IsValid) {
-            emit controllerAdded(controller);
-        }
-        else {
-            emit controllerDeleted(controller);
-            m_controllers.removeAll(controller);
-        }
     }
 }
