@@ -43,11 +43,13 @@ namespace xpilot
 		m_rxCom1("xpilot/audio/com1_rx", ReadWrite),
 		m_rxCom2("xpilot/audio/com2_rx", ReadWrite),
 		m_networkLoginStatus("xpilot/login/status", ReadOnly),
-		m_networkCallsign("xpilot/login/callsign", ReadOnly),
+		m_networkCallsign("xpilot/login/callsign", ReadWrite),
 		m_volumeSignalLevel("xpilot/audio/vu", ReadWrite),
 		m_aiControlled("xpilot/ai_controlled", ReadOnly),
 		m_aircraftCount("xpilot/num_aircraft", ReadOnly),
 		m_pluginVersion("xpilot/version", ReadOnly),
+		m_selcalCode("xpilot/selcal", ReadOnly),
+		m_selcalReceived("xpilot/selcal_received", ReadWrite),
 		m_frameRatePeriod("sim/operation/misc/frame_rate_period", ReadOnly),
 		m_com1Frequency("sim/cockpit2/radios/actuators/com1_frequency_hz_833", ReadWrite),
 		m_com2Frequency("sim/cockpit2/radios/actuators/com2_frequency_hz_833", ReadWrite),
@@ -439,6 +441,7 @@ namespace xpilot
 					else if (MessageType == "NetworkConnected")
 					{
 						string callsign(j["data"]["callsign"]);
+						string selcal(j["data"]["selcal"]);
 
 						QueueCallback([=]
 							{
@@ -447,6 +450,7 @@ namespace xpilot
 								TryGetTcasControl();
 								m_xplaneAtisEnabled = 0;
 								m_networkCallsign.setValue(callsign);
+								m_selcalCode.setValue(selcal);
 								m_networkLoginStatus.setValue(true);
 							});
 					}
@@ -461,6 +465,7 @@ namespace xpilot
 								ReleaseTcasControl();
 								m_xplaneAtisEnabled = 1;
 								m_networkCallsign.setValue("");
+								m_selcalCode.setValue("");
 								m_networkLoginStatus.setValue(false);
 							});
 					}

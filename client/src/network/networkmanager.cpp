@@ -126,6 +126,7 @@ namespace xpilot
             reply.insert("type", "NetworkConnected");
             QJsonObject data;
             data.insert("callsign", m_connectInfo.Callsign);
+            data.insert("selcal", m_connectInfo.SelcalCode);
             reply.insert("data", data);
             QJsonDocument doc(reply);
             m_xplaneAdapter.sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
@@ -454,6 +455,7 @@ namespace xpilot
             if(!m_connectInfo.SelcalCode.isEmpty() && selcal == "SELCAL " + m_connectInfo.SelcalCode.replace("-",""))
             {
                 emit selcalAlertReceived(pdu.From.toUpper(), frequencies);
+                m_xplaneAdapter.selcalAlertReceived();
             }
         }
         else

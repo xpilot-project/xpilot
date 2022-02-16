@@ -60,6 +60,7 @@ public:
     Q_INVOKABLE void ignoreAircraft(QString callsign);
     Q_INVOKABLE void unignoreAircraft(QString callsign);
     Q_INVOKABLE void showIgnoreList();
+    Q_INVOKABLE void selcalAlertReceived();
 
     void AddPlaneToSimulator(const NetworkAircraft& aircraft);
     void PlaneConfigChanged(const NetworkAircraft& aircraft);

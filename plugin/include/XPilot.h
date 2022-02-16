@@ -124,6 +124,8 @@ namespace xpilot
 		OwnedDataRef<int> m_aiControlled;
 		OwnedDataRef<int> m_aircraftCount;
 		OwnedDataRef<int> m_pluginVersion;
+		OwnedDataRef<string> m_selcalCode;
+		OwnedDataRef<int> m_selcalReceived;
 		DataRefAccess<int> m_xplaneAtisEnabled;
 		DataRefAccess<float> m_frameRatePeriod;
 		DataRefAccess<int> m_com1Frequency;

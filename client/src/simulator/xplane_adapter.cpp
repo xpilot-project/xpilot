@@ -790,6 +790,14 @@ void XplaneAdapter::showIgnoreList()
     emit ignoreList(m_ignoreList);
 }
 
+void XplaneAdapter::selcalAlertReceived()
+{
+    setDataRefValue("xpilot/selcal_received", 1);
+    QTimer::singleShot(1000, this, [&]{
+        setDataRefValue("xpilot/selcal_received", 0);
+    });
+}
+
 void XplaneAdapter::AddPlaneToSimulator(const NetworkAircraft &aircraft)
 {
     QJsonObject reply;
