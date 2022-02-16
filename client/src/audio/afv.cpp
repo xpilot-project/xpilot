@@ -78,6 +78,9 @@ namespace xpilot
                     case APISessionError::ConnectionError:
                         emit notificationPosted((int)NotificationType::Error, "Error initiating voice server connection.");
                         break;
+                    case APISessionError::AuthTokenExpiryTimeInPast:
+                        emit notificationPosted((int)NotificationType::Error, "Voice server auth token expiry time is in the past. Please make sure your system clock is synchronized.");
+                        break;
                     default:
                         break;
                     }
