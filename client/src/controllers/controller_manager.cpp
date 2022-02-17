@@ -105,10 +105,10 @@ namespace xpilot
             return n.Callsign == callsign;
         });
 
-        if(itr != m_controllers.end())
+        if(itr != m_controllers.end()) {
             itr->IsValidATC = true;
-
-        ValidateController(*itr);
+            ValidateController(*itr);
+        }
     }
 
     void ControllerManager::OnRealNameReceived(QString callsign, QString realName)
