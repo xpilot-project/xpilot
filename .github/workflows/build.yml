@@ -200,7 +200,7 @@ jobs:
 
     #if: ${{ false }}
 
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     env:
       IB_URL: https://installbuilder.com/installbuilder-enterprise-21.9.0-windows-x64-installer.exe
