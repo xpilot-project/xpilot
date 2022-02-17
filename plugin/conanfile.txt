@@ -6,3 +6,6 @@ boost/1.78.0
 
 [generators]
 cmake
+
+[options]
+boost:header_only=True
