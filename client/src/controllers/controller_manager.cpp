@@ -25,12 +25,15 @@ namespace xpilot
         });
         connect(&m_nearbyAtcTimer, &QTimer::timeout, this, [&]{
 
-            for(auto it = m_controllers.begin(), next_it = it; it != m_controllers.end(); it = next_it)
-            {
-                ++next_it;
-                if((QDateTime::currentSecsSinceEpoch() - it->LastUpdate) > 60) {
-                    m_controllers.erase(it);
+            QList<Controller> temp;
+            for(auto &controller : m_controllers) {
+                if(QDateTime::currentSecsSinceEpoch() - controller.LastUpdate > 60) {
+                    temp.append(controller);
                 }
+            }
+
+            for(auto &controller : temp) {
+                m_controllers.removeAll(controller);
             }
 
             QJsonObject reply;
