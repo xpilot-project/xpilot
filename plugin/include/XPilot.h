@@ -31,6 +31,7 @@
 #include "XPLMProcessing.h"
 #include "zmq.hpp"
 
+#define BOOST_INTERPROCESS_SHARED_DIR_FUNC
 #include <boost/interprocess/ipc/message_queue.hpp>
 
 #include <deque>
@@ -49,6 +50,17 @@ namespace bip = boost::interprocess;
 #define INBOUND_QUEUE "xpilot.inbound"
 #define MAX_MESSAGES 500
 #define MAX_MESSAGE_SIZE 2048
+
+namespace boost {
+	namespace interprocess {
+		namespace ipcdetail {
+			inline void get_shared_dir(std::string& shared_dir) {
+				const string pathResources(GetPluginPath() + "Resources");
+				shared_dir = pathResources.c_str();
+			}
+		}
+	}
+}
 
 namespace xpilot
 {

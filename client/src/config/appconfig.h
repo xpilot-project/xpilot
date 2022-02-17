@@ -31,6 +31,7 @@ namespace xpilot
         explicit AppConfig(QObject * owner = nullptr);
         static AppConfig *getInstance();
         const static QString &dataRoot();
+        const static QString &xplanePath();
 
         Q_INVOKABLE bool saveConfig();
         Q_INVOKABLE void loadConfig();

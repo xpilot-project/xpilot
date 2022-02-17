@@ -24,12 +24,14 @@
 
 #include "zmq.hpp"
 
+#include "src/config/appconfig.h"
 #include "src/aircrafts/network_aircraft.h"
 #include "src/aircrafts/velocity_vector.h"
 #include "src/aircrafts/user_aircraft_data.h"
 #include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/radio_stack_state.h"
 
+#define BOOST_INTERPROCESS_SHARED_DIR_FUNC
 #include <boost/interprocess/ipc/message_queue.hpp>
 
 namespace bip = boost::interprocess;
@@ -38,6 +40,16 @@ namespace bip = boost::interprocess;
 #define INBOUND_QUEUE "xpilot.inbound"
 #define MAX_MESSAGES 500
 #define MAX_MESSAGE_SIZE 2048
+
+namespace boost {
+    namespace interprocess {
+        namespace ipcdetail {
+            inline void get_shared_dir(std::string& shared_dir) {
+                shared_dir = xpilot::AppConfig::getInstance()->xplanePath().toStdString() + "/Resources/plugins/xPilot/Resources";
+            }
+        }
+    }
+}
 
 class XplaneAdapter : public QObject
 {

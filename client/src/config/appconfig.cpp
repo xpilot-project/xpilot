@@ -32,6 +32,15 @@ const QString &AppConfig::dataRoot()
     return path;
 }
 
+const QString &AppConfig::xplanePath()
+{
+    QFile f(dataRoot() + "lastxplanepath.txt");
+    f.open(QFile::ReadOnly | QFile::Text);
+    QTextStream in(&f);
+    static const QString path = in.readAll();
+    return path;
+}
+
 void AppConfig::loadConfig()
 {
     QDir dir(dataRoot());
