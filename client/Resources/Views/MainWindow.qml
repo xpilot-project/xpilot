@@ -1359,6 +1359,7 @@ Window {
                                         }
                                         catch(err) {
                                             appendMessage(err, colorRed, currentTab)
+                                            cliTextField.clear()
                                         }
                                     }
                                     historyIndex = -1
