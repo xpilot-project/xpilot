@@ -72,7 +72,7 @@ namespace xpilot
 
 	private:
 		XPilot* mEnv;
-		CAudioEngine* m_audioEngine = nullptr;
+		std::unique_ptr<CAudioEngine> m_audioEngine;
 
 		NetworkAircraft* GetAircraft(const string& callsign);
 		bool ReceivingFastPositionUpdates(NetworkAircraft* aircraft);

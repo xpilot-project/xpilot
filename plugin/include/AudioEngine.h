@@ -43,7 +43,6 @@ public:
 	~CAudioEngine();
 
 	void Update();
-	void Shutdown();
 	void LoadSound(const std::string& soundName, const std::string& soundFilePath, bool bLooping = true);
 	void UnloadSound(const std::string& soundName);
 	int CreateSoundChannel(const std::string& soundName, float fVolumedB = 0.0f);

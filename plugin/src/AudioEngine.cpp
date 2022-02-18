@@ -46,11 +46,6 @@ void CAudioEngine::Update()
     SoundSystem->update();
 }
 
-void CAudioEngine::Shutdown()
-{
-
-}
-
 void CAudioEngine::LoadSound(const string& soundName, const string& soundFilePath, bool bLooping)
 {
 	auto foundIt = SoundMap.find(soundName);

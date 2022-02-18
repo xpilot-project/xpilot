@@ -93,7 +93,7 @@ namespace xpilot
 	{
 		FlightModel::InitializeModels();
 
-		m_audioEngine = new CAudioEngine();
+		m_audioEngine = std::make_unique<CAudioEngine>();
 
 		m_audioEngine->LoadSound("JetEngine", GetPluginPath() + "/Resources/Sounds/JetEngine.wav");
 		m_audioEngine->LoadSound("PistonProp", GetPluginPath() + "/Resources/Sounds/PistonProp.wav");
