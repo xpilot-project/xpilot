@@ -30,6 +30,7 @@
 #include "XPLMUtilities.h"
 #include "XPLMProcessing.h"
 #include "zmq.hpp"
+#include "Utilities.h"
 
 #define BOOST_INTERPROCESS_SHARED_DIR_FUNC
 #include <boost/interprocess/ipc/message_queue.hpp>
@@ -55,8 +56,7 @@ namespace boost {
 	namespace interprocess {
 		namespace ipcdetail {
 			inline void get_shared_dir(std::string& shared_dir) {
-				const string pathResources(GetPluginPath() + "Resources");
-				shared_dir = pathResources.c_str();
+				shared_dir = getDataPath();
 			}
 		}
 	}

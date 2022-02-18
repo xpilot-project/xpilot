@@ -108,6 +108,8 @@ namespace xpilot
 		m_pluginVersion = PLUGIN_VERSION;
 
 		XPLMRegisterFlightLoopCallback(DeferredStartup, -1.0f, this);
+
+		LOG_MSG(logMSG, "Data Path: %s", getDataPath().c_str());
 	}
 
 	XPilot::~XPilot()

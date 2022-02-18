@@ -24,6 +24,7 @@
 #include "XPLMPlugin.h"
 #include "XPLMUtilities.h"
 #include "XPLMDataAccess.h"
+#include "platform_folders.h"
 
 #include <ctime>
 #include <string>
@@ -39,6 +40,12 @@
 #include <cmath>
 
 using namespace std;
+
+inline string getDataPath()
+{
+	const string dataPath(sago::getDataHomeLocal() + "/org.vatsim.xpilot/");
+	return dataPath;
+}
 
 template<typename ... Args>
 inline string string_format(const string& format, Args ... args)

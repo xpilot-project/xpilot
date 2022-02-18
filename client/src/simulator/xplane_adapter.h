@@ -45,7 +45,7 @@ namespace boost {
     namespace interprocess {
         namespace ipcdetail {
             inline void get_shared_dir(std::string& shared_dir) {
-                shared_dir = xpilot::AppConfig::getInstance()->xplanePath().toStdString() + "/Resources/plugins/xPilot/Resources";
+                shared_dir = xpilot::AppConfig::getInstance()->dataRoot().toStdString();
             }
         }
     }
