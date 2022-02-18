@@ -54,7 +54,7 @@ int xpilot::Main(int argc, char* argv[])
 
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::Floor);
-    QGuiApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+    QGuiApplication::setAttribute(Qt::AA_UseOpenGLES);
 
     QCoreApplication::setApplicationName("xPilot");
     QCoreApplication::setApplicationVersion(xpilot::BuildConfig::getVersionString());
