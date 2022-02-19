@@ -127,7 +127,9 @@ set(FSD_SOURCES
     src/fsd/pdu/pdu_text_message.h
     src/fsd/pdu/pdu_text_message.cpp
     src/fsd/pdu/pdu_wallop.h
-    src/fsd/pdu/pdu_wallop.cpp)
+    src/fsd/pdu/pdu_wallop.cpp
+    src/fsd/pdu/pdu_change_server.h
+    src/fsd/pdu/pdu_change_server.cpp)
 
 set(PROJECT_SOURCES
     src/main.cpp
