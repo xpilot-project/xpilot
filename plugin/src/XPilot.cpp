@@ -243,6 +243,8 @@ namespace xpilot
 			}
 			catch (bip::interprocess_exception& e) {}
 			catch (...) {}
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 	}
 
