@@ -690,7 +690,7 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
     if(outboundQueue != nullptr)
     {
         try {
-            outboundQueue->send(message.toStdString().data(), message.toStdString().size(), 0);
+            outboundQueue->try_send(message.toStdString().data(), message.toStdString().size(), 0);
 
             QMutexLocker lock(&mutex);
             {
