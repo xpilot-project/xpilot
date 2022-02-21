@@ -35,14 +35,6 @@ CAudioEngine::~CAudioEngine()
 
 void CAudioEngine::Update()
 {
-    for(auto it = ChannelMap.begin(), next_it = it; it != ChannelMap.end(); it = next_it)
-    {
-        ++next_it;
-        bool isPlaying = false;
-        it->second->isPlaying(&isPlaying);
-        if(!isPlaying)
-            ChannelMap.erase(it);
-    }
     SoundSystem->update();
 }
 
@@ -147,7 +139,7 @@ void CAudioEngine::SetListenerPosition()
 
 int CAudioEngine::ErrorCheck(const string& method, FMOD_RESULT result)
 {
-	if (result != FMOD_OK)
+	if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE))
 	{
 		LOG_MSG(logERROR, "FMOD Error: %s: %i", method.c_str(), result);
 		return 1;

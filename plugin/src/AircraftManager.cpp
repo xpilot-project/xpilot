@@ -247,14 +247,12 @@ namespace xpilot
 		if (!aircraft) return;
 
 		m_audioEngine->StopChannel(aircraft->SoundChannelId);
-
 		mapPlanes.erase(callsign);
 	}
 
 	void AircraftManager::RemoveAllPlanes()
 	{
 		m_audioEngine->StopAllChannels();
-
 		mapPlanes.clear();
 	}
 
@@ -305,8 +303,6 @@ namespace xpilot
 			XPLMCameraPosition_t camera;
 			XPLMReadCameraPosition(&camera);
 
-			instance->m_audioEngine->SetListenerPosition();
-
 			for (mapPlanesTy::iterator iter = mapPlanes.begin(); iter != mapPlanes.end(); ++iter)
 			{
 				int channel = iter->second->SoundChannelId;
@@ -324,6 +320,7 @@ namespace xpilot
 			}
 
 			if (instance->m_audioEngine != nullptr) {
+				instance->m_audioEngine->SetListenerPosition();
 				instance->m_audioEngine->Update();
 			}
 		}
