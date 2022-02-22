@@ -42,6 +42,7 @@
 #include "pdu/pdu_metar_response.h"
 #include "pdu/pdu_metar_request.h"
 #include "pdu/pdu_send_fast.h"
+#include "pdu/pdu_change_server.h"
 
 namespace xpilot
 {
@@ -96,9 +97,11 @@ namespace xpilot
         void RaiseRawDataReceived(QString data);
 
     private:
+        void connectSocketSignals();
         void handleSocketError(QAbstractSocket::SocketError socketError);
         void handleSocketConnected();
         void handleDataReceived();
+        void handleChangeServer(const QStringList& fields);
         void processData(QString data);
         void sendData(QString data);
         void processTM(QStringList& fields);
@@ -113,8 +116,9 @@ namespace xpilot
     private:
         QTextCodec* m_fsdTextCodec = nullptr;
 
-        QTcpSocket* m_socket;
-        bool m_connected { false };
+        std::unique_ptr<QTcpSocket> m_socket = std::make_unique<QTcpSocket>(this);
+        bool m_connected = false;
+        bool m_serverChangeInProgress = false;
 
         bool m_challengeServer;
         QString m_partialPacket = "";

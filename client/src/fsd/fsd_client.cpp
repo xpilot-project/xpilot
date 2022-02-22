@@ -6,13 +6,15 @@ namespace xpilot
 {
     FsdClient::FsdClient(QObject * parent) : QObject(parent)
     {
-        m_socket = new QTcpSocket(this);
-
+        connectSocketSignals();
         m_fsdTextCodec = QTextCodec::codecForName("ISO-8859-1");
+    }
 
-        connect(m_socket, &QTcpSocket::readyRead, this, &FsdClient::handleDataReceived);
-        connect(m_socket, &QTcpSocket::connected, this, &FsdClient::handleSocketConnected);
-        connect(m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::errorOccurred), this, &FsdClient::handleSocketError);
+    void FsdClient::connectSocketSignals()
+    {
+        connect(m_socket.get(), &QTcpSocket::readyRead, this, &FsdClient::handleDataReceived);
+        connect(m_socket.get(), &QTcpSocket::connected, this, &FsdClient::handleSocketConnected);
+        connect(m_socket.get(), &QTcpSocket::errorOccurred, this, &FsdClient::handleSocketError);
     }
 
     void FsdClient::Connect(QString address, quint32 port, bool challengeServer)
@@ -200,6 +202,10 @@ namespace xpilot
                     {
                         emit RaiseFastPilotPositionReceived(PDUFastPilotPosition::fromTokens(FastPilotPositionType::Stopped, fields));
                     }
+                    else if(pduTypeId == "$XX")
+                    {
+                        handleChangeServer(fields);
+                    }
                 }
             }
             catch(PDUFormatException &e) {
@@ -248,6 +254,9 @@ namespace xpilot
 
     void FsdClient::handleSocketError(QAbstractSocket::SocketError socketError)
     {
+        if(m_serverChangeInProgress)
+            return;
+
         const QString error = this->socketErrorString(socketError);
 
         switch(socketError)
@@ -265,6 +274,32 @@ namespace xpilot
     {
         m_connected = true;
         emit RaiseNetworkConnected();
+    }
+
+    void FsdClient::handleChangeServer(const QStringList &fields)
+    {
+        m_serverChangeInProgress = true;
+
+        const PDUChangeServer pdu = PDUChangeServer::fromTokens(fields);
+        auto newSocket = new QTcpSocket(this);
+
+        connect(newSocket, &QTcpSocket::connected, this, [this, newSocket]{
+            handleDataReceived();
+            QObject::disconnect(newSocket);
+            m_socket.reset(newSocket);
+            m_serverChangeInProgress = false;
+            connectSocketSignals();
+            handleDataReceived();
+        });
+        connect(newSocket, &QTcpSocket::errorOccurred, this, [this, newSocket]{
+            m_serverChangeInProgress = false;
+            delete newSocket;
+            if(m_socket->state() != QAbstractSocket::ConnectedState) {
+                Disconnect();
+            }
+        });
+        newSocket->connectToHost(pdu.NewServer, m_socket->peerPort());
+        m_partialPacket =  "";
     }
 
     QString FsdClient::socketErrorToQString(QAbstractSocket::SocketError error)
