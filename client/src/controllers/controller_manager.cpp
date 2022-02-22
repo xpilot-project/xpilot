@@ -33,6 +33,7 @@ namespace xpilot
             }
 
             for(auto &controller : temp) {
+                emit controllerDeleted(controller);
                 m_controllers.removeAll(controller);
             }
 
