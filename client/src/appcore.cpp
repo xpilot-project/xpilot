@@ -52,8 +52,11 @@ int xpilot::Main(int argc, char* argv[])
 
     auto sentryClose = qScopeGuard([]{ sentry_close(); });
 
-    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::Floor);
+#ifdef Q_OS_WIN
+    SetProcessDPIAware();
+#endif
+
+    QGuiApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
     QGuiApplication::setAttribute(Qt::AA_UseOpenGLES);
 
     QCoreApplication::setApplicationName("xPilot");
