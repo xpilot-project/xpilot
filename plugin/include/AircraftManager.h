@@ -77,7 +77,7 @@ namespace xpilot
 		NetworkAircraft* GetAircraft(const string& callsign);
 		bool ReceivingFastPositionUpdates(NetworkAircraft* aircraft);
 		Vector3 DerivePositionalVelocityVector(AircraftVisualState previousVisualState, AircraftVisualState newVisualState, long intervalMs);
-		static float UpdateAircraftSounds(float, float, int, void* ref);
+		static float AircraftMaintenanceCallback(float, float, int, void* ref);
 
 		thread::id m_xplaneThread;
 		void ThisThreadIsXplane()

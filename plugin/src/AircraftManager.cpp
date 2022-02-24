@@ -22,6 +22,7 @@
 #include "GeoCalc.hpp"
 #include "Quaternion.hpp"
 #include "XPilot.h"
+#include <chrono>
 
 using namespace std;
 
@@ -102,12 +103,12 @@ namespace xpilot
 
 		ThisThreadIsXplane();
 
-		XPLMRegisterFlightLoopCallback(&AircraftManager::UpdateAircraftSounds, -1.0f, this);
+		XPLMRegisterFlightLoopCallback(&AircraftManager::AircraftMaintenanceCallback, -1.0f, this);
 	}
 
 	AircraftManager::~AircraftManager()
 	{
-		XPLMUnregisterFlightLoopCallback(&AircraftManager::UpdateAircraftSounds, nullptr);
+		XPLMUnregisterFlightLoopCallback(&AircraftManager::AircraftMaintenanceCallback, nullptr);
 	}
 
 	void AircraftManager::HandleAddPlane(const string& callsign, const AircraftVisualState& visualState, const string& airline, const string& typeCode)
@@ -257,7 +258,7 @@ namespace xpilot
 		mapPlanes.clear();
 	}
 
-	float AircraftManager::UpdateAircraftSounds(float, float inElapsedTimeSinceLastFlightLoop, int, void* ref)
+	float AircraftManager::AircraftMaintenanceCallback(float, float inElapsedTimeSinceLastFlightLoop, int, void* ref)
 	{
 		auto* instance = static_cast<AircraftManager*>(ref);
 		
@@ -265,6 +266,17 @@ namespace xpilot
 		{
 			if (!instance->IsXplaneThread()) {
 				return -1.0f;
+			}
+
+			const auto now = chrono::steady_clock::now();
+
+			// purge stale aircraft (if we haven't receied a position update within the last 10 seconds)
+			for (auto& plane : mapPlanes) {
+				if (plane.second) {
+					if (chrono::duration_cast<chrono::milliseconds>(now - plane.second->LastSlowPositionTimestamp).count() > 10000) {
+						mapPlanes.erase(plane.first);
+					}
+				}
 			}
 
 			float soundVolume = 1.0f;
