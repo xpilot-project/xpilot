@@ -104,12 +104,30 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     connect(socket, &QUdpSocket::readyRead, this, &XplaneAdapter::OnDataReceived);
 
     m_zmqContext = std::make_unique<zmq::context_t>(1);
+
+    if(m_hostAddress != QHostAddress::LocalHost) {
+        try {
+            m_xplaneSocket = std::make_unique<zmq::socket_t>(*m_zmqContext, ZMQ_DEALER);
+            m_xplaneSocket->set(zmq::sockopt::routing_id, "xpilot");
+            m_xplaneSocket->set(zmq::sockopt::linger, 0);
+            m_xplaneSocket->connect(QString("tcp://%1:%2")
+                                    .arg(AppConfig::getInstance()->XplaneNetworkAddress)
+                                    .arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
+
+            initializeSocketThread();
+        }
+        catch(zmq::error_t &e) {}
+    }
+
     for(const QString &machine : qAsConst(AppConfig::getInstance()->VisualMachines)) {
-        auto socket = new zmq::socket_t(*m_zmqContext, ZMQ_DEALER);
-        socket->set(zmq::sockopt::routing_id, "xpilot");
-        socket->set(zmq::sockopt::linger, 0);
-        socket->connect(QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplaneVisualPluginPort).toStdString());
-        m_visualSockets.push_back(socket);
+        try {
+            auto socket = new zmq::socket_t(*m_zmqContext, ZMQ_DEALER);
+            socket->set(zmq::sockopt::routing_id, "xpilot");
+            socket->set(zmq::sockopt::linger, 0);
+            socket->connect(QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
+            m_visualSockets.push_back(socket);
+        }
+        catch(zmq::error_t &e) {}
     }
 
     connect(&m_heartbeatTimer, &QTimer::timeout, this, [&] {
@@ -183,6 +201,16 @@ XplaneAdapter::~XplaneAdapter()
     }
     m_visualSockets.clear();
 
+    if(m_xplaneSocket) {
+        m_xplaneSocket->close();
+        m_xplaneSocket.reset();
+    }
+
+    if(m_xplaneSocketThread) {
+        m_xplaneSocketThread->join();
+        m_xplaneSocketThread.reset();
+    }
+
     if(m_zmqContext) {
         m_zmqContext->close();
         m_zmqContext.reset();
@@ -229,124 +257,7 @@ void XplaneAdapter::initializeMessageQueues()
                     if(inboundQueue != nullptr && inboundQueue->try_receive(&data[0], data.size(), msgSize, priority))
                     {
                         data.resize(msgSize);
-
-                        auto json = QJsonDocument::fromJson(QString(data.c_str()).toUtf8());
-                        if(json.isNull() || !json.isObject())
-                            continue;
-
-                        QJsonObject obj = json.object();
-
-                        if(obj.contains("type"))
-                        {
-                            if(obj["type"] == "Shutdown")
-                            {
-                                clearSimConnection();
-                            }
-
-                            else if(obj["type"] == "PluginVersion")
-                            {
-                                QJsonObject data = obj["data"].toObject();
-                                if(data.contains("version"))
-                                {
-                                    if(data["version"].toInt() < BuildConfig::getVersionInt())
-                                    {
-                                        m_validPluginVersion = false;
-                                        emit invalidPluginVersion();
-                                    }
-                                    m_initialHandshake = true;
-                                }
-                            }
-
-                            else if(obj["type"] == "ValidateCsl")
-                            {
-                                QJsonObject data = obj["data"].toObject();
-                                if(data.contains("is_valid"))
-                                {
-                                    if(!data["is_valid"].toBool())
-                                    {
-                                        m_validCsl = false;
-                                        emit invalidCslConfiguration();
-                                    }
-                                }
-                                m_initialHandshake = true;
-                            }
-
-                            else if(obj["type"] == "RequestStationInfo")
-                            {
-                                if(obj.contains("data"))
-                                {
-                                    QJsonObject data = obj["data"].toObject();
-                                    if(!data["callsign"].toString().isEmpty())
-                                    {
-                                        emit requestStationInfo(data["callsign"].toString());
-                                    }
-                                }
-                            }
-
-                            else if(obj["type"] == "RadioMessageSent")
-                            {
-                                if(obj.contains("data"))
-                                {
-                                    QJsonObject data = obj["data"].toObject();
-                                    if(!data["message"].toString().isEmpty())
-                                    {
-                                        emit radioMessageSent(data["message"].toString());
-                                    }
-                                }
-                            }
-
-                            else if(obj["type"] == "PrivateMessageSent")
-                            {
-                                if(obj.contains("data"))
-                                {
-                                    QJsonObject data = obj["data"].toObject();
-                                    QString to = data["to"].toString().toUpper();
-                                    QString message = data["message"].toString();
-                                    if(!message.isEmpty() && !to.isEmpty())
-                                    {
-                                        emit privateMessageSent(to, message);
-                                    }
-                                }
-                            }
-
-                            else if(obj["type"] == "RequestMetar")
-                            {
-                                if(obj.contains("data"))
-                                {
-                                    QJsonObject data = obj["data"].toObject();
-                                    if(!data["station"].toString().isEmpty())
-                                    {
-                                        emit requestMetar(data["station"].toString());
-                                    }
-                                }
-                            }
-
-                            else if(obj["type"] == "Wallop")
-                            {
-                                if(obj.contains("data"))
-                                {
-                                    QJsonObject data = obj["data"].toObject();
-                                    if(!data["message"].toString().isEmpty())
-                                    {
-                                        emit sendWallop(data["message"].toString());
-                                    }
-                                }
-                            }
-
-                            else if(obj["type"] == "ForceDisconnect")
-                            {
-                                QString reason;
-                                if(obj.contains("data"))
-                                {
-                                    QJsonObject data = obj["data"].toObject();
-                                    if(!data["reason"].toString().isEmpty())
-                                    {
-                                        reason = data["reason"].toString();
-                                    }
-                                }
-                                emit forceDisconnect(reason);
-                            }
-                        }
+                        processMessage(data);
                     }
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -356,6 +267,145 @@ void XplaneAdapter::initializeMessageQueues()
             qDebug() << e.get_error_code() << e.what();
         }
     });
+}
+
+void XplaneAdapter::initializeSocketThread()
+{
+    m_xplaneSocketThread = std::make_unique<std::thread>([&]{
+       while(m_xplaneSocket) {
+           try {
+               zmq::message_t msg;
+               static_cast<void>(m_xplaneSocket->recv(msg, zmq::recv_flags::none));
+               QString data(std::string(static_cast<char*>(msg.data()), msg.size()).c_str());
+
+               if(!data.isEmpty()) {
+                   processMessage(data.toStdString());
+               }
+           }
+           catch(zmq::error_t &e) {}
+       }
+    });
+}
+
+void XplaneAdapter::processMessage(std::string message)
+{
+    auto json = QJsonDocument::fromJson(QString(message.c_str()).toUtf8());
+    if(json.isNull() || !json.isObject())
+        return;
+
+    QJsonObject obj = json.object();
+
+    if(obj.contains("type"))
+    {
+        if(obj["type"] == "Shutdown")
+        {
+            clearSimConnection();
+        }
+
+        else if(obj["type"] == "PluginVersion")
+        {
+            QJsonObject data = obj["data"].toObject();
+            if(data.contains("version"))
+            {
+                if(data["version"].toInt() < BuildConfig::getVersionInt())
+                {
+                    m_validPluginVersion = false;
+                    emit invalidPluginVersion();
+                }
+                m_initialHandshake = true;
+            }
+        }
+
+        else if(obj["type"] == "ValidateCsl")
+        {
+            QJsonObject data = obj["data"].toObject();
+            if(data.contains("is_valid"))
+            {
+                if(!data["is_valid"].toBool())
+                {
+                    m_validCsl = false;
+                    emit invalidCslConfiguration();
+                }
+            }
+            m_initialHandshake = true;
+        }
+
+        else if(obj["type"] == "RequestStationInfo")
+        {
+            if(obj.contains("data"))
+            {
+                QJsonObject data = obj["data"].toObject();
+                if(!data["callsign"].toString().isEmpty())
+                {
+                    emit requestStationInfo(data["callsign"].toString());
+                }
+            }
+        }
+
+        else if(obj["type"] == "RadioMessageSent")
+        {
+            if(obj.contains("data"))
+            {
+                QJsonObject data = obj["data"].toObject();
+                if(!data["message"].toString().isEmpty())
+                {
+                    emit radioMessageSent(data["message"].toString());
+                }
+            }
+        }
+
+        else if(obj["type"] == "PrivateMessageSent")
+        {
+            if(obj.contains("data"))
+            {
+                QJsonObject data = obj["data"].toObject();
+                QString to = data["to"].toString().toUpper();
+                QString message = data["message"].toString();
+                if(!message.isEmpty() && !to.isEmpty())
+                {
+                    emit privateMessageSent(to, message);
+                }
+            }
+        }
+
+        else if(obj["type"] == "RequestMetar")
+        {
+            if(obj.contains("data"))
+            {
+                QJsonObject data = obj["data"].toObject();
+                if(!data["station"].toString().isEmpty())
+                {
+                    emit requestMetar(data["station"].toString());
+                }
+            }
+        }
+
+        else if(obj["type"] == "Wallop")
+        {
+            if(obj.contains("data"))
+            {
+                QJsonObject data = obj["data"].toObject();
+                if(!data["message"].toString().isEmpty())
+                {
+                    emit sendWallop(data["message"].toString());
+                }
+            }
+        }
+
+        else if(obj["type"] == "ForceDisconnect")
+        {
+            QString reason;
+            if(obj.contains("data"))
+            {
+                QJsonObject data = obj["data"].toObject();
+                if(!data["reason"].toString().isEmpty())
+                {
+                    reason = data["reason"].toString();
+                }
+            }
+            emit forceDisconnect(reason);
+        }
+    }
 }
 
 void XplaneAdapter::clearSimConnection()
@@ -701,6 +751,17 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
         catch(bip::interprocess_exception &e) {
             qDebug() << e.get_error_code() << e.what();
         }
+    }
+
+    if(m_xplaneSocket) {
+        std::string identity = "xpilot";
+        zmq::message_t part1(identity.size());
+        std::memcpy(part1.data(), identity.data(), identity.size());
+        m_xplaneSocket->send(part1, zmq::send_flags::sndmore);
+
+        zmq::message_t msg(message.size());
+        std::memcpy(msg.data(), message.toStdString().data(), message.size());
+        m_xplaneSocket->send(msg, zmq::send_flags::none);
     }
 
     for(auto &visualSocket : m_visualSockets)

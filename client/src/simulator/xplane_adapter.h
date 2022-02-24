@@ -100,6 +100,8 @@ private:
     void sendCommand(std::string command);
 
     void initializeMessageQueues();
+    void initializeSocketThread();
+    void processMessage(std::string message);
     void clearSimConnection();
 
 public slots:
@@ -144,6 +146,8 @@ private:
     QList<QString> m_ignoreList;
 
     std::unique_ptr<zmq::context_t> m_zmqContext;
+    std::unique_ptr<zmq::socket_t> m_xplaneSocket; // if X-Plane is running on a different PC than xPilot
+    std::unique_ptr<std::thread> m_xplaneSocketThread;
     QList<zmq::socket_t*> m_visualSockets;
     QTimer m_heartbeatTimer;
     QTimer m_xplaneDataTimer;

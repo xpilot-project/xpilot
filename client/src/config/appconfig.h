@@ -62,7 +62,7 @@ namespace xpilot
         bool AlertSelcal;
         bool AlertDisconnect;
         QString XplaneNetworkAddress;
-        int XplaneVisualPluginPort;
+        int XplanePluginPort; // used for visual machines or if the sim is on a different machine than the xPilot client
         int XplaneUdpPort;
         bool SilenceModelInstall;
         QStringList VisualMachines;

@@ -78,7 +78,7 @@ void AppConfig::loadConfig()
         MicrophoneVolume = 0;
         HFSquelchEnabled = false;
         XplaneNetworkAddress = DEFAULT_XPLANE_NETWORK_ADDRESS;
-        XplaneVisualPluginPort = DEFAULT_PLUGIN_PORT;
+        XplanePluginPort = DEFAULT_PLUGIN_PORT;
         XplaneUdpPort = XPLANE_UDP_PORT;
         SilenceModelInstall = false;
         KeepWindowVisible = false;
@@ -127,7 +127,7 @@ void AppConfig::loadConfig()
     AlertDisconnect = jsonMap["AlertDisconnect"].toBool();
     AlertNetworkBroadcast = jsonMap["AlertNetworkBroadcast"].toBool();
     XplaneNetworkAddress = jsonMap["XplaneNetworkAddress"].toString();
-    XplaneVisualPluginPort = jsonMap["XplaneVisualPluginPort"].toInt();
+    XplanePluginPort = jsonMap["XplanePluginPort"].toInt();
     XplaneUdpPort = jsonMap["XplaneUdpPort"].toInt();
     SilenceModelInstall = jsonMap["SilenceModelInstall"].toBool();
     VisualMachines = jsonMap["VisualMachines"].toStringList();
@@ -219,7 +219,7 @@ bool AppConfig::saveConfig()
     jsonObj["AlertSelcal"] = AlertSelcal;
     jsonObj["AlertDisconnect"] = AlertDisconnect;
     jsonObj["XplaneNetworkAddress"] = XplaneNetworkAddress.isEmpty() ? DEFAULT_XPLANE_NETWORK_ADDRESS : XplaneNetworkAddress;
-    jsonObj["XplaneVisualPluginPort"] = XplaneVisualPluginPort == 0 ? DEFAULT_PLUGIN_PORT : XplaneVisualPluginPort;
+    jsonObj["XplanePluginPort"] = XplanePluginPort == 0 ? DEFAULT_PLUGIN_PORT : XplanePluginPort;
     jsonObj["XplaneUdpPort"] = XplaneUdpPort == 0 ? XPLANE_UDP_PORT : XplaneUdpPort;
     jsonObj["SilenceModelInstall"] = SilenceModelInstall;
     jsonObj["KeepWindowVisible"] = KeepWindowVisible;
