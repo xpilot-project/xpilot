@@ -32,8 +32,10 @@
 #include "zmq.hpp"
 #include "Utilities.h"
 
+#ifdef _WIN32
 #define BOOST_INTERPROCESS_SHARED_DIR_FUNC
-#include <boost/interprocess/ipc/message_queue.hpp>
+#endif
+#include <interprocess/include/boost/interprocess/ipc/message_queue.hpp>
 
 #include <deque>
 #include <thread>
@@ -52,15 +54,18 @@ namespace bip = boost::interprocess;
 #define MAX_MESSAGES 500
 #define MAX_MESSAGE_SIZE 2048
 
+#ifdef _WIN32
 namespace boost {
 	namespace interprocess {
 		namespace ipcdetail {
 			inline void get_shared_dir(std::string& shared_dir) {
-				shared_dir = getDataPath();
+				winapi::get_local_app_data(shared_dir);
+				shared_dir += "/org.vatsim.xpilot/";
 			}
 		}
 	}
 }
+#endif
 
 namespace xpilot
 {

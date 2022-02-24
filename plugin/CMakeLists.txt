@@ -51,6 +51,7 @@ include_directories("${CMAKE_SOURCE_DIR}/externals/XPMP2")
 include_directories("${CMAKE_SOURCE_DIR}/externals/SDK/CHeaders/XPLM")
 include_directories("${CMAKE_SOURCE_DIR}/externals/fmod/include")
 include_directories("${CMAKE_SOURCE_DIR}/externals/PlatformFolders")
+include_directories("${CMAKE_SOURCE_DIR}/externals/interprocess")
 
 set(Header_Files
   include/AircraftManager.h

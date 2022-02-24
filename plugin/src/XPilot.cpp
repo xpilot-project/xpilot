@@ -108,8 +108,6 @@ namespace xpilot
 		m_pluginVersion = PLUGIN_VERSION;
 
 		XPLMRegisterFlightLoopCallback(DeferredStartup, -1.0f, this);
-
-		LOG_MSG(logMSG, "Data Path: %s", getDataPath().c_str());
 	}
 
 	XPilot::~XPilot()
@@ -233,9 +231,10 @@ namespace xpilot
 				// from xpilot client
 				unsigned int priority;
 				bip::message_queue::size_type msgSize;
-
+				
 				std::string msg;
 				msg.resize(MAX_MESSAGE_SIZE);
+
 				if (m_outboundQueue != nullptr && m_outboundQueue->try_receive(&msg[0], msg.size(), msgSize, priority)) {
 					msg.resize(msgSize);
 					ProcessMessage(msg);
@@ -254,7 +253,7 @@ namespace xpilot
 		{
 			try {
 				zmq::message_t msg;
-				static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::dontwait));
+				static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::none));
 				if (msg.size() > 0)
 				{
 					string data(static_cast<char*>(msg.data()), msg.size());
@@ -262,6 +261,8 @@ namespace xpilot
 				}
 			}
 			catch (...) {}
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 	}
 

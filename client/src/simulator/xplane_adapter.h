@@ -31,8 +31,10 @@
 #include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/radio_stack_state.h"
 
+#ifdef Q_OS_WIN
 #define BOOST_INTERPROCESS_SHARED_DIR_FUNC
-#include <boost/interprocess/ipc/message_queue.hpp>
+#endif
+#include <3rdparty/interprocess/include/boost/interprocess/ipc/message_queue.hpp>
 
 namespace bip = boost::interprocess;
 
@@ -41,15 +43,18 @@ namespace bip = boost::interprocess;
 #define MAX_MESSAGES 500
 #define MAX_MESSAGE_SIZE 2048
 
+#ifdef Q_OS_WIN
 namespace boost {
     namespace interprocess {
         namespace ipcdetail {
             inline void get_shared_dir(std::string& shared_dir) {
-                shared_dir = xpilot::AppConfig::getInstance()->dataRoot().toStdString();
+                winapi::get_local_app_data(shared_dir);
+                shared_dir += "/org.vatsim.xpilot/";
             }
         }
     }
 }
+#endif
 
 class XplaneAdapter : public QObject
 {
