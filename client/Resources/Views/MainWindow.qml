@@ -39,6 +39,7 @@ Window {
     property string ourCallsign: ""
     property bool initialized: false
     property bool simConnected: false
+    property var radioStackState
 
     property string colorGreen: "#85a664"
     property string colorOrange: "#ffa500"
@@ -333,6 +334,12 @@ Window {
     Connections {
         target: xplaneAdapter
 
+        function onRadioStackStateChanged(stack) {
+            if(radioStackState !== stack) {
+                radioStackState = stack;
+            }
+        }
+
         function onSimConnectionStateChanged(state) {
             if(!simConnected && state) {
                 appendMessage("X-Plane connection established.", colorYellow)
@@ -492,7 +499,9 @@ Window {
             appendMessage(`SELCAL alert received on ${FrequencyUtils.fromNetworkFormat(frequencies[0])}`, colorYellow)
             if(AppConfig.AlertSelcal) {
                 mainWindow.alert(0)
-                selcalSound.play()
+                if(!radioStackState.SelcalMuteOverride) {
+                    selcalSound.play()
+                }
             }
         }
 

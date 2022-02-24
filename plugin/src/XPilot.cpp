@@ -50,6 +50,7 @@ namespace xpilot
 		m_pluginVersion("xpilot/version", ReadOnly),
 		m_selcalCode("xpilot/selcal", ReadOnly),
 		m_selcalReceived("xpilot/selcal_received", ReadWrite),
+		m_selcalMuteOverride("xpilot/selcal_mute_override", ReadWrite),
 		m_frameRatePeriod("sim/operation/misc/frame_rate_period", ReadOnly),
 		m_com1Frequency("sim/cockpit2/radios/actuators/com1_frequency_hz_833", ReadWrite),
 		m_com2Frequency("sim/cockpit2/radios/actuators/com2_frequency_hz_833", ReadWrite),

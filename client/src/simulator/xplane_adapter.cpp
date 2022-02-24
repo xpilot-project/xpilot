@@ -63,7 +63,8 @@ enum DataRef
     NoseWheelAngle,
     ReplayMode,
     Paused,
-    PushToTalk
+    PushToTalk,
+    SelcalMuteOverride
 };
 
 QHostAddress m_hostAddress;
@@ -466,6 +467,7 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/operation/prefs/replay_mode", DataRef::ReplayMode, 5);
     SubscribeDataRef("sim/time/paused", DataRef::Paused, 5);
     SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 15);
+    SubscribeDataRef("xpilot/selcal_mute_override", DataRef::SelcalMuteOverride, 5);
 }
 
 void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
@@ -726,6 +728,9 @@ void XplaneAdapter::OnDataReceived()
                         break;
                     case DataRef::PushToTalk:
                         (value > 0) ? emit pttPressed() : emit pttReleased();
+                        break;
+                    case DataRef::SelcalMuteOverride:
+                        m_radioStackState.SelcalMuteOverride = value > 0;
                         break;
                 }
             }

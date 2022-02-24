@@ -19,6 +19,7 @@ public:
     bool SquawkingModeC;
     bool SquawkingIdent;
     ushort TransponderCode;
+    bool SelcalMuteOverride;
 
     Q_PROPERTY(bool AvionicsPowerOn MEMBER AvionicsPowerOn)
 
@@ -35,6 +36,8 @@ public:
     Q_PROPERTY(bool SquawkingModeC MEMBER SquawkingModeC)
     Q_PROPERTY(bool SquawkingIdent MEMBER SquawkingIdent)
 
+    Q_PROPERTY(bool SelcalMuteOverride MEMBER SelcalMuteOverride)
+
     bool operator==(RadioStackState &other) const
     {
         return AvionicsPowerOn == other.AvionicsPowerOn
@@ -48,7 +51,8 @@ public:
                 && Com2Volume == other.Com2Volume
                 && SquawkingModeC == other.SquawkingModeC
                 && SquawkingIdent == other.SquawkingIdent
-                && TransponderCode == other.TransponderCode;
+                && TransponderCode == other.TransponderCode
+                && SelcalMuteOverride == other.SelcalMuteOverride;
     }
 
     bool operator!=(RadioStackState &other) const
@@ -64,7 +68,8 @@ public:
                 || Com2Volume != other.Com2Volume
                 || SquawkingModeC != other.SquawkingModeC
                 || SquawkingIdent != other.SquawkingIdent
-                || TransponderCode != other.TransponderCode;
+                || TransponderCode != other.TransponderCode
+                || SelcalMuteOverride != other.SelcalMuteOverride;
     }
 };
 

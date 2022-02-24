@@ -143,6 +143,7 @@ namespace xpilot
 		OwnedDataRef<int> m_pluginVersion;
 		OwnedDataRef<string> m_selcalCode;
 		OwnedDataRef<int> m_selcalReceived;
+		OwnedDataRef<int> m_selcalMuteOverride;
 		DataRefAccess<int> m_xplaneAtisEnabled;
 		DataRefAccess<float> m_frameRatePeriod;
 		DataRefAccess<int> m_com1Frequency;
