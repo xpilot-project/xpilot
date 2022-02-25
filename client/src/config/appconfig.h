@@ -119,6 +119,7 @@ namespace xpilot
         Q_PROPERTY(bool AlertDisconnect MEMBER AlertDisconnect NOTIFY alertDisconnectChanged);
         Q_PROPERTY(bool SilenceModelInstall MEMBER SilenceModelInstall)
         Q_PROPERTY(QStringList VisualMachines MEMBER VisualMachines)
+        Q_PROPERTY(QString XplaneNetworkAddress MEMBER XplaneNetworkAddress)
         Q_PROPERTY(bool KeepWindowVisible MEMBER KeepWindowVisible)
         Q_PROPERTY(bool AircraftRadioStackControlsVolume MEMBER AircraftRadioStackControlsVolume)
         Q_PROPERTY(bool MicrophoneCalibrated MEMBER MicrophoneCalibrated)

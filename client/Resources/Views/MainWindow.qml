@@ -1319,11 +1319,28 @@ Window {
                                                     xplaneAdapter.unignoreAircraft(cmd[1])
                                                     cliTextField.clear()
                                                     break;
+                                                case ".simip":
+                                                    console.log(cmd.length)
+                                                    if(cmd.length > 2) {
+                                                        throw `Too many parameters. Expected .simip IP`
+                                                    }
+                                                    if(cmd.length > 1) {
+                                                        AppConfig.XplaneNetworkAddress = cmd[1]
+                                                        AppConfig.saveConfig()
+                                                        appendMessage(`X-Plane network address set to ${AppConfig.XplaneNetworkAddress}. You must restart xPilot for the changes to take effect.`, colorYellow, currentTab)
+                                                    }
+                                                    else {
+                                                        AppConfig.XplaneNetworkAddress = "127.0.0.1"
+                                                        AppConfig.saveConfig()
+                                                        appendMessage("X-Plane network address reset to localhost (127.0.0.1). You must restart xPilot for the changes to take effect.", colorYellow, currentTab)
+                                                    }
+                                                    cliTextField.clear()
+                                                    break;
                                                 case ".visualip":
                                                     if(cmd.length < 2) {
                                                         AppConfig.VisualMachines = []
                                                         AppConfig.saveConfig()
-                                                        appendMessage("X-Plane visual machine addresses cleared", colorYellow, currentTab);
+                                                        appendMessage("X-Plane visual machine addresses cleared. You must restart xPilot for the changes to take effect.", colorYellow, currentTab);
                                                     }
                                                     else {
                                                         AppConfig.VisualMachines = []
