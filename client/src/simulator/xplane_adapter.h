@@ -148,6 +148,7 @@ private:
     std::unique_ptr<zmq::context_t> m_zmqContext;
     std::unique_ptr<zmq::socket_t> m_xplaneSocket; // if X-Plane is running on a different PC than xPilot
     std::unique_ptr<std::thread> m_xplaneSocketThread;
+    bool m_keepXplaneSocketThreadAlive = false;
     QList<zmq::socket_t*> m_visualSockets;
     QTimer m_heartbeatTimer;
     QTimer m_xplaneDataTimer;

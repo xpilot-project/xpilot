@@ -169,7 +169,7 @@ namespace xpilot
 		{
 			m_zmqContext = make_unique<zmq::context_t>(1);
 			m_zmqSocket = make_unique<zmq::socket_t>(*m_zmqContext.get(), ZMQ_ROUTER);
-			m_zmqSocket->setsockopt(ZMQ_IDENTITY, "xplane", 5);
+			m_zmqSocket->setsockopt(ZMQ_IDENTITY, "xpilot", 5);
 			m_zmqSocket->setsockopt(ZMQ_LINGER, 0);
 			m_zmqSocket->bind("tcp://*:" + Config::Instance().getTcpPort());
 
@@ -185,6 +185,8 @@ namespace xpilot
 
 	void XPilot::Shutdown()
 	{
+		SendReply("{\"type\":\"Shutdown\"}"); // this triggers the client to reset itself
+
 		try {
 			if (m_zmqSocket) {
 				m_zmqSocket->close();
@@ -204,9 +206,6 @@ namespace xpilot
 		catch (...) {}
 
 		// shutdown message queues
-
-		SendReply("{\"type\":\"Shutdown\"}"); // this triggers the client to reset itself
-
 		bip::message_queue::remove(OUTBOUND_QUEUE);
 		bip::message_queue::remove(INBOUND_QUEUE);
 
@@ -280,6 +279,21 @@ namespace xpilot
 		{
 			LOG_MSG(logERROR, "MessageQueue Error: %s", e.what());
 		}
+
+		try {
+			if (m_zmqSocket)
+			{
+				string identity = "xpilot";
+				zmq::message_t part1(identity.size());
+				memcpy(part1.data(), identity.data(), identity.size());
+				m_zmqSocket->send(part1, zmq::send_flags::sndmore);
+
+				zmq::message_t part2(message.size());
+				memcpy(part2.data(), message.data(), message.size());
+				zmq::send_result_t rc = m_zmqSocket->send(part2, zmq::send_flags::none);
+			}
+		}
+		catch (zmq::error_t& e) {}
 	}
 
 	void XPilot::ProcessMessage(const std::string& msg)
