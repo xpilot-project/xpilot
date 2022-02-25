@@ -274,7 +274,7 @@ namespace xpilot
 				string identity = "xpilot";
 				zmq::message_t part1(identity.size());
 				memcpy(part1.data(), identity.data(), identity.size());
-				m_zmqSocket->send(part1, zmq::send_flags::sndmore);
+				m_zmqSocket->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
 
 				zmq::message_t msg(message.size());
 				memcpy(msg.data(), message.data(), message.size());

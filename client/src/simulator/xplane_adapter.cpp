@@ -758,7 +758,7 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
             std::string identity = "xpilot";
             zmq::message_t part1(identity.size());
             std::memcpy(part1.data(), identity.data(), identity.size());
-            m_xplaneSocket->send(part1, zmq::send_flags::sndmore);
+            m_xplaneSocket->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
 
             zmq::message_t msg(message.size());
             std::memcpy(msg.data(), message.toStdString().data(), message.size());
@@ -774,7 +774,7 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
                 std::string identity = "xpilot";
                 zmq::message_t part1(identity.size());
                 std::memcpy(part1.data(), identity.data(), identity.size());
-                visualSocket->send(part1, zmq::send_flags::sndmore);
+                visualSocket->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
 
                 zmq::message_t msg(message.size());
                 std::memcpy(msg.data(), message.toStdString().data(), message.size());
