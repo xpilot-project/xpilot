@@ -34,6 +34,7 @@
 
 #ifdef _WIN32
 #define BOOST_INTERPROCESS_SHARED_DIR_FUNC
+#include <interprocess/include/boost/interprocess/detail/win32_api.hpp>
 #endif
 #include <interprocess/include/boost/interprocess/ipc/message_queue.hpp>
 

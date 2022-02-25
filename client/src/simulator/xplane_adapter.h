@@ -33,6 +33,7 @@
 
 #ifdef Q_OS_WIN
 #define BOOST_INTERPROCESS_SHARED_DIR_FUNC
+#include <3rdparty/interprocess/include/boost/interprocess/detail/win32_api.hpp>
 #endif
 #include <3rdparty/interprocess/include/boost/interprocess/ipc/message_queue.hpp>
 
