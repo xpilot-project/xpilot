@@ -273,6 +273,8 @@ void XplaneAdapter::initializeMessageQueues()
 
 void XplaneAdapter::initializeSocketThread()
 {
+    m_keepXplaneSocketThreadAlive = true;
+
     m_xplaneSocketThread = std::make_unique<std::thread>([&]{
        while(m_xplaneSocket && m_keepXplaneSocketThreadAlive) {
            try {
