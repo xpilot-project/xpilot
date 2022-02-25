@@ -1200,6 +1200,10 @@ Window {
                                                 }
                                                 cliTextField.clear()
                                             }
+                                            else if(cliTextField.text.startsWith(".downloadcsl")) {
+                                                modal_downloadModels.open()
+                                                cliTextField.clear()
+                                            }
                                             else {
 
                                                 if(!simConnected) {
