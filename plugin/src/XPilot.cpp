@@ -132,13 +132,6 @@ namespace xpilot
 		InitializeXPMP();
 		TryGetTcasControl();
 
-		// remove visuals zmq
-		m_zmqKeepAlive = false;
-		if (m_zmqThread) {
-			m_zmqThread->join();
-			m_zmqThread.reset();
-		}
-
 		// setup message queues
 		bip::message_queue::remove(OUTBOUND_QUEUE);
 		bip::message_queue::remove(INBOUND_QUEUE);
@@ -173,7 +166,6 @@ namespace xpilot
 			m_zmqSocket->setsockopt(ZMQ_LINGER, 0);
 			m_zmqSocket->bind("tcp://*:" + Config::Instance().getTcpPort());
 
-			m_zmqKeepAlive = true;
 			m_zmqThread = make_unique<thread>(&XPilot::ZmqWorker, this);
 			LOG_MSG(logMSG, "Now listening on port %s", Config::Instance().getTcpPort().c_str());
 		}
@@ -196,7 +188,6 @@ namespace xpilot
 				m_zmqContext->close();
 				m_zmqContext.reset();
 			}
-			m_zmqKeepAlive = false;
 			if (m_zmqThread) {
 				m_zmqThread->join();
 				m_zmqThread.reset();
@@ -249,20 +240,18 @@ namespace xpilot
 
 	void XPilot::ZmqWorker()
 	{
-		while (IsSocketReady())
-		{
+		while (m_zmqSocket) {
 			try {
 				zmq::message_t msg;
-				static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::none));
-				if (msg.size() > 0)
-				{
-					string data(static_cast<char*>(msg.data()), msg.size());
+				static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::dontwait));
+				std::string data(static_cast<char*>(msg.data()), msg.size());
+
+				if (!data.empty()) {
 					ProcessMessage(data);
 				}
 			}
-			catch (...) {}
-
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			catch (zmq::error_t& e) {}
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
 	}
 
@@ -280,20 +269,19 @@ namespace xpilot
 			LOG_MSG(logERROR, "MessageQueue Error: %s", e.what());
 		}
 
-		try {
-			if (m_zmqSocket)
-			{
+		if (m_zmqSocket) {
+			try {
 				string identity = "xpilot";
 				zmq::message_t part1(identity.size());
 				memcpy(part1.data(), identity.data(), identity.size());
 				m_zmqSocket->send(part1, zmq::send_flags::sndmore);
 
-				zmq::message_t part2(message.size());
-				memcpy(part2.data(), message.data(), message.size());
-				zmq::send_result_t rc = m_zmqSocket->send(part2, zmq::send_flags::none);
+				zmq::message_t msg(message.size());
+				memcpy(msg.data(), message.data(), message.size());
+				m_zmqSocket->send(msg, zmq::send_flags::dontwait);
 			}
+			catch (zmq::error_t& e) {}
 		}
-		catch (zmq::error_t& e) {}
 	}
 
 	void XPilot::ProcessMessage(const std::string& msg)

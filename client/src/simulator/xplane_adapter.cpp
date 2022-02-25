@@ -202,7 +202,6 @@ XplaneAdapter::~XplaneAdapter()
     }
     m_visualSockets.clear();
 
-    m_keepXplaneSocketThreadAlive = false;
     if(m_xplaneSocket) {
         m_xplaneSocket->close();
         m_xplaneSocket.reset();
@@ -262,7 +261,7 @@ void XplaneAdapter::initializeMessageQueues()
                         processMessage(data);
                     }
                 }
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
         }
         catch(bip::interprocess_exception &e) {
@@ -273,13 +272,11 @@ void XplaneAdapter::initializeMessageQueues()
 
 void XplaneAdapter::initializeSocketThread()
 {
-    m_keepXplaneSocketThreadAlive = true;
-
     m_xplaneSocketThread = std::make_unique<std::thread>([&]{
-       while(m_xplaneSocket && m_keepXplaneSocketThreadAlive) {
+       while(m_xplaneSocket) {
            try {
                zmq::message_t msg;
-               static_cast<void>(m_xplaneSocket->recv(msg, zmq::recv_flags::none));
+               static_cast<void>(m_xplaneSocket->recv(msg, zmq::recv_flags::dontwait));
                QString data(std::string(static_cast<char*>(msg.data()), msg.size()).c_str());
 
                if(!data.isEmpty()) {
@@ -287,6 +284,7 @@ void XplaneAdapter::initializeSocketThread()
                }
            }
            catch(zmq::error_t &e) {}
+           std::this_thread::sleep_for(std::chrono::milliseconds(1));
        }
     });
 }
@@ -749,12 +747,6 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
     {
         try {
             outboundQueue->try_send(message.toStdString().data(), message.toStdString().size(), 0);
-
-            QMutexLocker lock(&mutex);
-            {
-                m_rawDataStream << QString("[%1] >>> %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), message);
-                m_rawDataStream.flush();
-            }
         }
         catch(bip::interprocess_exception &e) {
             qDebug() << e.get_error_code() << e.what();
@@ -762,41 +754,40 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
     }
 
     if(m_xplaneSocket) {
-        std::string identity = "xpilot";
-        zmq::message_t part1(identity.size());
-        std::memcpy(part1.data(), identity.data(), identity.size());
-        m_xplaneSocket->send(part1, zmq::send_flags::sndmore);
+        try {
+            std::string identity = "xpilot";
+            zmq::message_t part1(identity.size());
+            std::memcpy(part1.data(), identity.data(), identity.size());
+            m_xplaneSocket->send(part1, zmq::send_flags::sndmore);
 
-        zmq::message_t msg(message.size());
-        std::memcpy(msg.data(), message.toStdString().data(), message.size());
-        m_xplaneSocket->send(msg, zmq::send_flags::none);
-
-        QMutexLocker lock(&mutex);
-        {
-            m_rawDataStream << QString("[%1] XplaneSocket >>> %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), message);
-            m_rawDataStream.flush();
+            zmq::message_t msg(message.size());
+            std::memcpy(msg.data(), message.toStdString().data(), message.size());
+            m_xplaneSocket->send(msg, zmq::send_flags::dontwait);
         }
+        catch(zmq::error_t &e) {}
     }
 
     for(auto &visualSocket : m_visualSockets)
     {
-        if(visualSocket != nullptr && visualSocket->handle() != nullptr)
-        {
-            std::string identity = "xpilot";
-            zmq::message_t part1(identity.size());
-            std::memcpy(part1.data(), identity.data(), identity.size());
-            visualSocket->send(part1, zmq::send_flags::sndmore);
+        if(visualSocket) {
+            try {
+                std::string identity = "xpilot";
+                zmq::message_t part1(identity.size());
+                std::memcpy(part1.data(), identity.data(), identity.size());
+                visualSocket->send(part1, zmq::send_flags::sndmore);
 
-            zmq::message_t msg(message.size());
-            std::memcpy(msg.data(), message.toStdString().data(), message.size());
-            visualSocket->send(msg, zmq::send_flags::none);
-
-            QMutexLocker lock(&mutex);
-            {
-                m_rawDataStream << QString("[%1] VisualSocket >>> %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), message);
-                m_rawDataStream.flush();
+                zmq::message_t msg(message.size());
+                std::memcpy(msg.data(), message.toStdString().data(), message.size());
+                visualSocket->send(msg, zmq::send_flags::dontwait);
             }
+            catch(zmq::error_t &e) {}
         }
+    }
+
+    QMutexLocker lock(&mutex);
+    {
+        m_rawDataStream << QString("[%1] >>> %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), message);
+        m_rawDataStream.flush();
     }
 }
 
