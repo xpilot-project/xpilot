@@ -31,7 +31,7 @@ jobs:
 
     #if: ${{ false }}
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     env:
       IB_URL: https://installbuilder.com/installbuilder-enterprise-21.9.0-linux-x64-installer.run
