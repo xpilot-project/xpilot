@@ -556,7 +556,7 @@ Window {
             if(args.DualReceiver) {
                 var freqString = "";
                 if(args.Frequencies.length > 1) {
-                    freqString = `${FrequencyUtils.formatFromFsd(args.Frequencies[0])} & ${FrequencyUtils.formatFromFsd(args.Frequencies[1])}`;
+                    freqString = `${FrequencyUtils.fromNetworkFormat(args.Frequencies[0])} & ${FrequencyUtils.fromNetworkFormat(args.Frequencies[1])}`;
                 }
                 else {
                     freqString = FrequencyUtils.fromNetworkFormat(args.Frequencies[0]);

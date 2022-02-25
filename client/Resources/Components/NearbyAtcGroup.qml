@@ -121,7 +121,7 @@ Column {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    var freq = FrequencyUtils.normalize25KhzFrequency(Frequency * 1000) / 1000
+                                    var freq = FrequencyUtils.normalize25KhzFrequency(Frequency)
                                     xplaneAdapter.setCom1Frequency(freq)
                                     ctxtMenu.close()
                                 }
@@ -140,7 +140,7 @@ Column {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    var freq = FrequencyUtils.normalize25KhzFrequency(Frequency * 1000) / 1000
+                                    var freq = FrequencyUtils.normalize25KhzFrequency(Frequency)
                                     xplaneAdapter.setCom2Frequency(freq)
                                     ctxtMenu.close()
                                 }
