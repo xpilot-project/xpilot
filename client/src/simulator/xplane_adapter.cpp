@@ -191,38 +191,41 @@ XplaneAdapter::~XplaneAdapter()
         m_zmqSocket.reset();
     }
 
-    if(m_zmqSocketThread) {
-        m_zmqSocketThread->join();
-        m_zmqSocketThread.reset();
-    }
-
     if(m_zmqContext) {
         m_zmqContext->close();
         m_zmqContext.reset();
+    }
+
+    m_keepSocketAlive = false;
+    if(m_zmqSocketThread) {
+        m_zmqSocketThread->join();
+        m_zmqSocketThread.reset();
     }
 }
 
 void XplaneAdapter::initializeSocketThread()
 {
+    m_keepSocketAlive = true;
     m_zmqSocketThread = std::make_unique<std::thread>([&]{
-       while(m_zmqSocket) {
+       while(IsSocketReady()) {
            try {
                zmq::message_t msg;
                static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::none));
                QString data(std::string(static_cast<char*>(msg.data()), msg.size()).c_str());
-
-               if(!data.isEmpty()) {
-                   processMessage(data.toStdString());
-               }
+               processMessage(data);
            }
            catch(zmq::error_t &e) {}
+           catch(...){}
        }
     });
 }
 
-void XplaneAdapter::processMessage(std::string message)
+void XplaneAdapter::processMessage(QString message)
 {
-    auto json = QJsonDocument::fromJson(QString(message.c_str()).toUtf8());
+    if(message.isEmpty())
+        return;
+
+    auto json = QJsonDocument::fromJson(message.toUtf8());
     if(json.isNull() || !json.isObject())
         return;
 
@@ -682,16 +685,16 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
 {
     if(message.isEmpty()) return;
 
-    if(m_zmqSocket) {
+    if(m_zmqSocket != nullptr && m_zmqSocket->handle() != nullptr) {
         try {
             std::string identity = "xpilot";
             zmq::message_t part1(identity.size());
             std::memcpy(part1.data(), identity.data(), identity.size());
-            m_zmqSocket->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
+            m_zmqSocket->send(part1, zmq::send_flags::sndmore);
 
             zmq::message_t msg(message.size());
             std::memcpy(msg.data(), message.toStdString().data(), message.size());
-            m_zmqSocket->send(msg, zmq::send_flags::dontwait);
+            m_zmqSocket->send(msg, zmq::send_flags::none);
         }
         catch(zmq::error_t &e) {
             writeToLog(QString("Socket error: %s").append(e.what()));
@@ -705,11 +708,11 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
                 std::string identity = "xpilot";
                 zmq::message_t part1(identity.size());
                 std::memcpy(part1.data(), identity.data(), identity.size());
-                visualSocket->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
+                visualSocket->send(part1, zmq::send_flags::sndmore);
 
                 zmq::message_t msg(message.size());
                 std::memcpy(msg.data(), message.toStdString().data(), message.size());
-                visualSocket->send(msg, zmq::send_flags::dontwait);
+                visualSocket->send(msg, zmq::send_flags::none);
             }
             catch(zmq::error_t &e) {
                 writeToLog(QString("Visual socket error: %s").append(e.what()));

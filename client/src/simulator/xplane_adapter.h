@@ -75,7 +75,7 @@ private:
     void sendCommand(std::string command);
 
     void initializeSocketThread();
-    void processMessage(std::string message);
+    void processMessage(QString message);
     void clearSimConnection();
 
     void writeToLog(QString message);
@@ -121,12 +121,20 @@ private:
 
     QList<QString> m_ignoreList;
 
+    bool m_keepSocketAlive = false;
     std::unique_ptr<zmq::context_t> m_zmqContext;
     std::unique_ptr<zmq::socket_t> m_zmqSocket;
     std::unique_ptr<std::thread> m_zmqSocketThread;
     QList<zmq::socket_t*> m_visualSockets;
     QTimer m_heartbeatTimer;
     QTimer m_xplaneDataTimer;
+
+    bool IsSocketConnected() const {
+        return m_zmqSocket != nullptr && m_zmqSocket->handle() != nullptr;
+    }
+    bool IsSocketReady() const {
+        return m_keepSocketAlive && IsSocketConnected();
+    }
 
     QFile m_pluginLog;
     QTextStream m_rawDataStream;

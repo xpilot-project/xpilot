@@ -145,9 +145,17 @@ namespace xpilot
 			return this_thread::get_id() == m_xplaneThread;
 		}
 
+		bool m_keepSocketAlive = false;
 		unique_ptr<thread> m_zmqThread;
 		unique_ptr<zmq::context_t> m_zmqContext;
 		unique_ptr<zmq::socket_t> m_zmqSocket;
+
+		bool IsSocketConnected()const {
+			return m_zmqSocket != nullptr && m_zmqSocket->handle() != nullptr;
+		}
+		bool IsSocketReady()const {
+			return m_keepSocketAlive && IsSocketConnected();
+		}
 
 		void ZmqWorker();
 		void ProcessMessage(const std::string& msg);

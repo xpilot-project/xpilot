@@ -135,11 +135,12 @@ namespace xpilot
 		try
 		{
 			m_zmqContext = make_unique<zmq::context_t>(1);
-			m_zmqSocket = make_unique<zmq::socket_t>(*m_zmqContext.get(), ZMQ_ROUTER);
+			m_zmqSocket = make_unique<zmq::socket_t>(*m_zmqContext, ZMQ_ROUTER);
 			m_zmqSocket->setsockopt(ZMQ_IDENTITY, "xpilot", 5);
 			m_zmqSocket->setsockopt(ZMQ_LINGER, 0);
 			m_zmqSocket->bind("tcp://*:" + Config::Instance().getTcpPort());
 
+			m_keepSocketAlive = true;
 			m_zmqThread = make_unique<thread>(&XPilot::ZmqWorker, this);
 			LOG_MSG(logMSG, "Now listening on port %s", Config::Instance().getTcpPort().c_str());
 		}
@@ -161,25 +162,24 @@ namespace xpilot
 				m_zmqContext->close();
 				m_zmqContext.reset();
 			}
-			if (m_zmqThread) {
-				m_zmqThread->join();
-				m_zmqThread.reset();
-			}
 		}
 		catch (zmq::error_t& e) {}
+
+		m_keepSocketAlive = false;
+		if (m_zmqThread) {
+			m_zmqThread->join();
+			m_zmqThread.reset();
+		}
 	}
 
 	void XPilot::ZmqWorker()
 	{
-		while (m_zmqSocket) {
+		while (IsSocketReady()) {
 			try {
 				zmq::message_t msg;
 				static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::none));
 				std::string data(static_cast<char*>(msg.data()), msg.size());
-
-				if (!data.empty()) {
-					ProcessMessage(data);
-				}
+				ProcessMessage(data);
 			}
 			catch (zmq::error_t& e) {}
 		}
@@ -187,16 +187,16 @@ namespace xpilot
 
 	void XPilot::SendReply(const string& message)
 	{
-		if (m_zmqSocket) {
+		if (IsSocketConnected() && !message.empty()) {
 			try {
 				string identity = "xpilot";
 				zmq::message_t part1(identity.size());
 				memcpy(part1.data(), identity.data(), identity.size());
-				m_zmqSocket->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
+				m_zmqSocket->send(part1, zmq::send_flags::sndmore);
 
-				zmq::message_t msg(message.size());
-				memcpy(msg.data(), message.data(), message.size());
-				m_zmqSocket->send(msg, zmq::send_flags::dontwait);
+				zmq::message_t part2(message.size());
+				memcpy(part2.data(), message.data(), message.size());
+				m_zmqSocket->send(part2, zmq::send_flags::none);
 			}
 			catch (zmq::error_t& e) {}
 		}
