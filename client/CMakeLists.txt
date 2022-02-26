@@ -343,7 +343,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC
     ${CMAKE_SOURCE_DIR}/afv-native/include)
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG> BOOST_DATE_TIME_NO_LIB)
+target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core Qt5::Quick Qt5::Network Qt5::Svg)
 
 if (WIN32)
@@ -416,7 +416,6 @@ target_link_libraries(${PROJECT_NAME}
     CONAN_PKG::sentry-native
     CONAN_PKG::sentry-crashpad
     CONAN_PKG::libzip
-    CONAN_PKG::boost
     ${OPUS_LIBRARY}
     ${PORTAUDIO_LIBRARY}
     ${SPEEX_LIBRARY}

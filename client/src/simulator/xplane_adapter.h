@@ -31,32 +31,6 @@
 #include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/radio_stack_state.h"
 
-#ifdef Q_OS_WIN
-#define BOOST_INTERPROCESS_SHARED_DIR_FUNC
-#include <3rdparty/interprocess/include/boost/interprocess/detail/win32_api.hpp>
-#endif
-#include <3rdparty/interprocess/include/boost/interprocess/ipc/message_queue.hpp>
-
-namespace bip = boost::interprocess;
-
-#define OUTBOUND_QUEUE "xpilot.outbound"
-#define INBOUND_QUEUE "xpilot.inbound"
-#define MAX_MESSAGES 500
-#define MAX_MESSAGE_SIZE 2048
-
-#ifdef Q_OS_WIN
-namespace boost {
-    namespace interprocess {
-        namespace ipcdetail {
-            inline void get_shared_dir(std::string& shared_dir) {
-                winapi::get_local_app_data(shared_dir);
-                shared_dir += "/org.vatsim.xpilot/";
-            }
-        }
-    }
-}
-#endif
-
 class XplaneAdapter : public QObject
 {
     Q_OBJECT
@@ -100,7 +74,6 @@ private:
     void setDataRefValue(std::string dataRef, float value);
     void sendCommand(std::string command);
 
-    void initializeMessageQueues();
     void initializeSocketThread();
     void processMessage(std::string message);
     void clearSimConnection();
@@ -147,17 +120,11 @@ private:
     QList<QString> m_ignoreList;
 
     std::unique_ptr<zmq::context_t> m_zmqContext;
-    std::unique_ptr<zmq::socket_t> m_xplaneSocket; // if X-Plane is running on a different PC than xPilot
-    std::unique_ptr<std::thread> m_xplaneSocketThread;
+    std::unique_ptr<zmq::socket_t> m_zmqSocket;
+    std::unique_ptr<std::thread> m_zmqSocketThread;
     QList<zmq::socket_t*> m_visualSockets;
     QTimer m_heartbeatTimer;
     QTimer m_xplaneDataTimer;
-
-    // message queue
-    bool m_keepMessageQueueAlive = false;
-    std::unique_ptr<std::thread> messageQueueThread;
-    std::unique_ptr<bip::message_queue> outboundQueue;  // xpilot -> xplane
-    std::unique_ptr<bip::message_queue> inboundQueue;   // xplane -> xpilot
 
     QFile m_pluginLog;
     QTextStream m_rawDataStream;

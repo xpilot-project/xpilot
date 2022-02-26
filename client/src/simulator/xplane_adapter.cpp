@@ -106,19 +106,16 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 
     m_zmqContext = std::make_unique<zmq::context_t>(1);
 
-    if(m_hostAddress != QHostAddress::LocalHost) {
-        try {
-            m_xplaneSocket = std::make_unique<zmq::socket_t>(*m_zmqContext, ZMQ_DEALER);
-            m_xplaneSocket->set(zmq::sockopt::routing_id, "xpilot");
-            m_xplaneSocket->set(zmq::sockopt::linger, 0);
-            m_xplaneSocket->connect(QString("tcp://%1:%2")
-                                    .arg(AppConfig::getInstance()->XplaneNetworkAddress)
-                                    .arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
-
-            initializeSocketThread();
-        }
-        catch(zmq::error_t &e) {}
+    try {
+        m_zmqSocket = std::make_unique<zmq::socket_t>(*m_zmqContext, ZMQ_DEALER);
+        m_zmqSocket->set(zmq::sockopt::routing_id, "xpilot");
+        m_zmqSocket->set(zmq::sockopt::linger, 0);
+        m_zmqSocket->connect(QString("tcp://%1:%2")
+                                .arg(AppConfig::getInstance()->XplaneNetworkAddress)
+                                .arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
+        initializeSocketThread();
     }
+    catch(zmq::error_t &e) {}
 
     for(const QString &machine : qAsConst(AppConfig::getInstance()->VisualMachines)) {
         try {
@@ -133,10 +130,6 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 
     connect(&m_heartbeatTimer, &QTimer::timeout, this, [&] {
         qint64 now = QDateTime::currentSecsSinceEpoch();
-
-        if(!m_keepMessageQueueAlive) {
-            initializeMessageQueues();
-        }
 
         if(!m_initialHandshake || (now - m_lastUdpTimestamp) > HEARTBEAT_TIMEOUT_SECS) {
             m_radioStackState = {};
@@ -184,32 +177,19 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 
 XplaneAdapter::~XplaneAdapter()
 {
-    m_keepMessageQueueAlive = false;
-
-    if(messageQueueThread) {
-        messageQueueThread->join();
-        messageQueueThread.reset();
-    }
-    if(inboundQueue) {
-        inboundQueue.reset();
-    }
-    if(outboundQueue) {
-        outboundQueue.reset();
-    }
-
     for(auto &visualSocket : m_visualSockets) {
         visualSocket->close();
     }
     m_visualSockets.clear();
 
-    if(m_xplaneSocket) {
-        m_xplaneSocket->close();
-        m_xplaneSocket.reset();
+    if(m_zmqSocket) {
+        m_zmqSocket->close();
+        m_zmqSocket.reset();
     }
 
-    if(m_xplaneSocketThread) {
-        m_xplaneSocketThread->join();
-        m_xplaneSocketThread.reset();
+    if(m_zmqSocketThread) {
+        m_zmqSocketThread->join();
+        m_zmqSocketThread.reset();
     }
 
     if(m_zmqContext) {
@@ -218,65 +198,13 @@ XplaneAdapter::~XplaneAdapter()
     }
 }
 
-void XplaneAdapter::initializeMessageQueues()
-{
-    if(messageQueueThread) {
-        messageQueueThread->join();
-        messageQueueThread.reset();
-    }
-
-    if(inboundQueue) {
-        inboundQueue.reset();
-    }
-
-    if(outboundQueue) {
-        outboundQueue.reset();
-    }
-
-    try {
-        outboundQueue = std::make_unique<bip::message_queue>(bip::open_only, OUTBOUND_QUEUE);
-    }
-    catch(bip::interprocess_exception &e) {
-        qDebug() << e.get_error_code() << e.what();
-    }
-
-    messageQueueThread = std::make_unique<std::thread>([&]{
-
-        try {
-            inboundQueue = std::make_unique<bip::message_queue>(bip::open_only, INBOUND_QUEUE);
-            m_keepMessageQueueAlive = true;
-
-            while(inboundQueue != nullptr && m_keepMessageQueueAlive)
-            {
-                if(inboundQueue->get_max_msg() > 0)
-                {
-                    unsigned int priority;
-                    bip::message_queue::size_type msgSize;
-
-                    std::string data;
-                    data.resize(MAX_MESSAGE_SIZE);
-                    if(inboundQueue != nullptr && inboundQueue->try_receive(&data[0], data.size(), msgSize, priority))
-                    {
-                        data.resize(msgSize);
-                        processMessage(data);
-                    }
-                }
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            }
-        }
-        catch(bip::interprocess_exception &e) {
-            qDebug() << e.get_error_code() << e.what();
-        }
-    });
-}
-
 void XplaneAdapter::initializeSocketThread()
 {
-    m_xplaneSocketThread = std::make_unique<std::thread>([&]{
-       while(m_xplaneSocket) {
+    m_zmqSocketThread = std::make_unique<std::thread>([&]{
+       while(m_zmqSocket) {
            try {
                zmq::message_t msg;
-               static_cast<void>(m_xplaneSocket->recv(msg, zmq::recv_flags::dontwait));
+               static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::none));
                QString data(std::string(static_cast<char*>(msg.data()), msg.size()).c_str());
 
                if(!data.isEmpty()) {
@@ -284,7 +212,6 @@ void XplaneAdapter::initializeSocketThread()
                }
            }
            catch(zmq::error_t &e) {}
-           std::this_thread::sleep_for(std::chrono::milliseconds(1));
        }
     });
 }
@@ -415,7 +342,6 @@ void XplaneAdapter::clearSimConnection()
     emit simConnectionStateChanged(false);
     m_initialHandshake = false;
     m_simConnected = false;
-    m_keepMessageQueueAlive = false;
 }
 
 void XplaneAdapter::Subscribe()
@@ -743,26 +669,16 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
 {
     if(message.isEmpty()) return;
 
-    if(outboundQueue != nullptr)
-    {
-        try {
-            outboundQueue->try_send(message.toStdString().data(), message.toStdString().size(), 0);
-        }
-        catch(bip::interprocess_exception &e) {
-            qDebug() << e.get_error_code() << e.what();
-        }
-    }
-
-    if(m_xplaneSocket) {
+    if(m_zmqSocket) {
         try {
             std::string identity = "xpilot";
             zmq::message_t part1(identity.size());
             std::memcpy(part1.data(), identity.data(), identity.size());
-            m_xplaneSocket->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
+            m_zmqSocket->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
 
             zmq::message_t msg(message.size());
             std::memcpy(msg.data(), message.toStdString().data(), message.size());
-            m_xplaneSocket->send(msg, zmq::send_flags::dontwait);
+            m_zmqSocket->send(msg, zmq::send_flags::dontwait);
         }
         catch(zmq::error_t &e) {}
     }

@@ -132,32 +132,6 @@ namespace xpilot
 		InitializeXPMP();
 		TryGetTcasControl();
 
-		// setup message queues
-		bip::message_queue::remove(OUTBOUND_QUEUE);
-		bip::message_queue::remove(INBOUND_QUEUE);
-
-		m_keepMessageQueueAlive = false;
-		if (m_messageQueueThread) {
-			m_messageQueueThread->join();
-			m_messageQueueThread.reset();
-		}
-		if (m_inboundQueue) {
-			m_inboundQueue.reset();
-		}
-		if (m_outboundQueue) {
-			m_outboundQueue.reset();
-		}
-
-		try {
-			m_inboundQueue = std::make_unique<bip::message_queue>(bip::open_or_create, INBOUND_QUEUE, MAX_MESSAGES, MAX_MESSAGE_SIZE);
-			m_outboundQueue = std::make_unique<bip::message_queue>(bip::open_or_create, OUTBOUND_QUEUE, MAX_MESSAGES, MAX_MESSAGE_SIZE);
-			m_messageQueueThread = std::make_unique<std::thread>(&XPilot::MessageQueueWorker, this);
-			m_keepMessageQueueAlive = true;
-		}
-		catch (bip::interprocess_exception& e) {
-			LOG_MSG(logERROR, "Error initializing message queues: %s", e.what());
-		}
-
 		try
 		{
 			m_zmqContext = make_unique<zmq::context_t>(1);
@@ -170,7 +144,6 @@ namespace xpilot
 			LOG_MSG(logMSG, "Now listening on port %s", Config::Instance().getTcpPort().c_str());
 		}
 		catch (zmq::error_t& e) {}
-		catch (...) {}
 
 		XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
 	}
@@ -194,48 +167,6 @@ namespace xpilot
 			}
 		}
 		catch (zmq::error_t& e) {}
-		catch (...) {}
-
-		// shutdown message queues
-		bip::message_queue::remove(OUTBOUND_QUEUE);
-		bip::message_queue::remove(INBOUND_QUEUE);
-
-		m_keepMessageQueueAlive = false;
-		if (m_inboundQueue) {
-			m_inboundQueue.reset();
-		}
-		if (m_outboundQueue) {
-			m_outboundQueue.reset();
-		}
-		if (m_messageQueueThread) {
-			m_messageQueueThread->join();
-			m_messageQueueThread.reset();
-		}
-	}
-
-	void XPilot::MessageQueueWorker()
-	{
-		while (IsMessageQueueReady())
-		{
-			try
-			{
-				// from xpilot client
-				unsigned int priority;
-				bip::message_queue::size_type msgSize;
-				
-				std::string msg;
-				msg.resize(MAX_MESSAGE_SIZE);
-
-				if (m_outboundQueue != nullptr && m_outboundQueue->try_receive(&msg[0], msg.size(), msgSize, priority)) {
-					msg.resize(msgSize);
-					ProcessMessage(msg);
-				}
-			}
-			catch (bip::interprocess_exception& e) {}
-			catch (...) {}
-
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		}
 	}
 
 	void XPilot::ZmqWorker()
@@ -243,7 +174,7 @@ namespace xpilot
 		while (m_zmqSocket) {
 			try {
 				zmq::message_t msg;
-				static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::dontwait));
+				static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::none));
 				std::string data(static_cast<char*>(msg.data()), msg.size());
 
 				if (!data.empty()) {
@@ -251,24 +182,11 @@ namespace xpilot
 				}
 			}
 			catch (zmq::error_t& e) {}
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
 	}
 
 	void XPilot::SendReply(const string& message)
 	{
-		try
-		{
-			if (m_inboundQueue && !message.empty())
-			{
-				m_inboundQueue->try_send(message.data(), message.size(), 0);
-			}
-		}
-		catch (bip::interprocess_exception& e)
-		{
-			LOG_MSG(logERROR, "MessageQueue Error: %s", e.what());
-		}
-
 		if (m_zmqSocket) {
 			try {
 				string identity = "xpilot";

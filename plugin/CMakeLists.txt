@@ -144,14 +144,11 @@ elseif(UNIX AND NOT APPLE)
     target_link_libraries(${PROJECT_NAME} ${FMOD_LIBRARY})
 endif()
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_DATE_TIME_NO_LIB)
-
 target_link_libraries(
   ${PROJECT_NAME}
 	CONAN_PKG::nlohmann_json
 	CONAN_PKG::zeromq
 	CONAN_PKG::cppzmq
-    CONAN_PKG::boost
 	${XPMP2_LIBRARY})
 
 if (WIN32 OR APPLE)

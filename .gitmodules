@@ -14,9 +14,3 @@
 	path = plugin/externals/imgui
 	url = git@github.com:xpilot-project/imgui.git
 	branch = xpilot
-[submodule "plugin/externals/interprocess"]
-	path = plugin/externals/interprocess
-	url = git@github.com:xpilot-project/interprocess.git
-[submodule "client/3rdparty/interprocess"]
-	path = client/3rdparty/interprocess
-	url = git@github.com:xpilot-project/interprocess.git

@@ -32,12 +32,6 @@
 #include "zmq.hpp"
 #include "Utilities.h"
 
-#ifdef _WIN32
-#define BOOST_INTERPROCESS_SHARED_DIR_FUNC
-#include <interprocess/include/boost/interprocess/detail/win32_api.hpp>
-#endif
-#include <interprocess/include/boost/interprocess/ipc/message_queue.hpp>
-
 #include <deque>
 #include <thread>
 #include <mutex>
@@ -48,25 +42,6 @@
 #include <iostream>
 
 using namespace std;
-namespace bip = boost::interprocess;
-
-#define OUTBOUND_QUEUE "xpilot.outbound"
-#define INBOUND_QUEUE "xpilot.inbound"
-#define MAX_MESSAGES 500
-#define MAX_MESSAGE_SIZE 2048
-
-#ifdef _WIN32
-namespace boost {
-	namespace interprocess {
-		namespace ipcdetail {
-			inline void get_shared_dir(std::string& shared_dir) {
-				winapi::get_local_app_data(shared_dir);
-				shared_dir += "/org.vatsim.xpilot/";
-			}
-		}
-	}
-}
-#endif
 
 namespace xpilot
 {
@@ -175,7 +150,6 @@ namespace xpilot
 		unique_ptr<zmq::socket_t> m_zmqSocket;
 
 		void ZmqWorker();
-		void MessageQueueWorker();
 		void ProcessMessage(const std::string& msg);
 
 		mutex m_mutex;
@@ -193,12 +167,6 @@ namespace xpilot
 		unique_ptr<TextMessageConsole> m_textMessageConsole;
 		unique_ptr<NearbyATCWindow> m_nearbyAtcWindow;
 		unique_ptr<SettingsWindow> m_settingsWindow;
-
-		std::unique_ptr<bip::message_queue> m_outboundQueue;	// xpilot -> xplane
-		std::unique_ptr<bip::message_queue> m_inboundQueue;		// xplane -> xpilot
-		bool m_keepMessageQueueAlive = false;
-		std::unique_ptr<thread> m_messageQueueThread;
-		bool IsMessageQueueReady() const { return m_outboundQueue != nullptr && m_keepMessageQueueAlive; }
 	};
 }
 
