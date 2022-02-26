@@ -268,10 +268,10 @@ namespace xpilot
 
 			const auto now = chrono::steady_clock::now();
 
-			// purge stale aircraft (if we haven't receied a position update within the last 10 seconds)
+			// purge stale aircraft (if we haven't receied a position update within the last 15 seconds)
 			for (auto& plane : mapPlanes) {
 				if (plane.second) {
-					if (chrono::duration_cast<chrono::milliseconds>(now - plane.second->LastSlowPositionTimestamp).count() > 10000) {
+					if (chrono::duration_cast<chrono::seconds>(now - plane.second->LastSlowPositionTimestamp).count() > 15) {
 						mapPlanes.erase(plane.first);
 					}
 				}
