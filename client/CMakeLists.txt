@@ -297,17 +297,13 @@ set(AFV_NATIVE_SOURCES
     ${AFV_NATIVE_AUDIO_SOURCES})
 
 set(AFV_NATIVE_THIRDPARTY_SOURCES
-    afv-native/extern/simpleSource/SimpleComp.cpp
-    afv-native/extern/simpleSource/SimpleComp.h
-    afv-native/extern/simpleSource/SimpleEnvelope.cpp
-    afv-native/extern/simpleSource/SimpleEnvelope.h
-    afv-native/extern/simpleSource/SimpleGain.h
-    afv-native/extern/simpleSource/SimpleGate.cpp
-    afv-native/extern/simpleSource/SimpleGate.h
-    afv-native/extern/simpleSource/SimpleHeader.h
-    afv-native/extern/simpleSource/SimpleLimit.cpp
-    afv-native/extern/simpleSource/SimpleLimit.h
-    afv-native/extern/simpleSource/SimpleCompProcess.inl)
+    afv-native/extern/compressor/compressor.c
+    afv-native/extern/compressor/compressor.h
+    afv-native/extern/compressor/mem.c
+    afv-native/extern/compressor/mem.h
+    afv-native/extern/compressor/sf_common.h
+    afv-native/extern/compressor/snd.c
+    afv-native/extern/compressor/snd.h)
 
 # Set some Win32 Specific Settings
 if (WIN32)
