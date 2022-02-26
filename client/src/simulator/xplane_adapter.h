@@ -78,6 +78,8 @@ private:
     void processMessage(std::string message);
     void clearSimConnection();
 
+    void writeToLog(QString message);
+
 public slots:
     void OnDataReceived();
 

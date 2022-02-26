@@ -115,7 +115,9 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
                                 .arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
         initializeSocketThread();
     }
-    catch(zmq::error_t &e) {}
+    catch(zmq::error_t &e) {
+        writeToLog(QString("Error opening socket: %s").append(e.what()));
+    }
 
     for(const QString &machine : qAsConst(AppConfig::getInstance()->VisualMachines)) {
         try {
@@ -125,7 +127,9 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
             socket->connect(QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
             m_visualSockets.push_back(socket);
         }
-        catch(zmq::error_t &e) {}
+        catch(zmq::error_t &e) {
+            writeToLog(QString("Error opening visual socket: %s").append(e.what()));
+        }
     }
 
     connect(&m_heartbeatTimer, &QTimer::timeout, this, [&] {
@@ -342,6 +346,15 @@ void XplaneAdapter::clearSimConnection()
     emit simConnectionStateChanged(false);
     m_initialHandshake = false;
     m_simConnected = false;
+}
+
+void XplaneAdapter::writeToLog(QString message)
+{
+    QMutexLocker lock(&mutex);
+    {
+        m_rawDataStream << QString("[%1] >>> %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), message);
+        m_rawDataStream.flush();
+    }
 }
 
 void XplaneAdapter::Subscribe()
@@ -680,7 +693,9 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
             std::memcpy(msg.data(), message.toStdString().data(), message.size());
             m_zmqSocket->send(msg, zmq::send_flags::dontwait);
         }
-        catch(zmq::error_t &e) {}
+        catch(zmq::error_t &e) {
+            writeToLog(QString("Socket error: %s").append(e.what()));
+        }
     }
 
     for(auto &visualSocket : m_visualSockets)
@@ -696,15 +711,13 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
                 std::memcpy(msg.data(), message.toStdString().data(), message.size());
                 visualSocket->send(msg, zmq::send_flags::dontwait);
             }
-            catch(zmq::error_t &e) {}
+            catch(zmq::error_t &e) {
+                writeToLog(QString("Visual socket error: %s").append(e.what()));
+            }
         }
     }
 
-    QMutexLocker lock(&mutex);
-    {
-        m_rawDataStream << QString("[%1] >>> %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), message);
-        m_rawDataStream.flush();
-    }
+    writeToLog(message);
 }
 
 void XplaneAdapter::setAudioComSelection(int radio)
