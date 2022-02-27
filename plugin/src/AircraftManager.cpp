@@ -269,14 +269,16 @@ namespace xpilot
 			const auto now = chrono::steady_clock::now();
 
 			// purge stale aircraft (if we haven't receied a position update within the last 15 seconds)
-			for (auto& plane : mapPlanes) {
-				if (plane.second) {
-					if (chrono::duration_cast<chrono::seconds>(now - plane.second->LastSlowPositionTimestamp).count() > 15) {
-						mapPlanes.erase(plane.first);
-					}
-				}
-			}
-
+            std::list<std::string> stalePlanes;
+            for(const auto& plane : mapPlanes) {
+                if(chrono::duration_cast<chrono::seconds>(now - plane.second->LastSlowPositionTimestamp).count() > 15) {
+                    stalePlanes.push_back(plane.first);
+                }
+            }
+            for(auto plane : stalePlanes) {
+                mapPlanes.erase(plane);
+            }
+            
 			float soundVolume = 1.0f;
 			float doorSum = 0;
 			bool anyDoorOpen = false;
