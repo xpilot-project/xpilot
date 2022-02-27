@@ -486,9 +486,13 @@ void XplaneAdapter::OnDataReceived()
     while(socket->hasPendingDatagrams())
     {
         QByteArray buffer;
+        QHostAddress fromAddress;
 
         buffer.resize(socket->pendingDatagramSize());
-        socket->readDatagram(buffer.data(), buffer.size());
+        socket->readDatagram(buffer.data(), buffer.size(), &fromAddress);
+
+        if(fromAddress.toIPv4Address() != m_hostAddress.toIPv4Address())
+            return;
 
         int pos = 0;
         QString header = QString::fromUtf8(buffer.mid(pos, 4));
