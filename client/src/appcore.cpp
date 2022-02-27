@@ -121,6 +121,7 @@ int xpilot::Main(int argc, char* argv[])
     context->setContextProperty("versionCheck", &versionCheck);
     context->setContextProperty("serverListManager", &serverListManager);
     context->setContextProperty("typeCodeDatabase", &typeCodeDatabase);
+    context->setContextProperty("applicationDirPath", QGuiApplication::applicationDirPath());
 
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [&](){
         networkManager.disconnectFromNetwork();

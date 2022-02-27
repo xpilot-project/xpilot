@@ -57,42 +57,42 @@ Window {
 
     SoundEffect {
         id: alertSound
-        source: "../Sounds/Alert.wav"
+        source: "file:///" + applicationDirPath + "/Sounds/Alert.wav"
     }
 
     SoundEffect {
         id: broadcastSound
-        source: "../Sounds/Broadcast.wav"
+        source: "file:///" + applicationDirPath + "/Sounds/Broadcast.wav"
     }
 
     SoundEffect {
         id: directRadioMessageSound
-        source: "../Sounds/DirectRadioMessage.wav"
+        source: "file:///" + applicationDirPath + "/Sounds/DirectRadioMessage.wav"
     }
 
     SoundEffect {
         id: errorSound
-        source: "../Sounds/Error.wav"
+        source: "file:///" + applicationDirPath + "/Sounds/Error.wav"
     }
 
     SoundEffect {
         id: newMessageSound
-        source: "../Sounds/NewMessage.wav"
+        source: "file:///" + applicationDirPath + "/Sounds/NewMessage.wav"
     }
 
     SoundEffect {
         id: privateMessageSound
-        source: "../Sounds/PrivateMessage.wav"
+        source: "file:///" + applicationDirPath + "/Sounds/PrivateMessage.wav"
     }
 
     SoundEffect {
         id: radioMessageSound
-        source: "../Sounds/RadioMessage.wav"
+        source: "file:///" + applicationDirPath + "/Sounds/RadioMessage.wav"
     }
 
     SoundEffect {
         id: selcalSound
-        source: "../Sounds/SelCal.wav"
+        source: "file:///" + applicationDirPath + "/Sounds/SELCAL.wav"
     }
 
     DownloadModels {
