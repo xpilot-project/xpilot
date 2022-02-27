@@ -100,7 +100,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
         // udp socket doesn't work if the address is "localhost" so we need to convert it
         m_hostAddress = QHostAddress::LocalHost;
     }
-    socket->bind(m_hostAddress);
+    socket->bind(QHostAddress::AnyIPv4);
 
     connect(socket, &QUdpSocket::readyRead, this, &XplaneAdapter::OnDataReceived);
 
