@@ -148,6 +148,8 @@ namespace xpilot
             {
                 setAudioApi(m_audioApi);
 
+                setMicrophoneVolume(AppConfig::getInstance()->MicrophoneVolume);
+
                 setCom1Volume(AppConfig::getInstance()->Com1Volume);
                 setCom2Volume(AppConfig::getInstance()->Com2Volume);
             }
