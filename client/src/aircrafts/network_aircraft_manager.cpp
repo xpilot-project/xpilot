@@ -48,7 +48,8 @@ namespace xpilot
         QVector<NetworkAircraft> deleteThese;
         for(auto& aircraft : m_aircraft)
         {
-            if(now.secsTo(aircraft.LastSlowPositionUpdateReceived) > 10000)
+            int timeSinceLastUpdate = aircraft.LastSlowPositionUpdateReceived.msecsTo(now);
+            if(timeSinceLastUpdate > 15000)
             {
                 deleteThese.append(aircraft);
             }
@@ -56,7 +57,7 @@ namespace xpilot
 
         for(auto & aircraft : deleteThese)
         {
-            DeletePlane(aircraft);
+            DeletePlane(aircraft, "Stale");
         }
     }
 
@@ -115,7 +116,7 @@ namespace xpilot
         {
             if(aircraft.Callsign == callsign)
             {
-                DeletePlane(aircraft);
+                DeletePlane(aircraft, "Deleted");
             }
         }
 
@@ -212,9 +213,9 @@ namespace xpilot
         m_aircraft.clear();
     }
 
-    void AircraftManager::DeletePlane(const NetworkAircraft &aircraft)
+    void AircraftManager::DeletePlane(const NetworkAircraft &aircraft, QString reason)
     {
-        m_xplaneAdapter.DeleteAircraft(aircraft);
+        m_xplaneAdapter.DeleteAircraft(aircraft, reason);
         m_aircraft.removeAll(aircraft);
     }
 
@@ -291,7 +292,7 @@ namespace xpilot
         {
             if(aircraft.Callsign == callsign)
             {
-                DeletePlane(aircraft);
+                DeletePlane(aircraft, "Ignore");
             }
         }
     }

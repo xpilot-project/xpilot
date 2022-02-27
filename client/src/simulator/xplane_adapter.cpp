@@ -913,13 +913,14 @@ void XplaneAdapter::PlaneModelChanged(const NetworkAircraft &aircraft)
     sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
 }
 
-void XplaneAdapter::DeleteAircraft(const NetworkAircraft &aircraft)
+void XplaneAdapter::DeleteAircraft(const NetworkAircraft &aircraft, QString reason)
 {
     QJsonObject reply;
     reply.insert("type", "RemovePlane");
 
     QJsonObject data;
     data.insert("callsign", aircraft.Callsign);
+    data.insert("reason", reason);
 
     reply.insert("data", data);
     QJsonDocument doc(reply);

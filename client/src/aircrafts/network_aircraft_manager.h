@@ -46,7 +46,7 @@ namespace xpilot
         void OnAircraftInfoReceived(QString callsign, QString typeCode, QString airlineIcao);
         void HandleAircraftConfiguration(NetworkAircraft& aircraft, const AircraftConfiguration& config);
         void DeleteAllPlanes();
-        void DeletePlane(const NetworkAircraft& aircraft);
+        void DeletePlane(const NetworkAircraft& aircraft, QString reason);
         void CreateNewAircraft(const QString &callsign, const AircraftVisualState& visualState);
         void UpdateExistingAircraft(NetworkAircraft& aircraft, const AircraftVisualState& visualState, double groundSpeed);
         bool IsEligibleToAddToSimulator(const NetworkAircraft& aircraft);

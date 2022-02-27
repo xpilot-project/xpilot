@@ -58,7 +58,7 @@ namespace xpilot
 
     struct TerrainElevationData
     {
-        chrono::steady_clock::time_point Timestamp;
+        chrono::system_clock::time_point Timestamp;
         WorldPoint Location;
         double RemoteValue;
         double LocalValue;
@@ -126,7 +126,7 @@ namespace xpilot
         float TargetSpoilerPosition = 0.0f;
         string Origin;
         string Destination;
-        chrono::steady_clock::time_point PreviousSurfaceUpdateTime;
+        chrono::system_clock::time_point PreviousSurfaceUpdateTime;
         XPMPPlaneSurfaces_t Surfaces;
         XPMPPlaneRadar_t Radar;
 
@@ -150,8 +150,8 @@ namespace xpilot
         Vector3 RotationalErrorVelocities;
         long ApplyErrorVelocitiesUntil;
 
-        chrono::steady_clock::time_point LastVelocityUpdate;
-        chrono::steady_clock::time_point LastSlowPositionTimestamp;
+        chrono::system_clock::time_point LastVelocityUpdate;
+        chrono::system_clock::time_point LastSlowPositionTimestamp;
 
         int SoundChannelId;
         EngineClassType EngineClass;

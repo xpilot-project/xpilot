@@ -100,7 +100,7 @@ namespace xpilot
         SetRoll(_visualState.Bank);
 
         IsFirstRenderPending = true;
-        LastSlowPositionTimestamp = chrono::steady_clock::now();
+        LastSlowPositionTimestamp = std::chrono::system_clock::now();
         PredictedVisualState = _visualState;
         VisualState = _visualState;
         PositionalVelocities = Vector3::Zero();
@@ -198,11 +198,11 @@ namespace xpilot
 
         HasUsableTerrainElevationData = false;
 
-        auto now = chrono::steady_clock::now();
+        auto now = std::chrono::system_clock::now();
 
         TerrainElevationHistory.remove_if([&](TerrainElevationData& meta) {
             return meta.Timestamp < (now - chrono::milliseconds(TERRAIN_ELEVATION_DATA_USABLE_AGE + 250));
-            });
+        });
 
         if (VisualState.AltitudeAgl.has_value() && (VisualState.AltitudeAgl.value() <= MAX_USABLE_ALTITUDE_AGL)) {
             TerrainElevationData data{};
@@ -385,7 +385,7 @@ namespace xpilot
 
     void NetworkAircraft::UpdatePosition(float _elapsedSinceLastCall, int)
     {
-        const auto now = chrono::steady_clock::now();
+        const auto now = std::chrono::system_clock::now();
 
         if (chrono::duration_cast<chrono::milliseconds>(now - LastVelocityUpdate).count() > 500)
         {

@@ -57,7 +57,7 @@ public:
     void AddPlaneToSimulator(const NetworkAircraft& aircraft);
     void PlaneConfigChanged(const NetworkAircraft& aircraft);
     void PlaneModelChanged(const NetworkAircraft& aircraft);
-    void DeleteAircraft(const NetworkAircraft& aircraft);
+    void DeleteAircraft(const NetworkAircraft& aircraft, QString reason);
     void DeleteAllAircraft();
     void DeleteAllControllers();
     void SendSlowPositionUpdate(const NetworkAircraft& aircraft, const AircraftVisualState& visualState, const double& groundSpeed);
