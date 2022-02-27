@@ -147,7 +147,9 @@ namespace xpilot
             else
             {
                 setAudioApi(m_audioApi);
-                configureAudioDevices();
+
+                setCom1Volume(AppConfig::getInstance()->Com1Volume);
+                setCom2Volume(AppConfig::getInstance()->Com2Volume);
             }
         });
 
@@ -181,8 +183,8 @@ namespace xpilot
                 }
 
                 if(AppConfig::getInstance()->AircraftRadioStackControlsVolume) {
-                    m_client->setRadioGain(0, ScaleVolume(m_radioStackState.Com1Volume / 100.0f));
-                    m_client->setRadioGain(1, ScaleVolume(m_radioStackState.Com2Volume / 100.0f));
+                    setCom1Volume(m_radioStackState.Com1Volume);
+                    setCom2Volume(m_radioStackState.Com2Volume);
                 }
 
                 updateTransceivers();
@@ -340,11 +342,7 @@ namespace xpilot
     void AudioForVatsim::OnNetworkConnected(QString callsign, bool enableVoice)
     {
         if(!enableVoice)
-        {
             return;
-        }
-
-        configureAudioDevices();
 
         m_client->setCallsign(callsign.toStdString());
         m_client->setCredentials(AppConfig::getInstance()->VatsimId.toStdString(), AppConfig::getInstance()->VatsimPasswordDecrypted.toStdString());
@@ -406,9 +404,6 @@ namespace xpilot
         {
             m_client->setAudioOutputDevice(AppConfig::getInstance()->OutputDevice.toStdString());
         }
-
-        m_client->setRadioGain(0, AppConfig::getInstance()->Com1Volume / 100.0f);
-        m_client->setRadioGain(1, AppConfig::getInstance()->Com2Volume / 100.0f);
 
         m_client->startAudio();
     }
