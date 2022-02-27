@@ -694,11 +694,11 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
             std::string identity = "xpilot";
             zmq::message_t part1(identity.size());
             std::memcpy(part1.data(), identity.data(), identity.size());
-            m_zmqSocket->send(part1, zmq::send_flags::sndmore);
+            m_zmqSocket->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
 
             zmq::message_t msg(message.size());
             std::memcpy(msg.data(), message.toStdString().data(), message.size());
-            m_zmqSocket->send(msg, zmq::send_flags::none);
+            m_zmqSocket->send(msg, zmq::send_flags::dontwait);
         }
         catch(zmq::error_t &e) {
             writeToLog(QString("Socket error: %s").append(e.what()));
@@ -712,11 +712,11 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
                 std::string identity = "xpilot";
                 zmq::message_t part1(identity.size());
                 std::memcpy(part1.data(), identity.data(), identity.size());
-                visualSocket->send(part1, zmq::send_flags::sndmore);
+                visualSocket->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
 
                 zmq::message_t msg(message.size());
                 std::memcpy(msg.data(), message.toStdString().data(), message.size());
-                visualSocket->send(msg, zmq::send_flags::none);
+                visualSocket->send(msg, zmq::send_flags::dontwait);
             }
             catch(zmq::error_t &e) {
                 writeToLog(QString("Visual socket error: %s").append(e.what()));
