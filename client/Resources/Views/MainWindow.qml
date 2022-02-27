@@ -146,11 +146,15 @@ Window {
     }
 
     Component.onCompleted: {
-        appendMessage(`Welcome to xPilot v${appVersion}`, colorYellow)
-        appendMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.", colorYellow);
-
         // we call this again so we can present the permission error if applicable
         AppConfig.loadConfig()
+
+        appendMessage(`Welcome to xPilot v${appVersion}`, colorYellow)
+        if(AppConfig.XplaneNetworkAddress !== "127.0.0.1" && AppConfig.XplaneNetworkAddress !== "localhost") {
+            appendMessage(`Waiting for X-Plane connection (${AppConfig.XplaneNetworkAddress})... Please make sure X-Plane is running and a flight is loaded.`, colorYellow)
+        } else {
+            appendMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.", colorYellow)
+        }
 
         if(!AppConfig.SilenceModelInstall) {
             modal_downloadModels.open()
