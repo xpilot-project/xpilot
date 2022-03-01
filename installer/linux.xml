@@ -1,0 +1,309 @@
+<project>
+    <shortName>xPilot</shortName>
+    <fullName>xPilot</fullName>
+    <version>2.0.0</version>
+    <licenseFile>../LICENSE</licenseFile>
+    <compressionAlgorithm>lzma-ultra</compressionAlgorithm>
+    <disableSplashScreen>1</disableSplashScreen>
+    <enableRollback>0</enableRollback>
+    <enableTimestamp>1</enableTimestamp>
+    <productDisplayIcon>../client/xpilot.ico</productDisplayIcon>
+    <productDisplayName>xPilot</productDisplayName>
+    <saveRelativePaths>1</saveRelativePaths>
+    <vendor>xPilot for VATSIM</vendor>
+    <functionDefinitionList>
+        <actionDefinition>
+            <name>IsXpilotRunning</name>
+            <actionList>
+                <showProgressDialog>
+                    <title>Waiting for xPilot to exit</title>
+                    <actionList>
+                        <while>
+                            <actionList>
+                                <wait ms="50" progressText="xPilot must be closed before the installation can proceed."/>
+                            </actionList>
+                            <conditionRuleList>
+                                <ruleGroup>
+                                    <ruleList>
+                                        <processTest logic="is_running" name="xPilot.AppImage"/>
+                                        <platformTest type="linux"/>
+                                    </ruleList>
+                                </ruleGroup>
+                            </conditionRuleList>
+                        </while>
+                    </actionList>
+                </showProgressDialog>
+            </actionList>
+        </actionDefinition>
+        <actionDefinition>
+            <name>IsXplaneRunning</name>
+            <actionList>
+                <showProgressDialog>
+                    <title>Waiting for X-Plane to exit</title>
+                    <actionList>
+                        <while>
+                            <actionList>
+                                <wait ms="50" progressText="X-Plane must be closed before the installation can proceed."/>
+                            </actionList>
+                            <conditionRuleList>
+                                <ruleGroup>
+                                    <ruleList>
+                                        <processTest logic="is_running" name="X-Plane-x86_64"/>
+                                        <platformTest type="linux"/>
+                                    </ruleList>
+                                </ruleGroup>
+                            </conditionRuleList>
+                        </while>
+                    </actionList>
+                </showProgressDialog>
+            </actionList>
+        </actionDefinition>
+    </functionDefinitionList>
+    <componentList>
+        <component>
+            <name>xPilot</name>
+            <description>xPilot for VATSIM</description>
+            <canBeEdited>1</canBeEdited>
+            <selected>1</selected>
+            <show>1</show>
+            <folderList>
+                <folder>
+                    <description>Program Files</description>
+                    <destination>${installdir}</destination>
+                    <name>programfiles</name>
+                    <platforms>linux</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <allowWildcards>1</allowWildcards>
+                            <origin>${client_build_dir}/*</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+                <folder>
+                    <description>X-Plane Plugin</description>
+                    <destination>${xplanepath}/Resources/plugins/xPilot</destination>
+                    <name>xplaneplugin</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <allowWildcards>1</allowWildcards>
+                            <origin>${plugin_build_dir}/*</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                    <ruleList>
+                        <stringTest text="${xplanepath}" type="not_empty"/>
+                    </ruleList>
+                </folder>
+            </folderList>
+        </component>
+    </componentList>
+    <preBuildActionList>
+        <setInstallerVariable>
+            <name>client_build_dir</name>
+            <value>${env(CLIENT_BUILD_DIR)}</value>
+            <ruleList>
+                <compareText logic="does_not_equal" text="${env(CLIENT_BUILD_DIR)}" value=""/>
+            </ruleList>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>plugin_build_dir</name>
+            <value>${env(PLUGIN_BUILD_DIR)}</value>
+            <ruleList>
+                <compareText logic="does_not_equal" text="${env(PLUGIN_BUILD_DIR)}" value=""/>
+            </ruleList>
+        </setInstallerVariable>
+    </preBuildActionList>
+    <preInstallationActionList>
+        <IsXpilotRunning/>
+        <IsXplaneRunning/>
+        <setInstallerVariable>
+            <name>last_install_dir</name>
+            <value>${platform_install_prefix}/${product_shortname}</value>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>last_xplane_path</name>
+            <value></value>
+        </setInstallerVariable>
+        <actionGroup>
+            <actionList>
+                <readFile>
+                    <name>last_install_dir</name>
+                    <path>~/.local/share/org.vatsim.xpilot/lastinstallpath.txt</path>
+                    <ruleList>
+                        <platformTest type="linux"/>
+                    </ruleList>
+                </readFile>
+            </actionList>
+            <ruleList>
+                <platformTest type="linux"/>
+                <fileTest>
+                    <condition>readable</condition>
+                    <path>~/.local/share/org.vatsim.xpilot/lastinstallpath.txt</path>
+                </fileTest>
+            </ruleList>
+        </actionGroup>
+        <actionGroup>
+            <actionList>
+                <readFile>
+                    <name>last_xplane_path</name>
+                    <path>~/.local/share/org.vatsim.xpilot/lastxplanepath.txt</path>
+                    <ruleList>
+                        <platformTest type="linux"/>
+                    </ruleList>
+                </readFile>
+            </actionList>
+            <ruleList>
+                <platformTest type="linux"/>
+                <fileTest>
+                    <condition>readable</condition>
+                    <path>~/.local/share/org.vatsim.xpilot/lastxplanepath.txt</path>
+                </fileTest>
+            </ruleList>
+        </actionGroup>
+        <setInstallerVariable>
+            <name>installdir</name>
+            <value>${last_install_dir}</value>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>xplanepath</name>
+            <value>${last_xplane_path}</value>
+        </setInstallerVariable>
+        <!-- detected existing installation, switch to upgrade mode. -->
+        <actionGroup>
+            <actionList>
+                <setInstallerVariable name="project.installationType" value="upgrade"/>
+                <setInstallerVariable name="project.allowComponentSelection" value="0"/>
+                <setInstallerVariable name="project.parameter(installdir).ask" value="0"/>
+            </actionList>
+            <ruleList>
+                <fileTest condition="exists" path="${installdir}"/>
+            </ruleList>
+        </actionGroup>
+    </preInstallationActionList>
+    <readyToInstallActionList>
+        <setInstallerVariable>
+            <name>desktop_prefix</name>
+            <persist>1</persist>
+            <value>~/.local/share/applications</value>
+            <ruleList>
+                <platformTest type="linux"/>
+            </ruleList>
+        </setInstallerVariable>
+    </readyToInstallActionList>
+    <postInstallationActionList>
+        <createDirectory>
+            <path>${installdir}/.sentry-native</path>
+        </createDirectory>
+        <createDirectory>
+            <path>~/.local/share/org.vatsim.xpilot</path>
+            <ruleList>
+                <platformTest type="linux"/>
+            </ruleList>
+        </createDirectory>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${desktop_prefix}/xPilot.desktop</path>
+            <text>
+[Desktop Entry]
+Encoding=UTF-8
+Name=xPilot
+GenericName=xPilot
+Comment=xPilot
+Icon=${installdir}/xpilot.png
+Exec=${installdir}/xPilot.AppImage
+Terminal=false
+Type=Application
+Categories=Application;
+            </text> 
+            <ruleList>
+                <platformTest type="linux"/>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <path>~/.local/share/org.vatsim.xpilot/lastinstallpath.txt</path>
+            <text>${installdir}</text>
+            <ruleList>
+                <platformTest type="linux"/>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <path>~/.local/share/org.vatsim.xpilot/lastxplanepath.txt</path>
+            <text>${xplanepath}</text>
+            <ruleList>
+                <platformTest type="linux"/>
+            </ruleList>
+        </writeFile>
+        <addFilesToUninstaller>
+            <files>~/.local/share/org.vatsim.xpilot/</files>
+            <matchHiddenFiles>1</matchHiddenFiles>
+            <ruleList>
+                <platformTest type="linux"/>
+            </ruleList>
+        </addFilesToUninstaller>
+        <addFilesToUninstaller>
+            <files>${desktop_prefix}/xPilot.desktop</files>
+            <ruleList>
+                <platformTest type="linux"/>
+            </ruleList>
+        </addFilesToUninstaller>
+        <addFilesToUninstaller>
+            <files>${installdir}/.sentry-native/</files>
+            <matchHiddenFiles>1</matchHiddenFiles>
+        </addFilesToUninstaller>
+    </postInstallationActionList>
+    <finalPageActionList>
+        <runProgram>
+            <program>${installdir}/xPilot.AppImage</program>
+            <programArguments>&amp;</programArguments>
+            <progressText>Launch ${project.fullName}</progressText>
+            <ruleList>
+                <platformTest type="linux"/>
+            </ruleList>
+        </runProgram>
+    </finalPageActionList>
+    <parameterList>
+        <directoryParameter>
+            <name>xplanepath</name>
+            <title>X-Plane 11 Location</title>
+            <description></description>
+            <explanation>Please browse to the folder where X-Plane 11 is installed so that the xPilot plugin can be installed.
+
+Advanced Users: If X-Plane is not installed on this computer, leave the folder path empty to skip installing the plugin. You will need to run the installer on the computer where X-Plane is installed to install the plugin.</explanation>
+            <value></value>
+            <default></default>
+            <allowEmptyValue>1</allowEmptyValue>
+            <mustBeWritable>0</mustBeWritable>
+            <mustExist>1</mustExist>
+            <width>40</width>
+            <validationActionList>
+                <throwError text="Invalid X-Plane folder path. The path should be the root folder of where X-Plane-x86_64 is installed.">
+                    <ruleList>
+                        <stringTest text="${xplanepath}" type="not_empty"/>
+                        <fileExists negate="1" path="${xplanepath}/X-Plane-x86_64"/>
+                        <platformTest type="linux"/>
+                    </ruleList>
+                </throwError>
+                <substitute>
+                    <files>${xplanepath}/Output/preferences/X-Plane.prf</files>
+                    <type>regexp</type>
+                    <substitutionList>
+                        <substitution pattern="^_rcv_port\s+(?!49000).*$" value="_rcv_port 49000"/>
+                        <substitution pattern="^_disable_incoming_networking\s+1$" value="_disable_incoming_networking 0"/>
+                    </substitutionList>
+                </substitute>
+            </validationActionList>
+        </directoryParameter>
+        <directoryParameter>
+            <name>installdir</name>
+            <description>Installer.Parameter.installdir.description</description>
+            <explanation>Installer.Parameter.installdir.explanation</explanation>
+            <value></value>
+            <default>${platform_install_prefix}/${product_fullname}</default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <cliOptionName>prefix</cliOptionName>
+            <mustBeWritable>1</mustBeWritable>
+            <mustExist>0</mustExist>
+            <width>40</width>
+        </directoryParameter>
+    </parameterList>
+</project>

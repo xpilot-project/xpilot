@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     env:
-      IB_URL: https://installbuilder.com/installbuilder-enterprise-21.9.0-linux-x64-installer.run
+      IB_URL: https://installbuilder.com/installbuilder-enterprise-21.12.0-linux-x64-installer.run
 
     steps:
       - name: Install dependencies
@@ -183,15 +183,13 @@ jobs:
           ./ib.run --mode unattended --prefix ${{ env.IB_DIR }}
           ${{ env.IB_DIR }}/bin/builder --version
           echo "$IB_LICENSE" > lic.xml
-          echo "INSTALLER_SRC_PREFIX=$(pwd)/client" >> $GITHUB_ENV
-          echo "INSTALLER_BIN_PREFIX=${{ github.workspace }}/output" >> $GITHUB_ENV
-          echo "REPO_ROOT_PREFIX=$(pwd)" >> $GITHUB_ENV
-          echo "INSTALLER_PLUGIN_PREFIX=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
+          echo "CLIENT_BUILD_DIR=${{ github.workspace }}/output" >> $GITHUB_ENV
+          echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
 
       - name: Create installer
         shell: bash
         run: |
-          ${{ env.IB_DIR }}/bin/builder build installer/project.xml \
+          ${{ env.IB_DIR }}/bin/builder build installer/linux.xml \
               --license lic.xml \
               --setvars project.outputDirectory=$(pwd) \
               --setvars project.version=${{ env.XPILOT_VERSION }}
@@ -212,7 +210,7 @@ jobs:
     runs-on: windows-2019
 
     env:
-      IB_URL: https://installbuilder.com/installbuilder-enterprise-21.9.0-windows-x64-installer.exe
+      IB_URL: https://installbuilder.com/installbuilder-enterprise-21.12.0-windows-x64-installer.exe
 
     steps:
 
@@ -335,15 +333,13 @@ jobs:
           ./ib.exe --mode unattended --prefix ${{ env.IB_DIR  }}
           ${{ env.IB_DIR }}/bin/builder-cli.exe --version
           echo "$IB_LICENSE" > lic.xml
-          echo "INSTALLER_SRC_PREFIX=$(pwd)/client" >> $GITHUB_ENV
-          echo "INSTALLER_BIN_PREFIX=$XPILOT_BIN_DIR" >> $GITHUB_ENV
-          echo "REPO_ROOT_PREFIX=$(pwd)" >> $GITHUB_ENV
-          echo "INSTALLER_PLUGIN_PREFIX=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
+          echo "CLIENT_BUILD_DIR=$XPILOT_BIN_DIR" >> $GITHUB_ENV
+          echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
 
       - name: Create installer
         shell: bash
         run: |
-          ${{ env.IB_DIR }}/bin/builder-cli.exe build installer/project.xml \
+          ${{ env.IB_DIR }}/bin/builder-cli.exe build installer/windows.xml \
               --license lic.xml \
               --setvars project.outputDirectory=$(pwd) \
               --setvars project.version=${{ env.XPILOT_VERSION }}
@@ -364,7 +360,7 @@ jobs:
     runs-on: macos-10.15
 
     env:
-      IB_URL: https://installbuilder.com/installbuilder-enterprise-21.9.0-osx-installer.dmg
+      IB_URL: https://installbuilder.com/installbuilder-enterprise-21.12.0-osx-installer.dmg
       MIN_VERSION: 10.14
 
     steps:
@@ -507,15 +503,13 @@ jobs:
           /Volumes/InstallBuilder\ Enterprise/*.app/Contents/MacOS/installbuilder.sh --mode unattended --prefix ${{ env.IB_DIR }}
           ${{ env.IB_DIR }}/bin/builder --version
           echo "$IB_LICENSE" > lic.xml
-          echo "INSTALLER_SRC_PREFIX=$(pwd)/client" >> $GITHUB_ENV
-          echo "INSTALLER_BIN_PREFIX=$XPILOT_BIN_DIR" >> $GITHUB_ENV
-          echo "REPO_ROOT_PREFIX=$(pwd)" >> $GITHUB_ENV
-          echo "INSTALLER_PLUGIN_PREFIX=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
+          echo "CLIENT_BUILD_DIR=$XPILOT_BIN_DIR" >> $GITHUB_ENV
+          echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
 
       - name: Create installer
         shell: bash
         run: |
-          ${{ env.IB_DIR }}/bin/builder build installer/project.xml \
+          ${{ env.IB_DIR }}/bin/builder build installer/macos.xml \
               --license lic.xml \
               --setvars project.outputDirectory=$(pwd) \
               --setvars project.version=${{ env.XPILOT_VERSION }} \
