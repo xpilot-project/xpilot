@@ -257,6 +257,11 @@
             <matchHiddenFiles>1</matchHiddenFiles>
         </addFilesToUninstaller>
     </postInstallationActionList>
+    <postUninstallationActionList>
+        <deleteFile>
+            <path>${windows_folder_desktopdirectory}/xPilot.lnk</path>
+        </deleteFile>
+    </postUninstallationActionList>
     <finalPageActionList>
         <createShortcuts>
             <destination>${windows_folder_desktopdirectory}</destination>
