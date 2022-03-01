@@ -81,10 +81,22 @@
                     </distributionFileList>
                 </folder>
                 <folder>
+                    <description>Copy Sounds</description>
+                    <destination>${windows_folder_local_appdata}/org.vatsim.xpilot/Sounds</destination>
+                    <name>sounds</name>
+                    <platforms>windows-x64</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <allowWildcards>1</allowWildcards>
+                            <origin>../client/Resources/Sounds/*</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+                <folder>
                     <description>X-Plane Plugin</description>
                     <destination>${xplanepath}/Resources/plugins/xPilot</destination>
                     <name>xplaneplugin</name>
-                    <platforms>all</platforms>
+                    <platforms>windows-x64</platforms>
                     <distributionFileList>
                         <distributionFile>
                             <allowWildcards>1</allowWildcards>
@@ -213,6 +225,12 @@
                 <platformTest type="windows"/>
             </ruleList>
         </createDirectory>
+        <createDirectory>
+            <path>${windows_folder_local_appdata}/org.vatsim.xpilot/Sounds</path>
+            <ruleList>
+                <platformTest type="windows"/>
+            </ruleList>
+        </createDirectory>
         <writeFile>
             <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastinstallpath.txt</path>
             <text>${installdir}</text>
@@ -239,11 +257,6 @@
             <matchHiddenFiles>1</matchHiddenFiles>
         </addFilesToUninstaller>
     </postInstallationActionList>
-    <postUninstallationActionList>
-        <deleteFile>
-            <path>${windows_folder_desktopdirectory}/xPilot.lnk</path>
-        </deleteFile>
-    </postUninstallationActionList>
     <finalPageActionList>
         <createShortcuts>
             <destination>${windows_folder_desktopdirectory}</destination>
@@ -267,7 +280,7 @@
         </createShortcuts>
         <runProgram>
             <program>${installdir}/xPilot.exe</program>
-            <programArguments>&amp;</programArguments>
+            <programArguments></programArguments>
             <progressText>Launch ${project.fullName}</progressText>
             <ruleList>
                 <platformTest type="windows"/>

@@ -57,42 +57,42 @@ Window {
 
     SoundEffect {
         id: alertSound
-        source: "file:///" + applicationDirPath + "/Sounds/Alert.wav"
+        source: "file:///" + appDataPath + "/Sounds/Alert.wav"
     }
 
     SoundEffect {
         id: broadcastSound
-        source: "file:///" + applicationDirPath + "/Sounds/Broadcast.wav"
+        source: "file:///" + appDataPath + "/Sounds/Broadcast.wav"
     }
 
     SoundEffect {
         id: directRadioMessageSound
-        source: "file:///" + applicationDirPath + "/Sounds/DirectRadioMessage.wav"
+        source: "file:///" + appDataPath + "/Sounds/DirectRadioMessage.wav"
     }
 
     SoundEffect {
         id: errorSound
-        source: "file:///" + applicationDirPath + "/Sounds/Error.wav"
+        source: "file:///" + appDataPath + "/Sounds/Error.wav"
     }
 
     SoundEffect {
         id: newMessageSound
-        source: "file:///" + applicationDirPath + "/Sounds/NewMessage.wav"
+        source: "file:///" + appDataPath + "/Sounds/NewMessage.wav"
     }
 
     SoundEffect {
         id: privateMessageSound
-        source: "file:///" + applicationDirPath + "/Sounds/PrivateMessage.wav"
+        source: "file:///" + appDataPath + "/Sounds/PrivateMessage.wav"
     }
 
     SoundEffect {
         id: radioMessageSound
-        source: "file:///" + applicationDirPath + "/Sounds/RadioMessage.wav"
+        source: "file:///" + appDataPath + "/Sounds/RadioMessage.wav"
     }
 
     SoundEffect {
         id: selcalSound
-        source: "file:///" + applicationDirPath + "/Sounds/SELCAL.wav"
+        source: "file:///" + appDataPath + "/Sounds/SELCAL.wav"
     }
 
     DownloadModels {

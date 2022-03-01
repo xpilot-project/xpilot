@@ -71,11 +71,23 @@
                     <description>Program Files</description>
                     <destination>${installdir}</destination>
                     <name>programfiles</name>
-                    <platforms>linux</platforms>
+                    <platforms>all</platforms>
                     <distributionFileList>
                         <distributionFile>
                             <allowWildcards>1</allowWildcards>
                             <origin>${client_build_dir}/*</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+                <folder>
+                    <description>Copy Sounds</description>
+                    <destination>~/.local/share/org.vatsim.xpilot/Sounds</destination>
+                    <name>sounds</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <allowWildcards>1</allowWildcards>
+                            <origin>../client/Resources/Sounds/*</origin>
                         </distributionFile>
                     </distributionFileList>
                 </folder>
@@ -200,6 +212,12 @@
                 <platformTest type="linux"/>
             </ruleList>
         </createDirectory>
+        <createDirectory>
+            <path>~/.local/share/org.vatsim.xpilot/Sounds</path>
+            <ruleList>
+                <platformTest type="linux"/>
+            </ruleList>
+        </createDirectory>
         <writeFile>
             <encoding>utf-8</encoding>
             <path>${desktop_prefix}/xPilot.desktop</path>
@@ -254,7 +272,7 @@ Categories=Application;
     <finalPageActionList>
         <runProgram>
             <program>${installdir}/xPilot.AppImage</program>
-            <programArguments>&amp;</programArguments>
+            <programArguments></programArguments>
             <progressText>Launch ${project.fullName}</progressText>
             <ruleList>
                 <platformTest type="linux"/>

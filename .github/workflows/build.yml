@@ -151,15 +151,6 @@ jobs:
           export QML_SOURCES_PATHS=${{ env.CLIENT_DIR }}/Resources
           mkdir -p AppDir/usr/bin
           cp ${{ env.CLIENT_DIR }}/build/bin/xpilot AppDir/usr/bin
-          mkdir -p AppDir/usr/bin/Sounds
-          cp ${{ env.CLIENT_DIR }}/Resources/Sounds/Alert.wav "AppDir/usr/bin/Sounds"
-          cp ${{ env.CLIENT_DIR }}/Resources/Sounds/Broadcast.wav "AppDir/usr/bin/Sounds"
-          cp ${{ env.CLIENT_DIR }}/Resources/Sounds/DirectRadioMessage.wav "AppDir/usr/bin/Sounds"
-          cp ${{ env.CLIENT_DIR }}/Resources/Sounds/Error.wav "AppDir/usr/bin/Sounds"
-          cp ${{ env.CLIENT_DIR }}/Resources/Sounds/NewMessage.wav "AppDir/usr/bin/Sounds"
-          cp ${{ env.CLIENT_DIR }}/Resources/Sounds/PrivateMessage.wav "AppDir/usr/bin/Sounds"
-          cp ${{ env.CLIENT_DIR }}/Resources/Sounds/RadioMessage.wav "AppDir/usr/bin/Sounds"
-          cp ${{ env.CLIENT_DIR }}/Resources/Sounds/SELCAL.wav "AppDir/usr/bin/Sounds"
           linuxdeploy-x86_64.AppImage \
             --plugin=qt \
             --output=appimage \
@@ -307,19 +298,6 @@ jobs:
         run: |
           cp client/externals/windows/libcrypto-1_1-x64.dll "$XPILOT_BIN_DIR"
           cp client/externals/windows/libssl-1_1-x64.dll "$XPILOT_BIN_DIR"
-
-      - name: Copy client sounds
-        shell: bash
-        run: |
-          mkdir "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/Alert.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/Broadcast.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/DirectRadioMessage.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/Error.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/NewMessage.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/PrivateMessage.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/RadioMessage.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/SELCAL.wav "$XPILOT_BIN_DIR/Sounds"
 
       - name: Get version
         shell: bash
@@ -476,19 +454,6 @@ jobs:
           -executable=xPilot.app/Contents/MacOS/xPilot \
           -sign-for-notarization="${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}"
           echo "XPILOT_BIN_DIR=`pwd`" >> $GITHUB_ENV
-
-      - name: Copy client sounds
-        shell: bash
-        run: |
-          mkdir "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/Alert.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/Broadcast.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/DirectRadioMessage.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/Error.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/NewMessage.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/PrivateMessage.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/RadioMessage.wav "$XPILOT_BIN_DIR/Sounds"
-          cp client/Resources/Sounds/SELCAL.wav "$XPILOT_BIN_DIR/Sounds"
 
       - name: Get version
         shell: bash

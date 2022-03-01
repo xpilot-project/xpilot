@@ -84,6 +84,18 @@
                     </distributionFileList>
                 </folder>
                 <folder>
+                    <description>Copy Sounds</description>
+                    <destination>~/Library/Application Support/org.vatsim.xpilot/Sounds</destination>
+                    <name>sounds</name>
+                    <platforms>osx</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <allowWildcards>1</allowWildcards>
+                            <origin>../client/Resources/Sounds/*</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+                <folder>
                     <description>X-Plane Plugin</description>
                     <destination>${xplanepath}/Resources/plugins/xPilot</destination>
                     <name>xplaneplugin</name>
@@ -201,6 +213,12 @@
                 <platformTest type="osx"/>
             </ruleList>
         </createDirectory>
+        <createDirectory>
+            <path>~/Library/Application Support/org.vatsim.xpilot/Sounds</path>
+            <ruleList>
+                <platformTest type="osx"/>
+            </ruleList>
+        </createDirectory>
         <writeFile>
             <path>~/Library/Application Support/org.vatsim.xpilot/lastinstallpath.txt</path>
             <text>${installdir}</text>
@@ -229,8 +247,8 @@
     </postInstallationActionList>
     <finalPageActionList>
         <runProgram>
-            <program>${installdir}/xPilot.app</program>
-            <programArguments>&amp;</programArguments>
+            <program>open</program>
+            <programArguments>${installdir}/xPilot.app</programArguments>
             <progressText>Launch ${project.fullName}</progressText>
             <ruleList>
                 <platformTest type="osx"/>
