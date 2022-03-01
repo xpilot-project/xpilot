@@ -144,7 +144,9 @@ namespace xpilot
 			m_zmqThread = make_unique<thread>(&XPilot::ZmqWorker, this);
 			LOG_MSG(logMSG, "Now listening on port %s", Config::Instance().getTcpPort().c_str());
 		}
-		catch (zmq::error_t& e) {}
+		catch (zmq::error_t& e) {
+			LOG_MSG(logERROR, "Error binding port (%s): %s", Config::Instance().getTcpPort().c_str(), zmq_strerror(errno));
+		}
 
 		XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
 	}
