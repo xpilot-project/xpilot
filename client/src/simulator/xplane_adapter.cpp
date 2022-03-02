@@ -106,17 +106,18 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 
     m_zmqContext = std::make_unique<zmq::context_t>(1);
 
+    initializeSocketThread();
+
     try {
-        m_zmqSocket = std::make_unique<zmq::socket_t>(*m_zmqContext, ZMQ_DEALER);
-        m_zmqSocket->set(zmq::sockopt::routing_id, "xpilot");
-        m_zmqSocket->set(zmq::sockopt::linger, 0);
-        m_zmqSocket->connect(QString("tcp://%1:%2")
-                                .arg(AppConfig::getInstance()->XplaneNetworkAddress)
-                                .arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
-        initializeSocketThread();
+        m_zmqSocketSend = std::make_unique<zmq::socket_t>(*m_zmqContext, ZMQ_DEALER);
+        m_zmqSocketSend->set(zmq::sockopt::routing_id, "xpilot.send");
+        m_zmqSocketSend->set(zmq::sockopt::linger, 0);
+        m_zmqSocketSend->connect(QString("tcp://%1:%2")
+                             .arg(AppConfig::getInstance()->XplaneNetworkAddress)
+                             .arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
     }
     catch(zmq::error_t &e) {
-        writeToLog(QString("Error opening socket: %s").append(e.what()));
+        writeToLog(QString("Error opening send socket: %1").arg(e.what()));
     }
 
     for(const QString &machine : qAsConst(AppConfig::getInstance()->VisualMachines)) {
@@ -128,7 +129,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
             m_visualSockets.push_back(socket);
         }
         catch(zmq::error_t &e) {
-            writeToLog(QString("Error opening visual socket: %s").append(e.what()));
+            writeToLog(QString("Error opening visual socket: %1").arg(e.what()));
         }
     }
 
@@ -191,15 +192,15 @@ XplaneAdapter::~XplaneAdapter()
         m_zmqSocket.reset();
     }
 
-    if(m_zmqContext) {
-        m_zmqContext->close();
-        m_zmqContext.reset();
-    }
-
     m_keepSocketAlive = false;
     if(m_zmqSocketThread) {
         m_zmqSocketThread->join();
         m_zmqSocketThread.reset();
+    }
+
+    if(m_zmqContext) {
+        m_zmqContext->close();
+        m_zmqContext.reset();
     }
 }
 
@@ -207,16 +208,33 @@ void XplaneAdapter::initializeSocketThread()
 {
     m_keepSocketAlive = true;
     m_zmqSocketThread = std::make_unique<std::thread>([&]{
-       while(IsSocketReady()) {
-           try {
-               zmq::message_t msg;
-               static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::none));
-               QString data(std::string(static_cast<char*>(msg.data()), msg.size()).c_str());
-               processMessage(data);
-           }
-           catch(zmq::error_t &e) {}
-           catch(...){}
-       }
+
+        try {
+            m_zmqSocket = std::make_unique<zmq::socket_t>(*m_zmqContext, ZMQ_DEALER);
+            m_zmqSocket->set(zmq::sockopt::routing_id, "xpilot");
+            m_zmqSocket->set(zmq::sockopt::linger, 0);
+            m_zmqSocket->connect(QString("tcp://%1:%2")
+                                 .arg(AppConfig::getInstance()->XplaneNetworkAddress)
+                                 .arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
+        }
+        catch(zmq::error_t &e) {
+            writeToLog(QString("Error opening recv socket: %1").arg(e.what()));
+        }
+
+        while(IsSocketReady()) {
+            try {
+                zmq::message_t msg;
+                static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::none));
+                QString data(std::string(static_cast<char*>(msg.data()), msg.size()).c_str());
+                processMessage(data);
+            }
+            catch(zmq::error_t &e){}
+        }
+
+        if(m_zmqSocketSend) {
+            m_zmqSocketSend->close();
+            m_zmqSocketSend.reset();
+        }
     });
 }
 
@@ -228,6 +246,8 @@ void XplaneAdapter::processMessage(QString message)
     auto json = QJsonDocument::fromJson(message.toUtf8());
     if(json.isNull() || !json.isObject())
         return;
+
+    writeToLog(message, true);
 
     QJsonObject obj = json.object();
 
@@ -351,11 +371,11 @@ void XplaneAdapter::clearSimConnection()
     m_simConnected = false;
 }
 
-void XplaneAdapter::writeToLog(QString message)
+void XplaneAdapter::writeToLog(QString message, bool receive)
 {
     QMutexLocker lock(&mutex);
     {
-        m_rawDataStream << QString("[%1] >>> %2\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), message);
+        m_rawDataStream << QString("[%1] %2 %3\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), receive ? "<<<" : ">>>", message);
         m_rawDataStream.flush();
     }
 }
@@ -689,19 +709,19 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
 {
     if(message.isEmpty()) return;
 
-    if(m_zmqSocket != nullptr && m_zmqSocket->handle() != nullptr) {
+    if(m_zmqSocketSend != nullptr && m_zmqSocketSend->handle() != nullptr) {
         try {
             std::string identity = "xpilot";
             zmq::message_t part1(identity.size());
             std::memcpy(part1.data(), identity.data(), identity.size());
-            m_zmqSocket->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
+            m_zmqSocketSend->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
 
             zmq::message_t msg(message.size());
             std::memcpy(msg.data(), message.toStdString().data(), message.size());
-            m_zmqSocket->send(msg, zmq::send_flags::dontwait);
+            m_zmqSocketSend->send(msg, zmq::send_flags::dontwait);
         }
         catch(zmq::error_t &e) {
-            writeToLog(QString("Socket error: %s").append(e.what()));
+            writeToLog(QString("Socket error: %1").arg(e.what()));
         }
     }
 
@@ -719,7 +739,7 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
                 visualSocket->send(msg, zmq::send_flags::dontwait);
             }
             catch(zmq::error_t &e) {
-                writeToLog(QString("Visual socket error: %s").append(e.what()));
+                writeToLog(QString("Visual socket error: %1").arg(e.what()));
             }
         }
     }

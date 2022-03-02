@@ -136,8 +136,8 @@ namespace xpilot
 		{
 			m_zmqContext = make_unique<zmq::context_t>(1);
 			m_zmqSocket = make_unique<zmq::socket_t>(*m_zmqContext, ZMQ_ROUTER);
-			m_zmqSocket->setsockopt(ZMQ_IDENTITY, "xpilot", 5);
-			m_zmqSocket->setsockopt(ZMQ_LINGER, 0);
+			m_zmqSocket->set(zmq::sockopt::routing_id, "xpilot");
+			m_zmqSocket->set(zmq::sockopt::linger, 0);
 			m_zmqSocket->bind("tcp://*:" + Config::Instance().getTcpPort());
 
 			m_keepSocketAlive = true;

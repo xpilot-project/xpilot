@@ -78,7 +78,7 @@ private:
     void processMessage(QString message);
     void clearSimConnection();
 
-    void writeToLog(QString message);
+    void writeToLog(QString message, bool receive = false);
 
 public slots:
     void OnDataReceived();
@@ -124,7 +124,10 @@ private:
     bool m_keepSocketAlive = false;
     std::unique_ptr<zmq::context_t> m_zmqContext;
     std::unique_ptr<zmq::socket_t> m_zmqSocket;
+    std::unique_ptr<zmq::socket_t> m_zmqSocketSend;
     std::unique_ptr<std::thread> m_zmqSocketThread;
+    std::deque<QString> m_zmqSocketQueue;
+    QMutex m_zmqSocketMutex;
     QList<zmq::socket_t*> m_visualSockets;
     QTimer m_heartbeatTimer;
     QTimer m_xplaneDataTimer;
