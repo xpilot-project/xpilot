@@ -52,17 +52,11 @@ int xpilot::Main(int argc, char* argv[])
 
     auto sentryClose = qScopeGuard([]{ sentry_close(); });
 
-#ifdef Q_OS_WIN
-    SetProcessDPIAware();
-#endif
-
-    QGuiApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
-    QGuiApplication::setAttribute(Qt::AA_UseOpenGLES);
-
     QCoreApplication::setApplicationName("xPilot");
     QCoreApplication::setApplicationVersion(xpilot::BuildConfig::getVersionString());
     QCoreApplication::setOrganizationName("Justin Shannon");
     QCoreApplication::setOrganizationDomain("org.vatsim.xpilot");
+    QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
 
     RunGuard guard("org.vatsim.xpilot");
     if(!guard.tryToRun()) {
