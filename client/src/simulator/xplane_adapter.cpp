@@ -110,7 +110,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     }
 
     QString url = QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort);
-    if((rv = nng_dial(_socket, url.toStdString().c_str(), NULL, 0)) != 0) {
+    if((rv = nng_dial(_socket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK)) != 0) {
         qDebug() << "Error dialing socket" << rv;
     }
 
@@ -138,7 +138,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
         }
 
         QString url = QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort);
-        if((rv = nng_dial(_visualSocket, url.toStdString().c_str(), NULL, 0)) != 0) {
+        if((rv = nng_dial(_visualSocket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK)) != 0) {
             qDebug() << "Error dialing visual socket" << rv;
         }
 
