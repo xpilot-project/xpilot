@@ -147,7 +147,7 @@ namespace xpilot
 
 		bool m_keepSocketAlive = false;
 		std::thread* m_socketThread;
-		nng_socket _socket{ NNG_SOCKET_INITIALIZER };
+		nng_socket _socket;
 
 		void SocketWorker();
 		void ProcessMessage(const std::string& msg);

@@ -34,6 +34,7 @@
 #include <thread>
 #include <algorithm>
 #include <vector>
+#include <cstring>
 #include <cstdarg>
 #include <cmath>
 
