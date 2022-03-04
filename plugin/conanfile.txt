@@ -1,7 +1,6 @@
 [requires]
-zeromq/4.3.4
-cppzmq/4.8.1
 nlohmann_json/3.10.3
+nng/1.5.2
 
 [generators]
 cmake

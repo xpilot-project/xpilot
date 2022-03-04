@@ -147,8 +147,7 @@ endif()
 target_link_libraries(
   ${PROJECT_NAME}
 	CONAN_PKG::nlohmann_json
-	CONAN_PKG::zeromq
-	CONAN_PKG::cppzmq
+    CONAN_PKG::nng
 	${XPMP2_LIBRARY})
 
 if (WIN32 OR APPLE)

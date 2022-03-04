@@ -132,76 +132,57 @@ namespace xpilot
 		InitializeXPMP();
 		TryGetTcasControl();
 
-		try
-		{
-			m_zmqContext = make_unique<zmq::context_t>(1);
-			m_zmqSocket = make_unique<zmq::socket_t>(*m_zmqContext, ZMQ_ROUTER);
-			m_zmqSocket->set(zmq::sockopt::routing_id, "xpilot");
-			m_zmqSocket->set(zmq::sockopt::linger, 0);
-			m_zmqSocket->bind("tcp://*:" + Config::Instance().getTcpPort());
+		int rv;
+		if ((rv = nng_pair0_open(&_socket)) != 0) {
+			LOG_MSG(logERROR, "Error opening socket: %i", rv);
+		}
 
-			m_keepSocketAlive = true;
-			m_zmqThread = make_unique<thread>(&XPilot::ZmqWorker, this);
-			LOG_MSG(logMSG, "Now listening on port %s", Config::Instance().getTcpPort().c_str());
+		std::string url = string_format("tcp://*:%s", Config::Instance().getTcpPort());
+		if ((rv = nng_listen(_socket, url.c_str(), NULL, 0)) != 0) {
+			LOG_MSG(logERROR, "Socket listen error: %i", rv);
 		}
-		catch (zmq::error_t& e) {
-			LOG_MSG(logERROR, "Error binding port (%s): %s", Config::Instance().getTcpPort().c_str(), zmq_strerror(errno));
-		}
+		LOG_MSG(logMSG, "Now listening on port %s", Config::Instance().getTcpPort().c_str());
+
+		m_keepSocketAlive = true;
+		m_socketThread = new std::thread(&XPilot::SocketWorker, this);
 
 		XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
 	}
 
 	void XPilot::Shutdown()
 	{
-		SendReply("{\"type\":\"Shutdown\"}"); // this triggers the client to reset itself
-
-		try {
-			if (m_zmqSocket) {
-				m_zmqSocket->close();
-				m_zmqSocket.reset();
-			}
-			if (m_zmqContext) {
-				m_zmqContext->close();
-				m_zmqContext.reset();
-			}
-		}
-		catch (zmq::error_t& e) {}
+		json reply;
+		reply["type"] = "Shutdown";
+		SendReply(reply.dump()); // this triggers the client to reset itself
 
 		m_keepSocketAlive = false;
-		if (m_zmqThread) {
-			m_zmqThread->join();
-			m_zmqThread.reset();
+
+		nng_close(_socket);
+		_socket = NNG_SOCKET_INITIALIZER;
+		nng_fini();
+
+		if (m_socketThread) {
+			m_socketThread->join();
 		}
 	}
 
-	void XPilot::ZmqWorker()
+	void XPilot::SocketWorker()
 	{
-		while (IsSocketReady()) {
-			try {
-				zmq::message_t msg;
-				static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::none));
-				std::string data(static_cast<char*>(msg.data()), msg.size());
-				ProcessMessage(data);
+		while (m_keepSocketAlive) {
+			int rv;
+			char* buf = nullptr;
+			size_t sz;
+			if ((rv = nng_recv(_socket, &buf, &sz, NNG_FLAG_ALLOC)) == 0) {
+				std::string msg(buf);
+				ProcessMessage(msg.c_str());
+				nng_free(buf, sz);
 			}
-			catch (zmq::error_t& e) {}
 		}
 	}
 
 	void XPilot::SendReply(const string& message)
 	{
-		if (IsSocketConnected() && !message.empty()) {
-			try {
-				string identity = "xpilot";
-				zmq::message_t part1(identity.size());
-				memcpy(part1.data(), identity.data(), identity.size());
-				m_zmqSocket->send(part1, zmq::send_flags::sndmore);
-
-				zmq::message_t part2(message.size());
-				memcpy(part2.data(), message.data(), message.size());
-				m_zmqSocket->send(part2, zmq::send_flags::none);
-			}
-			catch (zmq::error_t& e) {}
-		}
+		nng_send(_socket, (void*)message.c_str(), message.size() + 1, NNG_FLAG_NONBLOCK);
 	}
 
 	void XPilot::ProcessMessage(const std::string& msg)

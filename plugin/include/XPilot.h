@@ -29,8 +29,10 @@
 #include "XPLMMenus.h"
 #include "XPLMUtilities.h"
 #include "XPLMProcessing.h"
-#include "zmq.hpp"
 #include "Utilities.h"
+
+#include <nng/nng.h>
+#include <nng/protocol/pair0/pair.h>
 
 #include <deque>
 #include <thread>
@@ -146,18 +148,10 @@ namespace xpilot
 		}
 
 		bool m_keepSocketAlive = false;
-		unique_ptr<thread> m_zmqThread;
-		unique_ptr<zmq::context_t> m_zmqContext;
-		unique_ptr<zmq::socket_t> m_zmqSocket;
+		std::thread* m_socketThread;
+		nng_socket _socket{ NNG_SOCKET_INITIALIZER };
 
-		bool IsSocketConnected()const {
-			return m_zmqSocket != nullptr && m_zmqSocket->handle() != nullptr;
-		}
-		bool IsSocketReady()const {
-			return m_keepSocketAlive && IsSocketConnected();
-		}
-
-		void ZmqWorker();
+		void SocketWorker();
 		void ProcessMessage(const std::string& msg);
 
 		mutex m_mutex;

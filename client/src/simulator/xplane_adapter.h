@@ -22,7 +22,8 @@
 #include <QMutex>
 #include <QTimer>
 
-#include "zmq.hpp"
+#include <nng/nng.h>
+#include <nng/protocol/pair0/pair.h>
 
 #include "src/config/appconfig.h"
 #include "src/aircrafts/network_aircraft.h"
@@ -74,7 +75,6 @@ private:
     void setDataRefValue(std::string dataRef, float value);
     void sendCommand(std::string command);
 
-    void initializeSocketThread();
     void processMessage(QString message);
     void clearSimConnection();
 
@@ -120,24 +120,13 @@ private:
     RadioStackState m_radioStackState{};
 
     QList<QString> m_ignoreList;
-
-    bool m_keepSocketAlive = false;
-    std::unique_ptr<zmq::context_t> m_zmqContext;
-    std::unique_ptr<zmq::socket_t> m_zmqSocket;
-    std::unique_ptr<zmq::socket_t> m_zmqSocketSend;
-    std::unique_ptr<std::thread> m_zmqSocketThread;
-    std::deque<QString> m_zmqSocketQueue;
-    QMutex m_zmqSocketMutex;
-    QList<zmq::socket_t*> m_visualSockets;
     QTimer m_heartbeatTimer;
     QTimer m_xplaneDataTimer;
 
-    bool IsSocketConnected() const {
-        return m_zmqSocket != nullptr && m_zmqSocket->handle() != nullptr;
-    }
-    bool IsSocketReady() const {
-        return m_keepSocketAlive && IsSocketConnected();
-    }
+    bool m_keepSocketAlive = false;
+    std::unique_ptr<std::thread> m_socketThread;
+    nng_socket _socket;
+    QList<nng_socket> m_visualSockets;
 
     QFile m_pluginLog;
     QTextStream m_rawDataStream;

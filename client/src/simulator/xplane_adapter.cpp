@@ -104,33 +104,45 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 
     connect(socket, &QUdpSocket::readyRead, this, &XplaneAdapter::OnDataReceived);
 
-    m_zmqContext = std::make_unique<zmq::context_t>(1);
-
-    initializeSocketThread();
-
-    try {
-        m_zmqSocketSend = std::make_unique<zmq::socket_t>(*m_zmqContext, ZMQ_DEALER);
-        m_zmqSocketSend->set(zmq::sockopt::routing_id, "xpilot.send");
-        m_zmqSocketSend->set(zmq::sockopt::linger, 0);
-        m_zmqSocketSend->connect(QString("tcp://%1:%2")
-                             .arg(AppConfig::getInstance()->XplaneNetworkAddress)
-                             .arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
+    int rv;
+    if((rv = nng_pair0_open(&_socket)) != 0) {
+        qDebug() << "Error opening socket" << rv;
     }
-    catch(zmq::error_t &e) {
-        writeToLog(QString("Error opening send socket: %1").arg(e.what()));
+
+    QString url = QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort);
+    if((rv = nng_dial(_socket, url.toStdString().c_str(), NULL, 0)) != 0) {
+        qDebug() << "Error dialing socket" << rv;
     }
+
+    m_keepSocketAlive = true;
+    m_socketThread = std::make_unique<std::thread>([&]{
+        while (m_keepSocketAlive) {
+            int rv;
+            char* buf = nullptr;
+            size_t sz;
+            if ((rv = nng_recv(_socket, &buf, &sz, NNG_FLAG_ALLOC)) == 0) {
+                QString msg(buf);
+                processMessage(msg);
+                nng_free(buf, sz);
+            }
+        }
+    });
 
     for(const QString &machine : qAsConst(AppConfig::getInstance()->VisualMachines)) {
-        try {
-            auto socket = new zmq::socket_t(*m_zmqContext, ZMQ_DEALER);
-            socket->set(zmq::sockopt::routing_id, "xpilot");
-            socket->set(zmq::sockopt::linger, 0);
-            socket->connect(QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
-            m_visualSockets.push_back(socket);
+
+        nng_socket _visualSocket;
+
+        int rv;
+        if((rv = nng_pair0_open(&_visualSocket)) != 0) {
+            qDebug() << "Error opening visual socket" << rv;
         }
-        catch(zmq::error_t &e) {
-            writeToLog(QString("Error opening visual socket: %1").arg(e.what()));
+
+        QString url = QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort);
+        if((rv = nng_dial(_visualSocket, url.toStdString().c_str(), NULL, 0)) != 0) {
+            qDebug() << "Error dialing visual socket" << rv;
         }
+
+        m_visualSockets.push_back(_visualSocket);
     }
 
     connect(&m_heartbeatTimer, &QTimer::timeout, this, [&] {
@@ -183,59 +195,18 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 XplaneAdapter::~XplaneAdapter()
 {
     for(auto &visualSocket : m_visualSockets) {
-        visualSocket->close();
+        nng_close(visualSocket);
     }
     m_visualSockets.clear();
 
-    if(m_zmqSocket) {
-        m_zmqSocket->close();
-        m_zmqSocket.reset();
-    }
-
     m_keepSocketAlive = false;
-    if(m_zmqSocketThread) {
-        m_zmqSocketThread->join();
-        m_zmqSocketThread.reset();
+    nng_close(_socket);
+    _socket = NNG_SOCKET_INITIALIZER;
+
+    if(m_socketThread) {
+        m_socketThread->join();
+        m_socketThread.reset();
     }
-
-    if(m_zmqContext) {
-        m_zmqContext->close();
-        m_zmqContext.reset();
-    }
-}
-
-void XplaneAdapter::initializeSocketThread()
-{
-    m_keepSocketAlive = true;
-    m_zmqSocketThread = std::make_unique<std::thread>([&]{
-
-        try {
-            m_zmqSocket = std::make_unique<zmq::socket_t>(*m_zmqContext, ZMQ_DEALER);
-            m_zmqSocket->set(zmq::sockopt::routing_id, "xpilot");
-            m_zmqSocket->set(zmq::sockopt::linger, 0);
-            m_zmqSocket->connect(QString("tcp://%1:%2")
-                                 .arg(AppConfig::getInstance()->XplaneNetworkAddress)
-                                 .arg(AppConfig::getInstance()->XplanePluginPort).toStdString());
-        }
-        catch(zmq::error_t &e) {
-            writeToLog(QString("Error opening recv socket: %1").arg(e.what()));
-        }
-
-        while(IsSocketReady()) {
-            try {
-                zmq::message_t msg;
-                static_cast<void>(m_zmqSocket->recv(msg, zmq::recv_flags::none));
-                QString data(std::string(static_cast<char*>(msg.data()), msg.size()).c_str());
-                processMessage(data);
-            }
-            catch(zmq::error_t &e){}
-        }
-
-        if(m_zmqSocketSend) {
-            m_zmqSocketSend->close();
-            m_zmqSocketSend.reset();
-        }
-    });
 }
 
 void XplaneAdapter::processMessage(QString message)
@@ -709,39 +680,11 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
 {
     if(message.isEmpty()) return;
 
-    if(m_zmqSocketSend != nullptr && m_zmqSocketSend->handle() != nullptr) {
-        try {
-            std::string identity = "xpilot";
-            zmq::message_t part1(identity.size());
-            std::memcpy(part1.data(), identity.data(), identity.size());
-            m_zmqSocketSend->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
+    std::string msg = message.toStdString();
+    nng_send(_socket, msg.data(), msg.size() + 1, NNG_FLAG_NONBLOCK);
 
-            zmq::message_t msg(message.size());
-            std::memcpy(msg.data(), message.toStdString().data(), message.size());
-            m_zmqSocketSend->send(msg, zmq::send_flags::dontwait);
-        }
-        catch(zmq::error_t &e) {
-            writeToLog(QString("Socket error: %1").arg(e.what()));
-        }
-    }
-
-    for(auto &visualSocket : m_visualSockets)
-    {
-        if(visualSocket) {
-            try {
-                std::string identity = "xpilot";
-                zmq::message_t part1(identity.size());
-                std::memcpy(part1.data(), identity.data(), identity.size());
-                visualSocket->send(part1, zmq::send_flags::sndmore | zmq::send_flags::dontwait);
-
-                zmq::message_t msg(message.size());
-                std::memcpy(msg.data(), message.toStdString().data(), message.size());
-                visualSocket->send(msg, zmq::send_flags::dontwait);
-            }
-            catch(zmq::error_t &e) {
-                writeToLog(QString("Visual socket error: %1").arg(e.what()));
-            }
-        }
+    for(auto &visualSocket : m_visualSockets) {
+        nng_send(visualSocket, msg.data(), msg.size() + 1, NNG_FLAG_NONBLOCK);
     }
 
     writeToLog(message);
