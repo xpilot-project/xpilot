@@ -137,7 +137,7 @@ namespace xpilot
 			LOG_MSG(logERROR, "Error opening socket: %i", rv);
 		}
 
-		std::string url = string_format("tcp://*:%s", Config::Instance().getTcpPort());
+		std::string url = string_format("tcp://*:%s", Config::Instance().getTcpPort().c_str());
 		if ((rv = nng_listen(_socket, url.c_str(), NULL, 0)) != 0) {
 			LOG_MSG(logERROR, "Socket listen error: %i", rv);
 		}
