@@ -73,7 +73,7 @@ inline std::string strAtMost(const std::string s, size_t m)
 #if APL == 1 || LIN == 1
 inline void strncpy_s(char *dest, size_t destsz, const char *src, size_t count)
 {
-	strncpy(dest, src, min(destsz, count));
+	strncpy(dest, src, std::min(destsz, count));
 	dest[destsz - 1] = 0;
 }
 #endif
