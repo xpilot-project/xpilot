@@ -266,7 +266,7 @@ namespace xpilot
 				return -1.0f;
 			}
 
-			const auto now = chrono::system_clock::now();
+			const auto now = chrono::steady_clock::now();
 
 			// The client will take care of any stale aircraft (if the last position packet was more than 15 seconds ago).
 			// If the client doesn't close cleanly for some reason, the aircraft might not get deleted from the sim.
@@ -339,7 +339,7 @@ namespace xpilot
 		if (!aircraft)
 			return;
 
-		auto now = std::chrono::system_clock::now();
+		auto now = std::chrono::steady_clock::now();
 
 		// The logic here is that if we have not received a fast position packet recently, then
 		// we need to derive positional velocities from the last position that we received (either
@@ -384,7 +384,7 @@ namespace xpilot
 		aircraft->RotationalVelocities = rotationalVector;
 		aircraft->VisualState = visualState;
 
-		const auto now = std::chrono::system_clock::now();
+		const auto now = std::chrono::steady_clock::now();
 		if (chrono::duration_cast<chrono::milliseconds>(now - aircraft->LastVelocityUpdate).count() > 500)
 		{
 			aircraft->RotationalVelocities = Vector3::Zero();
@@ -406,7 +406,7 @@ namespace xpilot
 
 	bool AircraftManager::ReceivingFastPositionUpdates(NetworkAircraft* aircraft)
 	{
-		const auto now = std::chrono::system_clock::now();
+		const auto now = std::chrono::steady_clock::now();
 		const auto diff = chrono::duration_cast<chrono::milliseconds>(now - aircraft->LastVelocityUpdate);
 		return diff.count() <= FAST_POSITION_INTERVAL_TOLERANCE;
 	}
