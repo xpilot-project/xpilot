@@ -29,15 +29,13 @@
 #include <map>
 #include <mutex>
 
-using namespace std;
-
 namespace xpilot
 {
-	typedef map<string, unique_ptr<NetworkAircraft>> mapPlanesTy;
+	typedef std::map<std::string, std::unique_ptr<NetworkAircraft>> mapPlanesTy;
 	extern mapPlanesTy mapPlanes;
 	inline mapPlanesTy::iterator mapGetNextAircraft(mapPlanesTy::iterator iter)
 	{
-		return find_if(next(iter), mapPlanes.end(), [](const mapPlanesTy::value_type& p)
+		return std::find_if(std::next(iter), mapPlanes.end(), [](const mapPlanesTy::value_type& p)
 		{
 			return p.second.get();
 		});
@@ -50,12 +48,12 @@ namespace xpilot
 		AircraftManager(XPilot* instance);
 		virtual ~AircraftManager();
 
-		void HandleAddPlane(const string& callsign, const AircraftVisualState& visualState, const string& airline, const string& typeCode);
-		void HandleAircraftConfig(const string& callsign, const NetworkAircraftConfig& config);
-		void HandleChangePlaneModel(const string& callsign, const string& typeIcao, const string& airlineIcao);
-		void HandleSlowPositionUpdate(const string& callsign, AircraftVisualState visualState, double speed);
-		void HandleFastPositionUpdate(const string& callsign, const AircraftVisualState& visualState, Vector3 positionalVector, Vector3 rotationalVector);
-		void HandleRemovePlane(const string& callsign);
+		void HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState, const std::string& airline, const std::string& typeCode);
+		void HandleAircraftConfig(const std::string& callsign, const NetworkAircraftConfig& config);
+		void HandleChangePlaneModel(const std::string& callsign, const std::string& typeIcao, const std::string& airlineIcao);
+		void HandleSlowPositionUpdate(const std::string& callsign, AircraftVisualState visualState, double speed);
+		void HandleFastPositionUpdate(const std::string& callsign, const AircraftVisualState& visualState, Vector3 positionalVector, Vector3 rotationalVector);
+		void HandleRemovePlane(const std::string& callsign);
 		void RemoveAllPlanes();
 
 	protected:
@@ -68,25 +66,25 @@ namespace xpilot
 		DataRefAccess<float> m_environmentVolumeRatio;
 		DataRefAccess<int> m_isViewExternal;
 		DataRefAccess<float> m_canopyOpenRatio;
-		DataRefAccess<vector<float>> m_userDoorOpenRatio;
+		DataRefAccess<std::vector<float>> m_userDoorOpenRatio;
 
 	private:
 		XPilot* mEnv;
 		std::unique_ptr<CAudioEngine> m_audioEngine;
 
-		NetworkAircraft* GetAircraft(const string& callsign);
+		NetworkAircraft* GetAircraft(const std::string& callsign);
 		bool ReceivingFastPositionUpdates(NetworkAircraft* aircraft);
 		Vector3 DerivePositionalVelocityVector(AircraftVisualState previousVisualState, AircraftVisualState newVisualState, long intervalMs);
 		static float AircraftMaintenanceCallback(float, float, int, void* ref);
 
-		thread::id m_xplaneThread;
+		std::thread::id m_xplaneThread;
 		void ThisThreadIsXplane()
 		{
-			m_xplaneThread = this_thread::get_id();
+			m_xplaneThread = std::this_thread::get_id();
 		}
 		bool IsXplaneThread()const
 		{
-			return this_thread::get_id() == m_xplaneThread;
+			return std::this_thread::get_id() == m_xplaneThread;
 		}
 	};
 }

@@ -25,17 +25,15 @@
 #include "SettingsWindow.h"
 #include "XPMPMultiplayer.h"
 
-using namespace std;
-
 namespace xpilot
 {
-	static string cslPaths[7];
+	static std::string cslPaths[7];
 	static bool pathsEnabled[7];
 	static int selectedPathIdx;
 	static bool showHideLabels;
 	static bool debugModelMatching;
 	static int logLevel;
-	static string fallbackTypeCode;
+	static std::string fallbackTypeCode;
 	static bool overrideContactAtcCommand;
 	static bool showMessagePreview = true;
 	static int notificationPanelTimeout = 2;

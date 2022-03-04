@@ -100,12 +100,12 @@ namespace xpilot
 		top = screenTop - 35; /*width*/
 		left = screenRight - 800; /*padding top*/
 		bottom = top - 100; /*height*/
-		m_notificationPanel = make_unique<NotificationPanel>(left, top, right, bottom);
-		m_textMessageConsole = make_unique<TextMessageConsole>(this);
-		m_nearbyAtcWindow = make_unique<NearbyATCWindow>(this);
-		m_settingsWindow = make_unique<SettingsWindow>();
-		m_frameRateMonitor = make_unique<FrameRateMonitor>(this);
-		m_aircraftManager = make_unique<AircraftManager>(this);
+		m_notificationPanel = std::make_unique<NotificationPanel>(left, top, right, bottom);
+		m_textMessageConsole = std::make_unique<TextMessageConsole>(this);
+		m_nearbyAtcWindow = std::make_unique<NearbyATCWindow>(this);
+		m_settingsWindow = std::make_unique<SettingsWindow>();
+		m_frameRateMonitor = std::make_unique<FrameRateMonitor>(this);
+		m_aircraftManager = std::make_unique<AircraftManager>(this);
 		m_pluginVersion = PLUGIN_VERSION;
 
 		XPLMRegisterFlightLoopCallback(DeferredStartup, -1.0f, this);
@@ -180,7 +180,7 @@ namespace xpilot
 		}
 	}
 
-	void XPilot::SendReply(const string& message)
+	void XPilot::SendReply(const std::string& message)
 	{
 		nng_send(_socket, (void*)message.c_str(), message.size() + 1, NNG_FLAG_NONBLOCK);
 	}
@@ -193,15 +193,15 @@ namespace xpilot
 
 			if (j.find("type") != j.end())
 			{
-				string MessageType(j["type"]);
+				std::string MessageType(j["type"]);
 
 				if (!MessageType.empty())
 				{
 					if (MessageType == "AddPlane")
 					{
-						string callsign(j["data"]["callsign"]);
-						string airline(j["data"]["airline"]);
-						string typeCode(j["data"]["type_code"]);
+						std::string callsign(j["data"]["callsign"]);
+						std::string airline(j["data"]["airline"]);
+						std::string typeCode(j["data"]["type_code"]);
 						double latitude = static_cast<double>(j["data"]["latitude"]);
 						double longitude = static_cast<double>(j["data"]["longitude"]);
 						double altitude = static_cast<double>(j["data"]["altitude"]);
@@ -228,9 +228,9 @@ namespace xpilot
 
 					else if (MessageType == "ChangeModel")
 					{
-						string callsign(j["data"]["callsign"]);
-						string airline(j["data"]["airline"]);
-						string typeCode(j["data"]["type_code"]);
+						std::string callsign(j["data"]["callsign"]);
+						std::string airline(j["data"]["airline"]);
+						std::string typeCode(j["data"]["type_code"]);
 
 						if (!callsign.empty() && !typeCode.empty())
 						{
@@ -243,7 +243,7 @@ namespace xpilot
 
 					else if (MessageType == "SlowPositionUpdate")
 					{
-						string callsign(j["data"]["callsign"]);
+						std::string callsign(j["data"]["callsign"]);
 						double latitude = static_cast<double>(j["data"]["latitude"]);
 						double longitude = static_cast<double>(j["data"]["longitude"]);
 						double altitude = static_cast<double>(j["data"]["altitude"]);
@@ -271,7 +271,7 @@ namespace xpilot
 
 					else if (MessageType == "FastPositionUpdate")
 					{
-						string callsign(j["data"]["callsign"]);
+						std::string callsign(j["data"]["callsign"]);
 						double latitude = static_cast<double>(j["data"]["latitude"]);
 						double longitude = static_cast<double>(j["data"]["longitude"]);
 						double altitude = static_cast<double>(j["data"]["altitude"]);
@@ -328,7 +328,7 @@ namespace xpilot
 
 					else if (MessageType == "RemovePlane")
 					{
-						string callsign(j["data"]["callsign"]);
+						std::string callsign(j["data"]["callsign"]);
 
 						if (!callsign.empty())
 						{
@@ -349,8 +349,8 @@ namespace xpilot
 
 					else if (MessageType == "NetworkConnected")
 					{
-						string callsign(j["data"]["callsign"]);
-						string selcal(j["data"]["selcal"]);
+						std::string callsign(j["data"]["callsign"]);
+						std::string selcal(j["data"]["selcal"]);
 
 						QueueCallback([=]
 							{
@@ -389,7 +389,7 @@ namespace xpilot
 
 					else if (MessageType == "NotificationPosted")
 					{
-						string msg(j["data"]["message"]);
+						std::string msg(j["data"]["message"]);
 						long color = static_cast<long>(j["data"]["color"]);
 						int red = ((color >> 16) & 0xff);
 						int green = ((color >> 8) & 0xff);
@@ -399,36 +399,36 @@ namespace xpilot
 
 					else if (MessageType == "RadioMessageSent")
 					{
-						string msg(j["data"]["message"]);
+						std::string msg(j["data"]["message"]);
 						RadioMessageReceived(msg, 0, 255, 255);
 						AddNotificationPanelMessage(msg, 0, 255, 255);
 					}
 
 					else if (MessageType == "RadioMessageReceived")
 					{
-						string from(j["data"]["from"]);
-						string message(j["data"]["message"]);
+						std::string from(j["data"]["from"]);
+						std::string message(j["data"]["message"]);
 						bool isDirect = static_cast<bool>(j["data"]["direct"]);
 						double r = isDirect ? 255 : 192;
 						double g = isDirect ? 255 : 192;
 						double b = isDirect ? 255 : 192;
-						string msg = string_format("%s: %s", from.c_str(), message.c_str());
+						std::string msg = string_format("%s: %s", from.c_str(), message.c_str());
 						RadioMessageReceived(msg, r, g, b);
 						AddNotificationPanelMessage(msg, r, g, b);
 					}
 
 					else if (MessageType == "PrivateMessageReceived")
 					{
-						string msg(j["data"]["message"]);
-						string from(j["data"]["from"]);
+						std::string msg(j["data"]["message"]);
+						std::string from(j["data"]["from"]);
 						AddPrivateMessage(from, msg, ConsoleTabType::Received);
 						AddNotificationPanelMessage(string_format("%s [pvt]: %s", from.c_str(), msg.c_str()), 255, 255, 255);
 					}
 
 					else if (MessageType == "PrivateMessageSent")
 					{
-						string msg(j["data"]["message"]);
-						string to(j["data"]["to"]);
+						std::string msg(j["data"]["message"]);
+						std::string to(j["data"]["to"]);
 						AddPrivateMessage(to, msg, ConsoleTabType::Sent);
 						AddNotificationPanelMessage(string_format("%s [pvt]: %s", m_networkCallsign.value().c_str(), msg.c_str()), 255, 255, 255);
 					}
@@ -501,7 +501,7 @@ namespace xpilot
 		ReleaseTcasControl();
 	}
 
-	void XPilot::forceDisconnect(string reason)
+	void XPilot::forceDisconnect(std::string reason)
 	{
 		json msg;
 		msg["type"] = "ForceDisconnect";
@@ -509,7 +509,7 @@ namespace xpilot
 		SendReply(msg.dump());
 	}
 
-	void XPilot::requestStationInfo(string callsign)
+	void XPilot::requestStationInfo(std::string callsign)
 	{
 		json msg;
 		msg["type"] = "RequestStationInfo";
@@ -517,7 +517,7 @@ namespace xpilot
 		SendReply(msg.dump());
 	}
 
-	void XPilot::requestMetar(string station)
+	void XPilot::requestMetar(std::string station)
 	{
 		json msg;
 		msg["type"] = "RequestMetar";
@@ -564,7 +564,7 @@ namespace xpilot
 			});
 	}
 
-	void XPilot::sendWallop(string message)
+	void XPilot::sendWallop(std::string message)
 	{
 		json msg;
 		msg["type"] = "Wallop";
@@ -582,7 +582,7 @@ namespace xpilot
 
 	bool XPilot::InitializeXPMP()
 	{
-		const string pathResources(GetPluginPath() + "Resources");
+		const std::string pathResources(GetPluginPath() + "Resources");
 
 		auto err = XPMPMultiplayerInit(PLUGIN_NAME, pathResources.c_str(), &CBIntPrefsFunc);
 
@@ -595,7 +595,7 @@ namespace xpilot
 
 		if (!Config::Instance().hasValidPaths())
 		{
-			string err = "There are no valid CSL paths configured. Please verify your CSL configuration in X-Plane (Plugins > xPilot > Settings > CSL Configuration).";
+			std::string err = "There are no valid CSL paths configured. Please verify your CSL configuration in X-Plane (Plugins > xPilot > Settings > CSL Configuration).";
 			addNotification(err.c_str(), 192, 57, 43);
 			LOG_MSG(logERROR, err.c_str());
 		}
@@ -613,7 +613,7 @@ namespace xpilot
 							LOG_MSG(logERROR, "Error loading CSL package %s: %s", p.path.c_str(), err);
 						}
 					}
-					catch (exception& e)
+					catch (std::exception& e)
 					{
 						LOG_MSG(logERROR, "Error loading CSL package %s: %s", p.path.c_str(), err);
 					}
@@ -626,7 +626,7 @@ namespace xpilot
 		return true;
 	}
 
-	void XPilot::AddPrivateMessage(const string& recipient, const string& msg, ConsoleTabType tabType)
+	void XPilot::AddPrivateMessage(const std::string& recipient, const std::string& msg, ConsoleTabType tabType)
 	{
 		if (!recipient.empty() && !msg.empty())
 		{
@@ -637,7 +637,7 @@ namespace xpilot
 		}
 	}
 
-	void XPilot::RadioMessageReceived(const string& msg, double red, double green, double blue)
+	void XPilot::RadioMessageReceived(const std::string& msg, double red, double green, double blue)
 	{
 		if (!msg.empty())
 		{
@@ -648,7 +648,7 @@ namespace xpilot
 		}
 	}
 
-	void XPilot::AddNotificationPanelMessage(const string& msg, double red, double green, double blue)
+	void XPilot::AddNotificationPanelMessage(const std::string& msg, double red, double green, double blue)
 	{
 		if (!msg.empty())
 		{
@@ -659,24 +659,24 @@ namespace xpilot
 		}
 	}
 
-	void XPilot::addNotification(const string& msg, double red, double green, double blue)
+	void XPilot::addNotification(const std::string& msg, double red, double green, double blue)
 	{
 		RadioMessageReceived(msg, red, green, blue);
 		AddNotificationPanelMessage(msg, red, green, blue);
 	}
 
-	void XPilot::QueueCallback(const function<void()> &cb)
+	void XPilot::QueueCallback(const std::function<void()> &cb)
 	{
-		lock_guard<mutex> lck(m_mutex);
+		std::lock_guard<std::mutex> lck(m_mutex);
 		m_queuedCallbacks.push_back(cb);
 	}
 
 	void XPilot::InvokeQueuedCallbacks()
 	{
-		deque<function<void()>> temp;
+		std::deque<std::function<void()>> temp;
 		{
-			lock_guard<mutex> lck(m_mutex);
-			swap(temp, m_queuedCallbacks);
+			std::lock_guard<std::mutex> lck(m_mutex);
+			std::swap(temp, m_queuedCallbacks);
 		}
 		while (!temp.empty())
 		{

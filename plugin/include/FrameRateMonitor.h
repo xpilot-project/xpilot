@@ -27,8 +27,6 @@
 #include <vector>
 #include <sstream>
 
-using namespace std;
-
 namespace xpilot
 {
 	class XPilot;
@@ -44,7 +42,7 @@ namespace xpilot
 		DataRefAccess<float> m_frameRatePeriod;
 		DataRefAccess<float> m_groundSpeed;
 		DataRefAccess<int> m_isExternalVisual;
-		DataRefAccess<vector<int>> m_overridePlanePath;
+		DataRefAccess<std::vector<int>> m_overridePlanePath;
 		DataRefAccess<int> m_timePaused;
 	private:
 		XPilot* m_environment;

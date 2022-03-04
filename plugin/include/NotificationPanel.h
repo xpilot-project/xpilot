@@ -25,8 +25,6 @@
 #include <list>
 #include <chrono>
 
-using namespace std;
-
 namespace xpilot
 {
     class NotificationPanel : ImgWindow
@@ -34,7 +32,7 @@ namespace xpilot
     public:
         NotificationPanel(int left, int top, int right, int bottom);
         ~NotificationPanel();
-        void AddNotificationPanelMessage(const string& message, float red = 255, float green = 255, float blue = 255);
+        void AddNotificationPanelMessage(const std::string& message, float red = 255, float green = 255, float blue = 255);
         void toggle();
         bool isAlwaysVisible()const { return m_alwaysVisible; }
         void setAlwaysVisible(bool visible) { m_alwaysVisible = visible; }
@@ -43,7 +41,7 @@ namespace xpilot
     private:
         static float onFlightLoop(float, float, int, void* refcon);
         XPLMFlightLoopID m_flightLoopId;
-        chrono::system_clock::time_point m_disappearTime;
+        std::chrono::system_clock::time_point m_disappearTime;
         XplaneCommand m_togglePanelCommand;
         bool m_scrollToBottom;
         bool m_alwaysVisible;

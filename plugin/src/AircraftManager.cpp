@@ -24,8 +24,6 @@
 #include "XPilot.h"
 #include <chrono>
 
-using namespace std;
-
 namespace xpilot
 {
 	constexpr long FAST_POSITION_INTERVAL_TOLERANCE = 500;
@@ -111,16 +109,17 @@ namespace xpilot
 		XPLMUnregisterFlightLoopCallback(&AircraftManager::AircraftMaintenanceCallback, nullptr);
 	}
 
-	void AircraftManager::HandleAddPlane(const string& callsign, const AircraftVisualState& visualState, const string& airline, const string& typeCode)
+	void AircraftManager::HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState, 
+	const std::string& airline, const std::string& typeCode)
 	{
 		auto planeIt = mapPlanes.find(callsign);
 		if (planeIt != mapPlanes.end()) return;
 
 		NetworkAircraft* plane = new NetworkAircraft(callsign.c_str(), visualState, typeCode.c_str(), airline.c_str(), "", 0, "");
-		mapPlanes.emplace(callsign, move(plane));
+		mapPlanes.emplace(callsign, std::move(plane));
 
 		if (plane) {
-			string engineSound = "JetEngine";
+			std::string engineSound = "JetEngine";
 			switch (plane->EngineClass)
 			{
 			case EngineClassType::JetEngine:
@@ -143,7 +142,7 @@ namespace xpilot
 		}
 	}
 
-	void AircraftManager::HandleAircraftConfig(const string& callsign, const NetworkAircraftConfig& config)
+	void AircraftManager::HandleAircraftConfig(const std::string& callsign, const NetworkAircraftConfig& config)
 	{
 		auto planeIt = mapPlanes.find(callsign);
 		if (planeIt == mapPlanes.end()) return;
@@ -241,7 +240,7 @@ namespace xpilot
 		}
 	}
 
-	void AircraftManager::HandleRemovePlane(const string& callsign)
+	void AircraftManager::HandleRemovePlane(const std::string& callsign)
 	{
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft) return;
@@ -266,21 +265,21 @@ namespace xpilot
 				return -1.0f;
 			}
 
-			const auto now = chrono::steady_clock::now();
+			const auto now = std::chrono::steady_clock::now();
 
 			// The client will take care of any stale aircraft (if the last position packet was more than 15 seconds ago).
 			// If the client doesn't close cleanly for some reason, the aircraft might not get deleted from the sim.
-            std::list<std::string> stalePlanes;
+			std::list<std::string> stalePlanes;
 			for (auto& plane : mapPlanes) {
-				int timeSinceLastUpdate = chrono::duration_cast<chrono::seconds>(now - plane.second->LastSlowPositionTimestamp).count();
+				int timeSinceLastUpdate = std::chrono::duration_cast<std::chrono::seconds>(now - plane.second->LastSlowPositionTimestamp).count();
 				if (timeSinceLastUpdate > 60) {
 					stalePlanes.push_back(plane.first);
 					LOG_MSG(logINFO, "Removing Stale Aircraft: %s, %is", plane.first.c_str(), timeSinceLastUpdate);
 				}
 			}
-            for(auto plane : stalePlanes) {
-                mapPlanes.erase(plane);
-            }
+			for(auto plane : stalePlanes) {
+					mapPlanes.erase(plane);
+			}
             
 			float soundVolume = 1.0f;
 			float doorSum = 0;
@@ -333,7 +332,7 @@ namespace xpilot
 		return -1.0f;
 	}
 
-	void AircraftManager::HandleSlowPositionUpdate(const string& callsign, AircraftVisualState visualState, double speed)
+	void AircraftManager::HandleSlowPositionUpdate(const std::string& callsign, AircraftVisualState visualState, double speed)
 	{
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft)
@@ -349,7 +348,7 @@ namespace xpilot
 		{
 			auto lastUpdateTimeStamp = (aircraft->LastSlowPositionTimestamp < aircraft->LastVelocityUpdate) ? aircraft->LastSlowPositionTimestamp : aircraft->LastVelocityUpdate;
 
-			auto intervalMs = chrono::duration_cast<chrono::milliseconds>(now - lastUpdateTimeStamp).count();
+			auto intervalMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastUpdateTimeStamp).count();
 
 			aircraft->PositionalVelocities = DerivePositionalVelocityVector(
 				aircraft->VisualState,
@@ -374,7 +373,8 @@ namespace xpilot
 		aircraft->GroundSpeed = speed;
 	}
 
-	void AircraftManager::HandleFastPositionUpdate(const string& callsign, const AircraftVisualState& visualState, Vector3 positionalVector, Vector3 rotationalVector)
+	void AircraftManager::HandleFastPositionUpdate(const std::string& callsign, const AircraftVisualState& visualState, 
+	Vector3 positionalVector, Vector3 rotationalVector)
 	{
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft)
@@ -385,7 +385,7 @@ namespace xpilot
 		aircraft->VisualState = visualState;
 
 		const auto now = std::chrono::steady_clock::now();
-		if (chrono::duration_cast<chrono::milliseconds>(now - aircraft->LastVelocityUpdate).count() > 500)
+		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - aircraft->LastVelocityUpdate).count() > 500)
 		{
 			aircraft->RotationalVelocities = Vector3::Zero();
 			aircraft->RotationalErrorVelocities = Vector3::Zero();
@@ -393,11 +393,11 @@ namespace xpilot
 
 		aircraft->LastVelocityUpdate = now;
 		aircraft->RecordTerrainElevationHistory();
-		aircraft->UpdateErrorVectors(chrono::duration_cast<chrono::milliseconds>(now.time_since_epoch()).count());
+		aircraft->UpdateErrorVectors(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count());
 		aircraft->FastPositionsReceivedCount++;
 	}
 
-	NetworkAircraft* AircraftManager::GetAircraft(const string& callsign)
+	NetworkAircraft* AircraftManager::GetAircraft(const std::string& callsign)
 	{
 		auto planeIt = mapPlanes.find(callsign);
 		if (planeIt == mapPlanes.end()) return nullptr;
@@ -407,7 +407,7 @@ namespace xpilot
 	bool AircraftManager::ReceivingFastPositionUpdates(NetworkAircraft* aircraft)
 	{
 		const auto now = std::chrono::steady_clock::now();
-		const auto diff = chrono::duration_cast<chrono::milliseconds>(now - aircraft->LastVelocityUpdate);
+		const auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - aircraft->LastVelocityUpdate);
 		return diff.count() <= FAST_POSITION_INTERVAL_TOLERANCE;
 	}
 
@@ -442,7 +442,7 @@ namespace xpilot
 		);
 	}
 
-	void AircraftManager::HandleChangePlaneModel(const string& callsign, const string& typeIcao, const string& airlineIcao)
+	void AircraftManager::HandleChangePlaneModel(const std::string& callsign, const std::string& typeIcao, const std::string& airlineIcao)
 	{
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft) return;

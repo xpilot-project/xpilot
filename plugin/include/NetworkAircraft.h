@@ -34,8 +34,6 @@
 #include <queue>
 #include <mutex>
 
-using namespace std;
-
 namespace xpilot
 {
     struct AircraftVisualState
@@ -43,7 +41,7 @@ namespace xpilot
         double Lat;
         double Lon;
         double AltitudeTrue;
-        optional<double> AltitudeAgl = {};
+        std::optional<double> AltitudeAgl = {};
         double Pitch;
         double Heading;
         double Bank;
@@ -58,7 +56,7 @@ namespace xpilot
 
     struct TerrainElevationData
     {
-        chrono::steady_clock::time_point Timestamp;
+        std::chrono::steady_clock::time_point Timestamp;
         WorldPoint Location;
         double RemoteValue;
         double LocalValue;
@@ -75,21 +73,21 @@ namespace xpilot
 
     struct FlightModelInfo
     {
-        string category;
-        string regex;
+        std::string category;
+        std::string regex;
     };
 
     class FlightModel
     {
     public:
-        string modelCategory;
+        std::string modelCategory;
         double GEAR_DURATION = 10000;       // [ms] time for gear up/down
         double GEAR_DEFLECTION = 0.5;       // [m]  main gear deflection on meters during touchdown
         double FLAPS_DURATION = 5000;       // [ms] time for full flaps extension from 0% to 100%
 
     public:
         static void InitializeModels();
-        static vector<FlightModelInfo> modelMatches;
+        static std::vector<FlightModelInfo> modelMatches;
     };
 
     constexpr long TERRAIN_ELEVATION_DATA_USABLE_AGE = 2000;
@@ -99,7 +97,8 @@ namespace xpilot
     class NetworkAircraft : public XPMP2::Aircraft
     {
     public:
-        NetworkAircraft(const string& _callsign, const AircraftVisualState& _visualState, const string& _icaoType, const string& _icaoAirline, const string& _livery, XPMPPlaneID _modeS_id, const string& _modelName);
+        NetworkAircraft(const std::string& _callsign, const AircraftVisualState& _visualState, const std::string& _icaoType, 
+        const std::string& _icaoAirline, const std::string& _livery, XPMPPlaneID _modeS_id, const std::string& _modelName);
         virtual ~NetworkAircraft();
 
         void copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const;
@@ -124,21 +123,21 @@ namespace xpilot
         float TargetGearPosition = 0.0f;
         float TargetFlapsPosition = 0.0f;
         float TargetSpoilerPosition = 0.0f;
-        string Origin;
-        string Destination;
-        chrono::steady_clock::time_point PreviousSurfaceUpdateTime;
+        std::string Origin;
+        std::string Destination;
+        std::chrono::steady_clock::time_point PreviousSurfaceUpdateTime;
         XPMPPlaneSurfaces_t Surfaces;
         XPMPPlaneRadar_t Radar;
 
         FlightModel flightModel;
 
         TerrainProbe LocalTerrainProbe;
-        optional<double> LocalTerrainElevation = {};
-        optional<double> AdjustedAltitude = {};
+        std::optional<double> LocalTerrainElevation = {};
+        std::optional<double> AdjustedAltitude = {};
         double TargetTerrainOffset = 0.0;
         double TerrainOffset = 0.0;
         double TerrainOffsetMagnitude = 0.0;
-        list<TerrainElevationData> TerrainElevationHistory;
+        std::list<TerrainElevationData> TerrainElevationHistory;
         bool HasUsableTerrainElevationData;
 
         AircraftVisualState VisualState;
@@ -150,8 +149,8 @@ namespace xpilot
         Vector3 RotationalErrorVelocities;
         long ApplyErrorVelocitiesUntil;
 
-        chrono::steady_clock::time_point LastVelocityUpdate;
-        chrono::steady_clock::time_point LastSlowPositionTimestamp;
+        std::chrono::steady_clock::time_point LastVelocityUpdate;
+        std::chrono::steady_clock::time_point LastSlowPositionTimestamp;
 
         int SoundChannelId;
         EngineClassType EngineClass;

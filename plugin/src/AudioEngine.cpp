@@ -38,7 +38,7 @@ void CAudioEngine::Update()
     SoundSystem->update();
 }
 
-void CAudioEngine::LoadSound(const string& soundName, const string& soundFilePath, bool bLooping)
+void CAudioEngine::LoadSound(const std::string& soundName, const std::string& soundFilePath, bool bLooping)
 {
 	auto foundIt = SoundMap.find(soundName);
 	if (foundIt != SoundMap.end())
@@ -56,7 +56,7 @@ void CAudioEngine::LoadSound(const string& soundName, const string& soundFilePat
 	}
 }
 
-void CAudioEngine::UnloadSound(const string& soundName)
+void CAudioEngine::UnloadSound(const std::string& soundName)
 {
 	auto foundIt = SoundMap.find(soundName);
 	if (foundIt != SoundMap.end())
@@ -66,7 +66,7 @@ void CAudioEngine::UnloadSound(const string& soundName)
 	SoundMap.erase(foundIt);
 }
 
-int CAudioEngine::CreateSoundChannel(const string& soundName, float volumeDb)
+int CAudioEngine::CreateSoundChannel(const std::string& soundName, float volumeDb)
 {
 	int mChannelId = mNextChannelId++;
 	auto foundIt = SoundMap.find(soundName);
@@ -137,7 +137,7 @@ void CAudioEngine::SetListenerPosition()
 	CAudioEngine::ErrorCheck("SetListenerPosition", SoundSystem->set3DListenerAttributes(0, &zero, NULL, NULL, NULL));
 }
 
-int CAudioEngine::ErrorCheck(const string& method, FMOD_RESULT result)
+int CAudioEngine::ErrorCheck(const std::string& method, FMOD_RESULT result)
 {
 	if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE))
 	{

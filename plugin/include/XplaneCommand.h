@@ -23,14 +23,12 @@
 
 #include <functional>
 
-using namespace std;
-
 namespace xpilot
 {
 	class XplaneCommand
 	{
 	public:
-		XplaneCommand(const char* name, const char* description, function<void()> handler) :
+		XplaneCommand(const char* name, const char* description, std::function<void()> handler) :
 			m_handler(handler),
 			m_command(XPLMCreateCommand(name, description))
 		{
@@ -50,7 +48,7 @@ namespace xpilot
 			if (phase == xplm_CommandBegin) { (static_cast<XplaneCommand*>(refcon)->m_handler)(); }
 			return 1;
 		}
-		function<void()> m_handler;
+		std::function<void()> m_handler;
 		XPLMCommandRef m_command;
 	};
 }

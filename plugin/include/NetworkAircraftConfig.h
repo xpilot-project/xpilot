@@ -25,14 +25,13 @@
 #include <optional>
 
 using json = nlohmann::json;
-using namespace std;
 
 namespace nlohmann
 {
     template<typename T>
-    struct adl_serializer<optional<T>>
+    struct adl_serializer<std::optional<T>>
     {
-        static void to_json(json& j, const optional<T>& value)
+        static void to_json(json& j, const std::optional<T>& value)
         {
             if (!value)
             {
@@ -44,7 +43,7 @@ namespace nlohmann
             }
         }
 
-        static void from_json(json const& j, optional<T>& value)
+        static void from_json(json const& j, std::optional<T>& value)
         {
             if (j.is_null())
             {
@@ -62,29 +61,29 @@ namespace xpilot
 {
     struct NetworkAircraftConfigLights
     {
-        optional<bool> strobesOn;
-        optional<bool> landingOn;
-        optional<bool> taxiOn;
-        optional<bool> beaconOn;
-        optional<bool> navOn;
+        std::optional<bool> strobesOn;
+        std::optional<bool> landingOn;
+        std::optional<bool> taxiOn;
+        std::optional<bool> beaconOn;
+        std::optional<bool> navOn;
     };
 
     struct NetworkAircraftConfigData
     {
-        string callsign;
-        optional<NetworkAircraftConfigLights> lights;
-        optional<bool> enginesRunning;
-        optional<bool> enginesReversing;
-        optional<bool> onGround;
-        optional<bool> spoilersDeployed;
-        optional<bool> gearDown;
-        optional<float> flapsPct;
-        optional<bool> fullConfig;
+        std::string callsign;
+        std::optional<NetworkAircraftConfigLights> lights;
+        std::optional<bool> enginesRunning;
+        std::optional<bool> enginesReversing;
+        std::optional<bool> onGround;
+        std::optional<bool> spoilersDeployed;
+        std::optional<bool> gearDown;
+        std::optional<float> flapsPct;
+        std::optional<bool> fullConfig;
     };
 
     struct NetworkAircraftConfig
     {
-        string type;
+        std::string type;
         NetworkAircraftConfigData data;
     };
 

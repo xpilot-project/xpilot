@@ -24,13 +24,11 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 namespace xpilot
 {
     struct CslPackage
     {
-        string path;
+        std::string path;
         bool enabled;
 
         inline bool empty() const
@@ -41,7 +39,7 @@ namespace xpilot
         {
             return path == o.path;
         }
-        inline bool operator== (const string& s) const
+        inline bool operator== (const std::string& s) const
         {
             return path == s;
         }
@@ -60,21 +58,21 @@ namespace xpilot
         bool loadConfig();
         bool saveConfig();
 
-        typedef vector<CslPackage> vecCslPackages;
-        vector<CslPackage> getCSLPackages()const
+        typedef std::vector<CslPackage> vecCslPackages;
+        std::vector<CslPackage> getCSLPackages()const
         {
             return m_cslPackages;
         }
-        void saveCSLPath(int idx, const string path);
+        void saveCSLPath(int idx, const std::string path);
         void saveCSLEnabled(int idx, bool enabled);
         bool loadCSLPackage(int idx);
         bool hasValidPaths() const;
 
-        string getDefaultAcIcaoType() const
+        std::string getDefaultAcIcaoType() const
         {
             return m_defaultAcIcaoType;
         }
-        bool setDefaultAcIcaoType(const string type);
+        bool setDefaultAcIcaoType(const std::string type);
 
         bool setShowHideLabels(bool status);
         bool getShowHideLabels() const
@@ -88,8 +86,8 @@ namespace xpilot
             return m_debugModelMatching;
         }
 
-        bool setTcpPort(string port);
-        string getTcpPort() const
+        bool setTcpPort(std::string port);
+        std::string getTcpPort() const
         {
             return m_tcpPort;
         }
@@ -180,17 +178,17 @@ namespace xpilot
         bool setAircraftSoundVolume(int volume);
         int getAircraftSoundVolume() const
         {
-            return max(0, min(m_aircraftSoundVolume, 100));
+            return std::max(0, std::min(m_aircraftSoundVolume, 100));
         }
 
     private:
         Config() = default;
-        vector<CslPackage> m_cslPackages;
-        string m_defaultAcIcaoType = "A320";
+        std::vector<CslPackage> m_cslPackages;
+        std::string m_defaultAcIcaoType = "A320";
         bool m_showHideLabels = true;
         bool m_debugModelMatching = false;
         bool m_defaultAtis = false;
-        string m_tcpPort = "53100";
+        std::string m_tcpPort = "53100";
         bool m_overrideContactAtcCommand = false;
         int m_labelColor = COLOR_YELLOW;
         bool m_disableTcas = false;
