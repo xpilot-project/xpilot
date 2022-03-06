@@ -23,7 +23,7 @@
 #include <QTimer>
 
 #include <nng/nng.h>
-#include <nng/protocol/pair0/pair.h>
+#include <nng/protocol/pair1/pair.h>
 
 #include "src/config/appconfig.h"
 #include "src/aircrafts/network_aircraft.h"

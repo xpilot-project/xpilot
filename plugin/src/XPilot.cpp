@@ -131,22 +131,22 @@ namespace xpilot
 	{
 		InitializeXPMP();
 		TryGetTcasControl();
+		XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
 
 		int rv;
-		if ((rv = nng_pair0_open(&_socket)) != 0) {
+		if ((rv = nng_pair1_open(&_socket)) != 0) {
 			LOG_MSG(logERROR, "Error opening socket: %i", rv);
 		}
 
 		std::string url = string_format("tcp://*:%s", Config::Instance().getTcpPort().c_str());
 		if ((rv = nng_listen(_socket, url.c_str(), NULL, 0)) != 0) {
 			LOG_MSG(logERROR, "Socket listen error: %i", rv);
+			return;
 		}
 		LOG_MSG(logMSG, "Now listening on port %s", Config::Instance().getTcpPort().c_str());
 
 		m_keepSocketAlive = true;
 		m_socketThread = new std::thread(&XPilot::SocketWorker, this);
-
-		XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
 	}
 
 	void XPilot::Shutdown()

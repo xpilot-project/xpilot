@@ -32,7 +32,7 @@
 #include "Utilities.h"
 
 #include <nng/nng.h>
-#include <nng/protocol/pair0/pair.h>
+#include <nng/protocol/pair1/pair.h>
 
 #include <deque>
 #include <thread>

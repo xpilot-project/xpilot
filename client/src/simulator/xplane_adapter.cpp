@@ -105,13 +105,13 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     connect(socket, &QUdpSocket::readyRead, this, &XplaneAdapter::OnDataReceived);
 
     int rv;
-    if((rv = nng_pair0_open(&_socket)) != 0) {
-        qDebug() << "Error opening socket" << rv;
+    if((rv = nng_pair1_open(&_socket)) != 0) {
+        writeToLog(QString("Error opening socket: %i").arg(rv));
     }
 
     QString url = QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort);
     if((rv = nng_dial(_socket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK)) != 0) {
-        qDebug() << "Error dialing socket" << rv;
+        writeToLog(QString("Error dialing socket: %i").arg(rv));
     }
 
     m_keepSocketAlive = true;
@@ -133,16 +133,18 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
         nng_socket _visualSocket;
 
         int rv;
-        if((rv = nng_pair0_open(&_visualSocket)) != 0) {
-            qDebug() << "Error opening visual socket" << rv;
+        if((rv = nng_pair1_open(&_visualSocket)) != 0) {
+            writeToLog(QString("Error opening visual socket: %i").arg(rv));
         }
 
         QString url = QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort);
         if((rv = nng_dial(_visualSocket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK)) != 0) {
-            qDebug() << "Error dialing visual socket" << rv;
+            writeToLog(QString("Error dialing visual socket: %i").arg(rv));
         }
 
-        m_visualSockets.push_back(_visualSocket);
+        if(rv == 0) {
+            m_visualSockets.push_back(_visualSocket);
+        }
     }
 
     connect(&m_heartbeatTimer, &QTimer::timeout, this, [&] {
