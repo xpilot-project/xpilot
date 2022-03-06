@@ -156,20 +156,23 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
             m_userAircraftConfigData = {};
             Subscribe();
 
-            // request plugin version
+            if(!m_initialHandshake)
             {
-                QJsonObject reply;
-                reply.insert("type", "PluginVersion");
-                QJsonDocument doc(reply);
-                sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
-            }
+                // request plugin version
+                {
+                    QJsonObject reply;
+                    reply.insert("type", "PluginVersion");
+                    QJsonDocument doc(reply);
+                    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+                }
 
-            // validate csl
-            {
-                QJsonObject reply;
-                reply.insert("type", "ValidateCsl");
-                QJsonDocument doc(reply);
-                sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+                // validate csl
+                {
+                    QJsonObject reply;
+                    reply.insert("type", "ValidateCsl");
+                    QJsonDocument doc(reply);
+                    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+                }
             }
 
             if(m_simConnected) {
