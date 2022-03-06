@@ -556,9 +556,6 @@ namespace xpilot
 						if (ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
 							it->textInput = "";
 
-						if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0))
-							ImGui::SetKeyboardFocusHere(-1);
-
 						ImGui::PopID();
 						ImGui::EndTabItem();
 					}
