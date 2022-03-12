@@ -1366,6 +1366,9 @@ Window {
                                                     }
                                                 }
                                                 else {
+                                                    if(!cliTextField.text || /^\s*$/.test(cliTextField.text)) {
+                                                        return; // skip empty message
+                                                    }
                                                     if(currentTab == 0) {
                                                         if(!networkConnected) {
                                                             throw "Not connected to network."
