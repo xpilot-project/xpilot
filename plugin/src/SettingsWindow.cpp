@@ -60,7 +60,7 @@ namespace xpilot
 
 	void SettingsWindow::loadConfig()
 	{
-		const Config::vecCslPackages& paths = xpilot::Config::Instance().getCSLPackages();
+		const Config::vecCslPackages& paths = xpilot::Config::getInstance().getCSLPackages();
 		for (int i = 0; i < 7; i++)
 		{
 			if (i < paths.size())
@@ -73,24 +73,24 @@ namespace xpilot
 			}
 		}
 
-		debugModelMatching = xpilot::Config::Instance().getDebugModelMatching();
-		showHideLabels = xpilot::Config::Instance().getShowHideLabels();
-		fallbackTypeCode = xpilot::Config::Instance().getDefaultAcIcaoType();
-		showMessagePreview = xpilot::Config::Instance().getNotificationPanelVisible();
-		notificationPanelTimeout = xpilot::Config::Instance().getNotificationPanelTimeout();
-		overrideContactAtcCommand = xpilot::Config::Instance().getOverrideContactAtcCommand();
-		labelMaxDistance = xpilot::Config::Instance().getMaxLabelDistance();
-		labelVisibilityCutoff = xpilot::Config::Instance().getLabelCutoffVis();
-		logLevel = xpilot::Config::Instance().getLogLevel();
-		enableTransmitIndicator = xpilot::Config::Instance().getEnableTransmitIndicator();
-		enableAircraftSounds = xpilot::Config::Instance().getEnableAircraftSounds();
-		aircraftSoundVolume = xpilot::Config::Instance().getAircraftSoundVolume();
-		HexToRgb(xpilot::Config::Instance().getAircraftLabelColor(), lblCol);
+		debugModelMatching = xpilot::Config::getInstance().getDebugModelMatching();
+		showHideLabels = xpilot::Config::getInstance().getShowHideLabels();
+		fallbackTypeCode = xpilot::Config::getInstance().getDefaultAcIcaoType();
+		showMessagePreview = xpilot::Config::getInstance().getNotificationPanelVisible();
+		notificationPanelTimeout = xpilot::Config::getInstance().getNotificationPanelTimeout();
+		overrideContactAtcCommand = xpilot::Config::getInstance().getOverrideContactAtcCommand();
+		labelMaxDistance = xpilot::Config::getInstance().getMaxLabelDistance();
+		labelVisibilityCutoff = xpilot::Config::getInstance().getLabelCutoffVis();
+		logLevel = xpilot::Config::getInstance().getLogLevel();
+		enableTransmitIndicator = xpilot::Config::getInstance().getEnableTransmitIndicator();
+		enableAircraftSounds = xpilot::Config::getInstance().getEnableAircraftSounds();
+		aircraftSoundVolume = xpilot::Config::getInstance().getAircraftSoundVolume();
+		HexToRgb(xpilot::Config::getInstance().getAircraftLabelColor(), lblCol);
 	}
 
 	void Save()
 	{
-		if (!xpilot::Config::Instance().saveConfig())
+		if (!xpilot::Config::getInstance().saveConfig())
 		{
 			ImGui::OpenPopup("Error Saving Settings");
 		}
@@ -135,7 +135,7 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##AutoShowMessagePreview", &showMessagePreview))
 					{
-						xpilot::Config::Instance().setNotificationPanelVisible(showMessagePreview);
+						xpilot::Config::getInstance().setNotificationPanelVisible(showMessagePreview);
 						Save();
 					}
 
@@ -151,7 +151,7 @@ namespace xpilot
 					const char* autoHideOptions[] = { "5 seconds", "10 seconds", "15 seconds", "30 seconds", "60 seconds" };
 					if (ImGui::Combo("##AutoHide", &notificationPanelTimeout, autoHideOptions, IM_ARRAYSIZE(autoHideOptions)))
 					{
-						xpilot::Config::Instance().setNotificationPanelTimeout(notificationPanelTimeout);
+						xpilot::Config::getInstance().setNotificationPanelTimeout(notificationPanelTimeout);
 						Save();
 					}
 
@@ -165,7 +165,7 @@ namespace xpilot
 					if (ImGui::Checkbox("##ShowAircraftLabels", &showHideLabels))
 					{
 						XPMPEnableAircraftLabels(showHideLabels);
-						xpilot::Config::Instance().setShowHideLabels(showHideLabels);
+						xpilot::Config::getInstance().setShowHideLabels(showHideLabels);
 						Save();
 					}
 
@@ -190,7 +190,7 @@ namespace xpilot
 								+ (lround(lblCol[1] * 255.0f) << 8)
 								+ (lround(lblCol[2] * 255.0f) << 0));
 
-							xpilot::Config::Instance().setAircraftLabelColor(col);
+							xpilot::Config::getInstance().setAircraftLabelColor(col);
 							Save();
 						}
 						ImGui::EndPopup();
@@ -201,28 +201,28 @@ namespace xpilot
 					if (ImGui::ColorButton("Yellow", ImVec4(1.0f, 1.0f, 0.0f, 1.0f), ImGuiColorEditFlags_NoTooltip))
 					{
 						HexToRgb(COLOR_YELLOW, lblCol);
-						xpilot::Config::Instance().setAircraftLabelColor(COLOR_YELLOW);
+						xpilot::Config::getInstance().setAircraftLabelColor(COLOR_YELLOW);
 						Save();
 					}
 					ImGui::SameLine();
 					if (ImGui::ColorButton("Red", ImVec4(1.0f, 0.0f, 0.0f, 1.0f), ImGuiColorEditFlags_NoTooltip))
 					{
 						HexToRgb(COLOR_RED, lblCol);
-						xpilot::Config::Instance().setAircraftLabelColor(COLOR_RED);
+						xpilot::Config::getInstance().setAircraftLabelColor(COLOR_RED);
 						Save();
 					}
 					ImGui::SameLine();
 					if (ImGui::ColorButton("Green", ImVec4(0.0f, 1.0f, 0.0f, 1.0f), ImGuiColorEditFlags_NoTooltip))
 					{
 						HexToRgb(COLOR_GREEN, lblCol);
-						xpilot::Config::Instance().setAircraftLabelColor(COLOR_GREEN);
+						xpilot::Config::getInstance().setAircraftLabelColor(COLOR_GREEN);
 						Save();
 					}
 					ImGui::SameLine();
 					if (ImGui::ColorButton("Blue", ImVec4(0.0f, 0.94f, 0.94f, 1.0f), ImGuiColorEditFlags_NoTooltip))
 					{
 						HexToRgb(COLOR_BLUE, lblCol);
-						xpilot::Config::Instance().setAircraftLabelColor(COLOR_BLUE);
+						xpilot::Config::getInstance().setAircraftLabelColor(COLOR_BLUE);
 						Save();
 					}
 
@@ -236,7 +236,7 @@ namespace xpilot
 					if (ImGui::SliderInt("##MaxDist", &labelMaxDistance, 1, 20, "%d nm"))
 					{
 						XPMPSetAircraftLabelDist(float(labelMaxDistance), labelVisibilityCutoff);
-						xpilot::Config::Instance().setMaxLabelDistance(labelMaxDistance);
+						xpilot::Config::getInstance().setMaxLabelDistance(labelMaxDistance);
 						Save();
 					}
 
@@ -250,7 +250,7 @@ namespace xpilot
 					if (ImGui::Checkbox("##HideLabelsVisibility", &labelVisibilityCutoff))
 					{
 						XPMPSetAircraftLabelDist(float(labelMaxDistance), labelVisibilityCutoff);
-						xpilot::Config::Instance().setLabelCutoffVis(labelVisibilityCutoff);
+						xpilot::Config::getInstance().setLabelCutoffVis(labelVisibilityCutoff);
 						Save();
 					}
 
@@ -263,7 +263,7 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::InputTextStd("##Fallback", &fallbackTypeCode, ImGuiInputTextFlags_CharsUppercase))
 					{
-						xpilot::Config::Instance().setDefaultAcIcaoType(fallbackTypeCode);
+						xpilot::Config::getInstance().setDefaultAcIcaoType(fallbackTypeCode);
 						Save();
 					}
 
@@ -276,7 +276,7 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##EnableTransmitIndicator", &enableTransmitIndicator))
 					{
-						xpilot::Config::Instance().setEnableTransmitIndicator(enableTransmitIndicator);
+						xpilot::Config::getInstance().setEnableTransmitIndicator(enableTransmitIndicator);
 						Save();
 					}
 
@@ -289,7 +289,7 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##EnableAircraftSounds", &enableAircraftSounds))
 					{
-						xpilot::Config::Instance().setEnableAircraftSounds(enableAircraftSounds);
+						xpilot::Config::getInstance().setEnableAircraftSounds(enableAircraftSounds);
 						Save();
 					}
 
@@ -302,7 +302,7 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::SliderInt("##AircraftEngineVolume", &aircraftSoundVolume, 0, 100, "%d%%"))
 					{
-						xpilot::Config::Instance().setAircraftSoundVolume(aircraftSoundVolume);
+						xpilot::Config::getInstance().setAircraftSoundVolume(aircraftSoundVolume);
 						Save();
 					}
 
@@ -344,7 +344,7 @@ namespace xpilot
 						ImGui::TableSetColumnIndex(0);
 						if (ImGui::Checkbox("Enabled", &pathsEnabled[i]))
 						{
-							xpilot::Config::Instance().saveCSLEnabled(i, pathsEnabled[i]);
+							xpilot::Config::getInstance().saveCSLEnabled(i, pathsEnabled[i]);
 							Save();
 						}
 
@@ -352,7 +352,7 @@ namespace xpilot
 						ImGui::SetNextItemWidth(-1);
 						if (ImGui::InputTextStd("", &cslPaths[i]))
 						{
-							xpilot::Config::Instance().saveCSLPath(i, cslPaths[i]);
+							xpilot::Config::getInstance().saveCSLPath(i, cslPaths[i]);
 							Save();
 						}
 
@@ -371,8 +371,8 @@ namespace xpilot
 							cslPaths[i] = "";
 							pathsEnabled[i] = false;
 
-							xpilot::Config::Instance().saveCSLEnabled(i, pathsEnabled[i]);
-							xpilot::Config::Instance().saveCSLPath(i, cslPaths[i]);
+							xpilot::Config::getInstance().saveCSLEnabled(i, pathsEnabled[i]);
+							xpilot::Config::getInstance().saveCSLPath(i, cslPaths[i]);
 							Save();
 						}
 
@@ -382,8 +382,8 @@ namespace xpilot
 							cslPaths[selectedPathIdx] = fileBrowser.GetSelected().string();
 							pathsEnabled[selectedPathIdx] = true;
 
-							xpilot::Config::Instance().saveCSLEnabled(selectedPathIdx, pathsEnabled[selectedPathIdx]);
-							xpilot::Config::Instance().saveCSLPath(selectedPathIdx, cslPaths[selectedPathIdx]);
+							xpilot::Config::getInstance().saveCSLEnabled(selectedPathIdx, pathsEnabled[selectedPathIdx]);
+							xpilot::Config::getInstance().saveCSLPath(selectedPathIdx, cslPaths[selectedPathIdx]);
 							Save();
 
 							fileBrowser.ClearSelected();
@@ -437,7 +437,7 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##OverrideContactATC", &overrideContactAtcCommand))
 					{
-						xpilot::Config::Instance().setOverrideContactAtcCommand(overrideContactAtcCommand);
+						xpilot::Config::getInstance().setOverrideContactAtcCommand(overrideContactAtcCommand);
 						Save();
 					}
 
@@ -452,7 +452,7 @@ namespace xpilot
 					ImGui::SetNextItemWidth(logCbWidth);
 					if (ImGui::Combo("##LogLevel", &logLevel, "Debug\0Info\0Warning (default)\0Error\0Fatal\0", 5))
 					{
-						xpilot::Config::Instance().setLogLevel(logLevel);
+						xpilot::Config::getInstance().setLogLevel(logLevel);
 						Save();
 					}
 
@@ -465,7 +465,7 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##ModelMatchingLog", &debugModelMatching))
 					{
-						xpilot::Config::Instance().setDebugModelMatching(debugModelMatching);
+						xpilot::Config::getInstance().setDebugModelMatching(debugModelMatching);
 						Save();
 					}
 				}

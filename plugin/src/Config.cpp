@@ -51,7 +51,7 @@ namespace xpilot
         return j.dump(1);
     }
 
-    Config& Config::Instance()
+    Config& Config::getInstance()
     {
         static auto&& config = Config();
         return config;
@@ -61,119 +61,110 @@ namespace xpilot
     {
         std::string configPath(GetPluginPath() + "Resources/Config.json");
         std::ifstream ifs(configPath);
+
         if (!ifs)
-        {
-            saveConfig();
-        }
+            saveConfig(); // create configuration file if it does not exist
 
-        // which conversion to do with older config files?
-        enum cfgConvE { CFG_NO_CONV=0, CFG_PORT_CONV } conv = CFG_NO_CONV;
+        // conversion method for config file
+        enum cfgConvE { CFG_NO_CONV = 0, CFG_PORT_CONV } conv = CFG_NO_CONV;
 
-        try
+        json jf = json::parse(ifs, nullptr, false);
+        if (!jf.empty())
         {
-            json jf = json::parse(ifs);
-            if (!jf.empty())
+            if (!jf.contains("Version"))
             {
-                if(!jf.contains("Version"))
-                {
-                    conv = CFG_PORT_CONV;
-                }
-                if (jf.contains("ShowAircraftLabels"))
-                {
-                    setShowHideLabels(jf["ShowAircraftLabels"]);
-                }
-                if (jf.contains("DefaultIcaoType"))
-                {
-                    setDefaultAcIcaoType(jf["DefaultIcaoType"]);
-                }
-                if (jf.contains("PluginPort"))
-                {
-                    std::string v = json_to_string(jf["PluginPort"]);
-                    if(conv == CFG_PORT_CONV && v == "45001")
-                    {
-                        // convert to 53100 if previously on 45001
-                        v = "53100";
-                    }
-                    setTcpPort(v);
-                }
-                if (jf.contains("DebugModelMatching"))
-                {
-                    setDebugModelMatching(jf["DebugModelMatching"]);
-                }
-                if (jf.contains("EnableDefaultAtis"))
-                {
-                    setDefaultAtisEnabled(jf["EnableDefaultAtis"]);
-                }
-                if (jf.contains("ShowNotificationBar"))
-                {
-                    setNotificationPanelVisible(jf["ShowNotificationBar"]);
-                }
-                if (jf.contains("NotificationBarDisappearTime"))
-                {
-                    setNotificationPanelTimeout(jf["NotificationBarDisappearTime"]);
-                }
-                if (jf.contains("OverrideContactAtc"))
-                {
-                    setOverrideContactAtcCommand(jf["OverrideContactAtc"]);
-                }
-                if (jf.contains("DisableTcas"))
-                {
-                    setDisableTcas(jf["DisableTcas"]);
-                }
-                if (jf.contains("LabelColor"))
-                {
-                    setAircraftLabelColor(jf["LabelColor"]);
-                }
-                if (jf.contains("MaxLabelDist"))
-                {
-                    int dist = std::max(1, std::min(jf.at("MaxLabelDist").get<int>(), 20));
-                    setMaxLabelDistance(dist);
-                }
-                if (jf.contains("LabelCutoffVis"))
-                {
-                    setLabelCutoffVis(jf["LabelCutoffVis"]);
-                }
-                if (jf.contains("LogLevel"))
-                {
-                    setLogLevel(jf["LogLevel"]);
-                }
-                if (jf.contains("EnableTransmitIndicator"))
-                {
-                    setEnableTransmitIndicator(jf["EnableTransmitIndicator"]);
-                }
-                if (jf.contains("EnableAircraftSounds"))
-                {
-                    setEnableAircraftSounds(jf["EnableAircraftSounds"]);
-                }
-                if (jf.contains("AircraftSoundVolume"))
-                {
-                    int vol = std::max(0, std::min(jf.at("AircraftSoundVolume").get<int>(), 100));
-                    setAircraftSoundVolume(vol);
-                }
-                if (jf.contains("CSL"))
-                {
-                    json cslpackages = jf["CSL"];
-                    for (auto& p : cslpackages)
-                    {
-                        auto csl = p.get<CslPackage>();
-                        if (std::find(m_cslPackages.begin(), m_cslPackages.end(), csl.path) == m_cslPackages.end())
-                        {
-                            m_cslPackages.emplace_back(csl);
-                        }
-                    }
-                }
-                saveConfig();
+                conv = CFG_PORT_CONV;
             }
+            if (jf.contains("ShowAircraftLabels"))
+            {
+                setShowHideLabels(jf["ShowAircraftLabels"]);
+            }
+            if (jf.contains("DefaultIcaoType"))
+            {
+                setDefaultAcIcaoType(jf["DefaultIcaoType"]);
+            }
+            if (jf.contains("PluginPort"))
+            {
+                std::string v = json_to_string(jf["PluginPort"]);
+                if (conv == CFG_PORT_CONV && v == "45001")
+                {
+                    // convert to 53100 if previously on 45001
+                    v = "53100";
+                }
+                setTcpPort(v);
+            }
+            if (jf.contains("DebugModelMatching"))
+            {
+                setDebugModelMatching(jf["DebugModelMatching"]);
+            }
+            if (jf.contains("EnableDefaultAtis"))
+            {
+                setDefaultAtisEnabled(jf["EnableDefaultAtis"]);
+            }
+            if (jf.contains("ShowNotificationBar"))
+            {
+                setNotificationPanelVisible(jf["ShowNotificationBar"]);
+            }
+            if (jf.contains("NotificationBarDisappearTime"))
+            {
+                setNotificationPanelTimeout(jf["NotificationBarDisappearTime"]);
+            }
+            if (jf.contains("OverrideContactAtc"))
+            {
+                setOverrideContactAtcCommand(jf["OverrideContactAtc"]);
+            }
+            if (jf.contains("DisableTcas"))
+            {
+                setDisableTcas(jf["DisableTcas"]);
+            }
+            if (jf.contains("LabelColor"))
+            {
+                setAircraftLabelColor(jf["LabelColor"]);
+            }
+            if (jf.contains("MaxLabelDist"))
+            {
+                int dist = std::max(1, std::min(jf.at("MaxLabelDist").get<int>(), 20));
+                setMaxLabelDistance(dist);
+            }
+            if (jf.contains("LabelCutoffVis"))
+            {
+                setLabelCutoffVis(jf["LabelCutoffVis"]);
+            }
+            if (jf.contains("LogLevel"))
+            {
+                setLogLevel(jf["LogLevel"]);
+            }
+            if (jf.contains("EnableTransmitIndicator"))
+            {
+                setEnableTransmitIndicator(jf["EnableTransmitIndicator"]);
+            }
+            if (jf.contains("EnableAircraftSounds"))
+            {
+                setEnableAircraftSounds(jf["EnableAircraftSounds"]);
+            }
+            if (jf.contains("AircraftSoundVolume"))
+            {
+                int vol = std::max(0, std::min(jf.at("AircraftSoundVolume").get<int>(), 100));
+                setAircraftSoundVolume(vol);
+            }
+            if (jf.contains("CSL"))
+            {
+                json cslpackages = jf["CSL"];
+                for (auto& p : cslpackages)
+                {
+                    auto csl = p.get<CslPackage>();
+                    if (std::find(m_cslPackages.begin(), m_cslPackages.end(), csl.path) == m_cslPackages.end())
+                    {
+                        m_cslPackages.emplace_back(csl);
+                    }
+                }
+            }
+            saveConfig();
+            return true;
         }
-        catch (const std::string& e)
-        {
-            return false;
-        }
-        catch (...)
-        {
-            return false;
-        }
-        return true;
+
+        saveConfig();
+        return false;
     }
 
     bool Config::saveConfig()
@@ -201,9 +192,9 @@ namespace xpilot
         j["EnableAircraftSounds"] = getEnableAircraftSounds();
         j["AircraftSoundVolume"] = getAircraftSoundVolume();
 
+        auto jsonObjects = json::array();
         if (!m_cslPackages.empty())
         {
-            auto jsonObjects = json::array();
             for (CslPackage& p : m_cslPackages)
             {
                 if (!p.path.empty())
@@ -212,8 +203,8 @@ namespace xpilot
                     jsonObjects.push_back(j);
                 }
             }
-            j["CSL"] = jsonObjects;
         }
+        j["CSL"] = jsonObjects;
 
         file << j.dump(1);
 
@@ -396,16 +387,19 @@ namespace xpilot
         m_logLevel = lvl;
         return true;
     }
+
     bool Config::setEnableTransmitIndicator(bool b)
     {
         m_transmitIndicator = b;
         return true;
     }
+
     bool Config::setEnableAircraftSounds(bool b)
     {
         m_aircraftSounds = b;
         return false;
     }
+
     bool Config::setAircraftSoundVolume(int volume)
     {
         m_aircraftSoundVolume = volume;

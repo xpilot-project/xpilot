@@ -293,15 +293,15 @@ namespace xpilot
 				anyDoorOpen = true;
 			}
 
-			bool ShouldPauseSound = !Config::Instance().getEnableAircraftSounds() || !instance->m_soundOn || instance->m_simPaused;
+			bool ShouldPauseSound = !Config::getInstance().getEnableAircraftSounds() || !instance->m_soundOn || instance->m_simPaused;
 
 			if (instance->m_isViewExternal == 0 && instance->m_canopyOpenRatio == 0 && anyDoorOpen == false) {
 				// internal view
-				soundVolume = Config::Instance().getAircraftSoundVolume() / 100.0f * CLOSED_SPACE_VOLUME_SCALAR;
+				soundVolume = Config::getInstance().getAircraftSoundVolume() / 100.0f * CLOSED_SPACE_VOLUME_SCALAR;
 			}
 			else {
 				// external view
-				soundVolume = Config::Instance().getAircraftSoundVolume() / 100.0f * OUTSIDE_SPACE_VOLUME_SCALAR;
+				soundVolume = Config::getInstance().getAircraftSoundVolume() / 100.0f * OUTSIDE_SPACE_VOLUME_SCALAR;
 			}
 
 			XPLMCameraPosition_t camera;

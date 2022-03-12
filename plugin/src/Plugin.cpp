@@ -81,7 +81,7 @@ static int DrawTransmitIndicator(XPLMDrawingPhase inPhase, int inIsBefore, void*
 
 void ShowTransmitIndicator()
 {
-    if (Config::Instance().getEnableTransmitIndicator() && environment->isNetworkConnected() && environment->radiosPowered()) {
+    if (Config::getInstance().getEnableTransmitIndicator() && environment->isNetworkConnected() && environment->radiosPowered()) {
         XPLMRegisterDrawCallback(DrawTransmitIndicator, xplm_Phase_Window, 1, nullptr);
     }
 }
@@ -125,7 +125,7 @@ PLUGIN_API int XPluginEnable(void)
             environment.reset();
         }
         XPImgWindowInit();
-        Config::Instance().loadConfig();
+        Config::getInstance().loadConfig();
         environment = std::make_unique<xpilot::XPilot>();
         LOG_MSG(logMSG, "xPilot plugin enabled");
     }
@@ -192,7 +192,7 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID from, int msg, void* inParam)
 
 int ContactAtcCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
 {
-    if (xpilot::Config::Instance().getOverrideContactAtcCommand())
+    if (xpilot::Config::getInstance().getOverrideContactAtcCommand())
     {
         if (inPhase == xplm_CommandContinue)
         {
@@ -280,9 +280,9 @@ int ToggleAircraftLabelsCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhas
 {
     if (inPhase == xplm_CommandEnd)
     {
-        bool enabled = !xpilot::Config::Instance().getShowHideLabels();
-        xpilot::Config::Instance().setShowHideLabels(enabled);
-        xpilot::Config::Instance().saveConfig();
+        bool enabled = !xpilot::Config::getInstance().getShowHideLabels();
+        xpilot::Config::getInstance().setShowHideLabels(enabled);
+        xpilot::Config::getInstance().saveConfig();
         XPMPEnableAircraftLabels(enabled);
     }
     return 0;
@@ -337,7 +337,7 @@ void UpdateMenuItems()
 {
     XPLMSetMenuItemName(PluginMenu, MenuDefaultAtis, environment->IsXplaneAtisDisabled() ? "X-Plane ATIS: Disabled" : "X-Plane ATIS: Enabled", 0);
     XPLMSetMenuItemName(PluginMenu, MenuToggleTcas, XPMPHasControlOfAIAircraft() ? "Release TCAS Control" : "Request TCAS Control", 0);
-    XPLMSetMenuItemName(PluginMenu, MenuToggleAircraftLabels, xpilot::Config::Instance().getShowHideLabels() ? "Aircraft Labels: On" : "Aircraft Labels: Off", 0);
+    XPLMSetMenuItemName(PluginMenu, MenuToggleAircraftLabels, xpilot::Config::getInstance().getShowHideLabels() ? "Aircraft Labels: On" : "Aircraft Labels: Off", 0);
 }
 
 #ifdef _WIN32

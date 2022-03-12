@@ -274,7 +274,7 @@ inline void Log(logLevel level, const char *msg, ...)
 
 #define LOG_MSG(lvl, ...)                                \
 	{                                                      \
-		if (lvl >= xpilot::Config::Instance().getLogLevel()) \
+		if (lvl >= xpilot::Config::getInstance().getLogLevel()) \
 		{                                                    \
 			Log(lvl, __VA_ARGS__);                             \
 		}                                                    \

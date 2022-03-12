@@ -115,11 +115,11 @@ namespace xpilot
             NotificationHistory.push_back(notification);
             m_scrollToBottom = true;
 
-            if (Config::Instance().getNotificationPanelVisible())
+            if (Config::getInstance().getNotificationPanelVisible())
             {
                 SetVisible(true);
                 m_disappearTime = std::chrono::system_clock::now() +
-                    std::chrono::milliseconds(Config::Instance().getActualMessagePreviewTime() * 1000);
+                    std::chrono::milliseconds(Config::getInstance().getActualMessagePreviewTime() * 1000);
             }
         }
     }

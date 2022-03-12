@@ -138,12 +138,12 @@ namespace xpilot
 			LOG_MSG(logERROR, "Error opening socket: %i", rv);
 		}
 
-		std::string url = string_format("tcp://*:%s", Config::Instance().getTcpPort().c_str());
+		std::string url = string_format("tcp://*:%s", Config::getInstance().getTcpPort().c_str());
 		if ((rv = nng_listen(_socket, url.c_str(), NULL, 0)) != 0) {
 			LOG_MSG(logERROR, "Socket listen error: %i", rv);
 			return;
 		}
-		LOG_MSG(logMSG, "Now listening on port %s", Config::Instance().getTcpPort().c_str());
+		LOG_MSG(logMSG, "Now listening on port %s", Config::getInstance().getTcpPort().c_str());
 
 		m_keepSocketAlive = true;
 		m_socketThread = new std::thread(&XPilot::SocketWorker, this);
@@ -474,9 +474,9 @@ namespace xpilot
 	int CBIntPrefsFunc(const char*, [[maybe_unused]] const char* item, int defaultVal)
 	{
 		if (!strcmp(item, XPMP_CFG_ITM_MODELMATCHING))
-			return Config::Instance().getDebugModelMatching();
+			return Config::getInstance().getDebugModelMatching();
 		if (!strcmp(item, XPMP_CFG_ITM_LOGLEVEL))
-			return Config::Instance().getLogLevel();
+			return Config::getInstance().getLogLevel();
 		if (!strcmp(item, XPMP_CFG_ITM_CLAMPALL))
 			return 0;
 		return defaultVal;
@@ -593,7 +593,7 @@ namespace xpilot
 			return false;
 		}
 
-		if (!Config::Instance().hasValidPaths())
+		if (!Config::getInstance().hasValidPaths())
 		{
 			std::string err = "There are no valid CSL paths configured. Please verify your CSL configuration in X-Plane (Plugins > xPilot > Settings > CSL Configuration).";
 			addNotification(err.c_str(), 192, 57, 43);
@@ -601,7 +601,7 @@ namespace xpilot
 		}
 		else
 		{
-			for (const CslPackage& p : Config::Instance().getCSLPackages())
+			for (const CslPackage& p : Config::getInstance().getCSLPackages())
 			{
 				if (!p.path.empty() && p.enabled && CountFilesInPath(p.path) > 0)
 				{
@@ -621,8 +621,8 @@ namespace xpilot
 			}
 		}
 
-		XPMPEnableAircraftLabels(Config::Instance().getShowHideLabels());
-		XPMPSetAircraftLabelDist(Config::Instance().getMaxLabelDistance(), Config::Instance().getLabelCutoffVis());
+		XPMPEnableAircraftLabels(Config::getInstance().getShowHideLabels());
+		XPMPSetAircraftLabelDist(Config::getInstance().getMaxLabelDistance(), Config::getInstance().getLabelCutoffVis());
 		return true;
 	}
 

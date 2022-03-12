@@ -48,7 +48,7 @@ namespace xpilot
     class Config
     {
     public:
-        static Config& Instance();
+        static Config& getInstance();
         ~Config() = default;
         Config(const Config&) = delete;
         void operator=(const Config&) = delete;

@@ -473,7 +473,7 @@ namespace xpilot
             SetThrustRatio(0.0f);
         }
 
-        HexToRgb(Config::Instance().getAircraftLabelColor(), colLabel);
+        HexToRgb(Config::getInstance().getAircraftLabelColor(), colLabel);
     }
 
     void NetworkAircraft::copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const
