@@ -92,3 +92,8 @@ const QString xpilot::BuildConfig::getSentryDsn()
 {
     return "@SENTRY_DSN@";
 }
+
+const QString xpilot::BuildConfig::getLinuxBuildType()
+{
+    return "@LINUX_BUILD_TYPE@";
+}

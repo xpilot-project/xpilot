@@ -34,6 +34,8 @@ namespace xpilot
         static const int versionBeta();
 
         static const QString getSentryDsn();
+
+        static const QString getLinuxBuildType(); // ubuntu-latest, ubuntu-18.04
     };
 }
 

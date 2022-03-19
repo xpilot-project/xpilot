@@ -31,7 +31,11 @@ jobs:
 
     #if: ${{ false }}
 
-    runs-on: ubuntu-18.04
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-18.04]
 
     env:
       IB_URL: https://installbuilder.com/installbuilder-enterprise-21.12.0-linux-x64-installer.run
@@ -114,7 +118,8 @@ jobs:
             -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
             -DSENTRY_DSN=${{ env.SENTRY_DSN }} \
             -DSENTRY_BACKEND=crashpad \
-            -DSENTRY_INTEGRATION_QT=YES
+            -DSENTRY_INTEGRATION_QT=YES \
+            -DLINUX_BUILD_TYPE=${{ matrix.os }}
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}/build
@@ -185,12 +190,17 @@ jobs:
               --setvars project.outputDirectory=$(pwd) \
               --setvars project.version=${{ env.XPILOT_VERSION }}
 
+      - name: Rename Installer
+        shell: bash
+        run: |
+          mv xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run xPilot-${{ env.XPILOT_VERSION }}-linux-x64-${{ matrix.os }}-installer.run
+
       - name: Upload installer and plugin files
         uses: actions/upload-artifact@v2
         with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-Linux.zip
+          name: xPilot-${{ env.XPILOT_VERSION }}-Linux-x64-${{ matrix.os }}.zip
           path: |
-            xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run
+            xPilot-${{ env.XPILOT_VERSION }}-linux-x64-${{ matrix.os }}-installer.run
 
   ########################## Build Windows ##########################
   
