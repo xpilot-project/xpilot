@@ -16,11 +16,13 @@ public:
     InstallModels(QObject *parent = nullptr);
     ~InstallModels();
 
+    QtPromise::QPromise<QString> ValidateToken(const QString& url, const QString& vatsimId, const QString& token);
     QtPromise::QPromise<void> DownloadModels(const QString& url);
     QtPromise::QPromise<void> UnzipModels(const QString &path);
     void CreatePluginConfig(const QString &path);
     void DeleteTempDownload();
-    Q_INVOKABLE void downloadModels();
+    Q_INVOKABLE void checkIfZipExists();
+    Q_INVOKABLE void downloadModels(QString token, QString vatsimId);
     Q_INVOKABLE void validatePath(QString path);
     Q_INVOKABLE void cancel();
 
@@ -32,6 +34,8 @@ signals:
     void unzipProgressChanged(double value);
     void unzipFinished();
     void errorEncountered(QString error);
+    void tokenValidationError(QString error);
+    void downloadStarted();
 
 private:
     QNetworkAccessManager *nam = nullptr;

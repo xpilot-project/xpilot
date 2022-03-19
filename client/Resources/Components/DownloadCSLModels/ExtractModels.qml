@@ -17,6 +17,8 @@ Popup {
     focus: true
     closePolicy: Popup.NoAutoClose
 
+    signal closeWindow()
+
     property double pctProgress: 0
 
     Label {
@@ -82,7 +84,7 @@ Popup {
             cursorShape: Qt.PointingHandCursor
             onClicked: {
                 installModels.cancel()
-                popup.close()
+                closeWindow()
             }
         }
     }

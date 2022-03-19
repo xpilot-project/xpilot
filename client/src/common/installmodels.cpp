@@ -30,10 +30,44 @@ InstallModels::~InstallModels()
 
 }
 
+QtPromise::QPromise<QString> InstallModels::ValidateToken(const QString &url, const QString& vatsimId, const QString &token)
+{
+    return QPromise<QString>{[&](const auto resolve, const auto reject)
+        {
+            QNetworkRequest networkRequest(url);
+            networkRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, true);
+            networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+            QJsonObject obj;
+            obj["id"] = vatsimId;
+            obj["token"] = token;
+            QJsonDocument doc(obj);
+
+            m_reply = nam->post(networkRequest, doc.toJson());
+            QObject::connect(m_reply, &QNetworkReply::finished, [=]{
+                if(m_reply->error() == QNetworkReply::NoError) {
+                    QJsonDocument jsonResponse = QJsonDocument::fromJson(m_reply->readAll());
+                    QJsonObject jsonObject = jsonResponse.object();
+
+                    if(jsonObject.contains("status") && jsonObject["status"] == "error") {
+                        emit tokenValidationError(jsonObject["error"].toString());
+                    }
+                    else {
+                        QString downloadUrl = jsonObject["download_url"].toString();
+                        resolve(downloadUrl);
+                    }
+                }
+                m_reply->deleteLater();
+            });
+        }};
+}
+
 QPromise<void> InstallModels::DownloadModels(const QString &url)
 {
     return QPromise<void>{[&](const auto resolve, const auto reject)
         {
+            emit downloadStarted();
+
             QString tempPath = QDir::fromNativeSeparators(AppConfig::dataRoot());
 
             if(QFile::exists(pathAppend(tempPath, "Bluebell.zip")))
@@ -208,12 +242,24 @@ void InstallModels::DeleteTempDownload()
     }
 }
 
-void InstallModels::downloadModels()
+void InstallModels::checkIfZipExists()
 {
-    DownloadModels("https://xpilot-project.org/api/v3/DownloadModels").then([&]{
+    QString tempPath = QDir::fromNativeSeparators(AppConfig::dataRoot());
+    if(QFile::exists(pathAppend(tempPath, "Bluebell.zip")))
+    {
+        // zip already exists, don't download again
         emit setXplanePath();
-    }).fail([&](const QString &err){
-        errorEncountered("Download error: " + err);
+    }
+}
+
+void InstallModels::downloadModels(QString token, QString vatsimId)
+{
+    ValidateToken("https://xpilot-project.org/ValidateCdnAuth", vatsimId, token).then([&](const QString& url){
+        DownloadModels(url).then([&]{
+            emit setXplanePath();
+        }).fail([&](const QString& err){
+            errorEncountered("Download error: " + err);
+        });
     });
 }
 

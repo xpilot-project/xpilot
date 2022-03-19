@@ -18,6 +18,8 @@ Popup {
         focus: true
         closePolicy: Popup.NoAutoClose
 
+        signal closeWindow()
+
         Connections {
             target: installModels
 
@@ -110,7 +112,7 @@ Popup {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     installModels.cancel()
-                    popup.close()
+                    closeWindow()
                 }
             }
         }

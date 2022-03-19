@@ -33,6 +33,9 @@ Window {
 
     property QtObject connectWindow
     property QtObject settingsWindow
+    property QtObject downloadCslWindow // csl install
+    property QtObject setXplanePathWindow // csl install
+    property QtObject extractCslModelsWindow // csl install
     property int currentTab
     property bool closing: false
     property bool networkConnected: false
@@ -95,18 +98,6 @@ Window {
         source: "file:///" + appDataPath + "/Sounds/SELCAL.wav"
     }
 
-    DownloadModels {
-        id: modal_downloadModels
-    }
-
-    SetXplanePath {
-        id: modal_setXplanePath
-    }
-
-    ExtractModels {
-        id: modal_extractModels
-    }
-
     NewVersionAvailable {
         id: modal_newVersionAvailable
     }
@@ -157,7 +148,7 @@ Window {
         }
 
         if(!AppConfig.SilenceModelInstall) {
-            modal_downloadModels.open()
+            createCslDownloadWindow()
         }
 
         if(AppConfig.KeepWindowVisible) {
@@ -277,35 +268,56 @@ Window {
         target: installModels
 
         function onSetXplanePath() {
-            modal_downloadModels.close()
-            modal_setXplanePath.open()
+            downloadCslWindow.destroy()
+            createSetXplanePathWindow()
         }
 
         function onValidXplanePath() {
-            modal_setXplanePath.close()
-            modal_extractModels.open()
+            setXplanePathWindow.destroy()
+            createExtractCslModelsWindow()
         }
 
         function onUnzipFinished() {
-            modal_extractModels.close()
+            extractCslModelsWindow.destroy()
             appendMessage("CSL aircraft model package successfully installed! Please restart xPilot and X-Plane before connecting to the network.", colorYellow);
             AppConfig.SilenceModelInstall = true
         }
 
         function onDownloadProgressChanged(val) {
-            modal_downloadModels.pctProgress = val
+            downloadCslWindow.pctProgress = val
         }
 
         function onUnzipProgressChanged(val) {
-            modal_extractModels.pctProgress = val
+            extractCslModelsWindow.pctProgress = val
         }
 
         function onErrorEncountered(error) {
-            modal_downloadModels.close()
-            modal_setXplanePath.close()
-            modal_extractModels.close()
+            downloadCslWindow.destroy()
+            setXplanePathWindow.destroy()
+            extractCslModelsWindow.destroy()
             appendMessage(error, colorRed);
             errorSound.play()
+        }
+    }
+
+    Connections {
+        target: downloadCslWindow
+        function onCloseWindow() {
+            downloadCslWindow.destroy()
+        }
+    }
+
+    Connections {
+        target: setXplanePathWindow
+        function onCloseWindow() {
+            setXplanePathWindow.destroy()
+        }
+    }
+
+    Connections {
+        target: extractCslModelsWindow
+        function onCloseWindow() {
+            extractCslModelsWindow.destroy()
         }
     }
 
@@ -1205,7 +1217,7 @@ Window {
                                                 cliTextField.clear()
                                             }
                                             else if(cliTextField.text.startsWith(".downloadcsl")) {
-                                                modal_downloadModels.open()
+                                                createCslDownloadWindow()
                                                 cliTextField.clear()
                                             }
                                             else {
@@ -1558,6 +1570,30 @@ Window {
             else if(moveable) {
                 mainWindow.y += (mouseY - lastMouseY)
             }
+        }
+    }
+
+    function createCslDownloadWindow() {
+        var comp = Qt.createComponent("qrc:/Resources/Components/DownloadCSLModels/DownloadModels.qml")
+        if(comp.status === Component.Ready) {
+            downloadCslWindow = comp.createObject(mainWindow)
+            downloadCslWindow.open()
+        }
+    }
+
+    function createSetXplanePathWindow() {
+        var comp = Qt.createComponent("qrc:/Resources/Components/DownloadCSLModels/SetXplanePath.qml")
+        if(comp.status === Component.Ready) {
+            setXplanePathWindow = comp.createObject(mainWindow)
+            setXplanePathWindow.open()
+        }
+    }
+
+    function createExtractCslModelsWindow() {
+        var comp = Qt.createComponent("qrc:/Resources/Components/DownloadCSLModels/ExtractModels.qml")
+        if(comp.status === Component.Ready) {
+            extractCslModelsWindow = comp.createObject(mainWindow)
+            extractCslModelsWindow.open()
         }
     }
 }
