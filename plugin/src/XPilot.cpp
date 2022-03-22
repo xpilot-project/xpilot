@@ -170,13 +170,17 @@ namespace xpilot
 	void XPilot::SocketWorker()
 	{
 		while (m_keepSocketAlive) {
-			int rv;
-			char* buf = nullptr;
-			size_t sz;
-			if ((rv = nng_recv(_socket, &buf, &sz, NNG_FLAG_ALLOC)) == 0) {
-				std::string msg(buf);
-				ProcessMessage(msg.c_str());
-				nng_free(buf, sz);
+			char* buffer;
+			size_t bufLen;
+
+			int err;
+			err = nng_recv(_socket, &buffer, &bufLen, NNG_FLAG_ALLOC);
+
+			if (err == 0)
+			{
+				std::string msg(buffer, buffer + bufLen);
+				nng_free(buffer, bufLen);
+				ProcessMessage(msg);
 			}
 		}
 	}

@@ -117,13 +117,17 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     m_keepSocketAlive = true;
     m_socketThread = std::make_unique<std::thread>([&]{
         while (m_keepSocketAlive) {
-            int rv;
-            char* buf = nullptr;
-            size_t sz;
-            if ((rv = nng_recv(_socket, &buf, &sz, NNG_FLAG_ALLOC)) == 0) {
-                QString msg(buf);
+            char* buffer;
+            size_t bufLen;
+
+            int err;
+            err = nng_recv(_socket, &buffer, &bufLen, NNG_FLAG_ALLOC);
+
+            if(err == 0)
+            {
+                QString msg = QString::fromLocal8Bit(buffer, bufLen);
+                nng_free(buffer, bufLen);
                 processMessage(msg);
-                nng_free(buf, sz);
             }
         }
     });
