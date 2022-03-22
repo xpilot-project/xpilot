@@ -26,6 +26,7 @@
 #include <vector>
 #include <math.h>
 #include <iostream>
+#include <mutex>
 
 struct AudioVector3 {
 	float x;
@@ -62,6 +63,8 @@ public:
 
 private:
 	int mNextChannelId;
+	std::mutex mChannelMapMutex;
+	std::mutex mSoundMapMutex;
 };
 
 #endif // !AUDIO_ENGINE_H

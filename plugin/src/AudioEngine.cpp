@@ -29,7 +29,11 @@ CAudioEngine::CAudioEngine() :
 CAudioEngine::~CAudioEngine()
 {
 	CAudioEngine::ErrorCheck("~Implementation", SoundSystem->release());
+
+	std::lock_guard soundLock(mSoundMapMutex);
 	SoundMap.clear();
+
+	std::lock_guard channelLock(mChannelMapMutex);
 	ChannelMap.clear();
 }
 
@@ -40,6 +44,7 @@ void CAudioEngine::Update()
 
 void CAudioEngine::LoadSound(const std::string& soundName, const std::string& soundFilePath, bool bLooping)
 {
+	std::lock_guard soundLock(mSoundMapMutex);
 	auto foundIt = SoundMap.find(soundName);
 	if (foundIt != SoundMap.end())
 		return;
@@ -58,6 +63,7 @@ void CAudioEngine::LoadSound(const std::string& soundName, const std::string& so
 
 void CAudioEngine::UnloadSound(const std::string& soundName)
 {
+	std::lock_guard soundLock(mSoundMapMutex);
 	auto foundIt = SoundMap.find(soundName);
 	if (foundIt != SoundMap.end())
 		return;
@@ -68,6 +74,7 @@ void CAudioEngine::UnloadSound(const std::string& soundName)
 
 int CAudioEngine::CreateSoundChannel(const std::string& soundName, float volumeDb)
 {
+	std::lock_guard soundLock(mSoundMapMutex);
 	int mChannelId = mNextChannelId++;
 	auto foundIt = SoundMap.find(soundName);
 	if (foundIt == SoundMap.end()) {
@@ -78,8 +85,11 @@ int CAudioEngine::CreateSoundChannel(const std::string& soundName, float volumeD
 	CAudioEngine::ErrorCheck("CreateSoundChannel::playSound", SoundSystem->playSound(foundIt->second, nullptr, true, &pChannel));
 	if (pChannel)
 	{
-		CAudioEngine::ErrorCheck("CreateSoundChannel::set3DMinMaxDistance", pChannel->set3DMinMaxDistance(3.0f, 10000.0f));
-		ChannelMap[mChannelId] = pChannel;
+		std::lock_guard channelLock(mChannelMapMutex);
+		{
+			CAudioEngine::ErrorCheck("CreateSoundChannel::set3DMinMaxDistance", pChannel->set3DMinMaxDistance(3.0f, 10000.0f));
+			ChannelMap[mChannelId] = pChannel;
+		}
 	}
 
 	return mChannelId;
@@ -87,6 +97,7 @@ int CAudioEngine::CreateSoundChannel(const std::string& soundName, float volumeD
 
 void CAudioEngine::SetChannel3dPosition(int channelId, const AudioVector3& pos)
 {
+	std::lock_guard channelLock(mChannelMapMutex);
 	auto foundIt = ChannelMap.find(channelId);
 	if (foundIt == ChannelMap.end()) {
 		return;
@@ -98,6 +109,7 @@ void CAudioEngine::SetChannel3dPosition(int channelId, const AudioVector3& pos)
 
 void CAudioEngine::SetChannelVolume(int channelId, float volume)
 {
+	std::lock_guard channelLock(mChannelMapMutex);
 	auto tFoundIt = ChannelMap.find(channelId);
 	if (tFoundIt == ChannelMap.end())
 		return;
@@ -107,6 +119,7 @@ void CAudioEngine::SetChannelVolume(int channelId, float volume)
 
 void CAudioEngine::SetChannelPaused(int channel, bool paused)
 {
+	std::lock_guard channelLock(mChannelMapMutex);
 	auto tFoundIt = ChannelMap.find(channel);
 	if (tFoundIt == ChannelMap.end())
 		return;
@@ -116,6 +129,7 @@ void CAudioEngine::SetChannelPaused(int channel, bool paused)
 
 void CAudioEngine::StopChannel(int channel)
 {
+	std::lock_guard channelLock(mChannelMapMutex);
 	auto iter = ChannelMap.find(channel);
 	if (iter == ChannelMap.end())
 		return;
@@ -125,6 +139,7 @@ void CAudioEngine::StopChannel(int channel)
 
 void CAudioEngine::StopAllChannels()
 {
+	std::lock_guard channelLock(mChannelMapMutex);
 	for (auto it = ChannelMap.begin(), itEnd = ChannelMap.end(); it != itEnd; ++it)
 	{
 		it->second->stop();
