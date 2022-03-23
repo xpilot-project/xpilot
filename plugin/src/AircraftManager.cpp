@@ -262,16 +262,14 @@ namespace xpilot
 				return -1.0f;
 			}
 
-			const auto now = PrecisionTimestamp();
-
 			// The client will take care of any stale aircraft (if the last position packet was more than 15 seconds ago).
 			// If the client doesn't close cleanly for some reason, the aircraft might not get deleted from the sim.
 			std::list<std::string> stalePlanes;
 			for (auto& plane : mapPlanes) {
-				int timeSinceLastUpdate = now - plane.second->LastVelocityUpdate;
-				if (timeSinceLastUpdate > 60 * 1000) {
+				int64_t timeSinceLastUpdate = PrecisionTimestamp() - plane.second->LastUpdated;
+				if (timeSinceLastUpdate > 30 * 1000) {
 					stalePlanes.push_back(plane.first);
-					LOG_MSG(logINFO, "Removing Stale Aircraft: %s, %is", plane.first.c_str(), timeSinceLastUpdate);
+					LOG_MSG(logINFO, "Removing Stale Aircraft: %s", plane.first.c_str());
 				}
 			}
 			for (auto plane : stalePlanes) {
@@ -341,6 +339,15 @@ namespace xpilot
 		aircraft->VisualState = visualState;
 		aircraft->GroundSpeed = speed;
 		aircraft->UpdateVelocityVectors();
+	}
+
+	void AircraftManager::HandleHeartbeat(const std::string& callsign)
+	{
+		auto aircraft = GetAircraft(callsign);
+		if (!aircraft)
+			return;
+
+		aircraft->LastUpdated = PrecisionTimestamp();
 	}
 
 	NetworkAircraft* AircraftManager::GetAircraft(const std::string& callsign)

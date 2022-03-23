@@ -100,6 +100,7 @@ namespace xpilot
         {
            aircraft->Speed = speed;
            aircraft->LastUpdated = QDateTime::currentDateTimeUtc();
+           m_xplaneAdapter.SendHeartbeat(callsign);
 
            if((aircraft->Status == AircraftStatus::New) && IsEligibleToAddToSimulator(*aircraft))
            {

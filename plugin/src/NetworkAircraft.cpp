@@ -92,6 +92,7 @@ namespace xpilot
         strScpy(acInfoTexts.icaoAcType, acIcaoType.c_str(), sizeof(acInfoTexts.icaoAcType));
         strScpy(acInfoTexts.icaoAirline, acIcaoAirline.c_str(), sizeof(acInfoTexts.icaoAirline));
 
+        SetVisible(true);
         SetLocation(_visualState.Lat, _visualState.Lon, _visualState.AltitudeTrue);
         SetHeading(_visualState.Heading);
         SetPitch(_visualState.Pitch);
@@ -99,6 +100,7 @@ namespace xpilot
 
         IsFirstRenderPending = true;
         LastVelocityUpdate = PrecisionTimestamp();
+        LastUpdated = PrecisionTimestamp();
         PredictedVisualState = _visualState;
         VisualState = _visualState;
         PositionalVelocities = Vector3::Zero();
@@ -439,8 +441,6 @@ namespace xpilot
         SetRoll(PredictedVisualState.Bank);
         SetHeading(PredictedVisualState.Heading);
 
-        const auto diffMs = currentTimestamp - PreviousSurfaceUpdateTime;
-
         TargetGearPosition = IsGearDown || IsReportedOnGround ? 1.0f : 0.0f;
         TargetSpoilerPosition = IsSpoilersDeployed ? 1.0f : 0.0f;
         TargetReverserPosition = IsEnginesReversing ? 1.0f : 0.0f;
@@ -452,18 +452,21 @@ namespace xpilot
             Surfaces.flapRatio = TargetFlapsPosition;
             Surfaces.spoilerRatio = TargetSpoilerPosition;
         }
+        else
+        {
+            const auto diffMs = currentTimestamp - PreviousSurfaceUpdateTime;
+            Interpolate(Surfaces.gearPosition, TargetGearPosition, diffMs, flightModel.GEAR_DURATION);
+            Interpolate(Surfaces.flapRatio, TargetFlapsPosition, diffMs, flightModel.FLAPS_DURATION);
+            Interpolate(Surfaces.spoilerRatio, TargetSpoilerPosition, diffMs, flightModel.FLAPS_DURATION);
+            Interpolate(Surfaces.reversRatio, TargetReverserPosition, diffMs, 1500);
+            PreviousSurfaceUpdateTime = currentTimestamp;
+        }
 
         SetLightsTaxi(Surfaces.lights.taxiLights);
         SetLightsLanding(Surfaces.lights.landLights);
         SetLightsBeacon(Surfaces.lights.bcnLights);
         SetLightsStrobe(Surfaces.lights.strbLights);
         SetLightsNav(Surfaces.lights.navLights);
-
-        Interpolate(Surfaces.gearPosition, TargetGearPosition, diffMs, flightModel.GEAR_DURATION);
-        Interpolate(Surfaces.flapRatio, TargetFlapsPosition, diffMs, flightModel.FLAPS_DURATION);
-        Interpolate(Surfaces.spoilerRatio, TargetSpoilerPosition, diffMs, flightModel.FLAPS_DURATION);
-        Interpolate(Surfaces.reversRatio, TargetReverserPosition, diffMs, 1500);
-        PreviousSurfaceUpdateTime = currentTimestamp;
 
         SetGearRatio(Surfaces.gearPosition);
         SetFlapRatio(Surfaces.flapRatio);

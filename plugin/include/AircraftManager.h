@@ -51,6 +51,7 @@ namespace xpilot
 		void HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState, const std::string& airline, const std::string& typeCode);
 		void HandleAircraftConfig(const std::string& callsign, const NetworkAircraftConfig& config);
 		void HandleFastPositionUpdate(const std::string& callsign, const AircraftVisualState& visualState, Vector3 positionalVector, Vector3 rotationalVector, double speed);
+		void HandleHeartbeat(const std::string& callsign);
 		void HandleRemovePlane(const std::string& callsign);
 		void RemoveAllPlanes();
 

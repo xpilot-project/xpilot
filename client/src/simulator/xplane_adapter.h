@@ -62,6 +62,7 @@ public:
     void DeleteAllAircraft();
     void DeleteAllControllers();
     void SendFastPositionUpdate(const NetworkAircraft& aircraft, const AircraftVisualState& visualState, const VelocityVector& positionalVelocityVector, const VelocityVector& rotationalVelocityVector);
+    void SendHeartbeat(const QString callsign);
     void SendRadioMessage(const QString message);
     void RadioMessageReceived(const QString from, const QString message, bool isDirect);
     void NotificationPosted(const QString message, qint64 color);

@@ -137,6 +137,8 @@ namespace xpilot
         std::list<TerrainElevationData> TerrainElevationHistory;
         bool HasUsableTerrainElevationData;
 
+        int64_t LastUpdated;
+
         AircraftVisualState VisualState;
         AircraftVisualState PredictedVisualState;
 

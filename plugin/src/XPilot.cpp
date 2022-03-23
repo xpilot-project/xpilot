@@ -231,7 +231,20 @@ namespace xpilot
 						}
 					}
 
-					else if (MessageType == "FastPositionUpdate")
+					if (MessageType == "Heartbeat")
+					{
+						std::string callsign(j["data"]["callsign"]);
+
+						if (!callsign.empty())
+						{
+							QueueCallback([=]
+								{
+									m_aircraftManager->HandleHeartbeat(callsign);
+								});
+						}
+					}
+
+					if (MessageType == "FastPositionUpdate")
 					{
 						std::string callsign(j["data"]["callsign"]);
 						double latitude = static_cast<double>(j["data"]["latitude"]);
@@ -280,7 +293,7 @@ namespace xpilot
 						}
 					}
 
-					else if (MessageType == "AirplaneConfig")
+					if (MessageType == "AirplaneConfig")
 					{
 						auto acconfig = j.get<NetworkAircraftConfig>();
 						QueueCallback([=]
@@ -289,7 +302,7 @@ namespace xpilot
 							});
 					}
 
-					else if (MessageType == "RemovePlane")
+					if (MessageType == "RemovePlane")
 					{
 						std::string callsign(j["data"]["callsign"]);
 
@@ -302,7 +315,7 @@ namespace xpilot
 						}
 					}
 
-					else if (MessageType == "RemoveAllPlanes")
+					if (MessageType == "RemoveAllPlanes")
 					{
 						QueueCallback([=]
 							{
@@ -310,7 +323,7 @@ namespace xpilot
 							});
 					}
 
-					else if (MessageType == "NetworkConnected")
+					if (MessageType == "NetworkConnected")
 					{
 						std::string callsign(j["data"]["callsign"]);
 						std::string selcal(j["data"]["selcal"]);
@@ -327,7 +340,7 @@ namespace xpilot
 							});
 					}
 
-					else if (MessageType == "NetworkDisconnected")
+					if (MessageType == "NetworkDisconnected")
 					{
 						QueueCallback([=]
 							{
@@ -342,7 +355,7 @@ namespace xpilot
 							});
 					}
 
-					else if (MessageType == "NearbyAtc")
+					if (MessageType == "NearbyAtc")
 					{
 						QueueCallback([=]
 							{
@@ -350,7 +363,7 @@ namespace xpilot
 							});
 					}
 
-					else if (MessageType == "NotificationPosted")
+					if (MessageType == "NotificationPosted")
 					{
 						std::string msg(j["data"]["message"]);
 						long color = static_cast<long>(j["data"]["color"]);
@@ -360,14 +373,14 @@ namespace xpilot
 						addNotification(msg, red, green, blue);
 					}
 
-					else if (MessageType == "RadioMessageSent")
+					if (MessageType == "RadioMessageSent")
 					{
 						std::string msg(j["data"]["message"]);
 						RadioMessageReceived(msg, 0, 255, 255);
 						AddNotificationPanelMessage(msg, 0, 255, 255);
 					}
 
-					else if (MessageType == "RadioMessageReceived")
+					if (MessageType == "RadioMessageReceived")
 					{
 						std::string from(j["data"]["from"]);
 						std::string message(j["data"]["message"]);
@@ -380,7 +393,7 @@ namespace xpilot
 						AddNotificationPanelMessage(msg, r, g, b);
 					}
 
-					else if (MessageType == "PrivateMessageReceived")
+					if (MessageType == "PrivateMessageReceived")
 					{
 						std::string msg(j["data"]["message"]);
 						std::string from(j["data"]["from"]);
@@ -388,7 +401,7 @@ namespace xpilot
 						AddNotificationPanelMessage(string_format("%s [pvt]: %s", from.c_str(), msg.c_str()), 255, 255, 255);
 					}
 
-					else if (MessageType == "PrivateMessageSent")
+					if (MessageType == "PrivateMessageSent")
 					{
 						std::string msg(j["data"]["message"]);
 						std::string to(j["data"]["to"]);
@@ -396,7 +409,7 @@ namespace xpilot
 						AddNotificationPanelMessage(string_format("%s [pvt]: %s", m_networkCallsign.value().c_str(), msg.c_str()), 255, 255, 255);
 					}
 
-					else if (MessageType == "ValidateCsl")
+					if (MessageType == "ValidateCsl")
 					{
 						json reply;
 						reply["type"] = "ValidateCsl";
@@ -404,7 +417,7 @@ namespace xpilot
 						SendReply(reply.dump());
 					}
 
-					else if (MessageType == "PluginVersion")
+					if (MessageType == "PluginVersion")
 					{
 						json reply;
 						reply["type"] = "PluginVersion";

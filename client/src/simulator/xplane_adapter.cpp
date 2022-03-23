@@ -945,6 +945,19 @@ void XplaneAdapter::SendFastPositionUpdate(const NetworkAircraft &aircraft, cons
     sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
 }
 
+void XplaneAdapter::SendHeartbeat(const QString callsign)
+{
+    QJsonObject reply;
+    reply.insert("type", "Heartbeat");
+
+    QJsonObject data;
+    data.insert("callsign", callsign);
+
+    reply.insert("data", data);
+    QJsonDocument doc(reply);
+    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+}
+
 void XplaneAdapter::SendRadioMessage(const QString message)
 {
     QJsonObject reply;
