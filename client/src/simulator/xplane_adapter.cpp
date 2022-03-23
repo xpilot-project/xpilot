@@ -109,6 +109,9 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
         writeToLog(QString("Error opening socket: %1").arg(nng_strerror(rv)));
     }
 
+    nng_setopt_int(_socket, NNG_OPT_RECVBUF, 1000);
+    nng_setopt_int(_socket, NNG_OPT_SENDBUF, 1000);
+
     QString url = QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort);
     if((rv = nng_dial(_socket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK)) != 0) {
         writeToLog(QString("Error dialing socket: %1").arg(nng_strerror(rv)));
