@@ -195,6 +195,9 @@ namespace xpilot
 
     void NetworkAircraft::RecordTerrainElevationHistory(double currentTimestamp)
     {
+        if (!LocalTerrainElevation.has_value())
+            return;
+
         HasUsableTerrainElevationData = false;
 
         TerrainElevationHistory.remove_if([&](TerrainElevationData& meta) {
