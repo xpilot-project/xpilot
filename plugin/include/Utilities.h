@@ -204,6 +204,13 @@ inline float GetNetworkTime()
 	return XPLMGetDataf(drNetworkTime);
 }
 
+inline int64_t PrecisionTimestamp()
+{
+	using namespace std::chrono;
+	steady_clock::duration dur{ steady_clock::now().time_since_epoch() };
+	return duration_cast<milliseconds>(dur).count();
+}
+
 struct rgb
 {
 	float r;

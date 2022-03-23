@@ -50,9 +50,7 @@ namespace xpilot
 
 		void HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState, const std::string& airline, const std::string& typeCode);
 		void HandleAircraftConfig(const std::string& callsign, const NetworkAircraftConfig& config);
-		void HandleChangePlaneModel(const std::string& callsign, const std::string& typeIcao, const std::string& airlineIcao);
-		void HandleSlowPositionUpdate(const std::string& callsign, AircraftVisualState visualState, double speed);
-		void HandleFastPositionUpdate(const std::string& callsign, const AircraftVisualState& visualState, Vector3 positionalVector, Vector3 rotationalVector);
+		void HandleFastPositionUpdate(const std::string& callsign, const AircraftVisualState& visualState, Vector3 positionalVector, Vector3 rotationalVector, double speed);
 		void HandleRemovePlane(const std::string& callsign);
 		void RemoveAllPlanes();
 
@@ -73,8 +71,6 @@ namespace xpilot
 		std::unique_ptr<CAudioEngine> m_audioEngine;
 
 		NetworkAircraft* GetAircraft(const std::string& callsign);
-		bool ReceivingFastPositionUpdates(NetworkAircraft* aircraft);
-		Vector3 DerivePositionalVelocityVector(AircraftVisualState previousVisualState, AircraftVisualState newVisualState, long intervalMs);
 		static float AircraftMaintenanceCallback(float, float, int, void* ref);
 
 		std::thread::id m_xplaneThread;

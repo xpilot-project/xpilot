@@ -48,7 +48,7 @@ namespace xpilot
         QVector<NetworkAircraft> deleteThese;
         for(auto& aircraft : m_aircraft)
         {
-            int timeSinceLastUpdate = aircraft.LastSlowPositionUpdateReceived.msecsTo(now);
+            int timeSinceLastUpdate = aircraft.LastUpdated.msecsTo(now);
             if(timeSinceLastUpdate > 15000)
             {
                 deleteThese.append(aircraft);
@@ -76,37 +76,50 @@ namespace xpilot
 
     void AircraftManager::OnCapabilitiesRequestReceived(QString callsign)
     {
-        auto planeIt = std::find_if(m_aircraft.begin(), m_aircraft.end(), [=](NetworkAircraft a){return a.Callsign == callsign && a.Status != AircraftStatus::Ignored;});
+        auto aircraft = std::find_if(m_aircraft.begin(), m_aircraft.end(), [=](NetworkAircraft a){
+            return a.Callsign == callsign && a.Status != AircraftStatus::Ignored;
+        });
 
-        if(planeIt != m_aircraft.end())
+        if(aircraft != m_aircraft.end())
         {
             m_networkManager.SendAircraftInfoRequest(callsign);
         }
     }
 
-    void AircraftManager::OnSlowPositionUpdateReceived(QString callsign, AircraftVisualState visualState, double groundSpeed)
+    void AircraftManager::OnSlowPositionUpdateReceived(QString callsign, AircraftVisualState visualState, double speed)
     {
-        auto planeIt = std::find_if(m_aircraft.begin(), m_aircraft.end(), [=](NetworkAircraft a){return a.Callsign == callsign && a.Status != AircraftStatus::Ignored;});
+        auto aircraft = std::find_if(m_aircraft.begin(), m_aircraft.end(), [=](NetworkAircraft a){
+            return a.Callsign == callsign && a.Status != AircraftStatus::Ignored;
+        });
 
-        if(planeIt != m_aircraft.end())
+        if(aircraft == m_aircraft.end())
         {
-            UpdateExistingAircraft(*planeIt, visualState, groundSpeed);
+            SetUpNewAircraft(callsign, visualState);
         }
         else
         {
-            CreateNewAircraft(callsign, visualState);
+           aircraft->Speed = speed;
+           aircraft->LastUpdated = QDateTime::currentDateTimeUtc();
+
+           if((aircraft->Status == AircraftStatus::New) && IsEligibleToAddToSimulator(*aircraft))
+           {
+               SyncSimulatorAircraft();
+           }
         }
     }
 
     void AircraftManager::OnFastPositionUpdateReceived(QString callsign, AircraftVisualState visualState,
                                                        VelocityVector positionalVelocityVector, VelocityVector rotationalVelocityVector)
     {
-        auto planeIt = std::find_if(m_aircraft.begin(), m_aircraft.end(), [=](NetworkAircraft a){return a.Callsign == callsign && a.Status != AircraftStatus::Ignored;});
+        auto aircraft = std::find_if(m_aircraft.begin(), m_aircraft.end(), [=](NetworkAircraft a){
+            return a.Callsign == callsign && a.Status != AircraftStatus::Ignored;
+        });
 
-        if(planeIt != m_aircraft.end())
+        if(aircraft != m_aircraft.end())
         {
-            planeIt->HaveVelocities = true;
-            m_xplaneAdapter.SendFastPositionUpdate(*planeIt, visualState, positionalVelocityVector, rotationalVelocityVector);
+            aircraft->HaveVelocities = true;
+            aircraft->LastUpdated = QDateTime::currentDateTimeUtc();
+            m_xplaneAdapter.SendFastPositionUpdate(*aircraft, visualState, positionalVelocityVector, rotationalVelocityVector);
         }
     }
 
@@ -125,19 +138,14 @@ namespace xpilot
 
     void AircraftManager::OnAircraftInfoReceived(QString callsign, QString typeCode, QString airlineIcao)
     {
-        auto planeIt = std::find_if(m_aircraft.begin(), m_aircraft.end(), [=](NetworkAircraft a){return a.Callsign == callsign && a.Status != AircraftStatus::Ignored;});
+        auto aircraft = std::find_if(m_aircraft.begin(), m_aircraft.end(), [=](NetworkAircraft a){
+            return a.Callsign == callsign && a.Status != AircraftStatus::Ignored;
+        });
 
-        if(planeIt != m_aircraft.end())
+        if(aircraft != m_aircraft.end())
         {
-            if(!planeIt->TypeCode.isEmpty() && planeIt->TypeCode != typeCode)
-            {
-                planeIt->TypeCode = typeCode;
-                m_xplaneAdapter.PlaneModelChanged(*planeIt);
-                return;
-            }
-
-            planeIt->TypeCode = typeCode;
-            planeIt->Airline = airlineIcao;
+            aircraft->TypeCode = typeCode;
+            aircraft->Airline = airlineIcao;
             SyncSimulatorAircraft();
         }
     }
@@ -219,29 +227,18 @@ namespace xpilot
         m_aircraft.removeAll(aircraft);
     }
 
-    void AircraftManager::CreateNewAircraft(const QString &callsign, const AircraftVisualState &visualState)
+    void AircraftManager::SetUpNewAircraft(const QString &callsign, const AircraftVisualState &visualState)
     {
         NetworkAircraft aircraft{};
         aircraft.Callsign = callsign;
         aircraft.RemoteVisualState = visualState;
-        aircraft.LastSlowPositionUpdateReceived = QDateTime::currentDateTimeUtc();
+        aircraft.LastUpdated = QDateTime::currentDateTimeUtc();
         aircraft.Status = m_ignoredAircraft.contains(callsign) ? AircraftStatus::Ignored : AircraftStatus::New;
         m_aircraft.append(aircraft);
 
         m_networkManager.RequestCapabilities(callsign);
         m_networkManager.SendCapabilities(callsign);
         m_networkManager.SendAircraftInfoRequest(callsign);
-    }
-
-    void AircraftManager::UpdateExistingAircraft(NetworkAircraft &aircraft, const AircraftVisualState &visualState, double groundSpeed)
-    {
-        aircraft.LastSlowPositionUpdateReceived = QDateTime::currentDateTimeUtc();
-        m_xplaneAdapter.SendSlowPositionUpdate(aircraft, visualState, groundSpeed);
-
-        if((aircraft.Status == AircraftStatus::New) && IsEligibleToAddToSimulator(aircraft))
-        {
-            SyncSimulatorAircraft();
-        }
     }
 
     bool AircraftManager::IsEligibleToAddToSimulator(const NetworkAircraft &aircraft)
@@ -284,7 +281,8 @@ namespace xpilot
 
     void AircraftManager::OnIgnoreAircraft(QString callsign)
     {
-        if(!m_ignoredAircraft.contains(callsign)) {
+        if(!m_ignoredAircraft.contains(callsign))
+        {
             m_ignoredAircraft.push_back(callsign);
         }
 
@@ -299,7 +297,8 @@ namespace xpilot
 
     void AircraftManager::OnUnignoreAircraft(QString callsign)
     {
-        if(m_ignoredAircraft.contains(callsign)) {
+        if(m_ignoredAircraft.contains(callsign))
+        {
             m_ignoredAircraft.removeAll(callsign);
         }
     }

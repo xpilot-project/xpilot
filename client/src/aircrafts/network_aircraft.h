@@ -23,7 +23,7 @@ struct NetworkAircraft
     QString TypeCode;
     AircraftVisualState RemoteVisualState;
     std::optional<AircraftConfiguration> Configuration;
-    QDateTime LastSlowPositionUpdateReceived;
+    QDateTime LastUpdated;
     AircraftStatus Status;
     bool HaveVelocities;
     double Speed;
@@ -34,7 +34,7 @@ struct NetworkAircraft
                  && Airline == rhs.Airline
                  && TypeCode == rhs.TypeCode
                  && RemoteVisualState == rhs.RemoteVisualState
-                 && LastSlowPositionUpdateReceived == rhs.LastSlowPositionUpdateReceived
+                 && LastUpdated == rhs.LastUpdated
                  && Status == rhs.Status
                  && HaveVelocities == rhs.HaveVelocities
                  && Speed == rhs.Speed;

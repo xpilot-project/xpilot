@@ -231,49 +231,6 @@ namespace xpilot
 						}
 					}
 
-					else if (MessageType == "ChangeModel")
-					{
-						std::string callsign(j["data"]["callsign"]);
-						std::string airline(j["data"]["airline"]);
-						std::string typeCode(j["data"]["type_code"]);
-
-						if (!callsign.empty() && !typeCode.empty())
-						{
-							QueueCallback([=]
-								{
-									m_aircraftManager->HandleChangePlaneModel(callsign, typeCode, airline);
-								});
-						}
-					}
-
-					else if (MessageType == "SlowPositionUpdate")
-					{
-						std::string callsign(j["data"]["callsign"]);
-						double latitude = static_cast<double>(j["data"]["latitude"]);
-						double longitude = static_cast<double>(j["data"]["longitude"]);
-						double altitude = static_cast<double>(j["data"]["altitude"]);
-						double heading = static_cast<double>(j["data"]["heading"]);
-						double bank = static_cast<double>(j["data"]["bank"]);
-						double pitch = static_cast<double>(j["data"]["pitch"]);
-						double groundSpeed = static_cast<double>(j["data"]["ground_speed"]);
-
-						AircraftVisualState visualState{};
-						visualState.Lat = latitude;
-						visualState.Lon = longitude;
-						visualState.Heading = heading;
-						visualState.AltitudeTrue = altitude;
-						visualState.Pitch = pitch;
-						visualState.Bank = bank;
-
-						if (!callsign.empty())
-						{
-							QueueCallback([=]
-								{
-									m_aircraftManager->HandleSlowPositionUpdate(callsign, visualState, groundSpeed);
-								});
-						}
-					}
-
 					else if (MessageType == "FastPositionUpdate")
 					{
 						std::string callsign(j["data"]["callsign"]);
@@ -291,6 +248,7 @@ namespace xpilot
 						double velocityHeading = static_cast<double>(j["data"]["vh"]);
 						double velocityBank = static_cast<double>(j["data"]["vb"]);
 						double noseWheelAngle = static_cast<double>(j["data"]["nosewheel"]);
+						double speed = static_cast<double>(j["data"]["speed"]);
 
 						AircraftVisualState visualState{};
 						visualState.Lat = latitude;
@@ -317,7 +275,7 @@ namespace xpilot
 							QueueCallback([=]
 								{
 									m_aircraftManager->HandleFastPositionUpdate(callsign,
-										visualState, positionalVector, rotationalVelocity);
+										visualState, positionalVector, rotationalVelocity, speed);
 								});
 						}
 					}

@@ -917,26 +917,6 @@ void XplaneAdapter::DeleteAllControllers()
     sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
 }
 
-void XplaneAdapter::SendSlowPositionUpdate(const NetworkAircraft &aircraft, const AircraftVisualState &visualState, const double& groundSpeed)
-{
-    QJsonObject reply;
-    reply.insert("type", "SlowPositionUpdate");
-
-    QJsonObject data;
-    data.insert("callsign", aircraft.Callsign);
-    data.insert("latitude", visualState.Latitude);
-    data.insert("longitude", visualState.Longitude);
-    data.insert("altitude", visualState.Altitude);
-    data.insert("heading", visualState.Heading);
-    data.insert("bank", visualState.Bank);
-    data.insert("pitch", visualState.Pitch);
-    data.insert("ground_speed", groundSpeed);
-
-    reply.insert("data", data);
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
-}
-
 void XplaneAdapter::SendFastPositionUpdate(const NetworkAircraft &aircraft, const AircraftVisualState &visualState, const VelocityVector &positionalVelocityVector, const VelocityVector &rotationalVelocityVector)
 {
     QJsonObject reply;
@@ -958,6 +938,7 @@ void XplaneAdapter::SendFastPositionUpdate(const NetworkAircraft &aircraft, cons
     data.insert("vh", rotationalVelocityVector.Y);
     data.insert("vb", rotationalVelocityVector.Z);
     data.insert("nosewheel", visualState.NoseWheelAngle);
+    data.insert("speed", aircraft.Speed);
 
     reply.insert("data", data);
     QJsonDocument doc(reply);

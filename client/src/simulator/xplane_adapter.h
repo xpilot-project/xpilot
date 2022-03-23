@@ -61,7 +61,6 @@ public:
     void DeleteAircraft(const NetworkAircraft& aircraft, QString reason);
     void DeleteAllAircraft();
     void DeleteAllControllers();
-    void SendSlowPositionUpdate(const NetworkAircraft& aircraft, const AircraftVisualState& visualState, const double& groundSpeed);
     void SendFastPositionUpdate(const NetworkAircraft& aircraft, const AircraftVisualState& visualState, const VelocityVector& positionalVelocityVector, const VelocityVector& rotationalVelocityVector);
     void SendRadioMessage(const QString message);
     void RadioMessageReceived(const QString from, const QString message, bool isDirect);

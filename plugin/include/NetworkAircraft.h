@@ -56,7 +56,7 @@ namespace xpilot
 
     struct TerrainElevationData
     {
-        std::chrono::steady_clock::time_point Timestamp;
+        int64_t Timestamp;
         WorldPoint Location;
         double RemoteValue;
         double LocalValue;
@@ -99,23 +99,20 @@ namespace xpilot
     public:
         NetworkAircraft(const std::string& _callsign, const AircraftVisualState& _visualState, const std::string& _icaoType, 
         const std::string& _icaoAirline, const std::string& _livery, XPMPPlaneID _modeS_id, const std::string& _modelName);
-        virtual ~NetworkAircraft();
 
         void copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const;
         void copyBulkData(XPilotAPIAircraft::XPilotAPIBulkInfoTexts* pOut, size_t size) const;
 
-        void UpdateErrorVectors(double timestamp);
-        void RecordTerrainElevationHistory();
+        void UpdateErrorVectors(double currentTimestamp);
+        void RecordTerrainElevationHistory(double currentTimestamp);
+        void UpdateVelocityVectors();
 
         FlightModel GetFlightModel(const XPMP2::CSLModelInfo_t model);
 
-        int FastPositionsReceivedCount = 0;
         bool IsFirstRenderPending = true;
         bool IsReportedOnGround = false;
-        bool TerrainOffsetFinished = false;
         bool IsGearDown = false;
         bool IsEnginesRunning = false;
-        bool WasEnginesRunning = false;
         bool IsEnginesReversing = false;
         bool IsSpoilersDeployed = false;
         float GroundSpeed = 0.0f;
@@ -125,7 +122,7 @@ namespace xpilot
         float TargetSpoilerPosition = 0.0f;
         std::string Origin;
         std::string Destination;
-        std::chrono::steady_clock::time_point PreviousSurfaceUpdateTime;
+        int64_t PreviousSurfaceUpdateTime;
         XPMPPlaneSurfaces_t Surfaces;
         XPMPPlaneRadar_t Radar;
 
@@ -147,19 +144,18 @@ namespace xpilot
         Vector3 PositionalErrorVelocities;
         Vector3 RotationalVelocities;
         Vector3 RotationalErrorVelocities;
-        long ApplyErrorVelocitiesUntil;
-
-        std::chrono::steady_clock::time_point LastVelocityUpdate;
-        std::chrono::steady_clock::time_point LastSlowPositionTimestamp;
+        int64_t ApplyErrorVelocitiesUntil;
+        int64_t LastVelocityUpdate;
 
         int SoundChannelId;
         EngineClassType EngineClass;
 
     protected:
         virtual void UpdatePosition(float, int);
-        void ExtrapolatePosition(Vector3 velocityVector, Vector3 rotationVector, double interval);
+        AircraftVisualState ExtrapolatePosition(Vector3 velocityVector, Vector3 rotationVector, double interval);
         void PerformGroundClamping(float frameRate);
         void EnsureAboveGround();
+        void ClearRotationalVelocities();
     };
 }
 

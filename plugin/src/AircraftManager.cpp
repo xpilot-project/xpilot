@@ -233,9 +233,6 @@ namespace xpilot
 			if (config.data.onGround.value() != plane->IsReportedOnGround)
 			{
 				plane->IsReportedOnGround = config.data.onGround.value();
-				if (!plane->IsReportedOnGround) {
-					plane->TerrainOffsetFinished = false;
-				}
 			}
 		}
 	}
@@ -265,20 +262,20 @@ namespace xpilot
 				return -1.0f;
 			}
 
-			const auto now = std::chrono::steady_clock::now();
+			const auto now = PrecisionTimestamp();
 
 			// The client will take care of any stale aircraft (if the last position packet was more than 15 seconds ago).
 			// If the client doesn't close cleanly for some reason, the aircraft might not get deleted from the sim.
 			std::list<std::string> stalePlanes;
 			for (auto& plane : mapPlanes) {
-				int timeSinceLastUpdate = std::chrono::duration_cast<std::chrono::seconds>(now - plane.second->LastSlowPositionTimestamp).count();
-				if (timeSinceLastUpdate > 60) {
+				int timeSinceLastUpdate = now - plane.second->LastVelocityUpdate;
+				if (timeSinceLastUpdate > 60 * 1000) {
 					stalePlanes.push_back(plane.first);
 					LOG_MSG(logINFO, "Removing Stale Aircraft: %s, %is", plane.first.c_str(), timeSinceLastUpdate);
 				}
 			}
-			for(auto plane : stalePlanes) {
-					mapPlanes.erase(plane);
+			for (auto plane : stalePlanes) {
+				mapPlanes.erase(plane);
 			}
             
 			float soundVolume = 1.0f;
@@ -332,49 +329,8 @@ namespace xpilot
 		return -1.0f;
 	}
 
-	void AircraftManager::HandleSlowPositionUpdate(const std::string& callsign, AircraftVisualState visualState, double speed)
-	{
-		auto aircraft = GetAircraft(callsign);
-		if (!aircraft)
-			return;
-
-		auto now = std::chrono::steady_clock::now();
-
-		// The logic here is that if we have not received a fast position packet recently, then
-		// we need to derive positional velocities from the last position that we received (either
-		// fast or slow) and the position that we're currently processing. We also snap to the
-		// newly-reported rotation rather than trying to derive rotational velocities.
-		if (!ReceivingFastPositionUpdates(aircraft))
-		{
-			auto lastUpdateTimeStamp = (aircraft->LastSlowPositionTimestamp < aircraft->LastVelocityUpdate) ? aircraft->LastSlowPositionTimestamp : aircraft->LastVelocityUpdate;
-
-			auto intervalMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastUpdateTimeStamp).count();
-
-			aircraft->PositionalVelocities = DerivePositionalVelocityVector(
-				aircraft->VisualState,
-				visualState,
-				intervalMs
-			);
-			aircraft->RotationalVelocities = Vector3::Zero();
-
-			AircraftVisualState newVisualState{};
-			newVisualState.Lat = aircraft->PredictedVisualState.Lat;
-			newVisualState.Lon = aircraft->PredictedVisualState.Lon;
-			newVisualState.AltitudeTrue = aircraft->PredictedVisualState.AltitudeTrue;
-			newVisualState.Pitch = visualState.Pitch;
-			newVisualState.Heading = visualState.Heading;
-			newVisualState.Bank = visualState.Bank;
-
-			aircraft->PredictedVisualState = newVisualState;
-			aircraft->VisualState = visualState;
-		}
-
-		aircraft->LastSlowPositionTimestamp = now;
-		aircraft->GroundSpeed = speed;
-	}
-
-	void AircraftManager::HandleFastPositionUpdate(const std::string& callsign, const AircraftVisualState& visualState, 
-	Vector3 positionalVector, Vector3 rotationalVector)
+	void AircraftManager::HandleFastPositionUpdate(const std::string& callsign, const AircraftVisualState& visualState,
+		Vector3 positionalVector, Vector3 rotationalVector, double speed)
 	{
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft)
@@ -383,18 +339,8 @@ namespace xpilot
 		aircraft->PositionalVelocities = positionalVector;
 		aircraft->RotationalVelocities = rotationalVector;
 		aircraft->VisualState = visualState;
-
-		const auto now = std::chrono::steady_clock::now();
-		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - aircraft->LastVelocityUpdate).count() > 500)
-		{
-			aircraft->RotationalVelocities = Vector3::Zero();
-			aircraft->RotationalErrorVelocities = Vector3::Zero();
-		}
-
-		aircraft->LastVelocityUpdate = now;
-		aircraft->RecordTerrainElevationHistory();
-		aircraft->UpdateErrorVectors(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count());
-		aircraft->FastPositionsReceivedCount++;
+		aircraft->GroundSpeed = speed;
+		aircraft->UpdateVelocityVectors();
 	}
 
 	NetworkAircraft* AircraftManager::GetAircraft(const std::string& callsign)
@@ -402,51 +348,5 @@ namespace xpilot
 		auto planeIt = mapPlanes.find(callsign);
 		if (planeIt == mapPlanes.end()) return nullptr;
 		return planeIt->second.get();
-	}
-
-	bool AircraftManager::ReceivingFastPositionUpdates(NetworkAircraft* aircraft)
-	{
-		const auto now = std::chrono::steady_clock::now();
-		const auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - aircraft->LastVelocityUpdate);
-		return diff.count() <= FAST_POSITION_INTERVAL_TOLERANCE;
-	}
-
-	Vector3 AircraftManager::DerivePositionalVelocityVector(AircraftVisualState previousVisualState, AircraftVisualState newVisualState, long intervalMs)
-	{
-		// We're rounding the lat/lon/alt to the lowest common precision among slow and
-		// fast position updates, because sometimes the previous visual state is from a
-		// fast position. (The new visual state is always from a slow position.)
-
-		double latDelta = DegreesToMeters(CalculateNormalizedDelta(
-			Round(previousVisualState.Lat, 5),
-			Round(newVisualState.Lat, 5),
-			-90.0,
-			90.0
-		));
-
-		double lonDelta = DegreesToMeters(CalculateNormalizedDelta(
-			Round(previousVisualState.Lon, 5),
-			Round(newVisualState.Lon, 5),
-			-180.0,
-			180.0
-		)) * LongitudeScalingFactor(newVisualState.Lat);
-
-		double altDelta = newVisualState.AltitudeTrue - previousVisualState.AltitudeTrue;
-
-		double intervalSec = intervalMs / 1000.0;
-
-		return Vector3(
-			lonDelta / intervalSec,
-			altDelta / intervalSec,
-			latDelta / intervalSec
-		);
-	}
-
-	void AircraftManager::HandleChangePlaneModel(const std::string& callsign, const std::string& typeIcao, const std::string& airlineIcao)
-	{
-		auto aircraft = GetAircraft(callsign);
-		if (!aircraft) return;
-
-		aircraft->ChangeModel(typeIcao.c_str(), airlineIcao.c_str(), "");
 	}
 }

@@ -98,7 +98,7 @@ namespace xpilot
         SetRoll(_visualState.Bank);
 
         IsFirstRenderPending = true;
-        LastSlowPositionTimestamp = std::chrono::steady_clock::now();
+        LastVelocityUpdate = PrecisionTimestamp();
         PredictedVisualState = _visualState;
         VisualState = _visualState;
         PositionalVelocities = Vector3::Zero();
@@ -129,11 +129,7 @@ namespace xpilot
         }
     }
 
-    NetworkAircraft::~NetworkAircraft()
-    {
-    }
-
-    void NetworkAircraft::ExtrapolatePosition(
+    AircraftVisualState NetworkAircraft::ExtrapolatePosition(
         Vector3 velocityVector,
         Vector3 rotationVector,
         double interval)
@@ -147,64 +143,67 @@ namespace xpilot
         double alt_change = velocityVector.Y * interval * 3.28084;
         double new_alt = PredictedVisualState.AltitudeTrue + alt_change;
 
-        PerformGroundClamping(1.0 / interval);
-        SetLocation(new_lat, new_lon, AdjustedAltitude.has_value() ? AdjustedAltitude.value() : new_alt);
+        double pitch;
+        double bank;
+        double heading;
 
-        Quaternion current_orientation = Quaternion::FromEuler(
-            DegreesToRadians(GetPitch()),
-            DegreesToRadians(GetHeading()),
-            DegreesToRadians(GetRoll())
-        );
+        if (rotationVector == Vector3::Zero())
+        {
+            pitch = PredictedVisualState.Pitch;
+            bank = PredictedVisualState.Bank;
+            heading = PredictedVisualState.Heading;
+        }
+        else
+        {
+            Quaternion current_orientation = Quaternion::FromEuler(
+                DegreesToRadians(PredictedVisualState.Pitch),
+                DegreesToRadians(PredictedVisualState.Heading),
+                DegreesToRadians(PredictedVisualState.Bank)
+            );
 
-        Quaternion rotation = Quaternion::FromEuler(
-            rotationVector.X,
-            rotationVector.Y,
-            rotationVector.Z
-        );
+            Quaternion rotation = Quaternion::FromEuler(
+                rotationVector.X,
+                rotationVector.Y,
+                rotationVector.Z
+            );
 
-        Quaternion slerp = Quaternion::Slerp(
-            Quaternion::Identity(),
-            rotation,
-            interval > 1.0 ? 1.0 : interval
-        );
+            Quaternion slerp = Quaternion::Slerp(
+                Quaternion::Identity(),
+                rotation,
+                interval > 1.0 ? 1.0 : interval
+            );
 
-        Quaternion result = current_orientation * slerp;
+            Quaternion result = current_orientation * slerp;
 
-        Vector3 new_orientation = Quaternion::ToEuler(result);
+            Vector3 new_orientation = Quaternion::ToEuler(result);
 
-        double new_pitch = RadiansToDegrees(new_orientation.X);
-        double new_heading = RadiansToDegrees(new_orientation.Y);
-        double new_roll = RadiansToDegrees(new_orientation.Z);
-
-        PredictedVisualState.Lat = new_lat;
-        PredictedVisualState.Lon = new_lon;
-        PredictedVisualState.AltitudeTrue = new_alt;
-        PredictedVisualState.Pitch = new_pitch;
-        PredictedVisualState.Bank = new_roll;
-        PredictedVisualState.Heading = new_heading;
-
-        SetPitch(new_pitch);
-        SetHeading(new_heading);
-        SetRoll(new_roll);
-    }
-
-    void NetworkAircraft::RecordTerrainElevationHistory()
-    {
-        if (!LocalTerrainElevation.has_value()) {
-            return;
+            pitch = RadiansToDegrees(new_orientation.X);
+            heading = RadiansToDegrees(new_orientation.Y);
+            bank = RadiansToDegrees(new_orientation.Z);
         }
 
+        AircraftVisualState predictedVisualState{};
+        predictedVisualState.Lat = new_lat;
+        predictedVisualState.Lon = new_lon;
+        predictedVisualState.AltitudeTrue = new_alt;
+        predictedVisualState.Pitch = pitch;
+        predictedVisualState.Bank = bank;
+        predictedVisualState.Heading = heading;
+
+        return predictedVisualState;
+    }
+
+    void NetworkAircraft::RecordTerrainElevationHistory(double currentTimestamp)
+    {
         HasUsableTerrainElevationData = false;
 
-        auto now = std::chrono::steady_clock::now();
-
         TerrainElevationHistory.remove_if([&](TerrainElevationData& meta) {
-            return meta.Timestamp < (now - std::chrono::milliseconds(TERRAIN_ELEVATION_DATA_USABLE_AGE + 250));
+            return meta.Timestamp < (currentTimestamp - TERRAIN_ELEVATION_DATA_USABLE_AGE + 250);
         });
 
         if (VisualState.AltitudeAgl.has_value() && (VisualState.AltitudeAgl.value() <= MAX_USABLE_ALTITUDE_AGL)) {
             TerrainElevationData data{};
-            data.Timestamp = now;
+            data.Timestamp = currentTimestamp;
             data.Location.Latitude = VisualState.Lat;
             data.Location.Longitude = VisualState.Lon;
             data.LocalValue = LocalTerrainElevation.value();
@@ -220,8 +219,7 @@ namespace xpilot
 
         auto startSample = TerrainElevationHistory.front();
         auto endSample = TerrainElevationHistory.back();
-        auto age = std::chrono::duration_cast<std::chrono::milliseconds>(endSample.Timestamp - startSample.Timestamp).count();
-        if (age < TERRAIN_ELEVATION_DATA_USABLE_AGE) {
+        if ((endSample.Timestamp - startSample.Timestamp) < TERRAIN_ELEVATION_DATA_USABLE_AGE) {
             return;
         }
 
@@ -240,6 +238,18 @@ namespace xpilot
         }
 
         HasUsableTerrainElevationData = true;
+    }
+
+    void NetworkAircraft::UpdateVelocityVectors()
+    {
+        auto currentTimestamp = PrecisionTimestamp();
+        if (currentTimestamp - LastVelocityUpdate > 500)
+        {
+            ClearRotationalVelocities();
+        }
+        LastVelocityUpdate = currentTimestamp;
+        RecordTerrainElevationHistory(currentTimestamp);
+        UpdateErrorVectors(currentTimestamp);
     }
 
     void NetworkAircraft::PerformGroundClamping(float frameRate)
@@ -326,7 +336,16 @@ namespace xpilot
         }
     }
 
-    void NetworkAircraft::UpdateErrorVectors(double timestamp)
+    void NetworkAircraft::ClearRotationalVelocities()
+    {
+        RotationalVelocities = Vector3::Zero();
+        RotationalErrorVelocities = Vector3::Zero();
+        PredictedVisualState.Pitch = VisualState.Pitch;
+        PredictedVisualState.Bank = VisualState.Bank;
+        PredictedVisualState.Heading = VisualState.Heading;
+    }
+
+    void NetworkAircraft::UpdateErrorVectors(double currentTimestamp)
     {
         double latDelta = DegreesToMeters(CalculateNormalizedDelta(
             PredictedVisualState.Lat,
@@ -351,18 +370,18 @@ namespace xpilot
             latDelta / 2.0
         );
 
-        if (PredictedVisualState.Pitch == GetPitch() &&
-            PredictedVisualState.Heading == GetHeading() &&
-            PredictedVisualState.Bank == GetRoll())
+        if (PredictedVisualState.Pitch == VisualState.Pitch &&
+            PredictedVisualState.Heading == VisualState.Heading &&
+            PredictedVisualState.Bank == VisualState.Bank)
         {
             RotationalErrorVelocities = Vector3::Zero();
         }
         else
         {
             Quaternion currentOrientation = Quaternion::FromEuler(
-                DegreesToRadians(GetPitch()),
-                DegreesToRadians(GetHeading()),
-                DegreesToRadians(GetRoll())
+                DegreesToRadians(PredictedVisualState.Pitch),
+                DegreesToRadians(PredictedVisualState.Heading),
+                DegreesToRadians(PredictedVisualState.Bank)
             );
 
             Quaternion targetOrientation = Quaternion::FromEuler(
@@ -378,46 +397,57 @@ namespace xpilot
             RotationalErrorVelocities = Vector3(result.X / 2.0, result.Y / 2.0, result.Z / 2.0);
         }
 
-        ApplyErrorVelocitiesUntil = timestamp + 2000;
+        ApplyErrorVelocitiesUntil = currentTimestamp + 2000;
     }
 
-    void NetworkAircraft::UpdatePosition(float _elapsedSinceLastCall, int)
+    void NetworkAircraft::UpdatePosition(float _frameRatePeriod, int)
     {
-        const auto now = std::chrono::steady_clock::now();
+        auto currentTimestamp = PrecisionTimestamp();
 
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - LastVelocityUpdate).count() > 500)
+        if (IsFirstRenderPending)
         {
-            RotationalVelocities = Vector3::Zero();
+            PredictedVisualState = VisualState;
+            PositionalErrorVelocities = Vector3::Zero();
             RotationalErrorVelocities = Vector3::Zero();
         }
-
-        Vector3 positionalVelocities = PositionalVelocities;
-        Vector3 rotationalVelocities = RotationalVelocities;
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() <= ApplyErrorVelocitiesUntil) 
+        else
         {
-            positionalVelocities += PositionalErrorVelocities;
-            rotationalVelocities += RotationalErrorVelocities;
+            if (currentTimestamp - LastVelocityUpdate > 500)
+            {
+                ClearRotationalVelocities();
+            }
+
+            Vector3 positionalVelocities = PositionalVelocities;
+            Vector3 rotationalVelocities = RotationalVelocities;
+
+            if (currentTimestamp <= ApplyErrorVelocitiesUntil)
+            {
+                positionalVelocities += PositionalErrorVelocities;
+                rotationalVelocities += RotationalErrorVelocities;
+            }
+
+            PredictedVisualState = ExtrapolatePosition(positionalVelocities, rotationalVelocities, _frameRatePeriod);
         }
 
-        ExtrapolatePosition(positionalVelocities, rotationalVelocities, _elapsedSinceLastCall);
+        PerformGroundClamping(1.0 / _frameRatePeriod);
 
-        const auto diffMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - PreviousSurfaceUpdateTime);
+        SetLocation(PredictedVisualState.Lat, PredictedVisualState.Lon, AdjustedAltitude.has_value() ? AdjustedAltitude.value() : PredictedVisualState.AltitudeTrue);
+        SetPitch(PredictedVisualState.Pitch);
+        SetRoll(PredictedVisualState.Bank);
+        SetHeading(PredictedVisualState.Heading);
+
+        const auto diffMs = currentTimestamp - PreviousSurfaceUpdateTime;
 
         TargetGearPosition = IsGearDown || IsReportedOnGround ? 1.0f : 0.0f;
         TargetSpoilerPosition = IsSpoilersDeployed ? 1.0f : 0.0f;
         TargetReverserPosition = IsEnginesReversing ? 1.0f : 0.0f;
 
-        if (FastPositionsReceivedCount == 0)
+        if (IsFirstRenderPending)
         {
-            // we don't want to wait for the animation on first load...
-            // looks particular funny with the gear extending after the aircraft
-            // loads on the ground
+            // Set initial aircraft surfaces
             Surfaces.gearPosition = TargetGearPosition;
             Surfaces.flapRatio = TargetFlapsPosition;
             Surfaces.spoilerRatio = TargetSpoilerPosition;
-        }
-        else if (FastPositionsReceivedCount > 1) {
-            IsFirstRenderPending = false;
         }
 
         SetLightsTaxi(Surfaces.lights.taxiLights);
@@ -426,11 +456,11 @@ namespace xpilot
         SetLightsStrobe(Surfaces.lights.strbLights);
         SetLightsNav(Surfaces.lights.navLights);
 
-        Interpolate(Surfaces.gearPosition, TargetGearPosition, diffMs.count(), flightModel.GEAR_DURATION);
-        Interpolate(Surfaces.flapRatio, TargetFlapsPosition, diffMs.count(), flightModel.FLAPS_DURATION);
-        Interpolate(Surfaces.spoilerRatio, TargetSpoilerPosition, diffMs.count(), flightModel.FLAPS_DURATION);
-        Interpolate(Surfaces.reversRatio, TargetReverserPosition, diffMs.count(), 1500);
-        PreviousSurfaceUpdateTime = now;
+        Interpolate(Surfaces.gearPosition, TargetGearPosition, diffMs, flightModel.GEAR_DURATION);
+        Interpolate(Surfaces.flapRatio, TargetFlapsPosition, diffMs, flightModel.FLAPS_DURATION);
+        Interpolate(Surfaces.spoilerRatio, TargetSpoilerPosition, diffMs, flightModel.FLAPS_DURATION);
+        Interpolate(Surfaces.reversRatio, TargetReverserPosition, diffMs, 1500);
+        PreviousSurfaceUpdateTime = currentTimestamp;
 
         SetGearRatio(Surfaces.gearPosition);
         SetFlapRatio(Surfaces.flapRatio);
@@ -445,7 +475,7 @@ namespace xpilot
         if (IsReportedOnGround)
         {
             double rpm = (60 / (2 * M_PI * 3.2)) * abs(PositionalVelocities.X);
-            double rpmDeg = RpmToDegree(GetTireRotRpm(), _elapsedSinceLastCall);
+            double rpmDeg = RpmToDegree(GetTireRotRpm(), _frameRatePeriod);
             SetTireRotRpm(rpm);
             SetTireRotAngle(GetTireRotAngle() + rpmDeg);
             while (GetTireRotAngle() >= 360.0f)
@@ -456,7 +486,7 @@ namespace xpilot
         {
             SetEngineRotRpm(1200);
             SetPropRotRpm(GetEngineRotRpm());
-            SetEngineRotAngle(GetEngineRotAngle() + RpmToDegree(GetEngineRotRpm(), _elapsedSinceLastCall));
+            SetEngineRotAngle(GetEngineRotAngle() + RpmToDegree(GetEngineRotRpm(), _frameRatePeriod));
             while (GetEngineRotAngle() >= 360.0f)
             {
                 SetEngineRotAngle(GetEngineRotAngle() - 360.0f);
@@ -474,6 +504,8 @@ namespace xpilot
         }
 
         HexToRgb(Config::getInstance().getAircraftLabelColor(), colLabel);
+
+        IsFirstRenderPending = false;
     }
 
     void NetworkAircraft::copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const
