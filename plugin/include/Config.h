@@ -45,6 +45,14 @@ namespace xpilot
         }
     };
 
+    enum class NotificationPanelPosition
+    {
+        TopRight,
+        TopLeft,
+        BottomLeft,
+        BottomRight
+    };
+
     class Config
     {
     public:
@@ -127,6 +135,9 @@ namespace xpilot
             }
         }
 
+        void setNotificationPanelPosition(NotificationPanelPosition position);
+        NotificationPanelPosition getNotificationPanelPosition() const;
+
         bool setOverrideContactAtcCommand(bool status);
         bool getOverrideContactAtcCommand() const
         {
@@ -194,6 +205,7 @@ namespace xpilot
         bool m_disableTcas = false;
         bool m_notificationPanelVisibe = true;
         int m_notificationPanelTimeout = 10;
+        NotificationPanelPosition m_notificationPanelPosition = NotificationPanelPosition::TopRight;
         int m_maxLabelDist = 3;
         bool m_labelCutoffVis = true;
         bool m_transmitIndicator = false;

@@ -21,6 +21,7 @@
 
 #include "ImgWindow.h"
 #include "XplaneCommand.h"
+#include "Config.h"
 
 #include <list>
 #include <chrono>

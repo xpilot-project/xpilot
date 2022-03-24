@@ -109,6 +109,10 @@ namespace xpilot
             {
                 setNotificationPanelTimeout(jf["NotificationBarDisappearTime"]);
             }
+            if (jf.contains("NotificationPanelPosition"))
+            {
+                setNotificationPanelPosition(jf["NotificationPanelPosition"]);
+            }
             if (jf.contains("OverrideContactAtc"))
             {
                 setOverrideContactAtcCommand(jf["OverrideContactAtc"]);
@@ -182,6 +186,7 @@ namespace xpilot
         j["EnableDefaultAtis"] = getDefaultAtisEnabled();
         j["ShowNotificationBar"] = getNotificationPanelVisible();
         j["NotificationBarDisappearTime"] = getNotificationPanelTimeout();
+        j["NotificationPanelPosition"] = getNotificationPanelPosition();
         j["OverrideContactAtc"] = getOverrideContactAtcCommand();
         j["LabelColor"] = getAircraftLabelColor();
         j["DisableTcas"] = getDisableTcas();
@@ -302,6 +307,16 @@ namespace xpilot
     {
         m_defaultAtis = status;
         return true;
+    }
+
+    void Config::setNotificationPanelPosition(NotificationPanelPosition position)
+    {
+        m_notificationPanelPosition = position;
+    }
+
+    NotificationPanelPosition Config::getNotificationPanelPosition() const
+    {
+        return m_notificationPanelPosition;
     }
 
     bool Config::setOverrideContactAtcCommand(bool status)

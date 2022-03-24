@@ -91,12 +91,42 @@ namespace xpilot
 
         if (panel->GetVisible())
         {
-            int left, top, right, bottom, screenTop, screenRight;
-            XPLMGetScreenBoundsGlobal(nullptr, &screenTop, &screenRight, nullptr);
-            right = screenRight - 35; /*padding left*/
-            top = screenTop - 35; /*width*/
-            left = screenRight - 800; /*padding top*/
-            bottom = top - 100; /*height*/
+            int panelWidth = 600;
+            int panelHeight = 100;
+            int panelMargin = 35;
+
+            int left, top, right, bottom, screenTop, screenRight, screenLeft, screenBottom;
+            XPLMGetScreenBoundsGlobal(&screenLeft, &screenTop, &screenRight, &screenBottom);
+
+            switch (Config::getInstance().getNotificationPanelPosition())
+            {
+            default:
+            case NotificationPanelPosition::TopRight:
+                right = screenRight - panelMargin; /*margin right*/
+                top = screenTop - panelMargin; /*margin top*/
+                left = screenRight - panelWidth; /*width*/
+                bottom = top - panelHeight; /*height*/
+                break;
+            case NotificationPanelPosition::TopLeft:
+                right = screenLeft + panelWidth; /*width*/
+                top = screenTop - panelMargin; /*margin top*/
+                left = screenLeft + panelMargin; /*margin left*/
+                bottom = top - panelHeight; /*height*/
+                break;
+            case NotificationPanelPosition::BottomLeft:
+                right = screenLeft + panelWidth; /*width*/
+                top = screenBottom + panelHeight + panelMargin; /*height*/
+                left = screenLeft + panelMargin; /*margin left*/
+                bottom = screenBottom + panelMargin; /*margin bottom*/
+                break;
+            case NotificationPanelPosition::BottomRight:
+                right = screenRight - panelMargin; /*margin right*/
+                top = screenBottom + panelHeight + panelMargin; /*height*/
+                left = screenRight - panelWidth; /*margin left*/
+                bottom = screenBottom + panelMargin; /*margin bottom*/
+                break;
+            }
+
             panel->SetWindowGeometry(left, top, right, bottom);
         }
 

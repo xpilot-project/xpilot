@@ -96,9 +96,9 @@ namespace xpilot
 
 		int left, top, right, bottom, screenTop, screenRight;
 		XPLMGetScreenBoundsGlobal(nullptr, &screenTop, &screenRight, nullptr);
-		right = screenRight - 35; /*padding left*/
-		top = screenTop - 35; /*width*/
-		left = screenRight - 800; /*padding top*/
+		right = screenRight - 35; /*margin right*/
+		top = screenTop - 35; /*margin top*/
+		left = screenRight - 800; /*width*/
 		bottom = top - 100; /*height*/
 		m_notificationPanel = std::make_unique<NotificationPanel>(left, top, right, bottom);
 		m_textMessageConsole = std::make_unique<TextMessageConsole>(this);

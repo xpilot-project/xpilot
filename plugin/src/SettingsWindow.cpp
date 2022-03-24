@@ -37,6 +37,7 @@ namespace xpilot
 	static bool overrideContactAtcCommand;
 	static bool showMessagePreview = true;
 	static int notificationPanelTimeout = 2;
+	static int notificationPanelPosition = (int)NotificationPanelPosition::TopRight;
 	static int labelMaxDistance = 3;
 	static bool labelVisibilityCutoff = true;
 	static bool enableTransmitIndicator = false;
@@ -49,10 +50,10 @@ namespace xpilot
 	static int currentNode = -1;
 
 	SettingsWindow::SettingsWindow(WndMode _mode) :
-		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 345, 600, 0))
+		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 365, 600, 0))
 	{
 		SetWindowTitle(string_format("xPilot %s Settings", PLUGIN_VERSION_STRING));
-		SetWindowResizingLimits(600, 345, 600, 345);
+		SetWindowResizingLimits(600, 365, 600, 365);
 
 		fileBrowser.SetTitle("Browse...");
 		fileBrowser.SetWindowSize(450, 250);
@@ -78,6 +79,7 @@ namespace xpilot
 		fallbackTypeCode = xpilot::Config::getInstance().getDefaultAcIcaoType();
 		showMessagePreview = xpilot::Config::getInstance().getNotificationPanelVisible();
 		notificationPanelTimeout = xpilot::Config::getInstance().getNotificationPanelTimeout();
+		notificationPanelPosition = (int)xpilot::Config::getInstance().getNotificationPanelPosition();
 		overrideContactAtcCommand = xpilot::Config::getInstance().getOverrideContactAtcCommand();
 		labelMaxDistance = xpilot::Config::getInstance().getMaxLabelDistance();
 		labelVisibilityCutoff = xpilot::Config::getInstance().getLabelCutoffVis();
@@ -146,12 +148,28 @@ namespace xpilot
 					ImGui::SameLine();
 					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Automatically hide the Notification Panel after the selected number of seconds.");
 					ImGui::TableSetColumnIndex(1);
-					const float cbWidth = ImGui::CalcTextSize("5 Seconds_______").x;
+					const float cbWidth = ImGui::CalcTextSize("5 Seconds_________").x;
 					ImGui::SetNextItemWidth(cbWidth);
 					const char* autoHideOptions[] = { "5 seconds", "10 seconds", "15 seconds", "30 seconds", "60 seconds" };
 					if (ImGui::Combo("##AutoHide", &notificationPanelTimeout, autoHideOptions, IM_ARRAYSIZE(autoHideOptions)))
 					{
 						xpilot::Config::getInstance().setNotificationPanelTimeout(notificationPanelTimeout);
+						Save();
+					}
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Notification Panel Position");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Specify where the notification panel should appear within the main X-Plane window.");
+					ImGui::TableSetColumnIndex(1);
+					const float notificationPanelCbWidth = ImGui::CalcTextSize("Top Right__________").x;
+					ImGui::SetNextItemWidth(notificationPanelCbWidth);
+					const char* positionOptions[] = { "Top Right", "Top Left", "Bottom Left", "Bottom Right" };
+					if (ImGui::Combo("##NotificationPanelPosition", &notificationPanelPosition, positionOptions, IM_ARRAYSIZE(positionOptions)))
+					{
+						xpilot::Config::getInstance().setNotificationPanelPosition((NotificationPanelPosition)notificationPanelPosition);
 						Save();
 					}
 
