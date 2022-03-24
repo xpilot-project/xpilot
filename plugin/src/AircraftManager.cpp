@@ -288,7 +288,7 @@ namespace xpilot
 				anyDoorOpen = true;
 			}
 
-			bool ShouldPauseSound = !Config::getInstance().getEnableAircraftSounds() || !instance->m_soundOn || instance->m_simPaused;
+			bool ShouldPauseSound = !Config::getInstance().getAircraftSoundsEnabled() || !instance->m_soundOn || instance->m_simPaused;
 
 			if (instance->m_isViewExternal == 0 && instance->m_canopyOpenRatio == 0 && anyDoorOpen == false) {
 				// internal view

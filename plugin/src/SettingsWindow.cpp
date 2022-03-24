@@ -84,8 +84,8 @@ namespace xpilot
 		labelMaxDistance = xpilot::Config::getInstance().getMaxLabelDistance();
 		labelVisibilityCutoff = xpilot::Config::getInstance().getLabelCutoffVis();
 		logLevel = xpilot::Config::getInstance().getLogLevel();
-		enableTransmitIndicator = xpilot::Config::getInstance().getEnableTransmitIndicator();
-		enableAircraftSounds = xpilot::Config::getInstance().getEnableAircraftSounds();
+		enableTransmitIndicator = xpilot::Config::getInstance().getTransmitIndicatorEnabled();
+		enableAircraftSounds = xpilot::Config::getInstance().getAircraftSoundsEnabled();
 		aircraftSoundVolume = xpilot::Config::getInstance().getAircraftSoundVolume();
 		HexToRgb(xpilot::Config::getInstance().getAircraftLabelColor(), lblCol);
 	}
@@ -294,7 +294,7 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##EnableTransmitIndicator", &enableTransmitIndicator))
 					{
-						xpilot::Config::getInstance().setEnableTransmitIndicator(enableTransmitIndicator);
+						xpilot::Config::getInstance().setTransmitIndicatorEnabled(enableTransmitIndicator);
 						Save();
 					}
 
@@ -307,7 +307,7 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##EnableAircraftSounds", &enableAircraftSounds))
 					{
-						xpilot::Config::getInstance().setEnableAircraftSounds(enableAircraftSounds);
+						xpilot::Config::getInstance().setAircraftSoundsEnabled(enableAircraftSounds);
 						Save();
 					}
 

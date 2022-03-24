@@ -67,130 +67,63 @@ namespace xpilot
         bool saveConfig();
 
         typedef std::vector<CslPackage> vecCslPackages;
-        std::vector<CslPackage> getCSLPackages()const
-        {
-            return m_cslPackages;
-        }
+        std::vector<CslPackage> getCSLPackages()const;
         void saveCSLPath(int idx, const std::string path);
         void saveCSLEnabled(int idx, bool enabled);
         bool loadCSLPackage(int idx);
         bool hasValidPaths() const;
 
-        std::string getDefaultAcIcaoType() const
-        {
-            return m_defaultAcIcaoType;
-        }
-        bool setDefaultAcIcaoType(const std::string type);
+        std::string getDefaultAcIcaoType() const;
+        void setDefaultAcIcaoType(const std::string type);
 
-        bool setShowHideLabels(bool status);
-        bool getShowHideLabels() const
-        {
-            return m_showHideLabels;
-        }
+        void setShowHideLabels(bool status);
+        bool getShowHideLabels() const;
 
-        bool setDebugModelMatching(bool status);
-        bool getDebugModelMatching() const
-        {
-            return m_debugModelMatching;
-        }
+        void setDebugModelMatching(bool status);
+        bool getDebugModelMatching() const;
 
-        bool setTcpPort(std::string port);
-        std::string getTcpPort() const
-        {
-            return m_tcpPort;
-        }
+        void setTcpPort(std::string port);
+        std::string getTcpPort() const;
 
-        bool setDefaultAtisEnabled(bool status);
-        bool getDefaultAtisEnabled() const
-        {
-            return m_defaultAtis;
-        }
+        void setDefaultAtisEnabled(bool status);
+        bool getDefaultAtisEnabled() const;
 
-        bool setNotificationPanelVisible(bool enabled);
-        bool getNotificationPanelVisible()const
-        {
-            return m_notificationPanelVisibe;
-        }
+        void setNotificationPanelVisible(bool enabled);
+        bool getNotificationPanelVisible() const;
 
-        bool setNotificationPanelTimeout(int timeout);
-        int getNotificationPanelTimeout() const
-        {
-            return m_notificationPanelTimeout;
-        }
-        int getActualMessagePreviewTime()const
-        {
-            switch (m_notificationPanelTimeout)
-            {
-                case 0:
-                    return 5;
-                case 1:
-                    return 10;
-                case 2:
-                    return 15;
-                case 3:
-                    return 30;
-                case 4:
-                default:
-                    return 60;
-            }
-        }
+        void setNotificationPanelTimeout(int timeout);
+        int getNotificationPanelTimeout() const;
+        int getActualMessagePreviewTime() const;
 
         void setNotificationPanelPosition(NotificationPanelPosition position);
         NotificationPanelPosition getNotificationPanelPosition() const;
 
-        bool setOverrideContactAtcCommand(bool status);
-        bool getOverrideContactAtcCommand() const
-        {
-            return m_overrideContactAtcCommand;
-        }
+        void setOverrideContactAtcCommand(bool status);
+        bool getOverrideContactAtcCommand() const;
 
-        bool setAircraftLabelColor(int c);
-        int getAircraftLabelColor()
-        {
-            return m_labelColor;
-        }
+        void setAircraftLabelColor(int color);
+        int getAircraftLabelColor() const;
 
-        bool setDisableTcas(bool status);
-        bool getDisableTcas()const
-        {
-            return m_disableTcas;
-        }
+        void setTcasDisabled(bool status);
+        bool getTcasDisabled() const;
 
-        bool setMaxLabelDistance(int d);
-        int getMaxLabelDistance()const
-        {
-            return m_maxLabelDist;
-        }
+        void setMaxLabelDistance(int distance);
+        int getMaxLabelDistance() const;
 
-        bool setLabelCutoffVis(bool b);
-        bool getLabelCutoffVis()const
-        {
-            return m_labelCutoffVis;
-        }
+        void setLabelCutoffVis(bool value);
+        bool getLabelCutoffVis() const;
 
-        bool setLogLevel(int lvl);
-        int getLogLevel()const
-        {
-            return m_logLevel;
-        }
+        void setLogLevel(int level);
+        int getLogLevel() const;
 
-        bool setEnableTransmitIndicator(bool b);
-        bool getEnableTransmitIndicator()const
-        {
-            return m_transmitIndicator;
-        }
+        void setTransmitIndicatorEnabled(bool value);
+        bool getTransmitIndicatorEnabled() const;
 
-        bool setEnableAircraftSounds(bool b);
-        bool getEnableAircraftSounds()const
-        {
-            return m_aircraftSounds;
-        }
+        void setAircraftSoundsEnabled(bool value);
+        bool getAircraftSoundsEnabled() const;
 
-        bool setAircraftSoundVolume(int volume);
-        int getAircraftSoundVolume() const
-        {
-            return std::max(0, std::min(m_aircraftSoundVolume, 100));
-        }
+        void setAircraftSoundVolume(int volume);
+        int getAircraftSoundVolume() const;
 
     private:
         Config() = default;
@@ -198,19 +131,19 @@ namespace xpilot
         std::string m_defaultAcIcaoType = "A320";
         bool m_showHideLabels = true;
         bool m_debugModelMatching = false;
-        bool m_defaultAtis = false;
+        bool m_defaultAtisEnabled = false;
         std::string m_tcpPort = "53100";
         bool m_overrideContactAtcCommand = false;
         int m_labelColor = COLOR_YELLOW;
-        bool m_disableTcas = false;
-        bool m_notificationPanelVisibe = true;
+        bool m_tcasDisabled = false;
+        bool m_notificationPanelVisible = true;
         int m_notificationPanelTimeout = 10;
         NotificationPanelPosition m_notificationPanelPosition = NotificationPanelPosition::TopRight;
         int m_maxLabelDist = 3;
         bool m_labelCutoffVis = true;
-        bool m_transmitIndicator = false;
-        bool m_aircraftSounds = true;
-        int m_aircraftSoundVolume = 50;
+        bool m_transmitIndicatorEnabled = false;
+        bool m_aircraftSoundsEnabled = true;
+        int m_aircraftSoundsVolume = 50;
         int m_logLevel = 2; // 0=Debug, 1=Info, 2=Warning, 3=Error, 4=Fatal, 5=Msg
     };
 }
