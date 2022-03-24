@@ -695,10 +695,10 @@ void XplaneAdapter::sendSocketMessage(const QString &message)
     if(message.isEmpty()) return;
 
     std::string msg = message.toStdString();
-    nng_send(_socket, msg.data(), msg.size() + 1, NNG_FLAG_NONBLOCK);
+    nng_send(_socket, msg.data(), msg.size(), NNG_FLAG_NONBLOCK);
 
     for(auto &visualSocket : m_visualSockets) {
-        nng_send(visualSocket, msg.data(), msg.size() + 1, NNG_FLAG_NONBLOCK);
+        nng_send(visualSocket, msg.data(), msg.size(), NNG_FLAG_NONBLOCK);
     }
 
     writeToLog(message);

@@ -190,7 +190,7 @@ namespace xpilot
 
 	void XPilot::SendReply(const std::string& message)
 	{
-		nng_send(_socket, (void*)message.c_str(), message.size() + 1, NNG_FLAG_NONBLOCK);
+		nng_send(_socket, (void*)message.c_str(), message.size(), NNG_FLAG_NONBLOCK);
 	}
 
 	void XPilot::ProcessMessage(const std::string& msg)
