@@ -38,10 +38,7 @@ namespace xpilot
         probeinfo.structSize = sizeof(XPLMProbeInfo_t);
 
         XPLMWorldToLocal(degLat, degLon, 0, &x, &y, &z);
-        XPLMProbeTerrainXYZ(m_probeRef, x, y, z, &probeinfo);
-        XPLMLocalToWorld(probeinfo.locationX, probeinfo.locationY, probeinfo.locationZ, &foo, &foo, &alt);
-        XPLMWorldToLocal(degLat, degLon, alt, &x, &y, &z);
-        if (XPLMProbeTerrainXYZ(m_probeRef, x, y, z, &probeinfo) == xplm_ProbeHitTerrain) 
+        if (XPLMProbeTerrainXYZ(m_probeRef, x, y, z, &probeinfo) == xplm_ProbeHitTerrain)
         {
             XPLMLocalToWorld(probeinfo.locationX, probeinfo.locationY, probeinfo.locationZ, &foo, &foo, &alt);
             return alt * 3.28084;
