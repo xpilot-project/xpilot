@@ -138,6 +138,7 @@ namespace xpilot
         bool HasUsableTerrainElevationData;
 
         int64_t LastUpdated;
+        bool AircraftAddedEventSent = false;
 
         AircraftVisualState VisualState;
         AircraftVisualState PredictedVisualState;

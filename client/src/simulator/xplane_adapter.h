@@ -102,6 +102,8 @@ signals:
     void aircraftAlreadyIgnored(QString callsign);
     void aircraftUnignored(QString callsign);
     void aircraftNotIgnored(QString callsign);
+    void aircraftAddedToSim(QString callsign);
+    void aircraftRemovedFromSim(QString callsign);
     void ignoreList(QStringList list);
     void sendWallop(QString message);
     void simPausedStateChanged(bool paused);

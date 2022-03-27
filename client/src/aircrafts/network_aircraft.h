@@ -24,6 +24,7 @@ struct NetworkAircraft
     AircraftVisualState RemoteVisualState;
     std::optional<AircraftConfiguration> Configuration;
     QDateTime LastUpdated;
+    QDateTime LastSyncTime;
     AircraftStatus Status;
     bool HaveVelocities;
     double Speed;

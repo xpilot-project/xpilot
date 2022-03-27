@@ -109,11 +109,14 @@ namespace xpilot
 		XPLMUnregisterFlightLoopCallback(&AircraftManager::AircraftMaintenanceCallback, nullptr);
 	}
 
-	void AircraftManager::HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState, 
-	const std::string& airline, const std::string& typeCode)
+	void AircraftManager::HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState,
+		const std::string& airline, const std::string& typeCode)
 	{
 		auto planeIt = mapPlanes.find(callsign);
-		if (planeIt != mapPlanes.end()) return;
+		if (planeIt != mapPlanes.end()) {
+			HandleRemovePlane(callsign); // remove plane, the client will try adding it again
+			return;
+		}
 
 		NetworkAircraft* plane = new NetworkAircraft(callsign.c_str(), visualState, typeCode.c_str(), airline.c_str(), "", 0, "");
 		mapPlanes.emplace(callsign, std::move(plane));
@@ -149,11 +152,6 @@ namespace xpilot
 
 		NetworkAircraft* plane = planeIt->second.get();
 		if (!plane) return;
-
-		if (config.data.fullConfig.has_value() && config.data.fullConfig.value())
-		{
-			plane->SetVisible(true);
-		}
 
 		if (config.data.flapsPct.has_value())
 		{
@@ -244,6 +242,11 @@ namespace xpilot
 
 		m_audioEngine->StopChannel(aircraft->SoundChannelId);
 		mapPlanes.erase(callsign);
+
+		json reply;
+		reply["type"] = "AircraftDeleted";
+		reply["data"]["callsign"] = callsign;
+		mEnv->SendReply(reply.dump());
 	}
 
 	void AircraftManager::RemoveAllPlanes()
@@ -315,6 +318,16 @@ namespace xpilot
 					instance->m_audioEngine->SetChannel3dPosition(channel, soundPos);
 					instance->m_audioEngine->SetChannelPaused(channel, ShouldPauseSound || !iter->second->IsEnginesRunning);
 					instance->m_audioEngine->SetChannelVolume(channel, soundVolume);
+				}
+
+				// confirm aircraft creation
+				if (iter->second->IsInstanciated() && !iter->second->AircraftAddedEventSent)
+				{
+					json reply;
+					reply["type"] = "AircraftAdded";
+					reply["data"]["callsign"] = iter->first;
+					instance->mEnv->SendReply(reply.dump());
+					iter->second->AircraftAddedEventSent = true;
 				}
 			}
 

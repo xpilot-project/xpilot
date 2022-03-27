@@ -20,6 +20,8 @@ namespace xpilot
         connect(&m_networkManager, &NetworkManager::pilotDeleted, this, &AircraftManager::OnPilotDeleted);
         connect(&m_xplaneAdapter, &XplaneAdapter::aircraftIgnored, this, &AircraftManager::OnIgnoreAircraft);
         connect(&m_xplaneAdapter, &XplaneAdapter::aircraftUnignored, this, &AircraftManager::OnUnignoreAircraft);
+        connect(&m_xplaneAdapter, &XplaneAdapter::aircraftAddedToSim, this, &AircraftManager::OnAircraftAddedToSim);
+        connect(&m_xplaneAdapter, &XplaneAdapter::aircraftRemovedFromSim, this, &AircraftManager::OnAircraftRemovedFromSim);
         connect(&m_staleAircraftCheckTimer, &QTimer::timeout, this, &AircraftManager::OnStaleAircraftTimeoutTimeout);
         connect(&m_simulatorAircraftSyncTimer, &QTimer::timeout, this, &AircraftManager::OnSimulatorAircraftSyncTimeout);
     }
@@ -269,13 +271,24 @@ namespace xpilot
 
     void AircraftManager::SyncSimulatorAircraft()
     {
+        auto now = QDateTime::currentDateTimeUtc();
+
         for(auto& aircraft : m_aircraft)
         {
             if((aircraft.Status == AircraftStatus::New) && IsEligibleToAddToSimulator(aircraft))
             {
                 m_xplaneAdapter.AddPlaneToSimulator(aircraft);
                 m_xplaneAdapter.PlaneConfigChanged(aircraft);
-                aircraft.Status = AircraftStatus::Active;
+                aircraft.LastSyncTime = QDateTime::currentDateTimeUtc();
+                aircraft.Status = AircraftStatus::Pending;
+            }
+            else if(aircraft.Status == AircraftStatus::Pending)
+            {
+                int timeSinceSync = aircraft.LastSyncTime.msecsTo(now);
+                if(timeSinceSync > 10000)
+                {
+                    aircraft.Status = AircraftStatus::New; // try again in 10 seconds if no aircraft instance has been created
+                }
             }
         }
     }
@@ -301,6 +314,30 @@ namespace xpilot
         if(m_ignoredAircraft.contains(callsign))
         {
             m_ignoredAircraft.removeAll(callsign);
+        }
+    }
+
+    void AircraftManager::OnAircraftAddedToSim(QString callsign)
+    {
+        auto aircraft = std::find_if(m_aircraft.begin(), m_aircraft.end(), [=](NetworkAircraft a){
+            return a.Callsign == callsign;
+        });
+
+        if(aircraft != m_aircraft.end())
+        {
+            aircraft->Status = AircraftStatus::Active;
+        }
+    }
+
+    void AircraftManager::OnAircraftRemovedFromSim(QString callsign)
+    {
+        auto aircraft = std::find_if(m_aircraft.begin(), m_aircraft.end(), [=](NetworkAircraft a){
+            return a.Callsign == callsign;
+        });
+
+        if(aircraft != m_aircraft.end())
+        {
+            m_aircraft.removeAll(*aircraft);
         }
     }
 }

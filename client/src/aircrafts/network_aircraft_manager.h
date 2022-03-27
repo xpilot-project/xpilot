@@ -52,6 +52,8 @@ namespace xpilot
         void SyncSimulatorAircraft();
         void OnIgnoreAircraft(QString callsign);
         void OnUnignoreAircraft(QString callsign);
+        void OnAircraftAddedToSim(QString callsign);
+        void OnAircraftRemovedFromSim(QString callsign);
     };
 }
 

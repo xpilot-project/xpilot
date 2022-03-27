@@ -271,6 +271,30 @@ void XplaneAdapter::processMessage(QString message)
             m_initialHandshake = true;
         }
 
+        else if(obj["type"] == "AircraftAdded")
+        {
+            if(obj.contains("data"))
+            {
+                QJsonObject data = obj["data"].toObject();
+                if(!data["callsign"].toString().isEmpty())
+                {
+                    emit aircraftAddedToSim(data["callsign"].toString());
+                }
+            }
+        }
+
+        else if(obj["type"] == "AircraftDeleted")
+        {
+            if(obj.contains("data"))
+            {
+                QJsonObject data = obj["data"].toObject();
+                if(!data["callsign"].toString().isEmpty())
+                {
+                    emit aircraftRemovedFromSim(data["callsign"].toString());
+                }
+            }
+        }
+
         else if(obj["type"] == "RequestStationInfo")
         {
             if(obj.contains("data"))
