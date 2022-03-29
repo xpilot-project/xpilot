@@ -21,21 +21,20 @@
 
 #include "Dto.h"
 
-namespace xpilot 
-{
+namespace xpilot {
 	class XPilot;
 
 	class NearbyATCList
 	{
 	public:
-		std::string getCallsign() { return m_callsign; }
-		std::string getFrequency() { return m_frequency; }
-		std::string getRealName() { return m_realName; }
-		int getXplaneFrequency() { return m_xplaneFrequency; }
-		void setCallsign(std::string value) { m_callsign = value; }
-		void setFrequency(std::string value) { m_frequency = value; }
-		void setRealName(std::string value) { m_realName = value; }
-		void setXplaneFrequency(int value) { m_xplaneFrequency = value; }
+		std::string GetCallsign() { return m_callsign; }
+		std::string GetFrequency() { return m_frequency; }
+		std::string GetRealName() { return m_realName; }
+		int GetXplaneFrequency() { return m_xplaneFrequency; }
+		void SetCallsign(std::string value) { m_callsign = value; }
+		void SetFrequency(std::string value) { m_frequency = value; }
+		void SetRealName(std::string value) { m_realName = value; }
+		void SetXplaneFrequency(int value) { m_xplaneFrequency = value; }
 	private:
 		std::string m_callsign;
 		std::string m_frequency;
@@ -56,7 +55,6 @@ namespace xpilot
 		std::mutex m_mutex;
 		DataRefAccess<int> m_com1Frequency;
 	};
-
 }
 
 #endif // !NearbyATCWindow_h

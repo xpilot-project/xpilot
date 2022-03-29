@@ -38,8 +38,7 @@
 #include "XPLMDataAccess.h"
 #include "XPLMPlugin.h"
 
-namespace xpilot 
-{
+namespace xpilot {
 	template <typename T>
 	T readFunc(void*);
 	template <typename T>
@@ -54,8 +53,8 @@ namespace xpilot
 	class DataRefNotPublishedException : public std::runtime_error {
 	public:
 		DataRefNotPublishedException(const std::string& msg) :
-			std::runtime_error(msg)
-		{}
+			std::runtime_error(msg) {
+		}
 	};
 
 	/**
@@ -88,10 +87,8 @@ namespace xpilot
 			m_data_ref_identifier(identifier),
 			m_data_ref(nullptr),
 			m_value(T()),
-			m_callback(callback)
-		{
-			switch (read_write)
-			{
+			m_callback(callback) {
+			switch (read_write) {
 			case ReadOnly:
 				registerRead();
 				break;
@@ -102,8 +99,7 @@ namespace xpilot
 				registerReadWrite();
 				break;
 			}
-			if (publish_in_dre)
-			{
+			if (publish_in_dre) {
 				XPLMPluginID PluginID = XPLMFindPluginBySignature("xplanesdk.examples.DataRefEditor");
 				if (PluginID != XPLM_NO_PLUGIN_ID)
 					XPLMSendMessageToPlugin(PluginID, DRE_MSG_ADD_DATAREF, (void*)m_data_ref_identifier.c_str());
@@ -140,8 +136,7 @@ namespace xpilot
 		  * set the value so all other monitors of the dataref get it
 		  * @param val
 		  */
-		void setValue(const T& val)
-		{
+		void setValue(const T& val) {
 			m_value = val;
 			if (m_callback)
 				m_callback(val);
@@ -152,10 +147,8 @@ namespace xpilot
 		void registerRead();
 		void registerWrite();
 		void registerReadWrite();
-		void unregister()
-		{
-			if (m_data_ref)
-			{
+		void unregister() {
+			if (m_data_ref) {
 				XPLMUnregisterDataAccessor(m_data_ref);
 				m_data_ref = 0;
 			}
@@ -170,15 +163,13 @@ namespace xpilot
 	};
 
 	template <typename T>
-	T readFunc(void* inRefCon)
-	{
+	T readFunc(void* inRefCon) {
 		OwnedDataRef<T>* p_owned_data = static_cast<OwnedDataRef<T>*>(inRefCon);
 		return p_owned_data->value();
 	}
 
 	template <typename T>
-	void writeFunc(void* inRefCon, T data)
-	{
+	void writeFunc(void* inRefCon, T data) {
 		OwnedDataRef<T>* p_owned_data = static_cast<OwnedDataRef<T>*>(inRefCon);
 		p_owned_data->setValue(data);
 	}

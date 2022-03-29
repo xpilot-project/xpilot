@@ -25,8 +25,7 @@
 #include "Utilities.h"
 #include "XPilot.h"
 
-namespace xpilot
-{
+namespace xpilot {
 	static std::string m_inputValue;
 	static std::list<ConsoleMessage> m_messageHistory;
 	static std::list<Tab> m_tabs;
@@ -47,8 +46,7 @@ namespace xpilot
 		None
 	};
 
-	CommandOptions resolveOption(std::string input)
-	{
+	CommandOptions resolveOption(std::string input) {
 		std::string v(str_tolower(input));
 		if (v == ".chat" || v == ".msg") return xpilot::CommandOptions::Chat;
 		if (v == ".atis") return xpilot::CommandOptions::RequestAtis;
@@ -67,27 +65,22 @@ namespace xpilot
 	TextMessageConsole::TextMessageConsole(XPilot* instance) :
 		XPImgWindow(WND_MODE_FLOAT_CENTERED, WND_STYLE_SOLID, WndRect(0, 200, 600, 0)),
 		m_scrollToBottom(false),
-		m_env(instance)
-	{
+		m_env(instance) {
 		SetWindowResizingLimits(300, 100, 1024, 1024);
 		SetWindowTitle("Text Message Console");
 	}
 
-	void TextMessageConsole::SendRadioMessage(const std::string& message)
-	{
-		if (!message.empty())
-		{
+	void TextMessageConsole::SendRadioMessage(const std::string& message) {
+		if (!message.empty()) {
 			m_env->SendRadioMessage(message);
 		}
 	}
 
-	void TextMessageConsole::RadioMessageReceived(std::string msg, double red, double green, double blue)
-	{
-		if (!msg.empty())
-		{
+	void TextMessageConsole::RadioMessageReceived(std::string msg, double red, double green, double blue) {
+		if (!msg.empty()) {
 			ConsoleMessage m;
-			m.setMessage(string_format("[%s] %s", UtcTimestamp().c_str(), msg.c_str()));
-			m.setRed(red);
+			m.SetMessage(string_format("[%s] %s", UtcTimestamp().c_str(), msg.c_str()));
+			m.SetRed(red);
 			m.setGreen(green);
 			m.setBlue(blue);
 			m_messageHistory.push_back(m);
@@ -95,65 +88,53 @@ namespace xpilot
 		}
 	}
 
-	void TextMessageConsole::ShowErrorMessage(std::string error)
-	{
+	void TextMessageConsole::ShowErrorMessage(std::string error) {
 		ConsoleMessage m;
-		m.setMessage(string_format("[%s] %s", UtcTimestamp().c_str(), error.c_str()));
-		m.setRed(192);
+		m.SetMessage(string_format("[%s] %s", UtcTimestamp().c_str(), error.c_str()));
+		m.SetRed(192);
 		m.setGreen(57);
 		m.setBlue(43);
 		m_messageHistory.push_back(m);
 		m_scrollToBottom = true;
 	}
 
-	void TextMessageConsole::PrivateMessageError(std::string tabName, std::string error)
-	{
+	void TextMessageConsole::PrivateMessageError(std::string tabName, std::string error) {
 		ConsoleMessage m;
-		m.setMessage(string_format("[%s] %s", UtcTimestamp().c_str(), error.c_str()));
-		m.setRed(192);
+		m.SetMessage(string_format("[%s] %s", UtcTimestamp().c_str(), error.c_str()));
+		m.SetRed(192);
 		m.setGreen(57);
 		m.setBlue(43);
 
-		auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
-			{
-				return t.tabName == tabName;
-			});
+		auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t) {
+			return t.tabName == tabName;
+		});
 
-		if (it != m_tabs.end())
-		{
+		if (it != m_tabs.end()) {
 			it->scrollToBottom = true;
 		}
 	}
 
-	void TextMessageConsole::SendPrivateMessage(const std::string& to, const std::string& message)
-	{
-		if (!to.empty() && !message.empty())
-		{
+	void TextMessageConsole::SendPrivateMessage(const std::string& to, const std::string& message) {
+		if (!to.empty() && !message.empty()) {
 			m_env->SendPrivateMessage(to, message);
 		}
 	}
 
-	void TextMessageConsole::CloseTab(const std::string& tabName)
-	{
-		auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
-			{
-				return t.tabName == tabName;
-			});
-		if (it != m_tabs.end())
-		{
+	void TextMessageConsole::CloseTab(const std::string& tabName) {
+		auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t) {
+			return t.tabName == tabName;
+		});
+		if (it != m_tabs.end()) {
 			it->isOpen = false;
 		}
 	}
 
-	void TextMessageConsole::CreateNonExistingTab(const std::string& tabName)
-	{
-		auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
-			{
-				return t.tabName == tabName;
-			});
+	void TextMessageConsole::CreateNonExistingTab(const std::string& tabName) {
+		auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t) {
+			return t.tabName == tabName;
+		});
 
-		if (it == m_tabs.end())
-		{
+		if (it == m_tabs.end()) {
 			Tab tab;
 			tab.tabName = tabName;
 			tab.isOpen = true;
@@ -162,30 +143,24 @@ namespace xpilot
 		}
 	}
 
-	void TextMessageConsole::HandlePrivateMessage(const std::string& recipient, const std::string& msg, ConsoleTabType tabType)
-	{
-		switch (tabType)
-		{
+	void TextMessageConsole::HandlePrivateMessage(const std::string& recipient, const std::string& msg, ConsoleTabType tabType) {
+		switch (tabType) {
 		case ConsoleTabType::Sent:
 		{
 			ConsoleMessage m;
-			m.setMessage(string_format("[%s] %s: %s", UtcTimestamp().c_str(), m_env->ourCallsign().c_str(), msg.c_str()));
-			m.setRed(0);
+			m.SetMessage(string_format("[%s] %s: %s", UtcTimestamp().c_str(), m_env->OurCallsign().c_str(), msg.c_str()));
+			m.SetRed(0);
 			m.setGreen(255);
 			m.setBlue(255);
 
-			auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t)
-				{
-					return t.tabName == recipient;
-				});
+			auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t) {
+				return t.tabName == recipient;
+			});
 
-			if (it != m_tabs.end())
-			{
+			if (it != m_tabs.end()) {
 				it->messageHistory.push_back(m);
 				it->scrollToBottom = true;
-			}
-			else
-			{
+			} else {
 				CreateNonExistingTab(recipient);
 				HandlePrivateMessage(recipient, msg, ConsoleTabType::Sent);
 			}
@@ -194,23 +169,19 @@ namespace xpilot
 		case ConsoleTabType::Received:
 		{
 			ConsoleMessage m;
-			m.setMessage(string_format("[%s] %s: %s", UtcTimestamp().c_str(), recipient.c_str(), msg.c_str()));
-			m.setRed(255);
+			m.SetMessage(string_format("[%s] %s: %s", UtcTimestamp().c_str(), recipient.c_str(), msg.c_str()));
+			m.SetRed(255);
 			m.setGreen(255);
 			m.setBlue(255);
 
-			auto it = find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t)
-				{
-					return t.tabName == recipient;
-				});
+			auto it = find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t) {
+				return t.tabName == recipient;
+			});
 
-			if (it != m_tabs.end())
-			{
+			if (it != m_tabs.end()) {
 				it->messageHistory.push_back(m);
 				it->scrollToBottom = true;
-			}
-			else
-			{
+			} else {
 				CreateNonExistingTab(recipient);
 				HandlePrivateMessage(recipient, msg, ConsoleTabType::Received);
 			}
@@ -219,25 +190,20 @@ namespace xpilot
 		}
 	}
 
-	void TextMessageConsole::buildInterface()
-	{
+	void TextMessageConsole::buildInterface() {
 		ImGui::PushFont(0);
 
-		if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_NoTooltip))
-		{
-			if (ImGui::BeginTabItem("Messages"))
-			{
+		if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_NoTooltip)) {
+			if (ImGui::BeginTabItem("Messages")) {
 				ImGui::BeginChild("##Messages", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), false);
 				{
-					for (auto& e : m_messageHistory)
-					{
-						const ImVec4& color = ImVec4(e.getRed(), e.getGreen(), e.getBlue(), 1.0f);
+					for (auto& e : m_messageHistory) {
+						const ImVec4& color = ImVec4(e.GetRed(), e.GetGreen(), e.GetBlue(), 1.0f);
 						ImGui::PushStyleColor(ImGuiCol_Text, color);
-						ImGui::TextWrapped(e.getMessage().c_str());
+						ImGui::TextWrapped(e.GetMessage().c_str());
 						ImGui::PopStyleColor();
 					}
-					if (m_scrollToBottom)
-					{
+					if (m_scrollToBottom) {
 						ImGui::SetScrollHereY(1.0f);
 						m_scrollToBottom = false;
 					}
@@ -245,203 +211,143 @@ namespace xpilot
 				ImGui::EndChild();
 				ImGui::PushItemWidth(-1.0f);
 
-				if (ImGui::InputTextStd("##MessagesInput", &m_inputValue, ImGuiInputTextFlags_EnterReturnsTrue))
-				{
-					if (!m_inputValue.empty())
-					{
+				if (ImGui::InputTextStd("##MessagesInput", &m_inputValue, ImGuiInputTextFlags_EnterReturnsTrue)) {
+					if (!m_inputValue.empty()) {
 						std::vector<std::string> args;
 						tokenize(m_inputValue, args, " ", true);
-						if (args.size() > 0)
-						{
-							switch (resolveOption(args.at(0)))
-							{
+						if (args.size() > 0) {
+							switch (resolveOption(args.at(0))) {
 							case xpilot::CommandOptions::Chat:
-								if (!m_env->isNetworkConnected())
-								{
+								if (!m_env->IsNetworkConnected()) {
 									ShowErrorMessage("Not connected to network.");
-								}
-								else
-								{
-									if (args.size() >= 2)
-									{
-										if (args.size() >= 3)
-										{
+								} else {
+									if (args.size() >= 2) {
+										if (args.size() >= 3) {
 											std::string m;
 											join(args, ' ', m);
 
 											CreateNonExistingTab(str_toupper(args.at(1)));
 											SendPrivateMessage(str_toupper(args.at(1)), m);
-										}
-										else
-										{
+										} else {
 											CreateNonExistingTab(str_toupper(args.at(1)));
 										}
 										m_inputValue = "";
-									}
-									else
-									{
+									} else {
 										ShowErrorMessage("Invalid parameters. To open a new chat tab, use the command .chat <callsign> <message>");
 										m_inputValue = "";
 									}
 								}
 								break;
 							case xpilot::CommandOptions::RequestAtis:
-								if (!m_env->isNetworkConnected())
-								{
+								if (!m_env->IsNetworkConnected()) {
 									ShowErrorMessage("Not connected to the network.");
-								}
-								else
-								{
-									if (args.size() == 2)
-									{
-										m_env->requestStationInfo(args.at(1));
+								} else {
+									if (args.size() == 2) {
+										m_env->RequestStationInfo(args.at(1));
 										m_inputValue = "";
-									}
-									else
-									{
+									} else {
 										ShowErrorMessage("Invalid parameters. To request an ATIS, use the command .atis <callsign>");
 									}
 								}
 								break;
 							case xpilot::CommandOptions::MetarRequest:
-								if (!m_env->isNetworkConnected())
-								{
+								if (!m_env->IsNetworkConnected()) {
 									ShowErrorMessage("Not connected to the network.");
-								}
-								else
-								{
-									if (args.size() == 2)
-									{
-										m_env->requestMetar(args.at(1));
+								} else {
+									if (args.size() == 2) {
+										m_env->RequestMetar(args.at(1));
 										m_inputValue = "";
-									}
-									else
-									{
+									} else {
 										ShowErrorMessage("Invalid parameters. To request a METAR, use the command .metar <station>");
 									}
 								}
 								break;
 							case xpilot::CommandOptions::SetRadioFrequency:
-								if (args.size() == 2)
-								{
+								if (args.size() == 2) {
 									const std::regex regex("^1\\d\\d[\\.\\,]\\d{1,3}$");
-									if (args.at(0) == ".com1")
-									{
-										if (!regex_match(args.at(1), regex))
-										{
+									if (args.at(0) == ".com1") {
+										if (!regex_match(args.at(1), regex)) {
 											ShowErrorMessage("Invalid frequency format.");
-										}
-										else
-										{
+										} else {
 											std::string freq(args.at(1));
 											int freqInt = stod(freq) * 1000000;
-											if (freqInt < 118000000 || freqInt > 136975000)
-											{
+											if (freqInt < 118000000 || freqInt > 136975000) {
 												ShowErrorMessage("Invalid frequency range.");
 												return;
 											}
-											m_env->setCom1Frequency(freqInt / 1000);
+											m_env->SetCom1Frequency(freqInt / 1000);
 											m_inputValue = "";
 										}
-									}
-									else if (args.at(0) == ".com2")
-									{
-										if (!regex_match(args.at(1), regex))
-										{
+									} else if (args.at(0) == ".com2") {
+										if (!regex_match(args.at(1), regex)) {
 											ShowErrorMessage("Invalid frequency format.");
-										}
-										else
-										{
+										} else {
 											std::string freq(args.at(1));
 											int freqInt = stod(freq) * 1000000;
-											if (freqInt < 118000000 || freqInt > 136975000)
-											{
+											if (freqInt < 118000000 || freqInt > 136975000) {
 												ShowErrorMessage("Invalid frequency range.");
 												return;
 											}
-											m_env->setCom2Frequency(freqInt / 1000);
+											m_env->SetCom2Frequency(freqInt / 1000);
 											m_inputValue = "";
 										}
 									}
-								}
-								else
-								{
+								} else {
 									ShowErrorMessage("Invalid command format. To change the radio frequency, use the command .com1 123.45 or .com2 123.45");
 								}
 								break;
 							case xpilot::CommandOptions::OverrideTx:
-								if (args.size() == 2)
-								{
-									if (str_tolower(args.at(1)) != "com1" && str_tolower(args.at(1)) != "com2")
-									{
+								if (args.size() == 2) {
+									if (str_tolower(args.at(1)) != "com1" && str_tolower(args.at(1)) != "com2") {
 										ShowErrorMessage("Invalid command parameters. Expected .tx com<n>. For example, .tx com1");
 										return;
 									}
 									int radio = str_tolower(args.at(1)) == "com1" ? 1 : 2;
-									m_env->setAudioComSelection(radio);
+									m_env->SetAudioComSelection(radio);
 									m_inputValue = "";
-								}
-								else
-								{
+								} else {
 									ShowErrorMessage("Invalid command parameters. Expected .tx com<n>. For example, .tx com1");
 								}
 								break;
 							case xpilot::CommandOptions::OverrideRx:
-								if (args.size() == 3)
-								{
-									if (str_tolower(args.at(1)) != "com1" && str_tolower(args.at(1)) != "com2")
-									{
+								if (args.size() == 3) {
+									if (str_tolower(args.at(1)) != "com1" && str_tolower(args.at(1)) != "com2") {
 										ShowErrorMessage("Invalid command parameters. Expected .rx com<n> on|off. For example, .rx com1 on");
 										return;
 									}
-									if (str_tolower(args.at(2)) != "on" && str_tolower(args.at(2)) != "off")
-									{
+									if (str_tolower(args.at(2)) != "on" && str_tolower(args.at(2)) != "off") {
 										ShowErrorMessage("Invalid command parameters. Expected .rx com<n> on|off. For example, .rx com1 on");
 										return;
 									}
 									int radio = str_tolower(args.at(1)) == "com1" ? 1 : 2;
 									bool on = str_tolower(args.at(2)) == "on" ? true : false;
-									m_env->setAudioSelection(radio, on);
+									m_env->SetAudioSelection(radio, on);
 									m_inputValue = "";
-								}
-								else
-								{
+								} else {
 									ShowErrorMessage("Invalid command parameters. Expected .rx com<n> on|off. For example, .rx com1 on");
 								}
 								break;
 							case xpilot::CommandOptions::SetTransponderCode:
-								if (args.size() == 2)
-								{
+								if (args.size() == 2) {
 									std::string code = args.at(1);
-									if (std::regex_match(code, std::regex("^[0-7]{4}$")))
-									{
-										m_env->setTransponderCode(stoi(code));
+									if (std::regex_match(code, std::regex("^[0-7]{4}$"))) {
+										m_env->SetTransponderCode(stoi(code));
 										m_inputValue = "";
-									}
-									else
-									{
+									} else {
 										ShowErrorMessage("Invalid transponder code format.");
 									}
-								}
-								else
-								{
+								} else {
 									ShowErrorMessage("Invalid command parameters. Expected .x 1234");
 								}
 								break;
 							case xpilot::CommandOptions::Wallop:
-								if (!m_env->isNetworkConnected())
-								{
+								if (!m_env->IsNetworkConnected()) {
 									ShowErrorMessage("Not connected to the network.");
-								}
-								else
-								{
-									if (args.size() >= 2)
-									{
-										m_env->sendWallop(joinSkipFirst(args));
+								} else {
+									if (args.size() >= 2) {
+										m_env->SendWallop(joinSkipFirst(args));
 										m_inputValue = "";
-									}
-									else
-									{
+									} else {
 										ShowErrorMessage("Invalid parameters. To send a wallop request, use the command .wallop Your Message Here");
 									}
 								}
@@ -456,12 +362,9 @@ namespace xpilot
 								break;
 							case xpilot::CommandOptions::Close:
 							default:
-								if (!m_env->isNetworkConnected())
-								{
+								if (!m_env->IsNetworkConnected()) {
 									ShowErrorMessage("Not connected to network.");
-								}
-								else
-								{
+								} else {
 									SendRadioMessage(m_inputValue);
 									m_inputValue = "";
 								}
@@ -470,33 +373,29 @@ namespace xpilot
 						}
 					}
 				}
-				
+
 				if (ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
 					m_inputValue = "";
 
 				ImGui::EndTabItem();
 			}
-            
+
 			std::list<Tab>::iterator it = m_tabs.begin();
-			while(it != m_tabs.end()) {
-				if(!it->isOpen) {
+			while (it != m_tabs.end()) {
+				if (!it->isOpen) {
 					it = m_tabs.erase(it);
-				}
-				else {
+				} else {
 					std::string key = it->tabName;
-					if (ImGui::BeginTabItem(key.c_str(), &it->isOpen))
-					{
+					if (ImGui::BeginTabItem(key.c_str(), &it->isOpen)) {
 						ImGui::BeginChild(key.c_str(), ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), false);
 						{
-							for (auto& e : it->messageHistory)
-							{
-								const ImVec4& color = ImVec4(e.getRed(), e.getGreen(), e.getBlue(), 1.0f);
+							for (auto& e : it->messageHistory) {
+								const ImVec4& color = ImVec4(e.GetRed(), e.GetGreen(), e.GetBlue(), 1.0f);
 								ImGui::PushStyleColor(ImGuiCol_Text, color);
-								ImGui::TextWrapped(e.getMessage().c_str());
+								ImGui::TextWrapped(e.GetMessage().c_str());
 								ImGui::PopStyleColor();
 							}
-							if (it->scrollToBottom)
-							{
+							if (it->scrollToBottom) {
 								ImGui::SetScrollHereY(1.0f);
 								it->scrollToBottom = false;
 							}
@@ -504,16 +403,12 @@ namespace xpilot
 						ImGui::EndChild();
 						ImGui::PushID(key.c_str());
 						ImGui::PushItemWidth(-1.0f);
-						if (ImGui::InputTextStd("##Input", &it->textInput, ImGuiInputTextFlags_EnterReturnsTrue))
-						{
-							if (!it->textInput.empty())
-							{
+						if (ImGui::InputTextStd("##Input", &it->textInput, ImGuiInputTextFlags_EnterReturnsTrue)) {
+							if (!it->textInput.empty()) {
 								std::vector<std::string> args;
 								tokenize(it->textInput, args, " ", true);
-								if (args.size() > 0)
-								{
-									switch (resolveOption(args.at(0)))
-									{
+								if (args.size() > 0) {
+									switch (resolveOption(args.at(0))) {
 									case xpilot::CommandOptions::Clear:
 									{
 										it->messageHistory.clear();
@@ -525,12 +420,9 @@ namespace xpilot
 										CloseTab(key);
 										break;
 									default:
-										if (!m_env->isNetworkConnected())
-										{
+										if (!m_env->IsNetworkConnected()) {
 											PrivateMessageError(it->tabName, "Not connected to network.");
-										}
-										else
-										{
+										} else {
 											SendPrivateMessage(it->tabName, it->textInput);
 											it->textInput = "";
 										}
@@ -549,7 +441,7 @@ namespace xpilot
 					it++;
 				}
 			}
-            
+
 			ImGui::EndTabBar();
 			ImGui::PopFont();
 		}

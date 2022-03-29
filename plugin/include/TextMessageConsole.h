@@ -29,23 +29,23 @@ namespace xpilot {
 
 	class ConsoleMessage
 	{
-	private:
-		std::string message;
-		double red;
-		double green;
-		double blue;
 	public:
-		std::string getMessage() { return message; }
-		float getRed() { return red / 255; }
-		float getGreen() { return green / 255; }
-		float getBlue() { return blue / 255; }
-		void setMessage(std::string value) { message = value; }
-		void setRed(double value) { red = value; }
-		void setGreen(double value) { green = value; }
-		void setBlue(double value) { blue = value; }
+		std::string GetMessage() { return m_message; }
+		float GetRed() { return m_red / 255; }
+		float GetGreen() { return m_green / 255; }
+		float GetBlue() { return m_blue / 255; }
+		void SetMessage(std::string value) { m_message = value; }
+		void SetRed(double value) { m_red = value; }
+		void setGreen(double value) { m_green = value; }
+		void setBlue(double value) { m_blue = value; }
+	private:
+		std::string m_message;
+		double m_red;
+		double m_green;
+		double m_blue;
 	};
 
-	struct Tab 
+	struct Tab
 	{
 		std::string tabName;
 		std::string textInput;
@@ -60,7 +60,7 @@ namespace xpilot {
 		Sent
 	};
 
-	class TextMessageConsole : public XPImgWindow 
+	class TextMessageConsole : public XPImgWindow
 	{
 	public:
 		TextMessageConsole(XPilot* instance);

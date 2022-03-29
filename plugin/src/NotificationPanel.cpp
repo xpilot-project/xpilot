@@ -20,144 +20,129 @@
 #include "Utilities.h"
 #include "Config.h"
 
-namespace xpilot
-{
-    struct NotificationTy
-    {
-        std::string message;
-        float red;
-        float green;
-        float blue;
-    };
+namespace xpilot {
+	struct NotificationTy
+	{
+		std::string message;
+		float red;
+		float green;
+		float blue;
+	};
 
-    static std::list<NotificationTy> NotificationHistory;
+	static std::list<NotificationTy> NotificationHistory;
 
-    NotificationPanel::NotificationPanel(int left, int top, int right, int bottom) :
-        m_scrollToBottom(false),
-        m_alwaysVisible(false),
-        m_togglePanelCommand("xpilot/toggle_notification_panel", "xPilot: Notification Panel", [this] { toggle(); }),
-        ImgWindow(left, top, right, bottom, xplm_WindowDecorationSelfDecorated, xplm_WindowLayerFloatingWindows)
-    {
-        SetWindowTitle("Notification Panel");
-        SetVisible(false);
+	NotificationPanel::NotificationPanel(int left, int top, int right, int bottom) :
+		m_scrollToBottom(false),
+		m_alwaysVisible(false),
+		m_togglePanelCommand("xpilot/toggle_notification_panel", "xPilot: Notification Panel", [this] { Toggle(); }),
+		ImgWindow(left, top, right, bottom, xplm_WindowDecorationSelfDecorated, xplm_WindowLayerFloatingWindows) {
+		SetWindowTitle("Notification Panel");
+		SetVisible(false);
 
-        XPLMCreateFlightLoop_t flightLoopParams = {
-            sizeof(flightLoopParams),
-            xplm_FlightLoop_Phase_AfterFlightModel,
-            onFlightLoop,
-            reinterpret_cast<void*>(this)
-        };
-        m_flightLoopId = XPLMCreateFlightLoop(&flightLoopParams);
-        XPLMScheduleFlightLoop(m_flightLoopId, -1.0f, true);
-    }
+		XPLMCreateFlightLoop_t flightLoopParams = {
+			sizeof(flightLoopParams),
+			xplm_FlightLoop_Phase_AfterFlightModel,
+			OnFlightLoop,
+			reinterpret_cast<void*>(this)
+		};
+		m_flightLoopId = XPLMCreateFlightLoop(&flightLoopParams);
+		XPLMScheduleFlightLoop(m_flightLoopId, -1.0f, true);
+	}
 
-    NotificationPanel::~NotificationPanel()
-    {
-        XPLMUnregisterFlightLoopCallback(onFlightLoop, this);
-    }
+	NotificationPanel::~NotificationPanel() {
+		XPLMUnregisterFlightLoopCallback(OnFlightLoop, this);
+	}
 
-    void NotificationPanel::buildInterface()
-    {
-        ImGuiStyle& style = ImGui::GetStyle();
-        style.WindowBorderSize = 0.0f;
+	void NotificationPanel::buildInterface() {
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.WindowBorderSize = 0.0f;
 
-        for (auto& e : NotificationHistory)
-        {
-            const ImVec4& color = ImVec4(e.red, e.green, e.blue, 1.0f);
-            ImGui::PushStyleColor(ImGuiCol_Text, color);
-            ImGui::TextWrapped(e.message.c_str());
-            ImGui::PopStyleColor();
-        }
-        if (m_scrollToBottom)
-        {
-            ImGui::SetScrollHereY(1.0f);
-            m_scrollToBottom = false;
-        }
+		for (auto& e : NotificationHistory) {
+			const ImVec4& color = ImVec4(e.red, e.green, e.blue, 1.0f);
+			ImGui::PushStyleColor(ImGuiCol_Text, color);
+			ImGui::TextWrapped(e.message.c_str());
+			ImGui::PopStyleColor();
+		}
+		if (m_scrollToBottom) {
+			ImGui::SetScrollHereY(1.0f);
+			m_scrollToBottom = false;
+		}
 
-        if (!isAlwaysVisible())
-        {
-            if (m_disappearTime != std::chrono::system_clock::time_point()
-                && std::chrono::system_clock::now() > m_disappearTime)
-            {
-                SetVisible(false);
-                m_disappearTime = std::chrono::system_clock::time_point();
-            }
-        }
-    }
+		if (!IsAlwaysVisible()) {
+			if (m_disappearTime != std::chrono::system_clock::time_point()
+				&& std::chrono::system_clock::now() > m_disappearTime) {
+				SetVisible(false);
+				m_disappearTime = std::chrono::system_clock::time_point();
+			}
+		}
+	}
 
-    float NotificationPanel::onFlightLoop(float, float, int, void* refcon)
-    {
-        auto* panel = reinterpret_cast<NotificationPanel*>(refcon);
+	float NotificationPanel::OnFlightLoop(float, float, int, void* refcon) {
+		auto* panel = reinterpret_cast<NotificationPanel*>(refcon);
 
-        if (panel->GetVisible())
-        {
-            int panelWidth = 600;
-            int panelHeight = 100;
-            int panelMargin = 35;
+		if (panel->GetVisible()) {
+			int panelWidth = 600;
+			int panelHeight = 100;
+			int panelMargin = 35;
 
-            int left, top, right, bottom, screenTop, screenRight, screenLeft, screenBottom;
-            XPLMGetScreenBoundsGlobal(&screenLeft, &screenTop, &screenRight, &screenBottom);
+			int left, top, right, bottom, screenTop, screenRight, screenLeft, screenBottom;
+			XPLMGetScreenBoundsGlobal(&screenLeft, &screenTop, &screenRight, &screenBottom);
 
-            switch (Config::getInstance().getNotificationPanelPosition())
-            {
-            default:
-            case NotificationPanelPosition::TopRight:
-                right = screenRight - panelMargin; /*margin right*/
-                top = screenTop - panelMargin; /*margin top*/
-                left = screenRight - panelWidth; /*width*/
-                bottom = top - panelHeight; /*height*/
-                break;
-            case NotificationPanelPosition::TopLeft:
-                right = screenLeft + panelWidth; /*width*/
-                top = screenTop - panelMargin; /*margin top*/
-                left = screenLeft + panelMargin; /*margin left*/
-                bottom = top - panelHeight; /*height*/
-                break;
-            case NotificationPanelPosition::BottomLeft:
-                right = screenLeft + panelWidth; /*width*/
-                top = screenBottom + panelHeight + panelMargin; /*height*/
-                left = screenLeft + panelMargin; /*margin left*/
-                bottom = screenBottom + panelMargin; /*margin bottom*/
-                break;
-            case NotificationPanelPosition::BottomRight:
-                right = screenRight - panelMargin; /*margin right*/
-                top = screenBottom + panelHeight + panelMargin; /*height*/
-                left = screenRight - panelWidth; /*margin left*/
-                bottom = screenBottom + panelMargin; /*margin bottom*/
-                break;
-            }
+			switch (Config::GetInstance().GetNotificationPanelPosition()) {
+			default:
+			case NotificationPanelPosition::TopRight:
+				right = screenRight - panelMargin; /*margin right*/
+				top = screenTop - panelMargin; /*margin top*/
+				left = screenRight - panelWidth; /*width*/
+				bottom = top - panelHeight; /*height*/
+				break;
+			case NotificationPanelPosition::TopLeft:
+				right = screenLeft + panelWidth; /*width*/
+				top = screenTop - panelMargin; /*margin top*/
+				left = screenLeft + panelMargin; /*margin left*/
+				bottom = top - panelHeight; /*height*/
+				break;
+			case NotificationPanelPosition::BottomLeft:
+				right = screenLeft + panelWidth; /*width*/
+				top = screenBottom + panelHeight + panelMargin; /*height*/
+				left = screenLeft + panelMargin; /*margin left*/
+				bottom = screenBottom + panelMargin; /*margin bottom*/
+				break;
+			case NotificationPanelPosition::BottomRight:
+				right = screenRight - panelMargin; /*margin right*/
+				top = screenBottom + panelHeight + panelMargin; /*height*/
+				left = screenRight - panelWidth; /*margin left*/
+				bottom = screenBottom + panelMargin; /*margin bottom*/
+				break;
+			}
 
-            panel->SetWindowGeometry(left, top, right, bottom);
-        }
+			panel->SetWindowGeometry(left, top, right, bottom);
+		}
 
-        return -1.0f;
-    }
+		return -1.0f;
+	}
 
-    void NotificationPanel::AddNotificationPanelMessage(const std::string& message, float red, float green, float blue)
-    {
-        if (!message.empty())
-        {
-            NotificationTy notification;
-            notification.message = string_format("[%s] %s", UtcTimestamp().c_str(), message.c_str());
-            notification.red = red / 255;
-            notification.green = green / 255;
-            notification.blue = blue / 255;
-            NotificationHistory.push_back(notification);
-            m_scrollToBottom = true;
+	void NotificationPanel::AddNotificationPanelMessage(const std::string& message, float red, float green, float blue) {
+		if (!message.empty()) {
+			NotificationTy notification;
+			notification.message = string_format("[%s] %s", UtcTimestamp().c_str(), message.c_str());
+			notification.red = red / 255;
+			notification.green = green / 255;
+			notification.blue = blue / 255;
+			NotificationHistory.push_back(notification);
+			m_scrollToBottom = true;
 
-            if (Config::getInstance().getNotificationPanelVisible())
-            {
-                SetVisible(true);
-                m_disappearTime = std::chrono::system_clock::now() +
-                    std::chrono::milliseconds(Config::getInstance().getActualMessagePreviewTime() * 1000);
-            }
-        }
-    }
+			if (Config::GetInstance().GetNotificationPanelVisible()) {
+				SetVisible(true);
+				m_disappearTime = std::chrono::system_clock::now() +
+					std::chrono::milliseconds(Config::GetInstance().GetActualMessagePreviewTime() * 1000);
+			}
+		}
+	}
 
-    void NotificationPanel::toggle()
-    {
-        SetVisible(!GetVisible());
-        m_alwaysVisible = !m_alwaysVisible;
-        m_disappearTime = std::chrono::system_clock::time_point();
-    }
+	void NotificationPanel::Toggle() {
+		SetVisible(!GetVisible());
+		m_alwaysVisible = !m_alwaysVisible;
+		m_disappearTime = std::chrono::system_clock::time_point();
+	}
 }

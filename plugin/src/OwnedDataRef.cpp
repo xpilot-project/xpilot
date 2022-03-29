@@ -35,8 +35,7 @@
 using namespace xpilot;
 
 template <>
-void OwnedDataRef<int>::registerRead()
-{
+void OwnedDataRef<int>::registerRead() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_Int, 0,
 		readFunc<int>, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 		nullptr, nullptr, nullptr, nullptr, this, nullptr);
@@ -45,8 +44,7 @@ void OwnedDataRef<int>::registerRead()
 }
 
 template <>
-void OwnedDataRef<float>::registerRead()
-{
+void OwnedDataRef<float>::registerRead() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_Float, 0,
 		nullptr, nullptr, readFunc<float>, nullptr, nullptr, nullptr, nullptr, nullptr,
 		nullptr, nullptr, nullptr, nullptr, this, nullptr);
@@ -55,8 +53,7 @@ void OwnedDataRef<float>::registerRead()
 }
 
 template <>
-void OwnedDataRef<double>::registerRead()
-{
+void OwnedDataRef<double>::registerRead() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_Double, 0,
 		nullptr, nullptr, nullptr, nullptr, readFunc<double>, nullptr, nullptr, nullptr,
 		nullptr, nullptr, nullptr, nullptr, this, nullptr);
@@ -65,8 +62,7 @@ void OwnedDataRef<double>::registerRead()
 }
 
 template <>
-void OwnedDataRef<std::string>::registerRead()
-{
+void OwnedDataRef<std::string>::registerRead() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_Data, 0,
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 		nullptr, nullptr, readFuncStr, nullptr, this, nullptr);
@@ -75,8 +71,7 @@ void OwnedDataRef<std::string>::registerRead()
 }
 
 template <>
-void OwnedDataRef<std::vector<float> >::registerRead()
-{
+void OwnedDataRef<std::vector<float> >::registerRead() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_FloatArray, 0,
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 		readFuncVF, nullptr, nullptr, nullptr, this, nullptr);
@@ -85,8 +80,7 @@ void OwnedDataRef<std::vector<float> >::registerRead()
 }
 
 template <>
-void OwnedDataRef<int>::registerWrite()
-{
+void OwnedDataRef<int>::registerWrite() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_Int, 1,
 		nullptr, writeFunc<int>, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 		nullptr, nullptr, nullptr, nullptr, nullptr, this);
@@ -95,8 +89,7 @@ void OwnedDataRef<int>::registerWrite()
 }
 
 template <>
-void OwnedDataRef<float>::registerWrite()
-{
+void OwnedDataRef<float>::registerWrite() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_Float, 1,
 		nullptr, nullptr, nullptr, writeFunc<float>, nullptr, nullptr, nullptr, nullptr,
 		nullptr, nullptr, nullptr, nullptr, nullptr, this);
@@ -105,8 +98,7 @@ void OwnedDataRef<float>::registerWrite()
 }
 
 template <>
-void OwnedDataRef<double>::registerWrite()
-{
+void OwnedDataRef<double>::registerWrite() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_Double, 1,
 		nullptr, nullptr, nullptr, nullptr, nullptr, writeFunc<double>, nullptr, nullptr,
 		nullptr, nullptr, nullptr, nullptr, nullptr, this);
@@ -115,8 +107,7 @@ void OwnedDataRef<double>::registerWrite()
 }
 
 template <>
-void OwnedDataRef<std::string>::registerWrite()
-{
+void OwnedDataRef<std::string>::registerWrite() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_Data, 1,
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 		nullptr, nullptr, nullptr, writeFuncStr, nullptr, this);
@@ -125,8 +116,7 @@ void OwnedDataRef<std::string>::registerWrite()
 }
 
 template <>
-void OwnedDataRef<std::vector<float> >::registerWrite()
-{
+void OwnedDataRef<std::vector<float> >::registerWrite() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_FloatArray, 1,
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 		nullptr, writeFuncVF, nullptr, nullptr, nullptr, this);
@@ -135,8 +125,7 @@ void OwnedDataRef<std::vector<float> >::registerWrite()
 }
 
 template <>
-void OwnedDataRef<int>::registerReadWrite()
-{
+void OwnedDataRef<int>::registerReadWrite() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_Int, 1,
 		readFunc<int>, writeFunc<int>, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 		nullptr, nullptr, nullptr, nullptr, this, this);
@@ -145,8 +134,7 @@ void OwnedDataRef<int>::registerReadWrite()
 }
 
 template <>
-void OwnedDataRef<float>::registerReadWrite()
-{
+void OwnedDataRef<float>::registerReadWrite() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_Float, 1,
 		nullptr, nullptr, readFunc<float>, writeFunc<float>, nullptr, nullptr, nullptr, nullptr,
 		nullptr, nullptr, nullptr, nullptr, this, this);
@@ -155,8 +143,7 @@ void OwnedDataRef<float>::registerReadWrite()
 }
 
 template <>
-void OwnedDataRef<double>::registerReadWrite()
-{
+void OwnedDataRef<double>::registerReadWrite() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_Double, 1,
 		nullptr, nullptr, nullptr, nullptr, readFunc<double>, writeFunc<double>, nullptr, nullptr,
 		nullptr, nullptr, nullptr, nullptr, this, this);
@@ -165,8 +152,7 @@ void OwnedDataRef<double>::registerReadWrite()
 }
 
 template <>
-void OwnedDataRef<std::string>::registerReadWrite()
-{
+void OwnedDataRef<std::string>::registerReadWrite() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_Data, 1,
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 		nullptr, nullptr, readFuncStr, writeFuncStr, this, this);
@@ -175,8 +161,7 @@ void OwnedDataRef<std::string>::registerReadWrite()
 }
 
 template <>
-void OwnedDataRef<std::vector<float> >::registerReadWrite()
-{
+void OwnedDataRef<std::vector<float> >::registerReadWrite() {
 	m_data_ref = XPLMRegisterDataAccessor(m_data_ref_identifier.c_str(), xplmType_FloatArray, 1,
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 		readFuncVF, writeFuncVF, nullptr, nullptr, this, this);
@@ -184,8 +169,7 @@ void OwnedDataRef<std::vector<float> >::registerReadWrite()
 		throw DataRefNotPublishedException(m_data_ref_identifier);
 }
 
-int xpilot::readFuncStr(void* inRefCon, void* outValue, int inOffset, int inMaxLength)
-{
+int xpilot::readFuncStr(void* inRefCon, void* outValue, int inOffset, int inMaxLength) {
 	OwnedDataRef<std::string>* p_owned_data = static_cast<OwnedDataRef<std::string>*>(inRefCon);
 	std::size_t length = p_owned_data->value().length();
 	if (outValue == nullptr)
@@ -195,15 +179,13 @@ int xpilot::readFuncStr(void* inRefCon, void* outValue, int inOffset, int inMaxL
 	return inMaxLength;
 }
 
-void xpilot::writeFuncStr(void* inRefCon, void* inValue, int inOffset, int inMaxLength)
-{
+void xpilot::writeFuncStr(void* inRefCon, void* inValue, int inOffset, int inMaxLength) {
 	OwnedDataRef<std::string>* p_owned_data = static_cast<OwnedDataRef<std::string>*>(inRefCon);
 	char* str = static_cast<char*>(inValue);
 	p_owned_data->setValue(std::string(str).substr(inOffset, inMaxLength));
 }
 
-int xpilot::readFuncVF(void* inRefCon, float* outValues, int inOffset, int inMaxLength)
-{
+int xpilot::readFuncVF(void* inRefCon, float* outValues, int inOffset, int inMaxLength) {
 	std::size_t max_length = static_cast<unsigned int>(inMaxLength);
 	OwnedDataRef<std::vector<float> >* p_owned_data = static_cast<OwnedDataRef<std::vector<float> >*>(inRefCon);
 	if (outValues == nullptr)
@@ -213,8 +195,7 @@ int xpilot::readFuncVF(void* inRefCon, float* outValues, int inOffset, int inMax
 	return end;
 }
 
-void xpilot::writeFuncVF(void* inRefCon, float* inValues, int inOffset, int inMaxLength)
-{
+void xpilot::writeFuncVF(void* inRefCon, float* inValues, int inOffset, int inMaxLength) {
 	OwnedDataRef<std::vector<float> >* p_owned_data = static_cast<OwnedDataRef<std::vector<float> >*>(inRefCon);
 	p_owned_data->setValue(std::vector<float>(inValues + inOffset, inValues + inOffset + inMaxLength));
 }

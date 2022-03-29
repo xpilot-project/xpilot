@@ -18,32 +18,27 @@
 
 #include "TerrainProbe.h"
 
-namespace xpilot
-{
-    TerrainProbe::TerrainProbe() :
-        m_probeRef(XPLMCreateProbe(xplm_ProbeY))
-    {
+namespace xpilot {
+	TerrainProbe::TerrainProbe() :
+		m_probeRef(XPLMCreateProbe(xplm_ProbeY)) {
 
-    }
+	}
 
-    TerrainProbe::~TerrainProbe()
-    {
-        XPLMDestroyProbe(m_probeRef);
-    }
+	TerrainProbe::~TerrainProbe() {
+		XPLMDestroyProbe(m_probeRef);
+	}
 
-    double TerrainProbe::getTerrainElevation(double degLat, double degLon) const
-    {
-        double x, y, z, foo, alt;
-        XPLMProbeInfo_t probeinfo;
-        probeinfo.structSize = sizeof(XPLMProbeInfo_t);
+	double TerrainProbe::GetTerrainElevation(double degLat, double degLon) const {
+		double x, y, z, foo, alt;
+		XPLMProbeInfo_t probeinfo;
+		probeinfo.structSize = sizeof(XPLMProbeInfo_t);
 
-        XPLMWorldToLocal(degLat, degLon, 0, &x, &y, &z);
-        if (XPLMProbeTerrainXYZ(m_probeRef, x, y, z, &probeinfo) == xplm_ProbeHitTerrain)
-        {
-            XPLMLocalToWorld(probeinfo.locationX, probeinfo.locationY, probeinfo.locationZ, &foo, &foo, &alt);
-            return alt * 3.28084;
-        }
+		XPLMWorldToLocal(degLat, degLon, 0, &x, &y, &z);
+		if (XPLMProbeTerrainXYZ(m_probeRef, x, y, z, &probeinfo) == xplm_ProbeHitTerrain) {
+			XPLMLocalToWorld(probeinfo.locationX, probeinfo.locationY, probeinfo.locationZ, &foo, &foo, &alt);
+			return alt * 3.28084;
+		}
 
-        return 0;
-    }
+		return 0;
+	}
 }

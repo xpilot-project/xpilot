@@ -24,128 +24,122 @@
 #include <string>
 #include <vector>
 
-namespace xpilot
-{
-    struct CslPackage
-    {
-        std::string path;
-        bool enabled;
+namespace xpilot {
+	struct CslPackage
+	{
+		std::string path;
+		bool enabled;
 
-        inline bool empty() const
-        {
-            return path.empty();
-        }
-        inline bool operator== (const CslPackage& o) const
-        {
-            return path == o.path;
-        }
-        inline bool operator== (const std::string& s) const
-        {
-            return path == s;
-        }
-    };
+		inline bool empty() const {
+			return path.empty();
+		}
+		inline bool operator== (const CslPackage& o) const {
+			return path == o.path;
+		}
+		inline bool operator== (const std::string& s) const {
+			return path == s;
+		}
+	};
 
-    enum class NotificationPanelPosition
-    {
-        TopRight,
-        TopLeft,
-        BottomLeft,
-        BottomRight
-    };
+	enum class NotificationPanelPosition
+	{
+		TopRight,
+		TopLeft,
+		BottomLeft,
+		BottomRight
+	};
 
-    class Config
-    {
-    public:
-        static Config& getInstance();
-        ~Config() = default;
-        Config(const Config&) = delete;
-        void operator=(const Config&) = delete;
-        Config(Config&&)noexcept = default;
-        Config& operator=(Config&&)noexcept = default;
+	class Config
+	{
+	public:
+		static Config& GetInstance();
+		~Config() = default;
+		Config(const Config&) = delete;
+		void operator=(const Config&) = delete;
+		Config(Config&&)noexcept = default;
+		Config& operator=(Config&&)noexcept = default;
 
-        bool loadConfig();
-        bool saveConfig();
+		bool LoadConfig();
+		bool SaveConfig();
 
-        typedef std::vector<CslPackage> vecCslPackages;
-        std::vector<CslPackage> getCSLPackages()const;
-        void saveCSLPath(int idx, const std::string path);
-        void saveCSLEnabled(int idx, bool enabled);
-        bool loadCSLPackage(int idx);
-        bool hasValidPaths() const;
+		std::vector<CslPackage> GetCSLPackages()const;
+		void SaveCSLPath(int idx, const std::string path);
+		void SaveCSLEnabled(int idx, bool enabled);
+		bool HasValidPaths() const;
 
-        std::string getDefaultAcIcaoType() const;
-        void setDefaultAcIcaoType(const std::string type);
+		std::string GetDefaultAcIcaoType() const;
+		void SetDefaultAcIcaoType(const std::string type);
 
-        void setShowHideLabels(bool status);
-        bool getShowHideLabels() const;
+		void SetShowHideLabels(bool status);
+		bool GetShowHideLabels() const;
 
-        void setDebugModelMatching(bool status);
-        bool getDebugModelMatching() const;
+		void SetDebugModelMatching(bool status);
+		bool GetDebugModelMatching() const;
 
-        void setTcpPort(std::string port);
-        std::string getTcpPort() const;
+		void SetTcpPort(std::string port);
+		std::string GetTcpPort() const;
 
-        void setDefaultAtisEnabled(bool status);
-        bool getDefaultAtisEnabled() const;
+		void SetDefaultAtisEnabled(bool status);
+		bool GetDefaultAtisEnabled() const;
 
-        void setNotificationPanelVisible(bool enabled);
-        bool getNotificationPanelVisible() const;
+		void SetNotificationPanelVisible(bool enabled);
+		bool GetNotificationPanelVisible() const;
 
-        void setNotificationPanelTimeout(int timeout);
-        int getNotificationPanelTimeout() const;
-        int getActualMessagePreviewTime() const;
+		void SetNotificationPanelTimeout(int timeout);
+		int GetNotificationPanelTimeout() const;
+		int GetActualMessagePreviewTime() const;
 
-        void setNotificationPanelPosition(NotificationPanelPosition position);
-        NotificationPanelPosition getNotificationPanelPosition() const;
+		void SetNotificationPanelPosition(NotificationPanelPosition position);
+		NotificationPanelPosition GetNotificationPanelPosition() const;
 
-        void setOverrideContactAtcCommand(bool status);
-        bool getOverrideContactAtcCommand() const;
+		void SetOverrideContactAtcCommand(bool status);
+		bool GetOverrideContactAtcCommand() const;
 
-        void setAircraftLabelColor(int color);
-        int getAircraftLabelColor() const;
+		void SetAircraftLabelColor(int color);
+		int GetAircraftLabelColor() const;
 
-        void setTcasDisabled(bool status);
-        bool getTcasDisabled() const;
+		void SetTcasDisabled(bool status);
+		bool GetTcasDisabled() const;
 
-        void setMaxLabelDistance(int distance);
-        int getMaxLabelDistance() const;
+		void SetMaxLabelDistance(int distance);
+		int GetMaxLabelDistance() const;
 
-        void setLabelCutoffVis(bool value);
-        bool getLabelCutoffVis() const;
+		void SetLabelCutoffVis(bool value);
+		bool GetLabelCutoffVis() const;
 
-        void setLogLevel(int level);
-        int getLogLevel() const;
+		void SetLogLevel(int level);
+		int GetLogLevel() const;
 
-        void setTransmitIndicatorEnabled(bool value);
-        bool getTransmitIndicatorEnabled() const;
+		void SetTransmitIndicatorEnabled(bool value);
+		bool GetTransmitIndicatorEnabled() const;
 
-        void setAircraftSoundsEnabled(bool value);
-        bool getAircraftSoundsEnabled() const;
+		void SetAircraftSoundsEnabled(bool value);
+		bool GetAircraftSoundsEnabled() const;
 
-        void setAircraftSoundVolume(int volume);
-        int getAircraftSoundVolume() const;
+		void SetAircraftSoundVolume(int volume);
+		int GetAircraftSoundVolume() const;
 
-    private:
-        Config() = default;
-        std::vector<CslPackage> m_cslPackages;
-        std::string m_defaultAcIcaoType = "A320";
-        bool m_showHideLabels = true;
-        bool m_debugModelMatching = false;
-        bool m_defaultAtisEnabled = false;
-        std::string m_tcpPort = "53100";
-        bool m_overrideContactAtcCommand = false;
-        int m_labelColor = COLOR_YELLOW;
-        bool m_tcasDisabled = false;
-        bool m_notificationPanelVisible = true;
-        int m_notificationPanelTimeout = 10;
-        NotificationPanelPosition m_notificationPanelPosition = NotificationPanelPosition::TopRight;
-        int m_maxLabelDist = 3;
-        bool m_labelCutoffVis = true;
-        bool m_transmitIndicatorEnabled = false;
-        bool m_aircraftSoundsEnabled = true;
-        int m_aircraftSoundsVolume = 50;
-        int m_logLevel = 2; // 0=Debug, 1=Info, 2=Warning, 3=Error, 4=Fatal, 5=Msg
-    };
+	private:
+		Config() = default;
+		std::vector<CslPackage> m_cslPackages;
+		std::string m_defaultAcIcaoType = "A320";
+		bool m_showHideLabels = true;
+		bool m_debugModelMatching = false;
+		bool m_defaultAtisEnabled = false;
+		std::string m_tcpPort = "53100";
+		bool m_overrideContactAtcCommand = false;
+		int m_labelColor = COLOR_YELLOW;
+		bool m_tcasDisabled = false;
+		bool m_notificationPanelVisible = true;
+		int m_notificationPanelTimeout = 10;
+		NotificationPanelPosition m_notificationPanelPosition = NotificationPanelPosition::TopRight;
+		int m_maxLabelDist = 3;
+		bool m_labelCutoffVis = true;
+		bool m_transmitIndicatorEnabled = false;
+		bool m_aircraftSoundsEnabled = true;
+		int m_aircraftSoundsVolume = 50;
+		int m_logLevel = 2; // 0=Debug, 1=Info, 2=Warning, 3=Error, 4=Fatal, 5=Msg
+	};
 }
 
 #endif // !Config_h

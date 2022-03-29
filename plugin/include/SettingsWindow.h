@@ -19,8 +19,7 @@
 #ifndef SettingsWindow_h
 #define SettingsWindow_h
 
-namespace xpilot
-{
+namespace xpilot {
 	class SettingsWindow : public XPImgWindow
 	{
 	public:
@@ -28,7 +27,7 @@ namespace xpilot
 	protected:
 		void buildInterface() override;
 	private:
-		void loadConfig();
+		void LoadConfig();
 	};
 }
 

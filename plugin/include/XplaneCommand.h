@@ -23,28 +23,24 @@
 
 #include <functional>
 
-namespace xpilot
-{
+namespace xpilot {
 	class XplaneCommand
 	{
 	public:
 		XplaneCommand(const char* name, const char* description, std::function<void()> handler) :
 			m_handler(handler),
-			m_command(XPLMCreateCommand(name, description))
-		{
+			m_command(XPLMCreateCommand(name, description)) {
 			XPLMRegisterCommandHandler(m_command, callback, false, static_cast<void*>(this));
 		}
 
-		~XplaneCommand()
-		{
+		~XplaneCommand() {
 			XPLMUnregisterCommandHandler(m_command, callback, false, static_cast<void*>(this));
 		}
 
 		XplaneCommand(const XplaneCommand&) = delete;
 		XplaneCommand& operator =(const XplaneCommand&) = delete;
 	private:
-		static int callback(XPLMCommandRef, XPLMCommandPhase phase, void* refcon)
-		{
+		static int callback(XPLMCommandRef, XPLMCommandPhase phase, void* refcon) {
 			if (phase == xplm_CommandBegin) { (static_cast<XplaneCommand*>(refcon)->m_handler)(); }
 			return 1;
 		}

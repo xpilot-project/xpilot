@@ -38,8 +38,7 @@
 #include "XPLMDataAccess.h"
 #include "XPLMPlugin.h"
 
-namespace xpilot
-{
+namespace xpilot {
 	constexpr long DRE_MSG_ADD_DATAREF = 0x01000000;
 	const char* const DRE_PLUGIN_SINATURE = "xplanesdk.examples.DataRefEditor";
 
@@ -65,8 +64,8 @@ namespace xpilot
 	class LookupException : public std::runtime_error {
 	public:
 		LookupException(const std::string& msg) :
-			runtime_error(msg)
-		{}
+			runtime_error(msg) {
+		}
 	};
 
 	/**
@@ -76,8 +75,8 @@ namespace xpilot
 	class NotFoundException : public LookupException {
 	public:
 		NotFoundException(const std::string& msg) :
-			LookupException(msg)
-		{}
+			LookupException(msg) {
+		}
 	};
 
 	/**
@@ -87,8 +86,8 @@ namespace xpilot
 	class IncompatibleTypeException : public LookupException {
 	public:
 		IncompatibleTypeException(const std::string& msg) :
-			LookupException(msg)
-		{}
+			LookupException(msg) {
+		}
 	};
 
 	/**
@@ -98,8 +97,8 @@ namespace xpilot
 	class NotWriteableException : public LookupException {
 	public:
 		NotWriteableException(const std::string& msg) :
-			LookupException(msg)
-		{}
+			LookupException(msg) {
+		}
 	};
 
 	template <typename T>
@@ -216,8 +215,7 @@ namespace xpilot
 		  * @note is the same as operator=() for non-vector data
 		  * @todo is there a more elegant way to do this?
 		  */
-		void setVal(std::size_t, typename dataref_trait<SimType>::BasicType val)
-		{
+		void setVal(std::size_t, typename dataref_trait<SimType>::BasicType val) {
 			operator =(val);
 		}
 
@@ -235,8 +233,7 @@ namespace xpilot
 
 	private:
 
-		static void NotifactionFunc(void* refcon)
-		{
+		static void NotifactionFunc(void* refcon) {
 			DataRefAccess* self = static_cast<DataRefAccess*>(refcon);
 			self->notify();
 		}
@@ -275,10 +272,8 @@ namespace xpilot
 		m_data_ref(nullptr),
 		m_read_write(writeability),
 		shared_(false),
-		identifier_(identifier)
-	{
-		try
-		{
+		identifier_(identifier) {
+		try {
 			if (share && XPLMFindDataRef(identifier.c_str()) == nullptr)
 				shareDataRef(identifier, publish_in_dre);
 			lookUp(identifier);
@@ -289,21 +284,18 @@ namespace xpilot
 	}
 
 	template <typename SimType>
-	DataRefAccess<SimType>::~DataRefAccess()
-	{
+	DataRefAccess<SimType>::~DataRefAccess() {
 		if (shared_)
 			unshareData();
 	}
 
 	template <typename SimType>
-	const DataRefAccess<SimType>& DataRefAccess<SimType>::operator=(const DataRefAccess<SimType>& rhs)
-	{
+	const DataRefAccess<SimType>& DataRefAccess<SimType>::operator=(const DataRefAccess<SimType>& rhs) {
 		return operator=(SimType(rhs));
 	}
 
 	template <typename SimType>
-	bool DataRefAccess<SimType>::hasChanged() const
-	{
+	bool DataRefAccess<SimType>::hasChanged() const {
 		return true;
 	}
 
@@ -326,8 +318,7 @@ namespace xpilot
 	bool DataRefAccess<std::string>::hasChanged() const;
 
 	template <typename SimType>
-	void DataRefAccess<SimType>::forceChanged()
-	{
+	void DataRefAccess<SimType>::forceChanged() {
 		m_history = std::numeric_limits<SimType>::max();
 	}
 
@@ -341,20 +332,17 @@ namespace xpilot
 	void DataRefAccess<std::string>::forceChanged();
 
 	template <typename SimType>
-	void DataRefAccess<SimType>::save()
-	{
+	void DataRefAccess<SimType>::save() {
 		m_history = operator SimType();
 	}
 
 	template <typename SimType>
-	void DataRefAccess<SimType>::undo()
-	{
+	void DataRefAccess<SimType>::undo() {
 		operator=(m_history);
 	}
 
 	template <typename SimType>
-	void DataRefAccess<SimType>::shareDataRef(const std::string&, bool)
-	{
+	void DataRefAccess<SimType>::shareDataRef(const std::string&, bool) {
 		throw IncompatibleTypeException("No type defined for sharing data");
 	}
 
@@ -372,14 +360,12 @@ namespace xpilot
 	void DataRefAccess<std::string>::shareDataRef(const std::string&, bool publish_in_dre);
 
 	template <typename SimType>
-	void DataRefAccess<SimType>::unshareData()
-	{
+	void DataRefAccess<SimType>::unshareData() {
 		throw IncompatibleTypeException("No type defined for sharing data");
 	}
 
 	template <typename SimType>
-	void DataRefAccess<SimType>::share(int success, bool publish_in_dre)
-	{
+	void DataRefAccess<SimType>::share(int success, bool publish_in_dre) {
 		if (!success)
 			throw IncompatibleTypeException("Could not share data " + identifier_ + " type mismatch with already existing data.");
 		shared_ = true;
@@ -401,38 +387,33 @@ namespace xpilot
 	void DataRefAccess<std::string>::unshareData();
 
 	template <typename SimType>
-	void DataRefAccess<SimType>::publishInDRE()
-	{
+	void DataRefAccess<SimType>::publishInDRE() {
 		XPLMPluginID PluginID = XPLMFindPluginBySignature(DRE_PLUGIN_SINATURE);
 		if (PluginID != XPLM_NO_PLUGIN_ID)
 			XPLMSendMessageToPlugin(PluginID, DRE_MSG_ADD_DATAREF, static_cast<void*>(const_cast<char*>(identifier_.c_str())));
 	}
 
 	template <typename SimType>
-	void DataRefAccess<SimType>::lookUp(const std::string& identifier)
-	{
+	void DataRefAccess<SimType>::lookUp(const std::string& identifier) {
 		m_data_ref = XPLMFindDataRef(identifier.c_str());
 		if (!m_data_ref)
 			throw NotFoundException(identifier + " not found in X-Plane's available Datarefs.");
 	}
 
 	template <typename SimType>
-	void DataRefAccess<SimType>::checkWriteabilityIsValid()
-	{
+	void DataRefAccess<SimType>::checkWriteabilityIsValid() {
 		if (m_read_write == WriteOnly || m_read_write == ReadWrite)
 			if (!XPLMCanWriteDataRef(m_data_ref))
 				throw NotWriteableException("Declared to be writeable, but X-Plane says it is read-only.");
 	}
 
 	template <typename SimType>
-	void DataRefAccess<SimType>::checkDataType()
-	{
+	void DataRefAccess<SimType>::checkDataType() {
 		throw IncompatibleTypeException("No type defined.");
 	}
 
 	template <typename SimType>
-	void DataRefAccess<SimType>::logErrorWithDataRef(const std::string& error_msg, const std::string& dataref_identifier)
-	{
+	void DataRefAccess<SimType>::logErrorWithDataRef(const std::string& error_msg, const std::string& dataref_identifier) {
 
 	}
 
@@ -491,8 +472,7 @@ namespace xpilot
 	const DataRefAccess<std::string>& DataRefAccess<std::string>::operator=(const std::string&);
 
 	template <typename SimType>
-	typename dataref_trait<SimType>::BasicType DataRefAccess<SimType>::operator[](std::size_t) const
-	{
+	typename dataref_trait<SimType>::BasicType DataRefAccess<SimType>::operator[](std::size_t) const {
 		typedef typename dataref_trait<SimType>::BasicType T;
 		return T(*this);
 	}
@@ -502,7 +482,7 @@ namespace xpilot
 
 	template<>
 	dataref_trait<std::vector<int> >::BasicType DataRefAccess<std::vector<int> >::operator[](std::size_t index) const;
-	
+
 	template<>
 	dataref_trait<std::string>::BasicType DataRefAccess<std::string>::operator[](std::size_t index) const;
 

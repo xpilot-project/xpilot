@@ -24,52 +24,16 @@
 #include "XPilot.h"
 #include <chrono>
 
-namespace xpilot
-{
-	constexpr long FAST_POSITION_INTERVAL_TOLERANCE = 500;
-	constexpr double ERROR_CORRECTION_INTERVAL_FAST = 2.0;
-	constexpr double ERROR_CORRECTION_INTERVAL_SLOW = 5.0;
-
+namespace xpilot {
 	constexpr float CLOSED_SPACE_VOLUME_SCALAR = 0.10f;
 	constexpr float OUTSIDE_SPACE_VOLUME_SCALAR = 0.60f;
 
-	static double NormalizeDegrees(double value, double lowerBound, double upperBound)
-	{
-		double range = upperBound - lowerBound;
-		if (value < lowerBound)
-		{
-			return value + range;
-		}
-		if (value > upperBound)
-		{
-			return value - range;
-		}
-		return value;
-	}
-
-	static double CalculateNormalizedDelta(double start, double end, double lowerBound, double upperBound)
-	{
-		double range = upperBound - lowerBound;
-		double halfRange = range / 2.0;
-
-		if (abs(end - start) > halfRange)
-		{
-			end += (end > start ? -range : range);
-		}
-
-		return end - start;
-	}
-
 	mapPlanesTy mapPlanes;
-	mapPlanesTy::iterator mapGetAircraftByIndex(int idx)
-	{
+	mapPlanesTy::iterator mapGetAircraftByIndex(int idx) {
 		int i = 0;
-		for (mapPlanesTy::iterator iter = mapPlanes.begin(); iter != mapPlanes.end(); ++iter)
-		{
-			if (iter->second)
-			{
-				if (++i == idx)
-				{
+		for (mapPlanesTy::iterator iter = mapPlanes.begin(); iter != mapPlanes.end(); ++iter) {
+			if (iter->second) {
+				if (++i == idx) {
 					return iter;
 				}
 			}
@@ -88,8 +52,7 @@ namespace xpilot
 		m_environmentVolumeRatio("sim/operation/sound/enviro_volume_ratio", ReadOnly),
 		m_isViewExternal("sim/graphics/view/view_is_external", ReadOnly),
 		m_canopyOpenRatio("sim/operation/sound/users_canopy_open_ratio", ReadOnly),
-		m_userDoorOpenRatio("sim/operation/sound/users_door_open_ratio", ReadOnly)
-	{
+		m_userDoorOpenRatio("sim/operation/sound/users_door_open_ratio", ReadOnly) {
 		FlightModel::InitializeModels();
 
 		m_audioEngine = std::make_unique<CAudioEngine>();
@@ -104,14 +67,12 @@ namespace xpilot
 		XPLMRegisterFlightLoopCallback(&AircraftManager::AircraftMaintenanceCallback, -1.0f, this);
 	}
 
-	AircraftManager::~AircraftManager()
-	{
+	AircraftManager::~AircraftManager() {
 		XPLMUnregisterFlightLoopCallback(&AircraftManager::AircraftMaintenanceCallback, nullptr);
 	}
 
 	void AircraftManager::HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState,
-		const std::string& airline, const std::string& typeCode)
-	{
+		const std::string& airline, const std::string& typeCode) {
 		auto planeIt = mapPlanes.find(callsign);
 		if (planeIt != mapPlanes.end()) {
 			HandleRemovePlane(callsign); // remove plane, the client will try adding it again
@@ -123,8 +84,7 @@ namespace xpilot
 
 		if (plane) {
 			std::string engineSound = "JetEngine";
-			switch (plane->EngineClass)
-			{
+			switch (plane->EngineClass) {
 			case EngineClassType::JetEngine:
 				engineSound = "JetEngine";
 				break;
@@ -145,95 +105,71 @@ namespace xpilot
 		}
 	}
 
-	void AircraftManager::HandleAircraftConfig(const std::string& callsign, const AircraftConfigDto& config)
-	{
+	void AircraftManager::HandleAircraftConfig(const std::string& callsign, const AircraftConfigDto& config) {
 		auto planeIt = mapPlanes.find(callsign);
 		if (planeIt == mapPlanes.end()) return;
 
 		NetworkAircraft* plane = planeIt->second.get();
 		if (!plane) return;
 
-		if (config.flaps.has_value())
-		{
-			if (config.flaps.value() != plane->TargetFlapsPosition)
-			{
+		if (config.flaps.has_value()) {
+			if (config.flaps.value() != plane->TargetFlapsPosition) {
 				plane->TargetFlapsPosition = config.flaps.value();
 			}
 		}
-		if (config.gearDown.has_value())
-		{
-			if (config.gearDown.value() != plane->IsGearDown)
-			{
+		if (config.gearDown.has_value()) {
+			if (config.gearDown.value() != plane->IsGearDown) {
 				plane->IsGearDown = config.gearDown.value();
 			}
 		}
-		if (config.spoilersDeployed.has_value())
-		{
-			if (config.spoilersDeployed.value() != plane->IsSpoilersDeployed)
-			{
+		if (config.spoilersDeployed.has_value()) {
+			if (config.spoilersDeployed.value() != plane->IsSpoilersDeployed) {
 				plane->IsSpoilersDeployed = config.spoilersDeployed.value();
 			}
 		}
-		if (config.strobeLightsOn.has_value())
-		{
-			if (config.strobeLightsOn.value() != plane->Surfaces.lights.strbLights)
-			{
+		if (config.strobeLightsOn.has_value()) {
+			if (config.strobeLightsOn.value() != plane->Surfaces.lights.strbLights) {
 				plane->Surfaces.lights.strbLights = config.strobeLightsOn.value();
 			}
 		}
-		if (config.taxiLightsOn.has_value())
-		{
-			if (config.taxiLightsOn.value() != plane->Surfaces.lights.taxiLights)
-			{
+		if (config.taxiLightsOn.has_value()) {
+			if (config.taxiLightsOn.value() != plane->Surfaces.lights.taxiLights) {
 				plane->Surfaces.lights.taxiLights = config.taxiLightsOn.value();
 			}
 		}
-		if (config.navLightsOn.has_value())
-		{
-			if (config.navLightsOn.value() != plane->Surfaces.lights.navLights)
-			{
+		if (config.navLightsOn.has_value()) {
+			if (config.navLightsOn.value() != plane->Surfaces.lights.navLights) {
 				plane->Surfaces.lights.navLights = config.navLightsOn.value();
 			}
 		}
-		if (config.landingLightsOn.has_value())
-		{
-			if (config.landingLightsOn.value() != plane->Surfaces.lights.landLights)
-			{
+		if (config.landingLightsOn.has_value()) {
+			if (config.landingLightsOn.value() != plane->Surfaces.lights.landLights) {
 				plane->Surfaces.lights.landLights = config.landingLightsOn.value();
 			}
 		}
-		if (config.beaconLightsOn.has_value())
-		{
-			if (config.beaconLightsOn.value() != plane->Surfaces.lights.bcnLights)
-			{
+		if (config.beaconLightsOn.has_value()) {
+			if (config.beaconLightsOn.value() != plane->Surfaces.lights.bcnLights) {
 				plane->Surfaces.lights.bcnLights = config.beaconLightsOn.value();
 			}
 		}
-		if (config.enginesOn.has_value())
-		{
-			if (config.enginesOn.value() != plane->IsEnginesRunning)
-			{
+		if (config.enginesOn.has_value()) {
+			if (config.enginesOn.value() != plane->IsEnginesRunning) {
 				plane->IsEnginesRunning = config.enginesOn.value();
 			}
 		}
-		if (config.enginesReversing.has_value())
-		{
-			if (config.enginesReversing.value() != plane->IsEnginesReversing)
-			{
+		if (config.enginesReversing.has_value()) {
+			if (config.enginesReversing.value() != plane->IsEnginesReversing) {
 				plane->IsEnginesReversing = config.enginesReversing.value();
 			}
 		}
-		if (config.onGround.has_value())
-		{
-			if (config.onGround.value() != plane->IsReportedOnGround)
-			{
+		if (config.onGround.has_value()) {
+			if (config.onGround.value() != plane->IsReportedOnGround) {
 				plane->IsReportedOnGround = config.onGround.value();
 			}
 		}
 	}
 
-	void AircraftManager::HandleRemovePlane(const std::string& callsign)
-	{
+	void AircraftManager::HandleRemovePlane(const std::string& callsign) {
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft) return;
 
@@ -242,18 +178,15 @@ namespace xpilot
 		mEnv->AircraftDeleted(callsign);
 	}
 
-	void AircraftManager::RemoveAllPlanes()
-	{
+	void AircraftManager::RemoveAllPlanes() {
 		m_audioEngine->StopAllChannels();
 		mapPlanes.clear();
 	}
 
-	float AircraftManager::AircraftMaintenanceCallback(float, float inElapsedTimeSinceLastFlightLoop, int, void* ref)
-	{
+	float AircraftManager::AircraftMaintenanceCallback(float, float inElapsedTimeSinceLastFlightLoop, int, void* ref) {
 		auto* instance = static_cast<AircraftManager*>(ref);
-		
-		if (instance)
-		{
+
+		if (instance) {
 			if (!instance->IsXplaneThread()) {
 				return -1.0f;
 			}
@@ -271,7 +204,7 @@ namespace xpilot
 			for (auto plane : stalePlanes) {
 				mapPlanes.erase(plane);
 			}
-            
+
 			float soundVolume = 1.0f;
 			float doorSum = 0;
 			bool anyDoorOpen = false;
@@ -284,22 +217,20 @@ namespace xpilot
 				anyDoorOpen = true;
 			}
 
-			bool ShouldPauseSound = !Config::getInstance().getAircraftSoundsEnabled() || !instance->m_soundOn || instance->m_simPaused;
+			bool ShouldPauseSound = !Config::GetInstance().GetAircraftSoundsEnabled() || !instance->m_soundOn || instance->m_simPaused;
 
 			if (instance->m_isViewExternal == 0 && instance->m_canopyOpenRatio == 0 && anyDoorOpen == false) {
 				// internal view
-				soundVolume = Config::getInstance().getAircraftSoundVolume() / 100.0f * CLOSED_SPACE_VOLUME_SCALAR;
-			}
-			else {
+				soundVolume = Config::GetInstance().GetAircraftSoundVolume() / 100.0f * CLOSED_SPACE_VOLUME_SCALAR;
+			} else {
 				// external view
-				soundVolume = Config::getInstance().getAircraftSoundVolume() / 100.0f * OUTSIDE_SPACE_VOLUME_SCALAR;
+				soundVolume = Config::GetInstance().GetAircraftSoundVolume() / 100.0f * OUTSIDE_SPACE_VOLUME_SCALAR;
 			}
 
 			XPLMCameraPosition_t camera;
 			XPLMReadCameraPosition(&camera);
 
-			for (mapPlanesTy::iterator iter = mapPlanes.begin(); iter != mapPlanes.end(); ++iter)
-			{
+			for (mapPlanesTy::iterator iter = mapPlanes.begin(); iter != mapPlanes.end(); ++iter) {
 				int channel = iter->second->SoundChannelId;
 
 				AudioVector3 soundPos{};
@@ -314,8 +245,7 @@ namespace xpilot
 				}
 
 				// confirm aircraft creation
-				if (iter->second->IsInstanciated() && !iter->second->AircraftAddedEventSent)
-				{
+				if (iter->second->IsInstanciated() && !iter->second->AircraftAddedEventSent) {
 					instance->mEnv->AircraftAdded(iter->first);
 					iter->second->AircraftAddedEventSent = true;
 				}
@@ -331,8 +261,7 @@ namespace xpilot
 	}
 
 	void AircraftManager::HandleFastPositionUpdate(const std::string& callsign, const AircraftVisualState& visualState,
-		Vector3 positionalVector, Vector3 rotationalVector, double speed)
-	{
+		Vector3 positionalVector, Vector3 rotationalVector, double speed) {
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft)
 			return;
@@ -344,8 +273,7 @@ namespace xpilot
 		aircraft->UpdateVelocityVectors();
 	}
 
-	void AircraftManager::HandleHeartbeat(const std::string& callsign)
-	{
+	void AircraftManager::HandleHeartbeat(const std::string& callsign) {
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft)
 			return;
@@ -353,8 +281,7 @@ namespace xpilot
 		aircraft->LastUpdated = PrecisionTimestamp();
 	}
 
-	NetworkAircraft* AircraftManager::GetAircraft(const std::string& callsign)
-	{
+	NetworkAircraft* AircraftManager::GetAircraft(const std::string& callsign) {
 		auto planeIt = mapPlanes.find(callsign);
 		if (planeIt == mapPlanes.end()) return nullptr;
 		return planeIt->second.get();

@@ -48,7 +48,7 @@ static XPLMDataRef		gVrEnabledRef = nullptr;
 static XPLMDataRef		gModelviewMatrixRef = nullptr;
 static XPLMDataRef		gViewportRef = nullptr;
 static XPLMDataRef		gProjectionMatrixRef = nullptr;
-static XPLMDataRef		gFrameRatePeriodRef     = nullptr;
+static XPLMDataRef		gFrameRatePeriodRef = nullptr;
 
 std::shared_ptr<ImgFontAtlas> ImgWindow::sFontAtlas;
 
@@ -62,8 +62,7 @@ ImgWindow::ImgWindow(
 	mFirstRender(true),
 	mFontAtlas(sFontAtlas),
 	mPreferredLayer(layer),
-	bHandleWndResize(xplm_WindowDecorationSelfDecoratedResizable == decoration)
-{
+	bHandleWndResize(xplm_WindowDecorationSelfDecoratedResizable == decoration) {
 	ImFontAtlas* iFontAtlas = nullptr;
 	if (mFontAtlas) {
 		mFontAtlas->bindTexture();
@@ -115,8 +114,7 @@ ImgWindow::ImgWindow(
 	// bind the font
 	if (mFontAtlas) {
 		mFontTexture = static_cast<GLuint>(reinterpret_cast<intptr_t>(io.Fonts->TexID));
-	}
-	else {
+	} else {
 		if (iFontAtlas->TexID == nullptr) {
 			// fallback binding if an atlas wasn't explicitly set.
 			unsigned char* pixels;
@@ -173,8 +171,7 @@ ImgWindow::ImgWindow(
 	mWindowID = XPLMCreateWindowEx(&windowParams);
 }
 
-ImgWindow::~ImgWindow()
-{
+ImgWindow::~ImgWindow() {
 	ImGui::SetCurrentContext(mImGuiContext);
 	if (!mFontAtlas) {
 		// if we didn't have an explicit font atlas, destroy the texture.
@@ -185,22 +182,19 @@ ImgWindow::~ImgWindow()
 }
 
 void
-ImgWindow::GetCurrentWindowGeometry(int& left, int& top, int& right, int& bottom) const
-{
+ImgWindow::GetCurrentWindowGeometry(int& left, int& top, int& right, int& bottom) const {
 	if (IsPoppedOut())
 		GetWindowGeometryOS(left, top, right, bottom);
 	else if (IsInVR()) {
 		left = bottom = 0;
 		GetWindowGeometryVR(right, top);
-	}
-	else {
+	} else {
 		GetWindowGeometry(left, top, right, bottom);
 	}
 }
 
 void
-ImgWindow::SetWindowResizingLimits(int minW, int minH, int maxW, int maxH)
-{
+ImgWindow::SetWindowResizingLimits(int minW, int minH, int maxW, int maxH) {
 	minWidth = minW;
 	minHeight = minH;
 	maxWidth = maxW;
@@ -209,16 +203,14 @@ ImgWindow::SetWindowResizingLimits(int minW, int minH, int maxW, int maxH)
 }
 
 void
-ImgWindow::updateMatrices()
-{
+ImgWindow::updateMatrices() {
 	// Get the current modelview matrix, viewport, and projection matrix from X-Plane
 	XPLMGetDatavf(gModelviewMatrixRef, mModelView, 0, 16);
 	XPLMGetDatavf(gProjectionMatrixRef, mProjection, 0, 16);
 	XPLMGetDatavi(gViewportRef, mViewport, 0, 4);
 }
 
-static void multMatrixVec4f(GLfloat dst[4], const GLfloat m[16], const GLfloat v[4])
-{
+static void multMatrixVec4f(GLfloat dst[4], const GLfloat m[16], const GLfloat v[4]) {
 	dst[0] = v[0] * m[0] + v[1] * m[4] + v[2] * m[8] + v[3] * m[12];
 	dst[1] = v[0] * m[1] + v[1] * m[5] + v[2] * m[9] + v[3] * m[13];
 	dst[2] = v[0] * m[2] + v[1] * m[6] + v[2] * m[10] + v[3] * m[14];
@@ -226,8 +218,7 @@ static void multMatrixVec4f(GLfloat dst[4], const GLfloat m[16], const GLfloat v
 }
 
 void
-ImgWindow::boxelsToNative(int x, int y, int& outX, int& outY)
-{
+ImgWindow::boxelsToNative(int x, int y, int& outX, int& outY) {
 	GLfloat boxelPos[4] = { (GLfloat)x, (GLfloat)y, 0, 1 };
 	GLfloat eye[4], ndc[4];
 
@@ -248,8 +239,7 @@ ImgWindow::boxelsToNative(int x, int y, int& outX, int& outY)
  */
 
 void
-ImgWindow::RenderImGui(ImDrawData* draw_data)
-{
+ImgWindow::RenderImGui(ImDrawData* draw_data) {
 	// Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
 	ImGuiIO& io = ImGui::GetIO();
 	if (io.DisplayFramebufferScale.x != 1.0 ||
@@ -279,8 +269,7 @@ ImgWindow::RenderImGui(ImDrawData* draw_data)
 	glTranslatef(static_cast<GLfloat>(mLeft), static_cast<GLfloat>(-mTop), 0.0f);
 
 	// Render command lists
-	for (int n = 0; n < draw_data->CmdListsCount; n++)
-	{
+	for (int n = 0; n < draw_data->CmdListsCount; n++) {
 		const ImDrawList* cmd_list = draw_data->CmdLists[n];
 		const ImDrawVert* vtx_buffer = cmd_list->VtxBuffer.Data;
 		const ImDrawIdx* idx_buffer = cmd_list->IdxBuffer.Data;
@@ -288,13 +277,11 @@ ImgWindow::RenderImGui(ImDrawData* draw_data)
 		glTexCoordPointer(2, GL_FLOAT, sizeof(ImDrawVert), (const GLvoid*)((const char*)vtx_buffer + IM_OFFSETOF(ImDrawVert, uv)));
 		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(ImDrawVert), (const GLvoid*)((const char*)vtx_buffer + IM_OFFSETOF(ImDrawVert, col)));
 
-		for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
-		{
+		for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++) {
 			const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
 			if (pcmd->UserCallback) {
 				pcmd->UserCallback(cmd_list, pcmd);
-			}
-			else {
+			} else {
 				XPLMBindTexture2d((GLuint)(intptr_t)pcmd->TextureId, 0);
 
 				// Scissors work in viewport space - must translate the coordinates from ImGui -> Boxels, then Boxels -> Native.
@@ -323,8 +310,7 @@ ImgWindow::RenderImGui(ImDrawData* draw_data)
 }
 
 void
-ImgWindow::translateToImguiSpace(int inX, int inY, float& outX, float& outY)
-{
+ImgWindow::translateToImguiSpace(int inX, int inY, float& outX, float& outY) {
 	outX = static_cast<float>(inX - mLeft);
 	if (outX < 0.0f || outX >(float)(mRight - mLeft)) {
 		outX = -FLT_MAX;
@@ -340,29 +326,25 @@ ImgWindow::translateToImguiSpace(int inX, int inY, float& outX, float& outY)
 }
 
 void
-ImgWindow::translateImguiToBoxel(float inX, float inY, int& outX, int& outY)
-{
+ImgWindow::translateImguiToBoxel(float inX, float inY, int& outX, int& outY) {
 	outX = (int)(mLeft + inX);
 	outY = (int)(mTop - inY);
 }
 
 
 void
-ImgWindow::updateImgui()
-{
+ImgWindow::updateImgui() {
 	ImGui::SetCurrentContext(mImGuiContext);
 	auto& io = ImGui::GetIO();
 
 	// We need to handle key presses on a que because the X-Plane VR backspace key has an up / down
 	// action that occurs in the same frame and imgui will miss it because there is no time difference between the
 	// up and down
-	if (!mKeyQueue.empty())
-	{
+	if (!mKeyQueue.empty()) {
 		KeyPress press = mKeyQueue.front();
 		mKeyQueue.pop();
 
-		if (io.WantCaptureKeyboard)
-		{
+		if (io.WantCaptureKeyboard) {
 			// If you press and hold a key, the flags will actually be down, 0, 0, ..., up
 			// So the key always has to be considered as pressed unless the up flag is set
 			auto vk = static_cast<unsigned char>(press.inVirtualKey);
@@ -374,8 +356,7 @@ ImgWindow::updateImgui()
 			if ((press.inFlags & xplm_UpFlag) != xplm_UpFlag
 				&& !io.KeyCtrl
 				&& !io.KeyAlt
-				&& std::isprint(press.inKey))
-			{
+				&& std::isprint(press.inKey)) {
 				char smallStr[] = { press.inKey, 0 };
 				io.AddInputCharactersUTF8(smallStr);
 			}
@@ -410,8 +391,7 @@ ImgWindow::updateImgui()
 	int hasKeyboardFocus = XPLMHasKeyboardFocus(mWindowID);
 	if (io.WantTextInput && !hasKeyboardFocus) {
 		XPLMTakeKeyboardFocus(mWindowID);
-	}
-	else if (!io.WantTextInput && hasKeyboardFocus) {
+	} else if (!io.WantTextInput && hasKeyboardFocus) {
 		XPLMTakeKeyboardFocus(nullptr);
 		// reset keysdown otherwise we'll think any keys used to defocus the keyboard are still down!
 		for (auto& key : io.KeysDown) {
@@ -422,8 +402,7 @@ ImgWindow::updateImgui()
 }
 
 void
-ImgWindow::DrawWindowCB(XPLMWindowID /* inWindowID */, void* inRefcon)
-{
+ImgWindow::DrawWindowCB(XPLMWindowID /* inWindowID */, void* inRefcon) {
 	auto* thisWindow = reinterpret_cast<ImgWindow*>(inRefcon);
 
 	thisWindow->updateImgui();
@@ -438,15 +417,13 @@ ImgWindow::DrawWindowCB(XPLMWindowID /* inWindowID */, void* inRefcon)
 }
 
 int
-ImgWindow::HandleMouseClickCB(XPLMWindowID /* inWindowID */, int x, int y, XPLMMouseStatus inMouse, void* inRefcon)
-{
+ImgWindow::HandleMouseClickCB(XPLMWindowID /* inWindowID */, int x, int y, XPLMMouseStatus inMouse, void* inRefcon) {
 	auto* thisWindow = reinterpret_cast<ImgWindow*>(inRefcon);
 	return thisWindow->HandleMouseClickGeneric(x, y, inMouse, 0);
 }
 
 int
-ImgWindow::HandleMouseClickGeneric(int x, int y, XPLMMouseStatus inMouse, int button)
-{
+ImgWindow::HandleMouseClickGeneric(int x, int y, XPLMMouseStatus inMouse, int button) {
 	ImGui::SetCurrentContext(mImGuiContext);
 	ImGuiIO& io = ImGui::GetIO();
 
@@ -466,17 +443,14 @@ ImgWindow::HandleMouseClickGeneric(int x, int y, XPLMMouseStatus inMouse, int bu
 		if (button == 0 &&              // left button
 			IsInsideSim() &&            // floating window in sim
 			dragWhat &&                 // and if there actually _is_ dragging
-			(dx != 0 || dy != 0))
-		{
+			(dx != 0 || dy != 0)) {
 			// shall we drag the entire window?
-			if (dragWhat.wnd)
-			{
+			if (dragWhat.wnd) {
 				mLeft += dx;                      // move the wdinow
 				mRight += dx;
 				mTop += dy;
 				mBottom += dy;
-			}
-			else {
+			} else {
 				// do we need to handle window resize?
 				if (dragWhat.left)   mLeft += dx;
 				if (dragWhat.top)    mTop += dy;
@@ -484,13 +458,11 @@ ImgWindow::HandleMouseClickGeneric(int x, int y, XPLMMouseStatus inMouse, int bu
 				if (dragWhat.bottom) mBottom += dy;
 
 				// Make sure resizing limits are honored
-				if (mRight - mLeft < minWidth)
-				{
+				if (mRight - mLeft < minWidth) {
 					if (dragWhat.left) mLeft = mRight - minWidth;
 					else mRight = mLeft + minWidth;
 				}
-				if (mRight - mLeft > maxWidth)
-				{
+				if (mRight - mLeft > maxWidth) {
 					if (dragWhat.left) mLeft = mRight - maxWidth;
 					else mRight = mLeft + maxWidth;
 				}
@@ -525,13 +497,11 @@ ImgWindow::HandleMouseClickGeneric(int x, int y, XPLMMouseStatus inMouse, int bu
 			loc_x >= 0 && loc_y >= 0)   // valid local position
 		{
 			// shall we drag the entire window?
-			if (IsInsideWindowDragArea(loc_x, loc_y))
-			{
+			if (IsInsideWindowDragArea(loc_x, loc_y)) {
 				dragWhat.wnd = true;
 			}
 			// do we need to handle window resize?
-			else if (bHandleWndResize)
-			{
+			else if (bHandleWndResize) {
 				dragWhat.left = loc_x <= WND_RESIZE_LEFT_WIDTH;
 				dragWhat.top = loc_y <= WND_RESIZE_TOP_WIDTH;
 				dragWhat.right = loc_x >= (mRight - mLeft) - WND_RESIZE_RIGHT_WIDTH;
@@ -567,8 +537,7 @@ ImgWindow::HandleKeyFuncCB(
 	XPLMKeyFlags         inFlags,
 	char                 inVirtualKey,
 	void* inRefcon,
-	int                  /*losingFocus*/)
-{
+	int                  /*losingFocus*/) {
 	auto* thisWindow = reinterpret_cast<ImgWindow*>(inRefcon);
 
 	KeyPress press;
@@ -583,8 +552,7 @@ ImgWindow::HandleCursorFuncCB(
 	XPLMWindowID         /*inWindowID*/,
 	int                  x,
 	int                  y,
-	void* inRefcon)
-{
+	void* inRefcon) {
 	auto* thisWindow = reinterpret_cast<ImgWindow*>(inRefcon);
 	ImGui::SetCurrentContext(thisWindow->mImGuiContext);
 	ImGuiIO& io = ImGui::GetIO();
@@ -602,8 +570,7 @@ ImgWindow::HandleMouseWheelFuncCB(
 	int                  y,
 	int                  wheel,
 	int                  clicks,
-	void* inRefcon)
-{
+	void* inRefcon) {
 	auto* thisWindow = reinterpret_cast<ImgWindow*>(inRefcon);
 	ImGui::SetCurrentContext(thisWindow->mImGuiContext);
 	ImGuiIO& io = ImGui::GetIO();
@@ -626,23 +593,20 @@ ImgWindow::HandleMouseWheelFuncCB(
 }
 
 int
-ImgWindow::HandleRightClickFuncCB(XPLMWindowID /* inWindowID */, int x, int y, XPLMMouseStatus inMouse, void* inRefcon)
-{
+ImgWindow::HandleRightClickFuncCB(XPLMWindowID /* inWindowID */, int x, int y, XPLMMouseStatus inMouse, void* inRefcon) {
 	auto* thisWindow = reinterpret_cast<ImgWindow*>(inRefcon);
 	return thisWindow->HandleMouseClickGeneric(x, y, inMouse, 1);
 }
 
 
 void
-ImgWindow::SetWindowTitle(const std::string& title)
-{
+ImgWindow::SetWindowTitle(const std::string& title) {
 	mWindowTitle = title;
 	XPLMSetWindowTitle(mWindowID, mWindowTitle.c_str());
 }
 
 void
-ImgWindow::SetVisible(bool inIsVisible)
-{
+ImgWindow::SetVisible(bool inIsVisible) {
 	if (inIsVisible)
 		moveForVR();
 	if (GetVisible() == inIsVisible) {
@@ -659,14 +623,12 @@ ImgWindow::SetVisible(bool inIsVisible)
 }
 
 void
-ImgWindow::moveForVR()
-{
+ImgWindow::moveForVR() {
 	// if we're trying to display the window, check the state of the VR flag
 	// - if we're VR enabled, explicitly move the window to the VR world.
 	if (XPLMGetDatai(gVrEnabledRef)) {
 		XPLMSetWindowPositioningMode(mWindowID, xplm_WindowVR, 0);
-	}
-	else {
+	} else {
 		if (IsInVR()) {
 			XPLMSetWindowPositioningMode(mWindowID, mPreferredLayer, -1);
 		}
@@ -674,21 +636,18 @@ ImgWindow::moveForVR()
 }
 
 bool
-ImgWindow::GetVisible() const
-{
+ImgWindow::GetVisible() const {
 	return XPLMGetWindowIsVisible(mWindowID) != 0;
 }
 
 
 bool
-ImgWindow::onShow()
-{
+ImgWindow::onShow() {
 	return true;
 }
 
 void
-ImgWindow::SetWindowDragArea(int left, int top, int right, int bottom)
-{
+ImgWindow::SetWindowDragArea(int left, int top, int right, int bottom) {
 	dragLeft = left;
 	dragTop = top;
 	dragRight = right;
@@ -696,15 +655,13 @@ ImgWindow::SetWindowDragArea(int left, int top, int right, int bottom)
 }
 
 void
-ImgWindow::ClearWindowDragArea()
-{
+ImgWindow::ClearWindowDragArea() {
 	dragLeft = dragTop = dragRight = dragBottom = -1;
 }
 
 bool
 ImgWindow::HasWindowDragArea(int* pL, int* pT,
-	int* pR, int* pB) const
-{
+	int* pR, int* pB) const {
 	// return definition if requested
 	if (pL) *pL = dragLeft;
 	if (pT) *pT = dragTop;
@@ -718,8 +675,7 @@ ImgWindow::HasWindowDragArea(int* pL, int* pT,
 }
 
 bool
-ImgWindow::IsInsideWindowDragArea(int x, int y) const
-{
+ImgWindow::IsInsideWindowDragArea(int x, int y) const {
 	// values outside the window aren't valid
 	if (x == -FLT_MAX || y == -FLT_MAX)
 		return false;
@@ -735,8 +691,7 @@ ImgWindow::IsInsideWindowDragArea(int x, int y) const
 }
 
 void
-ImgWindow::SafeDelete()
-{
+ImgWindow::SafeDelete() {
 	sPendingDestruction.push(this);
 	if (sSelfDestructHandler == nullptr) {
 		XPLMCreateFlightLoop_t flParams{
@@ -757,8 +712,7 @@ float
 ImgWindow::SelfDestructCallback(float /*inElapsedSinceLastCall*/,
 	float /*inElapsedTimeSinceLastFlightLoop*/,
 	int   /*inCounter*/,
-	void* /*inRefcon*/)
-{
+	void* /*inRefcon*/) {
 	while (!sPendingDestruction.empty()) {
 		auto* thisObj = sPendingDestruction.front();
 		sPendingDestruction.pop();

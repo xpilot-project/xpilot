@@ -27,7 +27,7 @@
 void RegisterMenuItems();
 void UpdateMenuItems();
 
-static void MenuHandler(void * mRef, void * iRef);
+static void MenuHandler(void* mRef, void* iRef);
 
 inline XPLMCommandRef PttCommand = NULL;
 inline int PttCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon);

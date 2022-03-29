@@ -28,99 +28,97 @@
 #include <iostream>
 #include <stdint.h>
 
-namespace xpilot
-{
-    class Stopwatch
-    {
-    public:
-        typedef uint64_t timestamp_t;
-        typedef uint64_t timeunit_t;
+namespace xpilot {
+	class Stopwatch
+	{
+	public:
+		typedef uint64_t timestamp_t;
+		typedef uint64_t timeunit_t;
 
-        enum
-        {
-            MICROSEC = (timeunit_t)1,
-            MILLISEC = MICROSEC * 1000,
-            SECONDS = MILLISEC * 1000,
-            MINUTES = SECONDS * 60,
-            HOURS = MINUTES * 60,
-            DAYS = HOURS * 24
-        };
+		enum
+		{
+			MICROSEC = (timeunit_t)1,
+			MILLISEC = MICROSEC * 1000,
+			SECONDS = MILLISEC * 1000,
+			MINUTES = SECONDS * 60,
+			HOURS = MINUTES * 60,
+			DAYS = HOURS * 24
+		};
 
-        static bool correct_timeunit(timeunit_t t);
+		static bool correct_timeunit(timeunit_t t);
 
-        /**
-         * Creates a stopwatch that is not running.
-         */
-        Stopwatch();
+		/**
+		 * Creates a stopwatch that is not running.
+		 */
+		Stopwatch();
 
-        /**
-         * Starts or resumes the stopwatch, if it is not running already.
-         */
-        void start();
+		/**
+		 * Starts or resumes the stopwatch, if it is not running already.
+		 */
+		void start();
 
-        /**
-         * Stops the stopwatch, if it is not stopped already.
-         */
-        void stop();
+		/**
+		 * Stops the stopwatch, if it is not stopped already.
+		 */
+		void stop();
 
-        /**
-         * Returns, whether the stopwatch is running.
-         */
-        bool isRunning() const;
+		/**
+		 * Returns, whether the stopwatch is running.
+		 */
+		bool isRunning() const;
 
-        /**
-         * Returns the time elapsed between the start and stop of the
-         * stopwatch. If it is running, it returns the time from start
-         * until now. If the stopwatch is run previously, the previous
-         * runtime is added. If you want only the last measurment, you
-         * have to reset the timer, before stating the measurment.
-         * Does not change the running state.
-         */
-        double elapsed(timeunit_t timeunit = SECONDS) const;
+		/**
+		 * Returns the time elapsed between the start and stop of the
+		 * stopwatch. If it is running, it returns the time from start
+		 * until now. If the stopwatch is run previously, the previous
+		 * runtime is added. If you want only the last measurment, you
+		 * have to reset the timer, before stating the measurment.
+		 * Does not change the running state.
+		 */
+		double elapsed(timeunit_t timeunit = SECONDS) const;
 
-        /**
-         * Returns the time elapsed between the start and stop of the
-         * stopwatch. If it is running, it returns the time from start
-         * until now. If the stopwatch is run previously, the previous
-         * runtime is added. If you want only the last measurment, you
-         * have to reset the timer, before stating the measurment.
-         * Does not change the running state.
-         * In contrast to Stopwatch::elapsed(), only the timestamp is returned,
-         * that is the number if microseconds as an integer.
-         */
-        timestamp_t elapsed_timestamp() const;
+		/**
+		 * Returns the time elapsed between the start and stop of the
+		 * stopwatch. If it is running, it returns the time from start
+		 * until now. If the stopwatch is run previously, the previous
+		 * runtime is added. If you want only the last measurment, you
+		 * have to reset the timer, before stating the measurment.
+		 * Does not change the running state.
+		 * In contrast to Stopwatch::elapsed(), only the timestamp is returned,
+		 * that is the number if microseconds as an integer.
+		 */
+		timestamp_t elapsed_timestamp() const;
 
-        /**
-         * Resets the stopwatch.
-         */
-        void reset();
+		/**
+		 * Resets the stopwatch.
+		 */
+		void reset();
 
-        /**
-         * This method prints out the currently elapsed time.
-         */
-        void print(const char* msg = "", timeunit_t timeunit = SECONDS, std::ostream& os = std::cout) const;
+		/**
+		 * This method prints out the currently elapsed time.
+		 */
+		void print(const char* msg = "", timeunit_t timeunit = SECONDS, std::ostream& os = std::cout) const;
 
-        /**
-         * Convenient method for writing time in seconds
-         * to some ostream.
-         */
-        friend std::ostream& operator<<(std::ostream& os, const Stopwatch& stopwatch);
+		/**
+		 * Convenient method for writing time in seconds
+		 * to some ostream.
+		 */
+		friend std::ostream& operator<<(std::ostream& os, const Stopwatch& stopwatch);
 
-    private:
-        timestamp_t _beg, _end;
-        uint64_t _prev_elapsed;
-        bool _running;
+	private:
+		timestamp_t _beg, _end;
+		uint64_t _prev_elapsed;
+		bool _running;
 
-        /**
-         * Returns current time in microseconds since EPOCH.
-         */
-        static timestamp_t get_timestamp();
-    };
+		/**
+		 * Returns current time in microseconds since EPOCH.
+		 */
+		static timestamp_t get_timestamp();
+	};
 
-    inline bool Stopwatch::correct_timeunit(timeunit_t t)
-    {
-        return t == MICROSEC || t == MILLISEC || t == SECONDS || t == MINUTES || t == HOURS || t == DAYS;
-    }
+	inline bool Stopwatch::correct_timeunit(timeunit_t t) {
+		return t == MICROSEC || t == MILLISEC || t == SECONDS || t == MINUTES || t == HOURS || t == DAYS;
+	}
 }
 
 #endif /* STOPWATCH_H */

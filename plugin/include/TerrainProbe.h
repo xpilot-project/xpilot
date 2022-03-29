@@ -24,17 +24,16 @@
 
 #include <array>
 
-namespace xpilot
-{
-    class TerrainProbe
-    {
-    public:
-        TerrainProbe();
-        ~TerrainProbe();
-        double getTerrainElevation(double degLat, double degLon)const;
-    private:
-        XPLMProbeRef m_probeRef = nullptr;
-    };
+namespace xpilot {
+	class TerrainProbe
+	{
+	public:
+		TerrainProbe();
+		~TerrainProbe();
+		double GetTerrainElevation(double degLat, double degLon)const;
+	private:
+		XPLMProbeRef m_probeRef = nullptr;
+	};
 }
 
 #endif // !TerrainProbe_h

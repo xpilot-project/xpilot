@@ -46,8 +46,7 @@
 #include <algorithm>
 #include <iostream>
 
-namespace xpilot
-{
+namespace xpilot {
 	enum class dataRefs
 	{
 		DR_BULK_QUICK,
@@ -68,49 +67,44 @@ namespace xpilot
 		XPilot();
 		~XPilot();
 
-		void RadioMessageReceived(const std::string& msg, double red = 255, double green = 255, double blue = 255);
-		void AddPrivateMessage(const std::string& recipient, const std::string& msg, ConsoleTabType tabType);
-		void AddNotificationPanelMessage(const std::string& msg, double red = 255, double green = 255, double blue = 255);
-		void addNotification(const std::string& msg, double red = 255, double green = 255, double blue = 255);
-
-		void onNetworkDisconnected();
-		void onNetworkConnected();
-		void forceDisconnect(std::string reason = "");
-		void requestStationInfo(std::string station);
-		void requestMetar(std::string station);
-		void setCom1Frequency(float frequency);
-		void setCom2Frequency(float frequency);
-		void setAudioComSelection(int radio);
-		void setAudioSelection(int radio, bool on);
-		void setTransponderCode(int code);
-		void sendWallop(std::string message);
-		void SendRadioMessage(std::string message);
-		void SendPrivateMessage(std::string to, std::string message);
-		void AircraftDeleted(std::string callsign);
-		void AircraftAdded(std::string callsign);
-
-		std::string ourCallsign() const { return m_networkCallsign; }
-		bool isNetworkConnected() const { return m_networkLoginStatus; }
-		void setPttActive(bool active) { m_pttPressed = active; }
-		int getTxRadio() const { return m_audioComSelection; }
-		bool radiosPowered() const { return m_avionicsPower && (m_audioComSelection == 6 || m_audioComSelection == 7); }
-
-		void DisableXplaneAtis(bool disabled);
-		bool IsXplaneAtisDisabled() const { return !m_xplaneAtisEnabled; }
-
+		void Initialize();
+		void Shutdown();
 		void TryGetTcasControl();
 		void ReleaseTcasControl();
 
-		void toggleSettingsWindow();
-		void toggleNearbyAtcWindow();
-		void toggleTextMessageConsole();
-		void SetNotificationPanelAlwaysVisible(bool visible);
-		bool GetNotificationPanelAlwaysVisible() const;
-
+		void OnNetworkDisconnected();
+		void OnNetworkConnected();
+		void ForceDisconnect(std::string reason = "");
+		void DisableXplaneAtis(bool disabled);
+		bool IsXplaneAtisDisabled() const { return !m_xplaneAtisEnabled; }
+		std::string OurCallsign() const { return m_networkCallsign; }
+		bool IsNetworkConnected() const { return m_networkLoginStatus; }
+		void SetPttActive(bool active) { m_pttPressed = active; }
+		int GetTxRadio() const { return m_audioComSelection; }
+		bool IsRadiosPowered() const { return m_avionicsPower && (m_audioComSelection == 6 || m_audioComSelection == 7); }
+		void SetCom1Frequency(int frequency);
+		void SetCom2Frequency(int frequency);
+		void SetAudioComSelection(int radio);
+		void SetAudioSelection(int radio, bool on);
+		void SetTransponderCode(int code);
+		void SendWallop(std::string message);
+		void SendRadioMessage(std::string message);
+		void SendPrivateMessage(std::string to, std::string message);
+		void RadioMessageReceived(const std::string& msg, double red = 255, double green = 255, double blue = 255);
+		void AddPrivateMessage(const std::string& recipient, const std::string& msg, ConsoleTabType tabType);
+		void AddNotificationPanelMessage(const std::string& msg, double red = 255, double green = 255, double blue = 255);
+		void AddNotification(const std::string& msg, double red = 255, double green = 255, double blue = 255);
+		void RequestStationInfo(std::string station);
+		void RequestMetar(std::string station);
+		void AircraftDeleted(std::string callsign);
+		void AircraftAdded(std::string callsign);
 		void DeleteAllAircraft();
 
-		void Initialize();
-		void Shutdown();
+		void ToggleSettingsWindow();
+		void ToggleNearbyAtcWindow();
+		void ToggleTextMessageConsole();
+		void SetNotificationPanelAlwaysVisible(bool visible);
+		bool GetNotificationPanelAlwaysVisible() const;
 
 	protected:
 		OwnedDataRef<int> m_pttPressed;
@@ -140,19 +134,9 @@ namespace xpilot
 		static float MainFlightLoop(float, float, int, void* ref);
 		bool InitializeXPMP();
 
-		std::thread::id m_xplaneThread;
-		void ThisThreadIsXplane()
-		{
-			m_xplaneThread = std::this_thread::get_id();
-		}
-		bool IsXplaneThread()const
-		{
-			return std::this_thread::get_id() == m_xplaneThread;
-		}
-
 		bool m_keepSocketAlive = false;
-		std::thread* m_socketThread;
 		nng_socket _socket;
+		std::unique_ptr<std::thread> m_socketThread;
 
 		void SocketWorker();
 		void ProcessPacket(const BaseDto& dto);
@@ -164,7 +148,6 @@ namespace xpilot
 
 		XPLMDataRef m_bulkDataQuick{}, m_bulkDataExpensive{};
 		static int GetBulkData(void* inRefcon, void* outData, int inStartPos, int inNumBytes);
-		int m_currentAircraftCount = 1;
 
 		std::unique_ptr<FrameRateMonitor> m_frameRateMonitor;
 		std::unique_ptr<AircraftManager> m_aircraftManager;
@@ -174,11 +157,9 @@ namespace xpilot
 		std::unique_ptr<SettingsWindow> m_settingsWindow;
 
 		template<class T>
-		void SendDto(const T& dto)
-		{
+		void SendDto(const T& dto) {
 			msgpack::sbuffer dtoBuf;
-			if (encodeDto(dtoBuf, dto))
-			{
+			if (encodeDto(dtoBuf, dto)) {
 				if (dtoBuf.size() == 0)
 					return;
 

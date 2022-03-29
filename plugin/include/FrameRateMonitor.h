@@ -27,17 +27,16 @@
 #include <vector>
 #include <sstream>
 
-namespace xpilot
-{
+namespace xpilot {
 	class XPilot;
 
-    class FrameRateMonitor
-    {
+	class FrameRateMonitor
+	{
 	public:
 		FrameRateMonitor(XPilot* env);
 		~FrameRateMonitor();
-		void stopMonitoring();
-		void startMonitoring();
+		void StopMonitoring();
+		void StartMonitoring();
 	protected:
 		DataRefAccess<float> m_frameRatePeriod;
 		DataRefAccess<float> m_groundSpeed;
@@ -45,16 +44,17 @@ namespace xpilot
 		DataRefAccess<std::vector<int>> m_overridePlanePath;
 		DataRefAccess<int> m_timePaused;
 	private:
+		bool SkipMonitoring();
+		void ResetFrameRateDetection();
+		static float FlightLoopCallback(float, float, int, void* ref);
+
 		XPilot* m_environment;
 		Stopwatch m_stopwatch;
 		bool m_gaveFirstWarning;
 		bool m_gaveSecondWarning;
 		bool m_gaveDisconnectWarning;
 		bool m_gaveHealthyWarning;
-		bool skipMonitoring();
-		void resetFrameRateDetection();
-		static float flightLoopCallback(float, float, int, void* ref);
-    };
+	};
 }
 
 #endif // !FrameRateMonitor_h

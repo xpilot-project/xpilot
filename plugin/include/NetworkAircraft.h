@@ -34,132 +34,131 @@
 #include <queue>
 #include <mutex>
 
-namespace xpilot
-{
-    struct AircraftVisualState
-    {
-        double Lat;
-        double Lon;
-        double AltitudeTrue;
-        std::optional<double> AltitudeAgl = {};
-        double Pitch;
-        double Heading;
-        double Bank;
-        double NoseWheelAngle;
-    };
+namespace xpilot {
+	struct AircraftVisualState
+	{
+		double Lat;
+		double Lon;
+		double AltitudeTrue;
+		std::optional<double> AltitudeAgl = {};
+		double Pitch;
+		double Heading;
+		double Bank;
+		double NoseWheelAngle;
+	};
 
-    struct WorldPoint
-    {
-        double Latitude;
-        double Longitude;
-    };
+	struct WorldPoint
+	{
+		double Latitude;
+		double Longitude;
+	};
 
-    struct TerrainElevationData
-    {
-        int64_t Timestamp;
-        WorldPoint Location;
-        double RemoteValue;
-        double LocalValue;
-    };
+	struct TerrainElevationData
+	{
+		int64_t Timestamp;
+		WorldPoint Location;
+		double RemoteValue;
+		double LocalValue;
+	};
 
-    enum class EngineClassType
-    {
-        Helicopter,
-        PistonProp,
-        TurboProp,
-        JetEngine,
-        Unknown
-    };
+	enum class EngineClassType
+	{
+		Helicopter,
+		PistonProp,
+		TurboProp,
+		JetEngine,
+		Unknown
+	};
 
-    struct FlightModelInfo
-    {
-        std::string category;
-        std::string regex;
-    };
+	struct FlightModelInfo
+	{
+		std::string category;
+		std::string regex;
+	};
 
-    class FlightModel
-    {
-    public:
-        std::string modelCategory;
-        double GEAR_DURATION = 10000;       // [ms] time for gear up/down
-        double GEAR_DEFLECTION = 0.5;       // [m]  main gear deflection on meters during touchdown
-        double FLAPS_DURATION = 5000;       // [ms] time for full flaps extension from 0% to 100%
+	class FlightModel
+	{
+	public:
+		std::string modelCategory;
+		double GEAR_DURATION = 10000;       // [ms] time for gear up/down
+		double GEAR_DEFLECTION = 0.5;       // [m]  main gear deflection on meters during touchdown
+		double FLAPS_DURATION = 5000;       // [ms] time for full flaps extension from 0% to 100%
 
-    public:
-        static void InitializeModels();
-        static std::vector<FlightModelInfo> modelMatches;
-    };
+	public:
+		static void InitializeModels();
+		static std::vector<FlightModelInfo> modelMatches;
+	};
 
-    constexpr long TERRAIN_ELEVATION_DATA_USABLE_AGE = 2000;
-    constexpr double MAX_USABLE_ALTITUDE_AGL = 100.0;
-    constexpr double TERRAIN_ELEVATION_MAX_SLOPE = 3.0;
+	constexpr long TERRAIN_ELEVATION_DATA_USABLE_AGE = 2000;
+	constexpr double MAX_USABLE_ALTITUDE_AGL = 100.0;
+	constexpr double TERRAIN_ELEVATION_MAX_SLOPE = 3.0;
 
-    class NetworkAircraft : public XPMP2::Aircraft
-    {
-    public:
-        NetworkAircraft(const std::string& _callsign, const AircraftVisualState& _visualState, const std::string& _icaoType, 
-        const std::string& _icaoAirline, const std::string& _livery, XPMPPlaneID _modeS_id, const std::string& _modelName);
+	class NetworkAircraft : public XPMP2::Aircraft
+	{
+	public:
+		NetworkAircraft(const std::string& _callsign, const AircraftVisualState& _visualState, const std::string& _icaoType,
+			const std::string& _icaoAirline, const std::string& _livery, XPMPPlaneID _modeS_id, const std::string& _modelName);
 
-        void copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const;
-        void copyBulkData(XPilotAPIAircraft::XPilotAPIBulkInfoTexts* pOut, size_t size) const;
+		void copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const;
+		void copyBulkData(XPilotAPIAircraft::XPilotAPIBulkInfoTexts* pOut, size_t size) const;
 
-        void UpdateErrorVectors(double currentTimestamp);
-        void RecordTerrainElevationHistory(double currentTimestamp);
-        void UpdateVelocityVectors();
+		void UpdateErrorVectors(double currentTimestamp);
+		void RecordTerrainElevationHistory(double currentTimestamp);
+		void UpdateVelocityVectors();
 
-        FlightModel GetFlightModel(const XPMP2::CSLModelInfo_t model);
+		FlightModel GetFlightModel(const XPMP2::CSLModelInfo_t model);
 
-        bool IsFirstRenderPending = true;
-        bool IsReportedOnGround = false;
-        bool IsGearDown = false;
-        bool IsEnginesRunning = false;
-        bool IsEnginesReversing = false;
-        bool IsSpoilersDeployed = false;
-        float GroundSpeed = 0.0f;
-        float TargetReverserPosition = 0.0f;
-        float TargetGearPosition = 0.0f;
-        float TargetFlapsPosition = 0.0f;
-        float TargetSpoilerPosition = 0.0f;
-        std::string Origin;
-        std::string Destination;
-        int64_t PreviousSurfaceUpdateTime;
-        XPMPPlaneSurfaces_t Surfaces;
-        XPMPPlaneRadar_t Radar;
+		bool IsFirstRenderPending = true;
+		bool IsReportedOnGround = false;
+		bool IsGearDown = false;
+		bool IsEnginesRunning = false;
+		bool IsEnginesReversing = false;
+		bool IsSpoilersDeployed = false;
+		float GroundSpeed = 0.0f;
+		float TargetReverserPosition = 0.0f;
+		float TargetGearPosition = 0.0f;
+		float TargetFlapsPosition = 0.0f;
+		float TargetSpoilerPosition = 0.0f;
+		std::string Origin;
+		std::string Destination;
+		int64_t PreviousSurfaceUpdateTime;
+		XPMPPlaneSurfaces_t Surfaces;
+		XPMPPlaneRadar_t Radar;
 
-        FlightModel flightModel;
+		FlightModel flightModel;
 
-        TerrainProbe LocalTerrainProbe;
-        std::optional<double> LocalTerrainElevation = {};
-        std::optional<double> AdjustedAltitude = {};
-        double TargetTerrainOffset = 0.0;
-        double TerrainOffset = 0.0;
-        double TerrainOffsetMagnitude = 0.0;
-        std::list<TerrainElevationData> TerrainElevationHistory;
-        bool HasUsableTerrainElevationData;
+		TerrainProbe LocalTerrainProbe;
+		std::optional<double> LocalTerrainElevation = {};
+		std::optional<double> AdjustedAltitude = {};
+		double TargetTerrainOffset = 0.0;
+		double TerrainOffset = 0.0;
+		double TerrainOffsetMagnitude = 0.0;
+		std::list<TerrainElevationData> TerrainElevationHistory;
+		bool HasUsableTerrainElevationData;
 
-        int64_t LastUpdated;
-        bool AircraftAddedEventSent = false;
+		int64_t LastUpdated;
+		bool AircraftAddedEventSent = false;
 
-        AircraftVisualState VisualState;
-        AircraftVisualState PredictedVisualState;
+		AircraftVisualState VisualState;
+		AircraftVisualState PredictedVisualState;
 
-        Vector3 PositionalVelocities;
-        Vector3 PositionalErrorVelocities;
-        Vector3 RotationalVelocities;
-        Vector3 RotationalErrorVelocities;
-        int64_t ApplyErrorVelocitiesUntil;
-        int64_t LastVelocityUpdate;
+		Vector3 PositionalVelocities;
+		Vector3 PositionalErrorVelocities;
+		Vector3 RotationalVelocities;
+		Vector3 RotationalErrorVelocities;
+		int64_t ApplyErrorVelocitiesUntil;
+		int64_t LastVelocityUpdate;
 
-        int SoundChannelId;
-        EngineClassType EngineClass;
+		int SoundChannelId;
+		EngineClassType EngineClass;
 
-    protected:
-        virtual void UpdatePosition(float, int);
-        AircraftVisualState ExtrapolatePosition(Vector3 velocityVector, Vector3 rotationVector, double interval);
-        void PerformGroundClamping(float frameRate);
-        void EnsureAboveGround();
-        void ClearRotationalVelocities();
-    };
+	protected:
+		virtual void UpdatePosition(float, int);
+		AircraftVisualState ExtrapolatePosition(Vector3 velocityVector, Vector3 rotationVector, double interval);
+		void PerformGroundClamping(float frameRate);
+		void EnsureAboveGround();
+		void ClearRotationalVelocities();
+	};
 }
 
 #endif // !NetworkAircraft_h

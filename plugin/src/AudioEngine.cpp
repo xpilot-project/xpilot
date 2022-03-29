@@ -19,15 +19,13 @@
 #include "AudioEngine.h"
 #include "Utilities.h"
 
-CAudioEngine::CAudioEngine() : 
-	mNextChannelId(0)
-{
+CAudioEngine::CAudioEngine() :
+	mNextChannelId(0) {
 	CAudioEngine::ErrorCheck("Implementation::System_Create", FMOD::System_Create(&SoundSystem));
 	CAudioEngine::ErrorCheck("Implementation::init", SoundSystem->init(300, FMOD_INIT_NORMAL, 0));
 }
 
-CAudioEngine::~CAudioEngine()
-{
+CAudioEngine::~CAudioEngine() {
 	CAudioEngine::ErrorCheck("~Implementation", SoundSystem->release());
 
 	std::lock_guard soundLock(mSoundMapMutex);
@@ -37,13 +35,11 @@ CAudioEngine::~CAudioEngine()
 	ChannelMap.clear();
 }
 
-void CAudioEngine::Update()
-{
-    SoundSystem->update();
+void CAudioEngine::Update() {
+	SoundSystem->update();
 }
 
-void CAudioEngine::LoadSound(const std::string& soundName, const std::string& soundFilePath, bool bLooping)
-{
+void CAudioEngine::LoadSound(const std::string& soundName, const std::string& soundFilePath, bool bLooping) {
 	std::lock_guard soundLock(mSoundMapMutex);
 	auto foundIt = SoundMap.find(soundName);
 	if (foundIt != SoundMap.end())
@@ -55,14 +51,12 @@ void CAudioEngine::LoadSound(const std::string& soundName, const std::string& so
 	eMode |= bLooping ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
 	FMOD::Sound* pSound = nullptr;
 	CAudioEngine::ErrorCheck("LoadSound", SoundSystem->createSound(soundFilePath.c_str(), eMode, nullptr, &pSound));
-	if (pSound)
-	{
+	if (pSound) {
 		SoundMap[soundName] = pSound;
 	}
 }
 
-void CAudioEngine::UnloadSound(const std::string& soundName)
-{
+void CAudioEngine::UnloadSound(const std::string& soundName) {
 	std::lock_guard soundLock(mSoundMapMutex);
 	auto foundIt = SoundMap.find(soundName);
 	if (foundIt != SoundMap.end())
@@ -72,8 +66,7 @@ void CAudioEngine::UnloadSound(const std::string& soundName)
 	SoundMap.erase(foundIt);
 }
 
-int CAudioEngine::CreateSoundChannel(const std::string& soundName, float volumeDb)
-{
+int CAudioEngine::CreateSoundChannel(const std::string& soundName, float volumeDb) {
 	std::lock_guard soundLock(mSoundMapMutex);
 	int mChannelId = mNextChannelId++;
 	auto foundIt = SoundMap.find(soundName);
@@ -83,8 +76,7 @@ int CAudioEngine::CreateSoundChannel(const std::string& soundName, float volumeD
 
 	FMOD::Channel* pChannel = nullptr;
 	CAudioEngine::ErrorCheck("CreateSoundChannel::playSound", SoundSystem->playSound(foundIt->second, nullptr, true, &pChannel));
-	if (pChannel)
-	{
+	if (pChannel) {
 		std::lock_guard channelLock(mChannelMapMutex);
 		{
 			CAudioEngine::ErrorCheck("CreateSoundChannel::set3DMinMaxDistance", pChannel->set3DMinMaxDistance(3.0f, 10000.0f));
@@ -95,8 +87,7 @@ int CAudioEngine::CreateSoundChannel(const std::string& soundName, float volumeD
 	return mChannelId;
 }
 
-void CAudioEngine::SetChannel3dPosition(int channelId, const AudioVector3& pos)
-{
+void CAudioEngine::SetChannel3dPosition(int channelId, const AudioVector3& pos) {
 	std::lock_guard channelLock(mChannelMapMutex);
 	auto foundIt = ChannelMap.find(channelId);
 	if (foundIt == ChannelMap.end()) {
@@ -107,8 +98,7 @@ void CAudioEngine::SetChannel3dPosition(int channelId, const AudioVector3& pos)
 	CAudioEngine::ErrorCheck("SetChannel3dPosition", foundIt->second->set3DAttributes(&position, NULL));
 }
 
-void CAudioEngine::SetChannelVolume(int channelId, float volume)
-{
+void CAudioEngine::SetChannelVolume(int channelId, float volume) {
 	std::lock_guard channelLock(mChannelMapMutex);
 	auto tFoundIt = ChannelMap.find(channelId);
 	if (tFoundIt == ChannelMap.end())
@@ -117,8 +107,7 @@ void CAudioEngine::SetChannelVolume(int channelId, float volume)
 	CAudioEngine::ErrorCheck("SetChannelVolume", tFoundIt->second->setVolume(volume));
 }
 
-void CAudioEngine::SetChannelPaused(int channel, bool paused)
-{
+void CAudioEngine::SetChannelPaused(int channel, bool paused) {
 	std::lock_guard channelLock(mChannelMapMutex);
 	auto tFoundIt = ChannelMap.find(channel);
 	if (tFoundIt == ChannelMap.end())
@@ -127,8 +116,7 @@ void CAudioEngine::SetChannelPaused(int channel, bool paused)
 	CAudioEngine::ErrorCheck("SetChannelPaused", tFoundIt->second->setPaused(paused));
 }
 
-void CAudioEngine::StopChannel(int channel)
-{
+void CAudioEngine::StopChannel(int channel) {
 	std::lock_guard channelLock(mChannelMapMutex);
 	auto iter = ChannelMap.find(channel);
 	if (iter == ChannelMap.end())
@@ -137,33 +125,27 @@ void CAudioEngine::StopChannel(int channel)
 	CAudioEngine::ErrorCheck("RemoveChannel", iter->second->stop());
 }
 
-void CAudioEngine::StopAllChannels()
-{
+void CAudioEngine::StopAllChannels() {
 	std::lock_guard channelLock(mChannelMapMutex);
-	for (auto it = ChannelMap.begin(), itEnd = ChannelMap.end(); it != itEnd; ++it)
-	{
+	for (auto it = ChannelMap.begin(), itEnd = ChannelMap.end(); it != itEnd; ++it) {
 		it->second->stop();
 	}
 }
 
-void CAudioEngine::SetListenerPosition()
-{
+void CAudioEngine::SetListenerPosition() {
 	FMOD_VECTOR zero = { 0.0f,0.0f,0.0f };
 	CAudioEngine::ErrorCheck("SetListenerPosition", SoundSystem->set3DListenerAttributes(0, &zero, NULL, NULL, NULL));
 }
 
-int CAudioEngine::ErrorCheck(const std::string& method, FMOD_RESULT result)
-{
-	if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE))
-	{
+int CAudioEngine::ErrorCheck(const std::string& method, FMOD_RESULT result) {
+	if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE)) {
 		LOG_MSG(logERROR, "FMOD Error: %s: %i", method.c_str(), result);
 		return 1;
 	}
 	return 0;
 }
 
-FMOD_VECTOR CAudioEngine::VectorToFmod(const AudioVector3& vPosition)
-{
+FMOD_VECTOR CAudioEngine::VectorToFmod(const AudioVector3& vPosition) {
 	FMOD_VECTOR fVec{};
 	fVec.x = vPosition.x;
 	fVec.y = vPosition.y;

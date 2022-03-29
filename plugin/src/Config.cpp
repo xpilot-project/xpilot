@@ -28,483 +28,368 @@
 
 using json = nlohmann::json;
 
-namespace xpilot
-{
-    void to_json(json& j, const CslPackage& p)
-    {
-        j = json{ {"Path", RemoveSystemPath(p.path)},{"Enabled",p.enabled} };
-    }
+namespace xpilot {
+	void to_json(json& j, const CslPackage& p) {
+		j = json{ {"Path", RemoveSystemPath(p.path)},{"Enabled",p.enabled} };
+	}
 
-    void from_json(const json& j, CslPackage& p)
-    {
-        j.at("Path").get_to(p.path);
-        j.at("Enabled").get_to(p.enabled);
-    }
+	void from_json(const json& j, CslPackage& p) {
+		j.at("Path").get_to(p.path);
+		j.at("Enabled").get_to(p.enabled);
+	}
 
-    inline std::string json_to_string(const json& j)
-    {
-        if (j.type() == json::value_t::string)
-        {
-            return j.get<std::string>();
-        }
+	inline std::string json_to_string(const json& j) {
+		if (j.type() == json::value_t::string) {
+			return j.get<std::string>();
+		}
 
-        return j.dump(1);
-    }
+		return j.dump(1);
+	}
 
-    Config& Config::getInstance()
-    {
-        static auto&& config = Config();
-        return config;
-    }
+	Config& Config::GetInstance() {
+		static auto&& config = Config();
+		return config;
+	}
 
-    bool Config::loadConfig()
-    {
-        std::string configPath(GetPluginPath() + "Resources/Config.json");
-        std::ifstream ifs(configPath);
+	bool Config::LoadConfig() {
+		std::string configPath(GetPluginPath() + "Resources/Config.json");
+		std::ifstream ifs(configPath);
 
-        if (!ifs)
-            saveConfig(); // create configuration file if it does not exist
+		if (!ifs)
+			SaveConfig(); // create configuration file if it does not exist
 
-        // conversion method for config file
-        enum cfgConvE { CFG_NO_CONV = 0, CFG_PORT_CONV } conv = CFG_NO_CONV;
+		// conversion method for config file
+		enum cfgConvE { CFG_NO_CONV = 0, CFG_PORT_CONV } conv = CFG_NO_CONV;
 
-        json jf = json::parse(ifs, nullptr, false);
-        if (!jf.empty())
-        {
-            if (!jf.contains("Version"))
-            {
-                conv = CFG_PORT_CONV;
-            }
-            if (jf.contains("ShowAircraftLabels"))
-            {
-                setShowHideLabels(jf["ShowAircraftLabels"]);
-            }
-            if (jf.contains("DefaultIcaoType"))
-            {
-                setDefaultAcIcaoType(jf["DefaultIcaoType"]);
-            }
-            if (jf.contains("PluginPort"))
-            {
-                std::string v = json_to_string(jf["PluginPort"]);
-                if (conv == CFG_PORT_CONV && v == "45001")
-                {
-                    // convert to 53100 if previously on 45001
-                    v = "53100";
-                }
-                setTcpPort(v);
-            }
-            if (jf.contains("DebugModelMatching"))
-            {
-                setDebugModelMatching(jf["DebugModelMatching"]);
-            }
-            if (jf.contains("EnableDefaultAtis"))
-            {
-                setDefaultAtisEnabled(jf["EnableDefaultAtis"]);
-            }
-            if (jf.contains("ShowNotificationBar"))
-            {
-                setNotificationPanelVisible(jf["ShowNotificationBar"]);
-            }
-            if (jf.contains("NotificationBarDisappearTime"))
-            {
-                setNotificationPanelTimeout(jf["NotificationBarDisappearTime"]);
-            }
-            if (jf.contains("NotificationPanelPosition"))
-            {
-                setNotificationPanelPosition(jf["NotificationPanelPosition"]);
-            }
-            if (jf.contains("OverrideContactAtc"))
-            {
-                setOverrideContactAtcCommand(jf["OverrideContactAtc"]);
-            }
-            if (jf.contains("DisableTcas"))
-            {
-                setTcasDisabled(jf["DisableTcas"]);
-            }
-            if (jf.contains("LabelColor"))
-            {
-                setAircraftLabelColor(jf["LabelColor"]);
-            }
-            if (jf.contains("MaxLabelDist"))
-            {
-                int dist = std::max(1, std::min(jf.at("MaxLabelDist").get<int>(), 20));
-                setMaxLabelDistance(dist);
-            }
-            if (jf.contains("LabelCutoffVis"))
-            {
-                setLabelCutoffVis(jf["LabelCutoffVis"]);
-            }
-            if (jf.contains("LogLevel"))
-            {
-                setLogLevel(jf["LogLevel"]);
-            }
-            if (jf.contains("EnableTransmitIndicator"))
-            {
-                setTransmitIndicatorEnabled(jf["EnableTransmitIndicator"]);
-            }
-            if (jf.contains("EnableAircraftSounds"))
-            {
-                setAircraftSoundsEnabled(jf["EnableAircraftSounds"]);
-            }
-            if (jf.contains("AircraftSoundVolume"))
-            {
-                int vol = std::max(0, std::min(jf.at("AircraftSoundVolume").get<int>(), 100));
-                setAircraftSoundVolume(vol);
-            }
-            if (jf.contains("CSL"))
-            {
-                json cslpackages = jf["CSL"];
-                for (auto& p : cslpackages)
-                {
-                    auto csl = p.get<CslPackage>();
-                    if (std::find(m_cslPackages.begin(), m_cslPackages.end(), csl.path) == m_cslPackages.end())
-                    {
-                        m_cslPackages.emplace_back(csl);
-                    }
-                }
-            }
-            saveConfig();
-            return true;
-        }
+		json jf = json::parse(ifs, nullptr, false);
+		if (!jf.empty()) {
+			if (!jf.contains("Version")) {
+				conv = CFG_PORT_CONV;
+			}
+			if (jf.contains("ShowAircraftLabels")) {
+				SetShowHideLabels(jf["ShowAircraftLabels"]);
+			}
+			if (jf.contains("DefaultIcaoType")) {
+				SetDefaultAcIcaoType(jf["DefaultIcaoType"]);
+			}
+			if (jf.contains("PluginPort")) {
+				std::string v = json_to_string(jf["PluginPort"]);
+				if (conv == CFG_PORT_CONV && v == "45001") {
+					// convert to 53100 if previously on 45001
+					v = "53100";
+				}
+				SetTcpPort(v);
+			}
+			if (jf.contains("DebugModelMatching")) {
+				SetDebugModelMatching(jf["DebugModelMatching"]);
+			}
+			if (jf.contains("EnableDefaultAtis")) {
+				SetDefaultAtisEnabled(jf["EnableDefaultAtis"]);
+			}
+			if (jf.contains("ShowNotificationBar")) {
+				SetNotificationPanelVisible(jf["ShowNotificationBar"]);
+			}
+			if (jf.contains("NotificationBarDisappearTime")) {
+				SetNotificationPanelTimeout(jf["NotificationBarDisappearTime"]);
+			}
+			if (jf.contains("NotificationPanelPosition")) {
+				SetNotificationPanelPosition(jf["NotificationPanelPosition"]);
+			}
+			if (jf.contains("OverrideContactAtc")) {
+				SetOverrideContactAtcCommand(jf["OverrideContactAtc"]);
+			}
+			if (jf.contains("DisableTcas")) {
+				SetTcasDisabled(jf["DisableTcas"]);
+			}
+			if (jf.contains("LabelColor")) {
+				SetAircraftLabelColor(jf["LabelColor"]);
+			}
+			if (jf.contains("MaxLabelDist")) {
+				int dist = std::max(1, std::min(jf.at("MaxLabelDist").get<int>(), 20));
+				SetMaxLabelDistance(dist);
+			}
+			if (jf.contains("LabelCutoffVis")) {
+				SetLabelCutoffVis(jf["LabelCutoffVis"]);
+			}
+			if (jf.contains("LogLevel")) {
+				SetLogLevel(jf["LogLevel"]);
+			}
+			if (jf.contains("EnableTransmitIndicator")) {
+				SetTransmitIndicatorEnabled(jf["EnableTransmitIndicator"]);
+			}
+			if (jf.contains("EnableAircraftSounds")) {
+				SetAircraftSoundsEnabled(jf["EnableAircraftSounds"]);
+			}
+			if (jf.contains("AircraftSoundVolume")) {
+				int vol = std::max(0, std::min(jf.at("AircraftSoundVolume").get<int>(), 100));
+				SetAircraftSoundVolume(vol);
+			}
+			if (jf.contains("CSL")) {
+				json cslpackages = jf["CSL"];
+				for (auto& p : cslpackages) {
+					auto csl = p.get<CslPackage>();
+					if (std::find(m_cslPackages.begin(), m_cslPackages.end(), csl.path) == m_cslPackages.end()) {
+						m_cslPackages.emplace_back(csl);
+					}
+				}
+			}
+			SaveConfig();
+			return true;
+		}
 
-        saveConfig();
-        return false;
-    }
+		SaveConfig();
+		return false;
+	}
 
-    bool Config::saveConfig()
-    {
-        std::string configPath(GetPluginPath() + "Resources/Config.json");
-        std::ofstream file(configPath);
+	bool Config::SaveConfig() {
+		std::string configPath(GetPluginPath() + "Resources/Config.json");
+		std::ofstream file(configPath);
 
-        json j;
+		json j;
 
-        j["Version"] = CONFIG_VERSION;
-        j["ShowAircraftLabels"] = getShowHideLabels();
-        j["DefaultIcaoType"] = getDefaultAcIcaoType();
-        j["PluginPort"] = getTcpPort();
-        j["DebugModelMatching"] = getDebugModelMatching();
-        j["EnableDefaultAtis"] = getDefaultAtisEnabled();
-        j["ShowNotificationBar"] = getNotificationPanelVisible();
-        j["NotificationBarDisappearTime"] = getNotificationPanelTimeout();
-        j["NotificationPanelPosition"] = getNotificationPanelPosition();
-        j["OverrideContactAtc"] = getOverrideContactAtcCommand();
-        j["LabelColor"] = getAircraftLabelColor();
-        j["DisableTcas"] = getTcasDisabled();
-        j["MaxLabelDist"] = getMaxLabelDistance();
-        j["LabelCutoffVis"] = getLabelCutoffVis();
-        j["LogLevel"] = getLogLevel();
-        j["EnableTransmitIndicator"] = getTransmitIndicatorEnabled();
-        j["EnableAircraftSounds"] = getAircraftSoundsEnabled();
-        j["AircraftSoundVolume"] = getAircraftSoundVolume();
+		j["Version"] = CONFIG_VERSION;
+		j["ShowAircraftLabels"] = GetShowHideLabels();
+		j["DefaultIcaoType"] = GetDefaultAcIcaoType();
+		j["PluginPort"] = GetTcpPort();
+		j["DebugModelMatching"] = GetDebugModelMatching();
+		j["EnableDefaultAtis"] = GetDefaultAtisEnabled();
+		j["ShowNotificationBar"] = GetNotificationPanelVisible();
+		j["NotificationBarDisappearTime"] = GetNotificationPanelTimeout();
+		j["NotificationPanelPosition"] = GetNotificationPanelPosition();
+		j["OverrideContactAtc"] = GetOverrideContactAtcCommand();
+		j["LabelColor"] = GetAircraftLabelColor();
+		j["DisableTcas"] = GetTcasDisabled();
+		j["MaxLabelDist"] = GetMaxLabelDistance();
+		j["LabelCutoffVis"] = GetLabelCutoffVis();
+		j["LogLevel"] = GetLogLevel();
+		j["EnableTransmitIndicator"] = GetTransmitIndicatorEnabled();
+		j["EnableAircraftSounds"] = GetAircraftSoundsEnabled();
+		j["AircraftSoundVolume"] = GetAircraftSoundVolume();
 
-        auto jsonObjects = json::array();
-        if (!m_cslPackages.empty())
-        {
-            for (CslPackage& p : m_cslPackages)
-            {
-                if (!p.path.empty())
-                {
-                    json j = p;
-                    jsonObjects.push_back(j);
-                }
-            }
-        }
-        j["CSL"] = jsonObjects;
+		auto jsonObjects = json::array();
+		if (!m_cslPackages.empty()) {
+			for (CslPackage& p : m_cslPackages) {
+				if (!p.path.empty()) {
+					json j = p;
+					jsonObjects.push_back(j);
+				}
+			}
+		}
+		j["CSL"] = jsonObjects;
 
-        file << j.dump(1);
+		file << j.dump(1);
 
-        if (file.fail())
-            return false;
+		if (file.fail())
+			return false;
 
-        file.flush();
-        file.close();
-        return true;
-    }
+		file.flush();
+		file.close();
+		return true;
+	}
 
-    bool Config::hasValidPaths() const
-    {
-        return (std::count_if(m_cslPackages.begin(), m_cslPackages.end(), [](const CslPackage& p) {
-            return !p.path.empty() && p.enabled && CountFilesInPath(p.path) > 0;
-            }) > 0);
-    }
+	bool Config::HasValidPaths() const {
+		return (std::count_if(m_cslPackages.begin(), m_cslPackages.end(), [](const CslPackage& p) {
+			return !p.path.empty() && p.enabled && CountFilesInPath(p.path) > 0;
+		}) > 0);
+	}
 
-    std::vector<CslPackage> Config::getCSLPackages() const
-    {
-        return m_cslPackages;
-    }
+	std::vector<CslPackage> Config::GetCSLPackages() const {
+		return m_cslPackages;
+	}
 
-    void Config::saveCSLPath(int idx, std::string path)
-    {
-        while (size_t(idx) >= m_cslPackages.size())
-        {
-            m_cslPackages.push_back({});
-        }
-        m_cslPackages[idx].path = path;
-    }
+	void Config::SaveCSLPath(int idx, std::string path) {
+		while (size_t(idx) >= m_cslPackages.size()) {
+			m_cslPackages.push_back({});
+		}
+		m_cslPackages[idx].path = path;
+	}
 
-    void Config::saveCSLEnabled(int idx, bool enabled)
-    {
-        while (size_t(idx) >= m_cslPackages.size())
-        {
-            m_cslPackages.push_back({});
-        }
-        m_cslPackages[idx].enabled = enabled;
-    }
+	void Config::SaveCSLEnabled(int idx, bool enabled) {
+		while (size_t(idx) >= m_cslPackages.size()) {
+			m_cslPackages.push_back({});
+		}
+		m_cslPackages[idx].enabled = enabled;
+	}
 
-    // Load a CSL package interactively
-    bool Config::loadCSLPackage(int idx)
-    {
-        if (size_t(idx) < m_cslPackages.size())
-        {
-            const std::string path = GetPluginPath() + m_cslPackages[idx].path;
+	std::string Config::GetDefaultAcIcaoType() const {
+		return m_defaultAcIcaoType;
+	}
 
-            if (CountFilesInPath(path) > 1)
-            {
-                LOG_MSG(logDEBUG, "Found CSL Path: %s", path.c_str());
-                if (!path.empty())
-                {
-                    auto err = XPMPLoadCSLPackage(path.c_str());
-                    if (*err)
-                    {
-                        LOG_MSG(logERROR, "Error loading CSL package (%s): %s", path.c_str(), err);
-                    }
-                    else
-                    {
-                        LOG_MSG(logDEBUG, "CSL package successfully loaded: %s", path.c_str());
-                        return true;
-                    }
-                }
-            }
-            else
-            {
-                LOG_MSG(logDEBUG, "Skipping CSL path '%s' because it does not exist or the folder is empty.", path.c_str());
-            }
-        }
-        return false;
-    }
+	void Config::SetDefaultAcIcaoType(const std::string type) {
+		m_defaultAcIcaoType = type;
+		XPMPSetDefaultPlaneICAO(type.c_str());
+	}
 
-    std::string Config::getDefaultAcIcaoType() const
-    {
-        return m_defaultAcIcaoType;
-    }
+	void Config::SetShowHideLabels(bool status) {
+		m_showHideLabels = status;
+	}
 
-    void Config::setDefaultAcIcaoType(const std::string type)
-    {
-        m_defaultAcIcaoType = type;
-        XPMPSetDefaultPlaneICAO(type.c_str());
-    }
+	bool Config::GetShowHideLabels() const {
+		return m_showHideLabels;
+	}
 
-    void Config::setShowHideLabels(bool status)
-    {
-        m_showHideLabels = status;
-    }
+	void Config::SetDebugModelMatching(bool status) {
+		m_debugModelMatching = status;
+	}
 
-    bool Config::getShowHideLabels() const
-    {
-        return m_showHideLabels;
-    }
+	bool Config::GetDebugModelMatching() const {
+		return m_debugModelMatching;
+	}
 
-    void Config::setDebugModelMatching(bool status)
-    {
-        m_debugModelMatching = status;
-    }
+	void Config::SetTcpPort(std::string port) {
+		m_tcpPort = port;
+	}
 
-    bool Config::getDebugModelMatching() const
-    {
-        return m_debugModelMatching;
-    }
+	std::string Config::GetTcpPort() const {
+		return m_tcpPort;
+	}
 
-    void Config::setTcpPort(std::string port)
-    {
-        m_tcpPort = port;
-    }
+	void Config::SetDefaultAtisEnabled(bool status) {
+		m_defaultAtisEnabled = status;
+	}
 
-    std::string Config::getTcpPort() const
-    {
-        return m_tcpPort;
-    }
+	bool Config::GetDefaultAtisEnabled() const {
+		return m_defaultAtisEnabled;
+	}
 
-    void Config::setDefaultAtisEnabled(bool status)
-    {
-        m_defaultAtisEnabled = status;
-    }
+	void Config::SetNotificationPanelPosition(NotificationPanelPosition position) {
+		m_notificationPanelPosition = position;
+	}
 
-    bool Config::getDefaultAtisEnabled() const
-    {
-        return m_defaultAtisEnabled;
-    }
+	NotificationPanelPosition Config::GetNotificationPanelPosition() const {
+		return m_notificationPanelPosition;
+	}
 
-    void Config::setNotificationPanelPosition(NotificationPanelPosition position)
-    {
-        m_notificationPanelPosition = position;
-    }
+	void Config::SetOverrideContactAtcCommand(bool status) {
+		m_overrideContactAtcCommand = status;
+	}
 
-    NotificationPanelPosition Config::getNotificationPanelPosition() const
-    {
-        return m_notificationPanelPosition;
-    }
+	bool Config::GetOverrideContactAtcCommand() const {
+		return m_overrideContactAtcCommand;
+	}
 
-    void Config::setOverrideContactAtcCommand(bool status)
-    {
-        m_overrideContactAtcCommand = status;
-    }
+	void Config::SetAircraftLabelColor(int color) {
+		if (color > 0 && color <= 0xFFFFFF) {
+			m_labelColor = color;
+		} else {
+			m_labelColor = COLOR_YELLOW;
+		}
+	}
 
-    bool Config::getOverrideContactAtcCommand() const
-    {
-        return m_overrideContactAtcCommand;
-    }
+	int Config::GetAircraftLabelColor() const {
+		return m_labelColor;
+	}
 
-    void Config::setAircraftLabelColor(int color)
-    {
-        if (color > 0 && color <= 0xFFFFFF)
-        {
-            m_labelColor = color;
-        }
-        else
-        {
-            m_labelColor = COLOR_YELLOW;
-        }
-    }
+	void Config::SetTcasDisabled(bool status) {
+		m_tcasDisabled = status;
+	}
 
-    int Config::getAircraftLabelColor() const
-    {
-        return m_labelColor;
-    }
+	bool Config::GetTcasDisabled() const {
+		return m_tcasDisabled;
+	}
 
-    void Config::setTcasDisabled(bool status)
-    {
-        m_tcasDisabled = status;
-    }
+	void Config::SetNotificationPanelVisible(bool show) {
+		m_notificationPanelVisible = show;
+	}
 
-    bool Config::getTcasDisabled() const
-    {
-        return m_tcasDisabled;
-    }
+	bool Config::GetNotificationPanelVisible() const {
+		return m_notificationPanelVisible;
+	}
 
-    void Config::setNotificationPanelVisible(bool show)
-    {
-        m_notificationPanelVisible = show;
-    }
+	void Config::SetNotificationPanelTimeout(int timeout) {
+		switch (timeout) {
+		case 5:
+			m_notificationPanelTimeout = 0;
+			break;
+		case 10:
+			m_notificationPanelTimeout = 1;
+			break;
+		case 15:
+			m_notificationPanelTimeout = 2;
+			break;
+		case 30:
+			m_notificationPanelTimeout = 3;
+			break;
+		case 60:
+			m_notificationPanelTimeout = 4;
+			break;
+		default:
+			if (timeout <= 4) {
+				m_notificationPanelTimeout = timeout;
+			} else {
+				m_notificationPanelTimeout = 2;
+			}
+			break;
+		}
+	}
 
-    bool Config::getNotificationPanelVisible() const
-    {
-        return m_notificationPanelVisible;
-    }
+	int Config::GetNotificationPanelTimeout() const {
+		return m_notificationPanelTimeout;
+	}
 
-    void Config::setNotificationPanelTimeout(int timeout)
-    {
-        switch (timeout)
-        {
-        case 5:
-            m_notificationPanelTimeout = 0;
-            break;
-        case 10:
-            m_notificationPanelTimeout = 1;
-            break;
-        case 15:
-            m_notificationPanelTimeout = 2;
-            break;
-        case 30:
-            m_notificationPanelTimeout = 3;
-            break;
-        case 60:
-            m_notificationPanelTimeout = 4;
-            break;
-        default:
-            if (timeout <= 4)
-            {
-                m_notificationPanelTimeout = timeout;
-            }
-            else
-            {
-                m_notificationPanelTimeout = 2;
-            }
-            break;
-        }
-    }
+	int Config::GetActualMessagePreviewTime() const {
+		switch (m_notificationPanelTimeout) {
+		case 0:
+			return 5;
+		case 1:
+			return 10;
+		case 2:
+			return 15;
+		case 3:
+			return 30;
+		case 4:
+		default:
+			return 60;
+		}
+	}
 
-    int Config::getNotificationPanelTimeout() const
-    {
-        return m_notificationPanelTimeout;
-    }
+	void Config::SetMaxLabelDistance(int v) {
+		m_maxLabelDist = v;
+	}
 
-    int Config::getActualMessagePreviewTime() const
-    {
-        switch (m_notificationPanelTimeout)
-        {
-        case 0:
-            return 5;
-        case 1:
-            return 10;
-        case 2:
-            return 15;
-        case 3:
-            return 30;
-        case 4:
-        default:
-            return 60;
-        }
-    }
+	int Config::GetMaxLabelDistance() const {
+		return m_maxLabelDist;
+	}
 
-    void Config::setMaxLabelDistance(int v)
-    {
-        m_maxLabelDist = v;
-    }
+	void Config::SetLabelCutoffVis(bool value) {
+		m_labelCutoffVis = value;
+	}
 
-    int Config::getMaxLabelDistance() const
-    {
-        return m_maxLabelDist;
-    }
+	bool Config::GetLabelCutoffVis() const {
+		return m_labelCutoffVis;
+	}
 
-    void Config::setLabelCutoffVis(bool value)
-    {
-        m_labelCutoffVis = value;
-    }
+	void Config::SetLogLevel(int level) {
+		if (level > 5) level = 5;
+		if (level < 0) level = 0;
+		m_logLevel = level;
+	}
 
-    bool Config::getLabelCutoffVis() const
-    {
-        return m_labelCutoffVis;
-    }
+	int Config::GetLogLevel() const {
+		return m_logLevel;
+	}
 
-    void Config::setLogLevel(int level)
-    {
-        if (level > 5) level = 5;
-        if (level < 0) level = 0;
-        m_logLevel = level;
-    }
+	void Config::SetTransmitIndicatorEnabled(bool value) {
+		m_transmitIndicatorEnabled = value;
+	}
 
-    int Config::getLogLevel() const
-    {
-        return m_logLevel;
-    }
+	bool Config::GetTransmitIndicatorEnabled() const {
+		return m_transmitIndicatorEnabled;
+	}
 
-    void Config::setTransmitIndicatorEnabled(bool value)
-    {
-        m_transmitIndicatorEnabled = value;
-    }
+	void Config::SetAircraftSoundsEnabled(bool value) {
+		m_aircraftSoundsEnabled = value;
+	}
 
-    bool Config::getTransmitIndicatorEnabled() const
-    {
-        return m_transmitIndicatorEnabled;
-    }
+	bool Config::GetAircraftSoundsEnabled() const {
+		return m_aircraftSoundsEnabled;
+	}
 
-    void Config::setAircraftSoundsEnabled(bool value)
-    {
-        m_aircraftSoundsEnabled = value;
-    }
+	void Config::SetAircraftSoundVolume(int volume) {
+		m_aircraftSoundsVolume = volume;
+	}
 
-    bool Config::getAircraftSoundsEnabled() const
-    {
-        return m_aircraftSoundsEnabled;
-    }
-
-    void Config::setAircraftSoundVolume(int volume)
-    {
-        m_aircraftSoundsVolume = volume;
-    }
-
-    int Config::getAircraftSoundVolume() const
-    {
-        return std::max(0, std::min(m_aircraftSoundsVolume, 100));
-    }
+	int Config::GetAircraftSoundVolume() const {
+		return std::max(0, std::min(m_aircraftSoundsVolume, 100));
+	}
 }
