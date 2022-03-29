@@ -92,8 +92,8 @@ namespace xpilot {
 		void SendPrivateMessage(std::string to, std::string message);
 		void RadioMessageReceived(const std::string& msg, double red = 255, double green = 255, double blue = 255);
 		void AddPrivateMessage(const std::string& recipient, const std::string& msg, ConsoleTabType tabType);
-		void AddNotificationPanelMessage(const std::string& msg, double red = 255, double green = 255, double blue = 255);
-		void AddNotification(const std::string& msg, double red = 255, double green = 255, double blue = 255);
+		void AddNotificationPanelMessage(const std::string& msg, double red = 255, double green = 255, double blue = 255, bool forceShow = false);
+		void NotificationPosted(const std::string& msg, double red = 255, double green = 255, double blue = 255, bool forceShow = false);
 		void RequestStationInfo(std::string station);
 		void RequestMetar(std::string station);
 		void AircraftDeleted(std::string callsign);

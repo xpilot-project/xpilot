@@ -32,7 +32,7 @@ namespace xpilot {
 	public:
 		NotificationPanel(int left, int top, int right, int bottom);
 		~NotificationPanel();
-		void AddNotificationPanelMessage(const std::string& message, float red = 255, float green = 255, float blue = 255);
+		void AddNotificationPanelMessage(const std::string& message, float red = 255, float green = 255, float blue = 255, bool forceShow = false);
 		void Toggle();
 		bool IsAlwaysVisible()const { return m_alwaysVisible; }
 		void SetAlwaysVisible(bool visible) { m_alwaysVisible = visible; }

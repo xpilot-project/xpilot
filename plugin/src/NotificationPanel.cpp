@@ -122,7 +122,7 @@ namespace xpilot {
 		return -1.0f;
 	}
 
-	void NotificationPanel::AddNotificationPanelMessage(const std::string& message, float red, float green, float blue) {
+	void NotificationPanel::AddNotificationPanelMessage(const std::string& message, float red, float green, float blue, bool forceShow) {
 		if (!message.empty()) {
 			NotificationTy notification;
 			notification.message = string_format("[%s] %s", UtcTimestamp().c_str(), message.c_str());
@@ -132,7 +132,7 @@ namespace xpilot {
 			NotificationHistory.push_back(notification);
 			m_scrollToBottom = true;
 
-			if (Config::GetInstance().GetNotificationPanelVisible()) {
+			if (Config::GetInstance().GetNotificationPanelVisible() || forceShow) {
 				SetVisible(true);
 				m_disappearTime = std::chrono::system_clock::now() +
 					std::chrono::milliseconds(Config::GetInstance().GetActualMessagePreviewTime() * 1000);

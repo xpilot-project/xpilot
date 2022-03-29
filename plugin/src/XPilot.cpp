@@ -171,7 +171,7 @@ namespace xpilot {
 
 		if (!Config::GetInstance().HasValidPaths()) {
 			std::string err = "There are no valid CSL paths configured. Please verify your CSL configuration in X-Plane (Plugins > xPilot > Settings > CSL Configuration).";
-			AddNotification(err.c_str(), 192, 57, 43);
+			NotificationPosted(err.c_str(), 192, 57, 43, true);
 			LOG_MSG(logERROR, err.c_str());
 		} else {
 			for (const CslPackage& p : Config::GetInstance().GetCSLPackages()) {
@@ -335,15 +335,14 @@ namespace xpilot {
 			int green = ((color >> 8) & 0xff);
 			int blue = ((color) & 0xff);
 
-			AddNotification(dto.message.c_str(), red, green, blue);
+			NotificationPosted(dto.message.c_str(), red, green, blue);
 		}
 		if (packet.type == dto::RADIO_MESSAGE_SENT) {
 			RadioMessageSentDto dto;
 			packet.dto.convert(dto);
 
 			std::string msg = dto.message.c_str();
-			RadioMessageReceived(msg, 0, 255, 255);
-			AddNotificationPanelMessage(msg, 0, 255, 255);
+			NotificationPosted(msg, 0, 255, 255);
 		}
 		if (packet.type == dto::RADIO_MESSAGE_RECEIVED) {
 			RadioMessageReceivedDto dto;
@@ -353,8 +352,7 @@ namespace xpilot {
 			double g = dto.isDirect ? 255 : 192;
 			double b = dto.isDirect ? 255 : 192;
 			std::string msg = string_format("%s: %s", dto.from.c_str(), dto.message.c_str());
-			RadioMessageReceived(msg, r, g, b);
-			AddNotificationPanelMessage(msg, r, g, b);
+			NotificationPosted(msg, r, g, b);
 		}
 		if (packet.type == dto::PRIVATE_MESSAGE_SENT) {
 			PrivateMessageSentDto dto;
@@ -523,17 +521,17 @@ namespace xpilot {
 		}
 	}
 
-	void XPilot::AddNotificationPanelMessage(const std::string& msg, double red, double green, double blue) {
+	void XPilot::AddNotificationPanelMessage(const std::string& msg, double red, double green, double blue, bool forceShow) {
 		if (!msg.empty()) {
 			QueueCallback([=]() {
-				m_notificationPanel->AddNotificationPanelMessage(msg, red, green, blue);
+				m_notificationPanel->AddNotificationPanelMessage(msg, red, green, blue, forceShow);
 			});
 		}
 	}
 
-	void XPilot::AddNotification(const std::string& msg, double red, double green, double blue) {
+	void XPilot::NotificationPosted(const std::string& msg, double red, double green, double blue, bool forceShow) {
 		RadioMessageReceived(msg, red, green, blue);
-		AddNotificationPanelMessage(msg, red, green, blue);
+		AddNotificationPanelMessage(msg, red, green, blue, forceShow);
 	}
 
 	void XPilot::AircraftDeleted(std::string callsign) {
@@ -596,7 +594,7 @@ namespace xpilot {
 		if (!XPMPHasControlOfAIAircraft()) {
 			auto err = XPMPMultiplayerEnable(callbackRequestTcasAgain);
 			if (*err) {
-				AddNotification(err, 231, 76, 60);
+				NotificationPosted(err, 231, 76, 60, true);
 				LOG_MSG(logERROR, err);
 			}
 		}
