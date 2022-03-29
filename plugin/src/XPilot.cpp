@@ -323,9 +323,6 @@ namespace xpilot {
 				m_aircraftManager->HandleAircraftConfig(dto.callsign, dto);
 			});
 		}
-		if (packet.type == dto::NEARBY_ATC) {
-
-		}
 		if (packet.type == dto::NOTIFICATION_POSTED) {
 			NotificationPostedDto dto;
 			packet.dto.convert(dto);
@@ -361,7 +358,7 @@ namespace xpilot {
 			std::string msg = dto.message;
 			std::string to = dto.to;
 			AddPrivateMessage(to, msg, ConsoleTabType::Sent);
-			AddNotificationPanelMessage(string_format("%s [pvt]: %s", m_networkCallsign.value().c_str(), msg.c_str()), 255, 255, 255);
+			AddNotificationPanelMessage(string_format("%s [pvt]: %s", m_networkCallsign.value().c_str(), msg.c_str()), 0, 255, 255);
 		}
 		if (packet.type == dto::PRIVATE_MESSAGE_RECEIVED) {
 			PrivateMessageReceivedDto dto;
