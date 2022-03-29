@@ -31,6 +31,9 @@
 #include "XPLMProcessing.h"
 #include "Utilities.h"
 
+#include "Dto.h"
+#include <msgpack.hpp>
+
 #include <nng/nng.h>
 #include <nng/protocol/pair1/pair.h>
 
@@ -73,7 +76,7 @@ namespace xpilot
 		void onNetworkDisconnected();
 		void onNetworkConnected();
 		void forceDisconnect(std::string reason = "");
-		void requestStationInfo(std::string callsign);
+		void requestStationInfo(std::string station);
 		void requestMetar(std::string station);
 		void setCom1Frequency(float frequency);
 		void setCom2Frequency(float frequency);
@@ -81,12 +84,14 @@ namespace xpilot
 		void setAudioSelection(int radio, bool on);
 		void setTransponderCode(int code);
 		void sendWallop(std::string message);
+		void SendRadioMessage(std::string message);
+		void SendPrivateMessage(std::string to, std::string message);
+		void AircraftDeleted(std::string callsign);
+		void AircraftAdded(std::string callsign);
 
-		void SendReply(const std::string& message);
-
-		std::string ourCallsign() const { return m_networkCallsign;  }
+		std::string ourCallsign() const { return m_networkCallsign; }
 		bool isNetworkConnected() const { return m_networkLoginStatus; }
-		void setPttActive(bool active) { m_pttPressed = active;  }
+		void setPttActive(bool active) { m_pttPressed = active; }
 		int getTxRadio() const { return m_audioComSelection; }
 		bool radiosPowered() const { return m_avionicsPower && (m_audioComSelection == 6 || m_audioComSelection == 7); }
 
@@ -99,8 +104,8 @@ namespace xpilot
 		void toggleSettingsWindow();
 		void toggleNearbyAtcWindow();
 		void toggleTextMessageConsole();
-		void setNotificationPanelAlwaysVisible(bool visible);
-		bool getNotificationPanelAlwaysVisible() const;
+		void SetNotificationPanelAlwaysVisible(bool visible);
+		bool GetNotificationPanelAlwaysVisible() const;
 
 		void DeleteAllAircraft();
 
@@ -150,7 +155,7 @@ namespace xpilot
 		nng_socket _socket;
 
 		void SocketWorker();
-		void ProcessMessage(const std::string& msg);
+		void ProcessPacket(const BaseDto& dto);
 
 		std::mutex m_mutex;
 		std::deque<std::function<void()>> m_queuedCallbacks;
@@ -167,6 +172,20 @@ namespace xpilot
 		std::unique_ptr<TextMessageConsole> m_textMessageConsole;
 		std::unique_ptr<NearbyATCWindow> m_nearbyAtcWindow;
 		std::unique_ptr<SettingsWindow> m_settingsWindow;
+
+		template<class T>
+		void SendDto(const T& dto)
+		{
+			msgpack::sbuffer dtoBuf;
+			if (encodeDto(dtoBuf, dto))
+			{
+				if (dtoBuf.size() == 0)
+					return;
+
+				std::vector<unsigned char> dgBuffer(dtoBuf.data(), dtoBuf.data() + dtoBuf.size());
+				nng_send(_socket, reinterpret_cast<char*>(dgBuffer.data()), dgBuffer.size(), NNG_FLAG_NONBLOCK);
+			}
+		}
 	};
 }
 

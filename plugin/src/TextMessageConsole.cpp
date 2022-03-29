@@ -24,9 +24,6 @@
 #include "TextMessageConsole.h"
 #include "Utilities.h"
 #include "XPilot.h"
-#include <nlohmann/json.hpp>
-
-using json = nlohmann::json;
 
 namespace xpilot
 {
@@ -78,12 +75,9 @@ namespace xpilot
 
 	void TextMessageConsole::SendRadioMessage(const std::string& message)
 	{
-		if (m_env->isNetworkConnected())
+		if (!message.empty())
 		{
-			json msg;
-			msg["type"] = "RadioMessageSent";
-			msg["data"]["message"] = message;
-			m_env->SendReply(msg.dump());
+			m_env->SendRadioMessage(message);
 		}
 	}
 
@@ -131,18 +125,11 @@ namespace xpilot
 		}
 	}
 
-	void TextMessageConsole::SendPrivateMessage(const std::string& tabName, const std::string& message)
+	void TextMessageConsole::SendPrivateMessage(const std::string& to, const std::string& message)
 	{
-		if (!tabName.empty() && !message.empty())
+		if (!to.empty() && !message.empty())
 		{
-			if (m_env->isNetworkConnected())
-			{
-				json msg;
-				msg["type"] = "PrivateMessageSent";
-				msg["data"]["to"] = tabName;
-				msg["data"]["message"] = message;
-				m_env->SendReply(msg.dump());
-			}
+			m_env->SendPrivateMessage(to, message);
 		}
 	}
 

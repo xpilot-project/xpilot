@@ -36,29 +36,19 @@ namespace xpilot {
 		SetWindowResizingLimits(535, 300, 535, 300);
 	}
 
-	void NearbyATCWindow::UpdateList(const nlohmann::json data)
+	void NearbyATCWindow::UpdateList(const NearbyAtcDto data)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 		{
 			NearbyList.clear();
-			if (data.find("data") != data.end())
-			{
-				for (auto& item : data["data"].items())
-				{
-					try {
-						std::string callsign = item.value()["callsign"];
-						std::string frequency = item.value()["frequency"];
-						int xplaneFrequency = static_cast<double>(item.value()["xplane_frequency"]);
-						std::string realName = item.value()["real_name"];
-
-						NearbyATCList atc;
-						atc.setCallsign(callsign);
-						atc.setFrequency(frequency);
-						atc.setXplaneFrequency(xplaneFrequency);
-						atc.setRealName(realName);
-						NearbyList.push_back(atc);
-					}
-					catch (nlohmann::detail::type_error& e) { }
+			if (data.stations.size() > 0) {
+				for (auto& station : data.stations) {
+					NearbyATCList atc;
+					atc.setCallsign(station.callsign.c_str());
+					atc.setFrequency(station.frequency.c_str());
+					atc.setXplaneFrequency(station.xplaneFrequency);
+					atc.setRealName(station.name);
+					NearbyList.push_back(atc);
 				}
 			}
 		}

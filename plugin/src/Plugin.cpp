@@ -237,7 +237,7 @@ int ToggleMessagePreviewPanelCommandHandler(XPLMCommandRef inCommand, XPLMComman
 {
     if (inPhase == xplm_CommandEnd)
     {
-        environment->setNotificationPanelAlwaysVisible(!environment->getNotificationPanelAlwaysVisible());
+        environment->SetNotificationPanelAlwaysVisible(!environment->GetNotificationPanelAlwaysVisible());
     }
     return 0;
 }

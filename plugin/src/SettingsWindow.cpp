@@ -50,10 +50,10 @@ namespace xpilot
 	static int currentNode = -1;
 
 	SettingsWindow::SettingsWindow(WndMode _mode) :
-		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 365, 600, 0))
+		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 370, 600, 0))
 	{
 		SetWindowTitle(string_format("xPilot %s Settings", PLUGIN_VERSION_STRING));
-		SetWindowResizingLimits(600, 365, 600, 365);
+		SetWindowResizingLimits(600, 370, 600, 370);
 
 		fileBrowser.SetTitle("Browse...");
 		fileBrowser.SetWindowSize(450, 250);

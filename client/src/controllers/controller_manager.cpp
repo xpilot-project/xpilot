@@ -37,26 +37,7 @@ namespace xpilot
                 m_controllers.removeAll(controller);
             }
 
-            QJsonObject reply;
-            reply.insert("type", "NearbyAtc");
-
-            QJsonArray dataArray;
-            for(auto &atc : m_controllers)
-            {
-                if(atc.IsValid)
-                {
-                    QJsonObject data;
-                    data.insert("callsign", atc.Callsign);
-                    data.insert("xplane_frequency", (qint32)atc.Frequency);
-                    data.insert("frequency", QString::number(atc.Frequency / 1000.0, 'f', 3));
-                    data.insert("real_name", atc.RealName);
-                    dataArray.push_back(data);
-                }
-            }
-
-            reply.insert("data", dataArray);
-            QJsonDocument doc(reply);
-            m_xplaneAdapter.sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+            m_xplaneAdapter.UpdateControllers(m_controllers);
         });
     }
 

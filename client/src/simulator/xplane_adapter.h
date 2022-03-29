@@ -22,6 +22,8 @@
 #include <QMutex>
 #include <QTimer>
 
+#include <msgpack.hpp>
+
 #include <nng/nng.h>
 #include <nng/protocol/pair1/pair.h>
 
@@ -31,6 +33,10 @@
 #include "src/aircrafts/user_aircraft_data.h"
 #include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/radio_stack_state.h"
+#include "src/controllers/controller.h"
+#include "src/simulator/dto.h"
+
+using namespace xpilot;
 
 class XplaneAdapter : public QObject
 {
@@ -45,7 +51,6 @@ public:
     Q_INVOKABLE void setCom2Frequency(float freq);
     Q_INVOKABLE void transponderIdent();
     Q_INVOKABLE void transponderModeToggle();
-    Q_INVOKABLE void sendSocketMessage(const QString& message);
     Q_INVOKABLE void setAudioComSelection(int radio);
     Q_INVOKABLE void setAudioSelection(int radio, bool status);
     Q_INVOKABLE void setComRxDataref(int radio, bool active);
@@ -55,11 +60,11 @@ public:
     Q_INVOKABLE void showIgnoreList();
     Q_INVOKABLE void selcalAlertReceived();
 
-    void AddPlaneToSimulator(const NetworkAircraft& aircraft);
+    void AddAircraftToSimulator(const NetworkAircraft& aircraft);
     void PlaneConfigChanged(const NetworkAircraft& aircraft);
-    void PlaneModelChanged(const NetworkAircraft& aircraft);
     void DeleteAircraft(const NetworkAircraft& aircraft, QString reason);
     void DeleteAllAircraft();
+    void UpdateControllers(QList<Controller>& controllers);
     void DeleteAllControllers();
     void SendFastPositionUpdate(const NetworkAircraft& aircraft, const AircraftVisualState& visualState, const VelocityVector& positionalVelocityVector, const VelocityVector& rotationalVelocityVector);
     void SendHeartbeat(const QString callsign);
@@ -68,6 +73,8 @@ public:
     void NotificationPosted(const QString message, qint64 color);
     void SendPrivateMessage(const QString to, const QString message);
     void PrivateMessageReceived(const QString from, const QString message);
+    void NetworkConnected(QString callsign, QString selcal);
+    void NetworkDisconnected();
 
 private:
     void Subscribe();
@@ -76,9 +83,11 @@ private:
     void sendCommand(std::string command);
 
     void processMessage(QString message);
+    void processPacket(const BaseDto& packet);
     void clearSimConnection();
 
-    void writeToLog(QString message, bool receive = false);
+    void requestPluginVersion();
+    void validateCsl();
 
 public slots:
     void OnDataReceived();
@@ -127,12 +136,26 @@ private:
 
     bool m_keepSocketAlive = false;
     std::unique_ptr<std::thread> m_socketThread;
-    nng_socket _socket;
+    nng_socket m_socket;
     QList<nng_socket> m_visualSockets;
 
-    QFile m_pluginLog;
-    QTextStream m_rawDataStream;
-    QMutex mutex;
+    template<class T>
+    void SendDto(const T& dto)
+    {
+        msgpack::sbuffer dtoBuf;
+        if (encodeDto(dtoBuf, dto))
+        {
+            if (dtoBuf.size() == 0)
+                return;
+
+            std::vector<unsigned char> dgBuffer(dtoBuf.data(), dtoBuf.data() + dtoBuf.size());
+            nng_send(m_socket, reinterpret_cast<char*>(dgBuffer.data()), dgBuffer.size(), NNG_FLAG_NONBLOCK);
+
+            for(auto &visualSocket : m_visualSockets) {
+                nng_send(visualSocket, reinterpret_cast<char*>(dgBuffer.data()), dgBuffer.size(), NNG_FLAG_NONBLOCK);
+            }
+        }
+    }
 };
 
 #endif

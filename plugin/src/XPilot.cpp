@@ -22,18 +22,12 @@
 #include "Utilities.h"
 #include "AircraftManager.h"
 #include "NetworkAircraft.h"
-#include "NetworkAircraftConfig.h"
 #include "FrameRateMonitor.h"
 #include "NearbyATCWindow.h"
 #include "SettingsWindow.h"
 #include "NotificationPanel.h"
 #include "TextMessageConsole.h"
 #include "XPMP2/XPMPMultiplayer.h"
-#include <nlohmann/json.hpp>
-
-#include <regex>
-
-using json = nlohmann::json;
 
 namespace xpilot
 {
@@ -155,9 +149,8 @@ namespace xpilot
 
 	void XPilot::Shutdown()
 	{
-		json reply;
-		reply["type"] = "Shutdown";
-		SendReply(reply.dump()); // this triggers the client to reset itself
+		ShutdownDto dto{};
+		SendDto(dto);
 
 		m_keepSocketAlive = false;
 
@@ -174,261 +167,215 @@ namespace xpilot
 	{
 		while (m_keepSocketAlive) {
 			char* buffer;
-			size_t bufLen;
+			size_t bufferLen;
 
 			int err;
-			err = nng_recv(_socket, &buffer, &bufLen, NNG_FLAG_ALLOC);
+			err = nng_recv(_socket, &buffer, &bufferLen, NNG_FLAG_ALLOC);
 
 			if (err == 0)
 			{
-				std::string msg(buffer, buffer + bufLen);
-				nng_free(buffer, bufLen);
-				ProcessMessage(msg);
+				BaseDto dto;
+				auto obj = msgpack::unpack(reinterpret_cast<const char*>(buffer), bufferLen);
+
+				try {
+					obj.get().convert(dto);
+					ProcessPacket(dto);
+				}
+				catch (const msgpack::type_error& e) {}
+
+				nng_free(buffer, bufferLen);
 			}
 		}
 	}
 
-	void XPilot::SendReply(const std::string& message)
+	void XPilot::ProcessPacket(const BaseDto& packet)
 	{
-		nng_send(_socket, (void*)message.c_str(), message.size(), NNG_FLAG_NONBLOCK);
-	}
+		if (packet.type == dto::PLUGIN_VER) {
+			PluginVersionDto dto{ PLUGIN_VERSION };
+			SendDto(dto);
+		}
+		if (packet.type == dto::VALIDATE_CSL) {
+			ValidateCslDto dto{ XPMPGetNumberOfInstalledModels() > 0 };
+			SendDto(dto);
+		}
+		if (packet.type == dto::ADD_AIRCRAFT) {
+			AddAircraftDto dto;
+			packet.dto.convert(dto);
 
-	void XPilot::ProcessMessage(const std::string& msg)
-	{
-		if (!msg.empty() && json::accept(msg.c_str()))
-		{
-			json j = json::parse(msg.c_str());
+			AircraftVisualState visualState{};
+			visualState.Lat = dto.latitude;
+			visualState.Lon = dto.longitude;
+			visualState.Heading = dto.heading;
+			visualState.AltitudeTrue = dto.altitudeTrue;
+			visualState.Pitch = dto.pitch;
+			visualState.Bank = dto.bank;
 
-			if (j.find("type") != j.end())
+			if (!dto.callsign.empty() && !dto.typeCode.empty())
 			{
-				std::string MessageType(j["type"]);
-
-				if (!MessageType.empty())
-				{
-					if (MessageType == "AddPlane")
+				QueueCallback([=]
 					{
-						std::string callsign(j["data"]["callsign"]);
-						std::string airline(j["data"]["airline"]);
-						std::string typeCode(j["data"]["type_code"]);
-						double latitude = static_cast<double>(j["data"]["latitude"]);
-						double longitude = static_cast<double>(j["data"]["longitude"]);
-						double altitude = static_cast<double>(j["data"]["altitude"]);
-						double heading = static_cast<double>(j["data"]["heading"]);
-						double bank = static_cast<double>(j["data"]["bank"]);
-						double pitch = static_cast<double>(j["data"]["pitch"]);
-
-						AircraftVisualState visualState{};
-						visualState.Lat = latitude;
-						visualState.Lon = longitude;
-						visualState.Heading = heading;
-						visualState.AltitudeTrue = altitude;
-						visualState.Pitch = pitch;
-						visualState.Bank = bank;
-
-						if (!callsign.empty() && !typeCode.empty())
-						{
-							QueueCallback([=]
-								{
-									m_aircraftManager->HandleAddPlane(callsign, visualState, airline, typeCode);
-								});
-						}
-					}
-
-					if (MessageType == "Heartbeat")
-					{
-						std::string callsign(j["data"]["callsign"]);
-
-						if (!callsign.empty())
-						{
-							QueueCallback([=]
-								{
-									m_aircraftManager->HandleHeartbeat(callsign);
-								});
-						}
-					}
-
-					if (MessageType == "FastPositionUpdate")
-					{
-						std::string callsign(j["data"]["callsign"]);
-						double latitude = static_cast<double>(j["data"]["latitude"]);
-						double longitude = static_cast<double>(j["data"]["longitude"]);
-						double altitude = static_cast<double>(j["data"]["altitude"]);
-						double agl = static_cast<double>(j["data"]["agl"]);
-						double heading = static_cast<double>(j["data"]["heading"]);
-						double bank = static_cast<double>(j["data"]["bank"]);
-						double pitch = static_cast<double>(j["data"]["pitch"]);
-						double velocityLongitude = static_cast<double>(j["data"]["vx"]);
-						double velocityAltitude = static_cast<double>(j["data"]["vy"]);
-						double velocityLatitude = static_cast<double>(j["data"]["vz"]);
-						double velocityPitch = static_cast<double>(j["data"]["vp"]);
-						double velocityHeading = static_cast<double>(j["data"]["vh"]);
-						double velocityBank = static_cast<double>(j["data"]["vb"]);
-						double noseWheelAngle = static_cast<double>(j["data"]["nosewheel"]);
-						double speed = static_cast<double>(j["data"]["speed"]);
-
-						AircraftVisualState visualState{};
-						visualState.Lat = latitude;
-						visualState.Lon = longitude;
-						visualState.AltitudeTrue = altitude;
-						visualState.AltitudeAgl = agl;
-						visualState.Pitch = pitch;
-						visualState.Bank = bank;
-						visualState.Heading = heading;
-						visualState.NoseWheelAngle = noseWheelAngle;
-
-						Vector3 positionalVector{};
-						positionalVector.X = velocityLongitude;
-						positionalVector.Y = velocityAltitude;
-						positionalVector.Z = velocityLatitude;
-
-						Vector3 rotationalVelocity{};
-						rotationalVelocity.X = velocityPitch * -1;
-						rotationalVelocity.Y = velocityHeading;
-						rotationalVelocity.Z = velocityBank * -1;
-
-						if (!callsign.empty())
-						{
-							QueueCallback([=]
-								{
-									m_aircraftManager->HandleFastPositionUpdate(callsign,
-										visualState, positionalVector, rotationalVelocity, speed);
-								});
-						}
-					}
-
-					if (MessageType == "AirplaneConfig")
-					{
-						auto acconfig = j.get<NetworkAircraftConfig>();
-						QueueCallback([=]
-							{
-								m_aircraftManager->HandleAircraftConfig(acconfig.data.callsign, acconfig);
-							});
-					}
-
-					if (MessageType == "RemovePlane")
-					{
-						std::string callsign(j["data"]["callsign"]);
-
-						if (!callsign.empty())
-						{
-							QueueCallback([=]
-								{
-									m_aircraftManager->HandleRemovePlane(callsign);
-								});
-						}
-					}
-
-					if (MessageType == "RemoveAllPlanes")
-					{
-						QueueCallback([=]
-							{
-								m_aircraftManager->RemoveAllPlanes();
-							});
-					}
-
-					if (MessageType == "NetworkConnected")
-					{
-						std::string callsign(j["data"]["callsign"]);
-						std::string selcal(j["data"]["selcal"]);
-
-						QueueCallback([=]
-							{
-								m_aircraftManager->RemoveAllPlanes();
-								m_frameRateMonitor->startMonitoring();
-								TryGetTcasControl();
-								m_xplaneAtisEnabled = 0;
-								m_networkCallsign.setValue(callsign);
-								m_selcalCode.setValue(selcal);
-								m_networkLoginStatus.setValue(true);
-							});
-					}
-
-					if (MessageType == "NetworkDisconnected")
-					{
-						QueueCallback([=]
-							{
-								m_aircraftManager->RemoveAllPlanes();
-								m_frameRateMonitor->stopMonitoring();
-								m_nearbyAtcWindow->UpdateList({});
-								ReleaseTcasControl();
-								m_xplaneAtisEnabled = 1;
-								m_networkCallsign.setValue("");
-								m_selcalCode.setValue("");
-								m_networkLoginStatus.setValue(false);
-							});
-					}
-
-					if (MessageType == "NearbyAtc")
-					{
-						QueueCallback([=]
-							{
-								m_nearbyAtcWindow->UpdateList(j);
-							});
-					}
-
-					if (MessageType == "NotificationPosted")
-					{
-						std::string msg(j["data"]["message"]);
-						long color = static_cast<long>(j["data"]["color"]);
-						int red = ((color >> 16) & 0xff);
-						int green = ((color >> 8) & 0xff);
-						int blue = ((color) & 0xff);
-						addNotification(msg, red, green, blue);
-					}
-
-					if (MessageType == "RadioMessageSent")
-					{
-						std::string msg(j["data"]["message"]);
-						RadioMessageReceived(msg, 0, 255, 255);
-						AddNotificationPanelMessage(msg, 0, 255, 255);
-					}
-
-					if (MessageType == "RadioMessageReceived")
-					{
-						std::string from(j["data"]["from"]);
-						std::string message(j["data"]["message"]);
-						bool isDirect = static_cast<bool>(j["data"]["direct"]);
-						double r = isDirect ? 255 : 192;
-						double g = isDirect ? 255 : 192;
-						double b = isDirect ? 255 : 192;
-						std::string msg = string_format("%s: %s", from.c_str(), message.c_str());
-						RadioMessageReceived(msg, r, g, b);
-						AddNotificationPanelMessage(msg, r, g, b);
-					}
-
-					if (MessageType == "PrivateMessageReceived")
-					{
-						std::string msg(j["data"]["message"]);
-						std::string from(j["data"]["from"]);
-						AddPrivateMessage(from, msg, ConsoleTabType::Received);
-						AddNotificationPanelMessage(string_format("%s [pvt]: %s", from.c_str(), msg.c_str()), 255, 255, 255);
-					}
-
-					if (MessageType == "PrivateMessageSent")
-					{
-						std::string msg(j["data"]["message"]);
-						std::string to(j["data"]["to"]);
-						AddPrivateMessage(to, msg, ConsoleTabType::Sent);
-						AddNotificationPanelMessage(string_format("%s [pvt]: %s", m_networkCallsign.value().c_str(), msg.c_str()), 255, 255, 255);
-					}
-
-					if (MessageType == "ValidateCsl")
-					{
-						json reply;
-						reply["type"] = "ValidateCsl";
-						reply["data"]["is_valid"] = XPMPGetNumberOfInstalledModels() > 0;
-						SendReply(reply.dump());
-					}
-
-					if (MessageType == "PluginVersion")
-					{
-						json reply;
-						reply["type"] = "PluginVersion";
-						reply["data"]["version"] = PLUGIN_VERSION;
-						SendReply(reply.dump());
-					}
-				}
+						m_aircraftManager->HandleAddPlane(dto.callsign, visualState, dto.airline, dto.typeCode);
+					});
 			}
+		}
+		if (packet.type == dto::HEARTBEAT) {
+			HeartbeatDto dto;
+			packet.dto.convert(dto);
+
+			QueueCallback([=]
+				{
+					m_aircraftManager->HandleHeartbeat(dto.callsign);
+				});
+		}
+		if (packet.type == dto::FAST_POSITION_UPDATE) {
+			FastPositionUpdateDto dto;
+			packet.dto.convert(dto);
+
+			AircraftVisualState visualState{};
+			visualState.Lat = dto.latitude;
+			visualState.Lon = dto.longitude;
+			visualState.AltitudeTrue = dto.altitudeTrue;
+			visualState.AltitudeAgl = dto.altitudeAgl;
+			visualState.Pitch = dto.pitch;
+			visualState.Bank = dto.bank;
+			visualState.Heading = dto.heading;
+			visualState.NoseWheelAngle = dto.noseWheelAngle;
+
+			Vector3 positionalVector{};
+			positionalVector.X = dto.vx; // vel lon
+			positionalVector.Y = dto.vy; // vel alt
+			positionalVector.Z = dto.vz; // vel lat
+
+			Vector3 rotationalVelocity{};
+			rotationalVelocity.X = dto.vp * -1; // vel pitch
+			rotationalVelocity.Y = dto.vh; // vel heading
+			rotationalVelocity.Z = dto.vb * -1; // vel bank
+
+			if (!dto.callsign.empty())
+			{
+				QueueCallback([=]
+					{
+						m_aircraftManager->HandleFastPositionUpdate(dto.callsign,
+							visualState, positionalVector, rotationalVelocity, dto.speed);
+					});
+			}
+		}
+		if (packet.type == dto::DELETE_AIRCRAFT) {
+			DeleteAircraftDto dto;
+			packet.dto.convert(dto);
+
+			if (!dto.callsign.empty())
+			{
+				QueueCallback([=]
+					{
+						m_aircraftManager->HandleRemovePlane(dto.callsign);
+					});
+			}
+		}
+		if (packet.type == dto::DELETE_ALL_AIRCRAFT) {
+			QueueCallback([=]
+				{
+					m_aircraftManager->RemoveAllPlanes();
+				});
+		}
+		if (packet.type == dto::AIRCRAFT_CONFIG) {
+			AircraftConfigDto dto;
+			packet.dto.convert(dto);
+			QueueCallback([=]
+				{
+					m_aircraftManager->HandleAircraftConfig(dto.callsign, dto);
+				});
+		}
+		if (packet.type == dto::NEARBY_ATC) {
+
+		}
+		if (packet.type == dto::NOTIFICATION_POSTED) {
+			NotificationPostedDto dto;
+			packet.dto.convert(dto);
+
+			long color = dto.color;
+			int red = ((color >> 16) & 0xff);
+			int green = ((color >> 8) & 0xff);
+			int blue = ((color) & 0xff);
+
+			addNotification(dto.message.c_str(), red, green, blue);
+		}
+		if (packet.type == dto::RADIO_MESSAGE_SENT) {
+			RadioMessageSentDto dto;
+			packet.dto.convert(dto);
+
+			std::string msg = dto.message.c_str();
+			RadioMessageReceived(msg, 0, 255, 255);
+			AddNotificationPanelMessage(msg, 0, 255, 255);
+		}
+		if (packet.type == dto::RADIO_MESSAGE_RECEIVED) {
+			RadioMessageReceivedDto dto;
+			packet.dto.convert(dto);
+
+			double r = dto.isDirect ? 255 : 192;
+			double g = dto.isDirect ? 255 : 192;
+			double b = dto.isDirect ? 255 : 192;
+			std::string msg = string_format("%s: %s", dto.from.c_str(), dto.message.c_str());
+			RadioMessageReceived(msg, r, g, b);
+			AddNotificationPanelMessage(msg, r, g, b);
+		}
+		if (packet.type == dto::PRIVATE_MESSAGE_SENT) {
+			PrivateMessageSentDto dto;
+			packet.dto.convert(dto);
+
+			std::string msg = dto.message;
+			std::string to = dto.to;
+			AddPrivateMessage(to, msg, ConsoleTabType::Sent);
+			AddNotificationPanelMessage(string_format("%s [pvt]: %s", m_networkCallsign.value().c_str(), msg.c_str()), 255, 255, 255);
+		}
+		if (packet.type == dto::PRIVATE_MESSAGE_RECEIVED) {
+			PrivateMessageReceivedDto dto;
+			packet.dto.convert(dto);
+
+			std::string msg = dto.message;
+			std::string from = dto.from;
+			AddPrivateMessage(from, msg, ConsoleTabType::Received);
+			AddNotificationPanelMessage(string_format("%s [pvt]: %s", from.c_str(), msg.c_str()), 255, 255, 255);
+		}
+		if (packet.type == dto::NEARBY_ATC) {
+			NearbyAtcDto dto;
+			packet.dto.convert(dto);
+
+			QueueCallback([=]
+				{
+					m_nearbyAtcWindow->UpdateList(dto);
+				});
+		}
+		if (packet.type == dto::CONNECTED) {
+			ConnectedDto dto;
+			packet.dto.convert(dto);
+
+			std::string callsign = dto.callsign;
+			std::string selcal = dto.selcal;
+
+			QueueCallback([=]
+				{
+					m_aircraftManager->RemoveAllPlanes();
+					m_frameRateMonitor->startMonitoring();
+					TryGetTcasControl();
+					m_xplaneAtisEnabled = 0;
+					m_networkCallsign.setValue(callsign);
+					m_selcalCode.setValue(selcal);
+					m_networkLoginStatus.setValue(true);
+				});
+		}
+		if (packet.type == dto::DISCONNECTED) {
+			QueueCallback([=]
+				{
+					m_aircraftManager->RemoveAllPlanes();
+					m_frameRateMonitor->stopMonitoring();
+					m_nearbyAtcWindow->UpdateList({});
+					ReleaseTcasControl();
+					m_xplaneAtisEnabled = 1;
+					m_networkCallsign.setValue("");
+					m_selcalCode.setValue("");
+					m_networkLoginStatus.setValue(false);
+				});
 		}
 	}
 
@@ -482,26 +429,20 @@ namespace xpilot
 
 	void XPilot::forceDisconnect(std::string reason)
 	{
-		json msg;
-		msg["type"] = "ForceDisconnect";
-		msg["data"]["reason"] = reason;
-		SendReply(msg.dump());
+		ForcedDisconnectDto dto{ reason };
+		SendDto(dto);
 	}
 
-	void XPilot::requestStationInfo(std::string callsign)
+	void XPilot::requestStationInfo(std::string station)
 	{
-		json msg;
-		msg["type"] = "RequestStationInfo";
-		msg["data"]["callsign"] = callsign;
-		SendReply(msg.dump());
+		RequestStationInfoDto dto{ station };
+		SendDto(dto);
 	}
 
 	void XPilot::requestMetar(std::string station)
 	{
-		json msg;
-		msg["type"] = "RequestMetar";
-		msg["data"]["station"] = station;
-		SendReply(msg.dump());
+		RequestMetarDto dto{ station };
+		SendDto(dto);
 	}
 
 	void XPilot::setCom1Frequency(float frequency)
@@ -545,10 +486,38 @@ namespace xpilot
 
 	void XPilot::sendWallop(std::string message)
 	{
-		json msg;
-		msg["type"] = "Wallop";
-		msg["data"]["message"] = message;
-		SendReply(msg.dump());
+		WallopSentDto dto{ message };
+		SendDto(dto);
+	}
+
+	void XPilot::SendRadioMessage(std::string message)
+	{
+		if (!isNetworkConnected())
+			return;
+
+		RadioMessageSentDto dto{ message };
+		SendDto(dto);
+	}
+
+	void XPilot::SendPrivateMessage(std::string to, std::string message)
+	{
+		if (!isNetworkConnected())
+			return;
+
+		PrivateMessageSentDto dto{ to, message };
+		SendDto(dto);
+	}
+
+	void XPilot::AircraftDeleted(std::string callsign)
+	{
+		AircraftDeletedDto dto{ callsign };
+		SendDto(dto);
+	}
+
+	void XPilot::AircraftAdded(std::string callsign)
+	{
+		AircraftAddedDto dto{ callsign };
+		SendDto(dto);
 	}
 
 	void XPilot::setAudioComSelection(int radio)
@@ -680,12 +649,12 @@ namespace xpilot
 		m_textMessageConsole->SetVisible(!m_textMessageConsole->GetVisible());
 	}
 
-	void XPilot::setNotificationPanelAlwaysVisible(bool visible)
+	void XPilot::SetNotificationPanelAlwaysVisible(bool visible)
 	{
 		m_notificationPanel->setAlwaysVisible(visible);
 	}
 
-	bool XPilot::getNotificationPanelAlwaysVisible()const
+	bool XPilot::GetNotificationPanelAlwaysVisible()const
 	{
 		return m_notificationPanel->isAlwaysVisible();
 	}

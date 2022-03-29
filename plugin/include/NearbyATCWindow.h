@@ -19,9 +19,7 @@
 #ifndef NearbyATCWindow_h
 #define NearbyATCWindow_h
 
-#include <nlohmann/json.hpp>
-
-using json = nlohmann::json;
+#include "Dto.h"
 
 namespace xpilot 
 {
@@ -49,7 +47,7 @@ namespace xpilot
 	public:
 		NearbyATCWindow(XPilot* instance);
 		~NearbyATCWindow() final = default;
-		void UpdateList(const nlohmann::json data);
+		void UpdateList(const NearbyAtcDto data);
 		void ClearList();
 	protected:
 		void buildInterface() override;

@@ -277,7 +277,7 @@ namespace xpilot
         {
             if((aircraft.Status == AircraftStatus::New) && IsEligibleToAddToSimulator(aircraft))
             {
-                m_xplaneAdapter.AddPlaneToSimulator(aircraft);
+                m_xplaneAdapter.AddAircraftToSimulator(aircraft);
                 m_xplaneAdapter.PlaneConfigChanged(aircraft);
                 aircraft.LastSyncTime = QDateTime::currentDateTimeUtc();
                 aircraft.Status = AircraftStatus::Pending;

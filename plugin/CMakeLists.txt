@@ -56,11 +56,11 @@ set(Header_Files
   include/AudioEngine.h
   include/Config.h
   include/Constants.h
+  include/Dto.h
   include/DataRefAccess.h
   include/FrameRateMonitor.h
   include/NearbyATCWindow.h
   include/NetworkAircraft.h
-  include/NetworkAircraftConfig.h
   include/NotificationPanel.h
   include/OwnedDataRef.h
   include/Plugin.h
@@ -83,7 +83,6 @@ set(Source_Files
   src/FrameRateMonitor.cpp
   src/NearbyATCWindow.cpp
   src/NetworkAircraft.cpp
-  src/NetworkAircraftConfig.cpp
   src/NotificationPanel.cpp
   src/OwnedDataRef.cpp
   src/Plugin.cpp
@@ -145,6 +144,7 @@ target_link_libraries(
   ${PROJECT_NAME}
 	CONAN_PKG::nlohmann_json
     CONAN_PKG::nng
+    CONAN_PKG::msgpack-cxx
 	${XPMP2_LIBRARY})
 
 if (WIN32 OR APPLE)

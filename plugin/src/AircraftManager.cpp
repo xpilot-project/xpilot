@@ -145,7 +145,7 @@ namespace xpilot
 		}
 	}
 
-	void AircraftManager::HandleAircraftConfig(const std::string& callsign, const NetworkAircraftConfig& config)
+	void AircraftManager::HandleAircraftConfig(const std::string& callsign, const AircraftConfigDto& config)
 	{
 		auto planeIt = mapPlanes.find(callsign);
 		if (planeIt == mapPlanes.end()) return;
@@ -153,84 +153,81 @@ namespace xpilot
 		NetworkAircraft* plane = planeIt->second.get();
 		if (!plane) return;
 
-		if (config.data.flapsPct.has_value())
+		if (config.flaps.has_value())
 		{
-			if (config.data.flapsPct.value() != plane->TargetFlapsPosition)
+			if (config.flaps.value() != plane->TargetFlapsPosition)
 			{
-				plane->TargetFlapsPosition = config.data.flapsPct.value();
+				plane->TargetFlapsPosition = config.flaps.value();
 			}
 		}
-		if (config.data.gearDown.has_value())
+		if (config.gearDown.has_value())
 		{
-			if (config.data.gearDown.value() != plane->IsGearDown)
+			if (config.gearDown.value() != plane->IsGearDown)
 			{
-				plane->IsGearDown = config.data.gearDown.value();
+				plane->IsGearDown = config.gearDown.value();
 			}
 		}
-		if (config.data.spoilersDeployed.has_value())
+		if (config.spoilersDeployed.has_value())
 		{
-			if (config.data.spoilersDeployed.value() != plane->IsSpoilersDeployed)
+			if (config.spoilersDeployed.value() != plane->IsSpoilersDeployed)
 			{
-				plane->IsSpoilersDeployed = config.data.spoilersDeployed.value();
+				plane->IsSpoilersDeployed = config.spoilersDeployed.value();
 			}
 		}
-		if (config.data.lights.has_value())
+		if (config.strobeLightsOn.has_value())
 		{
-			if (config.data.lights.value().strobesOn.has_value())
+			if (config.strobeLightsOn.value() != plane->Surfaces.lights.strbLights)
 			{
-				if (config.data.lights.value().strobesOn.value() != plane->Surfaces.lights.strbLights)
-				{
-					plane->Surfaces.lights.strbLights = config.data.lights.value().strobesOn.value();
-				}
-			}
-			if (config.data.lights.value().taxiOn.has_value())
-			{
-				if (config.data.lights.value().taxiOn.value() != plane->Surfaces.lights.taxiLights)
-				{
-					plane->Surfaces.lights.taxiLights = config.data.lights.value().taxiOn.value();
-				}
-			}
-			if (config.data.lights.value().navOn.has_value())
-			{
-				if (config.data.lights.value().navOn.value() != plane->Surfaces.lights.navLights)
-				{
-					plane->Surfaces.lights.navLights = config.data.lights.value().navOn.value();
-				}
-			}
-			if (config.data.lights.value().landingOn.has_value())
-			{
-				if (config.data.lights.value().landingOn.value() != plane->Surfaces.lights.landLights)
-				{
-					plane->Surfaces.lights.landLights = config.data.lights.value().landingOn.value();
-				}
-			}
-			if (config.data.lights.value().beaconOn.has_value())
-			{
-				if (config.data.lights.value().beaconOn.value() != plane->Surfaces.lights.bcnLights)
-				{
-					plane->Surfaces.lights.bcnLights = config.data.lights.value().beaconOn.value();
-				}
+				plane->Surfaces.lights.strbLights = config.strobeLightsOn.value();
 			}
 		}
-		if (config.data.enginesRunning.has_value())
+		if (config.taxiLightsOn.has_value())
 		{
-			if (config.data.enginesRunning.value() != plane->IsEnginesRunning)
+			if (config.taxiLightsOn.value() != plane->Surfaces.lights.taxiLights)
 			{
-				plane->IsEnginesRunning = config.data.enginesRunning.value();
+				plane->Surfaces.lights.taxiLights = config.taxiLightsOn.value();
 			}
 		}
-		if (config.data.enginesReversing.has_value())
+		if (config.navLightsOn.has_value())
 		{
-			if (config.data.enginesReversing.value() != plane->IsEnginesReversing)
+			if (config.navLightsOn.value() != plane->Surfaces.lights.navLights)
 			{
-				plane->IsEnginesReversing = config.data.enginesReversing.value();
+				plane->Surfaces.lights.navLights = config.navLightsOn.value();
 			}
 		}
-		if (config.data.onGround.has_value())
+		if (config.landingLightsOn.has_value())
 		{
-			if (config.data.onGround.value() != plane->IsReportedOnGround)
+			if (config.landingLightsOn.value() != plane->Surfaces.lights.landLights)
 			{
-				plane->IsReportedOnGround = config.data.onGround.value();
+				plane->Surfaces.lights.landLights = config.landingLightsOn.value();
+			}
+		}
+		if (config.beaconLightsOn.has_value())
+		{
+			if (config.beaconLightsOn.value() != plane->Surfaces.lights.bcnLights)
+			{
+				plane->Surfaces.lights.bcnLights = config.beaconLightsOn.value();
+			}
+		}
+		if (config.enginesOn.has_value())
+		{
+			if (config.enginesOn.value() != plane->IsEnginesRunning)
+			{
+				plane->IsEnginesRunning = config.enginesOn.value();
+			}
+		}
+		if (config.enginesReversing.has_value())
+		{
+			if (config.enginesReversing.value() != plane->IsEnginesReversing)
+			{
+				plane->IsEnginesReversing = config.enginesReversing.value();
+			}
+		}
+		if (config.onGround.has_value())
+		{
+			if (config.onGround.value() != plane->IsReportedOnGround)
+			{
+				plane->IsReportedOnGround = config.onGround.value();
 			}
 		}
 	}
@@ -242,11 +239,7 @@ namespace xpilot
 
 		m_audioEngine->StopChannel(aircraft->SoundChannelId);
 		mapPlanes.erase(callsign);
-
-		json reply;
-		reply["type"] = "AircraftDeleted";
-		reply["data"]["callsign"] = callsign;
-		mEnv->SendReply(reply.dump());
+		mEnv->AircraftDeleted(callsign);
 	}
 
 	void AircraftManager::RemoveAllPlanes()
@@ -323,10 +316,7 @@ namespace xpilot
 				// confirm aircraft creation
 				if (iter->second->IsInstanciated() && !iter->second->AircraftAddedEventSent)
 				{
-					json reply;
-					reply["type"] = "AircraftAdded";
-					reply["data"]["callsign"] = iter->first;
-					instance->mEnv->SendReply(reply.dump());
+					instance->mEnv->AircraftAdded(iter->first);
 					iter->second->AircraftAddedEventSent = true;
 				}
 			}

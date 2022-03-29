@@ -177,6 +177,7 @@ set(PROJECT_SOURCES
     src/network/events/radio_message_received.h
     src/simulator/xplane_adapter.h
     src/simulator/xplane_adapter.cpp
+    src/simulator/dto.h
     src/aircrafts/network_aircraft.h
     src/aircrafts/aircraft_visual_state.h
     src/aircrafts/velocity_vector.h
@@ -407,7 +408,7 @@ add_subdirectory(3rdparty/qtpromise)
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
     CONAN_PKG::openssl
-    CONAN_PKG::msgpack
+    CONAN_PKG::msgpack-cxx
     CONAN_PKG::nlohmann_json
     CONAN_PKG::libcurl
     CONAN_PKG::libevent

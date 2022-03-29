@@ -3,6 +3,11 @@
 #include "src/common/build_config.h"
 #include "src/common/utils.h"
 
+#include <iostream>
+#include <istream>
+#include <iomanip>
+#include <string>
+
 #include <QTimer>
 #include <QtEndian>
 #include <QDateTime>
@@ -71,25 +76,6 @@ QHostAddress m_hostAddress;
 
 XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 {
-    QDir pluginLogPath(pathAppend(AppConfig::getInstance()->dataRoot(), "PluginLogs"));
-    if(!pluginLogPath.exists()) {
-        pluginLogPath.mkpath(".");
-    }
-
-    // keep only the last 10 log files
-    QFileInfoList files = pluginLogPath.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Time);
-    const int MAX_LOGS_TO_RETAIN = 10;
-    for(int index = files.size(); index >= MAX_LOGS_TO_RETAIN; --index) {
-        const QFileInfo &info = files.at(index - 1);
-        QFile::remove(info.absoluteFilePath());
-    }
-
-    m_pluginLog.setFileName(pathAppend(pluginLogPath.path(), QString("PluginLog-%1.txt").arg(QDateTime::currentDateTimeUtc().toString("yyyyMMdd-hhmmss"))));
-    if(m_pluginLog.open(QFile::WriteOnly))
-    {
-        m_rawDataStream.setDevice(&m_pluginLog);
-    }
-
     m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch() - HEARTBEAT_TIMEOUT_SECS; // initialize timestamp in the past to prevent ghost connection status
 
     socket = new QUdpSocket(this);
@@ -104,33 +90,36 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 
     connect(socket, &QUdpSocket::readyRead, this, &XplaneAdapter::OnDataReceived);
 
-    int rv;
-    if((rv = nng_pair1_open(&_socket)) != 0) {
-        writeToLog(QString("Error opening socket: %1").arg(nng_strerror(rv)));
-    }
-
-    nng_setopt_int(_socket, NNG_OPT_RECVBUF, 1000);
-    nng_setopt_int(_socket, NNG_OPT_SENDBUF, 1000);
+    nng_pair1_open(&m_socket);
+    nng_setopt_int(m_socket, NNG_OPT_RECVBUF, 1000);
+    nng_setopt_int(m_socket, NNG_OPT_SENDBUF, 1000);
 
     QString url = QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort);
-    if((rv = nng_dial(_socket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK)) != 0) {
-        writeToLog(QString("Error dialing socket: %1").arg(nng_strerror(rv)));
-    }
+    nng_dial(m_socket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK);
 
     m_keepSocketAlive = true;
     m_socketThread = std::make_unique<std::thread>([&]{
         while (m_keepSocketAlive) {
             char* buffer;
-            size_t bufLen;
+            size_t bufferLen;
 
             int err;
-            err = nng_recv(_socket, &buffer, &bufLen, NNG_FLAG_ALLOC);
+            err = nng_recv(m_socket, &buffer, &bufferLen, NNG_FLAG_ALLOC);
 
             if(err == 0)
             {
-                QString msg = QString::fromLocal8Bit(buffer, bufLen);
-                nng_free(buffer, bufLen);
-                processMessage(msg);
+                BaseDto dto;
+                auto obj = msgpack::unpack(reinterpret_cast<const char*>(buffer), bufferLen);
+
+                try {
+                    obj.get().convert(dto);
+                    processPacket(dto);
+                }
+                catch(const msgpack::type_error&e) {
+                    qDebug() << e.what();
+                }
+
+                nng_free(buffer, bufferLen);
             }
         }
     });
@@ -141,13 +130,11 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 
         int rv;
         if((rv = nng_pair1_open(&_visualSocket)) != 0) {
-            writeToLog(QString("Error opening visual socket: %1").arg(nng_strerror(rv)));
             continue;
         }
 
         QString url = QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort);
         if((rv = nng_dial(_visualSocket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK)) != 0) {
-            writeToLog(QString("Error dialing visual socket: %1").arg(nng_strerror(rv)));
             continue;
         }
 
@@ -168,20 +155,10 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
             if(!m_initialHandshake)
             {
                 // request plugin version
-                {
-                    QJsonObject reply;
-                    reply.insert("type", "PluginVersion");
-                    QJsonDocument doc(reply);
-                    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
-                }
+                requestPluginVersion();
 
                 // validate csl
-                {
-                    QJsonObject reply;
-                    reply.insert("type", "ValidateCsl");
-                    QJsonDocument doc(reply);
-                    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
-                }
+                validateCsl();
             }
 
             if(m_simConnected) {
@@ -214,8 +191,8 @@ XplaneAdapter::~XplaneAdapter()
     m_visualSockets.clear();
 
     m_keepSocketAlive = false;
-    nng_close(_socket);
-    _socket = NNG_SOCKET_INITIALIZER;
+    nng_close(m_socket);
+    m_socket = NNG_SOCKET_INITIALIZER;
 
     if(m_socketThread) {
         m_socketThread->join();
@@ -223,153 +200,85 @@ XplaneAdapter::~XplaneAdapter()
     }
 }
 
-void XplaneAdapter::processMessage(QString message)
+void XplaneAdapter::processPacket(const BaseDto &packet)
 {
-    if(message.isEmpty())
-        return;
+    if(packet.type == dto::PLUGIN_VER) {
+        PluginVersionDto dto{};
+        packet.dto.convert(dto);
 
-    auto json = QJsonDocument::fromJson(message.toUtf8());
-    if(json.isNull() || !json.isObject())
-        return;
-
-    writeToLog(message, true);
-
-    QJsonObject obj = json.object();
-
-    if(obj.contains("type"))
-    {
-        if(obj["type"] == "Shutdown")
+        if(dto.version < BuildConfig::getVersionInt())
         {
-            clearSimConnection();
+            m_validPluginVersion = false;
+            emit invalidPluginVersion();
         }
+        m_initialHandshake = true;
+    }
+    if(packet.type == dto::VALIDATE_CSL) {
+        ValidateCslDto dto{};
+        packet.dto.convert(dto);
 
-        else if(obj["type"] == "PluginVersion")
-        {
-            QJsonObject data = obj["data"].toObject();
-            if(data.contains("version"))
-            {
-                if(data["version"].toInt() < BuildConfig::getVersionInt())
-                {
-                    m_validPluginVersion = false;
-                    emit invalidPluginVersion();
-                }
-                m_initialHandshake = true;
-            }
+        if(!dto.isValid) {
+            m_validCsl = false;
+            emit invalidCslConfiguration();
         }
-
-        else if(obj["type"] == "ValidateCsl")
-        {
-            QJsonObject data = obj["data"].toObject();
-            if(data.contains("is_valid"))
-            {
-                if(!data["is_valid"].toBool())
-                {
-                    m_validCsl = false;
-                    emit invalidCslConfiguration();
-                }
-            }
-            m_initialHandshake = true;
+        m_initialHandshake = true;
+    }
+    if(packet.type == dto::AIRCRAFT_ADDED) {
+        AircraftAddedDto dto{};
+        packet.dto.convert(dto);
+        if(!dto.callsign.empty()) {
+            emit aircraftAddedToSim(dto.callsign.c_str());
         }
-
-        else if(obj["type"] == "AircraftAdded")
-        {
-            if(obj.contains("data"))
-            {
-                QJsonObject data = obj["data"].toObject();
-                if(!data["callsign"].toString().isEmpty())
-                {
-                    emit aircraftAddedToSim(data["callsign"].toString());
-                }
-            }
+    }
+    if(packet.type == dto::AIRCRAFT_DELETED) {
+        AircraftAddedDto dto{};
+        packet.dto.convert(dto);
+        if(!dto.callsign.empty()) {
+            emit aircraftRemovedFromSim(dto.callsign.c_str());
         }
-
-        else if(obj["type"] == "AircraftDeleted")
-        {
-            if(obj.contains("data"))
-            {
-                QJsonObject data = obj["data"].toObject();
-                if(!data["callsign"].toString().isEmpty())
-                {
-                    emit aircraftRemovedFromSim(data["callsign"].toString());
-                }
-            }
+    }
+    if(packet.type == dto::REQUEST_STATION_INFO) {
+        RequestStationInfoDto dto{};
+        packet.dto.convert(dto);
+        if(!dto.station.empty()) {
+            emit requestStationInfo(dto.station.c_str());
         }
-
-        else if(obj["type"] == "RequestStationInfo")
-        {
-            if(obj.contains("data"))
-            {
-                QJsonObject data = obj["data"].toObject();
-                if(!data["callsign"].toString().isEmpty())
-                {
-                    emit requestStationInfo(data["callsign"].toString());
-                }
-            }
+    }
+    if(packet.type == dto::REQUEST_METAR) {
+        RequestMetarDto dto;
+        packet.dto.convert(dto);
+        if(!dto.station.empty()) {
+            emit requestMetar(dto.station.c_str());
         }
-
-        else if(obj["type"] == "RadioMessageSent")
-        {
-            if(obj.contains("data"))
-            {
-                QJsonObject data = obj["data"].toObject();
-                if(!data["message"].toString().isEmpty())
-                {
-                    emit radioMessageSent(data["message"].toString());
-                }
-            }
+    }
+    if(packet.type == dto::RADIO_MESSAGE_SENT) {
+        RadioMessageSentDto dto;
+        packet.dto.convert(dto);
+        if(!dto.message.empty()) {
+            emit radioMessageSent(dto.message.c_str());
         }
-
-        else if(obj["type"] == "PrivateMessageSent")
-        {
-            if(obj.contains("data"))
-            {
-                QJsonObject data = obj["data"].toObject();
-                QString to = data["to"].toString().toUpper();
-                QString message = data["message"].toString();
-                if(!message.isEmpty() && !to.isEmpty())
-                {
-                    emit privateMessageSent(to, message);
-                }
-            }
+    }
+    if(packet.type == dto::PRIVATE_MESSAGE_SENT) {
+        PrivateMessageSentDto dto;
+        packet.dto.convert(dto);
+        if(!dto.to.empty() && !dto.message.empty()) {
+            emit privateMessageSent(dto.to.c_str(), dto.message.c_str());
         }
-
-        else if(obj["type"] == "RequestMetar")
-        {
-            if(obj.contains("data"))
-            {
-                QJsonObject data = obj["data"].toObject();
-                if(!data["station"].toString().isEmpty())
-                {
-                    emit requestMetar(data["station"].toString());
-                }
-            }
+    }
+    if(packet.type == dto::WALLOP_SENT) {
+        WallopSentDto dto;
+        packet.dto.convert(dto);
+        if(!dto.message.empty()) {
+            emit sendWallop(dto.message.c_str());
         }
-
-        else if(obj["type"] == "Wallop")
-        {
-            if(obj.contains("data"))
-            {
-                QJsonObject data = obj["data"].toObject();
-                if(!data["message"].toString().isEmpty())
-                {
-                    emit sendWallop(data["message"].toString());
-                }
-            }
-        }
-
-        else if(obj["type"] == "ForceDisconnect")
-        {
-            QString reason;
-            if(obj.contains("data"))
-            {
-                QJsonObject data = obj["data"].toObject();
-                if(!data["reason"].toString().isEmpty())
-                {
-                    reason = data["reason"].toString();
-                }
-            }
-            emit forceDisconnect(reason);
-        }
+    }
+    if(packet.type == dto::FORCE_DISCONNECT) {
+        ForcedDisconnectDto dto;
+        packet.dto.convert(dto);
+        emit forceDisconnect(dto.reason.c_str());
+    }
+    if(packet.type == dto::SHUTDOWN) {
+        clearSimConnection();
     }
 }
 
@@ -378,15 +287,6 @@ void XplaneAdapter::clearSimConnection()
     emit simConnectionStateChanged(false);
     m_initialHandshake = false;
     m_simConnected = false;
-}
-
-void XplaneAdapter::writeToLog(QString message, bool receive)
-{
-    QMutexLocker lock(&mutex);
-    {
-        m_rawDataStream << QString("[%1] %2 %3\n").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), receive ? "<<<" : ">>>", message);
-        m_rawDataStream.flush();
-    }
 }
 
 void XplaneAdapter::Subscribe()
@@ -714,18 +614,16 @@ void XplaneAdapter::OnDataReceived()
     }
 }
 
-void XplaneAdapter::sendSocketMessage(const QString &message)
+void XplaneAdapter::requestPluginVersion()
 {
-    if(message.isEmpty()) return;
+    PluginVersionDto dto{};
+    SendDto(dto);
+}
 
-    std::string msg = message.toStdString();
-    nng_send(_socket, msg.data(), msg.size(), NNG_FLAG_NONBLOCK);
-
-    for(auto &visualSocket : m_visualSockets) {
-        nng_send(visualSocket, msg.data(), msg.size(), NNG_FLAG_NONBLOCK);
-    }
-
-    writeToLog(message);
+void XplaneAdapter::validateCsl()
+{
+    ValidateCslDto dto{};
+    SendDto(dto);
 }
 
 void XplaneAdapter::setAudioComSelection(int radio)
@@ -807,250 +705,215 @@ void XplaneAdapter::selcalAlertReceived()
     });
 }
 
-void XplaneAdapter::AddPlaneToSimulator(const NetworkAircraft &aircraft)
+void XplaneAdapter::AddAircraftToSimulator(const NetworkAircraft &aircraft)
 {
-    QJsonObject reply;
-    reply.insert("type", "AddPlane");
-
-    QJsonObject data;
-    data.insert("callsign", aircraft.Callsign);
-    data.insert("airline", aircraft.Airline);
-    data.insert("type_code", aircraft.TypeCode);
-    data.insert("latitude", aircraft.RemoteVisualState.Latitude);
-    data.insert("longitude", aircraft.RemoteVisualState.Longitude);
-    data.insert("altitude", aircraft.RemoteVisualState.Altitude);
-    data.insert("heading", aircraft.RemoteVisualState.Heading);
-    data.insert("bank", aircraft.RemoteVisualState.Bank);
-    data.insert("pitch", aircraft.RemoteVisualState.Pitch);
-    reply.insert("data", data);
-
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+    AddAircraftDto dto{};
+    dto.callsign = aircraft.Callsign.toStdString();
+    dto.airline = aircraft.Airline.toStdString();
+    dto.typeCode = aircraft.TypeCode.toStdString();
+    dto.latitude = aircraft.RemoteVisualState.Latitude;
+    dto.longitude = aircraft.RemoteVisualState.Longitude;
+    dto.altitudeTrue = aircraft.RemoteVisualState.Altitude;
+    dto.heading = aircraft.RemoteVisualState.Heading;
+    dto.bank = aircraft.RemoteVisualState.Bank;
+    dto.pitch = aircraft.RemoteVisualState.Pitch;
+    SendDto(dto);
 }
 
 void XplaneAdapter::PlaneConfigChanged(const NetworkAircraft &aircraft)
 {
-    QJsonObject reply;
-    reply.insert("type", "AirplaneConfig");
-
-    QJsonObject data;
-    data.insert("callsign", aircraft.Callsign);
+    AircraftConfigDto dto{};
+    dto.callsign = aircraft.Callsign.toStdString();
 
     if(!aircraft.Configuration->IsIncremental())
     {
-        data.insert("full_config", true);
+        dto.fullConfig = true;
     }
 
     if(aircraft.Configuration->Engines.has_value())
     {
         if(aircraft.Configuration->HasEnginesRunning())
         {
-            data.insert("engines_on", aircraft.Configuration->IsAnyEngineRunning());
+            dto.enginesOn = aircraft.Configuration->IsAnyEngineRunning();
         }
         if(aircraft.Configuration->HasEnginesReversing())
         {
-            data.insert("engines_reversing", aircraft.Configuration->IsAnyEngineReversing());
+            dto.enginesReversing = aircraft.Configuration->IsAnyEngineReversing();
         }
     }
 
     if(aircraft.Configuration->OnGround.has_value())
     {
-        data.insert("on_ground", aircraft.Configuration->OnGround.value());
+        dto.onGround = aircraft.Configuration->OnGround.value();
     }
 
     if(aircraft.Configuration->FlapsPercent.has_value())
     {
-        data.insert("flaps", std::round((aircraft.Configuration->FlapsPercent.value() / 100.0f) * 100.0) / 100.0);
+        dto.flaps = std::round((aircraft.Configuration->FlapsPercent.value() / 100.0f) * 100.0) / 100.0;
+    }
+
+    if(aircraft.Configuration->SpoilersDeployed.has_value())
+    {
+        dto.spoilersDeployed = aircraft.Configuration->SpoilersDeployed.value();
     }
 
     if(aircraft.Configuration->GearDown.has_value())
     {
-        data.insert("gear_down", aircraft.Configuration->GearDown.value());
+        dto.gearDown = aircraft.Configuration->GearDown.value();
     }
 
     if(aircraft.Configuration->Lights->HasLights())
     {
-        QJsonObject lights;
         if(aircraft.Configuration->Lights->BeaconOn.has_value())
         {
-            lights.insert("beacon_lights_on", aircraft.Configuration->Lights->BeaconOn.value());
+            dto.beaconLightsOn = aircraft.Configuration->Lights->BeaconOn.value();
         }
         if(aircraft.Configuration->Lights->LandingOn.has_value())
         {
-            lights.insert("landing_lights_on", aircraft.Configuration->Lights->LandingOn.value());
+            dto.landingLightsOn = aircraft.Configuration->Lights->LandingOn.value();
         }
         if(aircraft.Configuration->Lights->NavOn.has_value())
         {
-            lights.insert("nav_lights_on", aircraft.Configuration->Lights->NavOn.value());
+            dto.navLightsOn = aircraft.Configuration->Lights->NavOn.value();
         }
         if(aircraft.Configuration->Lights->StrobeOn.has_value())
         {
-            lights.insert("strobe_lights_on", aircraft.Configuration->Lights->StrobeOn.value());
+            dto.strobeLightsOn = aircraft.Configuration->Lights->StrobeOn.value();
         }
         if(aircraft.Configuration->Lights->TaxiOn.has_value())
         {
-            lights.insert("taxi_lights_on", aircraft.Configuration->Lights->TaxiOn.value());
+            dto.taxiLightsOn = aircraft.Configuration->Lights->TaxiOn.value();
         }
-        data.insert("lights", lights);
     }
 
-    reply.insert("data", data);
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
-}
-
-void XplaneAdapter::PlaneModelChanged(const NetworkAircraft &aircraft)
-{
-    QJsonObject reply;
-    reply.insert("type", "ChangeModel");
-
-    QJsonObject data;
-    data.insert("callsign", aircraft.Callsign);
-    data.insert("type_code", aircraft.TypeCode);
-    data.insert("airline", aircraft.Airline);
-
-    reply.insert("data", data);
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+    SendDto(dto);
 }
 
 void XplaneAdapter::DeleteAircraft(const NetworkAircraft &aircraft, QString reason)
 {
-    QJsonObject reply;
-    reply.insert("type", "RemovePlane");
-
-    QJsonObject data;
-    data.insert("callsign", aircraft.Callsign);
-    data.insert("reason", reason);
-
-    reply.insert("data", data);
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+    DeleteAircraftDto dto{};
+    dto.callsign = aircraft.Callsign.toStdString();
+    dto.reason = reason.toStdString();
+    SendDto(dto);
 }
 
 void XplaneAdapter::DeleteAllAircraft()
 {
-    QJsonObject reply;
-    reply.insert("type", "RemoveAllPlanes");
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+    DeleteAllAircraftDto dto{};
+    SendDto(dto);
+}
+
+void XplaneAdapter::UpdateControllers(QList<Controller> &controllers)
+{
+    NearbyAtcDto dto{};
+    for(auto &controller : controllers)
+    {
+        if(controller.IsValid)
+        {
+            NearbyAtcStationDto station;
+            station.callsign = controller.Callsign.toStdString();
+            station.frequency = QString::number(controller.Frequency / 1000.0, 'f', 3).toStdString();
+            station.xplaneFrequency = controller.Frequency;
+            station.name = controller.RealName.toStdString();
+            dto.stations.push_back(station);
+        }
+    }
+    SendDto(dto);
 }
 
 void XplaneAdapter::DeleteAllControllers()
 {
-    QJsonObject reply;
-    reply.insert("type", "NearbyAtc");
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+    NearbyAtcDto dto{};
+    SendDto(dto);
 }
 
 void XplaneAdapter::SendFastPositionUpdate(const NetworkAircraft &aircraft, const AircraftVisualState &visualState, const VelocityVector &positionalVelocityVector, const VelocityVector &rotationalVelocityVector)
 {
-    QJsonObject reply;
-    reply.insert("type", "FastPositionUpdate");
+    FastPositionUpdateDto dto{};
+    dto.callsign = aircraft.Callsign.toStdString();
+    dto.latitude = visualState.Latitude;
+    dto.longitude = visualState.Longitude;
+    dto.altitudeTrue = visualState.Altitude;
+    dto.altitudeAgl = visualState.AltitudeAgl;
+    dto.heading = visualState.Heading;
+    dto.bank = visualState.Bank;
+    dto.pitch = visualState.Pitch;
+    dto.vx = positionalVelocityVector.X;
+    dto.vy = positionalVelocityVector.Y;
+    dto.vz = positionalVelocityVector.Z;
+    dto.vp = rotationalVelocityVector.X;
+    dto.vh = rotationalVelocityVector.Y;
+    dto.vb = rotationalVelocityVector.Z;
+    dto.noseWheelAngle = visualState.NoseWheelAngle;
+    dto.speed = aircraft.Speed;
 
-    QJsonObject data;
-    data.insert("callsign", aircraft.Callsign);
-    data.insert("latitude", visualState.Latitude);
-    data.insert("longitude", visualState.Longitude);
-    data.insert("altitude", visualState.Altitude);
-    data.insert("agl", visualState.AltitudeAgl);
-    data.insert("heading", visualState.Heading);
-    data.insert("bank", visualState.Bank);
-    data.insert("pitch", visualState.Pitch);
-    data.insert("vx", positionalVelocityVector.X);
-    data.insert("vy", positionalVelocityVector.Y);
-    data.insert("vz", positionalVelocityVector.Z);
-    data.insert("vp", rotationalVelocityVector.X);
-    data.insert("vh", rotationalVelocityVector.Y);
-    data.insert("vb", rotationalVelocityVector.Z);
-    data.insert("nosewheel", visualState.NoseWheelAngle);
-    data.insert("speed", aircraft.Speed);
-
-    reply.insert("data", data);
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+    SendDto(dto);
 }
 
 void XplaneAdapter::SendHeartbeat(const QString callsign)
 {
-    QJsonObject reply;
-    reply.insert("type", "Heartbeat");
+    HeartbeatDto dto{};
+    dto.callsign = callsign.toStdString();
 
-    QJsonObject data;
-    data.insert("callsign", callsign);
-
-    reply.insert("data", data);
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+    SendDto(dto);
 }
 
 void XplaneAdapter::SendRadioMessage(const QString message)
 {
-    QJsonObject reply;
-    reply.insert("type", "RadioMessageSent");
+    RadioMessageSentDto dto{};
+    dto.message = message.toStdString();
 
-    QJsonObject data;
-    data.insert("message", message);
-
-    reply.insert("data", data);
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+    SendDto(dto);
 }
 
 void XplaneAdapter::RadioMessageReceived(const QString from, const QString message, bool isDirect)
 {
-    QJsonObject reply;
-    reply.insert("type", "RadioMessageReceived");
+    RadioMessageReceivedDto dto{};
+    dto.from = from.toStdString();
+    dto.message = message.toStdString();
+    dto.isDirect = isDirect;
 
-    QJsonObject data;
-    data.insert("from", from);
-    data.insert("message", message);
-    data.insert("direct", isDirect);
-
-    reply.insert("data", data);
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+    SendDto(dto);
 }
 
 void XplaneAdapter::NotificationPosted(const QString message, qint64 color)
 {
-    QJsonObject reply;
-    reply.insert("type", "NotificationPosted");
+    NotificationPostedDto dto{};
+    dto.message = message.toStdString();
+    dto.color = color;
 
-    QJsonObject data;
-    data.insert("message", message);
-    data.insert("color", color);
-
-    reply.insert("data", data);
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+    SendDto(dto);
 }
 
 void XplaneAdapter::SendPrivateMessage(const QString to, const QString message)
 {
-    QJsonObject reply;
-    reply.insert("type", "PrivateMessageSent");
+    PrivateMessageSentDto dto{};
+    dto.to = to.toStdString();
+    dto.message = message.toStdString();
 
-    QJsonObject data;
-    data.insert("to", to.toUpper());
-    data.insert("message", message);
-
-    reply.insert("data", data);
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+    SendDto(dto);
 }
 
 void XplaneAdapter::PrivateMessageReceived(const QString from, const QString message)
 {
-    QJsonObject reply;
-    reply.insert("type", "PrivateMessageReceived");
+    PrivateMessageReceivedDto dto{};
+    dto.from = from.toStdString();
+    dto.message = message.toStdString();
 
-    QJsonObject data;
-    data.insert("from", from.toUpper());
-    data.insert("message", message);
+    SendDto(dto);
+}
 
-    reply.insert("data", data);
-    QJsonDocument doc(reply);
-    sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+void XplaneAdapter::NetworkConnected(QString callsign, QString selcal)
+{
+    ConnectedDto dto;
+    dto.callsign = callsign.toStdString();
+    dto.selcal = selcal.toStdString();
+
+    SendDto(dto);
+}
+
+void XplaneAdapter::NetworkDisconnected()
+{
+    DisconnectedDto dto;
+    SendDto(dto);
 }

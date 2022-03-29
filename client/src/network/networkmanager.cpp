@@ -122,14 +122,7 @@ namespace xpilot
         emit networkConnected(m_connectInfo.Callsign, !m_connectInfo.TowerViewMode);
 
         if(!m_connectInfo.TowerViewMode) {
-            QJsonObject reply;
-            reply.insert("type", "NetworkConnected");
-            QJsonObject data;
-            data.insert("callsign", m_connectInfo.Callsign);
-            data.insert("selcal", m_connectInfo.SelcalCode);
-            reply.insert("data", data);
-            QJsonDocument doc(reply);
-            m_xplaneAdapter.sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
+            m_xplaneAdapter.NetworkConnected(m_connectInfo.Callsign, m_connectInfo.SelcalCode);
         }
     }
 
@@ -155,11 +148,7 @@ namespace xpilot
             }
         }
 
-        QJsonObject reply;
-        reply.insert("type", "NetworkDisconnected");
-        QJsonDocument doc(reply);
-        m_xplaneAdapter.sendSocketMessage(QString(doc.toJson(QJsonDocument::Compact)));
-
+        m_xplaneAdapter.NetworkDisconnected();
         emit networkDisconnected(m_forcedDisconnect);
 
         m_intentionalDisconnect = false;

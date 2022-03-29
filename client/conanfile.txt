@@ -1,5 +1,5 @@
 [requires]
-msgpack/3.3.0
+msgpack-cxx/4.1.0
 nlohmann_json/3.9.1
 openssl/1.1.1k
 libcurl/7.75.0
