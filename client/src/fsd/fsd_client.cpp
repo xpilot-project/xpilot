@@ -223,6 +223,7 @@ namespace xpilot
         emit RaiseRawDataSent(bufferEncoded);
 
         m_socket->write(bufferEncoded);
+        m_socket->flush();
     }
 
     void FsdClient::processTM(QStringList &fields)
