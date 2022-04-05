@@ -638,13 +638,13 @@ namespace xpilot
 
     void NetworkManager::OnSlowPositionTimerElapsed()
     {
-        SendSlowPositionPacket();
         if(m_simPaused) {
             SendZeroVelocityFastPositionPacket();
         }
         else if(!PositionalVelocityIsZero(m_userAircraftData)) {
             SendFastPositionPacket(true);
         }
+        SendSlowPositionPacket();
     }
 
     void NetworkManager::OnFastPositionTimerElapsed()
