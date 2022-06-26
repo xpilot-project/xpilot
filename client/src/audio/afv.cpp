@@ -62,7 +62,7 @@ namespace xpilot
         afv_native::setLogger(gLogger, this);
 
         ev_base = event_base_new();
-        m_client = std::make_shared<afv_native::Client>(ev_base, 2, "xPilot");
+        m_client = std::make_shared<afv_native::Client>(ev_base, 2, QString("xPilot %1").arg(BuildConfig::getVersionString()));
         m_client->ClientEventCallback.addCallback(nullptr, [&](afv_native::ClientEventType evt, void* data)
         {
             switch(evt)
