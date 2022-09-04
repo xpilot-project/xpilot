@@ -161,6 +161,11 @@ jobs:
             --output=appimage \
             --create-desktop-file \
             --executable=${{ env.CLIENT_DIR }}/build/bin/xpilot \
+            --library=${{ github.workspace }}/client/externals/linux/libcrypto/libssl.so.1.1 \
+            --library=${{ github.workspace }}/client/externals/linux/libcrypto/libcrypto.so.1.1 \
+            --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/afalg.so \
+            --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/capi.so \
+            --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/padlock.so \
             --appdir=AppDir \
             --icon-file=${{ env.CLIENT_DIR }}/xpilot.png
           mkdir -p ${{ github.workspace }}/output && mv xpilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
