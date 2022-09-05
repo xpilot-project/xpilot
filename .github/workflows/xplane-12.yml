@@ -8,7 +8,7 @@ on:
       - 'v*'
 
 concurrency:
-  group: ${{ github.ref }}
+  group: ${{ github.ref }}-xplane12
   cancel-in-progress: true
 
 env:
