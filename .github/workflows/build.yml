@@ -29,7 +29,7 @@ jobs:
   
   build-linux:
 
-    #if: ${{ false }}
+    if: ${{ false }}
 
     runs-on: ${{ matrix.os }}
     
@@ -230,34 +230,63 @@ jobs:
           pip3 install conan
           pip3 install conan_package_tools
 
-      ### Buid Plugin ###
+      ### Buid X-Plane 11 Plugin ###
 
-      - name: Create plugin build directory
+      - name: Create X-Plane 11 plugin build directory
         working-directory: ${{ env.PLUGIN_DIR }}
         run: |
-          cmake -E make_directory build
+          cmake -E make_directory build_11
 
       - name: Install plugin conan packages
-        working-directory: ${{ env.PLUGIN_DIR }}/build
+        working-directory: ${{ env.PLUGIN_DIR }}/build_11
         run: |
           conan install .. -s compiler.runtime=MT --build=missing
 
       - name: Plugin CMake
-        working-directory: ${{ env.PLUGIN_DIR }}/build
+        working-directory: ${{ env.PLUGIN_DIR }}/build_11
         run: |
           cmake ..
 
       - name: Build plugin
-        working-directory: ${{ env.PLUGIN_DIR }}/build
+        working-directory: ${{ env.PLUGIN_DIR }}/build_11
         run: |
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
       - name: Package plugin
         run: |
-          mkdir -p ${{ github.workspace }}/xPilot/win_x64
-          cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.xpl ${{ github.workspace }}/xPilot/win_x64
-          cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.pdb ${{ github.workspace }}/xPilot/win_x64
-          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
+          mkdir -p ${{ github.workspace }}/xPilot_11/win_x64
+          cp ${{ env.PLUGIN_DIR }}/build_11/win_x64/xPilot.xpl ${{ github.workspace }}/xPilot_11/win_x64
+          cp ${{ env.PLUGIN_DIR }}/build_11/win_x64/xPilot.pdb ${{ github.workspace }}/xPilot_11/win_x64
+          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot_11/
+
+      ### Buid X-Plane 12 Plugin ###
+
+      - name: Create X-Plane 12 plugin build directory
+        working-directory: ${{ env.PLUGIN_DIR }}
+        run: |
+          cmake -E make_directory build_xp12
+
+      - name: Install plugin conan packages
+        working-directory: ${{ env.PLUGIN_DIR }}/build_xp12
+        run: |
+          conan install .. -s compiler.runtime=MT --build=missing
+
+      - name: Plugin CMake
+        working-directory: ${{ env.PLUGIN_DIR }}/build_xp12
+        run: |
+          cmake ..
+
+      - name: Build plugin
+        working-directory: ${{ env.PLUGIN_DIR }}/build_xp12
+        run: |
+          cmake --build . --config ${{ env.BUILD_TYPE }}
+
+      - name: Package plugin
+        run: |
+          mkdir -p ${{ github.workspace }}/xPilot_12/win_x64
+          cp ${{ env.PLUGIN_DIR }}/build_xp12/win_x64/xPilot.xpl ${{ github.workspace }}/xPilot_12/win_x64
+          cp ${{ env.PLUGIN_DIR }}/build_xp12/win_x64/xPilot.pdb ${{ github.workspace }}/xPilot_12/win_x64
+          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot_12/
 
       ### Build Client ###
 
@@ -327,7 +356,7 @@ jobs:
           ${{ env.IB_DIR }}/bin/builder-cli.exe --version
           echo "$IB_LICENSE" > lic.xml
           echo "CLIENT_BUILD_DIR=$XPILOT_BIN_DIR" >> $GITHUB_ENV
-          echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
+          echo "PLUGIN_WORKSPACE=${{ github.workspace }}" >> $GITHUB_ENV
 
       - name: Create installer
         shell: bash
@@ -348,7 +377,7 @@ jobs:
   
   build-macos:
 
-    #if: ${{ false }}
+    if: ${{ false }}
   
     runs-on: macos-latest
 
