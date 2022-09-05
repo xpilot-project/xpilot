@@ -100,7 +100,7 @@
                     <distributionFileList>
                         <distributionFile>
                             <allowWildcards>1</allowWildcards>
-                            <origin>${PLUGIN_WORKSPACE}/${pluginVersion}/*</origin>
+                            <origin>${plugin_build_dir}/*</origin>
                         </distributionFile>
                     </distributionFileList>
                     <ruleList>
@@ -141,10 +141,10 @@
             </ruleList>
         </setInstallerVariable>
         <setInstallerVariable>
-            <name>PLUGIN_WORKSPACE</name>
-            <value>${env(PLUGIN_WORKSPACE)}</value>
+            <name>plugin_build_dir</name>
+            <value>${env(PLUGIN_BUILD_DIR)}</value>
             <ruleList>
-                <compareText logic="does_not_equal" text="${env(PLUGIN_WORKSPACE)}" value=""/>
+                <compareText logic="does_not_equal" text="${env(PLUGIN_BUILD_DIR)}" value=""/>
             </ruleList>
         </setInstallerVariable>
     </preBuildActionList>
@@ -293,28 +293,11 @@
         </runProgram>
     </finalPageActionList>
     <parameterList>
-        <choiceParameter>
-            <name>pluginVersion</name>
-            <ask>1</ask>
-            <default>xp11</default>
-            <description>Please choose your X-Plane version. The xPilot plugin will not work if you choose the wrong version.</description>
-            <title>Select X-Plane Version</title>
-            <optionList>
-                <option>
-                    <value>xPilot_11</value>
-                    <text>X-Plane 11</text>
-                </option>
-                <option>
-                    <value>xPilot_12</value>
-                    <text>X-Plane 12</text>
-                </option>
-            </optionList>
-        </choiceParameter>
         <directoryParameter>
             <name>xplanepath</name>
             <title>X-Plane 11 Location</title>
             <description></description>
-            <explanation>Please browse to the folder where X-Plane is installed so that the xPilot plugin can be installed.
+            <explanation>Please browse to the folder where X-Plane 11 is installed so that the xPilot plugin can be installed.
 
 Advanced Users: If X-Plane is not installed on this computer, leave the folder path empty to skip installing the plugin. You will need to run the installer on the computer where X-Plane is installed to install the plugin.</explanation>
             <value></value>

@@ -1,4 +1,4 @@
-name: Build xPilot
+name: Build xPilot (X-Plane 11)
 
 on:
   push:
@@ -230,63 +230,34 @@ jobs:
           pip3 install conan
           pip3 install conan_package_tools
 
-      ### Buid X-Plane 11 Plugin ###
+      ### Buid Plugin ###
 
-      - name: Create X-Plane 11 plugin build directory
+      - name: Create plugin build directory
         working-directory: ${{ env.PLUGIN_DIR }}
         run: |
-          cmake -E make_directory build_11
+          cmake -E make_directory build
 
       - name: Install plugin conan packages
-        working-directory: ${{ env.PLUGIN_DIR }}/build_11
+        working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
           conan install .. -s compiler.runtime=MT --build=missing
 
       - name: Plugin CMake
-        working-directory: ${{ env.PLUGIN_DIR }}/build_11
+        working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
           cmake ..
 
       - name: Build plugin
-        working-directory: ${{ env.PLUGIN_DIR }}/build_11
+        working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
       - name: Package plugin
         run: |
-          mkdir -p ${{ github.workspace }}/xPilot_11/win_x64
-          cp ${{ env.PLUGIN_DIR }}/build_11/win_x64/xPilot.xpl ${{ github.workspace }}/xPilot_11/win_x64
-          cp ${{ env.PLUGIN_DIR }}/build_11/win_x64/xPilot.pdb ${{ github.workspace }}/xPilot_11/win_x64
-          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot_11/
-
-      ### Buid X-Plane 12 Plugin ###
-
-      - name: Create X-Plane 12 plugin build directory
-        working-directory: ${{ env.PLUGIN_DIR }}
-        run: |
-          cmake -E make_directory build_xp12
-
-      - name: Install plugin conan packages
-        working-directory: ${{ env.PLUGIN_DIR }}/build_xp12
-        run: |
-          conan install .. -s compiler.runtime=MT --build=missing
-
-      - name: Plugin CMake
-        working-directory: ${{ env.PLUGIN_DIR }}/build_xp12
-        run: |
-          cmake ..
-
-      - name: Build plugin
-        working-directory: ${{ env.PLUGIN_DIR }}/build_xp12
-        run: |
-          cmake --build . --config ${{ env.BUILD_TYPE }}
-
-      - name: Package plugin
-        run: |
-          mkdir -p ${{ github.workspace }}/xPilot_12/win_x64
-          cp ${{ env.PLUGIN_DIR }}/build_xp12/win_x64/xPilot.xpl ${{ github.workspace }}/xPilot_12/win_x64
-          cp ${{ env.PLUGIN_DIR }}/build_xp12/win_x64/xPilot.pdb ${{ github.workspace }}/xPilot_12/win_x64
-          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot_12/
+          mkdir -p ${{ github.workspace }}/xPilot/win_x64
+          cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.xpl ${{ github.workspace }}/xPilot/win_x64
+          cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.pdb ${{ github.workspace }}/xPilot/win_x64
+          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
       ### Build Client ###
 
