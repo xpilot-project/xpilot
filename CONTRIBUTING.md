@@ -10,7 +10,7 @@ The first thing you should do is search through the [issues](https://github.com/
 Pull requests are the easiest (and most preferred) way to contribute changes because they offer a clean way for commenting and revising of proposed changes.
 
 1. Create a  [GitHub account](https://github.com/join) if you don't already have one.
-2. `Fork` the project repository by clicking the **Fork** button on top right of the repository page. ![fork](https://help.github.com/assets/images/help/repository/fork_button.jpg) 
+2. `Fork` the project repository by clicking the **Fork** button on top right of the repository page. ![fork](https://docs.github.com/assets/cb-23088/images/help/repository/fork_button.png) 
 3. `Clone` your forked repository `git clone https://github.com/xpilot-project/xpilot.git`
 4. Add a new feature branch `git checkout -b my-feature-branch`
 5. Make changes to the code and commit them locally (your commit message should describe what the changes are)
