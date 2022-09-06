@@ -76,7 +76,7 @@
                     <distributionFileList>
                         <distributionFile>
                             <allowWildcards>1</allowWildcards>
-                            <origin>${client_build_dir}/*</origin>
+                            <origin>${client_dir}/*</origin>
                         </distributionFile>
                     </distributionFileList>
                 </folder>
@@ -100,7 +100,7 @@
                     <distributionFileList>
                         <distributionFile>
                             <allowWildcards>1</allowWildcards>
-                            <origin>${plugin_build_dir}/*</origin>
+                            <origin>${plugin_dir}/*</origin>
                         </distributionFile>
                     </distributionFileList>
                     <ruleList>
@@ -134,17 +134,17 @@
     </componentList>
     <preBuildActionList>
         <setInstallerVariable>
-            <name>client_build_dir</name>
-            <value>${env(CLIENT_BUILD_DIR)}</value>
+            <name>client_dir</name>
+            <value>${env(CLIENT_DIR)}</value>
             <ruleList>
-                <compareText logic="does_not_equal" text="${env(CLIENT_BUILD_DIR)}" value=""/>
+                <compareText logic="does_not_equal" text="${env(CLIENT_DIR)}" value=""/>
             </ruleList>
         </setInstallerVariable>
         <setInstallerVariable>
-            <name>plugin_build_dir</name>
-            <value>${env(PLUGIN_BUILD_DIR)}</value>
+            <name>plugin_dir</name>
+            <value>${env(PLUGIN_DIR)}</value>
             <ruleList>
-                <compareText logic="does_not_equal" text="${env(PLUGIN_BUILD_DIR)}" value=""/>
+                <compareText logic="does_not_equal" text="${env(PLUGIN_DIR)}" value=""/>
             </ruleList>
         </setInstallerVariable>
     </preBuildActionList>
