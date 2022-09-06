@@ -29,7 +29,7 @@ jobs:
   
   build-linux:
 
-    if: ${{ false }}
+    #if: ${{ false }}
 
     runs-on: ${{ matrix.os }}
     
@@ -348,7 +348,7 @@ jobs:
   
   build-macos:
 
-    if: ${{ false }}
+    #if: ${{ false }}
   
     runs-on: macos-latest
 
