@@ -7,10 +7,6 @@ on:
     tags:
       - 'v*'
 
-concurrency:
-  group: ${{ github.ref }}-xplane12
-  cancel-in-progress: true
-
 env:
   QT_VERSION: 5.15.2
   BUILD_TYPE: RelWithDebInfo
