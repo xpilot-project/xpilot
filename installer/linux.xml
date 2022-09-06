@@ -282,9 +282,9 @@ Categories=Application;
     <parameterList>
         <directoryParameter>
             <name>xplanepath</name>
-            <title>X-Plane 11 Location</title>
+            <title>X-Plane Location</title>
             <description></description>
-            <explanation>Please browse to the folder where X-Plane 11 is installed so that the xPilot plugin can be installed.
+            <explanation>Please browse to the folder where X-Plane is installed so that the xPilot plugin can be installed.
 
 Advanced Users: If X-Plane is not installed on this computer, leave the folder path empty to skip installing the plugin. You will need to run the installer on the computer where X-Plane is installed to install the plugin.</explanation>
             <value></value>
