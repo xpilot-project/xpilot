@@ -379,7 +379,7 @@ jobs:
       - name: Install plugin conan packages
         working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
-          conan install .. --build=missing
+          conan install .. --build=missing --build=nng
 
       - name: Plugin CMake
         working-directory: ${{ env.PLUGIN_DIR }}/build
@@ -419,7 +419,7 @@ jobs:
       - name: Install client conan packages
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
-          conan install .. --build=missing --build=nng
+          conan install .. --build=missing
 
       - name: Client CMake
         working-directory: ${{ env.CLIENT_DIR }}/build
