@@ -28,6 +28,7 @@
 #include "XPLMMap.h"
 
 #include <cstdint>
+#include <cmath>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -47,6 +48,9 @@ constexpr float RPM_to_RADs = 0.10471975511966f;
 constexpr double M_per_FT   = 0.3048;   // meter per 1 foot
 /// Convert nautical miles to meters
 constexpr int M_per_NM      = 1852;     // meter per one nautical mile
+/// @brief standard gravitational acceleration [m/s²]
+/// @see https://en.wikipedia.org/wiki/Gravity_of_Earth
+constexpr float G_EARTH     = 9.80665f;
 
 /// The dataRefs provided by XPMP2 to the CSL models
 enum DR_VALS : std::uint8_t {
@@ -205,6 +209,24 @@ public:
     /// @brief Current radar status
     /// @note Only the condition `mode != Standby` is of interest to XPMP2 for considering the aircraft for TCAS display
     XPMPPlaneRadar_t acRadar;
+
+    /// @brief Wake dataRef support
+    /// @see https://developer.x-plane.com/article/plugin-traffic-wake-turbulence/
+    /// @detail If values aren't set during aircraft creation, ie. remain at `NAN`, then defaults will be applied
+    ///         based on the aircraft's wake turbulence category,
+    ///         looked up from the Doc8643 list via ICAO aircraft type designator.
+    struct wakeTy {
+        float wingSpan_m = NAN;             ///< wing span of the aircraft creating wake turbulence
+        float wingArea_m2 = NAN;            ///< wing area (total area of both wings combined) of the aircraft creating wake turbulence
+        float mass_kg = NAN;                ///< actual mass of the aircraft creating the wake
+
+        void clear() { *this = wakeTy(); }  ///< clear all values to defaults
+        bool needsDefaults() const;         ///< any value left at `NAN`, ie. requires setting from Doc8643 WTC defaults?
+        /// based on Doc8643 WTC fill with defaults
+        void applyDefaults(const std::string& _wtc, bool _bOverwriteAllFields = true);
+        /// Copies values only for non-NAN fields
+        void fillUpFrom(const wakeTy& o);
+    } wake;
     
     /// Informational texts passed on via multiplayer shared dataRefs
     XPMPInfoTexts_t acInfoTexts;
@@ -480,6 +502,27 @@ public:
     float GetWeightOnWheel() const { return v[V_MISC_WEIGHT_ON_WHEELS]; }
     void SetWeightOnWheels(bool _b) { v[V_MISC_WEIGHT_ON_WHEELS] = float(_b); }
 
+    // Wake support as per X-Plane 12
+
+    /// @brief Fill in default wake turbulence support data based on Doc8643 wake turbulence category
+    /// @param _bOverwriteAllFields If `false` only overwrites `NAN` values in `wakeTy`
+    void WakeApplyDefaults(bool _bOverwriteAllFields = true);
+
+    float GetWingSpan () const          { return wake.wingSpan_m; }     ///< Wing span [m]
+    void SetWingSpan (float _m)         { wake.wingSpan_m = _m; }       ///< Wing span [m]
+
+    float GetWingArea() const           { return wake.wingArea_m2; }    ///< Wing area [m²]
+    void SetWingArea (float _m2)        { wake.wingArea_m2 = _m2; }     ///< Wing area [m²]
+
+    int GetWakeCat() const;                                             ///< Category between 0=light and 3=Super, derived from WTC
+
+    float GetMass() const               { return wake.mass_kg; }        ///< Mass [kg]
+    void SetMass(float _kg)             { wake.mass_kg = _kg; }         ///< Mass [kg]
+
+    // Overridables:
+    virtual float GetAoA() const        { return GetPitch(); }          ///< Angle of Attach, returns pitch (but you can override in your class)
+    virtual float GetLift() const       { return GetMass() * G_EARTH; } ///< Lift produced. You _should_ override to blend in/out for take-off/landing, but XPMP2 has no dynamic info of your plane, not even an on-the-ground flag
+
     // The following is implemented in Map.cpp:
     /// Determine which map icon to use for this aircraft
     void MapFindIcon ();
@@ -520,6 +563,9 @@ protected:
 
 /// Find aircraft by its plane ID, can return nullptr
 Aircraft* AcFindByID (XPMPPlaneID _id);
+
+/// (Re)Define default wake turbulence values per WTC
+bool AcSetDefaultWakeData(const std::string& _wtc, const Aircraft::wakeTy& _wake);
 
 //
 // MARK: XPMP2 Exception class
