@@ -151,6 +151,7 @@ target_link_libraries(
 	CONAN_PKG::nlohmann_json
     CONAN_PKG::nng
     CONAN_PKG::msgpack-cxx
+    CONAN_PKG::boost
 	${XPMP2_LIBRARY})
 
 if (WIN32 OR APPLE)
