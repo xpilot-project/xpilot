@@ -419,7 +419,7 @@ jobs:
       - name: Install client conan packages
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
-          conan install .. --build=missing
+          conan install .. --build=missing --build=nng
 
       - name: Client CMake
         working-directory: ${{ env.CLIENT_DIR }}/build
