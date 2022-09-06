@@ -34,7 +34,7 @@ jobs:
         os: [ubuntu-latest, ubuntu-18.04]
 
     env:
-      IB_URL: https://installbuilder.com/installbuilder-enterprise-21.12.0-linux-x64-installer.run
+      IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-linux-x64-installer.run
 
     steps:
       - name: Install dependencies
@@ -212,7 +212,7 @@ jobs:
     runs-on: windows-2019
 
     env:
-      IB_URL: https://installbuilder.com/installbuilder-enterprise-21.12.0-windows-x64-installer.exe
+      IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-windows-x64-installer.exe
 
     steps:
 
@@ -349,7 +349,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      IB_URL: https://installbuilder.com/installbuilder-enterprise-21.12.0-osx-installer.dmg
+      IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-osx-installer.dmg
       MIN_VERSION: 10.14
 
     steps:
