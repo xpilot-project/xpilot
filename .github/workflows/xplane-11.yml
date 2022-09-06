@@ -327,7 +327,7 @@ jobs:
           ${{ env.IB_DIR }}/bin/builder-cli.exe --version
           echo "$IB_LICENSE" > lic.xml
           echo "CLIENT_BUILD_DIR=$XPILOT_BIN_DIR" >> $GITHUB_ENV
-          echo "PLUGIN_WORKSPACE=${{ github.workspace }}" >> $GITHUB_ENV
+          echo "PLUGIN_WORKSPACE=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
 
       - name: Create installer
         shell: bash
@@ -537,7 +537,7 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
-          name: xPilot ${{ steps.get_version.outputs.version }}
+          name: xPilot ${{ steps.get_version.outputs.version }} (X-Plane 11)
           prerelease: true
           draft: true
           files: |
