@@ -179,7 +179,7 @@ jobs:
       - name: Setup InstallBuilder
         shell: bash
         run: |
-          curl -k -L ${{ env.IB_URL }} --output ib.run
+          curl -k -L ${{ env.IB_URL }} --output ib.run --retry 5
           chmod +x ib.run
           ./ib.run --mode unattended --prefix ${{ env.IB_DIR }}
           ${{ env.IB_DIR }}/bin/builder --version
@@ -322,7 +322,7 @@ jobs:
       - name: Setup InstallBuilder
         shell: bash
         run: |
-          curl -k -L ${{ env.IB_URL }} --output ib.exe
+          curl -k -L ${{ env.IB_URL }} --output ib.exe --retry 5
           ./ib.exe --mode unattended --prefix ${{ env.IB_DIR  }}
           ${{ env.IB_DIR }}/bin/builder-cli.exe --version
           echo "$IB_LICENSE" > lic.xml
@@ -478,7 +478,7 @@ jobs:
       - name: Setup InstallBuilder
         shell: bash
         run: |
-          curl -k -L ${{ env.IB_URL }} --output ib.dmg
+          curl -k -L ${{ env.IB_URL }} --output ib.dmg --retry 5
           hdiutil attach ib.dmg
           /Volumes/InstallBuilder\ Enterprise/*.app/Contents/MacOS/installbuilder.sh --mode unattended --prefix ${{ env.IB_DIR }}
           ${{ env.IB_DIR }}/bin/builder --version
