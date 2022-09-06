@@ -384,7 +384,7 @@ jobs:
       - name: Plugin CMake
         working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
-          cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_VERSION }} -DBUILD_XP12=1
+          cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_VERSION }} -DCMAKE_OSX_ARCHITECTURES=x86_64;arm64 -DBUILD_XP12=1
 
       - name: Build plugin
         working-directory: ${{ env.PLUGIN_DIR }}/build
