@@ -5,7 +5,6 @@ msgpack-cxx/4.1.0
 boost/1.78.0
 
 [options]
-msgpack-cxx:use_boost=False
 boost:header_only=True
 
 [generators]

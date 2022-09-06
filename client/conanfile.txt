@@ -8,6 +8,10 @@ sentry-native/0.4.12
 sentry-crashpad/0.4.12
 libzip/1.8.0
 nng/1.5.2
+boost/1.78.0
+
+[options]
+boost:header_only=True
 
 [generators]
 cmake
