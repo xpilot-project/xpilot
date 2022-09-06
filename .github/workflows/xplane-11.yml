@@ -326,8 +326,8 @@ jobs:
           ./ib.exe --mode unattended --prefix ${{ env.IB_DIR  }}
           ${{ env.IB_DIR }}/bin/builder-cli.exe --version
           echo "$IB_LICENSE" > lic.xml
-          echo "CLIENT_DIR=$XPILOT_BIN_DIR" >> $GITHUB_ENV
-          echo "PLUGIN_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
+          echo "CLIENT_BUILD_DIR=$XPILOT_BIN_DIR" >> $GITHUB_ENV
+          echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
 
       - name: Create installer
         shell: bash
