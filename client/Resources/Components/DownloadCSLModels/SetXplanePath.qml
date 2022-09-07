@@ -31,7 +31,7 @@ Popup {
 
         Label {
             id: lblXplanePath
-            text: "Please browse to the folder where X-Plane 11 is installed:"
+            text: "Please browse to the folder where X-Plane is installed:"
             font.pixelSize: 14
             renderType: Text.NativeRendering
             wrapMode: Text.WordWrap
@@ -58,7 +58,7 @@ Popup {
 
         FileDialog {
             id: xplanePath
-            title: "Select X-Plane 11 Folder"
+            title: "Select X-Plane Folder"
             selectFolder: true
             onAccepted: {
                 var path = xplanePath.folder.toString()
