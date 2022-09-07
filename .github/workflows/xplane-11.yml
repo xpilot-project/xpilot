@@ -194,14 +194,14 @@ jobs:
       - name: Rename Installer
         shell: bash
         run: |
-          mv xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run xPilot-${{ env.XPILOT_VERSION }}-linux-x64-${{ matrix.os }}-installer.run
+          mv xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run xPilot-${{ env.XPILOT_VERSION }}-linux-x64-${{ matrix.os }}-XP11.run
 
       - name: Upload installer and plugin files
         uses: actions/upload-artifact@v2
         with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-Linux-x64-${{ matrix.os }}.zip
+          name: xPilot-${{ env.XPILOT_VERSION }}-linux-x64-${{ matrix.os }}-XP11.zip
           path: |
-            xPilot-${{ env.XPILOT_VERSION }}-linux-x64-${{ matrix.os }}-installer.run
+            xPilot-${{ env.XPILOT_VERSION }}-linux-x64-${{ matrix.os }}-XP11.run
 
   ########################## Build Windows ##########################
   
@@ -333,12 +333,17 @@ jobs:
               --setvars project.outputDirectory=$(pwd) \
               --setvars project.version=${{ env.XPILOT_VERSION }}
 
+      - name: Rename Installer
+        shell: bash
+        run: |
+          mv xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe xPilot-${{ env.XPILOT_VERSION }}-Windows-XP11.exe
+
       - name: Upload installer and plugin files
         uses: actions/upload-artifact@v2
         with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-Windows.zip
+          name: xPilot-${{ env.XPILOT_VERSION }}-Windows-XP11.zip
           path: |
-            xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe
+            xPilot-${{ env.XPILOT_VERSION }}-Windows-XP11.exe
 
   ########################## Build macOS ##########################
   
@@ -492,6 +497,11 @@ jobs:
               --setvars apple_signing_identity=${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }} \
               --setvars password=${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
 
+      - name: Rename Installer
+        shell: bash
+        run: |
+          mv xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg xPilot-${{ env.XPILOT_VERSION }}-macOS-XP11.dmg
+
       - name: Notarize installer
         shell: bash
         run: |
@@ -499,14 +509,14 @@ jobs:
           --primary-bundle-id "org.vatsim.xpilot" \
           --username "${{ secrets.NOTARIZATION_USERNAME }}" \
           --password "${{ secrets.NOTARIZATION_PASSWORD }}" \
-          --file xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
+          --file xPilot-${{ env.XPILOT_VERSION }}-macOS-XP11.dmg
 
       - name: Upload installer and plugin files
         uses: actions/upload-artifact@v2
         with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip
+          name: xPilot-${{ env.XPILOT_VERSION }}-macOS-XP11.zip
           path: |
-            xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg
+            xPilot-${{ env.XPILOT_VERSION }}-macOS-XP11.dmg
 
   ########################## Create Release ##########################
 
