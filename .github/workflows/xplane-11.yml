@@ -67,7 +67,7 @@ jobs:
       - name: Plugin CMake
         working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
-          cmake ..
+          cmake .. -DBUILD_XP12=0
 
       - name: Build plugin
         working-directory: ${{ env.PLUGIN_DIR }}/build
@@ -115,7 +115,8 @@ jobs:
             -DSENTRY_DSN=${{ env.SENTRY_DSN }} \
             -DSENTRY_BACKEND=crashpad \
             -DSENTRY_INTEGRATION_QT=YES \
-            -DLINUX_BUILD_TYPE=${{ matrix.os }}
+            -DLINUX_BUILD_TYPE=${{ matrix.os }} \
+            -DBUILD_XP12=0
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}/build
@@ -241,7 +242,7 @@ jobs:
       - name: Plugin CMake
         working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
-          cmake ..
+          cmake .. -DBUILD_XP12=0
 
       - name: Build plugin
         working-directory: ${{ env.PLUGIN_DIR }}/build
@@ -276,7 +277,7 @@ jobs:
       - name: Client CMake
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
-          cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} -DSENTRY_DSN=${{ env.SENTRY_DSN }} -DSENTRY_BACKEND=crashpad -DSENTRY_INTEGRATION_QT=YES
+          cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} -DSENTRY_DSN=${{ env.SENTRY_DSN }} -DSENTRY_BACKEND=crashpad -DSENTRY_INTEGRATION_QT=YES -DBUILD_XP12=0
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}/build
@@ -389,7 +390,7 @@ jobs:
       - name: Plugin CMake
         working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
-          cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_VERSION }}
+          cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_VERSION }} -DBUILD_XP12=0
 
       - name: Build plugin
         working-directory: ${{ env.PLUGIN_DIR }}/build
@@ -437,7 +438,8 @@ jobs:
             -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
             -DSENTRY_DSN=${{ env.SENTRY_DSN }} \
             -DSENTRY_BACKEND=crashpad \
-            -DSENTRY_INTEGRATION_QT=YES
+            -DSENTRY_INTEGRATION_QT=YES \
+            -DBUILD_XP12=0
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}/build
