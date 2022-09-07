@@ -60,6 +60,7 @@ include_directories("${CMAKE_SOURCE_DIR}/externals/ImgWindow")
 include_directories("${CMAKE_SOURCE_DIR}/externals/XPMP2")
 include_directories("${CMAKE_SOURCE_DIR}/externals/SDK/CHeaders/XPLM")
 include_directories("${CMAKE_SOURCE_DIR}/externals/${FMOD_PATH}/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../nng/include")
 
 set(Header_Files
   include/AircraftManager.h
@@ -129,7 +130,13 @@ elseif (WIN32)
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/XPMP2/win")
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/sdk/Libraries/Win")
 	list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/${FMOD_PATH}/win")
+    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../nng/win")
 endif()
+
+# Link NNG
+find_library(NNG_LIB nng REQUIRED)
+message("NNG_LIB=${NNG_LIB}")
+target_link_libraries(${PROJECT_NAME} ${NNG_LIB})
 
 # Link the XPMP2 library
 find_library(XPMP2_LIBRARY XPMP2 REQUIRED)
@@ -153,7 +160,6 @@ endif()
 target_link_libraries(
   ${PROJECT_NAME}
 	CONAN_PKG::nlohmann_json
-    CONAN_PKG::nng
     CONAN_PKG::msgpack-cxx
     CONAN_PKG::boost
 	${XPMP2_LIBRARY})
@@ -239,3 +245,5 @@ set_target_properties(${PROJECT_NAME}
     OUTPUT_NAME "xPilot"
     SUFFIX ".xpl"
 )
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC -DNNG_STATIC_LIB)

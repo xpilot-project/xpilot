@@ -1,6 +1,5 @@
 [requires]
 nlohmann_json/3.10.3
-nng/1.5.2
 msgpack-cxx/4.1.0
 boost/1.78.0
 
