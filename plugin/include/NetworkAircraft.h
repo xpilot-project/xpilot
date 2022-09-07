@@ -106,6 +106,8 @@ namespace xpilot {
 		void RecordTerrainElevationHistory(double currentTimestamp);
 		void UpdateVelocityVectors();
 
+		float GetLift() const override;
+
 		FlightModel GetFlightModel(const XPMP2::CSLModelInfo_t model);
 
 		bool IsFirstRenderPending = true;

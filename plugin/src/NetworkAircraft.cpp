@@ -540,6 +540,12 @@ namespace xpilot {
 		modelMatches.push_back({ "MediumJets", ".*" });
 	}
 
+	float NetworkAircraft::GetLift() const
+	{
+		// No wake if the aircraft is reported on the ground
+		return IsReportedOnGround ? 0.0f : GetMass() * XPMP2::G_EARTH;
+	}
+
 	FlightModel NetworkAircraft::GetFlightModel(const XPMP2::CSLModelInfo_t model) {
 		std::string classification = string_format("%s;%s;%s;", model.doc8643WTC.c_str(), model.doc8643Classification.c_str(), model.icaoType.c_str());
 		std::string category = "MediumJets";
