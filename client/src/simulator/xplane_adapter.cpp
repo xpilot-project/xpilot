@@ -219,7 +219,10 @@ void XplaneAdapter::processPacket(const BaseDto &packet)
 
         if(!dto.isValid) {
             m_validCsl = false;
-            emit invalidCslConfiguration();
+            if(!m_cslValidated) {
+                emit invalidCslConfiguration(); // only show invalid CSL warning once
+                m_cslValidated = true;
+            }
         }
         m_initialHandshake = true;
     }

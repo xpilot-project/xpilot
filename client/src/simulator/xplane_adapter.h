@@ -123,6 +123,7 @@ private:
     bool m_simConnected = false;
     bool m_initialHandshake = false;
     bool m_validPluginVersion = true;
+    bool m_cslValidated = false;
     bool m_validCsl = true;
     bool m_simPaused = false;
 
