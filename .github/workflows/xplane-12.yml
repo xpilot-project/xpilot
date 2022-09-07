@@ -115,7 +115,8 @@ jobs:
             -DSENTRY_DSN=${{ env.SENTRY_DSN }} \
             -DSENTRY_BACKEND=crashpad \
             -DSENTRY_INTEGRATION_QT=YES \
-            -DLINUX_BUILD_TYPE=${{ matrix.os }}
+            -DLINUX_BUILD_TYPE=${{ matrix.os }} \
+            -DBUILD_XP12=1
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}/build
@@ -276,7 +277,7 @@ jobs:
       - name: Client CMake
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
-          cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} -DSENTRY_DSN=${{ env.SENTRY_DSN }} -DSENTRY_BACKEND=crashpad -DSENTRY_INTEGRATION_QT=YES
+          cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} -DSENTRY_DSN=${{ env.SENTRY_DSN }} -DSENTRY_BACKEND=crashpad -DSENTRY_INTEGRATION_QT=YES -DBUILD_XP12=1
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}/build
@@ -437,7 +438,8 @@ jobs:
             -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
             -DSENTRY_DSN=${{ env.SENTRY_DSN }} \
             -DSENTRY_BACKEND=crashpad \
-            -DSENTRY_INTEGRATION_QT=YES
+            -DSENTRY_INTEGRATION_QT=YES \
+            -DBUILD_XP12=1
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}/build
