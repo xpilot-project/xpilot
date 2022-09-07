@@ -248,4 +248,6 @@ set_target_properties(${PROJECT_NAME}
     SUFFIX ".xpl"
 )
 
+if(WIN32)
 target_compile_definitions(${PROJECT_NAME} PUBLIC -DNNG_STATIC_LIB)
+endif()

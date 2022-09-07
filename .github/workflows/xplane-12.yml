@@ -209,7 +209,7 @@ jobs:
 
     #if: ${{ false }}
 
-    runs-on: windows-2019
+    runs-on: windows-latest
 
     env:
       IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-windows-x64-installer.exe
