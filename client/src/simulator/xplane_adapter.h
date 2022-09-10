@@ -157,6 +157,11 @@ private:
             }
         }
     }
+
+    typedef struct rref_data_type {
+        int idx;
+        float val;
+    } rref_data_type;
 };
 
 #endif

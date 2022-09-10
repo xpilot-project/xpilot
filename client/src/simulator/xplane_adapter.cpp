@@ -415,203 +415,196 @@ void XplaneAdapter::transponderModeToggle()
 
 void XplaneAdapter::OnDataReceived()
 {
-    while(socket->hasPendingDatagrams())
+    QByteArray buffer;
+    QHostAddress fromAddress;
+
+    buffer.resize(socket->pendingDatagramSize());
+    socket->readDatagram(buffer.data(), buffer.size(), &fromAddress);
+
+    if(fromAddress.toIPv4Address() != m_hostAddress.toIPv4Address())
+        return;
+
+    if(strncmp(buffer.constData(), "RREF", 4) == 0)
     {
-        QByteArray buffer;
-        QHostAddress fromAddress;
+        m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch();
 
-        buffer.resize(socket->pendingDatagramSize());
-        socket->readDatagram(buffer.data(), buffer.size(), &fromAddress);
+        int num_structs = (buffer.size() - 5) / sizeof(rref_data_type);
+        const rref_data_type *f = reinterpret_cast<const rref_data_type*>(buffer.constData() + 5);
 
-        if(fromAddress.toIPv4Address() != m_hostAddress.toIPv4Address())
-            return;
-
-        int pos = 0;
-        QString header = QString::fromUtf8(buffer.mid(pos, 4));
-        pos += 5;
-
-        if(header == "RREF")
+        for(int i = 0; i < num_structs; i+= 1)
         {
-            m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch();
+            float value = f[i].val;
 
-            while(pos < buffer.length())
+            switch(f[i].idx)
             {
-                int id = *(reinterpret_cast<const int*>(buffer.mid(pos, 4).constData()));
-                pos += 4;
-
-                float value = *(reinterpret_cast<const float*>(buffer.mid(pos, 4).constData()));
-                pos += 4;
-
-                switch(id) {
-                    case DataRef::AvionicsPower:
-                        m_radioStackState.AvionicsPowerOn = value;
-                        break;
-                    case DataRef::AudioComSelection:
-                        if(value == 6) {
-                            m_radioStackState.Com1TransmitEnabled = true;
-                            m_radioStackState.Com2TransmitEnabled = false;
-                        } else if(value == 7) {
-                            m_radioStackState.Com1TransmitEnabled = false;
-                            m_radioStackState.Com2TransmitEnabled = true;
-                        }
-                        break;
-                    case DataRef::Com1AudioSelection:
-                        m_radioStackState.Com1ReceiveEnabled = value;
-                        break;
-                    case DataRef::Com2AudioSelection:
-                        m_radioStackState.Com2ReceiveEnabled = value;
-                        break;
-                    case DataRef::Com1Frequency:
-                        m_radioStackState.Com1Frequency = value;
-                        break;
-                    case DataRef::Com2Frequency:
-                        m_radioStackState.Com2Frequency = value;
-                        break;
-                    case DataRef::Com1Volume:
-                        {
-                            int volume = qRound(value * 100);
-                            volume = (volume > 100) ? 100 : volume;
-                            volume = (volume < 0) ? 0 : volume;
-                            m_radioStackState.Com1Volume = volume;
-                        }
-                        break;
-                    case DataRef::Com2Volume:
-                        {
-                            int volume = qRound(value * 100);
-                            volume = (volume > 100) ? 100 : volume;
-                            volume = (volume < 0) ? 0 : volume;
-                            m_radioStackState.Com2Volume = volume;
-                        }
-                        break;
-                    case DataRef::TransponderIdent:
-                        m_radioStackState.SquawkingIdent = value;
-                        break;
-                    case DataRef::TransponderMode:
-                        m_radioStackState.SquawkingModeC = value >= 2;
-                        break;
-                    case DataRef::TransponderCode:
-                        m_radioStackState.TransponderCode = value;
-                        break;
-                    case DataRef::Latitude:
-                        m_userAircraftData.Latitude = value;
-                        break;
-                    case DataRef::Longitude:
-                        m_userAircraftData.Longitude = value;
-                        break;
-                    case DataRef::Heading:
-                        m_userAircraftData.Heading = value;
-                        break;
-                    case DataRef::Pitch:
-                        m_userAircraftData.Pitch = value;
-                        break;
-                    case DataRef::Bank:
-                        m_userAircraftData.Bank = value;
-                        break;
-                    case DataRef::AltitudeMsl:
-                        m_userAircraftData.AltitudeMslM = value;
-                        break;
-                    case DataRef::AltitudeAgl:
-                        m_userAircraftData.AltitudeAglM = value;
-                        break;
-                    case DataRef::BarometerSeaLevel:
-                        m_userAircraftData.BarometerSeaLevel = value * 33.8639; // inHg to millibar
-                        break;
-                    case DataRef::LatitudeVelocity:
-                        m_userAircraftData.LatitudeVelocity = value * -1.0;
-                        break;
-                    case DataRef::AltitudeVelocity:
-                        m_userAircraftData.AltitudeVelocity = value;
-                        break;
-                    case DataRef::LongitudeVelocity:
-                        m_userAircraftData.LongitudeVelocity = value;
-                        break;
-                    case DataRef::PitchVelocity:
-                        m_userAircraftData.PitchVelocity = value * -1.0;
-                        break;
-                    case DataRef::HeadingVelocity:
-                        m_userAircraftData.HeadingVelocity = value;
-                        break;
-                    case DataRef::BankVelocity:
-                        m_userAircraftData.BankVelocity = value * -1.0;
-                        break;
-                    case DataRef::GroundSpeed:
-                        m_userAircraftData.GroundSpeed = value * 1.94384; // mps -> knots
-                        break;
-                    case DataRef::BeaconLights:
-                        m_userAircraftConfigData.BeaconOn = value;
-                        break;
-                    case DataRef::LandingLights:
-                        m_userAircraftConfigData.LandingLightsOn = value;
-                        break;
-                    case DataRef::TaxiLights:
-                        m_userAircraftConfigData.TaxiLightsOn = value;
-                        break;
-                    case DataRef::NavLights:
-                        m_userAircraftConfigData.NavLightsOn = value;
-                        break;
-                    case DataRef::StrobeLights:
-                        m_userAircraftConfigData.StrobesOn = value;
-                        break;
-                    case DataRef::EngineCount:
-                        m_userAircraftConfigData.EngineCount = value;
-                        break;
-                    case DataRef::Engine1Running:
-                        m_userAircraftConfigData.Engine1Running = value;
-                        break;
-                    case DataRef::Engine2Running:
-                        m_userAircraftConfigData.Engine2Running = value;
-                        break;
-                    case DataRef::Engine3Running:
-                        m_userAircraftConfigData.Engine3Running = value;
-                        break;
-                    case DataRef::Engine4Running:
-                        m_userAircraftConfigData.Engine4Running = value;
-                        break;
-                    case DataRef::Engine1Reversing:
-                        m_userAircraftConfigData.Engine1Reversing = (value == 3);
-                        break;
-                    case DataRef::Engine2Reversing:
-                        m_userAircraftConfigData.Engine2Reversing = (value == 3);
-                        break;
-                    case DataRef::Engine3Reversing:
-                        m_userAircraftConfigData.Engine3Reversing = (value == 3);
-                        break;
-                    case DataRef::Engine4Reversing:
-                        m_userAircraftConfigData.Engine4Reversing = (value == 3);
-                        break;
-                    case DataRef::OnGround:
-                        m_userAircraftConfigData.OnGround = value;
-                        break;
-                    case DataRef::GearDown:
-                        m_userAircraftConfigData.GearDown = value;
-                        break;
-                    case DataRef::FlapRatio:
-                        m_userAircraftConfigData.FlapsRatio = value;
-                        break;
-                    case DataRef::SpeedbrakeRatio:
-                        m_userAircraftConfigData.SpeedbrakeRatio = value;
-                        break;
-                    case DataRef::NoseWheelAngle:
-                        m_userAircraftData.NoseWheelAngle = value;
-                        break;
-                    case DataRef::ReplayMode:
-                        if(value > 0) {
-                            emit replayModeDetected();
-                        }
-                        break;
-                    case DataRef::Paused:
-                        if(value != m_simPaused) {
-                            emit simPausedStateChanged(value > 0);
-                            m_simPaused = value;
-                        }
-                        break;
-                    case DataRef::PushToTalk:
-                        (value > 0) ? emit pttPressed() : emit pttReleased();
-                        break;
-                    case DataRef::SelcalMuteOverride:
-                        m_radioStackState.SelcalMuteOverride = value > 0;
-                        break;
-                }
+                case DataRef::AvionicsPower:
+                    m_radioStackState.AvionicsPowerOn = value;
+                    break;
+                case DataRef::AudioComSelection:
+                    if(value == 6) {
+                        m_radioStackState.Com1TransmitEnabled = true;
+                        m_radioStackState.Com2TransmitEnabled = false;
+                    } else if(value == 7) {
+                        m_radioStackState.Com1TransmitEnabled = false;
+                        m_radioStackState.Com2TransmitEnabled = true;
+                    }
+                    break;
+                case DataRef::Com1AudioSelection:
+                    m_radioStackState.Com1ReceiveEnabled = value;
+                    break;
+                case DataRef::Com2AudioSelection:
+                    m_radioStackState.Com2ReceiveEnabled = value;
+                    break;
+                case DataRef::Com1Frequency:
+                    m_radioStackState.Com1Frequency = value;
+                    break;
+                case DataRef::Com2Frequency:
+                    m_radioStackState.Com2Frequency = value;
+                    break;
+                case DataRef::Com1Volume:
+                    {
+                        int volume = qRound(value * 100);
+                        volume = (volume > 100) ? 100 : volume;
+                        volume = (volume < 0) ? 0 : volume;
+                        m_radioStackState.Com1Volume = volume;
+                    }
+                    break;
+                case DataRef::Com2Volume:
+                    {
+                        int volume = qRound(value * 100);
+                        volume = (volume > 100) ? 100 : volume;
+                        volume = (volume < 0) ? 0 : volume;
+                        m_radioStackState.Com2Volume = volume;
+                    }
+                    break;
+                case DataRef::TransponderIdent:
+                    m_radioStackState.SquawkingIdent = value;
+                    break;
+                case DataRef::TransponderMode:
+                    m_radioStackState.SquawkingModeC = value >= 2;
+                    break;
+                case DataRef::TransponderCode:
+                    m_radioStackState.TransponderCode = value;
+                    break;
+                case DataRef::Latitude:
+                    m_userAircraftData.Latitude = value;
+                    break;
+                case DataRef::Longitude:
+                    m_userAircraftData.Longitude = value;
+                    break;
+                case DataRef::Heading:
+                    m_userAircraftData.Heading = value;
+                    break;
+                case DataRef::Pitch:
+                    m_userAircraftData.Pitch = value;
+                    break;
+                case DataRef::Bank:
+                    m_userAircraftData.Bank = value;
+                    break;
+                case DataRef::AltitudeMsl:
+                    m_userAircraftData.AltitudeMslM = value;
+                    break;
+                case DataRef::AltitudeAgl:
+                    m_userAircraftData.AltitudeAglM = value;
+                    break;
+                case DataRef::BarometerSeaLevel:
+                    m_userAircraftData.BarometerSeaLevel = value * 33.8639; // inHg to millibar
+                    break;
+                case DataRef::LatitudeVelocity:
+                    m_userAircraftData.LatitudeVelocity = value * -1.0;
+                    break;
+                case DataRef::AltitudeVelocity:
+                    m_userAircraftData.AltitudeVelocity = value;
+                    break;
+                case DataRef::LongitudeVelocity:
+                    m_userAircraftData.LongitudeVelocity = value;
+                    break;
+                case DataRef::PitchVelocity:
+                    m_userAircraftData.PitchVelocity = value * -1.0;
+                    break;
+                case DataRef::HeadingVelocity:
+                    m_userAircraftData.HeadingVelocity = value;
+                    break;
+                case DataRef::BankVelocity:
+                    m_userAircraftData.BankVelocity = value * -1.0;
+                    break;
+                case DataRef::GroundSpeed:
+                    m_userAircraftData.GroundSpeed = value * 1.94384; // mps -> knots
+                    break;
+                case DataRef::BeaconLights:
+                    m_userAircraftConfigData.BeaconOn = value;
+                    break;
+                case DataRef::LandingLights:
+                    m_userAircraftConfigData.LandingLightsOn = value;
+                    break;
+                case DataRef::TaxiLights:
+                    m_userAircraftConfigData.TaxiLightsOn = value;
+                    break;
+                case DataRef::NavLights:
+                    m_userAircraftConfigData.NavLightsOn = value;
+                    break;
+                case DataRef::StrobeLights:
+                    m_userAircraftConfigData.StrobesOn = value;
+                    break;
+                case DataRef::EngineCount:
+                    m_userAircraftConfigData.EngineCount = value;
+                    break;
+                case DataRef::Engine1Running:
+                    m_userAircraftConfigData.Engine1Running = value;
+                    break;
+                case DataRef::Engine2Running:
+                    m_userAircraftConfigData.Engine2Running = value;
+                    break;
+                case DataRef::Engine3Running:
+                    m_userAircraftConfigData.Engine3Running = value;
+                    break;
+                case DataRef::Engine4Running:
+                    m_userAircraftConfigData.Engine4Running = value;
+                    break;
+                case DataRef::Engine1Reversing:
+                    m_userAircraftConfigData.Engine1Reversing = (value == 3);
+                    break;
+                case DataRef::Engine2Reversing:
+                    m_userAircraftConfigData.Engine2Reversing = (value == 3);
+                    break;
+                case DataRef::Engine3Reversing:
+                    m_userAircraftConfigData.Engine3Reversing = (value == 3);
+                    break;
+                case DataRef::Engine4Reversing:
+                    m_userAircraftConfigData.Engine4Reversing = (value == 3);
+                    break;
+                case DataRef::OnGround:
+                    m_userAircraftConfigData.OnGround = value;
+                    break;
+                case DataRef::GearDown:
+                    m_userAircraftConfigData.GearDown = value;
+                    break;
+                case DataRef::FlapRatio:
+                    m_userAircraftConfigData.FlapsRatio = value;
+                    break;
+                case DataRef::SpeedbrakeRatio:
+                    m_userAircraftConfigData.SpeedbrakeRatio = value;
+                    break;
+                case DataRef::NoseWheelAngle:
+                    m_userAircraftData.NoseWheelAngle = value;
+                    break;
+                case DataRef::ReplayMode:
+                    if(value > 0) {
+                        emit replayModeDetected();
+                    }
+                    break;
+                case DataRef::Paused:
+                    if(value != m_simPaused) {
+                        emit simPausedStateChanged(value > 0);
+                        m_simPaused = value;
+                    }
+                    break;
+                case DataRef::PushToTalk:
+                    (value > 0) ? emit pttPressed() : emit pttReleased();
+                    break;
+                case DataRef::SelcalMuteOverride:
+                    m_radioStackState.SelcalMuteOverride = value > 0;
+                    break;
             }
         }
     }
