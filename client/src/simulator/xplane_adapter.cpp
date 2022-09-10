@@ -41,6 +41,7 @@ enum DataRef
     Longitude,
     AltitudeMsl,
     AltitudeAgl,
+    AltitudePressure,
     BarometerSeaLevel,
     GroundSpeed,
     Pitch,
@@ -69,7 +70,8 @@ enum DataRef
     ReplayMode,
     Paused,
     PushToTalk,
-    SelcalMuteOverride
+    SelcalMuteOverride,
+    XplaneVersionNumber
 };
 
 QHostAddress m_hostAddress;
@@ -314,6 +316,7 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/flightmodel/position/longitude", DataRef::Longitude, 5);
     SubscribeDataRef("sim/flightmodel/position/elevation", DataRef::AltitudeMsl, 5);
     SubscribeDataRef("sim/flightmodel/position/y_agl", DataRef::AltitudeAgl, 5);
+    SubscribeDataRef("sim/flightmodel2/position/pressure_altitude", DataRef::AltitudePressure, 5);
     SubscribeDataRef("sim/weather/barometer_sealevel_inhg", DataRef::BarometerSeaLevel, 5);
     SubscribeDataRef("sim/flightmodel/position/theta", DataRef::Pitch, 5);
     SubscribeDataRef("sim/flightmodel/position/psi", DataRef::Heading, 5);
@@ -343,6 +346,7 @@ void XplaneAdapter::Subscribe()
     SubscribeDataRef("sim/time/paused", DataRef::Paused, 5);
     SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 15);
     SubscribeDataRef("xpilot/selcal_mute_override", DataRef::SelcalMuteOverride, 5);
+    SubscribeDataRef("sim/version/xplane_internal_version", DataRef::XplaneVersionNumber, 1);
 }
 
 void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
@@ -507,6 +511,9 @@ void XplaneAdapter::OnDataReceived()
                 case DataRef::AltitudeAgl:
                     m_userAircraftData.AltitudeAglM = value;
                     break;
+                case DataRef::AltitudePressure:
+                    m_userAircraftData.AltitudePressure = value;
+                    break;
                 case DataRef::BarometerSeaLevel:
                     m_userAircraftData.BarometerSeaLevel = value * 33.8639; // inHg to millibar
                     break;
@@ -604,6 +611,9 @@ void XplaneAdapter::OnDataReceived()
                     break;
                 case DataRef::SelcalMuteOverride:
                     m_radioStackState.SelcalMuteOverride = value > 0;
+                    break;
+                case DataRef::XplaneVersionNumber:
+                    m_xplaneVersion = value;
                     break;
             }
         }

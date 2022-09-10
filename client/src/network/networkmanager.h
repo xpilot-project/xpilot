@@ -147,6 +147,9 @@ namespace xpilot
 
         double CalculatePressureAltitude() const
         {
+            if(m_xplaneAdapter.XplaneVersion() >= 120000) {
+                return m_userAircraftData.AltitudePressure;
+            }
             const double deltaPressure = 1013.25 - m_userAircraftData.BarometerSeaLevel;
             const double deltaAltitudeV = deltaPressure * 30.0; // 30.0 ft per millibar
             return (m_userAircraftData.AltitudeMslM * 3.28084) + deltaAltitudeV;

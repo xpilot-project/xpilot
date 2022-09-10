@@ -11,6 +11,7 @@ public:
     double Longitude;
     double AltitudeMslM;
     double AltitudeAglM;
+    double AltitudePressure;
     double BarometerSeaLevel;
     double GroundSpeed;
     double Pitch;
@@ -30,6 +31,7 @@ public:
                 Longitude != other.Longitude ||
                 AltitudeMslM != other.AltitudeMslM ||
                 AltitudeAglM != other.AltitudeAglM ||
+                AltitudePressure != other.AltitudePressure ||
                 BarometerSeaLevel != other.BarometerSeaLevel ||
                 GroundSpeed != other.GroundSpeed ||
                 Pitch != other.Pitch ||
@@ -50,6 +52,7 @@ public:
                 Longitude == other.Longitude &&
                 AltitudeMslM == other.AltitudeMslM &&
                 AltitudeAglM == other.AltitudeAglM &&
+                AltitudePressure == other.AltitudePressure &&
                 BarometerSeaLevel == other.BarometerSeaLevel &&
                 GroundSpeed == other.GroundSpeed &&
                 Pitch == other.Pitch &&

@@ -76,6 +76,8 @@ public:
     void NetworkConnected(QString callsign, QString selcal);
     void NetworkDisconnected();
 
+    int XplaneVersion() const { return m_xplaneVersion; }
+
 private:
     void Subscribe();
     void SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency);
@@ -134,6 +136,8 @@ private:
     QList<QString> m_ignoreList;
     QTimer m_heartbeatTimer;
     QTimer m_xplaneDataTimer;
+
+    int m_xplaneVersion;
 
     bool m_keepSocketAlive = false;
     std::unique_ptr<std::thread> m_socketThread;
