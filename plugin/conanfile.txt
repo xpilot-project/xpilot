@@ -2,6 +2,7 @@
 nlohmann_json/3.10.3
 msgpack-cxx/4.1.0
 boost/1.78.0
+nng/1.5.2
 
 [options]
 boost:header_only=True

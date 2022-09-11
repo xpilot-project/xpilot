@@ -122,11 +122,6 @@ elseif (WIN32)
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/sdk/Libraries/Win")
 endif()
 
-# Link NNG
-find_library(NNG_LIB nng REQUIRED)
-message("NNG_LIB=${NNG_LIB}")
-target_link_libraries(${PROJECT_NAME} ${NNG_LIB})
-
 # Link the XPMP2 library
 find_library(XPMP2_LIBRARY XPMP2 REQUIRED)
 message ("XPMP2_LIBRARY = ${XPMP2_LIBRARY}")
@@ -154,6 +149,7 @@ target_link_libraries(
 	CONAN_PKG::nlohmann_json
     CONAN_PKG::msgpack-cxx
     CONAN_PKG::boost
+    CONAN_PKG::nng
 	${XPMP2_LIBRARY})
 
 if (WIN32 OR APPLE)
@@ -237,7 +233,3 @@ set_target_properties(${PROJECT_NAME}
     OUTPUT_NAME "xPilot"
     SUFFIX ".xpl"
 )
-
-if(WIN32)
-target_compile_definitions(${PROJECT_NAME} PUBLIC -DNNG_STATIC_LIB)
-endif()
