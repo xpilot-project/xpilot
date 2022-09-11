@@ -55,10 +55,6 @@ if(NOT SENTRY_DSN)
     set(SENTRY_DSN "")
 endif ()
 
-if (NOT LINUX_BUILD_TYPE)
-    set(LINUX_BUILD_TYPE "ubuntu-latest")
-endif ()
-
 configure_file(src/common/build_config.cpp.in ${CMAKE_BINARY_DIR}/generated/build_config.cpp)
 include_directories(${CMAKE_BINARY_DIR}/generated)
 

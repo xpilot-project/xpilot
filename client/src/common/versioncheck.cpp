@@ -140,12 +140,9 @@ void VersionCheck::PerformVersionCheck()
                 }
                 else if(BuildConfig::isRunningOnLinuxPlatform())
                 {
-                    if(name.toLower().contains(BuildConfig::getLinuxBuildType().toLower()))
-                    {
-                        emit newVersionAvailable();
-                        m_fileName = name;
-                        m_downloadUrl = downloadUrl;
-                    }
+                    emit newVersionAvailable();
+                    m_fileName = name;
+                    m_downloadUrl = downloadUrl;
                 }
             }
         }
