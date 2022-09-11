@@ -97,8 +97,3 @@ const QString xpilot::BuildConfig::getLinuxBuildType()
 {
     return "@LINUX_BUILD_TYPE@";
 }
-
-bool xpilot::BuildConfig::isXplane12Build()
-{
-    return @BUILD_XP12@;
-}

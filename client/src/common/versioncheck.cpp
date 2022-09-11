@@ -120,9 +120,6 @@ void VersionCheck::PerformVersionCheck()
                 QString name = asset[QLatin1String("name")].toString();
                 QString downloadUrl = asset[QLatin1String("browser_download_url")].toString();
 
-                if(BuildConfig::isXplane12Build() && !name.toLower().contains("xp12"))
-                    continue;
-
                 if(BuildConfig::isRunningOnWindowsPlatform())
                 {
                     if(name.toLower().contains("windows"))

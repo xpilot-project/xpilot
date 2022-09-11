@@ -36,8 +36,6 @@ namespace xpilot
         static const QString getSentryDsn();
 
         static const QString getLinuxBuildType(); // ubuntu-latest, ubuntu-18.04
-
-        static bool isXplane12Build();
     };
 }
 
