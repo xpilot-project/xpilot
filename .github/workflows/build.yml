@@ -1,11 +1,10 @@
-name: Build xPilot (X-Plane 12)
+name: Build xPilot
 
 on:
   push:
-    branches:
-      - 'dev/*'
     tags:
       - 'v*'
+  workflow_dispatch:
 
 env:
   QT_VERSION: 5.15.2
@@ -21,196 +20,13 @@ env:
 
 jobs:
 
-  ########################## Build Linux ##########################
-  
-  build-linux:
-
-    #if: ${{ false }}
-
-    runs-on: ${{ matrix.os }}
-    
-    strategy:
-      matrix:
-        os: [ubuntu-latest, ubuntu-18.04]
-
-    env:
-      IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-linux-x64-installer.run
-
-    steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install libasound2-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev python3-setuptools
-          
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-          
-      - name: Install conan
-        run: |
-          python3 -m pip install --upgrade pip
-          pip3 install conan
-          pip3 install conan_package_tools
-
-      ### Buid Plugin ###
-
-      - name: Create plugin build directory
-        working-directory: ${{ env.PLUGIN_DIR }}
-        run: |
-          cmake -E make_directory build
-
-      - name: Install plugin conan packages
-        working-directory: ${{ env.PLUGIN_DIR }}/build
-        run: |
-          conan install .. --build=missing
-
-      - name: Plugin CMake
-        working-directory: ${{ env.PLUGIN_DIR }}/build
-        run: |
-          cmake .. -DBUILD_XP12=1
-
-      - name: Build plugin
-        working-directory: ${{ env.PLUGIN_DIR }}/build
-        run: |
-          cmake --build . --config ${{ env.BUILD_TYPE }}
-
-      - name: Extract debug symbols
-        working-directory: ${{ env.PLUGIN_DIR }}/build/lin_x64
-        run: |
-          objcopy --only-keep-debug xPilot.xpl xPilot.debug
-
-      - name: Package plugin
-        run: |
-          mkdir -p ${{ github.workspace }}/xPilot/lin_x64
-          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.xpl ${{ github.workspace }}/xPilot/lin_x64
-          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.debug ${{ github.workspace }}/xPilot/lin_x64
-          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
-
-      ### Build Client ###
-
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-            setup-python: false
-            version: ${{ env.QT_VERSION }}
-
-      - name: Create client build directory
-        working-directory: ${{ env.CLIENT_DIR }}
-        run: |
-          cmake -E make_directory build
-
-      - name: Install client conan packages
-        working-directory: ${{ env.CLIENT_DIR }}/build
-        run: |
-          conan install .. --build=missing
-
-      - name: Client CMake
-        working-directory: ${{ env.CLIENT_DIR }}/build
-        run: |
-          cmake ${{ env.CLIENT_DIR }} \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
-            -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
-            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
-            -DSENTRY_DSN=${{ env.SENTRY_DSN }} \
-            -DSENTRY_BACKEND=crashpad \
-            -DSENTRY_INTEGRATION_QT=YES \
-            -DLINUX_BUILD_TYPE=${{ matrix.os }} \
-            -DBUILD_XP12=1
-
-      - name: Build client
-        working-directory: ${{ env.CLIENT_DIR }}/build
-        run: |
-          cmake --build . --config ${{ env.BUILD_TYPE }}
-
-      - name: Extract debug symbols
-        working-directory: ${{ env.CLIENT_DIR }}/build/bin
-        run: |
-          mv xPilot xpilot
-          objcopy --only-keep-debug xpilot xpilot.debug
-
-      - name: Setup Sentry CLI
-        uses: mathieu-bour/setup-sentry-cli@1.2.0
-        with:
-          version: latest
-          token: ${{ secrets.SENTRY_TOKEN }}
-          organization: xpilot
-          project: xpilot
-
-      - name: Upload debug information files
-        working-directory: ${{ env.CLIENT_DIR }}/build/bin
-        run: |
-          sentry-cli upload-dif xpilot xpilot.debug
-
-      - name: Install LinuxDeploy
-        uses: miurahr/install-linuxdeploy-action@v1
-        with:
-          dir: ${{ github.workspace }}
-          plugins: qt appimage
-
-      - name: Create AppImage
-        run: |
-          export QML_SOURCES_PATHS=${{ env.CLIENT_DIR }}/Resources
-          mkdir -p AppDir/usr/bin
-          cp ${{ env.CLIENT_DIR }}/build/bin/xpilot AppDir/usr/bin
-          linuxdeploy-x86_64.AppImage \
-            --plugin=qt \
-            --output=appimage \
-            --create-desktop-file \
-            --executable=${{ env.CLIENT_DIR }}/build/bin/xpilot \
-            --library=${{ github.workspace }}/client/externals/linux/libcrypto/libssl.so.1.1 \
-            --library=${{ github.workspace }}/client/externals/linux/libcrypto/libcrypto.so.1.1 \
-            --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/afalg.so \
-            --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/capi.so \
-            --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/padlock.so \
-            --appdir=AppDir \
-            --icon-file=${{ env.CLIENT_DIR }}/xpilot.png
-          mkdir -p ${{ github.workspace }}/output && mv xpilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
-          cp ${{ env.CLIENT_DIR }}/xpilot.png ${{ github.workspace }}/output
-
-      - name: Get version
-        shell: bash
-        run: |
-          echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
-
-      - name: Setup InstallBuilder
-        shell: bash
-        run: |
-          curl -k -L ${{ env.IB_URL }} --output ib.run --retry 5
-          chmod +x ib.run
-          ./ib.run --mode unattended --prefix ${{ env.IB_DIR }}
-          ${{ env.IB_DIR }}/bin/builder --version
-          echo "$IB_LICENSE" > lic.xml
-          echo "CLIENT_BUILD_DIR=${{ github.workspace }}/output" >> $GITHUB_ENV
-          echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
-
-      - name: Create installer
-        shell: bash
-        run: |
-          ${{ env.IB_DIR }}/bin/builder build installer/linux.xml \
-              --license lic.xml \
-              --setvars project.outputDirectory=$(pwd) \
-              --setvars project.version=${{ env.XPILOT_VERSION }}
-
-      - name: Rename Installer
-        shell: bash
-        run: |
-          mv xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run xPilot-${{ env.XPILOT_VERSION }}-linux-x64-${{ matrix.os }}-XP12.run
-
-      - name: Upload installer and plugin files
-        uses: actions/upload-artifact@v2
-        with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-linux-x64-${{ matrix.os }}-XP12.zip
-          path: |
-            xPilot-${{ env.XPILOT_VERSION }}-linux-x64-${{ matrix.os }}-XP12.run
-
   ########################## Build Windows ##########################
-  
+
   build-windows:
 
     #if: ${{ false }}
 
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     env:
       IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-windows-x64-installer.exe
@@ -220,7 +36,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
-          
+
       - name: Install Conan
         run: |
           python3 -m pip install --upgrade pip
@@ -234,15 +50,15 @@ jobs:
         run: |
           cmake -E make_directory build
 
-      - name: Install plugin conan packages
+      - name: Install plugin dependencies
         working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
           conan install .. -s compiler.runtime=MT --build=missing
 
-      - name: Plugin CMake
+      - name: CMake plugin build files
         working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
-          cmake .. -DBUILD_XP12=1
+          cmake ..
 
       - name: Build plugin
         working-directory: ${{ env.PLUGIN_DIR }}/build
@@ -269,15 +85,21 @@ jobs:
         run: |
           cmake -E make_directory build
 
-      - name: Install client conan packages
+      - name: Install client dependencies
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
           conan install .. --build=missing
 
-      - name: Client CMake
+      - name: CMake client build files
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
-          cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} -DSENTRY_DSN=${{ env.SENTRY_DSN }} -DSENTRY_BACKEND=crashpad -DSENTRY_INTEGRATION_QT=YES -DBUILD_XP12=1
+          cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
+            -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} `
+            -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} `
+            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} `
+            -DSENTRY_DSN=${{ env.SENTRY_DSN }} `
+            -DSENTRY_BACKEND=crashpad `
+            -DSENTRY_INTEGRATION_QT=YES
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}/build
@@ -285,6 +107,7 @@ jobs:
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
       - name: Setup Sentry CLI
+        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
         uses: mathieu-bour/setup-sentry-cli@1.2.0
         with:
           version: latest
@@ -293,11 +116,12 @@ jobs:
           project: xpilot
 
       - name: Upload debug information files
+        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
         working-directory: ${{ env.CLIENT_DIR }}/build/bin
         run: |
           sentry-cli upload-dif xPilot.exe xPilot.pdb
 
-      - name: Deploy Qt application
+      - name: Deploy application
         working-directory: ${{ env.CLIENT_DIR }}/build/bin
         shell: bash
         run: |
@@ -319,7 +143,7 @@ jobs:
       - name: Setup InstallBuilder
         shell: bash
         run: |
-          curl -k -L ${{ env.IB_URL }} --output ib.exe --retry 5
+          curl -k -L ${{ env.IB_URL }} --output ib.exe
           ./ib.exe --mode unattended --prefix ${{ env.IB_DIR  }}
           ${{ env.IB_DIR }}/bin/builder-cli.exe --version
           echo "$IB_LICENSE" > lic.xml
@@ -337,17 +161,17 @@ jobs:
       - name: Rename Installer
         shell: bash
         run: |
-          mv xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe xPilot-${{ env.XPILOT_VERSION }}-Windows-XP12.exe
+          mv xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe xPilot-${{ env.XPILOT_VERSION }}-Windows.exe
 
-      - name: Upload installer and plugin files
+      - name: Upload installer artifact
         uses: actions/upload-artifact@v2
         with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-Windows-XP12.zip
+          name: xPilot-${{ env.XPILOT_VERSION }}-Windows.zip
           path: |
-            xPilot-${{ env.XPILOT_VERSION }}-Windows-XP12.exe
+            xPilot-${{ env.XPILOT_VERSION }}-Windows.exe
 
-  ########################## Build macOS ##########################
-  
+  ##########################  Build macOS  ##########################
+
   build-macos:
 
     #if: ${{ false }}
@@ -356,7 +180,7 @@ jobs:
 
     env:
       IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-osx-installer.dmg
-      MIN_VERSION: 10.14
+      MIN_OS_VERSION: 10.14
 
     steps:
       - uses: actions/checkout@v2
@@ -368,7 +192,7 @@ jobs:
           CERTIFICATE: ${{ secrets.APPLE_SIGNING_CERTIFICATE }}
           CERTIFICATE_PASSWORD: ${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
         run: ./scripts/make_keychain.sh
-          
+
       - name: Install Conan
         run: |
           python3 -m pip install --upgrade pip
@@ -382,15 +206,15 @@ jobs:
         run: |
           cmake -E make_directory build
 
-      - name: Install plugin conan packages
+      - name: Install plugin dependencies
         working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
-          conan install .. --build=missing --build=nng
+          conan install .. --build=missing
 
-      - name: Plugin CMake
+      - name: CMake plugin build files
         working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
-          cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_VERSION }} -DBUILD_XP12=1
+          cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_VERSION }}
 
       - name: Build plugin
         working-directory: ${{ env.PLUGIN_DIR }}/build
@@ -422,12 +246,12 @@ jobs:
         run: |
           cmake -E make_directory build
 
-      - name: Install client conan packages
+      - name: Install client dependencies
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
           conan install .. --build=missing
 
-      - name: Client CMake
+      - name: CMake client build files
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
           cmake .. \
@@ -438,8 +262,7 @@ jobs:
             -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
             -DSENTRY_DSN=${{ env.SENTRY_DSN }} \
             -DSENTRY_BACKEND=crashpad \
-            -DSENTRY_INTEGRATION_QT=YES \
-            -DBUILD_XP12=1
+            -DSENTRY_INTEGRATION_QT=YES
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}/build
@@ -452,6 +275,7 @@ jobs:
           dsymutil xPilot.app/Contents/MacOS/xPilot -o xPilot.dSYM
 
       - name: Setup Sentry CLI
+        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
         uses: mathieu-bour/setup-sentry-cli@1.2.0
         with:
           version: latest
@@ -460,11 +284,12 @@ jobs:
           project: xpilot
 
       - name: Upload debug information files
+        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
         working-directory: ${{ env.CLIENT_DIR }}/build/bin
         run: |
           sentry-cli upload-dif xPilot.app/Contents/MacOS/xPilot xPilot.dSYM
 
-      - name: Deploy Qt app bundle
+      - name: Deploy application
         working-directory: ${{ env.CLIENT_DIR }}/build/bin
         run: |
           ${{ env.Qt5_DIR }}/bin/macdeployqt xPilot.app \
@@ -481,7 +306,7 @@ jobs:
       - name: Setup InstallBuilder
         shell: bash
         run: |
-          curl -k -L ${{ env.IB_URL }} --output ib.dmg --retry 5
+          curl -k -L ${{ env.IB_URL }} --output ib.dmg
           hdiutil attach ib.dmg
           /Volumes/InstallBuilder\ Enterprise/*.app/Contents/MacOS/installbuilder.sh --mode unattended --prefix ${{ env.IB_DIR }}
           ${{ env.IB_DIR }}/bin/builder --version
@@ -502,7 +327,7 @@ jobs:
       - name: Rename Installer
         shell: bash
         run: |
-          mv xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg xPilot-${{ env.XPILOT_VERSION }}-macOS-XP12.dmg
+          mv xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
 
       - name: Notarize installer
         shell: bash
@@ -511,20 +336,201 @@ jobs:
           --primary-bundle-id "org.vatsim.xpilot" \
           --username "${{ secrets.NOTARIZATION_USERNAME }}" \
           --password "${{ secrets.NOTARIZATION_PASSWORD }}" \
-          --file xPilot-${{ env.XPILOT_VERSION }}-macOS-XP12.dmg
+          --file xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
 
-      - name: Upload installer and plugin files
+      - name: Upload installer artifact
         uses: actions/upload-artifact@v2
         with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-macOS-XP12.zip
+          name: xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip
           path: |
-            xPilot-${{ env.XPILOT_VERSION }}-macOS-XP12.dmg
+            xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
+
+  ##########################  Build Linux  ##########################
+
+  build-linux:
+
+    #if: ${{ false }}
+
+    runs-on: ubuntu-latest
+
+    env:
+      IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-linux-x64-installer.run
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libasound2-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev python3-setuptools
+          
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install Conan
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install conan
+          pip3 install conan_package_tools
+
+      ### Buid Plugin ###
+
+      - name: Create plugin build directory
+        working-directory: ${{ env.PLUGIN_DIR }}
+        run: |
+          cmake -E make_directory build
+
+      - name: Install plugin dependencies
+        working-directory: ${{ env.PLUGIN_DIR }}/build
+        run: |
+          conan install .. --build=missing
+
+      - name: CMake plugin build files
+        working-directory: ${{ env.PLUGIN_DIR }}/build
+        run: |
+          cmake ..
+
+      - name: Build plugin
+        working-directory: ${{ env.PLUGIN_DIR }}/build
+        run: |
+          cmake --build . --config ${{ env.BUILD_TYPE }}
+
+      - name: Package plugin
+        run: |
+          mkdir -p ${{ github.workspace }}/xPilot/lin_x64
+          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.xpl ${{ github.workspace }}/xPilot/lin_x64
+          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
+
+      - name: Extract debug symbols
+        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
+        working-directory: ${{ env.PLUGIN_DIR }}/build/lin_x64
+        run: |
+          objcopy --only-keep-debug xPilot.xpl xPilot.debug
+          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.debug ${{ github.workspace }}/xPilot/lin_x64
+
+      ### Build Client ###
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+            setup-python: false
+            version: ${{ env.QT_VERSION }}
+
+      - name: Create client build directory
+        working-directory: ${{ env.CLIENT_DIR }}
+        run: |
+          cmake -E make_directory build
+
+      - name: Install client dependencies
+        working-directory: ${{ env.CLIENT_DIR }}/build
+        run: |
+          conan install .. --build=missing
+
+      - name: CMake client build files
+        working-directory: ${{ env.CLIENT_DIR }}/build
+        run: |
+          cmake ${{ env.CLIENT_DIR }} \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
+            -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
+            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
+            -DSENTRY_DSN=${{ env.SENTRY_DSN }} \
+            -DSENTRY_BACKEND=crashpad \
+            -DSENTRY_INTEGRATION_QT=YES
+
+      - name: Build client
+        working-directory: ${{ env.CLIENT_DIR }}/build
+        run: |
+          cmake --build . --config ${{ env.BUILD_TYPE }}
+
+      - name: Extract debug symbols
+        working-directory: ${{ env.CLIENT_DIR }}/build/bin
+        run: |
+          mv xPilot xpilot
+          objcopy --only-keep-debug xpilot xpilot.debug
+
+      - name: Setup Sentry CLI
+        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
+        uses: mathieu-bour/setup-sentry-cli@1.2.0
+        with:
+          version: latest
+          token: ${{ secrets.SENTRY_TOKEN }}
+          organization: xpilot
+          project: xpilot
+
+      - name: Upload debug information files
+        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
+        working-directory: ${{ env.CLIENT_DIR }}/build/bin
+        run: |
+          sentry-cli upload-dif xpilot xpilot.debug
+        
+      - name: Install LinuxDeploy
+        uses: miurahr/install-linuxdeploy-action@v1
+        with:
+          dir: ${{ github.workspace }}
+          plugins: qt appimage
+
+      - name: Deploy application
+        run: |
+          export QML_SOURCES_PATHS=${{ env.CLIENT_DIR }}/Resources
+          mkdir -p AppDir/usr/bin
+          cp ${{ env.CLIENT_DIR }}/build/bin/xpilot AppDir/usr/bin
+          linuxdeploy-x86_64.AppImage \
+            --plugin=qt \
+            --output=appimage \
+            --create-desktop-file \
+            --executable=${{ env.CLIENT_DIR }}/build/bin/xpilot \
+            --library=${{ github.workspace }}/client/externals/linux/libcrypto/libssl.so.1.1 \
+            --library=${{ github.workspace }}/client/externals/linux/libcrypto/libcrypto.so.1.1 \
+            --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/afalg.so \
+            --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/capi.so \
+            --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/padlock.so \
+            --appdir=AppDir \
+            --icon-file=${{ env.CLIENT_DIR }}/xpilot.png
+          mkdir -p ${{ github.workspace }}/output && mv xpilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
+          cp ${{ env.CLIENT_DIR }}/xpilot.png ${{ github.workspace }}/output
+
+      - name: Get version
+        shell: bash
+        run: |
+          echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
+
+      - name: Setup InstallBuilder
+        shell: bash
+        run: |
+          curl -k -L ${{ env.IB_URL }} --output ib.run
+          chmod +x ib.run
+          ./ib.run --mode unattended --prefix ${{ env.IB_DIR }}
+          ${{ env.IB_DIR }}/bin/builder --version
+          echo "$IB_LICENSE" > lic.xml
+          echo "CLIENT_BUILD_DIR=${{ github.workspace }}/output" >> $GITHUB_ENV
+          echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
+
+      - name: Create installer
+        shell: bash
+        run: |
+          ${{ env.IB_DIR }}/bin/builder build installer/linux.xml \
+              --license lic.xml \
+              --setvars project.outputDirectory=$(pwd) \
+              --setvars project.version=${{ env.XPILOT_VERSION }}
+
+      - name: Rename Installer
+        shell: bash
+        run: |
+          mv xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run xPilot-${{ env.XPILOT_VERSION }}-Linux.run
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: xPilot-${{ env.XPILOT_VERSION }}-Linux.zip
+          path: |
+            xPilot-${{ env.XPILOT_VERSION }}-Linux.run
 
   ########################## Create Release ##########################
 
   release:
     runs-on: ubuntu-latest
     needs: [build-linux, build-windows, build-macos]
+    if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
 
     steps:
       - name: Download artifacts
@@ -535,20 +541,17 @@ jobs:
         uses: battila7/get-version-action@v2
 
       - name: Reorganize
-        run: |
-          mv xPilot*/* . && rmdir xPilot*/
+        run: mv xPilot*/* . && rmdir xPilot*/
 
       - name: List directory contents
-        run: |
-          ls -R
+        run: ls -R
 
       - name: Create release
         uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         with:
           name: xPilot ${{ steps.get_version.outputs.version }} (X-Plane 12)
           prerelease: true
           draft: true
-          files: |
-            xPilot*
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+          files: xPilot*
