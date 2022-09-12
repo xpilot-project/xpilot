@@ -131,7 +131,7 @@ void VersionCheck::PerformVersionCheck()
                 }
                 else if(BuildConfig::isRunningOnMacOSPlatform())
                 {
-                    if(name.toLower().contains("osx"))
+                    if(name.toLower().contains("macos"))
                     {
                         emit newVersionAvailable();
                         m_fileName = name;
