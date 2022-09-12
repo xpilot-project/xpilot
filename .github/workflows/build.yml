@@ -560,7 +560,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          name: xPilot ${{ steps.get_version.outputs.version }} (X-Plane 12)
+          name: xPilot ${{ steps.get_version.outputs.version }}
           prerelease: true
           draft: true
           files: xPilot*
