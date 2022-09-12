@@ -107,7 +107,7 @@
                         </distributionFile>
                     </distributionFileList>
                     <ruleList>
-                        <stringTest text="${xplanepath}" type="not_empty"/>
+                        <stringTest text="${xplane11path}" type="not_empty"/>
                     </ruleList>
                 </folder>
                 <folder>
@@ -122,7 +122,7 @@
                         </distributionFile>
                     </distributionFileList>
                     <ruleList>
-                        <stringTest text="${xplanepath}" type="not_empty"/>
+                        <stringTest text="${xplane12path}" type="not_empty"/>
                     </ruleList>
                 </folder>
             </folderList>
