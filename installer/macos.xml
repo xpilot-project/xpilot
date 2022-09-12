@@ -96,9 +96,24 @@
                     </distributionFileList>
                 </folder>
                 <folder>
-                    <description>X-Plane Plugin</description>
-                    <destination>${xplanepath}/Resources/plugins/xPilot</destination>
-                    <name>xplaneplugin</name>
+                    <description>X-Plane 11 Plugin</description>
+                    <destination>${xplane11path}/Resources/plugins/xPilot</destination>
+                    <name>xplane11plugin</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <allowWildcards>1</allowWildcards>
+                            <origin>${plugin_build_dir}/*</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                    <ruleList>
+                        <stringTest text="${xplanepath}" type="not_empty"/>
+                    </ruleList>
+                </folder>
+                <folder>
+                    <description>X-Plane 12 Plugin</description>
+                    <destination>${xplane12path}/Resources/plugins/xPilot</destination>
+                    <name>xplane12plugin</name>
                     <platforms>all</platforms>
                     <distributionFileList>
                         <distributionFile>
@@ -144,7 +159,11 @@
             <value>${platform_install_prefix}/${product_shortname}</value>
         </setInstallerVariable>
         <setInstallerVariable>
-            <name>last_xplane_path</name>
+            <name>xplane11path</name>
+            <value></value>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>xplane12path</name>
             <value></value>
         </setInstallerVariable>
         <actionGroup>
@@ -168,8 +187,8 @@
         <actionGroup>
             <actionList>
                 <readFile>
-                    <name>last_xplane_path</name>
-                    <path>~/Library/Application Support/org.vatsim.xpilot/lastxplanepath.txt</path>
+                    <name>xplane11path</name>
+                    <path>~/Library/Application Support/org.vatsim.xpilot/xplane11path.txt</path>
                     <ruleList>
                         <platformTest type="osx"/>
                     </ruleList>
@@ -179,7 +198,25 @@
                 <platformTest type="osx"/>
                 <fileTest>
                     <condition>readable</condition>
-                    <path>~/Library/Application Support/org.vatsim.xpilot/lastxplanepath.txt</path>
+                    <path>~/Library/Application Support/org.vatsim.xpilot/xplane11path.txt</path>
+                </fileTest>
+            </ruleList>
+        </actionGroup>
+        <actionGroup>
+            <actionList>
+                <readFile>
+                    <name>xplane12path</name>
+                    <path>~/Library/Application Support/org.vatsim.xpilot/xplane12path.txt</path>
+                    <ruleList>
+                        <platformTest type="osx"/>
+                    </ruleList>
+                </readFile>
+            </actionList>
+            <ruleList>
+                <platformTest type="osx"/>
+                <fileTest>
+                    <condition>readable</condition>
+                    <path>~/Library/Application Support/org.vatsim.xpilot/xplane12path.txt</path>
                 </fileTest>
             </ruleList>
         </actionGroup>
@@ -188,8 +225,12 @@
             <value>${last_install_dir}</value>
         </setInstallerVariable>
         <setInstallerVariable>
-            <name>xplanepath</name>
-            <value>${last_xplane_path}</value>
+            <name>xplane11path</name>
+            <value>${xplane11path}</value>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>xplane12path</name>
+            <value>${xplane12path}</value>
         </setInstallerVariable>
         <!-- detected existing installation, switch to upgrade mode. -->
         <actionGroup>
@@ -227,8 +268,15 @@
             </ruleList>
         </writeFile>
         <writeFile>
-            <path>~/Library/Application Support/org.vatsim.xpilot/lastxplanepath.txt</path>
-            <text>${xplanepath}</text>
+            <path>~/Library/Application Support/org.vatsim.xpilot/xplane11path.txt</path>
+            <text>${xplane11path}</text>
+            <ruleList>
+                <platformTest type="osx"/>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <path>~/Library/Application Support/org.vatsim.xpilot/xplane12path.txt</path>
+            <text>${xplane12path}</text>
             <ruleList>
                 <platformTest type="osx"/>
             </ruleList>
@@ -244,6 +292,9 @@
             <files>${installdir}/.sentry-native/</files>
             <matchHiddenFiles>1</matchHiddenFiles>
         </addFilesToUninstaller>
+        <deleteFile>
+            <path>~/Library/Application Support/org.vatsim.xpilot/lastxplanepath.txt</path>
+        </deleteFile>
     </postInstallationActionList>
     <finalPageActionList>
         <runProgram>
@@ -257,12 +308,14 @@
     </finalPageActionList>
     <parameterList>
         <directoryParameter>
-            <name>xplanepath</name>
-            <title>X-Plane Location</title>
+            <name>xplane12path</name>
+            <title>X-Plane 12 Location</title>
             <description></description>
-            <explanation>Please browse to the folder where X-Plane is installed so that the xPilot plugin can be installed.
+            <explanation>Please browse to the folder where X-Plane 12 is installed so that the xPilot plugin can be installed.
 
-Advanced Users: If X-Plane is not installed on this computer, leave the folder path empty to skip installing the plugin. You will need to run the installer on the computer where X-Plane is installed to install the plugin.</explanation>
+ADVANCED USERS: If X-Plane 12 is not installed on this computer, leave the folder path empty to skip installing the plugin. You will need to run the installer on the computer where X-Plane 12 is installed to install the plugin.
+
+Skip this step if you DO NOT use X-Plane 12.</explanation>
             <value></value>
             <default></default>
             <allowEmptyValue>1</allowEmptyValue>
@@ -270,15 +323,48 @@ Advanced Users: If X-Plane is not installed on this computer, leave the folder p
             <mustExist>1</mustExist>
             <width>40</width>
             <validationActionList>
-                <throwError text="Invalid X-Plane folder path. The path should be the root folder of where X-Plane.app is installed.">
+                <throwError text="Invalid X-Plane 12 folder path. The path should be the root folder of where X-Plane.app is installed.">
                     <ruleList>
-                        <stringTest text="${xplanepath}" type="not_empty"/>
-                        <fileExists negate="1" path="${xplanepath}/X-Plane.app"/>
+                        <stringTest text="${xplane12path}" type="not_empty"/>
+                        <fileExists negate="1" path="${xplane12path}/X-Plane.app"/>
                         <platformTest type="osx"/>
                     </ruleList>
                 </throwError>
                 <substitute>
-                    <files>${xplanepath}/Output/preferences/X-Plane.prf</files>
+                    <files>${xplane12path}/Output/preferences/X-Plane.prf</files>
+                    <type>regexp</type>
+                    <substitutionList>
+                        <substitution pattern="^_rcv_port\s+(?!49000).*$" value="_rcv_port 49000"/>
+                        <substitution pattern="^_disable_incoming_networking\s+1$" value="_disable_incoming_networking 0"/>
+                    </substitutionList>
+                </substitute>
+            </validationActionList>
+        </directoryParameter>
+        <directoryParameter>
+            <name>xplane11path</name>
+            <title>X-Plane 11 Location</title>
+            <description></description>
+            <explanation>Please browse to the folder where X-Plane 11 is installed so that the xPilot plugin can be installed.
+
+ADVANCED USERS: If X-Plane 11 is not installed on this computer, leave the folder path empty to skip installing the plugin. You will need to run the installer on the computer where X-Plane 11 is installed to install the plugin.
+
+Skip this step if you DO NOT use X-Plane 11.</explanation>
+            <value></value>
+            <default></default>
+            <allowEmptyValue>1</allowEmptyValue>
+            <mustBeWritable>0</mustBeWritable>
+            <mustExist>1</mustExist>
+            <width>40</width>
+            <validationActionList>
+                <throwError text="Invalid X-Plane 11 folder path. The path should be the root folder of where X-Plane.app is installed.">
+                    <ruleList>
+                        <stringTest text="${xplane11path}" type="not_empty"/>
+                        <fileExists negate="1" path="${xplane11path}/X-Plane.app"/>
+                        <platformTest type="osx"/>
+                    </ruleList>
+                </throwError>
+                <substitute>
+                    <files>${xplane11path}/Output/preferences/X-Plane.prf</files>
                     <type>regexp</type>
                     <substitutionList>
                         <substitution pattern="^_rcv_port\s+(?!49000).*$" value="_rcv_port 49000"/>
