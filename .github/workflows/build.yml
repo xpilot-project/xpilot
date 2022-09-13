@@ -215,7 +215,7 @@ jobs:
       - name: CMake plugin build files
         working-directory: ${{ env.PLUGIN_DIR }}/build
         run: |
-          cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_VERSION }}
+          cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_OS_VERSION }}
 
       - name: Build plugin
         working-directory: ${{ env.PLUGIN_DIR }}/build
@@ -263,7 +263,7 @@ jobs:
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
           cmake .. \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_VERSION }} \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_OS_VERSION }} \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
             -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
