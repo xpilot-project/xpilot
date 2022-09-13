@@ -78,6 +78,8 @@ public:
 
     int XplaneVersion() const { return m_xplaneVersion; }
 
+    void SetStationCallsign(int com, QString callsign);
+
 private:
     void SubscribeDataRefs();
     void SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency);

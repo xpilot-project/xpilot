@@ -11,6 +11,7 @@ namespace xpilot
         m_networkManager(networkManager),
         m_xplaneAdapter(xplaneAdapter)
     {
+        connect(&m_xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, &ControllerManager::OnRadioStackStateChanged);
         connect(&m_networkManager, &NetworkManager::controllerUpdateReceived, this, &ControllerManager::OnControllerUpdateReceived);
         connect(&m_networkManager, &NetworkManager::isValidAtcReceived, this, &ControllerManager::IsValidATCReceived);
         connect(&m_networkManager, &NetworkManager::realNameReceived, this, &ControllerManager::OnRealNameReceived);
@@ -38,6 +39,7 @@ namespace xpilot
             }
 
             m_xplaneAdapter.UpdateControllers(m_controllers);
+            UpdateStationCallsigns();
         });
     }
 
@@ -120,8 +122,42 @@ namespace xpilot
         });
         if(itr != m_controllers.end())
         {
+            if(m_radioStackState.Com1Frequency == itr->Frequency) {
+                m_xplaneAdapter.SetStationCallsign(1, "");
+            }
+            if(m_radioStackState.Com2Frequency == itr->Frequency) {
+                m_xplaneAdapter.SetStationCallsign(2, "");
+            }
             emit controllerDeleted(*itr);
             m_controllers.removeAll(*itr);
+        }
+    }
+
+    void ControllerManager::OnRadioStackStateChanged(RadioStackState radioStack)
+    {
+        if(m_radioStackState != radioStack)
+        {
+            m_radioStackState = radioStack;
+            UpdateStationCallsigns();
+        }
+    }
+
+    void ControllerManager::UpdateStationCallsigns()
+    {
+        auto com1 = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
+            return n.Frequency == m_radioStackState.Com1Frequency;
+        });
+
+        if(com1 != m_controllers.end()) {
+            m_xplaneAdapter.SetStationCallsign(1, com1->Callsign);
+        }
+
+        auto com2 = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
+            return n.Frequency == m_radioStackState.Com2Frequency;
+        });
+
+        if(com2 != m_controllers.end()) {
+            m_xplaneAdapter.SetStationCallsign(2, com2->Callsign);
         }
     }
 

@@ -30,12 +30,15 @@ namespace xpilot
         void OnRealNameReceived(QString callsign, QString realName);
         void RefreshController(Controller controller);
         void OnControllerDeleted(QString callsign);
+        void OnRadioStackStateChanged(RadioStackState radioStack);
+        void UpdateStationCallsigns();
 
     private:
         NetworkManager &m_networkManager;
         XplaneAdapter &m_xplaneAdapter;
         QList<Controller> m_controllers;
         QTimer m_nearbyAtcTimer;
+        RadioStackState m_radioStackState;
     };
 }
 

@@ -44,6 +44,8 @@ namespace xpilot {
 		m_selcalCode("xpilot/selcal", ReadOnly),
 		m_selcalReceived("xpilot/selcal_received", ReadWrite),
 		m_selcalMuteOverride("xpilot/selcal_mute_override", ReadWrite),
+		m_com1StationCallsign("xpilot/com1_station_callsign", ReadOnly),
+		m_com2StationCallsign("xpilot/com2_station_callsign", ReadOnly),
 		m_frameRatePeriod("sim/operation/misc/frame_rate_period", ReadOnly),
 		m_com1Frequency("sim/cockpit2/radios/actuators/com1_frequency_hz_833", ReadWrite),
 		m_com2Frequency("sim/cockpit2/radios/actuators/com2_frequency_hz_833", ReadWrite),
@@ -392,6 +394,8 @@ namespace xpilot {
 				m_networkCallsign.setValue(callsign);
 				m_selcalCode.setValue(selcal);
 				m_networkLoginStatus.setValue(true);
+				m_com1StationCallsign.setValue("");
+				m_com2StationCallsign.setValue("");
 			});
 		}
 		if (packet.type == dto::DISCONNECTED) {
@@ -404,6 +408,26 @@ namespace xpilot {
 				m_networkCallsign.setValue("");
 				m_selcalCode.setValue("");
 				m_networkLoginStatus.setValue(false);
+				m_com1StationCallsign.setValue("");
+				m_com2StationCallsign.setValue("");
+			});
+		}
+		if (packet.type == dto::STATION_CALLSIGN) {
+			ComStationCallsign dto;
+			packet.dto.convert(dto);
+
+			std::string callsign = dto.callsign;
+			int comStack = dto.com;
+
+			QueueCallback([=] {
+				switch (comStack) {
+				case 1:
+					m_com1StationCallsign.setValue(callsign);
+					break;
+				case 2:
+					m_com2StationCallsign.setValue(callsign);
+					break;
+				}
 			});
 		}
 	}

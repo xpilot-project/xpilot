@@ -934,3 +934,11 @@ void XplaneAdapter::NetworkDisconnected()
     DisconnectedDto dto;
     SendDto(dto);
 }
+
+void XplaneAdapter::SetStationCallsign(int com, QString callsign)
+{
+    ComStationCallsign dto{};
+    dto.callsign = callsign.toStdString();
+    dto.com = com;
+    SendDto(dto);
+}
