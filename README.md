@@ -25,3 +25,9 @@ xPilot is licensed under the [GPLv3 open-source license](LICENSE).
 * [nanomsg-NG](https://nng.nanomsg.org/) lightweight messaging library (used for IPC between xPilot and X-Plane)
 * [ImGui](https://github.com/ocornut/imgui) graphical user interface, used for the X-Plane plugin windows
 * Application icon created by [Freepik](https://www.flaticon.com/authors/freepik)
+* Cloud-based Mac hardware sponsored by MacStadium
+
+[![MacStadium](https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png)][2]
+
+[2]: https://macstadium.com
+
