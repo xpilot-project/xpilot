@@ -27,7 +27,5 @@ xPilot is licensed under the [GPLv3 open-source license](LICENSE).
 * Application icon created by [Freepik](https://www.flaticon.com/authors/freepik)
 * Cloud-based Mac hardware sponsored by MacStadium
 
-[![MacStadium](https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png)][2]
-
-[2]: https://macstadium.com
+<a href="https://macstadium.com"><img src="https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png" width="250"></a>
 
