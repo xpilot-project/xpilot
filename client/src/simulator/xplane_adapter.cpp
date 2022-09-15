@@ -152,7 +152,8 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
             m_radioStackState = {};
             m_userAircraftData = {};
             m_userAircraftConfigData = {};
-            Subscribe();
+
+            SubscribeDataRefs();
 
             if(!m_initialHandshake)
             {
@@ -181,8 +182,6 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
         emit radioStackStateChanged(m_radioStackState);
     });
     m_xplaneDataTimer.start(50);
-
-    Subscribe();
 }
 
 XplaneAdapter::~XplaneAdapter()
@@ -292,9 +291,10 @@ void XplaneAdapter::clearSimConnection()
     emit simConnectionStateChanged(false);
     m_initialHandshake = false;
     m_simConnected = false;
+    m_subscribedDataRefs.clear();
 }
 
-void XplaneAdapter::Subscribe()
+void XplaneAdapter::SubscribeDataRefs()
 {
     SubscribeDataRef("sim/cockpit2/switches/avionics_power_on", DataRef::AvionicsPower, 5);
     SubscribeDataRef("sim/cockpit2/radios/actuators/audio_com_selection", DataRef::AudioComSelection, 5);
@@ -351,6 +351,10 @@ void XplaneAdapter::Subscribe()
 
 void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
 {
+    if(m_subscribedDataRefs.contains(dataRef.c_str())) {
+        return; // already subscribed, skip
+    }
+
     QByteArray data;
 
     data.fill(0, 413);
@@ -361,6 +365,10 @@ void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t 
     data.resize(413);
 
     socket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
+
+    if(m_simConnected) {
+        m_subscribedDataRefs.push_back(dataRef.c_str());
+    }
 }
 
 void XplaneAdapter::setDataRefValue(std::string dataRef, float value)
@@ -435,7 +443,7 @@ void XplaneAdapter::OnDataReceived()
         int num_structs = (buffer.size() - 5) / sizeof(rref_data_type);
         const rref_data_type *f = reinterpret_cast<const rref_data_type*>(buffer.constData() + 5);
 
-        for(int i = 0; i < num_structs; i+= 1)
+        for(int i = 0; i < num_structs; i++)
         {
             float value = f[i].val;
 
@@ -613,6 +621,7 @@ void XplaneAdapter::OnDataReceived()
                     m_radioStackState.SelcalMuteOverride = value > 0;
                     break;
                 case DataRef::XplaneVersionNumber:
+                    SKIP_EMPTY(value);
                     m_xplaneVersion = value;
                     break;
             }
