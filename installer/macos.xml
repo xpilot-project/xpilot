@@ -11,6 +11,7 @@
     <productDisplayName>xPilot</productDisplayName>
     <saveRelativePaths>1</saveRelativePaths>
     <vendor>xPilot for VATSIM</vendor>
+    <osxPlatforms>osx-x86_64 osx-arm64</osxPlatforms>
     <osxApplicationBundleIcon>../client/xpilot.icns</osxApplicationBundleIcon>  
     <osxApplicationBundleIdentifier>org.vatsim.xpilot</osxApplicationBundleIdentifier>
     <osxSigningIdentity>${apple_signing_identity}</osxSigningIdentity>
