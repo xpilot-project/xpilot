@@ -420,8 +420,10 @@ void XplaneAdapter::transponderModeToggle()
 {
     if(m_radioStackState.SquawkingModeC) {
         setDataRefValue("sim/cockpit/radios/transponder_mode", 0);
+        sendCommand("laminar/B738/knob/transponder_stby");
     } else {
         setDataRefValue("sim/cockpit/radios/transponder_mode", 2);
+        sendCommand("laminar/B738/knob/transponder_alton");
     }
 }
 
