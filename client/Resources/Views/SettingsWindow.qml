@@ -34,7 +34,7 @@ Window {
         return value.replace(/[\n\r]/g, "")
     }
 
-    onClosing: {
+    onClosing: (close) => {
         if(inputDeviceChanged) {
             close.accepted = false
             calibrationRequired.open()

@@ -15,6 +15,10 @@ Popup {
     modal: true
     focus: true
     closePolicy: Popup.NoAutoClose
+    background: Rectangle {
+        color: "white"
+        border.color: "black"
+    }
 
     signal useInvalidTypeCode()
 

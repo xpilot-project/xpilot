@@ -14,6 +14,10 @@ Popup {
     y: (parent.height - height) / 2
     focus: true
     closePolicy: Popup.NoAutoClose
+    background: Rectangle {
+        color: "white"
+        border.color: "black"
+    }
 
     Text {
         id: popupText
