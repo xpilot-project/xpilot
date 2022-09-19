@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.19)
 project(xPilot LANGUAGES C CXX)
 
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -137,6 +140,45 @@ if (WIN32)
         $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endif ()
 
+if (UNIX)
+    set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/vatsimauth.a)
+    set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libopus.a)
+    set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libportaudio.a)
+    set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
+
+    find_library(ALSA_LIBRARY NAMES asound)
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CONAN_BIN_DIRS_SENTRY-CRASHPAD}/crashpad_handler"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+endif ()
+
+if (APPLE)
+    set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/vatsimauth.a)
+    set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libopus.a)
+    set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libportaudio.a)
+    set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libspeexdsp.a)
+    set(ALSA_LIBRARY "")
+
+    find_library(COREFOUNDATION CoreFoundation)
+    find_library(COREAUDIO CoreAudio)
+    find_library(AUDIOTOOLBOX AudioToolbox)
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist")
+
+    add_custom_target(osx_bundle_dirs
+        COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources
+        COMMAND cp ${CMAKE_SOURCE_DIR}/xpilot.icns ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources/xpilot.icns)
+
+    add_dependencies(${PROJECT_NAME} osx_bundle_dirs)
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CONAN_BIN_DIRS_SENTRY-CRASHPAD}/crashpad_handler"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+endif ()
+
 target_link_libraries(
     ${PROJECT_NAME}
     PRIVATE
@@ -169,5 +211,6 @@ target_link_libraries(
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 
 if(MSVC)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32.lib)
     target_compile_definitions(${PROJECT_NAME} PUBLIC _USE_MATH_DEFINES)
 endif()
