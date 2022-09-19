@@ -1,12 +1,11 @@
-import QtQuick 2.15
-import QtQuick.Controls 1.4
-import QtQuick.Controls.Styles 1.4
-import QtQuick.Controls 2.12
-import QtQuick.Window 2.12
-import QtQuick.Layouts 1.12
-import QtWebSockets 1.2
-import QtMultimedia 5.12
-import QtQuick.Dialogs 1.2
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Controls.Basic
+import QtQuick.Dialogs
+import QtQuick.Window
+import QtQuick.Layouts
+import QtWebSockets
+import QtMultimedia
 
 import AppConfig 1.0
 import "../Scripts/FrequencyUtils.js" as FrequencyUtils
@@ -167,8 +166,7 @@ Window {
         initialized = true;
     }
 
-    // @disable-check M16
-    onClosing: {
+    onClosing: function(closing) {
         close.accepted = !networkConnected || closing
         onTriggered: if(!closing && networkConnected) confirmClose.open()
     }
@@ -193,7 +191,7 @@ Window {
         }
     }
 
-    onVisibilityChanged: {
+    onVisibilityChanged: function(visibility) {
         if(initialized && visibility !== Window.Hidden) {
             var isMaximized = (visibility === Window.Maximized || visibility === Window.FullScreen)
             if(AppConfig.WindowConfig.Maximized && !isMaximized) {
@@ -863,7 +861,7 @@ Window {
                 ground: nearbyGround
                 delivery: nearbyDelivery
                 atis: nearbyAtis
-                onStartChatSession: {
+                onStartChatSession: function(callsign) {
                     focusOrCreateTab(callsign)
                 }
             }
@@ -1139,14 +1137,14 @@ Window {
 
                                 property var commandHistory: []
                                 property int historyIndex: -1
-                                property var commandLineValue: ""
+                                property string commandLineValue: ""
 
                                 background: Rectangle {
                                     color: 'transparent'
                                     border.color: '#5C5C5C'
                                 }
 
-                                Keys.onPressed: {
+                                Keys.onPressed: function(event) {
                                     if(event.key === Qt.Key_Escape) {
                                         cliTextField.clear()
                                     }
@@ -1475,7 +1473,7 @@ Window {
             moveable = false
         }
 
-        onPressed: {
+        onPressed: function(mouse) {
             if (mouse.button !== Qt.LeftButton
                     || mainWindow.visibility === Window.Maximized
                     || mainWindow.visibility === Window.FullScreen) {

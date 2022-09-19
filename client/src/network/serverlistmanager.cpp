@@ -1,5 +1,4 @@
 #include "serverlistmanager.h"
-#include "src/common/build_config.h"
 #include "src/config/appconfig.h"
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -36,7 +35,7 @@ namespace xpilot
 
     QtPromise::QPromise<QVector<NetworkServerInfo>> ServerListManager::DownloadServerList(const QString &url)
     {
-        return QPromise<QVector<NetworkServerInfo>>{[&](const auto resolve, const auto reject)
+        return QtPromise::QPromise<QVector<NetworkServerInfo>>{[&](const auto resolve, const auto reject)
         {
             m_reply = nam->get(QNetworkRequest{url});
 

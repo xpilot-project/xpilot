@@ -1,9 +1,8 @@
-import QtQuick 2.15
-import QtQuick.Controls 1.4
-import QtQuick.Controls.Styles 1.4
-import QtQuick.Controls 2.12
-import QtQuick.Window 2.12
-import QtQuick.Layouts 1.12
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Controls.Basic
+import QtQuick.Window
+import QtQuick.Layouts
 import AppConfig 1.0
 import "../../Controls"
 
@@ -16,6 +15,10 @@ Popup {
     modal: true
     focus: true
     closePolicy: Popup.NoAutoClose
+    background: Rectangle {
+        color: "white"
+        border.color: "black"
+    }
 
     Text {
         id: labelAskDownload

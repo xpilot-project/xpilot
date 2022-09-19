@@ -95,7 +95,7 @@ void AppConfig::loadConfig()
     }
 
     QTextStream config(&configFile);
-    config.setCodec("UTF-8");
+    config.setEncoding(QStringEncoder::Utf8);
     QString json(config.readAll());
     configFile.close();
 

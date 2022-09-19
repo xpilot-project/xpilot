@@ -1,7 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Controls 2.12
-import QtQuick.Controls.Material 2.12
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
+import QtQuick.Controls.Basic
 import "../Controls"
 import "../Scripts/FrequencyUtils.js" as FrequencyUtils
 
@@ -9,16 +9,16 @@ ColumnLayout {
     property bool simConnected: false
     property bool networkConnected: false
 
-    property var isCom1Rx: false
-    property var isCom2Rx: false
+    property bool isCom1Rx: false
+    property bool isCom2Rx: false
 
-    property var isCom1Tx: false
-    property var isCom2Tx: false
+    property bool isCom1Tx: false
+    property bool isCom2Tx: false
 
     property var radioStackState;
 
-    property var com1Hf: 0
-    property var com2Hf: 0
+    property real com1Hf: 0
+    property real com2Hf: 0
 
     Connections {
         target: xplaneAdapter
@@ -123,12 +123,12 @@ ColumnLayout {
                 anchors.fill: parent
                 hoverEnabled: true
                 propagateComposedEvents: true
-                onClicked: mouse.accepted = false
-                onPressed: mouse.accepted = false
-                onReleased: mouse.accepted = false
-                onDoubleClicked: mouse.accepted = false
-                onPositionChanged: mouse.accepted = false
-                onPressAndHold: mouse.accepted = false
+                onClicked: (mouse) => mouse.accepted = false
+                onPressed: (mouse) => mouse.accepted = false
+                onReleased: (mouse) => mouse.accepted = false
+                onDoubleClicked: (mouse) => mouse.accepted = false
+                onPositionChanged: (mouse) => mouse.accepted = false
+                onPressAndHold: (mouse) => mouse.accepted = false
             }
         }
         Text {
@@ -189,12 +189,12 @@ ColumnLayout {
                 anchors.fill: parent
                 hoverEnabled: true
                 propagateComposedEvents: true
-                onClicked: mouse.accepted = false
-                onPressed: mouse.accepted = false
-                onReleased: mouse.accepted = false
-                onDoubleClicked: mouse.accepted = false
-                onPositionChanged: mouse.accepted = false
-                onPressAndHold: mouse.accepted = false
+                onClicked: (mouse) => mouse.accepted = false
+                onPressed: (mouse) => mouse.accepted = false
+                onReleased: (mouse) => mouse.accepted = false
+                onDoubleClicked: (mouse) => mouse.accepted = false
+                onPositionChanged: (mouse) => mouse.accepted = false
+                onPressAndHold: (mouse) => mouse.accepted = false
             }
         }
         Text {

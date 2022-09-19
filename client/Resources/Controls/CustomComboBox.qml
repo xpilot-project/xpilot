@@ -1,9 +1,10 @@
-import QtQuick 2.12
-import QtQuick.Window 2.2
-import QtQuick.Layouts 1.3
-import QtQuick.Controls 2.12
-import QtQuick.Shapes 1.0
-import QtQml.Models 2.12
+import QtQuick
+import QtQuick.Window
+import QtQuick.Layouts
+import QtQuick.Controls
+import QtQuick.Controls.Basic
+import QtQuick.Shapes
+import QtQml.Models
 
 ComboBox {
     id: control

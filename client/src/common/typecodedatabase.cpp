@@ -73,9 +73,9 @@ void TypeCodeDatabase::PerformTypeCodeDownload()
     });
 }
 
-QPromise<QString> TypeCodeDatabase::GetTypeCodeUrl()
+QtPromise::QPromise<QString> TypeCodeDatabase::GetTypeCodeUrl()
 {
-    return QPromise<QString>{[&](const auto resolve, const auto reject)
+    return QtPromise::QPromise<QString>{[&](const auto resolve, const auto reject)
         {
             QString url("https://xpilot-project.org/api/v3/TypeCodes");
 
@@ -111,9 +111,9 @@ QPromise<QString> TypeCodeDatabase::GetTypeCodeUrl()
         }};
 }
 
-QPromise<void> TypeCodeDatabase::DownloadTypeCodes(QString url)
+QtPromise::QPromise<void> TypeCodeDatabase::DownloadTypeCodes(QString url)
 {
-    return QPromise<void>{[&](const auto resolve, const auto reject)
+    return QtPromise::QPromise<void>{[&](const auto resolve, const auto reject)
         {
             if(url.isEmpty())
             {
@@ -169,7 +169,7 @@ void TypeCodeDatabase::searchTypeCodes(QString predicate)
     });
 
     // limit results to no more than 10 type codes
-    QList<TypeCodeInfo> limitedResults(results.begin(), std::next(results.begin(), std::min(10, results.size())));
+    QList<TypeCodeInfo> limitedResults(results.begin(), std::next(results.begin(), std::min(10, (int)results.size())));
 
     QVariantList variantList;
     for(const auto& v : qAsConst(limitedResults))
@@ -188,8 +188,8 @@ void TypeCodeDatabase::searchTypeCodes(QString predicate)
 void TypeCodeDatabase::validateTypeCodeBeforeConnect(QString typeCode)
 {
     auto result = std::find_if(m_typeCodes.begin(), m_typeCodes.end(), [&](TypeCodeInfo info){
-            return info.TypeCode.toUpper() == typeCode.toUpper();
-});
+        return info.TypeCode.toUpper() == typeCode.toUpper();
+    });
 
     emit validateTypeCode(result != m_typeCodes.end());
 }

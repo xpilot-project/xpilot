@@ -25,7 +25,7 @@ VersionCheck::VersionCheck(QObject *parent) :
 
 QtPromise::QPromise<QByteArray> VersionCheck::CheckForUpdates()
 {
-    return QPromise<QByteArray>{[&](const auto resolve, const auto reject)
+    return QtPromise::QPromise<QByteArray>{[&](const auto resolve, const auto reject)
         {
             QString url(BuildConfig::versionCheckUrl());
 
@@ -163,7 +163,7 @@ void VersionCheck::DeleteOlderInstallers()
 
 QtPromise::QPromise<void> VersionCheck::DownloadInstaller()
 {
-    return QPromise<void>{[&](const auto resolve, const auto reject)
+    return QtPromise::QPromise<void>{[&](const auto resolve, const auto reject)
         {
             emit downloadStarted();
 

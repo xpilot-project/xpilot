@@ -8,13 +8,10 @@
 #include <QAbstractSocket>
 #include <QTcpSocket>
 #include <QTimer>
-#include <QTextCodec>
 #include <QMetaEnum>
 #include <QHash>
 #include <QCryptographicHash>
 
-#include "src/network/vatsim_auth.h"
-#include "client_properties.h"
 #include "pdu/pdu_base.h"
 #include "pdu/pdu_add_atc.h"
 #include "pdu/pdu_server_identification.h"
@@ -35,14 +32,10 @@
 #include "pdu/pdu_client_query_response.h"
 #include "pdu/pdu_kill_request.h"
 #include "pdu/pdu_protocol_error.h"
-#include "pdu/pdu_auth_challenge.h"
-#include "pdu/pdu_auth_response.h"
 #include "pdu/pdu_fast_pilot_position.h"
 #include "pdu/pdu_pilot_position.h"
 #include "pdu/pdu_metar_response.h"
-#include "pdu/pdu_metar_request.h"
 #include "pdu/pdu_send_fast.h"
-#include "pdu/pdu_change_server.h"
 
 namespace xpilot
 {
@@ -114,8 +107,6 @@ namespace xpilot
         QString toMd5(QString value);
 
     private:
-        QTextCodec* m_fsdTextCodec = nullptr;
-
         std::unique_ptr<QTcpSocket> m_socket = std::make_unique<QTcpSocket>(this);
         bool m_connected = false;
         bool m_serverChangeInProgress = false;

@@ -1,11 +1,12 @@
-import QtQuick 2.15
-import QtQuick.Window 2.2
-import QtQuick.Layouts 1.3
-import QtQuick.Controls 2.12
-import QtQuick.Dialogs 1.2
+import QtQuick
+import QtQuick.Window
+import QtQuick.Layouts
+import QtQuick.Controls
+import QtQuick.Controls.Basic
+import QtQuick.Dialogs
+
 import "../Components"
 import "../Controls"
-
 import AppConfig 1.0
 
 Window {
@@ -20,12 +21,12 @@ Window {
     flags: Qt.Dialog
     modality: Qt.ApplicationModal
 
-    property var serverListLoaded: false
-    property var apiListLoaded: false
-    property var inputDeviceListLoaded: false
-    property var outputDeviceListLoaded: false
-    property var initialized: false
-    property var inputDeviceChanged: false
+    property bool serverListLoaded: false
+    property bool apiListLoaded: false
+    property bool inputDeviceListLoaded: false
+    property bool outputDeviceListLoaded: false
+    property bool initialized: false
+    property bool inputDeviceChanged: false
 
     signal closeWindow()
 
@@ -33,7 +34,6 @@ Window {
         return value.replace(/[\n\r]/g, "")
     }
 
-    // @disable-check M16
     onClosing: {
         if(inputDeviceChanged) {
             close.accepted = false

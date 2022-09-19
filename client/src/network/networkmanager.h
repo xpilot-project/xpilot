@@ -21,7 +21,6 @@ using namespace QtPromise;
 #include "src/aircrafts/aircraft_visual_state.h"
 #include "src/aircrafts/aircraft_configuration.h"
 #include "src/network/events/radio_message_received.h"
-#include "src/common/build_config.h"
 
 namespace xpilot
 {
@@ -52,7 +51,7 @@ namespace xpilot
         void SendAircraftConfigurationUpdate(AircraftConfiguration config);
         void SendCapabilities(QString to);
 
-        QPromise<QByteArray> GetJwtToken();
+        QtPromise::QPromise<QByteArray> GetJwtToken();
 
     signals:
         void networkConnected(QString callsign, bool enableVoice);

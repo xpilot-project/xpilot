@@ -1,13 +1,16 @@
 #include "fsd_client.h"
 #include "src/common/build_config.h"
-#include "src/config/appconfig.h"
+#include "src/network/vatsim_auth.h"
+
+#include <src/fsd/pdu/pdu_auth_challenge.h>
+#include <src/fsd/pdu/pdu_auth_response.h>
+#include <src/fsd/pdu/pdu_change_server.h>
 
 namespace xpilot
 {
     FsdClient::FsdClient(QObject * parent) : QObject(parent)
     {
         connectSocketSignals();
-        m_fsdTextCodec = QTextCodec::codecForName("ISO-8859-1");
     }
 
     void FsdClient::connectSocketSignals()
@@ -43,7 +46,9 @@ namespace xpilot
         const QByteArray dataEncoded = m_socket->readAll();
         if(dataEncoded.isEmpty()) return;
 
-        const QString data = m_fsdTextCodec->toUnicode(dataEncoded);
+        auto decoder = QStringDecoder(QStringDecoder::Latin1);
+        const QString data = decoder(dataEncoded);
+
         processData(data);
     }
 
@@ -78,7 +83,7 @@ namespace xpilot
 
             try {
                 QStringList fields = packet.split(PDUBase::Delimeter);
-                const QCharRef prefixChar = fields[0][0];
+                const QChar prefixChar = fields[0][0];
 
                 if(prefixChar == '@')
                 {
@@ -218,7 +223,8 @@ namespace xpilot
     {
         if(!m_connected || data.isEmpty()) return;
 
-        const QByteArray bufferEncoded = m_fsdTextCodec->fromUnicode(data);
+        auto encoder = QStringEncoder(QStringEncoder::Latin1);
+        const QByteArray bufferEncoded = encoder(data);
 
         emit RaiseRawDataSent(bufferEncoded);
 

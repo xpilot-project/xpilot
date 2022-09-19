@@ -1,8 +1,9 @@
-import QtQuick 2.15
-import QtQuick.Window 2.2
-import QtQuick.Layouts 1.3
-import QtQuick.Controls 2.12
-import QtQuick.Dialogs 1.2
+import QtQuick
+import QtQuick.Window
+import QtQuick.Layouts
+import QtQuick.Controls
+import QtQuick.Controls.Basic
+import QtQuick.Dialogs
 import AppConfig 1.0
 import "../Components"
 import "../Controls"
@@ -15,6 +16,10 @@ Popup {
     y: Math.round((parent.height - height) / 2)
     focus: true
     closePolicy: Popup.NoAutoClose
+    background: Rectangle {
+        color: "white"
+        border.color: "black"
+    }
 
     signal closeWindow()
 
@@ -340,12 +345,12 @@ Popup {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        if(txtCallsign.text == "") {
+                        if(txtCallsign.text === "") {
                             validationPopup.errorMessage = "Callsign is required"
                             validationPopup.open()
                             return
                         }
-                        if(txtTypeCode.text == "") {
+                        if(txtTypeCode.text === "") {
                             validationPopup.errorMessage = "Aircraft type code is required"
                             validationPopup.open()
                             return

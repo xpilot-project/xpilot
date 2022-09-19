@@ -6,6 +6,8 @@
 
 #include <QMap>
 
+#include <src/common/build_config.h>
+
 using namespace afv_native::afv;
 
 namespace xpilot
@@ -253,6 +255,9 @@ namespace xpilot
                 case NotificationType::Warning:
                     m_xplaneAdapter.NotificationPosted(message, COLOR_ORANGE);
                     break;
+                case NotificationType::TextMessage:
+                case NotificationType::RadioMessageReceived:
+                    break;
             }
         });
 
@@ -382,7 +387,7 @@ namespace xpilot
         {
             AudioDeviceInfo audioDevice{};
             audioDevice.DeviceName = device.second.name.c_str();
-            audioDevice.Id = device.first;
+            audioDevice.Id = (QChar)device.first;
             m_outputDevices.append(audioDevice);
         }
 
@@ -393,7 +398,7 @@ namespace xpilot
         {
             AudioDeviceInfo audioDevice{};
             audioDevice.DeviceName = device.second.name.c_str();
-            audioDevice.Id = device.first;
+            audioDevice.Id = (QChar)device.first;
             m_inputDevices.append(audioDevice);
         }
 

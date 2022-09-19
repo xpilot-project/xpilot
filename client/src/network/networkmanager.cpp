@@ -4,9 +4,9 @@
 #include <QRandomGenerator>
 #include <QDateTime>
 
+#include <src/fsd/pdu/pdu_metar_request.h>
+
 #include "networkmanager.h"
-#include "serverlistmanager.h"
-#include "src/appcore.h"
 #include "src/config/appconfig.h"
 #include "src/common/build_config.h"
 #include "src/common/frequency_utils.h"
@@ -14,6 +14,7 @@
 #include "src/common/utils.h"
 #include "src/aircrafts/aircraft_visual_state.h"
 #include "src/aircrafts/velocity_vector.h"
+#include "src/network/vatsim_auth.h"
 
 namespace xpilot
 {
@@ -95,6 +96,9 @@ namespace xpilot
                     break;
                 case NotificationType::Warning:
                     m_xplaneAdapter.NotificationPosted(message, COLOR_ORANGE);
+                    break;
+                case NotificationType::TextMessage:
+                case NotificationType::RadioMessageReceived:
                     break;
             }
         });
@@ -306,6 +310,31 @@ namespace xpilot
                 break;
             case ClientQueryType::Capabilities:
                 emit capabilitiesResponseReceived(pdu.From, pdu.Payload.join(":"));
+                break;
+            case ClientQueryType::Unknown:
+            case ClientQueryType::COM1Freq:
+            case ClientQueryType::Server:
+            case ClientQueryType::INF:
+            case ClientQueryType::FlightPlan:
+            case ClientQueryType::IPC:
+            case ClientQueryType::RequestRelief:
+            case ClientQueryType::CancelRequestRelief:
+            case ClientQueryType::RequestHelp:
+            case ClientQueryType::CancelRequestHelp:
+            case ClientQueryType::WhoHas:
+            case ClientQueryType::InitiateTrack:
+            case ClientQueryType::AcceptHandoff:
+            case ClientQueryType::DropTrack:
+            case ClientQueryType::SetFinalAltitude:
+            case ClientQueryType::SetTempAltitude:
+            case ClientQueryType::SetBeaconCode:
+            case ClientQueryType::SetScratchpad:
+            case ClientQueryType::SetVoiceType:
+            case ClientQueryType::AircraftConfiguration:
+            case ClientQueryType::NewInfo:
+            case ClientQueryType::NewATIS:
+            case ClientQueryType::Estimate:
+            case ClientQueryType::SetGlobalData:
                 break;
         }
     }
@@ -684,9 +713,9 @@ namespace xpilot
         m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, to, ClientQueryType::Capabilities, caps));
     }
 
-    QPromise<QByteArray> NetworkManager::GetJwtToken()
+    QtPromise::QPromise<QByteArray> NetworkManager::GetJwtToken()
     {
-        return QPromise<QByteArray>{[&](const auto resolve, const auto reject)
+        return QtPromise::QPromise<QByteArray>{[&](const auto resolve, const auto reject)
             {
                 QJsonObject obj;
                 obj["cid"] = AppConfig::getInstance()->VatsimId;

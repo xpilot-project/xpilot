@@ -1,5 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Controls.Basic
 
 Button {
     id: button
@@ -23,7 +24,7 @@ Button {
     }
 
     background: Rectangle {
-        color: active ? "#0164AD" : (btnMouseArea.pressed ? "#a7acb1" : btnMouseArea.containsMouse ? "#565e64" : "transparent")
+        color: active ? "#0164AD" : (btnMouseArea.pressed ? "#a7acb1" : button.enabled && btnMouseArea.containsMouse ? "#565e64" : "transparent")
         opacity: button.enabled ? 1 : 0.5
         border.color: active ? '#0078CE' : '#6c757d'
     }
