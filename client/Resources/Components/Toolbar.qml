@@ -73,7 +73,6 @@ GridLayout {
                     }
                     else {
                         var comp = Qt.createComponent("qrc:/Resources/Views/ConnectWindow.qml")
-                        console.log(comp.errorString())
                         if(comp.status === Component.Ready) {
                             connectWindow = comp.createObject(mainWindow)
                             connectWindow.open()
