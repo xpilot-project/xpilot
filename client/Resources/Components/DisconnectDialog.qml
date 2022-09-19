@@ -15,6 +15,12 @@ Popup {
     modal: true
     focus: true
     closePolicy: Popup.NoAutoClose
+    background: Rectangle {
+        color: "white"
+        border.color: "black"
+    }
+
+    signal exitApplication()
 
     Text {
         id: lblAskDisconnect
@@ -40,7 +46,7 @@ Popup {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: {
-                Qt.quit()
+                exitApplication()
             }
         }
     }

@@ -36,7 +36,6 @@ Window {
     property QtObject setXplanePathWindow // csl install
     property QtObject extractCslModelsWindow // csl install
     property int currentTab
-    property bool closing: false
     property bool networkConnected: false
     property string ourCallsign: ""
     property bool initialized: false
@@ -107,6 +106,7 @@ Window {
 
     DisconnectDialog {
         id: confirmClose
+        onExitApplication: Qt.exit(0)
     }
 
     MicrophoneCalibrationRequired {
@@ -166,9 +166,9 @@ Window {
         initialized = true;
     }
 
-    onClosing: function(closing) {
-        close.accepted = !networkConnected || closing
-        onTriggered: if(!closing && networkConnected) confirmClose.open()
+    onClosing: (close) => {
+        close.accepted = !networkConnected
+        onTriggered: if(networkConnected) confirmClose.open()
     }
 
     onXChanged: {
