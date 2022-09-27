@@ -7,9 +7,13 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")
+set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
 
 # Configure Qt
 
@@ -26,20 +30,6 @@ if("${QT_MAJOR_VERSION}" STREQUAL "6")
 endif()
 
 find_package(Qt${QT_MAJOR_VERSION} COMPONENTS Core Quick Network Svg REQUIRED PATHS $ENV{Qt${QT_MAJOR_VERSION}_HOME})
-
-# Configure Conan
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
-if(MSVC)
-    if(NOT DEFINED CONAN_LINK_RUNTIME AND DEFINED CONAN_SETTINGS_COMPILER_RUNTIME)
-        message(WARNING "Forcing MSVC runtime based on conan profile")
-        # this means Conan is not running the build, so we need to fix our linker flags ourself.... although we can probably cheat...
-        set(CONAN_LINK_RUNTIME "/${CONAN_SETTINGS_COMPILER_RUNTIME}")
-        conan_set_vs_runtime()
-    endif()
-endif(MSVC)
 
 # Read config variables
 file(READ ${CMAKE_SOURCE_DIR}/../xpilot.json XPILOT_JSON)
@@ -67,10 +57,6 @@ endif ()
 
 if (NOT CONFIG_ENCRYPTION_KEY)
     set(CONFIG_ENCRYPTION_KEY 0)
-endif ()
-
-if(NOT SENTRY_DSN)
-    set(SENTRY_DSN "")
 endif ()
 
 # Set some Win32 Specific Settings
@@ -111,6 +97,8 @@ qt_add_resources(qrc_SOURCES qml.qrc)
 
 add_executable(${PROJECT_NAME} ${GUI_TYPE} ${xpilot_SRC} ${afv_HEADERS} ${afv_SRC} ${qrc_SOURCES} xpilot.rc)
 
+qt6_import_qml_plugins(${PROJECT_NAME})
+
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/afv-native/include")
 source_group("AFV Headers" FILES ${afv_HEADERS})
 
@@ -126,18 +114,14 @@ target_include_directories(${PROJECT_NAME}
     ${CMAKE_SOURCE_DIR}/afv-native/include)
 
 add_subdirectory(3rdparty/qtpromise)
+add_subdirectory(3rdparty/msgpack-c)
+add_subdirectory(3rdparty/json)
 
 if (WIN32)
     set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/vatsimauth.lib)
     set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/opus.lib)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/portaudio.lib)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/speexdsp.lib)
-    set(ALSA_LIBRARY "")
-
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CONAN_BIN_DIRS_SENTRY-CRASHPAD}/crashpad_handler.exe"
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endif ()
 
 if (UNIX)
@@ -145,21 +129,35 @@ if (UNIX)
     set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libopus.a)
     set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libportaudio.a)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
-
     find_library(ALSA_LIBRARY NAMES asound)
-
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CONAN_BIN_DIRS_SENTRY-CRASHPAD}/crashpad_handler"
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endif ()
 
 if (APPLE)
-    set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/vatsimauth.a)
-    set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libopus.a)
-    set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libportaudio.a)
-    set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libspeexdsp.a)
-    set(ALSA_LIBRARY "")
+    find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/externals/macos)
+    find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/externals/macos)
+    find_library(LIB_PORTAUDIO portaudio ${CMAKE_SOURCE_DIR}/externals/macos)
+    find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/externals/macos)
+
+    #nng
+    include_directories(${CMAKE_SOURCE_DIR}/externals/macos/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/externals/macos/nng)
+
+    #openssl
+    include_directories(${CMAKE_SOURCE_DIR}/externals/macos/openssl/include)
+    find_library(LIB_CRYPTO crypto ${CMAKE_SOURCE_DIR}/externals/macos/openssl/lib)
+    find_library(LIB_SSL ssl ${CMAKE_SOURCE_DIR}/externals/macos/openssl/lib)
+
+    #libevent
+    include_directories(${CMAKE_SOURCE_DIR}/externals/macos/libevent/include)
+    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/externals/macos/libevent/lib)
+
+    #libcurl
+    include_directories(${CMAKE_SOURCE_DIR}/externals/macos/libcurl/include)
+    find_library(LIB_CURL curl ${CMAKE_SOURCE_DIR}/externals/macos/libcurl/lib)
+
+    #libzip
+    include_directories(${CMAKE_SOURCE_DIR}/externals/macos/libzip/include)
+    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/externals/macos/libzip/lib)
 
     find_library(COREFOUNDATION CoreFoundation)
     find_library(COREAUDIO CoreAudio)
@@ -172,12 +170,19 @@ if (APPLE)
         COMMAND cp ${CMAKE_SOURCE_DIR}/xpilot.icns ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources/xpilot.icns)
 
     add_dependencies(${PROJECT_NAME} osx_bundle_dirs)
-
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CONAN_BIN_DIRS_SENTRY-CRASHPAD}/crashpad_handler"
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endif ()
+
+if(APPLE)
+    target_link_libraries(${PROJECT_NAME}
+        PUBLIC
+        ${COREFOUNDATION}
+        ${COREAUDIO}
+        ${AUDIOTOOLBOX})
+elseif(UNIX)
+    target_link_libraries(${PROJECT_NAME}
+        PUBLIC
+        ${ALSA_LIBRARY})
+endif()
 
 target_link_libraries(
     ${PROJECT_NAME}
@@ -187,25 +192,20 @@ target_link_libraries(
     Qt${QT_MAJOR_VERSION}::Network
     Qt${QT_MAJOR_VERSION}::Svg
     PUBLIC
-    CONAN_PKG::openssl
-    CONAN_PKG::msgpack-cxx
-    CONAN_PKG::nlohmann_json
-    CONAN_PKG::libcurl
-    CONAN_PKG::libevent
-    CONAN_PKG::sentry-native
-    CONAN_PKG::sentry-crashpad
-    CONAN_PKG::libzip
-    CONAN_PKG::nng
-    CONAN_PKG::boost
-    ${OPUS_LIBRARY}
-    ${PORTAUDIO_LIBRARY}
-    ${SPEEX_LIBRARY}
-    ${VATSIM_AUTH_LIBRARY}
-    ${COREFOUNDATION}
-    ${COREAUDIO}
-    ${AUDIOTOOLBOX}
-    ${ALSA_LIBRARY}
+    ${LIB_OPUS}
+    ${LIB_VATSIM_AUTH}
+    ${LIB_EVENT}
+    ${LIB_CRYPTO}
+    ${LIB_SSL}
+    ${LIB_CURL}
+    ${LIB_PORTAUDIO}
+    ${LIB_SPEEXDSP}
+    ${LIB_VATSIM_AUTH}
+    ${LIB_NNG}
+    ${LIB_ZIP}
     qtpromise
+    msgpackc-cxx
+    nlohmann_json
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
