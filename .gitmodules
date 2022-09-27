@@ -14,3 +14,9 @@
 	path = plugin/externals/imgui
 	url = git@github.com:xpilot-project/imgui.git
 	branch = xpilot
+[submodule "client/3rdparty/json"]
+	path = client/3rdparty/json
+	url = git@github.com:nlohmann/json.git
+[submodule "client/3rdparty/msgpack-c"]
+	path = client/3rdparty/msgpack-c
+	url = git@github.com:msgpack/msgpack-c.git
