@@ -14,7 +14,7 @@ xPilot is a cross-platform X-Plane pilot client for VATSIM, supporting Windows, 
 # Contributing
 xPilot is written in C++ using the [Qt framework](https://www.qt.io/). Please read the [Contribution Guide](CONTRIBUTING.md) for details on how to contribute to the project.
 
-You can also support the development of xPilot by making a monetary donation. Thank you for your support.
+If you enjoy using xPilot, please considering donating to support the future development of the project. Thank you for your support.
 
 <a href="https://www.paypal.com/donate/?business=7MD45Q2CGTVDS&no_recurring=0&item_name=Thank+you+for+supporting+the+development+of+xPilot.&currency_code=USD"><img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif"></a>
 
