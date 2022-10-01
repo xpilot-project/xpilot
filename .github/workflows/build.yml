@@ -7,12 +7,11 @@ on:
   workflow_dispatch:
 
 env:
-  QT_VERSION: 5.15.2
+  QT_VERSION: 6.3.2
   BUILD_TYPE: RelWithDebInfo
   VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
   VATSIM_CLIENT_KEY: ${{ secrets.VATSIM_CLIENT_KEY }}
   CONFIG_ENCRYPTION_KEY: ${{ secrets.CONFIG_ENCRYPTION_KEY }}
-  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
   CLIENT_DIR: ${{ github.workspace }}/client
   PLUGIN_DIR: ${{ github.workspace }}/plugin
   IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
@@ -97,44 +96,20 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
             -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} `
             -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} `
-            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} `
-            -DSENTRY_DSN=${{ env.SENTRY_DSN }} `
-            -DSENTRY_BACKEND=crashpad `
-            -DSENTRY_INTEGRATION_QT=YES
+            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Setup Sentry CLI
-        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
-        uses: mathieu-bour/setup-sentry-cli@1.2.0
-        with:
-          version: latest
-          token: ${{ secrets.SENTRY_TOKEN }}
-          organization: xpilot
-          project: xpilot
-
-      - name: Upload debug information files
-        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
-        working-directory: ${{ env.CLIENT_DIR }}/build/bin
-        run: |
-          sentry-cli upload-dif xPilot.exe xPilot.pdb
-
       - name: Deploy application
         working-directory: ${{ env.CLIENT_DIR }}/build/bin
         shell: bash
         run: |
-          ${{ env.Qt5_DIR }}/bin/windeployqt.exe xPilot.exe \
+          ${{ env.Qt6_DIR }}/bin/windeployqt.exe xPilot.exe \
           -qmldir="${{ env.CLIENT_DIR }}/Resources"
           echo "XPILOT_BIN_DIR=`pwd`" >> $GITHUB_ENV
-
-      - name: Copy OpenSSL libraries
-        shell: bash
-        run: |
-          cp client/externals/windows/libcrypto-1_1-x64.dll "$XPILOT_BIN_DIR"
-          cp client/externals/windows/libssl-1_1-x64.dll "$XPILOT_BIN_DIR"
 
       - name: Get version
         shell: bash
@@ -267,10 +242,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
             -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
-            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
-            -DSENTRY_DSN=${{ env.SENTRY_DSN }} \
-            -DSENTRY_BACKEND=crashpad \
-            -DSENTRY_INTEGRATION_QT=YES
+            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}/build
@@ -282,25 +254,10 @@ jobs:
         run: |
           dsymutil xPilot.app/Contents/MacOS/xPilot -o xPilot.dSYM
 
-      - name: Setup Sentry CLI
-        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
-        uses: mathieu-bour/setup-sentry-cli@1.2.0
-        with:
-          version: latest
-          token: ${{ secrets.SENTRY_TOKEN }}
-          organization: xpilot
-          project: xpilot
-
-      - name: Upload debug information files
-        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
-        working-directory: ${{ env.CLIENT_DIR }}/build/bin
-        run: |
-          sentry-cli upload-dif xPilot.app/Contents/MacOS/xPilot xPilot.dSYM
-
       - name: Deploy application
         working-directory: ${{ env.CLIENT_DIR }}/build/bin
         run: |
-          ${{ env.Qt5_DIR }}/bin/macdeployqt xPilot.app \
+          ${{ env.Qt6_DIR }}/bin/macdeployqt xPilot.app \
           -qmldir=${{ env.CLIENT_DIR }}/Resources \
           -executable=xPilot.app/Contents/MacOS/xPilot \
           -sign-for-notarization="${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}"
@@ -441,10 +398,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
             -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
-            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
-            -DSENTRY_DSN=${{ env.SENTRY_DSN }} \
-            -DSENTRY_BACKEND=crashpad \
-            -DSENTRY_INTEGRATION_QT=YES
+            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}/build
@@ -456,21 +410,6 @@ jobs:
         run: |
           mv xPilot xpilot
           objcopy --only-keep-debug xpilot xpilot.debug
-
-      - name: Setup Sentry CLI
-        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
-        uses: mathieu-bour/setup-sentry-cli@1.2.0
-        with:
-          version: latest
-          token: ${{ secrets.SENTRY_TOKEN }}
-          organization: xpilot
-          project: xpilot
-
-      - name: Upload debug information files
-        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
-        working-directory: ${{ env.CLIENT_DIR }}/build/bin
-        run: |
-          sentry-cli upload-dif xpilot xpilot.debug
         
       - name: Install LinuxDeploy
         uses: miurahr/install-linuxdeploy-action@v1
