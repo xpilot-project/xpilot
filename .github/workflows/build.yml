@@ -44,33 +44,33 @@ jobs:
 
       ### Buid Plugin ###
 
-      - name: Create plugin build directory
-        working-directory: ${{ env.PLUGIN_DIR }}
-        run: |
-          cmake -E make_directory build
+      # - name: Create plugin build directory
+      #   working-directory: ${{ env.PLUGIN_DIR }}
+      #   run: |
+      #     cmake -E make_directory build
 
-      - name: Install plugin dependencies
-        working-directory: ${{ env.PLUGIN_DIR }}/build
-        run: |
-          conan install .. -s compiler.runtime=MT --build=missing
+      # - name: Install plugin dependencies
+      #   working-directory: ${{ env.PLUGIN_DIR }}/build
+      #   run: |
+      #     conan install .. -s compiler.runtime=MT --build=missing
 
-      - name: CMake plugin build files
-        working-directory: ${{ env.PLUGIN_DIR }}/build
-        run: |
-          cmake ..
+      # - name: CMake plugin build files
+      #   working-directory: ${{ env.PLUGIN_DIR }}/build
+      #   run: |
+      #     cmake ..
 
-      - name: Build plugin
-        working-directory: ${{ env.PLUGIN_DIR }}/build
-        run: |
-          cmake --build . --config ${{ env.BUILD_TYPE }}
+      # - name: Build plugin
+      #   working-directory: ${{ env.PLUGIN_DIR }}/build
+      #   run: |
+      #     cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Package plugin
-        run: |
-          mkdir -p ${{ github.workspace }}/xPilot/win_x64
-          cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.xpl ${{ github.workspace }}/xPilot/win_x64
-          cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.pdb ${{ github.workspace }}/xPilot/win_x64
-          cp ${{ github.workspace }}/plugin/externals/fmod/fmod.dll ${{ github.workspace }}/xPilot/win_x64
-          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
+      # - name: Package plugin
+      #   run: |
+      #     mkdir -p ${{ github.workspace }}/xPilot/win_x64
+      #     cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.xpl ${{ github.workspace }}/xPilot/win_x64
+      #     cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.pdb ${{ github.workspace }}/xPilot/win_x64
+      #     cp ${{ github.workspace }}/plugin/externals/fmod/fmod.dll ${{ github.workspace }}/xPilot/win_x64
+      #     cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
       ### Build Client ###
 
@@ -150,7 +150,7 @@ jobs:
 
   build-macos:
 
-    #if: ${{ false }}
+    if: ${{ false }}
   
     runs-on: macos-latest
 
@@ -314,7 +314,7 @@ jobs:
 
   build-linux:
 
-    #if: ${{ false }}
+    if: ${{ false }}
 
     runs-on: ubuntu-latest
 
