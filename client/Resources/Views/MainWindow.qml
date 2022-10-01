@@ -4,7 +4,6 @@ import QtQuick.Controls.Basic
 import QtQuick.Dialogs
 import QtQuick.Window
 import QtQuick.Layouts
-import QtWebSockets
 import QtMultimedia
 
 import AppConfig 1.0
@@ -58,42 +57,42 @@ Window {
 
     SoundEffect {
         id: alertSound
-        source: "file:///" + appDataPath + "/Sounds/Alert.wav"
+        source: "file:/" + appDataPath + "/Sounds/Alert.wav"
     }
 
     SoundEffect {
         id: broadcastSound
-        source: "file:///" + appDataPath + "/Sounds/Broadcast.wav"
+        source: "file:/" + appDataPath + "/Sounds/Broadcast.wav"
     }
 
     SoundEffect {
         id: directRadioMessageSound
-        source: "file:///" + appDataPath + "/Sounds/DirectRadioMessage.wav"
+        source: "file:/" + appDataPath + "/Sounds/DirectRadioMessage.wav"
     }
 
     SoundEffect {
         id: errorSound
-        source: "file:///" + appDataPath + "/Sounds/Error.wav"
+        source: "file:/" + appDataPath + "/Sounds/Error.wav"
     }
 
     SoundEffect {
         id: newMessageSound
-        source: "file:///" + appDataPath + "/Sounds/NewMessage.wav"
+        source: "file:/" + appDataPath + "/Sounds/NewMessage.wav"
     }
 
     SoundEffect {
         id: privateMessageSound
-        source: "file:///" + appDataPath + "/Sounds/PrivateMessage.wav"
+        source: "file:/" + appDataPath + "/Sounds/PrivateMessage.wav"
     }
 
     SoundEffect {
         id: radioMessageSound
-        source: "file:///" + appDataPath + "/Sounds/RadioMessage.wav"
+        source: "file:/" + appDataPath + "/Sounds/RadioMessage.wav"
     }
 
     SoundEffect {
         id: selcalSound
-        source: "file:///" + appDataPath + "/Sounds/SELCAL.wav"
+        source: "file:/" + appDataPath + "/Sounds/SELCAL.wav"
     }
 
     NewVersionAvailable {
