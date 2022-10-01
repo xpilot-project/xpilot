@@ -27,7 +27,6 @@ namespace xpilot
             return;
         }
         m_challengeServer = challengeServer;
-        m_socket->reset();
         m_socket->connectToHost(address, port);
         m_partialPacket = "";
     }
