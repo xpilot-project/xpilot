@@ -85,11 +85,6 @@ jobs:
         run: |
           cmake -E make_directory build
 
-      - name: Install client dependencies
-        working-directory: ${{ env.CLIENT_DIR }}/build
-        run: |
-          conan install .. --build=missing
-
       - name: CMake client build files
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
