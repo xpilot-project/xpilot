@@ -5,15 +5,19 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")
-set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(Boost_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/externals/boost)
+
+if(APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")
+    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+endif()
 
 # Configure Qt
 
@@ -118,10 +122,35 @@ add_subdirectory(3rdparty/msgpack-c)
 add_subdirectory(3rdparty/json)
 
 if (WIN32)
-    set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/vatsimauth.lib)
-    set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/opus.lib)
-    set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/portaudio.lib)
-    set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/speexdsp.lib)
+    find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/externals/windows)
+    find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/externals/windows)
+    find_library(LIB_PORTAUDIO portaudio ${CMAKE_SOURCE_DIR}/externals/windows)
+    find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/externals/windows)
+
+    #nng
+    include_directories(${CMAKE_SOURCE_DIR}/externals/windows/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/externals/windows/nng/lib)
+
+    #openssl
+    include_directories(${CMAKE_SOURCE_DIR}/externals/windows/openssl/include)
+    find_library(LIB_CRYPTO libcrypto ${CMAKE_SOURCE_DIR}/externals/windows/openssl/lib)
+    find_library(LIB_SSL libssl ${CMAKE_SOURCE_DIR}/externals/windows/openssl/lib)
+
+    #libevent
+    include_directories(${CMAKE_SOURCE_DIR}/externals/windows/libevent/include)
+    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/externals/windows/libevent/lib)
+
+    #libcurl
+    include_directories(${CMAKE_SOURCE_DIR}/externals/windows/libcurl/include)
+    find_library(LIB_CURL libcurl ${CMAKE_SOURCE_DIR}/externals/windows/libcurl/lib)
+
+    #libzip
+    include_directories(${CMAKE_SOURCE_DIR}/externals/windows/libzip/include)
+    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/externals/windows/libzip/lib)
+    find_library(LIB_BZIP2 bzip2 ${CMAKE_SOURCE_DIR}/externals/windows/libzip/lib)
+    find_library(LIB_ZSTD zstd ${CMAKE_SOURCE_DIR}/externals/windows/libzip/lib)
+    find_library(LIB_LZMA lzma ${CMAKE_SOURCE_DIR}/externals/windows/libzip/lib)
+    find_library(ZLIB zlib ${CMAKE_SOURCE_DIR}/externals/windows/libzip/lib)
 endif ()
 
 if (UNIX)
@@ -195,9 +224,9 @@ target_link_libraries(
     ${LIB_OPUS}
     ${LIB_VATSIM_AUTH}
     ${LIB_EVENT}
+    ${LIB_CURL}
     ${LIB_CRYPTO}
     ${LIB_SSL}
-    ${LIB_CURL}
     ${LIB_PORTAUDIO}
     ${LIB_SPEEXDSP}
     ${LIB_VATSIM_AUTH}
@@ -211,6 +240,7 @@ target_link_libraries(
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 
 if(MSVC)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32.lib)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32.lib Wldap32.lib Iphlpapi.lib crypt32.lib)
     target_compile_definitions(${PROJECT_NAME} PUBLIC _USE_MATH_DEFINES)
+    add_definitions(-DCURL_STATICLIB -DNNG_STATIC_LIB)
 endif()
