@@ -36,11 +36,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Conan
-        run: |
-          python3 -m pip install --upgrade pip
-          pip3 install conan
-          pip3 install conan_package_tools
+      # - name: Install Conan
+      #   run: |
+      #     python3 -m pip install --upgrade pip
+      #     pip3 install conan
+      #     pip3 install conan_package_tools
 
       ### Buid Plugin ###
 
@@ -99,7 +99,7 @@ jobs:
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
       - name: Deploy application
-        working-directory: ${{ env.CLIENT_DIR }}/build/bin
+        working-directory: ${{ env.CLIENT_DIR }}/build/RelWithDebInfo
         shell: bash
         run: |
           ${{ env.Qt6_DIR }}/bin/windeployqt.exe xPilot.exe \
