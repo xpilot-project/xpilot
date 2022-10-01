@@ -1,9 +1,6 @@
 [submodule "client/afv-native"]
 	path = client/afv-native
 	url = git@github.com:xpilot-project/afv-native.git
-[submodule "client/qtpromise"]
-	path = client/qtpromise
-	url = git@github.com:simonbrunel/qtpromise.git
 [submodule "client/3rdparty/qtpromise"]
 	path = client/3rdparty/qtpromise
 	url = git@github.com:simonbrunel/qtpromise.git
