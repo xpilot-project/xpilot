@@ -19,6 +19,12 @@ if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
 endif()
 
+if(WIN32)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT ")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
+endif()
+
 # Configure Qt
 
 set(QT_MAJOR_VERSION 6)
@@ -96,6 +102,7 @@ file(
 )
 
 list(FILTER afv_SRC EXCLUDE REGEX ".*SoundIOAudioDevice\\.(h|cpp)$")
+list(FILTER afv_SRC EXCLUDE REGEX ".*PortAudioAudioDevice\\.(h|cpp)$")
 
 qt_add_resources(qrc_SOURCES qml.qrc)
 
@@ -124,7 +131,6 @@ add_subdirectory(3rdparty/json)
 if (WIN32)
     find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/externals/windows)
     find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/externals/windows)
-    find_library(LIB_PORTAUDIO portaudio ${CMAKE_SOURCE_DIR}/externals/windows)
     find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/externals/windows)
 
     #nng
@@ -147,16 +153,11 @@ if (WIN32)
     #libzip
     include_directories(${CMAKE_SOURCE_DIR}/externals/windows/libzip/include)
     find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/externals/windows/libzip/lib)
-    find_library(LIB_BZIP2 bzip2 ${CMAKE_SOURCE_DIR}/externals/windows/libzip/lib)
-    find_library(LIB_ZSTD zstd ${CMAKE_SOURCE_DIR}/externals/windows/libzip/lib)
-    find_library(LIB_LZMA lzma ${CMAKE_SOURCE_DIR}/externals/windows/libzip/lib)
-    find_library(ZLIB zlib ${CMAKE_SOURCE_DIR}/externals/windows/libzip/lib)
 endif ()
 
 if (UNIX)
     set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/vatsimauth.a)
     set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libopus.a)
-    set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libportaudio.a)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
     find_library(ALSA_LIBRARY NAMES asound)
 endif ()
@@ -164,7 +165,6 @@ endif ()
 if (APPLE)
     find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/externals/macos)
     find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/externals/macos)
-    find_library(LIB_PORTAUDIO portaudio ${CMAKE_SOURCE_DIR}/externals/macos)
     find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/externals/macos)
 
     #nng
@@ -227,7 +227,6 @@ target_link_libraries(
     ${LIB_CURL}
     ${LIB_CRYPTO}
     ${LIB_SSL}
-    ${LIB_PORTAUDIO}
     ${LIB_SPEEXDSP}
     ${LIB_VATSIM_AUTH}
     ${LIB_NNG}
