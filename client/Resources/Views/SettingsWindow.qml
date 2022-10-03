@@ -13,7 +13,7 @@ Window {
     id: formSettings
     title: "Settings"
     width: 670
-    height: 660
+    height: 620
     minimumHeight: height
     minimumWidth: width
     maximumHeight: height
@@ -22,7 +22,6 @@ Window {
     modality: Qt.ApplicationModal
 
     property bool serverListLoaded: false
-    property bool apiListLoaded: false
     property bool inputDeviceListLoaded: false
     property bool outputDeviceListLoaded: false
     property bool initialized: false
@@ -75,7 +74,6 @@ Window {
         networkServerCombobox.model = AppConfig.CachedServers;
         outputDeviceList.model = audio.OutputDevices;
         inputDeviceList.model = audio.InputDevices;
-        audioApiList.model = audio.AudioApis;
         com1Slider.volume = AppConfig.Com1Volume;
         com2Slider.volume = AppConfig.Com2Volume;
         microphoneVolume.volume = AppConfig.MicrophoneVolume;
@@ -427,47 +425,6 @@ Window {
                     Layout.preferredWidth: 287
                     onCheckedChanged: {
                         audio.disableAudioEffects(switchDisableRadioEffects.checked)
-                    }
-                }
-            }
-        }
-
-        Item {
-            id: audioApi
-            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-            Layout.column: 0
-            Layout.columnSpan: 2
-            Layout.preferredWidth: 50
-            Layout.row: 6
-            Layout.fillWidth: true
-            Layout.preferredHeight: 50
-            Text {
-                id: audioApiLabel
-                color: "#333333"
-                text: qsTr("Audio API")
-                renderType: Text.NativeRendering
-                font.pixelSize: 13
-            }
-
-            CustomComboBox {
-                id: audioApiList
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: audioApiLabel.bottom
-                anchors.topMargin: 5
-                anchors.leftMargin: 0
-                anchors.rightMargin: 0
-                textRole: "name"
-                valueRole: "id"
-                onModelChanged: {
-                    currentIndex = audioApiList.find(AppConfig.AudioApi)
-                    apiListLoaded = true
-                }
-                onCurrentIndexChanged: {
-                    if(apiListLoaded) {
-                        AppConfig.AudioApi = audioApiList.textAt(currentIndex)
-                        var api = audioApiList.valueAt(currentIndex)
-                        audio.setAudioApi(api)
                     }
                 }
             }
