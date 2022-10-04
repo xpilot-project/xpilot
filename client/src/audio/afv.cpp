@@ -134,13 +134,29 @@ namespace xpilot
         m_client->setEnableOutputEffects(!AppConfig::getInstance()->AudioEffectsDisabled);
         m_client->setEnableHfSquelch(AppConfig::getInstance()->HFSquelchEnabled);
 
+        m_audioDrivers = afv_native::audio::AudioDevice::getAPIs();
+        for(const auto& driver : m_audioDrivers)
+        {
+            if(QString(driver.second.c_str()) == AppConfig::getInstance()->AudioApi)
+            {
+                m_audioApi = driver.first;
+            }
+        }
+
         QTimer::singleShot(0, this, [this]{
-            configureAudioDevices();
+            if(m_audioDrivers.empty())
+            {
+                emit notificationPosted((int)NotificationType::Error, "Could not initialize audio drivers or devices.");
+            }
+            else
+            {
+                setAudioApi(m_audioApi);
 
-            setMicrophoneVolume(AppConfig::getInstance()->MicrophoneVolume);
+                setMicrophoneVolume(AppConfig::getInstance()->MicrophoneVolume);
 
-            setCom1Volume(AppConfig::getInstance()->Com1Volume);
-            setCom2Volume(AppConfig::getInstance()->Com2Volume);
+                setCom1Volume(AppConfig::getInstance()->Com1Volume);
+                setCom2Volume(AppConfig::getInstance()->Com2Volume);
+            }
         });
 
         connect(&m_transceiverTimer, &QTimer::timeout, this, &AudioForVatsim::OnTransceiverTimer);
