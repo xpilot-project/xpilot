@@ -132,7 +132,7 @@ public:
     bool operator==(const AircraftConfiguration& rhs)
     {
         return GearDown == rhs.GearDown &&
-                FlapsPercent == rhs.GearDown &&
+                FlapsPercent == rhs.FlapsPercent &&
                 SpoilersDeployed == rhs.SpoilersDeployed &&
                 OnGround == rhs.OnGround &&
                 Lights.value() == rhs.Lights.value() &&
