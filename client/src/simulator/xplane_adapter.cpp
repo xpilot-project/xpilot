@@ -611,9 +611,9 @@ void XplaneAdapter::OnDataReceived()
                     }
                     break;
                 case DataRef::Paused:
-                    if(value != m_simPaused) {
+                    if((bool)value != m_simPaused) {
                         emit simPausedStateChanged(value > 0);
-                        m_simPaused = value;
+                        m_simPaused = (bool)value;
                     }
                     break;
                 case DataRef::PushToTalk:
