@@ -46,6 +46,7 @@ namespace xpilot
         QVector<NetworkServerInfo> CachedServers;
         ConnectInfo RecentConnection;
         ClientWindowConfig WindowConfig;
+        QString AudioApi;
         QString OutputDevice;
         QString InputDevice;
         int Com1Volume = 100;
@@ -101,6 +102,7 @@ namespace xpilot
         Q_PROPERTY(QVariant CachedServers READ VariantCachedServers)
         Q_PROPERTY(ConnectInfo RecentConnection MEMBER RecentConnection)
         Q_PROPERTY(ClientWindowConfig WindowConfig MEMBER WindowConfig)
+        Q_PROPERTY(QString AudioApi MEMBER AudioApi)
         Q_PROPERTY(QString InputDevice MEMBER InputDevice NOTIFY inputDeviceChanged)
         Q_PROPERTY(QString OutputDevice MEMBER OutputDevice)
         Q_PROPERTY(int Com1Volume MEMBER Com1Volume)
@@ -114,7 +116,7 @@ namespace xpilot
         Q_PROPERTY(bool AlertDirectRadioMessage MEMBER AlertDirectRadioMessage NOTIFY alertDirectRadioMessageChanged)
         Q_PROPERTY(bool AlertSelcal MEMBER AlertSelcal NOTIFY alertSelcalChanged)
         Q_PROPERTY(bool AlertNetworkBroadcast MEMBER AlertNetworkBroadcast NOTIFY alertNetworkBroadcastChanged)
-        Q_PROPERTY(bool AlertDisconnect MEMBER AlertDisconnect NOTIFY alertDisconnectChanged)
+        Q_PROPERTY(bool AlertDisconnect MEMBER AlertDisconnect NOTIFY alertDisconnectChanged);
         Q_PROPERTY(bool SilenceModelInstall MEMBER SilenceModelInstall)
         Q_PROPERTY(QStringList VisualMachines MEMBER VisualMachines)
         Q_PROPERTY(QString XplaneNetworkAddress MEMBER XplaneNetworkAddress)

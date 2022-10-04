@@ -111,6 +111,7 @@ void AppConfig::loadConfig()
     Name = jsonMap["Name"].toString();
     HomeAirport = jsonMap["HomeAirport"].toString();
     ServerName = jsonMap["ServerName"].toString();
+    AudioApi = jsonMap["AudioApi"].toString();
     InputDevice = jsonMap["InputDevice"].toString();
     OutputDevice = jsonMap["OutputDevice"].toString();
     Com1Volume = qMin(qMax(jsonMap["Com1Volume"].toInt(), 0), 100);
@@ -202,6 +203,7 @@ bool AppConfig::saveConfig()
     jsonObj["Name"] = Name;
     jsonObj["HomeAirport"] = HomeAirport;
     jsonObj["ServerName"] = ServerName;
+    jsonObj["AudioApi"] = AudioApi;
     jsonObj["InputDevice"] = InputDevice;
     jsonObj["OutputDevice"] = OutputDevice;
     jsonObj["Com1Volume"] = qMin(qMax(Com1Volume, 0), 100);
