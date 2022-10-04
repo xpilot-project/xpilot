@@ -31,6 +31,7 @@ namespace xpilot
     public:
         ServerListManager(QObject * parent = nullptr);
         void PerformServerListDownload(const QString &url);
+        QtPromise::QPromise<QString> DownloadStatusInfo(const QString &url);
         QtPromise::QPromise<QVector<NetworkServerInfo>> DownloadServerList(const QString &url);
 
     signals:

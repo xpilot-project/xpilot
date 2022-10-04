@@ -83,7 +83,7 @@ int xpilot::Main(int argc, char* argv[])
     AudioForVatsim audio(networkManager, xplaneAdapter, controllerManager);
 
     QTimer::singleShot(500, [&](){
-        serverListManager.PerformServerListDownload("https://data.vatsim.net/v3/vatsim-servers.json");
+        serverListManager.PerformServerListDownload("https://status.vatsim.net/status.json");
         versionCheck.PerformVersionCheck();
         typeCodeDatabase.PerformTypeCodeDownload();
     });
