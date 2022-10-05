@@ -401,6 +401,44 @@ namespace xpilot {
 						ImGui::EndTable();
 					}
 				}
+
+				if (m_env->IsNetworkConnected()) {
+					ImGui::PushStyleColor(ImGuiCol_ChildBg, headerColor);
+					ImGui::BeginChild("#unicom", ImVec2(600, 21));
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text(" Unicom");
+					ImGui::EndChild();
+					ImGui::PopStyleColor();
+
+					if (ImGui::BeginTable("#unicom", 4, ImGuiTableFlags_RowBg)) {
+						ImGui::TableSetupColumn("#callsign", ImGuiTableColumnFlags_WidthFixed, 110);
+						ImGui::TableSetupColumn("#frequency", ImGuiTableColumnFlags_WidthFixed, 100);
+						ImGui::TableSetupColumn("#name", ImGuiTableColumnFlags_WidthStretch);
+						ImGui::TableSetupColumn("#actions", ImGuiTableColumnFlags_WidthFixed, 70);
+
+						ImGui::TableNextRow();
+
+						ImGui::TableSetColumnIndex(0);
+						ImGui::AlignTextToFramePadding();
+						ImGui::Text(" Unicom");
+
+						ImGui::TableSetColumnIndex(1);
+						ImGui::Text("122.800");
+
+						ImGui::TableSetColumnIndex(3);
+						ImGui::SameLine(22.);
+
+						std::string btn2 = "Frequency#unicom";
+						ImGui::PushID(btn2.c_str());
+						if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM1 Frequency")) {
+							m_com1Frequency = 122800;
+						}
+						ImGui::PopID();
+
+						ImGui::EndTable();
+					}
+				}
+
 				ImGui::EndChild();
 			}
 		}
