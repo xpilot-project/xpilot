@@ -1,18 +1,15 @@
 cmake_minimum_required(VERSION 3.16)
-project(xpilot LANGUAGES C CXX VERSION 2.0.0)
-
-set(CONAN_DISABLE_CHECK_COMPILER TRUE)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(xpilot LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD_REQUIRED 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD 17)
 
-if(BUILD_XP12)
-    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE INTERNAL "")
-endif()
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")
+set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+
+set(Boost_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/externals/boost)
 
 file(READ ${CMAKE_SOURCE_DIR}/../xpilot.json XPILOT_JSON)
 string(JSON IS_BETA_VERSION GET ${XPILOT_JSON} is_beta)
@@ -31,31 +28,44 @@ endif()
 
 configure_file(${CMAKE_SOURCE_DIR}/include/Constants.h.in ${CMAKE_SOURCE_DIR}/include/Constants.h @ONLY)
 
-if(MSVC)
-	if(NOT DEFINED CONAN_LINK_RUNTIME AND DEFINED CONAN_SETTINGS_COMPILER_RUNTIME)
-		message(WARNING "Forcing MSVC runtime based on conan profile")
-		# this means Conan is not running the build, so we need to fix our linker flags ourself.... although we can probably cheat...
-		set(CONAN_LINK_RUNTIME "/${CONAN_SETTINGS_COMPILER_RUNTIME}")
-		conan_set_vs_runtime()
-	endif()
-endif(MSVC)
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/externals/gmath)
+include_directories(${CMAKE_SOURCE_DIR}/externals/imgui)
+include_directories(${CMAKE_SOURCE_DIR}/externals/imgui/font)
+include_directories(${CMAKE_SOURCE_DIR}/externals/imgui/imgwindow)
+include_directories(${CMAKE_SOURCE_DIR}/externals/xpmp2)
+include_directories(${CMAKE_SOURCE_DIR}/externals/sdk/CHeaders/XPLM)
+include_directories(${CMAKE_SOURCE_DIR}/externals/fmod/include)
 
-if (WIN32)
-    # Compile as multithreaded plugin on Windows
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-endif ()
+if(WIN32)
+    include_directories(${CMAKE_SOURCE_DIR}/externals/windows/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/externals/windows/nng)
+elseif(APPLE)
+    include_directories(${CMAKE_SOURCE_DIR}/externals/macos/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/externals/macos/nng)
+elseif(UNIX)
+    include_directories(${CMAKE_SOURCE_DIR}/externals/linux/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/externals/linux/nng)
+endif()
 
-include_directories("${CMAKE_SOURCE_DIR}/include")
-include_directories("${CMAKE_SOURCE_DIR}/externals/Font")
-include_directories("${CMAKE_SOURCE_DIR}/externals/gmath")
-include_directories("${CMAKE_SOURCE_DIR}/externals/imgui")
-include_directories("${CMAKE_SOURCE_DIR}/externals/imgui-stdlib")
-include_directories("${CMAKE_SOURCE_DIR}/externals/ImgWindow")
-include_directories("${CMAKE_SOURCE_DIR}/externals/XPMP2")
-include_directories("${CMAKE_SOURCE_DIR}/externals/SDK/CHeaders/XPLM")
-include_directories("${CMAKE_SOURCE_DIR}/externals/fmod/include")
+add_subdirectory(externals/msgpack-c)
+add_subdirectory(externals/json)
 
-set(Header_Files
+file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
+    ${PROJECT_SOURCE_DIR}/src/*.cpp
+    ${PROJECT_SOURCE_DIR}/include/*.h)
+
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/externals/imgui)
+include_directories(${CMAKE_SOURCE_DIR}/externals/imgui-stdlib)
+include_directories(${CMAKE_SOURCE_DIR}/externals/imgwindow)
+include_directories(${CMAKE_SOURCE_DIR}/externals/font)
+include_directories(${CMAKE_SOURCE_DIR}/externals/gmath)
+include_directories(${CMAKE_SOURCE_DIR}/externals/fmod/include)
+include_directories(${CMAKE_SOURCE_DIR}/externals/xpmp2)
+include_directories(${CMAKE_SOURCE_DIR}/externals/sdk/CHeaders/XPLM)
+
+set(INCLUDES
   include/AircraftManager.h
   include/AudioEngine.h
   include/Config.h
@@ -77,9 +87,9 @@ set(Header_Files
   include/XPilotAPI.h
   include/XplaneCommand.h)
 
-source_group("Header Files" FILES ${Header_Files})
+source_group("Header Files" FILES ${INCLUDES})
 
-set(Source_Files
+set(SRC
   src/AircraftManager.cpp
   src/AudioEngine.cpp
   src/Config.cpp
@@ -100,25 +110,23 @@ set(Source_Files
   externals/imgui/imgui_tables.cpp
   externals/imgui/imgui_widgets.cpp
   externals/imgui-stdlib/imgui_stdlib.cpp
-  externals/ImgWindow/XPImgWindow.cpp
-  externals/ImgWindow/ImgFontAtlas.cpp
-  externals/ImgWindow/ImgWindow.cpp)
+  externals/imgwindow/XPImgWindow.cpp
+  externals/imgwindow/ImgFontAtlas.cpp
+  externals/imgwindow/ImgWindow.cpp)
 
-source_group("Source Files" FILES ${Source_Files})
-
-set(ALL_FILES  ${Header_Files} ${Source_Files})
-
-add_library(${PROJECT_NAME} MODULE ${ALL_FILES})
+source_group("Source Files" FILES ${SRC})
+set(ALL_FILES ${INCLUDES} ${SRC})
+add_library(${PROJECT_NAME} MODULE ${SRC})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/externals)
 
 if (APPLE)
-    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/XPMP2/macos")
+    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/xpmp2/macos")
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/sdk/Libraries/Mac")
 elseif (UNIX)
-    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/XPMP2/lin")
+    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/xpmp2/lin")
 elseif (WIN32)
-    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/XPMP2/win")
+    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/xpmp2/win")
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/sdk/Libraries/Win")
 endif()
 
@@ -139,17 +147,16 @@ elseif(APPLE)
     message ("FMOD_LIBRARY = ${FMOD_LIBRARY}")
     target_link_libraries(${PROJECT_NAME} ${FMOD_LIBRARY})
 elseif(UNIX AND NOT APPLE)
-    find_library(FMOD_LIBRARY NAMES libfmod.so.13 REQUIRED)
+    find_library(FMOD_LIBRARY NAMES libfmod.so REQUIRED)
     message ("FMOD_LIBRARY = ${FMOD_LIBRARY}")
     target_link_libraries(${PROJECT_NAME} ${FMOD_LIBRARY})
 endif()
 
 target_link_libraries(
   ${PROJECT_NAME}
-	CONAN_PKG::nlohmann_json
-    CONAN_PKG::msgpack-cxx
-    CONAN_PKG::boost
-    CONAN_PKG::nng
+    msgpackc-cxx
+    nlohmann_json
+    ${LIB_NNG}
 	${XPMP2_LIBRARY})
 
 if (WIN32 OR APPLE)
@@ -203,6 +210,8 @@ add_definitions(-DXPLM200=1 -DXPLM210=1 -DXPLM300=1 -DXPLM301=1 -DXPLM303=1)
 
 # Define platform macros.
 add_definitions(-DAPL=$<BOOL:${APPLE}> -DIBM=$<BOOL:${WIN32}> -DLIN=$<AND:$<BOOL:${UNIX}>,$<NOT:$<BOOL:${APPLE}>>>)
+
+add_definitions(-DNNG_STATIC_LIB)
 
 if (UNIX OR APPLE)
     add_compile_options(-fexceptions -fpermissive)

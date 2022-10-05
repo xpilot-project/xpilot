@@ -124,9 +124,9 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC
     ${CMAKE_SOURCE_DIR}/afv-native/include)
 
-add_subdirectory(3rdparty/qtpromise)
-add_subdirectory(3rdparty/msgpack-c)
-add_subdirectory(3rdparty/json)
+add_subdirectory(externals/qtpromise)
+add_subdirectory(externals/msgpack-c)
+add_subdirectory(externals/json)
 
 if (WIN32)
     find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/externals/windows)
@@ -135,24 +135,24 @@ if (WIN32)
 
     #nng
     include_directories(${CMAKE_SOURCE_DIR}/externals/windows/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/externals/windows/nng/lib)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/externals/windows/nng)
 
     #openssl
     include_directories(${CMAKE_SOURCE_DIR}/externals/windows/openssl/include)
-    find_library(LIB_CRYPTO libcrypto ${CMAKE_SOURCE_DIR}/externals/windows/openssl/lib)
-    find_library(LIB_SSL libssl ${CMAKE_SOURCE_DIR}/externals/windows/openssl/lib)
+    find_library(LIB_CRYPTO libcrypto ${CMAKE_SOURCE_DIR}/externals/windows/openssl)
+    find_library(LIB_SSL libssl ${CMAKE_SOURCE_DIR}/externals/windows/openssl)
 
     #libevent
     include_directories(${CMAKE_SOURCE_DIR}/externals/windows/libevent/include)
-    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/externals/windows/libevent/lib)
+    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/externals/windows/libevent)
 
     #libcurl
     include_directories(${CMAKE_SOURCE_DIR}/externals/windows/libcurl/include)
-    find_library(LIB_CURL libcurl ${CMAKE_SOURCE_DIR}/externals/windows/libcurl/lib)
+    find_library(LIB_CURL libcurl ${CMAKE_SOURCE_DIR}/externals/windows/libcurl)
 
     #libzip
     include_directories(${CMAKE_SOURCE_DIR}/externals/windows/libzip/include)
-    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/externals/windows/libzip/lib)
+    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/externals/windows/libzip)
 endif ()
 
 if (UNIX)
@@ -173,20 +173,20 @@ if (APPLE)
 
     #openssl
     include_directories(${CMAKE_SOURCE_DIR}/externals/macos/openssl/include)
-    find_library(LIB_CRYPTO crypto ${CMAKE_SOURCE_DIR}/externals/macos/openssl/lib)
-    find_library(LIB_SSL ssl ${CMAKE_SOURCE_DIR}/externals/macos/openssl/lib)
+    find_library(LIB_CRYPTO crypto ${CMAKE_SOURCE_DIR}/externals/macos/openssl)
+    find_library(LIB_SSL ssl ${CMAKE_SOURCE_DIR}/externals/macos/openssl)
 
     #libevent
     include_directories(${CMAKE_SOURCE_DIR}/externals/macos/libevent/include)
-    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/externals/macos/libevent/lib)
+    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/externals/macos/libevent)
 
     #libcurl
     include_directories(${CMAKE_SOURCE_DIR}/externals/macos/libcurl/include)
-    find_library(LIB_CURL curl ${CMAKE_SOURCE_DIR}/externals/macos/libcurl/lib)
+    find_library(LIB_CURL curl ${CMAKE_SOURCE_DIR}/externals/macos/libcurl)
 
     #libzip
     include_directories(${CMAKE_SOURCE_DIR}/externals/macos/libzip/include)
-    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/externals/macos/libzip/lib)
+    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/externals/macos/libzip)
 
     find_library(COREFOUNDATION CoreFoundation)
     find_library(COREAUDIO CoreAudio)
