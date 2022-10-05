@@ -102,6 +102,7 @@ file(
 )
 
 list(FILTER afv_SRC EXCLUDE REGEX ".*SoundIOAudioDevice\\.(h|cpp)$")
+list(FILTER afv_SRC EXCLUDE REGEX ".*PortAudioAudioDevice\\.(h|cpp)$")
 
 qt_add_resources(qrc_SOURCES qml.qrc)
 
@@ -126,7 +127,6 @@ target_include_directories(${PROJECT_NAME}
 add_subdirectory(3rdparty/qtpromise)
 add_subdirectory(3rdparty/msgpack-c)
 add_subdirectory(3rdparty/json)
-add_subdirectory(afv-native/extern/portaudio)
 
 if (WIN32)
     find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/externals/windows)
@@ -234,7 +234,6 @@ target_link_libraries(
     qtpromise
     msgpackc-cxx
     nlohmann_json
-    PortAudio
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)

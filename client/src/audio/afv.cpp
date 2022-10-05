@@ -71,6 +71,12 @@ namespace xpilot
         {
             switch(evt)
             {
+                case afv_native::ClientEventType::AudioDisabled:
+                    emit notificationPosted((int)NotificationType::Error, "No speaker device detected. You will not be able to communicate on voice until you plug in a speaker device and restart xPilot.");
+                    break;
+                case afv_native::ClientEventType::InputDeviceError:
+                    emit notificationPosted((int)NotificationType::Error, "No microphone device detected. You will not be able to communicate on voice until you plug in a microphone device and restart xPilot.");
+                    break;
                 case afv_native::ClientEventType::APIServerError:
                     if(data != nullptr) {
                         auto error = *reinterpret_cast<APISessionError*>(data);
@@ -134,30 +140,10 @@ namespace xpilot
         m_client->setEnableOutputEffects(!AppConfig::getInstance()->AudioEffectsDisabled);
         m_client->setEnableHfSquelch(AppConfig::getInstance()->HFSquelchEnabled);
 
-        m_audioDrivers = afv_native::audio::AudioDevice::getAPIs();
-        for(const auto& driver : m_audioDrivers)
-        {
-            if(QString(driver.second.c_str()) == AppConfig::getInstance()->AudioApi)
-            {
-                m_audioApi = driver.first;
-            }
-        }
-
-        QTimer::singleShot(0, this, [this]{
-            if(m_audioDrivers.empty())
-            {
-                emit notificationPosted((int)NotificationType::Error, "Could not initialize audio drivers or devices.");
-            }
-            else
-            {
-                setAudioApi(m_audioApi);
-
-                setMicrophoneVolume(AppConfig::getInstance()->MicrophoneVolume);
-
-                setCom1Volume(AppConfig::getInstance()->Com1Volume);
-                setCom2Volume(AppConfig::getInstance()->Com2Volume);
-            }
-        });
+        configureAudioDevices();
+        setMicrophoneVolume(AppConfig::getInstance()->MicrophoneVolume);
+        setCom1Volume(AppConfig::getInstance()->Com1Volume);
+        setCom2Volume(AppConfig::getInstance()->Com2Volume);
 
         connect(&m_transceiverTimer, &QTimer::timeout, this, &AudioForVatsim::OnTransceiverTimer);
         connect(&m_rxTxQueryTimer, &QTimer::timeout, this, [&]{
@@ -298,16 +284,20 @@ namespace xpilot
 
     void AudioForVatsim::setInputDevice(QString deviceName)
     {
-        m_client->stopAudio();
-        m_client->setAudioInputDevice(deviceName.toStdString().c_str());
-        m_client->startAudio();
+        if(!deviceName.isEmpty()) {
+            m_client->stopAudio();
+            m_client->setAudioInputDevice(deviceName.toStdString().c_str());
+            m_client->startAudio();
+        }
     }
 
     void AudioForVatsim::setOutputDevice(QString deviceName)
     {
-        m_client->stopAudio();
-        m_client->setAudioOutputDevice(deviceName.toStdString().c_str());
-        m_client->startAudio();
+        if(!deviceName.isEmpty()) {
+            m_client->stopAudio();
+            m_client->setAudioOutputDevice(deviceName.toStdString().c_str());
+            m_client->startAudio();
+        }
     }
 
     void AudioForVatsim::setCom1Volume(double volume)
