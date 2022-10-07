@@ -155,7 +155,7 @@ namespace xpilot {
 		EngineClassType EngineClass;
 
 	protected:
-		virtual void UpdatePosition(float, int);
+		virtual void UpdatePosition(float, int) override;
 		AircraftVisualState ExtrapolatePosition(Vector3 velocityVector, Vector3 rotationVector, double interval);
 		void PerformGroundClamping(float frameRate);
 		void EnsureAboveGround();
