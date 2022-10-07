@@ -27,7 +27,7 @@
 #include "SettingsWindow.h"
 #include "NotificationPanel.h"
 #include "TextMessageConsole.h"
-#include "XPMP2/XPMPMultiplayer.h"
+#include "xpmp2/XPMPMultiplayer.h"
 
 namespace xpilot {
 	XPilot::XPilot() :
@@ -124,7 +124,7 @@ namespace xpilot {
 		nng_setopt_int(_socket, NNG_OPT_RECVBUF, 1024);
 		nng_setopt_int(_socket, NNG_OPT_SENDBUF, 1024);
 
-		std::string url = "ipc://xpilot.ipc";
+		std::string url = "ipc:///tmp//xpilot.ipc";
 		if ((rv = nng_listen(_socket, url.c_str(), NULL, 0)) != 0) {
 			LOG_MSG(logERROR, "Socket listen error (%s): %s", url.c_str(), nng_strerror(rv));
 			return;
