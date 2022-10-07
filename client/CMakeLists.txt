@@ -185,8 +185,8 @@ if (APPLE)
     find_library(LIB_CURL curl ${CMAKE_SOURCE_DIR}/../externals/macos/libcurl)
 
     #libzip
-    include_directories(${CMAKE_SOURCE_DIR}/externals/macos/libzip/include)
-    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/externals/macos/libzip)
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libzip/include)
+    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/../externals/macos/libzip)
 
     find_library(COREFOUNDATION CoreFoundation)
     find_library(COREAUDIO CoreAudio)
