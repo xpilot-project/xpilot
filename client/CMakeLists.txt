@@ -11,7 +11,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(Boost_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/externals/boost)
+set(Boost_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../externals/boost)
 
 if(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
@@ -124,65 +124,65 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC
     ${CMAKE_SOURCE_DIR}/afv-native/include)
 
-add_subdirectory(externals/qtpromise)
-add_subdirectory(externals/msgpack-c)
-add_subdirectory(externals/json)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/msgpack-c ${CMAKE_CURRENT_BINARY_DIR}/msgpack-c)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/json ${CMAKE_CURRENT_BINARY_DIR}/json)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/qtpromise ${CMAKE_CURRENT_BINARY_DIR}/qtpromise)
 
 if (WIN32)
-    find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/externals/windows)
-    find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/externals/windows)
-    find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/externals/windows)
+    find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/../externals/windows)
+    find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/../externals/windows)
+    find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/../externals/windows)
 
     #nng
-    include_directories(${CMAKE_SOURCE_DIR}/externals/windows/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/externals/windows/nng)
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/windows/nng)
 
     #openssl
-    include_directories(${CMAKE_SOURCE_DIR}/externals/windows/openssl/include)
-    find_library(LIB_CRYPTO libcrypto ${CMAKE_SOURCE_DIR}/externals/windows/openssl)
-    find_library(LIB_SSL libssl ${CMAKE_SOURCE_DIR}/externals/windows/openssl)
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/openssl/include)
+    find_library(LIB_CRYPTO libcrypto ${CMAKE_SOURCE_DIR}/../externals/windows/openssl)
+    find_library(LIB_SSL libssl ${CMAKE_SOURCE_DIR}/../externals/windows/openssl)
 
     #libevent
-    include_directories(${CMAKE_SOURCE_DIR}/externals/windows/libevent/include)
-    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/externals/windows/libevent)
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/libevent/include)
+    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/../externals/windows/libevent)
 
     #libcurl
-    include_directories(${CMAKE_SOURCE_DIR}/externals/windows/libcurl/include)
-    find_library(LIB_CURL libcurl ${CMAKE_SOURCE_DIR}/externals/windows/libcurl)
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/libcurl/include)
+    find_library(LIB_CURL libcurl ${CMAKE_SOURCE_DIR}/../externals/windows/libcurl)
 
     #libzip
-    include_directories(${CMAKE_SOURCE_DIR}/externals/windows/libzip/include)
-    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/externals/windows/libzip)
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/libzip/include)
+    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/../externals/windows/libzip)
 endif ()
 
 if (UNIX)
-    set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/vatsimauth.a)
-    set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libopus.a)
-    set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
+    set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/../externals/linux/vatsimauth.a)
+    set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/../externals/linux/libopus.a)
+    set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/../externals/linux/libspeexdsp.a)
     find_library(ALSA_LIBRARY NAMES asound)
 endif ()
 
 if (APPLE)
-    find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/externals/macos)
-    find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/externals/macos)
-    find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/externals/macos)
+    find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/../externals/macos)
+    find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/../externals/macos)
+    find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/../externals/macos)
 
     #nng
-    include_directories(${CMAKE_SOURCE_DIR}/externals/macos/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/externals/macos/nng)
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/macos/nng)
 
     #openssl
-    include_directories(${CMAKE_SOURCE_DIR}/externals/macos/openssl/include)
-    find_library(LIB_CRYPTO crypto ${CMAKE_SOURCE_DIR}/externals/macos/openssl)
-    find_library(LIB_SSL ssl ${CMAKE_SOURCE_DIR}/externals/macos/openssl)
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/openssl/include)
+    find_library(LIB_CRYPTO crypto ${CMAKE_SOURCE_DIR}/../externals/macos/openssl)
+    find_library(LIB_SSL ssl ${CMAKE_SOURCE_DIR}/../externals/macos/openssl)
 
     #libevent
-    include_directories(${CMAKE_SOURCE_DIR}/externals/macos/libevent/include)
-    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/externals/macos/libevent)
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libevent/include)
+    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/../externals/macos/libevent)
 
     #libcurl
-    include_directories(${CMAKE_SOURCE_DIR}/externals/macos/libcurl/include)
-    find_library(LIB_CURL curl ${CMAKE_SOURCE_DIR}/externals/macos/libcurl)
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libcurl/include)
+    find_library(LIB_CURL curl ${CMAKE_SOURCE_DIR}/../externals/macos/libcurl)
 
     #libzip
     include_directories(${CMAKE_SOURCE_DIR}/externals/macos/libzip/include)

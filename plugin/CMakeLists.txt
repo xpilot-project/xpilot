@@ -9,7 +9,7 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")
 set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 
-set(Boost_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/externals/boost)
+set(Boost_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../externals/boost)
 
 file(READ ${CMAKE_SOURCE_DIR}/../xpilot.json XPILOT_JSON)
 string(JSON IS_BETA_VERSION GET ${XPILOT_JSON} is_beta)
@@ -28,42 +28,33 @@ endif()
 
 configure_file(${CMAKE_SOURCE_DIR}/include/Constants.h.in ${CMAKE_SOURCE_DIR}/include/Constants.h @ONLY)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/externals/gmath)
-include_directories(${CMAKE_SOURCE_DIR}/externals/imgui)
-include_directories(${CMAKE_SOURCE_DIR}/externals/imgui/font)
-include_directories(${CMAKE_SOURCE_DIR}/externals/imgui/imgwindow)
-include_directories(${CMAKE_SOURCE_DIR}/externals/xpmp2)
-include_directories(${CMAKE_SOURCE_DIR}/externals/sdk/CHeaders/XPLM)
-include_directories(${CMAKE_SOURCE_DIR}/externals/fmod/include)
-
 if(WIN32)
-    include_directories(${CMAKE_SOURCE_DIR}/externals/windows/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/externals/windows/nng)
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/windows/nng)
 elseif(APPLE)
-    include_directories(${CMAKE_SOURCE_DIR}/externals/macos/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/externals/macos/nng)
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/macos/nng)
 elseif(UNIX)
-    include_directories(${CMAKE_SOURCE_DIR}/externals/linux/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/externals/linux/nng)
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/linux/nng)
 endif()
 
-add_subdirectory(externals/msgpack-c)
-add_subdirectory(externals/json)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/msgpack-c ${CMAKE_CURRENT_BINARY_DIR}/msgpack-c)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/json ${CMAKE_CURRENT_BINARY_DIR}/json)
 
 file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/src/*.cpp
     ${PROJECT_SOURCE_DIR}/include/*.h)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/externals/imgui)
-include_directories(${CMAKE_SOURCE_DIR}/externals/imgui-stdlib)
-include_directories(${CMAKE_SOURCE_DIR}/externals/imgwindow)
-include_directories(${CMAKE_SOURCE_DIR}/externals/font)
-include_directories(${CMAKE_SOURCE_DIR}/externals/gmath)
-include_directories(${CMAKE_SOURCE_DIR}/externals/fmod/include)
-include_directories(${CMAKE_SOURCE_DIR}/externals/xpmp2)
-include_directories(${CMAKE_SOURCE_DIR}/externals/sdk/CHeaders/XPLM)
+include_directories(${CMAKE_SOURCE_DIR}/../externals/imgui)
+include_directories(${CMAKE_SOURCE_DIR}/../externals/imgui-stdlib)
+include_directories(${CMAKE_SOURCE_DIR}/../externals/imgwindow)
+include_directories(${CMAKE_SOURCE_DIR}/../externals/font)
+include_directories(${CMAKE_SOURCE_DIR}/../externals/gmath)
+include_directories(${CMAKE_SOURCE_DIR}/../externals/fmod/include)
+include_directories(${CMAKE_SOURCE_DIR}/../externals/xpmp2)
+include_directories(${CMAKE_SOURCE_DIR}/../externals/sdk/CHeaders/XPLM)
 
 set(INCLUDES
   include/AircraftManager.h
@@ -105,38 +96,37 @@ set(SRC
   src/TerrainProbe.cpp
   src/TextMessageConsole.cpp
   src/XPilot.cpp
-  externals/imgui/imgui.cpp
-  externals/imgui/imgui_draw.cpp
-  externals/imgui/imgui_tables.cpp
-  externals/imgui/imgui_widgets.cpp
-  externals/imgui-stdlib/imgui_stdlib.cpp
-  externals/imgwindow/XPImgWindow.cpp
-  externals/imgwindow/ImgFontAtlas.cpp
-  externals/imgwindow/ImgWindow.cpp)
+  ../externals/imgui/imgui.cpp
+  ../externals/imgui/imgui_draw.cpp
+  ../externals/imgui/imgui_tables.cpp
+  ../externals/imgui/imgui_widgets.cpp
+  ../externals/imgui-stdlib/imgui_stdlib.cpp
+  ../externals/imgwindow/XPImgWindow.cpp
+  ../externals/imgwindow/ImgFontAtlas.cpp
+  ../externals/imgwindow/ImgWindow.cpp)
 
 source_group("Source Files" FILES ${SRC})
 set(ALL_FILES ${INCLUDES} ${SRC})
-add_library(${PROJECT_NAME} MODULE ${SRC})
+add_library(${PROJECT_NAME} MODULE ${ALL_FILES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/externals)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/../externals)
 
 if (APPLE)
-    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/xpmp2/macos")
-    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/sdk/Libraries/Mac")
+    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/xpmp2/macos")
+    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/sdk/Libraries/Mac")
 elseif (UNIX)
-    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/xpmp2/lin")
+    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/xpmp2/lin")
 elseif (WIN32)
-    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/xpmp2/win")
-    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/sdk/Libraries/Win")
+    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/xpmp2/win")
+    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/sdk/Libraries/Win")
 endif()
 
 # Link the XPMP2 library
 find_library(XPMP2_LIBRARY XPMP2 REQUIRED)
 message ("XPMP2_LIBRARY = ${XPMP2_LIBRARY}")
-target_link_libraries(${PROJECT_NAME} ${XPMP2_LIBRARY})
 
 # Link FMOD
-list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externals/fmod")
+list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/fmod")
 
 if(WIN32)
     find_library(FMOD_LIBRARY NAMES fmod_vc.lib REQUIRED)
@@ -152,8 +142,7 @@ elseif(UNIX AND NOT APPLE)
     target_link_libraries(${PROJECT_NAME} ${FMOD_LIBRARY})
 endif()
 
-target_link_libraries(
-  ${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME} 
     msgpackc-cxx
     nlohmann_json
     ${LIB_NNG}
