@@ -74,7 +74,7 @@ namespace xpilot {
 					ImGui::PushStyleColor(ImGuiCol_ChildBg, headerColor);
 					ImGui::BeginChild("#Center", ImVec2(600, 21));
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text(" Center");
+					ImGui::TextUnformatted(" Center");
 					ImGui::EndChild();
 					ImGui::PopStyleColor();
 
@@ -92,13 +92,13 @@ namespace xpilot {
 								char buf[32];
 								sprintf(buf, " %s", station.GetCallsign().c_str());
 								ImGui::AlignTextToFramePadding();
-								ImGui::Text(buf);
+								ImGui::TextUnformatted(buf);
 
 								ImGui::TableSetColumnIndex(1);
-								ImGui::Text(station.GetFrequency().c_str());
+								ImGui::TextUnformatted(station.GetFrequency().c_str());
 
 								ImGui::TableSetColumnIndex(2);
-								ImGui::Text(station.GetRealName().c_str());
+								ImGui::TextUnformatted(station.GetRealName().c_str());
 
 								ImGui::TableSetColumnIndex(3);
 								std::string btn1 = "RequestInfo#" + station.GetCallsign();
@@ -130,7 +130,7 @@ namespace xpilot {
 					ImGui::PushStyleColor(ImGuiCol_ChildBg, headerColor);
 					ImGui::BeginChild("#Approach", ImVec2(600, 21));
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text(" Approach/Departure");
+					ImGui::TextUnformatted(" Approach/Departure");
 					ImGui::EndChild();
 					ImGui::PopStyleColor();
 
@@ -148,13 +148,13 @@ namespace xpilot {
 								char buf[32];
 								sprintf(buf, " %s", station.GetCallsign().c_str());
 								ImGui::AlignTextToFramePadding();
-								ImGui::Text(buf);
+								ImGui::TextUnformatted(buf);
 
 								ImGui::TableSetColumnIndex(1);
-								ImGui::Text(station.GetFrequency().c_str());
+								ImGui::TextUnformatted(station.GetFrequency().c_str());
 
 								ImGui::TableSetColumnIndex(2);
-								ImGui::Text(station.GetRealName().c_str());
+								ImGui::TextUnformatted(station.GetRealName().c_str());
 
 								ImGui::TableSetColumnIndex(3);
 								std::string btn1 = "RequestInfo#" + station.GetCallsign();
@@ -186,7 +186,7 @@ namespace xpilot {
 					ImGui::PushStyleColor(ImGuiCol_ChildBg, headerColor);
 					ImGui::BeginChild("#Tower", ImVec2(600, 21));
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text(" Tower");
+					ImGui::TextUnformatted(" Tower");
 					ImGui::EndChild();
 					ImGui::PopStyleColor();
 
@@ -204,13 +204,13 @@ namespace xpilot {
 								char buf[32];
 								sprintf(buf, " %s", station.GetCallsign().c_str());
 								ImGui::AlignTextToFramePadding();
-								ImGui::Text(buf);
+								ImGui::TextUnformatted(buf);
 
 								ImGui::TableSetColumnIndex(1);
-								ImGui::Text(station.GetFrequency().c_str());
+								ImGui::TextUnformatted(station.GetFrequency().c_str());
 
 								ImGui::TableSetColumnIndex(2);
-								ImGui::Text(station.GetRealName().c_str());
+								ImGui::TextUnformatted(station.GetRealName().c_str());
 
 								ImGui::TableSetColumnIndex(3);
 								std::string btn1 = "RequestInfo#" + station.GetCallsign();
@@ -242,7 +242,7 @@ namespace xpilot {
 					ImGui::PushStyleColor(ImGuiCol_ChildBg, headerColor);
 					ImGui::BeginChild("#ground", ImVec2(600, 21));
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text(" Ground");
+					ImGui::TextUnformatted(" Ground");
 					ImGui::EndChild();
 					ImGui::PopStyleColor();
 
@@ -260,13 +260,13 @@ namespace xpilot {
 								char buf[32];
 								sprintf(buf, " %s", station.GetCallsign().c_str());
 								ImGui::AlignTextToFramePadding();
-								ImGui::Text(buf);
+								ImGui::TextUnformatted(buf);
 
 								ImGui::TableSetColumnIndex(1);
-								ImGui::Text(station.GetFrequency().c_str());
+								ImGui::TextUnformatted(station.GetFrequency().c_str());
 
 								ImGui::TableSetColumnIndex(2);
-								ImGui::Text(station.GetRealName().c_str());
+								ImGui::TextUnformatted(station.GetRealName().c_str());
 
 								ImGui::TableSetColumnIndex(3);
 								std::string btn1 = "RequestInfo#" + station.GetCallsign();
@@ -298,7 +298,7 @@ namespace xpilot {
 					ImGui::PushStyleColor(ImGuiCol_ChildBg, headerColor);
 					ImGui::BeginChild("#delivery", ImVec2(600, 21));
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text(" Delivery");
+					ImGui::TextUnformatted(" Delivery");
 					ImGui::EndChild();
 					ImGui::PopStyleColor();
 
@@ -316,13 +316,13 @@ namespace xpilot {
 								char buf[32];
 								sprintf(buf, " %s", station.GetCallsign().c_str());
 								ImGui::AlignTextToFramePadding();
-								ImGui::Text(buf);
+								ImGui::TextUnformatted(buf);
 
 								ImGui::TableSetColumnIndex(1);
-								ImGui::Text(station.GetFrequency().c_str());
+								ImGui::TextUnformatted(station.GetFrequency().c_str());
 
 								ImGui::TableSetColumnIndex(2);
-								ImGui::Text(station.GetRealName().c_str());
+								ImGui::TextUnformatted(station.GetRealName().c_str());
 
 								ImGui::TableSetColumnIndex(3);
 								std::string btn1 = "RequestInfo#" + station.GetCallsign();
@@ -354,7 +354,7 @@ namespace xpilot {
 					ImGui::PushStyleColor(ImGuiCol_ChildBg, headerColor);
 					ImGui::BeginChild("#atis", ImVec2(600, 21));
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text(" ATIS");
+					ImGui::TextUnformatted(" ATIS");
 					ImGui::EndChild();
 					ImGui::PopStyleColor();
 
@@ -372,13 +372,13 @@ namespace xpilot {
 								char buf[32];
 								sprintf(buf, " %s", station.GetCallsign().c_str());
 								ImGui::AlignTextToFramePadding();
-								ImGui::Text(buf);
+								ImGui::TextUnformatted(buf);
 
 								ImGui::TableSetColumnIndex(1);
-								ImGui::Text(station.GetFrequency().c_str());
+								ImGui::TextUnformatted(station.GetFrequency().c_str());
 
 								ImGui::TableSetColumnIndex(2);
-								ImGui::Text(station.GetRealName().c_str());
+								ImGui::TextUnformatted(station.GetRealName().c_str());
 
 								ImGui::TableSetColumnIndex(3);
 								std::string btn1 = "RequestInfo#" + station.GetCallsign();

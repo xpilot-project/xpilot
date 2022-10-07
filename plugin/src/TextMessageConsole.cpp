@@ -200,7 +200,7 @@ namespace xpilot {
 					for (auto& e : m_messageHistory) {
 						const ImVec4& color = ImVec4(e.GetRed(), e.GetGreen(), e.GetBlue(), 1.0f);
 						ImGui::PushStyleColor(ImGuiCol_Text, color);
-						ImGui::TextWrapped(e.GetMessage().c_str());
+						ImGui::TextWrapped("%s", e.GetMessage().c_str());
 						ImGui::PopStyleColor();
 					}
 					if (m_scrollToBottom) {
@@ -392,7 +392,7 @@ namespace xpilot {
 							for (auto& e : it->messageHistory) {
 								const ImVec4& color = ImVec4(e.GetRed(), e.GetGreen(), e.GetBlue(), 1.0f);
 								ImGui::PushStyleColor(ImGuiCol_Text, color);
-								ImGui::TextWrapped(e.GetMessage().c_str());
+								ImGui::TextWrapped("%s", e.GetMessage().c_str());
 								ImGui::PopStyleColor();
 							}
 							if (it->scrollToBottom) {

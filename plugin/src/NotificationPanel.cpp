@@ -60,7 +60,7 @@ namespace xpilot {
 		for (auto& e : NotificationHistory) {
 			const ImVec4& color = ImVec4(e.red, e.green, e.blue, 1.0f);
 			ImGui::PushStyleColor(ImGuiCol_Text, color);
-			ImGui::TextWrapped(e.message.c_str());
+			ImGui::TextWrapped("%s", e.message.c_str());
 			ImGui::PopStyleColor();
 		}
 		if (m_scrollToBottom) {
