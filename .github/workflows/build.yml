@@ -370,11 +370,21 @@ jobs:
 
       ### Build Client ###
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+      - name: Download Qt
+        uses: robinraju/release-downloader@v1.5
         with:
-            setup-python: false
-            version: ${{ env.QT_VERSION }}
+          repository: "xpilot-project/qt6"
+          tag: "v6.3.2"
+          fileName: "linux.7z"
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      
+      - name: Setup Qt
+        run: |
+          7z x -oqt6 linux.7z
+          echo "Qt6_DIR=$(pwd)/qt6" >> $GITHUB_ENV
+          echo "QT_PLUGIN_PATH=$(pwd)/qt6/plugins" >> $GITHUB_ENV
+          echo "QML2_IMPORT_PATH=$(pwd)/qt6/qml" >> $GITHUB_ENV
+          echo "$(pwd)/qt6/bin" >> $GITHUB_PATH
 
       - name: Create client build directory
         working-directory: ${{ env.CLIENT_DIR }}

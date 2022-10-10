@@ -159,7 +159,27 @@ if (UNIX)
     set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/../externals/linux/vatsimauth.a)
     set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/../externals/linux/libopus.a)
     set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/../externals/linux/libspeexdsp.a)
-    find_library(ALSA_LIBRARY NAMES asound)
+
+    #nng
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/linux/nng)
+
+    #openssl
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/openssl/include)
+    find_library(LIB_CRYPTO crypto ${CMAKE_SOURCE_DIR}/../externals/linux/openssl)
+    find_library(LIB_SSL ssl ${CMAKE_SOURCE_DIR}/../externals/linux/openssl)
+
+    #libevent
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/libevent/include)
+    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/../externals/linux/libevent)
+
+    #libcurl
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/libcurl/include)
+    find_library(LIB_CURL curl ${CMAKE_SOURCE_DIR}/../externals/linux/libcurl)
+
+    #libzip
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/libzip/include)
+    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/../externals/linux/libzip)
 endif ()
 
 if (APPLE)
