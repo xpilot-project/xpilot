@@ -11,6 +11,7 @@
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QProcess>
+#include <QCryptographicHash>
 
 using namespace xpilot;
 using namespace QtPromise;
