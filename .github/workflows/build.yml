@@ -1,10 +1,8 @@
-name: Build xPilot
+name: 'Build xPilot'
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
+  push:
 
 env:
   QT_VERSION: 6.3.2
@@ -23,7 +21,7 @@ jobs:
 
   build-windows:
 
-    #if: ${{ false }}
+    if: ${{ false }}
 
     runs-on: windows-2019
 
@@ -36,23 +34,12 @@ jobs:
         with:
           submodules: recursive
 
-      # - name: Install Conan
-      #   run: |
-      #     python3 -m pip install --upgrade pip
-      #     pip3 install conan
-      #     pip3 install conan_package_tools
-
       ### Buid Plugin ###
 
       # - name: Create plugin build directory
       #   working-directory: ${{ env.PLUGIN_DIR }}
       #   run: |
       #     cmake -E make_directory build
-
-      # - name: Install plugin dependencies
-      #   working-directory: ${{ env.PLUGIN_DIR }}/build
-      #   run: |
-      #     conan install .. -s compiler.runtime=MT --build=missing
 
       # - name: CMake plugin build files
       #   working-directory: ${{ env.PLUGIN_DIR }}/build
@@ -69,77 +56,84 @@ jobs:
       #     mkdir -p ${{ github.workspace }}/xPilot/win_x64
       #     cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.xpl ${{ github.workspace }}/xPilot/win_x64
       #     cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.pdb ${{ github.workspace }}/xPilot/win_x64
-      #     cp ${{ github.workspace }}/plugin/externals/fmod/fmod.dll ${{ github.workspace }}/xPilot/win_x64
+      #     cp ${{ github.workspace }}/externals/fmod/fmod.dll ${{ github.workspace }}/xPilot/win_x64
       #     cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
       ### Build Client ###
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+      - name: Download Qt
+        uses: robinraju/release-downloader@v1.5
         with:
-            setup-python: false
-            version: ${{ env.QT_VERSION }}
-
-      - name: Create client build directory
-        working-directory: ${{ env.CLIENT_DIR }}
+          repository: "xpilot-project/qt6"
+          tag: "v6.3.2"
+          fileName: "windows.7z"
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      
+      - name: Setup Qt
         run: |
-          cmake -E make_directory build
+          7z x -oqt6 windows.7z
+          echo "Qt6_DIR=$(pwd)/qt6" >> $GITHUB_ENV
 
-      - name: CMake client build files
-        working-directory: ${{ env.CLIENT_DIR }}/build
-        run: |
-          cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
-            -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} `
-            -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} `
-            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
+      # - name: Create client build directory
+      #   working-directory: ${{ env.CLIENT_DIR }}
+      #   run: |
+      #     cmake -E make_directory build
 
-      - name: Build client
-        working-directory: ${{ env.CLIENT_DIR }}/build
-        run: |
-          cmake --build . --config ${{ env.BUILD_TYPE }}
+      # - name: CMake client build files
+      #   working-directory: ${{ env.CLIENT_DIR }}/build
+      #   run: |
+      #     cmake .. -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
+      #       -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} `
+      #       -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} `
+      #       -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
 
-      - name: Deploy application
-        working-directory: ${{ env.CLIENT_DIR }}/build/RelWithDebInfo
-        shell: bash
-        run: |
-          ${{ env.Qt6_DIR }}/bin/windeployqt.exe xPilot.exe \
-          -qmldir="${{ env.CLIENT_DIR }}/Resources"
-          echo "XPILOT_BIN_DIR=`pwd`" >> $GITHUB_ENV
+      # - name: Build client
+      #   working-directory: ${{ env.CLIENT_DIR }}/build
+      #   run: |
+      #     cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Get version
-        shell: bash
-        run: |
-          echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
+      # - name: Deploy application
+      #   working-directory: ${{ env.CLIENT_DIR }}/build/RelWithDebInfo
+      #   shell: bash
+      #   run: |
+      #     ${{ env.Qt6_DIR }}/bin/windeployqt.exe xPilot.exe \
+      #     -qmldir="${{ env.CLIENT_DIR }}/Resources"
+      #     echo "XPILOT_BIN_DIR=`pwd`" >> $GITHUB_ENV
 
-      - name: Setup InstallBuilder
-        shell: bash
-        run: |
-          curl -k -L ${{ env.IB_URL }} --output ib.exe
-          ./ib.exe --mode unattended --prefix ${{ env.IB_DIR  }}
-          ${{ env.IB_DIR }}/bin/builder-cli.exe --version
-          echo "$IB_LICENSE" > lic.xml
-          echo "CLIENT_BUILD_DIR=$XPILOT_BIN_DIR" >> $GITHUB_ENV
-          echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
+      # - name: Get version
+      #   shell: bash
+      #   run: |
+      #     echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
 
-      - name: Create installer
-        shell: bash
-        run: |
-          ${{ env.IB_DIR }}/bin/builder-cli.exe build installer/windows.xml \
-              --license lic.xml \
-              --setvars project.outputDirectory=$(pwd) \
-              --setvars project.version=${{ env.XPILOT_VERSION }}
+      # - name: Setup InstallBuilder
+      #   shell: bash
+      #   run: |
+      #     curl -k -L ${{ env.IB_URL }} --output ib.exe
+      #     ./ib.exe --mode unattended --prefix ${{ env.IB_DIR  }}
+      #     ${{ env.IB_DIR }}/bin/builder-cli.exe --version
+      #     echo "$IB_LICENSE" > lic.xml
+      #     echo "CLIENT_BUILD_DIR=$XPILOT_BIN_DIR" >> $GITHUB_ENV
+      #     echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
 
-      - name: Rename Installer
-        shell: bash
-        run: |
-          mv xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe xPilot-${{ env.XPILOT_VERSION }}-Windows.exe
+      # - name: Create installer
+      #   shell: bash
+      #   run: |
+      #     ${{ env.IB_DIR }}/bin/builder-cli.exe build installer/windows.xml \
+      #         --license lic.xml \
+      #         --setvars project.outputDirectory=$(pwd) \
+      #         --setvars project.version=${{ env.XPILOT_VERSION }}
 
-      - name: Upload installer artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-Windows.zip
-          path: |
-            xPilot-${{ env.XPILOT_VERSION }}-Windows.exe
+      # - name: Rename Installer
+      #   shell: bash
+      #   run: |
+      #     mv xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe xPilot-${{ env.XPILOT_VERSION }}-Windows.exe
+
+      # - name: Upload installer artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: xPilot-${{ env.XPILOT_VERSION }}-Windows.zip
+      #     path: |
+      #       xPilot-${{ env.XPILOT_VERSION }}-Windows.exe
 
   ##########################  Build macOS  ##########################
 
@@ -164,154 +158,156 @@ jobs:
           CERTIFICATE_PASSWORD: ${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
         run: ./scripts/make_keychain.sh
 
-      - name: Install Conan
-        run: |
-          python3 -m pip install --upgrade pip
-          pip3 install conan
-          pip3 install conan_package_tools
-
       ### Buid Plugin ###
 
-      - name: Create plugin build directory
-        working-directory: ${{ env.PLUGIN_DIR }}
-        run: |
-          cmake -E make_directory build
+      # - name: Create plugin build directory
+      #   working-directory: ${{ env.PLUGIN_DIR }}
+      #   run: |
+      #     cmake -E make_directory build
 
-      - name: Install plugin dependencies
-        working-directory: ${{ env.PLUGIN_DIR }}/build
-        run: |
-          conan install .. --build=missing
+      # - name: CMake plugin build files
+      #   working-directory: ${{ env.PLUGIN_DIR }}/build
+      #   run: |
+      #     cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_OS_VERSION }}
 
-      - name: CMake plugin build files
-        working-directory: ${{ env.PLUGIN_DIR }}/build
-        run: |
-          cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_OS_VERSION }}
+      # - name: Build plugin
+      #   working-directory: ${{ env.PLUGIN_DIR }}/build
+      #   run: |
+      #     cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Build plugin
-        working-directory: ${{ env.PLUGIN_DIR }}/build
-        run: |
-          cmake --build . --config ${{ env.BUILD_TYPE }}
+      # - name: Extract debug symbols
+      #   working-directory: ${{ env.PLUGIN_DIR }}/build/mac_x64
+      #   run: |
+      #     dsymutil xPilot.xpl -o xPilot.dSYM
 
-      - name: Extract debug symbols
-        working-directory: ${{ env.PLUGIN_DIR }}/build/mac_x64
-        run: |
-          dsymutil xPilot.xpl -o xPilot.dSYM
+      # - name: Package plugin
+      #   run: |
+      #     mkdir -p ${{ github.workspace }}/xPilot/mac_x64
+      #     cp ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.xpl ${{ github.workspace }}/xPilot/mac_x64
+      #     cp -R ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.dSYM ${{ github.workspace }}/xPilot/mac_x64
+      #     cp ${{ github.workspace }}/externals/fmod/libfmod.dylib ${{ github.workspace }}/xPilot/mac_x64
+      #     cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
-      - name: Package plugin
-        run: |
-          mkdir -p ${{ github.workspace }}/xPilot/mac_x64
-          cp ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.xpl ${{ github.workspace }}/xPilot/mac_x64
-          cp -R ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.dSYM ${{ github.workspace }}/xPilot/mac_x64
-          cp ${{ github.workspace }}/plugin/externals/fmod/libfmod.dylib ${{ github.workspace }}/xPilot/mac_x64
-          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
-
-      - name: Fix FMOD search path
-        working-directory: ${{ github.workspace }}/xPilot/mac_x64
-        run: |
-          install_name_tool -id @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib libfmod.dylib
-          install_name_tool -change @rpath/libfmod.dylib @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib xPilot.xpl
+      # - name: Fix FMOD search path
+      #   working-directory: ${{ github.workspace }}/xPilot/mac_x64
+      #   run: |
+      #     install_name_tool -id @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib libfmod.dylib
+      #     install_name_tool -change @rpath/libfmod.dylib @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib xPilot.xpl
 
       ### Build Client ###
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+      - name: Download Qt
+        uses: robinraju/release-downloader@v1.5
         with:
-            setup-python: false
-            version: ${{ env.QT_VERSION }}
+          repository: "xpilot-project/qt6"
+          tag: "v6.3.2"
+          fileName: "macos.7z"
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
-      - name: Create client build directory
-        working-directory: ${{ env.CLIENT_DIR }}
+      - name: Setup Qt
         run: |
-          cmake -E make_directory build
+          7z x macos.7z -o qt6
+          echo "Qt6_DIR=$(pwd)/qt6" >> $GITHUB_ENV
 
-      - name: Install client dependencies
-        working-directory: ${{ env.CLIENT_DIR }}/build
-        run: |
-          conan install .. --build=missing
+      # - name: Install Qt
+      #   uses: jurplel/install-qt-action@v3
+      #   with:
+      #       setup-python: false
+      #       version: ${{ env.QT_VERSION }}
 
-      - name: CMake client build files
-        working-directory: ${{ env.CLIENT_DIR }}/build
-        run: |
-          cmake .. \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_OS_VERSION }} \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
-            -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
-            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
+      # - name: Create client build directory
+      #   working-directory: ${{ env.CLIENT_DIR }}
+      #   run: |
+      #     cmake -E make_directory build
 
-      - name: Build client
-        working-directory: ${{ env.CLIENT_DIR }}/build
-        run: |
-          cmake --build . --config ${{ env.BUILD_TYPE }}
+      # - name: Install client dependencies
+      #   working-directory: ${{ env.CLIENT_DIR }}/build
+      #   run: |
+      #     conan install .. --build=missing
 
-      - name: Extract debug symbols
-        working-directory: ${{ env.CLIENT_DIR }}/build/bin
-        run: |
-          dsymutil xPilot.app/Contents/MacOS/xPilot -o xPilot.dSYM
+      # - name: CMake client build files
+      #   working-directory: ${{ env.CLIENT_DIR }}/build
+      #   run: |
+      #     cmake .. \
+      #       -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_OS_VERSION }} \
+      #       -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+      #       -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
+      #       -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
+      #       -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
 
-      - name: Deploy application
-        working-directory: ${{ env.CLIENT_DIR }}/build/bin
-        run: |
-          ${{ env.Qt6_DIR }}/bin/macdeployqt xPilot.app \
-          -qmldir=${{ env.CLIENT_DIR }}/Resources \
-          -executable=xPilot.app/Contents/MacOS/xPilot \
-          -sign-for-notarization="${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}"
-          echo "XPILOT_BIN_DIR=`pwd`" >> $GITHUB_ENV
+      # - name: Build client
+      #   working-directory: ${{ env.CLIENT_DIR }}/build
+      #   run: |
+      #     cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Get version
-        shell: bash
-        run: |
-          echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
+      # - name: Extract debug symbols
+      #   working-directory: ${{ env.CLIENT_DIR }}/build/bin
+      #   run: |
+      #     dsymutil xPilot.app/Contents/MacOS/xPilot -o xPilot.dSYM
 
-      - name: Setup InstallBuilder
-        shell: bash
-        run: |
-          curl -k -L ${{ env.IB_URL }} --output ib.dmg
-          hdiutil attach ib.dmg
-          /Volumes/InstallBuilder\ Enterprise/*.app/Contents/MacOS/installbuilder.sh --mode unattended --prefix ${{ env.IB_DIR }}
-          ${{ env.IB_DIR }}/bin/builder --version
-          echo "$IB_LICENSE" > lic.xml
-          echo "CLIENT_BUILD_DIR=$XPILOT_BIN_DIR" >> $GITHUB_ENV
-          echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
+      # - name: Deploy application
+      #   working-directory: ${{ env.CLIENT_DIR }}/build/bin
+      #   run: |
+      #     ${{ env.Qt6_DIR }}/bin/macdeployqt xPilot.app \
+      #     -qmldir=${{ env.CLIENT_DIR }}/Resources \
+      #     -executable=xPilot.app/Contents/MacOS/xPilot \
+      #     -sign-for-notarization="${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}"
+      #     echo "XPILOT_BIN_DIR=`pwd`" >> $GITHUB_ENV
 
-      - name: Create installer
-        shell: bash
-        run: |
-          ${{ env.IB_DIR }}/bin/builder build installer/macos.xml \
-              --license lic.xml \
-              --setvars project.outputDirectory=$(pwd) \
-              --setvars project.version=${{ env.XPILOT_VERSION }} \
-              --setvars apple_signing_identity=${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }} \
-              --setvars password=${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
+      # - name: Get version
+      #   shell: bash
+      #   run: |
+      #     echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
 
-      - name: Rename Installer
-        shell: bash
-        run: |
-          mv xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
+      # - name: Setup InstallBuilder
+      #   shell: bash
+      #   run: |
+      #     curl -k -L ${{ env.IB_URL }} --output ib.dmg
+      #     hdiutil attach ib.dmg
+      #     /Volumes/InstallBuilder\ Enterprise/*.app/Contents/MacOS/installbuilder.sh --mode unattended --prefix ${{ env.IB_DIR }}
+      #     ${{ env.IB_DIR }}/bin/builder --version
+      #     echo "$IB_LICENSE" > lic.xml
+      #     echo "CLIENT_BUILD_DIR=$XPILOT_BIN_DIR" >> $GITHUB_ENV
+      #     echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
 
-      - name: Notarize installer
-        shell: bash
-        run: |
-          xcrun altool --notarize-app \
-          --primary-bundle-id "org.vatsim.xpilot" \
-          --username "${{ secrets.NOTARIZATION_USERNAME }}" \
-          --password "${{ secrets.NOTARIZATION_PASSWORD }}" \
-          --file xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
+      # - name: Create installer
+      #   shell: bash
+      #   run: |
+      #     ${{ env.IB_DIR }}/bin/builder build installer/macos.xml \
+      #         --license lic.xml \
+      #         --setvars project.outputDirectory=$(pwd) \
+      #         --setvars project.version=${{ env.XPILOT_VERSION }} \
+      #         --setvars apple_signing_identity=${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }} \
+      #         --setvars password=${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
 
-      - name: Upload installer artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip
-          path: |
-            xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
+      # - name: Rename Installer
+      #   shell: bash
+      #   run: |
+      #     mv xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
+
+      # - name: Notarize installer
+      #   shell: bash
+      #   run: |
+      #     xcrun altool --notarize-app \
+      #     --primary-bundle-id "org.vatsim.xpilot" \
+      #     --username "${{ secrets.NOTARIZATION_USERNAME }}" \
+      #     --password "${{ secrets.NOTARIZATION_PASSWORD }}" \
+      #     --file xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
+
+      # - name: Upload installer artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip
+      #     path: |
+      #       xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
 
   ##########################  Build Linux  ##########################
 
   build-linux:
 
-    if: ${{ false }}
+    #if: ${{ false }}
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     env:
       IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-linux-x64-installer.run
@@ -319,54 +315,46 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
+          ldd --version
           sudo apt-get update
-          sudo apt-get install libasound2-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev python3-setuptools
+          sudo apt install build-essential libgl1-mesa-dev libpulse-dev libxcb-glx0 libxcb-icccm4 libxcb-image0 \
+          libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-render0 libxcb-shape0 libxcb-shm0 libxcb-sync1 \
+          libxcb-util1 libxcb-xfixes0 libxcb-xinerama0 libxcb1 libxkbcommon-x11-0 libdrm-dev
           
       - uses: actions/checkout@v2
         with:
           submodules: recursive
 
-      - name: Install Conan
-        run: |
-          python3 -m pip install --upgrade pip
-          pip3 install conan
-          pip3 install conan_package_tools
-
       ### Buid Plugin ###
 
-      - name: Create plugin build directory
-        working-directory: ${{ env.PLUGIN_DIR }}
-        run: |
-          cmake -E make_directory build
+      # - name: Create plugin build directory
+      #   working-directory: ${{ env.PLUGIN_DIR }}
+      #   run: |
+      #     cmake -E make_directory build
 
-      - name: Install plugin dependencies
-        working-directory: ${{ env.PLUGIN_DIR }}/build
-        run: |
-          conan install .. --build=missing
+      # - name: CMake plugin build files
+      #   working-directory: ${{ env.PLUGIN_DIR }}/build
+      #   run: |
+      #     cmake ..
 
-      - name: CMake plugin build files
-        working-directory: ${{ env.PLUGIN_DIR }}/build
-        run: |
-          cmake ..
+      # - name: Build plugin
+      #   working-directory: ${{ env.PLUGIN_DIR }}/build
+      #   run: |
+      #     cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Build plugin
-        working-directory: ${{ env.PLUGIN_DIR }}/build
-        run: |
-          cmake --build . --config ${{ env.BUILD_TYPE }}
+      # - name: Package plugin
+      #   run: |
+      #     mkdir -p ${{ github.workspace }}/xPilot/lin_x64
+      #     cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.xpl ${{ github.workspace }}/xPilot/lin_x64
+      #     cp ${{ github.workspace }}/plugin/externals/fmod/libfmod.so.13 ${{ github.workspace }}/xPilot/lin_x64
+      #     cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
-      - name: Package plugin
-        run: |
-          mkdir -p ${{ github.workspace }}/xPilot/lin_x64
-          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.xpl ${{ github.workspace }}/xPilot/lin_x64
-          cp ${{ github.workspace }}/plugin/externals/fmod/libfmod.so.13 ${{ github.workspace }}/xPilot/lin_x64
-          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
-
-      - name: Extract debug symbols
-        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
-        working-directory: ${{ env.PLUGIN_DIR }}/build/lin_x64
-        run: |
-          objcopy --only-keep-debug xPilot.xpl xPilot.debug
-          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.debug ${{ github.workspace }}/xPilot/lin_x64
+      # - name: Extract debug symbols
+      #   if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
+      #   working-directory: ${{ env.PLUGIN_DIR }}/build/lin_x64
+      #   run: |
+      #     objcopy --only-keep-debug xPilot.xpl xPilot.debug
+      #     cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.debug ${{ github.workspace }}/xPilot/lin_x64
 
       ### Build Client ###
 
@@ -385,98 +373,101 @@ jobs:
           echo "QT_PLUGIN_PATH=$(pwd)/qt6/plugins" >> $GITHUB_ENV
           echo "QML2_IMPORT_PATH=$(pwd)/qt6/qml" >> $GITHUB_ENV
           echo "$(pwd)/qt6/bin" >> $GITHUB_PATH
+          chmod -R +x qt6
 
-      - name: Create client build directory
-        working-directory: ${{ env.CLIENT_DIR }}
+      - name: Build client
+        working-directory: client
         run: |
-          cmake -E make_directory build
-
-      - name: Install client dependencies
-        working-directory: ${{ env.CLIENT_DIR }}/build
-        run: |
-          conan install .. --build=missing
-
-      - name: CMake client build files
-        working-directory: ${{ env.CLIENT_DIR }}/build
-        run: |
-          cmake ${{ env.CLIENT_DIR }} \
+          mkdir build && cd build
+          cmake .. \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
             -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
-            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }}
-
-      - name: Build client
-        working-directory: ${{ env.CLIENT_DIR }}/build
-        run: |
+            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
+            -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }}
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Extract debug symbols
-        working-directory: ${{ env.CLIENT_DIR }}/build/bin
-        run: |
-          mv xPilot xpilot
-          objcopy --only-keep-debug xpilot xpilot.debug
+      # - name: CMakeError
+      #   if: always()
+      #   run: cat client/build/CMakeFiles/CMakeError.log
         
-      - name: Install LinuxDeploy
-        uses: miurahr/install-linuxdeploy-action@v1
-        with:
-          dir: ${{ github.workspace }}
-          plugins: qt appimage
+      # - name: CMakeOutput
+      #   if: always()
+      #   run: cat client/build/CMakeFiles/CMakeOutput.log
 
-      - name: Deploy application
-        run: |
-          export QML_SOURCES_PATHS=${{ env.CLIENT_DIR }}/Resources
-          mkdir -p AppDir/usr/bin
-          cp ${{ env.CLIENT_DIR }}/build/bin/xpilot AppDir/usr/bin
-          linuxdeploy-x86_64.AppImage \
-            --plugin=qt \
-            --output=appimage \
-            --create-desktop-file \
-            --executable=${{ env.CLIENT_DIR }}/build/bin/xpilot \
-            --library=${{ github.workspace }}/client/externals/linux/libcrypto/libssl.so.1.1 \
-            --library=${{ github.workspace }}/client/externals/linux/libcrypto/libcrypto.so.1.1 \
-            --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/afalg.so \
-            --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/capi.so \
-            --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/padlock.so \
-            --appdir=AppDir \
-            --icon-file=${{ env.CLIENT_DIR }}/xpilot.png
-          mkdir -p ${{ github.workspace }}/output && mv xpilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
-          cp ${{ env.CLIENT_DIR }}/xpilot.png ${{ github.workspace }}/output
-
-      - name: Get version
-        shell: bash
-        run: |
-          echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
-
-      - name: Setup InstallBuilder
-        shell: bash
-        run: |
-          curl -k -L ${{ env.IB_URL }} --output ib.run
-          chmod +x ib.run
-          ./ib.run --mode unattended --prefix ${{ env.IB_DIR }}
-          ${{ env.IB_DIR }}/bin/builder --version
-          echo "$IB_LICENSE" > lic.xml
-          echo "CLIENT_BUILD_DIR=${{ github.workspace }}/output" >> $GITHUB_ENV
-          echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
-
-      - name: Create installer
-        shell: bash
-        run: |
-          ${{ env.IB_DIR }}/bin/builder build installer/linux.xml \
-              --license lic.xml \
-              --setvars project.outputDirectory=$(pwd) \
-              --setvars project.version=${{ env.XPILOT_VERSION }}
-
-      - name: Rename Installer
-        shell: bash
-        run: |
-          mv xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run xPilot-${{ env.XPILOT_VERSION }}-Linux.run
-
-      - name: Upload installer artifact
+      - name: Upload build
         uses: actions/upload-artifact@v2
         with:
-          name: xPilot-${{ env.XPILOT_VERSION }}-Linux.zip
-          path: |
-            xPilot-${{ env.XPILOT_VERSION }}-Linux.run
+          name: xpilot
+          path: client/build/xPilot
+
+      # - name: Extract debug symbols
+      #   working-directory: ${{ env.CLIENT_DIR }}/build/bin
+      #   run: |
+      #     mv xPilot xpilot
+      #     objcopy --only-keep-debug xpilot xpilot.debug
+        
+      # - name: Install LinuxDeploy
+      #   uses: miurahr/install-linuxdeploy-action@v1
+      #   with:
+      #     dir: ${{ github.workspace }}
+      #     plugins: qt appimage
+
+      # - name: Deploy application
+      #   run: |
+      #     export QML_SOURCES_PATHS=${{ env.CLIENT_DIR }}/Resources
+      #     mkdir -p AppDir/usr/bin
+      #     cp ${{ env.CLIENT_DIR }}/build/bin/xpilot AppDir/usr/bin
+      #     linuxdeploy-x86_64.AppImage \
+      #       --plugin=qt \
+      #       --output=appimage \
+      #       --create-desktop-file \
+      #       --executable=${{ env.CLIENT_DIR }}/build/bin/xpilot \
+      #       --library=${{ github.workspace }}/client/externals/linux/libcrypto/libssl.so.1.1 \
+      #       --library=${{ github.workspace }}/client/externals/linux/libcrypto/libcrypto.so.1.1 \
+      #       --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/afalg.so \
+      #       --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/capi.so \
+      #       --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/padlock.so \
+      #       --appdir=AppDir \
+      #       --icon-file=${{ env.CLIENT_DIR }}/xpilot.png
+      #     mkdir -p ${{ github.workspace }}/output && mv xpilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
+      #     cp ${{ env.CLIENT_DIR }}/xpilot.png ${{ github.workspace }}/output
+
+      # - name: Get version
+      #   shell: bash
+      #   run: |
+      #     echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
+
+      # - name: Setup InstallBuilder
+      #   shell: bash
+      #   run: |
+      #     curl -k -L ${{ env.IB_URL }} --output ib.run
+      #     chmod +x ib.run
+      #     ./ib.run --mode unattended --prefix ${{ env.IB_DIR }}
+      #     ${{ env.IB_DIR }}/bin/builder --version
+      #     echo "$IB_LICENSE" > lic.xml
+      #     echo "CLIENT_BUILD_DIR=${{ github.workspace }}/output" >> $GITHUB_ENV
+      #     echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
+
+      # - name: Create installer
+      #   shell: bash
+      #   run: |
+      #     ${{ env.IB_DIR }}/bin/builder build installer/linux.xml \
+      #         --license lic.xml \
+      #         --setvars project.outputDirectory=$(pwd) \
+      #         --setvars project.version=${{ env.XPILOT_VERSION }}
+
+      # - name: Rename Installer
+      #   shell: bash
+      #   run: |
+      #     mv xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run xPilot-${{ env.XPILOT_VERSION }}-Linux.run
+
+      # - name: Upload installer artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: xPilot-${{ env.XPILOT_VERSION }}-Linux.zip
+      #     path: |
+      #       xPilot-${{ env.XPILOT_VERSION }}-Linux.run
 
   ########################## Create Release ##########################
 
