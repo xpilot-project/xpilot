@@ -156,9 +156,9 @@ if (WIN32)
 endif ()
 
 if (UNIX)
-    set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/../externals/linux/vatsimauth.a)
-    set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/../externals/linux/libopus.a)
-    set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/../externals/linux/libspeexdsp.a)
+    find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/../externals/linux)
+    find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/../externals/linux)
+    find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/../externals/linux)
 
     #nng
     include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/nng/include)
@@ -228,9 +228,13 @@ if(APPLE)
         ${COREAUDIO}
         ${AUDIOTOOLBOX})
 elseif(UNIX)
-    target_link_libraries(${PROJECT_NAME}
-        PUBLIC
-        ${ALSA_LIBRARY})
+    # Link library for dynamic loading of shared objects on UNIX systems.
+    #find_library(DL_LIBRARY dl REQUIRED)
+    # Threads
+    #set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+    #set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+    #find_package(Threads REQUIRED)
+    #target_link_libraries(${PROJECT_NAME} ${DL_LIBRARY} Threads::Threads)
 endif()
 
 target_link_libraries(
