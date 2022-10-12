@@ -103,7 +103,7 @@ QByteArray SimpleCrypt::encryptToByteArray(QByteArray plaintext)
     if (m_protectionMode == ProtectionChecksum) {
         flags |= CryptoFlagChecksum;
         QDataStream s(&integrityProtection, QIODeviceBase::WriteOnly);
-        s << qChecksum(ba.constData(), ba.length());
+        s << qChecksum(QByteArrayView(ba.constData(), ba.length()));
     } else if (m_protectionMode == ProtectionHash) {
         flags |= CryptoFlagHash;
         QCryptographicHash hash(QCryptographicHash::Sha1);
@@ -225,7 +225,7 @@ QByteArray SimpleCrypt::decryptToByteArray(QByteArray cypher)
             s >> storedChecksum;
         }
         ba = ba.mid(2);
-        quint16 checksum = qChecksum(ba.constData(), ba.length());
+        quint16 checksum = qChecksum(QByteArrayView(ba.constData(), ba.length()));
         integrityOk = (checksum == storedChecksum);
     } else if (flags.testFlag(CryptoFlagHash)) {
         if (ba.length() < 20) {
