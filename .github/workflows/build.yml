@@ -315,11 +315,16 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          ldd --version
           sudo apt-get update
-          sudo apt install build-essential libgl1-mesa-dev libpulse-dev libxcb-glx0 libxcb-icccm4 libxcb-image0 \
-          libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-render0 libxcb-shape0 libxcb-shm0 libxcb-sync1 \
-          libxcb-util1 libxcb-xfixes0 libxcb-xinerama0 libxcb1 libxkbcommon-x11-0 libdrm-dev
+          sudo apt-get install libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev \
+          libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev \
+          libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev \
+          libxcb-render-util0-dev libxcb-util-dev libxcb-xinerama0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev \
+          libglu1-mesa-dev freeglut3-dev mesa-common-dev libglfw3-dev libgles2-mesa-dev
+          sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev \
+          gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
+          gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl \
+          gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
           
       - uses: actions/checkout@v2
         with:
@@ -327,34 +332,25 @@ jobs:
 
       ### Buid Plugin ###
 
-      # - name: Create plugin build directory
-      #   working-directory: ${{ env.PLUGIN_DIR }}
-      #   run: |
-      #     cmake -E make_directory build
+      - name: Build plugin
+        working-directory: ${{ env.PLUGIN_DIR }}
+        run: |
+          mkdir build && cd build
+          cmake .. && cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      # - name: CMake plugin build files
-      #   working-directory: ${{ env.PLUGIN_DIR }}/build
-      #   run: |
-      #     cmake ..
+      - name: Package plugin
+        run: |
+          mkdir -p ${{ github.workspace }}/xPilot/lin_x64
+          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.xpl ${{ github.workspace }}/xPilot/lin_x64
+          cp ${{ github.workspace }}/externals/fmod/libfmod.so ${{ github.workspace }}/xPilot/lin_x64
+          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
-      # - name: Build plugin
-      #   working-directory: ${{ env.PLUGIN_DIR }}/build
-      #   run: |
-      #     cmake --build . --config ${{ env.BUILD_TYPE }}
-
-      # - name: Package plugin
-      #   run: |
-      #     mkdir -p ${{ github.workspace }}/xPilot/lin_x64
-      #     cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.xpl ${{ github.workspace }}/xPilot/lin_x64
-      #     cp ${{ github.workspace }}/plugin/externals/fmod/libfmod.so.13 ${{ github.workspace }}/xPilot/lin_x64
-      #     cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
-
-      # - name: Extract debug symbols
-      #   if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
-      #   working-directory: ${{ env.PLUGIN_DIR }}/build/lin_x64
-      #   run: |
-      #     objcopy --only-keep-debug xPilot.xpl xPilot.debug
-      #     cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.debug ${{ github.workspace }}/xPilot/lin_x64
+      - name: Extract debug symbols
+        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
+        working-directory: ${{ env.PLUGIN_DIR }}/build/lin_x64
+        run: |
+          objcopy --only-keep-debug xPilot.xpl xPilot.debug
+          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.debug ${{ github.workspace }}/xPilot/lin_x64
 
       ### Build Client ###
 
@@ -376,7 +372,7 @@ jobs:
           chmod -R +x qt6
 
       - name: Build client
-        working-directory: client
+        working-directory: ${{ env.CLIENT_DIR }}
         run: |
           mkdir build && cd build
           cmake .. \
@@ -387,22 +383,14 @@ jobs:
             -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }}
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      # - name: CMakeError
-      #   if: always()
-      #   run: cat client/build/CMakeFiles/CMakeError.log
-        
-      # - name: CMakeOutput
-      #   if: always()
-      #   run: cat client/build/CMakeFiles/CMakeOutput.log
-
       - name: Upload build
         uses: actions/upload-artifact@v2
         with:
           name: xpilot
-          path: client/build/xPilot
+          path: ${{ env.CLIENT_DIR }}/build/xPilot
 
       # - name: Extract debug symbols
-      #   working-directory: ${{ env.CLIENT_DIR }}/build/bin
+      #   working-directory: ${{ env.CLIENT_DIR }}/build
       #   run: |
       #     mv xPilot xpilot
       #     objcopy --only-keep-debug xpilot xpilot.debug
@@ -411,35 +399,26 @@ jobs:
       #   uses: miurahr/install-linuxdeploy-action@v1
       #   with:
       #     dir: ${{ github.workspace }}
-      #     plugins: qt appimage
+      #     plugins: appimage
 
       # - name: Deploy application
       #   run: |
-      #     export QML_SOURCES_PATHS=${{ env.CLIENT_DIR }}/Resources
       #     mkdir -p AppDir/usr/bin
-      #     cp ${{ env.CLIENT_DIR }}/build/bin/xpilot AppDir/usr/bin
+      #     cp ${{ env.CLIENT_DIR }}/build/xpilot AppDir/usr/bin
       #     linuxdeploy-x86_64.AppImage \
-      #       --plugin=qt \
       #       --output=appimage \
       #       --create-desktop-file \
-      #       --executable=${{ env.CLIENT_DIR }}/build/bin/xpilot \
-      #       --library=${{ github.workspace }}/client/externals/linux/libcrypto/libssl.so.1.1 \
-      #       --library=${{ github.workspace }}/client/externals/linux/libcrypto/libcrypto.so.1.1 \
-      #       --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/afalg.so \
-      #       --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/capi.so \
-      #       --library=${{ github.workspace }}/client/externals/linux/libcrypto/engines-1.1/padlock.so \
+      #       --executable=${{ env.CLIENT_DIR }}/build/xpilot \
       #       --appdir=AppDir \
       #       --icon-file=${{ env.CLIENT_DIR }}/xpilot.png
       #     mkdir -p ${{ github.workspace }}/output && mv xpilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
       #     cp ${{ env.CLIENT_DIR }}/xpilot.png ${{ github.workspace }}/output
 
       # - name: Get version
-      #   shell: bash
       #   run: |
       #     echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
 
       # - name: Setup InstallBuilder
-      #   shell: bash
       #   run: |
       #     curl -k -L ${{ env.IB_URL }} --output ib.run
       #     chmod +x ib.run
@@ -450,7 +429,6 @@ jobs:
       #     echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
 
       # - name: Create installer
-      #   shell: bash
       #   run: |
       #     ${{ env.IB_DIR }}/bin/builder build installer/linux.xml \
       #         --license lic.xml \

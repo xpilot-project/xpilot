@@ -227,14 +227,6 @@ if(APPLE)
         ${COREFOUNDATION}
         ${COREAUDIO}
         ${AUDIOTOOLBOX})
-elseif(UNIX)
-    # Link library for dynamic loading of shared objects on UNIX systems.
-    #find_library(DL_LIBRARY dl REQUIRED)
-    # Threads
-    #set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-    #set(THREADS_PREFER_PTHREAD_FLAG TRUE)
-    #find_package(Threads REQUIRED)
-    #target_link_libraries(${PROJECT_NAME} ${DL_LIBRARY} Threads::Threads)
 endif()
 
 target_link_libraries(

@@ -185,22 +185,20 @@ elseif (UNIX)
     target_link_libraries(${PROJECT_NAME} ${DL_LIBRARY} Threads::Threads)
     # Specify additional runtime search paths for dynamically-linked libraries.
     # Restrict set of symbols exported from the plugin to the ones required by XPLM:
-    target_link_libraries(${PROJECT_NAME} -Wl,--version-script -Wl,${CMAKE_SOURCE_DIR}/src/Xpilot.sym)    
+    target_link_libraries(${PROJECT_NAME} -Wl,--version-script -Wl,${CMAKE_SOURCE_DIR}/src/Xpilot.sym)
 endif ()
 
 # Link OpenGL
 set (OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)  # apt install freeglut3-dev
-include_directories( ${OpenGL_INCLUDE_DIRS} )
-target_link_libraries( ${PROJECT_NAME} ${OpenGL_LIBRARIES} )
+include_directories(${OpenGL_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${OpenGL_LIBRARIES})
 
 # Enable all X-Plane SDK APIs up to the newest version.
 add_definitions(-DXPLM200=1 -DXPLM210=1 -DXPLM300=1 -DXPLM301=1 -DXPLM303=1)
 
 # Define platform macros.
 add_definitions(-DAPL=$<BOOL:${APPLE}> -DIBM=$<BOOL:${WIN32}> -DLIN=$<AND:$<BOOL:${UNIX}>,$<NOT:$<BOOL:${APPLE}>>>)
-
-add_definitions(-DNNG_STATIC_LIB)
 
 if (UNIX OR APPLE)
     add_compile_options(-fexceptions -fpermissive)
