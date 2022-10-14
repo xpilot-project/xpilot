@@ -6,9 +6,9 @@ extern "C"
 {
 #endif // __cplusplus
 
-char* GenerateAuthResponse(const char* challenge, const unsigned short public_key, const char* private_key);
-char* GenerateAuthChallenge();
-char* GetSystemUid();
+const char* GenerateAuthResponse(const char* challenge, const unsigned short public_key, const char* private_key);
+const char* GenerateAuthChallenge();
+const char* GetSystemUid();
 
 #ifdef __cplusplus
 }
