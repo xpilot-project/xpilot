@@ -21,7 +21,7 @@ endif()
 
 if(WIN32)
     set(CMAKE_CXX_EXTENSIONS OFF)
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT ")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 endif()
 
@@ -227,6 +227,14 @@ if(APPLE)
         ${COREFOUNDATION}
         ${COREAUDIO}
         ${AUDIOTOOLBOX})
+endif()
+
+if(WIN32)
+set(wmf_libs dxva2.lib evr.lib mf.lib mfplat.lib mfplay.lib mfreadwrite.lib mfuuid.lib)
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+    ${wmf_libs}
+)
 endif()
 
 target_link_libraries(

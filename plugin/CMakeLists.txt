@@ -200,6 +200,8 @@ add_definitions(-DXPLM200=1 -DXPLM210=1 -DXPLM300=1 -DXPLM301=1 -DXPLM303=1)
 # Define platform macros.
 add_definitions(-DAPL=$<BOOL:${APPLE}> -DIBM=$<BOOL:${WIN32}> -DLIN=$<AND:$<BOOL:${UNIX}>,$<NOT:$<BOOL:${APPLE}>>>)
 
+add_definitions(-DNNG_STATIC_LIB)
+
 if (UNIX OR APPLE)
     add_compile_options(-fexceptions -fpermissive)
     add_compile_options(-fvisibility=hidden)

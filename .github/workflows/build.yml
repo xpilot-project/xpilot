@@ -6,7 +6,7 @@ on:
 
 env:
   QT_VERSION: 6.3.2
-  BUILD_TYPE: RelWithDebInfo
+  BUILD_TYPE: Release
   VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
   VATSIM_CLIENT_KEY: ${{ secrets.VATSIM_CLIENT_KEY }}
   CONFIG_ENCRYPTION_KEY: ${{ secrets.CONFIG_ENCRYPTION_KEY }}
@@ -21,9 +21,9 @@ jobs:
 
   build-windows:
 
-    if: ${{ false }}
+    #if: ${{ false }}
 
-    runs-on: windows-2019
+    runs-on: windows-latest
 
     env:
       IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-windows-x64-installer.exe
@@ -36,19 +36,12 @@ jobs:
 
       ### Buid Plugin ###
 
-      # - name: Create plugin build directory
+      # - name: Build plugin
       #   working-directory: ${{ env.PLUGIN_DIR }}
       #   run: |
-      #     cmake -E make_directory build
-
-      # - name: CMake plugin build files
-      #   working-directory: ${{ env.PLUGIN_DIR }}/build
-      #   run: |
+      #     mkdir build
+      #     cd build
       #     cmake ..
-
-      # - name: Build plugin
-      #   working-directory: ${{ env.PLUGIN_DIR }}/build
-      #   run: |
       #     cmake --build . --config ${{ env.BUILD_TYPE }}
 
       # - name: Package plugin
@@ -61,6 +54,10 @@ jobs:
 
       ### Build Client ###
 
+      # - name: Install WMF
+      #   run: |
+      #     Install-WindowsFeature Server-Media-Foundation
+
       - name: Download Qt
         uses: robinraju/release-downloader@v1.5
         with:
@@ -72,7 +69,29 @@ jobs:
       - name: Setup Qt
         run: |
           7z x -oqt6 windows.7z
-          echo "Qt6_DIR=$(pwd)/qt6" >> $GITHUB_ENV
+          echo "Qt6_DIR=$(pwd)/qt6" >> $env:GITHUB_ENV
+          echo "QT_PLUGIN_PATH=$(pwd)/qt6/plugins" >> $env:GITHUB_ENV
+          echo "QML2_IMPORT_PATH=$(pwd)/qt6/qml" >> $env:GITHUB_ENV
+
+      - name: Build client
+        working-directory: ${{ env.CLIENT_DIR }}
+        run: |
+          mkdir build
+          cd build
+          cmake .. `
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
+            -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} `
+            -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} `
+            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} `
+            -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} `
+            -DCMAKE_LIBRARY_PATH="C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x64"
+          cmake --build . --config ${{ env.BUILD_TYPE }}
+
+      - name: Upload build
+        uses: actions/upload-artifact@v2
+        with:
+          name: xpilot
+          path: ${{ env.CLIENT_DIR }}/build/Release/xPilot.exe
 
       # - name: Create client build directory
       #   working-directory: ${{ env.CLIENT_DIR }}
@@ -160,39 +179,30 @@ jobs:
 
       ### Buid Plugin ###
 
-      # - name: Create plugin build directory
-      #   working-directory: ${{ env.PLUGIN_DIR }}
-      #   run: |
-      #     cmake -E make_directory build
+      - name: Build plugin
+        working-directory: ${{ env.PLUGIN_DIR }}
+        run: |
+          mkdir build && cd build
+          cmake .. && cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      # - name: CMake plugin build files
-      #   working-directory: ${{ env.PLUGIN_DIR }}/build
-      #   run: |
-      #     cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_OS_VERSION }}
+      - name: Extract debug symbols
+        working-directory: ${{ env.PLUGIN_DIR }}/build/mac_x64
+        run: |
+          dsymutil xPilot.xpl -o xPilot.dSYM
 
-      # - name: Build plugin
-      #   working-directory: ${{ env.PLUGIN_DIR }}/build
-      #   run: |
-      #     cmake --build . --config ${{ env.BUILD_TYPE }}
+      - name: Package plugin
+        run: |
+          mkdir -p ${{ github.workspace }}/xPilot/mac_x64
+          cp ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.xpl ${{ github.workspace }}/xPilot/mac_x64
+          cp -R ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.dSYM ${{ github.workspace }}/xPilot/mac_x64
+          cp ${{ github.workspace }}/externals/fmod/libfmod.dylib ${{ github.workspace }}/xPilot/mac_x64
+          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
-      # - name: Extract debug symbols
-      #   working-directory: ${{ env.PLUGIN_DIR }}/build/mac_x64
-      #   run: |
-      #     dsymutil xPilot.xpl -o xPilot.dSYM
-
-      # - name: Package plugin
-      #   run: |
-      #     mkdir -p ${{ github.workspace }}/xPilot/mac_x64
-      #     cp ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.xpl ${{ github.workspace }}/xPilot/mac_x64
-      #     cp -R ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.dSYM ${{ github.workspace }}/xPilot/mac_x64
-      #     cp ${{ github.workspace }}/externals/fmod/libfmod.dylib ${{ github.workspace }}/xPilot/mac_x64
-      #     cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
-
-      # - name: Fix FMOD search path
-      #   working-directory: ${{ github.workspace }}/xPilot/mac_x64
-      #   run: |
-      #     install_name_tool -id @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib libfmod.dylib
-      #     install_name_tool -change @rpath/libfmod.dylib @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib xPilot.xpl
+      - name: Fix FMOD search path
+        working-directory: ${{ github.workspace }}/xPilot/mac_x64
+        run: |
+          install_name_tool -id @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib libfmod.dylib
+          install_name_tool -change @rpath/libfmod.dylib @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib xPilot.xpl
 
       ### Build Client ###
 
@@ -206,8 +216,28 @@ jobs:
 
       - name: Setup Qt
         run: |
-          7z x macos.7z -o qt6
+          7z x -oqt6 macos.7z
           echo "Qt6_DIR=$(pwd)/qt6" >> $GITHUB_ENV
+          echo "QT_PLUGIN_PATH=$(pwd)/qt6/plugins" >> $GITHUB_ENV
+          echo "QML2_IMPORT_PATH=$(pwd)/qt6/qml" >> $GITHUB_ENV
+
+      - name: Build client
+        working-directory: ${{ env.CLIENT_DIR }}
+        run: |
+          mkdir build && cd build
+          cmake .. \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
+            -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
+            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
+            -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }}
+          cmake --build . --config ${{ env.BUILD_TYPE }}
+
+      - name: Upload build
+        uses: actions/upload-artifact@v2
+        with:
+          name: xpilot
+          path: ${{ env.CLIENT_DIR }}/build/xPilot.app
 
       # - name: Install Qt
       #   uses: jurplel/install-qt-action@v3
@@ -305,7 +335,7 @@ jobs:
 
   build-linux:
 
-    #if: ${{ false }}
+    if: ${{ false }}
 
     runs-on: ubuntu-20.04
 
