@@ -72,6 +72,7 @@ jobs:
           echo "Qt6_DIR=$(pwd)/qt6" >> $env:GITHUB_ENV
           echo "QT_PLUGIN_PATH=$(pwd)/qt6/plugins" >> $env:GITHUB_ENV
           echo "QML2_IMPORT_PATH=$(pwd)/qt6/qml" >> $env:GITHUB_ENV
+          echo "EXTERNAL_LIBS=$(pwd)/externals" >> $env:GITHUB_ENV
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}
@@ -84,7 +85,7 @@ jobs:
             -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} `
             -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} `
             -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} `
-            -DCMAKE_LIBRARY_PATH="C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x64"
+            -DCMAKE_LIBRARY_PATH=${{ env.EXTERNAL_LIBS }}/windows/wmf
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
       - name: Upload build

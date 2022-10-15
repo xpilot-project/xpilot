@@ -229,14 +229,6 @@ if(APPLE)
         ${AUDIOTOOLBOX})
 endif()
 
-if(WIN32)
-set(wmf_libs dxva2.lib evr.lib mf.lib mfplat.lib mfplay.lib mfreadwrite.lib mfuuid.lib)
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-    ${wmf_libs}
-)
-endif()
-
 target_link_libraries(
     ${PROJECT_NAME}
     PRIVATE
