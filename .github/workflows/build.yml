@@ -54,10 +54,6 @@ jobs:
 
       ### Build Client ###
 
-      # - name: Install WMF
-      #   run: |
-      #     Install-WindowsFeature Server-Media-Foundation
-
       - name: Download Qt
         uses: robinraju/release-downloader@v1.5
         with:
@@ -336,7 +332,7 @@ jobs:
 
   build-linux:
 
-    if: ${{ false }}
+    #if: ${{ false }}
 
     runs-on: ubuntu-20.04
 
@@ -363,25 +359,25 @@ jobs:
 
       ### Buid Plugin ###
 
-      - name: Build plugin
-        working-directory: ${{ env.PLUGIN_DIR }}
-        run: |
-          mkdir build && cd build
-          cmake .. && cmake --build . --config ${{ env.BUILD_TYPE }}
+      # - name: Build plugin
+      #   working-directory: ${{ env.PLUGIN_DIR }}
+      #   run: |
+      #     mkdir build && cd build
+      #     cmake .. && cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Package plugin
-        run: |
-          mkdir -p ${{ github.workspace }}/xPilot/lin_x64
-          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.xpl ${{ github.workspace }}/xPilot/lin_x64
-          cp ${{ github.workspace }}/externals/fmod/libfmod.so ${{ github.workspace }}/xPilot/lin_x64
-          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
+      # - name: Package plugin
+      #   run: |
+      #     mkdir -p ${{ github.workspace }}/xPilot/lin_x64
+      #     cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.xpl ${{ github.workspace }}/xPilot/lin_x64
+      #     cp ${{ github.workspace }}/externals/fmod/libfmod.so ${{ github.workspace }}/xPilot/lin_x64
+      #     cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
-      - name: Extract debug symbols
-        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
-        working-directory: ${{ env.PLUGIN_DIR }}/build/lin_x64
-        run: |
-          objcopy --only-keep-debug xPilot.xpl xPilot.debug
-          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.debug ${{ github.workspace }}/xPilot/lin_x64
+      # - name: Extract debug symbols
+      #   if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
+      #   working-directory: ${{ env.PLUGIN_DIR }}/build/lin_x64
+      #   run: |
+      #     objcopy --only-keep-debug xPilot.xpl xPilot.debug
+      #     cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.debug ${{ github.workspace }}/xPilot/lin_x64
 
       ### Build Client ###
 
