@@ -101,9 +101,6 @@ file(
     "${CMAKE_SOURCE_DIR}/afv-native/extern/compressor/*"
 )
 
-list(FILTER afv_SRC EXCLUDE REGEX ".*SoundIOAudioDevice\\.(h|cpp)$")
-list(FILTER afv_SRC EXCLUDE REGEX ".*PortAudioAudioDevice\\.(h|cpp)$")
-
 qt_add_resources(qrc_SOURCES qml.qrc)
 
 add_executable(${PROJECT_NAME} ${GUI_TYPE} ${xpilot_SRC} ${afv_HEADERS} ${afv_SRC} ${qrc_SOURCES} xpilot.rc)
