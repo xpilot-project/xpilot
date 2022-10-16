@@ -155,7 +155,7 @@ jobs:
 
   build-macos:
 
-    if: ${{ false }}
+    #if: ${{ false }}
   
     runs-on: macos-latest
 
@@ -176,30 +176,30 @@ jobs:
 
       ### Buid Plugin ###
 
-      - name: Build plugin
-        working-directory: ${{ env.PLUGIN_DIR }}
-        run: |
-          mkdir build && cd build
-          cmake .. && cmake --build . --config ${{ env.BUILD_TYPE }}
+      # - name: Build plugin
+      #   working-directory: ${{ env.PLUGIN_DIR }}
+      #   run: |
+      #     mkdir build && cd build
+      #     cmake .. && cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Extract debug symbols
-        working-directory: ${{ env.PLUGIN_DIR }}/build/mac_x64
-        run: |
-          dsymutil xPilot.xpl -o xPilot.dSYM
+      # - name: Extract debug symbols
+      #   working-directory: ${{ env.PLUGIN_DIR }}/build/mac_x64
+      #   run: |
+      #     dsymutil xPilot.xpl -o xPilot.dSYM
 
-      - name: Package plugin
-        run: |
-          mkdir -p ${{ github.workspace }}/xPilot/mac_x64
-          cp ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.xpl ${{ github.workspace }}/xPilot/mac_x64
-          cp -R ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.dSYM ${{ github.workspace }}/xPilot/mac_x64
-          cp ${{ github.workspace }}/externals/fmod/libfmod.dylib ${{ github.workspace }}/xPilot/mac_x64
-          cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
+      # - name: Package plugin
+      #   run: |
+      #     mkdir -p ${{ github.workspace }}/xPilot/mac_x64
+      #     cp ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.xpl ${{ github.workspace }}/xPilot/mac_x64
+      #     cp -R ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.dSYM ${{ github.workspace }}/xPilot/mac_x64
+      #     cp ${{ github.workspace }}/externals/fmod/libfmod.dylib ${{ github.workspace }}/xPilot/mac_x64
+      #     cp -R ${{ github.workspace }}/plugin/Resources ${{ github.workspace }}/xPilot/
 
-      - name: Fix FMOD search path
-        working-directory: ${{ github.workspace }}/xPilot/mac_x64
-        run: |
-          install_name_tool -id @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib libfmod.dylib
-          install_name_tool -change @rpath/libfmod.dylib @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib xPilot.xpl
+      # - name: Fix FMOD search path
+      #   working-directory: ${{ github.workspace }}/xPilot/mac_x64
+      #   run: |
+      #     install_name_tool -id @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib libfmod.dylib
+      #     install_name_tool -change @rpath/libfmod.dylib @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib xPilot.xpl
 
       ### Build Client ###
 
@@ -332,7 +332,7 @@ jobs:
 
   build-linux:
 
-    #if: ${{ false }}
+    if: ${{ false }}
 
     runs-on: ubuntu-20.04
 
