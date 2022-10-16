@@ -158,16 +158,19 @@ elseif(APPLE)
     if(NOT LIB_VATSIM_AUTH)
         message(FATAL_ERROR "vatsimauth library not found")
     endif()
+    message(STATUS "vatsimauth: ${LIB_VATSIM_AUTH}")
 
     find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/../externals/macos)
     if(NOT LIB_OPUS)
         message(FATAL_ERROR "opus library not found")
     endif()
+    message(STATUS "opus: ${LIB_OPUS}")
 
     find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/../externals/macos)
     if(NOT LIB_SPEEXDSP)
         message(FATAL_ERROR "speexdsp library not found")
     endif()
+    message(STATUS "speexdsp: ${LIB_SPEEXDSP}")
 
     #nng
     include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/nng/include)
@@ -175,6 +178,7 @@ elseif(APPLE)
     if(NOT LIB_NNG)
         message(FATAL_ERROR "nng library not found")
     endif()
+    message(STATUS "nng: ${LIB_NNG}")
 
     #openssl
     include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/openssl/include)
@@ -183,11 +187,13 @@ elseif(APPLE)
     if(NOT LIB_CRYPTO)
         message(FATAL_ERROR "crypto library not found")
     endif()
+    message(STATUS "crypto: ${LIB_CRYPTO}")
 
     find_library(LIB_SSL ssl ${CMAKE_SOURCE_DIR}/../externals/macos/openssl)
     if(NOT LIB_SSL)
         message(FATAL_ERROR "ssl library not found")
     endif()
+    message(STATUS "ssl: ${LIB_SSL}")
 
     #libevent
     include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libevent/include)
@@ -195,6 +201,7 @@ elseif(APPLE)
     if(NOT LIB_EVENT)
         message(FATAL_ERROR "event library not found")
     endif()
+    message(STATUS "event: ${LIB_EVENT}")
 
     #libcurl
     include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libcurl/include)
@@ -202,6 +209,7 @@ elseif(APPLE)
     if(NOT LIB_CURL)
         message(FATAL_ERROR "curl library not found")
     endif()
+    message(STATUS "curl: ${LIB_CURL}")
 
     #libzip
     include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libzip/include)
@@ -209,6 +217,7 @@ elseif(APPLE)
     if(NOT LIB_ZIP)
         message(FATAL_ERROR "zip library not found")
     endif()
+    message(STATUS "zip: ${LIB_ZIP}")
 
     find_library(COREFOUNDATION CoreFoundation)
     find_library(COREAUDIO CoreAudio)
