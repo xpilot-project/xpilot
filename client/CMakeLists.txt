@@ -152,7 +152,7 @@ if (WIN32)
     find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/../externals/windows/libzip)
 endif ()
 
-if (UNIX)
+if (UNIX AND NOT APPLE)
     find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/../externals/linux)
     find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/../externals/linux)
     find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/../externals/linux)
