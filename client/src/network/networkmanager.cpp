@@ -257,6 +257,8 @@ namespace xpilot
                              QString::number(m_userAircraftData.AltitudeMslM * 3.28084));
                 m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, pdu.From, inf));
                 break;
+            default:
+                break;
         }
     }
 
@@ -311,30 +313,7 @@ namespace xpilot
             case ClientQueryType::Capabilities:
                 emit capabilitiesResponseReceived(pdu.From, pdu.Payload.join(":"));
                 break;
-            case ClientQueryType::Unknown:
-            case ClientQueryType::COM1Freq:
-            case ClientQueryType::Server:
-            case ClientQueryType::INF:
-            case ClientQueryType::FlightPlan:
-            case ClientQueryType::IPC:
-            case ClientQueryType::RequestRelief:
-            case ClientQueryType::CancelRequestRelief:
-            case ClientQueryType::RequestHelp:
-            case ClientQueryType::CancelRequestHelp:
-            case ClientQueryType::WhoHas:
-            case ClientQueryType::InitiateTrack:
-            case ClientQueryType::AcceptHandoff:
-            case ClientQueryType::DropTrack:
-            case ClientQueryType::SetFinalAltitude:
-            case ClientQueryType::SetTempAltitude:
-            case ClientQueryType::SetBeaconCode:
-            case ClientQueryType::SetScratchpad:
-            case ClientQueryType::SetVoiceType:
-            case ClientQueryType::AircraftConfiguration:
-            case ClientQueryType::NewInfo:
-            case ClientQueryType::NewATIS:
-            case ClientQueryType::Estimate:
-            case ClientQueryType::SetGlobalData:
+            default:
                 break;
         }
     }
