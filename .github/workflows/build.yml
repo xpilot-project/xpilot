@@ -227,7 +227,8 @@ jobs:
             -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
             -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
             -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
-            -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }}
+            -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} \
+            -DOPENSSL_ROOT_DIR=${{ github.workspace }}/externals/macos/openssl
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
       - name: Upload build
