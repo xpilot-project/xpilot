@@ -126,6 +126,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/json ${CMAKE_CURRENT_BINARY_DI
 add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/qtpromise ${CMAKE_CURRENT_BINARY_DIR}/qtpromise)
 
 if (WIN32)
+
     find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/../externals/windows)
     find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/../externals/windows)
     find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/../externals/windows)
@@ -150,9 +151,79 @@ if (WIN32)
     #libzip
     include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/libzip/include)
     find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/../externals/windows/libzip)
-endif ()
 
-if (UNIX AND NOT APPLE)
+elseif(APPLE)
+
+    find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/../externals/macos)
+    if(NOT LIB_VATSIM_AUTH)
+        message(FATAL_ERROR "vatsimauth library not found")
+    endif()
+
+    find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/../externals/macos)
+    if(NOT LIB_OPUS)
+        message(FATAL_ERROR "opus library not found")
+    endif()
+
+    find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/../externals/macos)
+    if(NOT LIB_SPEEXDSP)
+        message(FATAL_ERROR "speexdsp library not found")
+    endif()
+
+    #nng
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/macos/nng)
+    if(NOT LIB_NNG)
+        message(FATAL_ERROR "nng library not found")
+    endif()
+
+    #openssl
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/openssl/include)
+
+    find_library(LIB_CRYPTO crypto ${CMAKE_SOURCE_DIR}/../externals/macos/openssl)
+    if(NOT LIB_CRYPTO)
+        message(FATAL_ERROR "crypto library not found")
+    endif()
+
+    find_library(LIB_SSL ssl ${CMAKE_SOURCE_DIR}/../externals/macos/openssl)
+    if(NOT LIB_SSL)
+        message(FATAL_ERROR "ssl library not found")
+    endif()
+
+    #libevent
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libevent/include)
+    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/../externals/macos/libevent)
+    if(NOT LIB_EVENT)
+        message(FATAL_ERROR "event library not found")
+    endif()
+
+    #libcurl
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libcurl/include)
+    find_library(LIB_CURL curl ${CMAKE_SOURCE_DIR}/../externals/macos/libcurl)
+    if(NOT LIB_CURL)
+        message(FATAL_ERROR "curl library not found")
+    endif()
+
+    #libzip
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libzip/include)
+    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/../externals/macos/libzip)
+    if(NOT LIB_ZIP)
+        message(FATAL_ERROR "zip library not found")
+    endif()
+
+    find_library(COREFOUNDATION CoreFoundation)
+    find_library(COREAUDIO CoreAudio)
+    find_library(AUDIOTOOLBOX AudioToolbox)
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist")
+
+    add_custom_target(osx_bundle_dirs
+        COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources
+        COMMAND cp ${CMAKE_SOURCE_DIR}/xpilot.icns ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources/xpilot.icns)
+
+    add_dependencies(${PROJECT_NAME} osx_bundle_dirs)
+
+else()
+
     find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/../externals/linux)
     find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/../externals/linux)
     find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/../externals/linux)
@@ -177,45 +248,7 @@ if (UNIX AND NOT APPLE)
     #libzip
     include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/libzip/include)
     find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/../externals/linux/libzip)
-endif ()
 
-if (APPLE)
-    find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/../externals/macos)
-    find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/../externals/macos)
-    find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/../externals/macos)
-
-    #nng
-    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/macos/nng)
-
-    #openssl
-    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/openssl/include)
-    find_library(LIB_CRYPTO crypto ${CMAKE_SOURCE_DIR}/../externals/macos/openssl)
-    find_library(LIB_SSL ssl ${CMAKE_SOURCE_DIR}/../externals/macos/openssl)
-
-    #libevent
-    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libevent/include)
-    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/../externals/macos/libevent)
-
-    #libcurl
-    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libcurl/include)
-    find_library(LIB_CURL curl ${CMAKE_SOURCE_DIR}/../externals/macos/libcurl)
-
-    #libzip
-    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libzip/include)
-    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/../externals/macos/libzip)
-
-    find_library(COREFOUNDATION CoreFoundation)
-    find_library(COREAUDIO CoreAudio)
-    find_library(AUDIOTOOLBOX AudioToolbox)
-
-    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist")
-
-    add_custom_target(osx_bundle_dirs
-        COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources
-        COMMAND cp ${CMAKE_SOURCE_DIR}/xpilot.icns ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources/xpilot.icns)
-
-    add_dependencies(${PROJECT_NAME} osx_bundle_dirs)
 endif ()
 
 if(APPLE)
