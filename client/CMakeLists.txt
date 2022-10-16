@@ -154,19 +154,19 @@ if (WIN32)
 
 elseif(APPLE)
 
-    find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/../externals/macos)
+    find_library(LIB_VATSIM_AUTH vatsimauth PATHS ${CMAKE_SOURCE_DIR}/../externals/macos NO_DEFAULT_PATH )
     if(NOT LIB_VATSIM_AUTH)
         message(FATAL_ERROR "vatsimauth library not found")
     endif()
     message(STATUS "vatsimauth: ${LIB_VATSIM_AUTH}")
 
-    find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/../externals/macos)
+    find_library(LIB_OPUS opus PATHS ${CMAKE_SOURCE_DIR}/../externals/macos NO_DEFAULT_PATH )
     if(NOT LIB_OPUS)
         message(FATAL_ERROR "opus library not found")
     endif()
     message(STATUS "opus: ${LIB_OPUS}")
 
-    find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/../externals/macos)
+    find_library(LIB_SPEEXDSP speexdsp PATHS ${CMAKE_SOURCE_DIR}/../externals/macos NO_DEFAULT_PATH )
     if(NOT LIB_SPEEXDSP)
         message(FATAL_ERROR "speexdsp library not found")
     endif()
@@ -174,7 +174,7 @@ elseif(APPLE)
 
     #nng
     include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/macos/nng)
+    find_library(LIB_NNG nng PATHS ${CMAKE_SOURCE_DIR}/../externals/macos/nng NO_DEFAULT_PATH )
     if(NOT LIB_NNG)
         message(FATAL_ERROR "nng library not found")
     endif()
@@ -182,14 +182,13 @@ elseif(APPLE)
 
     #openssl
     include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/openssl/include)
-
-    find_library(LIB_CRYPTO crypto ${CMAKE_SOURCE_DIR}/../externals/macos/openssl)
+    find_library(LIB_CRYPTO crypto PATHS ${CMAKE_SOURCE_DIR}/../externals/macos/openssl NO_DEFAULT_PATH )
     if(NOT LIB_CRYPTO)
         message(FATAL_ERROR "crypto library not found")
     endif()
     message(STATUS "crypto: ${LIB_CRYPTO}")
 
-    find_library(LIB_SSL ssl ${CMAKE_SOURCE_DIR}/../externals/macos/openssl)
+    find_library(LIB_SSL ssl PATHS ${CMAKE_SOURCE_DIR}/../externals/macos/openssl NO_DEFAULT_PATH)
     if(NOT LIB_SSL)
         message(FATAL_ERROR "ssl library not found")
     endif()
@@ -197,7 +196,7 @@ elseif(APPLE)
 
     #libevent
     include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libevent/include)
-    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/../externals/macos/libevent)
+    find_library(LIB_EVENT event PATHS ${CMAKE_SOURCE_DIR}/../externals/macos/libevent NO_DEFAULT_PATH )
     if(NOT LIB_EVENT)
         message(FATAL_ERROR "event library not found")
     endif()
@@ -205,7 +204,7 @@ elseif(APPLE)
 
     #libcurl
     include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libcurl/include)
-    find_library(LIB_CURL curl ${CMAKE_SOURCE_DIR}/../externals/macos/libcurl)
+    find_library(LIB_CURL curl PATHS ${CMAKE_SOURCE_DIR}/../externals/macos/libcurl NO_DEFAULT_PATH)
     if(NOT LIB_CURL)
         message(FATAL_ERROR "curl library not found")
     endif()
@@ -213,7 +212,7 @@ elseif(APPLE)
 
     #libzip
     include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libzip/include)
-    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/../externals/macos/libzip)
+    find_library(LIB_ZIP zip PATHS ${CMAKE_SOURCE_DIR}/../externals/macos/libzip NO_DEFAULT_PATH)
     if(NOT LIB_ZIP)
         message(FATAL_ERROR "zip library not found")
     endif()
