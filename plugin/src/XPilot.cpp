@@ -125,8 +125,8 @@ namespace xpilot {
 		nng_setopt_int(_socket, NNG_OPT_SENDBUF, 1024);
 
 		std::string url = "ipc:///tmp//xpilot.ipc";
-		if (Config::GetInstance().GetUseTcpSocket()) {
-			url = string_format("tcp://*:%s", Config::GetInstance().GetTcpPort().c_str());
+		if (Config::GetInstance().GetUseTcpSocket() && Config::GetInstance().GetTcpPort() > 0) {
+			url = string_format("tcp://*:%i", Config::GetInstance().GetTcpPort());
 		}
 
 		if ((rv = nng_listen(_socket, url.c_str(), NULL, 0)) != 0) {

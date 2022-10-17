@@ -20,6 +20,7 @@
 #define Config_h
 
 #include "Constants.h"
+#include "XPMPMultiplayer.h"
 
 #include <string>
 #include <vector>
@@ -67,59 +68,62 @@ namespace xpilot {
 		void SaveCSLEnabled(int idx, bool enabled);
 		bool HasValidPaths() const;
 
-		std::string GetDefaultAcIcaoType() const;
-		void SetDefaultAcIcaoType(const std::string type);
+		std::string GetDefaultAcIcaoType() const { return m_defaultAcIcaoType; }
+		void SetDefaultAcIcaoType(const std::string type) {
+			m_defaultAcIcaoType = type;
+			XPMPSetDefaultPlaneICAO(type.c_str());
+		}
 
-		void SetShowHideLabels(bool status);
-		bool GetShowHideLabels() const;
+		void SetShowHideLabels(bool status) { m_showHideLabels = status; }
+		bool GetShowHideLabels() const { return m_showHideLabels; }
 
-		void SetDebugModelMatching(bool status);
-		bool GetDebugModelMatching() const;
+		void SetDebugModelMatching(bool status) { m_debugModelMatching = status; }
+		bool GetDebugModelMatching() const { return m_debugModelMatching; }
 
-		void SetTcpPort(std::string port);
-		std::string GetTcpPort() const;
-
+		void SetTcpPort(int port) { m_tcpPort = port; }
+		int GetTcpPort() const { return m_tcpPort; }
+		void SetUseTcpSocket(bool enabled) { m_useTcpSocket = enabled; }
 		bool GetUseTcpSocket() const { return m_useTcpSocket; }
 
-		void SetDefaultAtisEnabled(bool status);
-		bool GetDefaultAtisEnabled() const;
+		void SetDefaultAtisEnabled(bool status) { m_defaultAtisEnabled = status; }
+		bool GetDefaultAtisEnabled() const { return m_defaultAtisEnabled; }
 
-		void SetNotificationPanelVisible(bool enabled);
-		bool GetNotificationPanelVisible() const;
+		void SetNotificationPanelVisible(bool enabled) { m_notificationPanelVisible = enabled; }
+		bool GetNotificationPanelVisible() const { return m_notificationPanelVisible; }
 
 		void SetNotificationPanelTimeout(int timeout);
-		int GetNotificationPanelTimeout() const;
+		int GetNotificationPanelTimeout() const { return m_notificationPanelTimeout; }
 		int GetActualMessagePreviewTime() const;
 
-		void SetNotificationPanelPosition(NotificationPanelPosition position);
-		NotificationPanelPosition GetNotificationPanelPosition() const;
+		void SetNotificationPanelPosition(NotificationPanelPosition position) { m_notificationPanelPosition = position; }
+		NotificationPanelPosition GetNotificationPanelPosition() const { return m_notificationPanelPosition; }
 
-		void SetOverrideContactAtcCommand(bool status);
-		bool GetOverrideContactAtcCommand() const;
+		void SetOverrideContactAtcCommand(bool status) { m_overrideContactAtcCommand = status; }
+		bool GetOverrideContactAtcCommand() const { return m_overrideContactAtcCommand; }
 
 		void SetAircraftLabelColor(int color);
-		int GetAircraftLabelColor() const;
+		int GetAircraftLabelColor() const { return m_labelColor; }
 
-		void SetTcasDisabled(bool status);
-		bool GetTcasDisabled() const;
+		void SetTcasDisabled(bool status) { m_tcasDisabled = status; }
+		bool GetTcasDisabled() const { return m_tcasDisabled; }
 
-		void SetMaxLabelDistance(int distance);
-		int GetMaxLabelDistance() const;
+		void SetMaxLabelDistance(int distance) { m_maxLabelDist = distance; }
+		int GetMaxLabelDistance() const { return m_maxLabelDist; }
 
-		void SetLabelCutoffVis(bool value);
-		bool GetLabelCutoffVis() const;
+		void SetLabelCutoffVis(bool value) { m_labelCutoffVis = value; }
+		bool GetLabelCutoffVis() const { return m_labelCutoffVis; }
 
-		void SetLogLevel(int level);
-		int GetLogLevel() const;
+		void SetLogLevel(int level) { m_logLevel = std::max(0, std::min(m_logLevel, 5)); }
+		int GetLogLevel() const { return std::max(0, std::min(m_logLevel, 5)); }
 
-		void SetTransmitIndicatorEnabled(bool value);
-		bool GetTransmitIndicatorEnabled() const;
+		void SetTransmitIndicatorEnabled(bool enabled) { m_transmitIndicatorEnabled = enabled; }
+		bool GetTransmitIndicatorEnabled() const { return m_transmitIndicatorEnabled; }
 
-		void SetAircraftSoundsEnabled(bool value);
-		bool GetAircraftSoundsEnabled() const;
+		void SetAircraftSoundsEnabled(bool enabled) { m_aircraftSoundsEnabled = enabled; }
+		bool GetAircraftSoundsEnabled() const { return m_aircraftSoundsEnabled; }
 
-		void SetAircraftSoundVolume(int volume);
-		int GetAircraftSoundVolume() const;
+		void SetAircraftSoundVolume(int volume) { m_aircraftSoundsVolume = volume; }
+		int GetAircraftSoundVolume() const { return std::max(0, std::min(m_aircraftSoundsVolume, 100)); }
 
 	private:
 		Config() = default;
@@ -128,7 +132,7 @@ namespace xpilot {
 		bool m_showHideLabels = true;
 		bool m_debugModelMatching = false;
 		bool m_defaultAtisEnabled = false;
-		std::string m_tcpPort = "53100";
+		int m_tcpPort = 53100;
 		bool m_useTcpSocket = false;
 		bool m_overrideContactAtcCommand = false;
 		int m_labelColor = COLOR_YELLOW;
