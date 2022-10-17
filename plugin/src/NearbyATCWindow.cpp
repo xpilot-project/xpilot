@@ -68,14 +68,6 @@ namespace xpilot {
 
 		std::lock_guard<std::mutex> lock(m_mutex);
 		{
-			ImGui::PushID("Frequency#Unicom");
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, greenHover.Value);
-			if (ImGui::ButtonTooltip("UNICOM", "Tune COM1 radio to UNICOM frequency", white, green, ImVec2(80, 0))) {
-				m_com1Frequency = 122800;
-			}
-			ImGui::PopStyleColor();
-			ImGui::PopID();
-
 			if (ImGui::BeginChild("OnlineControllers")) {
 				auto ctrCount = std::count_if(NearbyList.begin(), NearbyList.end(), [](NearbyATCList& v) {
 					return ends_with<std::string>(v.GetCallsign(), "_CTR") || ends_with<std::string>(v.GetCallsign(), "_FSS");
@@ -412,6 +404,39 @@ namespace xpilot {
 						ImGui::EndTable();
 					}
 				}
+
+				if (m_env->IsNetworkConnected()) {
+					ImGui::PushStyleColor(ImGuiCol_TableRowBg, headerColor.Value);
+					if (ImGui::BeginTable("#unicom", 4, ImGuiTableFlags_RowBg)) {
+						ImGui::TableSetupColumn("#callsign", ImGuiTableColumnFlags_WidthFixed, 110);
+						ImGui::TableSetupColumn("#frequency", ImGuiTableColumnFlags_WidthFixed, 100);
+						ImGui::TableSetupColumn("#name", ImGuiTableColumnFlags_WidthStretch);
+						ImGui::TableSetupColumn("#actions", ImGuiTableColumnFlags_WidthFixed, 70);
+
+						ImGui::TableNextRow();
+
+						ImGui::TableSetColumnIndex(0);
+						ImGui::AlignTextToFramePadding();
+						ImGui::Text(" UNICOM");
+
+						ImGui::TableSetColumnIndex(1);
+						ImGui::Text("122.800");
+
+						ImGui::TableSetColumnIndex(3);
+						ImGui::SameLine(22);
+
+						std::string btn2 = "Frequency#unicom";
+						ImGui::PushID(btn2.c_str());
+						if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM1 Frequency")) {
+							m_com1Frequency = 122800;
+						}
+						ImGui::PopID();
+
+						ImGui::EndTable();
+					}
+					ImGui::PopStyleColor();
+				}
+
 				ImGui::EndChild();
 			}
 		}
