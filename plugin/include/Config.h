@@ -79,6 +79,8 @@ namespace xpilot {
 		void SetTcpPort(std::string port);
 		std::string GetTcpPort() const;
 
+		bool GetUseTcpSocket() const { return m_useTcpSocket; }
+
 		void SetDefaultAtisEnabled(bool status);
 		bool GetDefaultAtisEnabled() const;
 
@@ -127,6 +129,7 @@ namespace xpilot {
 		bool m_debugModelMatching = false;
 		bool m_defaultAtisEnabled = false;
 		std::string m_tcpPort = "53100";
+		bool m_useTcpSocket = false;
 		bool m_overrideContactAtcCommand = false;
 		int m_labelColor = COLOR_YELLOW;
 		bool m_tcasDisabled = false;

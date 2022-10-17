@@ -125,6 +125,10 @@ namespace xpilot {
 		nng_setopt_int(_socket, NNG_OPT_SENDBUF, 1024);
 
 		std::string url = "ipc:///tmp//xpilot.ipc";
+		if (Config::GetInstance().GetUseTcpSocket()) {
+			url = string_format("tcp://*:%s", Config::GetInstance().GetTcpPort().c_str());
+		}
+
 		if ((rv = nng_listen(_socket, url.c_str(), NULL, 0)) != 0) {
 			LOG_MSG(logERROR, "Socket listen error (%s): %s", url.c_str(), nng_strerror(rv));
 			return;

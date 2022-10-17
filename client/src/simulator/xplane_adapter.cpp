@@ -95,7 +95,14 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     nng_pair1_open(&m_socket);
     nng_setopt_int(m_socket, NNG_OPT_RECVBUF, 1024);
     nng_setopt_int(m_socket, NNG_OPT_SENDBUF, 1024);
-    nng_dial(m_socket, "ipc:///tmp//xpilot.ipc", NULL, NNG_FLAG_NONBLOCK);
+
+    const QList<QString> localhostAddresses = {"127.0.0.1","localhost"};
+    if(AppConfig::getInstance()->XplaneNetworkAddress.isEmpty() || localhostAddresses.contains(AppConfig::getInstance()->XplaneNetworkAddress.toLower())) {
+        nng_dial(m_socket, "ipc:///tmp//xpilot.ipc", NULL, NNG_FLAG_NONBLOCK);
+    } else {
+        QString url = QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress, AppConfig::getInstance()->XplanePluginPort);
+        nng_dial(m_socket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK);
+    }
 
     m_keepSocketAlive = true;
     m_socketThread = std::make_unique<std::thread>([&]{

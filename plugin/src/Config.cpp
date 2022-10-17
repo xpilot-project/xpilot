@@ -80,6 +80,9 @@ namespace xpilot {
 				}
 				SetTcpPort(v);
 			}
+			if (jf.contains("UseTcpSocket")) {
+				m_useTcpSocket = jf["UseTcpSocket"];
+			}
 			if (jf.contains("DebugModelMatching")) {
 				SetDebugModelMatching(jf["DebugModelMatching"]);
 			}
@@ -151,6 +154,7 @@ namespace xpilot {
 		j["ShowAircraftLabels"] = GetShowHideLabels();
 		j["DefaultIcaoType"] = GetDefaultAcIcaoType();
 		j["PluginPort"] = GetTcpPort();
+		j["UseTcpSocket"] = GetUseTcpSocket();
 		j["DebugModelMatching"] = GetDebugModelMatching();
 		j["EnableDefaultAtis"] = GetDefaultAtisEnabled();
 		j["ShowNotificationBar"] = GetNotificationPanelVisible();
