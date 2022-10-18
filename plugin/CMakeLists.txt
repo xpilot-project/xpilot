@@ -41,6 +41,7 @@ endif()
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/msgpack-c ${CMAKE_CURRENT_BINARY_DIR}/msgpack-c)
 add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/json ${CMAKE_CURRENT_BINARY_DIR}/json)
+add_subdirectory(3rdparty/XPMP2)
 
 file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/src/*.cpp
@@ -53,7 +54,6 @@ include_directories(${CMAKE_SOURCE_DIR}/../externals/imgwindow)
 include_directories(${CMAKE_SOURCE_DIR}/../externals/font)
 include_directories(${CMAKE_SOURCE_DIR}/../externals/gmath)
 include_directories(${CMAKE_SOURCE_DIR}/../externals/fmod/include)
-include_directories(${CMAKE_SOURCE_DIR}/../externals/xpmp2)
 include_directories(${CMAKE_SOURCE_DIR}/../externals/sdk/CHeaders/XPLM)
 
 set(INCLUDES
@@ -112,18 +112,10 @@ add_library(${PROJECT_NAME} MODULE ${ALL_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/../externals)
 
 if (APPLE)
-    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/xpmp2/macos")
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/sdk/Libraries/Mac")
-elseif (UNIX)
-    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/xpmp2/lin")
 elseif (WIN32)
-    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/xpmp2/win")
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/sdk/Libraries/Win")
 endif()
-
-# Link the XPMP2 library
-find_library(XPMP2_LIBRARY XPMP2 REQUIRED)
-message ("XPMP2_LIBRARY = ${XPMP2_LIBRARY}")
 
 # Link FMOD
 list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/fmod")
@@ -145,8 +137,8 @@ endif()
 target_link_libraries(${PROJECT_NAME} 
     msgpackc-cxx
     nlohmann_json
-    ${LIB_NNG}
-	${XPMP2_LIBRARY})
+    XPMP2
+    ${LIB_NNG})
 
 if (WIN32 OR APPLE)
     find_library(XPLM_LIBRARY NAMES XPLM XPLM_64.lib)
