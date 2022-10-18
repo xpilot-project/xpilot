@@ -253,11 +253,19 @@ namespace xpilot {
 
 						ImGui::TableSetColumnIndex(3);
 
-						ImGui::SameLine(53);
+						ImGui::SameLine(22);
 						std::string btn1 = "Frequency1#UNICOM";
 						ImGui::PushID(btn1.c_str());
 						if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM1 Frequency")) {
 							m_com1Frequency = 122800;
+						}
+						ImGui::PopID();
+
+						ImGui::SameLine();
+						std::string btn2 = "Frequency2#UNICOM";
+						ImGui::PushID(btn2.c_str());
+						if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM2 Frequency")) {
+							m_com2Frequency = 122800;
 						}
 						ImGui::PopID();
 
