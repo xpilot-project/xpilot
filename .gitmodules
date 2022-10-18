@@ -4,3 +4,6 @@
 [submodule "externals"]
 	path = externals
 	url = git@github.com:xpilot-project/externals.git
+[submodule "plugin/3rdparty/XPMP2"]
+	path = plugin/3rdparty/XPMP2
+	url = git@github.com:xpilot-project/XPMP2.git
