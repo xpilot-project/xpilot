@@ -113,7 +113,7 @@ namespace xpilot {
 		void SetLabelCutoffVis(bool value) { m_labelCutoffVis = value; }
 		bool GetLabelCutoffVis() const { return m_labelCutoffVis; }
 
-		void SetLogLevel(int level) { m_logLevel = std::max(0, std::min(m_logLevel, 5)); }
+		void SetLogLevel(int level) { m_logLevel = std::max(0, std::min(level, 5)); }
 		int GetLogLevel() const { return std::max(0, std::min(m_logLevel, 5)); }
 
 		void SetTransmitIndicatorEnabled(bool enabled) { m_transmitIndicatorEnabled = enabled; }
