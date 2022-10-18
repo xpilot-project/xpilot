@@ -27,7 +27,7 @@
 #include "SettingsWindow.h"
 #include "NotificationPanel.h"
 #include "TextMessageConsole.h"
-#include "xpmp2/XPMPMultiplayer.h"
+#include "XPMPMultiplayer.h"
 
 namespace xpilot {
 	XPilot::XPilot() :
