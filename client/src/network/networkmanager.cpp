@@ -392,7 +392,7 @@ namespace xpilot
 
     void NetworkManager::OnATCPositionReceived(PDUATCPosition pdu)
     {
-        emit controllerUpdateReceived(pdu.From, pdu.Frequency, pdu.Lat, pdu.Lon);
+        emit controllerUpdateReceived(pdu.From, pdu.Frequencies[0], pdu.Lat, pdu.Lon);
     }
 
     void NetworkManager::OnMetarResponseReceived(PDUMetarResponse pdu)
@@ -433,7 +433,7 @@ namespace xpilot
     void NetworkManager::OnBroadcastMessageReceived(PDUBroadcastMessage pdu)
     {
         emit broadcastMessageReceived(pdu.From.toUpper(), pdu.Message);
-        m_xplaneAdapter.NotificationPosted(QString("[BROADCAST] %1: %2").arg(pdu.From.toUpper()).arg(pdu.Message), COLOR_ORANGE);
+        m_xplaneAdapter.NotificationPosted(QString("[BROADCAST] %1: %2").arg(pdu.From.toUpper(), pdu.Message), COLOR_ORANGE);
     }
 
     void NetworkManager::OnRadioMessageReceived(PDURadioMessage pdu)
@@ -464,7 +464,7 @@ namespace xpilot
 
         if(frequencies.size() == 0) return;
 
-        QRegularExpression re("^SELCAL ([A-Z][A-Z]-?[A-Z][A-Z])$");
+        static QRegularExpression re("^SELCAL ([A-Z][A-Z]-?[A-Z][A-Z])$");
         QRegularExpressionMatch match = re.match(pdu.Messages);
 
         if(match.hasMatch())
@@ -494,7 +494,7 @@ namespace xpilot
 
     void NetworkManager::OnPlaneInfoRequestReceived(PDUPlaneInfoRequest pdu)
     {
-        QRegularExpression re("^([A-Z]{3})\\d+");
+        static QRegularExpression re("^([A-Z]{3})\\d+");
         QRegularExpressionMatch match = re.match(m_connectInfo.Callsign);
 
         m_fsd.SendPDU(PDUPlaneInfoResponse(m_connectInfo.Callsign, pdu.From, m_connectInfo.TypeCode, match.hasMatch() ? match.captured(1)  : "", "", ""));
@@ -577,7 +577,8 @@ namespace xpilot
     void NetworkManager::SendSlowPositionPacket()
     {
         if(m_connectInfo.ObserverMode) {
-            m_fsd.SendPDU(PDUATCPosition(m_connectInfo.Callsign, 99998, NetworkFacility::OBS, 40, NetworkRating::OBS,
+            QList<int> freqs = {99998};
+            m_fsd.SendPDU(PDUATCPosition(m_connectInfo.Callsign, freqs, NetworkFacility::OBS, 40, NetworkRating::OBS,
                                          m_userAircraftData.Latitude, m_userAircraftData.Longitude));
         }
         else {

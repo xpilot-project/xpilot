@@ -2,12 +2,13 @@
 #define PDU_ATCPOSITION_H
 
 #include <QString>
+#include <QList>
 #include "pdu_base.h"
 
 class PDUATCPosition : public PDUBase
 {
 public:
-    PDUATCPosition(QString from, int freq, NetworkFacility facility, int visRange, NetworkRating rating, double lat, double lon);
+    PDUATCPosition(QString from, QList<int> freqs, NetworkFacility facility, int visRange, NetworkRating rating, double lat, double lon);
 
     QStringList toTokens() const;
 
@@ -15,7 +16,7 @@ public:
 
     static QString pdu() { return "%"; }
 
-    int Frequency;
+    QList<int> Frequencies;
     NetworkFacility Facility;
     int VisibilityRange;
     NetworkRating Rating;
