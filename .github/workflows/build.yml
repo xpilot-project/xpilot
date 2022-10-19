@@ -19,7 +19,7 @@ jobs:
   ########################## Build Windows ##########################
 
   build-windows:
-    #if: ${{ false }}
+    if: ${{ false }}
 
     runs-on: windows-latest
 
@@ -119,7 +119,7 @@ jobs:
   ##########################  Build macOS  ##########################
 
   build-macos:
-    #if: ${{ false }}
+    if: ${{ false }}
 
     runs-on: macos-latest
 
@@ -333,14 +333,14 @@ jobs:
       - name: Deploy application
         run: |
           mkdir -p AppDir/usr/bin
-          cp ${{ env.CLIENT_DIR }}/build/xpilot AppDir/usr/bin
+          cp ${{ env.CLIENT_DIR }}/build/xPilot AppDir/usr/bin
           linuxdeploy-x86_64.AppImage \
             --output=appimage \
             --create-desktop-file \
-            --executable=${{ env.CLIENT_DIR }}/build/xpilot \
+            --executable=${{ env.CLIENT_DIR }}/build/xPilot \
             --appdir=AppDir \
             --icon-file=${{ env.CLIENT_DIR }}/icon.png
-          mkdir -p ${{ github.workspace }}/output && mv xpilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
+          mkdir -p ${{ github.workspace }}/output && mv xPilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
           cp ${{ env.CLIENT_DIR }}/icon.png ${{ github.workspace }}/output
 
       - name: Get version
