@@ -324,24 +324,21 @@ jobs:
             -DOPENSSL_ROOT_DIR=${{ github.workspace }}/externals/linux/openssl
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Install LinuxDeploy
-        uses: miurahr/install-linuxdeploy-action@v1
-        with:
-          dir: ${{ github.workspace }}
-          plugins: appimage
-
-      - name: Deploy application
+      - name: Prepare AppImage
+        working-directory: ${{ env.CLIENT_DIR }}/xPilot.AppDir
         run: |
-          mkdir -p AppDir/usr/bin
-          cp ${{ env.CLIENT_DIR }}/build/xPilot AppDir/usr/bin
-          linuxdeploy-x86_64.AppImage \
-            --output=appimage \
-            --create-desktop-file \
-            --executable=${{ env.CLIENT_DIR }}/build/xPilot \
-            --appdir=AppDir \
-            --icon-file=${{ env.CLIENT_DIR }}/xpilot.png
-          mkdir -p ${{ github.workspace }}/output && mv xPilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
-          cp ${{ env.CLIENT_DIR }}/xpilot.png ${{ github.workspace }}/output
+          chmod +x AppRun
+          chmod +x xPilot.desktop
+          cp ${{ env.CLIENT_DIR }}/build/xPilot usr/bin
+          mv usr/bin/xPilot usr/bin/xpilot
+
+      - name: Build AppImage
+        run: |
+          wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x *.AppImage
+          ./appimagetool-x86_64.AppImage --comp gzip "${{ env.CLIENT_DIR }}/xPilot.AppDir" -n
+          mkdir dist
+          mv xPilot*.AppImage* dist/.
 
       - name: Get version
         run: |
@@ -354,7 +351,7 @@ jobs:
           ./ib.run --mode unattended --prefix ${{ env.IB_DIR }}
           ${{ env.IB_DIR }}/bin/builder --version
           echo "$IB_LICENSE" > lic.xml
-          echo "CLIENT_BUILD_DIR=${{ github.workspace }}/output" >> $GITHUB_ENV
+          echo "CLIENT_BUILD_DIR=${{ github.workspace }}/dist" >> $GITHUB_ENV
           echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
 
       - name: Create installer
