@@ -7,11 +7,15 @@
     <disableSplashScreen>1</disableSplashScreen>
     <enableRollback>0</enableRollback>
     <enableTimestamp>1</enableTimestamp>
-    <productDisplayIcon>../client/xpilot.ico</productDisplayIcon>
+    <productDisplayIcon>${installdir}/icon.ico</productDisplayIcon>
     <productDisplayName>xPilot</productDisplayName>
     <saveRelativePaths>1</saveRelativePaths>
     <vendor>xPilot for VATSIM</vendor>
-    <windowsExecutableIcon>../client/xpilot.ico</windowsExecutableIcon>
+    <windowsExecutableIcon>../client/icon.ico</windowsExecutableIcon>
+    <installationType>normal</installationType>
+    <uninstallerName>Uninstall</uninstallerName>
+    <windowsSoftwareRegistryPrefix>xPilot for VATSIM</windowsSoftwareRegistryPrefix>
+    <windowsARPRegistryPrefix>xPilot for VATSIM</windowsARPRegistryPrefix>
     <functionDefinitionList>
         <actionDefinition>
             <name>IsXpilotRunning</name>
@@ -167,10 +171,6 @@
         <IsXpilotRunning/>
         <IsXplaneRunning/>
         <setInstallerVariable>
-            <name>last_install_dir</name>
-            <value>${platform_install_prefix}/${product_shortname}</value>
-        </setInstallerVariable>
-        <setInstallerVariable>
             <name>xplane11path</name>
             <value></value>
         </setInstallerVariable>
@@ -179,15 +179,6 @@
             <value></value>
         </setInstallerVariable>
         <actionGroup>
-            <actionList>
-                <readFile>
-                    <name>last_install_dir</name>
-                    <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastinstallpath.txt</path>
-                    <ruleList>
-                        <platformTest type="windows"/>
-                    </ruleList>
-                </readFile>
-            </actionList>
             <ruleList>
                 <platformTest type="windows"/>
                 <fileTest>
@@ -232,10 +223,14 @@
                 </fileTest>
             </ruleList>
         </actionGroup>
-        <setInstallerVariable>
-            <name>installdir</name>
-            <value>${last_install_dir}</value>
-        </setInstallerVariable>
+        <registryGet>
+            <key>HKEY_LOCAL_MACHINE\Software\${project.windowsSoftwareRegistryPrefix}</key>
+            <name>Location</name>
+            <variable>installdir</variable>
+            <ruleList>
+                <platformTest type="windows"/>
+            </ruleList>
+        </registryGet>
         <setInstallerVariable>
             <name>xplane11path</name>
             <value>${xplane11path}</value>
@@ -244,22 +239,105 @@
             <name>xplane12path</name>
             <value>${xplane12path}</value>
         </setInstallerVariable>
-        <!-- detected existing installation, switch to upgrade mode. -->
-        <actionGroup>
-            <actionList>
-                <setInstallerVariable name="project.installationType" value="upgrade"/>
-                <setInstallerVariable name="project.allowComponentSelection" value="0"/>
-                <setInstallerVariable name="project.parameter(installdir).ask" value="0"/>
-            </actionList>
+        <setInstallerVariable>
+            <name>project.parameter(installdir).ask</name>
+            <value>0</value>
             <ruleList>
                 <fileTest condition="exists" path="${installdir}"/>
             </ruleList>
-        </actionGroup>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>isUpgradeMode</name>
+            <value>1</value>
+            <ruleList>
+                <fileTest condition="exists" path="${installdir}"/>
+            </ruleList>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>project.overwritePolicy</name>
+            <value>onlyIfNewer</value>
+            <ruleList>
+                <fileTest condition="exists" path="${installdir}"/>
+            </ruleList>
+        </setInstallerVariable>
     </preInstallationActionList>
+    <readyToInstallActionList>
+        <!-- Add the files installed by the previous installation to the uninstaller -->
+        <addDirectoriesToUninstaller>
+            <addContents>1</addContents>
+            <matchHiddenFiles>1</matchHiddenFiles>
+            <files>${installdir}</files>
+            <ruleList>
+                <isTrue value="${isUpgradeMode}"/>
+            </ruleList>
+        </addDirectoriesToUninstaller>
+        <actionGroup>
+            <actionList>
+                <!-- Remove ARP entries from previous versions... ugly but it works I guess -->
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.1" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.2" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.3" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.4" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.5" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.6" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.7" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.8" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.9" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.10" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.11" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.12" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.13" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.14" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.15" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.16" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.17" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.18" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.19" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.20" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.21" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.22" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.23" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.24" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.25" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.26" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.27" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.28" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.29" />               
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.30" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.31" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.32" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.33" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.34" />
+                <registryDelete key="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\xPilot 2.0.0-beta.35" />
+                <registryDelete>
+                    <key>HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${project.windowsARPRegistryPrefix}</key>
+                </registryDelete>
+            </actionList>
+            <ruleList>
+                <platformTest type="windows"/>
+                <isTrue value="${isUpgradeMode}"/>
+            </ruleList>
+        </actionGroup>
+    </readyToInstallActionList>
     <postInstallationActionList>
-        <createDirectory>
-            <path>${installdir}/.sentry-native</path>
-        </createDirectory>
+        <!-- delete old client files -->
+        <deleteFile path="${installdir}/.sentry-native" />
+        <deleteFile path="${installdir}/audio" />
+        <deleteFile path="${installdir}/bearer" />
+        <deleteFile path="${installdir}/iconengines" />
+        <deleteFile path="${installdir}/imageformats" />
+        <deleteFile path="${installdir}/mediaservice" />
+        <deleteFile path="${installdir}/platforms" />
+        <deleteFile path="${installdir}/playlistformats" />
+        <deleteFile path="${installdir}/qmltooling" />
+        <deleteFile path="${installdir}/scenegraph" />
+        <deleteFile path="${installdir}/styles" />
+        <deleteFile path="${installdir}/translations" />
+        <deleteFile path="${installdir}/Qt*" />
+        <deleteFile path="${installdir}/*.dll" />
+        <deleteFile path="${installdir}/*.pdb" />
+        <deleteFile path="${installdir}/crashpad_handler.exe" />
+        <!-- //////////////////////// -->
         <createDirectory>
             <path>${windows_folder_local_appdata}/org.vatsim.xpilot</path>
             <ruleList>
