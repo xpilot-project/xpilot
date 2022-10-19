@@ -1,9 +1,8 @@
 [Desktop Entry]
-Encoding=UTF-8
 Name=xPilot
 GenericName=xPilot
-Comment=xPilot
-Icon=xpilot.png
+Comment=xPilot for VATSIM
+Icon=xpilot
 Exec=xpilot
 Terminal=false
 Type=Application
