@@ -1,4 +1,4 @@
-name: 'Build xPilot'
+name: "Build xPilot"
 
 on:
   workflow_dispatch:
@@ -16,11 +16,9 @@ env:
   IB_DIR: ../ib
 
 jobs:
-
   ########################## Build Windows ##########################
 
   build-windows:
-
     #if: ${{ false }}
 
     runs-on: windows-latest
@@ -29,7 +27,6 @@ jobs:
       IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-windows-x64-installer.exe
 
     steps:
-
       - uses: actions/checkout@v2
         with:
           submodules: recursive
@@ -61,7 +58,7 @@ jobs:
           tag: "v6.3.2"
           fileName: "windows.7z"
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-      
+
       - name: Setup Qt
         run: |
           7z x -oqt6 windows.7z
@@ -83,7 +80,7 @@ jobs:
             -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} `
             -DCMAKE_LIBRARY_PATH=${{ env.EXTERNAL_LIBS }}/windows/wmf
           cmake --build . --config ${{ env.BUILD_TYPE }}
-  
+
       - name: Get version
         shell: bash
         run: |
@@ -122,9 +119,8 @@ jobs:
   ##########################  Build macOS  ##########################
 
   build-macos:
-
     #if: ${{ false }}
-  
+
     runs-on: macos-latest
 
     env:
@@ -249,7 +245,6 @@ jobs:
   ##########################  Build Linux  ##########################
 
   build-linux:
-
     #if: ${{ false }}
 
     runs-on: ubuntu-20.04
@@ -270,14 +265,14 @@ jobs:
           gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
           gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl \
           gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
-          
+
       - uses: actions/checkout@v2
         with:
           submodules: recursive
 
-      ### Buid Plugin ###
+        ### Buid Plugin ###
 
-      # - name: Build plugin
+      - name: Build plugin
         working-directory: ${{ env.PLUGIN_DIR }}
         run: |
           mkdir build && cd build
@@ -306,7 +301,7 @@ jobs:
           tag: "v6.3.2"
           fileName: "linux.7z"
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-      
+
       - name: Setup Qt
         run: |
           7z x -oqt6 linux.7z
@@ -328,7 +323,7 @@ jobs:
             -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} \
             -DOPENSSL_ROOT_DIR=${{ github.workspace }}/externals/linux/openssl
           cmake --build . --config ${{ env.BUILD_TYPE }}
-        
+
       - name: Install LinuxDeploy
         uses: miurahr/install-linuxdeploy-action@v1
         with:
