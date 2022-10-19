@@ -226,7 +226,7 @@ elseif(APPLE)
 
     add_custom_target(osx_bundle_dirs
         COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources
-        COMMAND cp ${CMAKE_SOURCE_DIR}/xpilot.icns ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources/xpilot.icns)
+        COMMAND cp ${CMAKE_SOURCE_DIR}/icon.icns ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources/icon.icns)
 
     add_dependencies(${PROJECT_NAME} osx_bundle_dirs)
 

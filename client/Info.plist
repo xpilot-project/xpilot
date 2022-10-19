@@ -9,7 +9,7 @@
 		<key>CFBundleGetInfoString</key>
 		<string>X-Plane pilot client for VATSIM</string>
 		<key>CFBundleIconFile</key>
-		<string>xpilot.icns</string>
+		<string>icon.icns</string>
 		<key>CFBundleIdentifier</key>
 		<string>org.vatsim.xpilot</string>
 		<key>CFBundlePackageType</key>
