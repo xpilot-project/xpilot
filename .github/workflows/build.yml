@@ -339,9 +339,9 @@ jobs:
             --create-desktop-file \
             --executable=${{ env.CLIENT_DIR }}/build/xPilot \
             --appdir=AppDir \
-            --icon-file=${{ env.CLIENT_DIR }}/icon.png
+            --icon-file=${{ env.CLIENT_DIR }}/xpilot.png
           mkdir -p ${{ github.workspace }}/output && mv xPilot*.AppImage ${{ github.workspace }}/output/xPilot.AppImage
-          cp ${{ env.CLIENT_DIR }}/icon.png ${{ github.workspace }}/output
+          cp ${{ env.CLIENT_DIR }}/xpilot.png ${{ github.workspace }}/output
 
       - name: Get version
         run: |
