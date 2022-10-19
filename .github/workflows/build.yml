@@ -5,7 +5,6 @@ on:
   push:
 
 env:
-  QT_VERSION: 6.3.2
   BUILD_TYPE: Release
   VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
   VATSIM_CLIENT_KEY: ${{ secrets.VATSIM_CLIENT_KEY }}
@@ -19,7 +18,7 @@ jobs:
   ########################## Build Windows ##########################
 
   build-windows:
-    if: ${{ false }}
+    #if: ${{ false }}
 
     runs-on: windows-latest
 
@@ -119,7 +118,7 @@ jobs:
   ##########################  Build macOS  ##########################
 
   build-macos:
-    if: ${{ false }}
+    #if: ${{ false }}
 
     runs-on: macos-latest
 
@@ -260,8 +259,8 @@ jobs:
           libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev \
           libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev \
           libxcb-render-util0-dev libxcb-util-dev libxcb-xinerama0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev \
-          libglu1-mesa-dev freeglut3-dev mesa-common-dev libglfw3-dev libgles2-mesa-dev
-          sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev \
+          libglu1-mesa-dev freeglut3-dev mesa-common-dev libglfw3-dev libgles2-mesa-dev \
+          libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev \
           gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
           gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl \
           gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
@@ -323,12 +322,20 @@ jobs:
             -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} \
             -DOPENSSL_ROOT_DIR=${{ github.workspace }}/externals/linux/openssl
           cmake --build . --config ${{ env.BUILD_TYPE }}
+          ldd xPilot
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: xpilot-binary.zip
+          path: ${{ env.CLIENT_DIR }}/build/xPilot
 
       - name: Prepare AppImage
         working-directory: ${{ env.CLIENT_DIR }}/xPilot.AppDir
         run: |
           chmod +x AppRun
           chmod +x xPilot.desktop
+          mkdir usr/bin -p
           cp ${{ env.CLIENT_DIR }}/build/xPilot usr/bin
           mv usr/bin/xPilot usr/bin/xpilot
 
@@ -338,7 +345,7 @@ jobs:
           chmod +x *.AppImage
           ./appimagetool-x86_64.AppImage --comp gzip "${{ env.CLIENT_DIR }}/xPilot.AppDir" -n
           mkdir dist
-          mv xPilot*.AppImage* dist/.
+          mv xPilot*.AppImage* dist/xPilot.AppImage
 
       - name: Get version
         run: |

@@ -127,45 +127,90 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/qtpromise ${CMAKE_CURRENT_BINA
 
 if (WIN32)
 
-    find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/../externals/windows)
-    find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/../externals/windows)
-    find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/../externals/windows)
+    #vatsimauth
+    find_library(LIB_VATSIM_AUTH vatsimauth PATHS ${CMAKE_SOURCE_DIR}/../externals/windows NO_DEFAULT_PATH)
+    if(NOT LIB_VATSIM_AUTH)
+        message(FATAL_ERROR "vatsimauth library not found")
+    endif()
+    message(STATUS "vatsimauth: ${LIB_VATSIM_AUTH}")
+
+    #opus
+    find_library(LIB_OPUS opus PATHS ${CMAKE_SOURCE_DIR}/../externals/windows NO_DEFAULT_PATH )
+    if(NOT LIB_OPUS)
+        message(FATAL_ERROR "opus library not found")
+    endif()
+    message(STATUS "opus: ${LIB_OPUS}")
+
+    #speexdsp
+    find_library(LIB_SPEEXDSP speexdsp PATHS ${CMAKE_SOURCE_DIR}/../externals/windows NO_DEFAULT_PATH )
+    if(NOT LIB_SPEEXDSP)
+        message(FATAL_ERROR "speexdsp library not found")
+    endif()
+    message(STATUS "speexdsp: ${LIB_SPEEXDSP}")
 
     #nng
     include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/windows/nng)
+    find_library(LIB_NNG nng PATHS ${CMAKE_SOURCE_DIR}/../externals/windows/nng NO_DEFAULT_PATH )
+    if(NOT LIB_NNG)
+        message(FATAL_ERROR "nng library not found")
+    endif()
+    message(STATUS "nng: ${LIB_NNG}")
 
     #openssl
     include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/openssl/include)
-    find_library(LIB_CRYPTO libcrypto ${CMAKE_SOURCE_DIR}/../externals/windows/openssl)
-    find_library(LIB_SSL libssl ${CMAKE_SOURCE_DIR}/../externals/windows/openssl)
+    find_library(LIB_CRYPTO libcrypto PATHS ${CMAKE_SOURCE_DIR}/../externals/windows/openssl NO_DEFAULT_PATH )
+    if(NOT LIB_CRYPTO)
+        message(FATAL_ERROR "libcrypto library not found")
+    endif()
+    message(STATUS "libcrypto: ${LIB_CRYPTO}")
+
+    find_library(LIB_SSL libssl PATHS ${CMAKE_SOURCE_DIR}/../externals/windows/openssl NO_DEFAULT_PATH)
+    if(NOT LIB_SSL)
+        message(FATAL_ERROR "libssl library not found")
+    endif()
+    message(STATUS "libssl: ${LIB_SSL}")
 
     #libevent
     include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/libevent/include)
-    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/../externals/windows/libevent)
+    find_library(LIB_EVENT event PATHS ${CMAKE_SOURCE_DIR}/../externals/windows/libevent NO_DEFAULT_PATH )
+    if(NOT LIB_EVENT)
+        message(FATAL_ERROR "event library not found")
+    endif()
+    message(STATUS "event: ${LIB_EVENT}")
 
     #libcurl
     include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/libcurl/include)
-    find_library(LIB_CURL libcurl ${CMAKE_SOURCE_DIR}/../externals/windows/libcurl)
+    find_library(LIB_CURL libcurl PATHS ${CMAKE_SOURCE_DIR}/../externals/windows/libcurl NO_DEFAULT_PATH)
+    if(NOT LIB_CURL)
+        message(FATAL_ERROR "libcurl library not found")
+    endif()
+    message(STATUS "libcurl: ${LIB_CURL}")
 
     #libzip
     include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/libzip/include)
-    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/../externals/windows/libzip)
+    find_library(LIB_ZIP zip PATHS ${CMAKE_SOURCE_DIR}/../externals/windows/libzip NO_DEFAULT_PATH)
+    if(NOT LIB_ZIP)
+        message(FATAL_ERROR "zip library not found")
+    endif()
+    message(STATUS "zip: ${LIB_ZIP}")
 
 elseif(APPLE)
 
+    #vatsimauth
     find_library(LIB_VATSIM_AUTH vatsimauth PATHS ${CMAKE_SOURCE_DIR}/../externals/macos NO_DEFAULT_PATH )
     if(NOT LIB_VATSIM_AUTH)
         message(FATAL_ERROR "vatsimauth library not found")
     endif()
     message(STATUS "vatsimauth: ${LIB_VATSIM_AUTH}")
 
+    #opus
     find_library(LIB_OPUS opus PATHS ${CMAKE_SOURCE_DIR}/../externals/macos NO_DEFAULT_PATH )
     if(NOT LIB_OPUS)
         message(FATAL_ERROR "opus library not found")
     endif()
     message(STATUS "opus: ${LIB_OPUS}")
 
+    #speexdsp
     find_library(LIB_SPEEXDSP speexdsp PATHS ${CMAKE_SOURCE_DIR}/../externals/macos NO_DEFAULT_PATH )
     if(NOT LIB_SPEEXDSP)
         message(FATAL_ERROR "speexdsp library not found")
@@ -232,30 +277,72 @@ elseif(APPLE)
 
 else()
 
-    find_library(LIB_VATSIM_AUTH vatsimauth ${CMAKE_SOURCE_DIR}/../externals/linux)
-    find_library(LIB_OPUS opus ${CMAKE_SOURCE_DIR}/../externals/linux)
-    find_library(LIB_SPEEXDSP speexdsp ${CMAKE_SOURCE_DIR}/../externals/linux)
-
-    #nng
-    include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/linux/nng)
-
-    #openssl
-    include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/openssl/include)
-    find_library(LIB_CRYPTO crypto ${CMAKE_SOURCE_DIR}/../externals/linux/openssl)
-    find_library(LIB_SSL ssl ${CMAKE_SOURCE_DIR}/../externals/linux/openssl)
-
-    #libevent
-    include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/libevent/include)
-    find_library(LIB_EVENT event ${CMAKE_SOURCE_DIR}/../externals/linux/libevent)
-
-    #libcurl
-    include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/libcurl/include)
-    find_library(LIB_CURL curl ${CMAKE_SOURCE_DIR}/../externals/linux/libcurl)
-
-    #libzip
-    include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/libzip/include)
-    find_library(LIB_ZIP zip ${CMAKE_SOURCE_DIR}/../externals/linux/libzip)
+      #vatsimauth
+      find_library(LIB_VATSIM_AUTH vatsimauth PATHS ${CMAKE_SOURCE_DIR}/../externals/linux NO_DEFAULT_PATH)
+      if(NOT LIB_VATSIM_AUTH)
+          message(FATAL_ERROR "vatsimauth library not found")
+      endif()
+      message(STATUS "vatsimauth: ${LIB_VATSIM_AUTH}")
+  
+      #opus
+      find_library(LIB_OPUS opus PATHS ${CMAKE_SOURCE_DIR}/../externals/linux NO_DEFAULT_PATH )
+      if(NOT LIB_OPUS)
+          message(FATAL_ERROR "opus library not found")
+      endif()
+      message(STATUS "opus: ${LIB_OPUS}")
+  
+      #speexdsp
+      find_library(LIB_SPEEXDSP speexdsp PATHS ${CMAKE_SOURCE_DIR}/../externals/linux NO_DEFAULT_PATH )
+      if(NOT LIB_SPEEXDSP)
+          message(FATAL_ERROR "speexdsp library not found")
+      endif()
+      message(STATUS "speexdsp: ${LIB_SPEEXDSP}")
+  
+      #nng
+      include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/nng/include)
+      find_library(LIB_NNG nng PATHS ${CMAKE_SOURCE_DIR}/../externals/linux/nng NO_DEFAULT_PATH )
+      if(NOT LIB_NNG)
+          message(FATAL_ERROR "nng library not found")
+      endif()
+      message(STATUS "nng: ${LIB_NNG}")
+  
+      #openssl
+      include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/openssl/include)
+      find_library(LIB_CRYPTO crypto PATHS ${CMAKE_SOURCE_DIR}/../externals/linux/openssl NO_DEFAULT_PATH )
+      if(NOT LIB_CRYPTO)
+          message(FATAL_ERROR "crypto library not found")
+      endif()
+      message(STATUS "crypto: ${LIB_CRYPTO}")
+  
+      find_library(LIB_SSL ssl PATHS ${CMAKE_SOURCE_DIR}/../externals/linux/openssl NO_DEFAULT_PATH)
+      if(NOT LIB_SSL)
+          message(FATAL_ERROR "ssl library not found")
+      endif()
+      message(STATUS "ssl: ${LIB_SSL}")
+  
+      #libevent
+      include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/libevent/include)
+      find_library(LIB_EVENT event PATHS ${CMAKE_SOURCE_DIR}/../externals/linux/libevent NO_DEFAULT_PATH )
+      if(NOT LIB_EVENT)
+          message(FATAL_ERROR "event library not found")
+      endif()
+      message(STATUS "event: ${LIB_EVENT}")
+  
+      #libcurl
+      include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/libcurl/include)
+      find_library(LIB_CURL curl PATHS ${CMAKE_SOURCE_DIR}/../externals/linux/libcurl NO_DEFAULT_PATH)
+      if(NOT LIB_CURL)
+          message(FATAL_ERROR "curl library not found")
+      endif()
+      message(STATUS "curl: ${LIB_CURL}")
+  
+      #libzip
+      include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/libzip/include)
+      find_library(LIB_ZIP zip PATHS ${CMAKE_SOURCE_DIR}/../externals/linux/libzip NO_DEFAULT_PATH)
+      if(NOT LIB_ZIP)
+          message(FATAL_ERROR "zip library not found")
+      endif()
+      message(STATUS "zip: ${LIB_ZIP}")
 
 endif ()
 
@@ -274,7 +361,6 @@ target_link_libraries(
     Qt${QT_MAJOR_VERSION}::Quick
     Qt${QT_MAJOR_VERSION}::Network
     Qt${QT_MAJOR_VERSION}::Svg
-    PUBLIC
     ${LIB_OPUS}
     ${LIB_VATSIM_AUTH}
     ${LIB_EVENT}
@@ -291,9 +377,8 @@ target_link_libraries(
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
+add_definitions(-DCURL_STATICLIB -DNNG_STATIC_LIB)
 
 if(MSVC)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32.lib Wldap32.lib Iphlpapi.lib crypt32.lib)
     target_compile_definitions(${PROJECT_NAME} PUBLIC _USE_MATH_DEFINES)
-    add_definitions(-DCURL_STATICLIB -DNNG_STATIC_LIB)
 endif()
