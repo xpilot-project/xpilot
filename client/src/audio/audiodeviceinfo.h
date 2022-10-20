@@ -15,12 +15,10 @@ public:
     QString DeviceName;
     QString Id;
 
-    bool operator==(const AudioDeviceInfo& b)
-    {
+    bool operator==(const AudioDeviceInfo& b) const {
         return DeviceName == b.DeviceName && Id == b.Id;
     }
-    bool operator!=(const AudioDeviceInfo& b)
-    {
+    bool operator!=(const AudioDeviceInfo& b) const {
         return DeviceName != b.DeviceName || Id != b.Id;
     }
 };
