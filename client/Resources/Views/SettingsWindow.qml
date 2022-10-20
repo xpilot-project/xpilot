@@ -34,7 +34,7 @@ Window {
     }
 
     onClosing: (close) => {
-        if(inputDeviceChanged) {
+        if(inputDeviceChanged && inputDeviceList.currentIndex > -1) {
             close.accepted = false
             calibrationRequired.open()
         }
@@ -42,6 +42,7 @@ Window {
             AppConfig.saveConfig();
             closeWindow()
         }
+        audio.settingsWindowClosed()
     }
 
     Connections {
@@ -97,23 +98,28 @@ Window {
                 y = screen.virtualY + 50
             }
             initialized = true
+            audio.settingsWindowOpened()
         }
     }
 
     Popup {
         id: calibrationRequired
         width: 500
-        height: 220
+        height: 200
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
         modal: true
         focus: true
         closePolicy: Popup.NoAutoClose
         margins: 20
+        background: Rectangle {
+            color: "white"
+            border.color: "black"
+        }
 
         Text {
             id: calibrationInfo
-            text: "<strong>Microphone Calibration Required</strong><br/><br/>Because your microphone device changed, you must confirm your microphone volume is at an acceptable level.<br/><br/>Please verify that the microphone volume level indicator stays green when you speak normally. Use the Mic Volume slider to adjust the microphone volume if necessary."
+            text: "<strong>Microphone Calibration Required</strong><br/><br/>Because your microphone device changed, you must confirm that your microphone volume is at an acceptable level.<br/><br/>Please verify that the microphone volume level indicator stays green when you speak normally. Use the Mic Volume slider to adjust the microphone volume as necessary."
             font.pixelSize: 14
             renderType: Text.NativeRendering
             width: parent.width
