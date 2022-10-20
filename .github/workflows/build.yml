@@ -207,7 +207,7 @@ jobs:
           /Volumes/InstallBuilder\ Enterprise/*.app/Contents/MacOS/installbuilder.sh --mode unattended --prefix ${{ env.IB_DIR }}
           ${{ env.IB_DIR }}/bin/builder --version
           echo "$IB_LICENSE" > lic.xml
-          echo "CLIENT_BUILD_DIR=${{ env.CLIENT_DIR }}/build/bin" >> $GITHUB_ENV
+          echo "CLIENT_BUILD_DIR=${{ env.CLIENT_DIR }}/build" >> $GITHUB_ENV
           echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
 
       - name: Create installer
@@ -322,13 +322,6 @@ jobs:
             -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} \
             -DOPENSSL_ROOT_DIR=${{ github.workspace }}/externals/linux/openssl
           cmake --build . --config ${{ env.BUILD_TYPE }}
-          ldd xPilot
-
-      - name: Upload binary
-        uses: actions/upload-artifact@v2
-        with:
-          name: xpilot-binary.zip
-          path: ${{ env.CLIENT_DIR }}/build/xPilot
 
       - name: Prepare AppImage
         working-directory: ${{ env.CLIENT_DIR }}/xPilot.AppDir
@@ -372,6 +365,7 @@ jobs:
         shell: bash
         run: |
           mv xPilot-${{ env.XPILOT_VERSION }}-linux-x64-installer.run xPilot-${{ env.XPILOT_VERSION }}-Linux.run
+          chmod +x xPilot-${{ env.XPILOT_VERSION }}-Linux.run
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v2

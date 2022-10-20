@@ -78,9 +78,9 @@
                     <name>programfiles</name>
                     <platforms>windows-x64</platforms>
                     <distributionFileList>
-                        <distributionFile>
-                            <allowWildcards>1</allowWildcards>
+                        <distributionFile allowWildcards="1">
                             <origin>${client_build_dir}/*</origin>
+                            <excludeFiles>*/xPilot.exp;*/xPilot.lib</excludeFiles>
                         </distributionFile>
                     </distributionFileList>
                 </folder>
@@ -178,15 +178,6 @@
             <name>xplane12path</name>
             <value></value>
         </setInstallerVariable>
-        <actionGroup>
-            <ruleList>
-                <platformTest type="windows"/>
-                <fileTest>
-                    <condition>readable</condition>
-                    <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastinstallpath.txt</path>
-                </fileTest>
-            </ruleList>
-        </actionGroup>
         <actionGroup>
             <actionList>
                 <readFile>
@@ -351,13 +342,6 @@
             </ruleList>
         </createDirectory>
         <writeFile>
-            <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastinstallpath.txt</path>
-            <text>${installdir}</text>
-            <ruleList>
-                <platformTest type="windows"/>
-            </ruleList>
-        </writeFile>
-        <writeFile>
             <path>${windows_folder_local_appdata}/org.vatsim.xpilot/xplane11path.txt</path>
             <text>${xplane11path}</text>
             <ruleList>
@@ -378,12 +362,11 @@
                 <platformTest type="windows"/>
             </ruleList>
         </addFilesToUninstaller>
-        <addFilesToUninstaller>
-            <files>${installdir}/.sentry-native/</files>
-            <matchHiddenFiles>1</matchHiddenFiles>
-        </addFilesToUninstaller>
         <deleteFile>
             <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastxplanepath.txt</path>
+        </deleteFile>
+        <deleteFile>
+            <path>${windows_folder_local_appdata}/org.vatsim.xpilot/lastinstallpath</path>
         </deleteFile>
     </postInstallationActionList>
     <postUninstallationActionList>
