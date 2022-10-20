@@ -348,7 +348,7 @@ namespace xpilot
             AircraftVisualState visualState {};
             visualState.Latitude = pdu.Lat;
             visualState.Longitude = pdu.Lon;
-            visualState.Altitude = pdu.TrueAltitude;
+            visualState.Altitude = AdjustIncomingAltitude(pdu.TrueAltitude);
             visualState.Pitch = pdu.Pitch;
             visualState.Heading = pdu.Heading;
             visualState.Bank = pdu.Bank;
@@ -362,7 +362,7 @@ namespace xpilot
         AircraftVisualState visualState {};
         visualState.Latitude = pdu.Lat;
         visualState.Longitude = pdu.Lon;
-        visualState.Altitude = pdu.AltitudeTrue;
+        visualState.Altitude = AdjustIncomingAltitude(pdu.AltitudeTrue);
         visualState.AltitudeAgl = pdu.AltitudeAgl;
         visualState.Pitch = pdu.Pitch;
         visualState.Heading = pdu.Heading;
