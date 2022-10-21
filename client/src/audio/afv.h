@@ -28,7 +28,6 @@ namespace xpilot
         Q_OBJECT
         Q_PROPERTY(QVariant OutputDevices READ getOutputDevices NOTIFY outputDevicesChanged)
         Q_PROPERTY(QVariant InputDevices READ getInputDevices NOTIFY inputDevicesChanged)
-        Q_PROPERTY(QVariant AudioApis READ getAudioApis NOTIFY audioApisChanged)
 
     public:
         AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, ControllerManager& controllerManager, QObject* parent = nullptr);
@@ -66,22 +65,6 @@ namespace xpilot
             return QVariant::fromValue(itemList);
         }
 
-        QVariant getAudioApis() const
-        {
-            QVariantList itemList;
-
-            for(const auto &api: m_audioDrivers)
-            {
-                QVariantMap itemMap;
-                itemMap.insert("id", api.first);
-                itemMap.insert("name", api.second.c_str());
-                itemList.append(itemMap);
-            }
-
-            return QVariant::fromValue(itemList);
-        }
-
-        Q_INVOKABLE void setAudioApi(int api);
         Q_INVOKABLE void setInputDevice(QString deviceId);
         Q_INVOKABLE void setOutputDevice(QString deviceId);
         Q_INVOKABLE void setCom1Volume(double volume);
@@ -89,18 +72,20 @@ namespace xpilot
         Q_INVOKABLE void disableAudioEffects(bool disabled);
         Q_INVOKABLE void enableHfSquelch(bool enabled);
         Q_INVOKABLE void setMicrophoneVolume(int volume);
+        Q_INVOKABLE void settingsWindowOpened();
+        Q_INVOKABLE void settingsWindowClosed();
 
     private slots:
         void OnNetworkConnected(QString callsign, bool enableVoice);
         void OnNetworkDisconnected();
         void OnTransceiverTimer();
+        void OnAudioDevicesTimer();
 
     signals:
         void notificationPosted(int type, QString message);
         void radioRxChanged(uint radio, bool active);
         void outputDevicesChanged();
         void inputDevicesChanged();
-        void audioApisChanged();
         void inputVuChanged(float vu);
         void radioAliasChanged(uint radio, quint32 frequency);
 
@@ -128,10 +113,9 @@ namespace xpilot
         RadioStackState m_radioStackState;
         UserAircraftData m_userAircraftData;
 
-        int m_audioApi = 0;
         QList<AudioDeviceInfo> m_outputDevices;
         QList<AudioDeviceInfo> m_inputDevices;
-        std::map<afv_native::audio::AudioDevice::Api, std::string> m_audioDrivers;
+        QTimer m_audioDevicesTimer;
 
         bool fuzzyMatchCallsign(const QString &callsign, const QString &compareTo) const;
         void getPrefixSuffix(const QString &callsign, QString &prefix, QString &suffix) const;

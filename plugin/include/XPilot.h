@@ -119,6 +119,8 @@ namespace xpilot {
 		OwnedDataRef<std::string> m_selcalCode;
 		OwnedDataRef<int> m_selcalReceived;
 		OwnedDataRef<int> m_selcalMuteOverride;
+		OwnedDataRef<std::string> m_com1StationCallsign;
+		OwnedDataRef<std::string> m_com2StationCallsign;
 		DataRefAccess<int> m_xplaneAtisEnabled;
 		DataRefAccess<float> m_frameRatePeriod;
 		DataRefAccess<int> m_com1Frequency;

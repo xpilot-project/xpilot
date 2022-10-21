@@ -31,8 +31,8 @@ public:
     TypeCodeDatabase(QObject *parent = nullptr);
 
     void PerformTypeCodeDownload();
-    QPromise<QString> GetTypeCodeUrl();
-    QPromise<void> DownloadTypeCodes(QString url);
+    QtPromise::QPromise<QString> GetTypeCodeUrl();
+    QtPromise::QPromise<void> DownloadTypeCodes(QString url);
     Q_INVOKABLE void searchTypeCodes(QString predicate);
     Q_INVOKABLE void validateTypeCodeBeforeConnect(QString typeCode);
 

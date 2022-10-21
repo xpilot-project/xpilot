@@ -1,7 +1,8 @@
-import QtQuick 2.12
-import QtQuick.Window 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Controls 2.12
+import QtQuick
+import QtQuick.Window
+import QtQuick.Layouts
+import QtQuick.Controls
+import QtQuick.Controls.Basic
 import "../Controls"
 
 GridLayout {
@@ -10,7 +11,7 @@ GridLayout {
     anchors.fill: parent
     property bool simConnected: false
     property bool networkConnected: false
-    property var myCallsign: ""
+    property string myCallsign: ""
     property bool connectWindowOpen: false
 
     Connections {

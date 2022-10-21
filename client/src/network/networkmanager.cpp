@@ -4,9 +4,9 @@
 #include <QRandomGenerator>
 #include <QDateTime>
 
+#include <src/fsd/pdu/pdu_metar_request.h>
+
 #include "networkmanager.h"
-#include "serverlistmanager.h"
-#include "src/appcore.h"
 #include "src/config/appconfig.h"
 #include "src/common/build_config.h"
 #include "src/common/frequency_utils.h"
@@ -14,6 +14,7 @@
 #include "src/common/utils.h"
 #include "src/aircrafts/aircraft_visual_state.h"
 #include "src/aircrafts/velocity_vector.h"
+#include "src/network/vatsim_auth.h"
 
 namespace xpilot
 {
@@ -95,6 +96,9 @@ namespace xpilot
                     break;
                 case NotificationType::Warning:
                     m_xplaneAdapter.NotificationPosted(message, COLOR_ORANGE);
+                    break;
+                case NotificationType::TextMessage:
+                case NotificationType::RadioMessageReceived:
                     break;
             }
         });
@@ -307,6 +311,31 @@ namespace xpilot
             case ClientQueryType::Capabilities:
                 emit capabilitiesResponseReceived(pdu.From, pdu.Payload.join(":"));
                 break;
+            case ClientQueryType::Unknown:
+            case ClientQueryType::COM1Freq:
+            case ClientQueryType::Server:
+            case ClientQueryType::INF:
+            case ClientQueryType::FlightPlan:
+            case ClientQueryType::IPC:
+            case ClientQueryType::RequestRelief:
+            case ClientQueryType::CancelRequestRelief:
+            case ClientQueryType::RequestHelp:
+            case ClientQueryType::CancelRequestHelp:
+            case ClientQueryType::WhoHas:
+            case ClientQueryType::InitiateTrack:
+            case ClientQueryType::AcceptHandoff:
+            case ClientQueryType::DropTrack:
+            case ClientQueryType::SetFinalAltitude:
+            case ClientQueryType::SetTempAltitude:
+            case ClientQueryType::SetBeaconCode:
+            case ClientQueryType::SetScratchpad:
+            case ClientQueryType::SetVoiceType:
+            case ClientQueryType::AircraftConfiguration:
+            case ClientQueryType::NewInfo:
+            case ClientQueryType::NewATIS:
+            case ClientQueryType::Estimate:
+            case ClientQueryType::SetGlobalData:
+                break;
         }
     }
 
@@ -319,7 +348,7 @@ namespace xpilot
             AircraftVisualState visualState {};
             visualState.Latitude = pdu.Lat;
             visualState.Longitude = pdu.Lon;
-            visualState.Altitude = pdu.TrueAltitude;
+            visualState.Altitude = AdjustIncomingAltitude(pdu.TrueAltitude);
             visualState.Pitch = pdu.Pitch;
             visualState.Heading = pdu.Heading;
             visualState.Bank = pdu.Bank;
@@ -333,7 +362,7 @@ namespace xpilot
         AircraftVisualState visualState {};
         visualState.Latitude = pdu.Lat;
         visualState.Longitude = pdu.Lon;
-        visualState.Altitude = pdu.AltitudeTrue;
+        visualState.Altitude = AdjustIncomingAltitude(pdu.AltitudeTrue);
         visualState.AltitudeAgl = pdu.AltitudeAgl;
         visualState.Pitch = pdu.Pitch;
         visualState.Heading = pdu.Heading;
@@ -363,7 +392,7 @@ namespace xpilot
 
     void NetworkManager::OnATCPositionReceived(PDUATCPosition pdu)
     {
-        emit controllerUpdateReceived(pdu.From, pdu.Frequency, pdu.Lat, pdu.Lon);
+        emit controllerUpdateReceived(pdu.From, pdu.Frequencies[0], pdu.Lat, pdu.Lon);
     }
 
     void NetworkManager::OnMetarResponseReceived(PDUMetarResponse pdu)
@@ -404,7 +433,7 @@ namespace xpilot
     void NetworkManager::OnBroadcastMessageReceived(PDUBroadcastMessage pdu)
     {
         emit broadcastMessageReceived(pdu.From.toUpper(), pdu.Message);
-        m_xplaneAdapter.NotificationPosted(QString("[BROADCAST] %1: %2").arg(pdu.From.toUpper()).arg(pdu.Message), COLOR_ORANGE);
+        m_xplaneAdapter.NotificationPosted(QString("[BROADCAST] %1: %2").arg(pdu.From.toUpper(), pdu.Message), COLOR_ORANGE);
     }
 
     void NetworkManager::OnRadioMessageReceived(PDURadioMessage pdu)
@@ -435,7 +464,7 @@ namespace xpilot
 
         if(frequencies.size() == 0) return;
 
-        QRegularExpression re("^SELCAL ([A-Z][A-Z]-?[A-Z][A-Z])$");
+        static QRegularExpression re("^SELCAL ([A-Z][A-Z]-?[A-Z][A-Z])$");
         QRegularExpressionMatch match = re.match(pdu.Messages);
 
         if(match.hasMatch())
@@ -465,7 +494,7 @@ namespace xpilot
 
     void NetworkManager::OnPlaneInfoRequestReceived(PDUPlaneInfoRequest pdu)
     {
-        QRegularExpression re("^([A-Z]{3})\\d+");
+        static QRegularExpression re("^([A-Z]{3})\\d+");
         QRegularExpressionMatch match = re.match(m_connectInfo.Callsign);
 
         m_fsd.SendPDU(PDUPlaneInfoResponse(m_connectInfo.Callsign, pdu.From, m_connectInfo.TypeCode, match.hasMatch() ? match.captured(1)  : "", "", ""));
@@ -548,7 +577,8 @@ namespace xpilot
     void NetworkManager::SendSlowPositionPacket()
     {
         if(m_connectInfo.ObserverMode) {
-            m_fsd.SendPDU(PDUATCPosition(m_connectInfo.Callsign, 99998, NetworkFacility::OBS, 40, NetworkRating::OBS,
+            QList<int> freqs = {99998};
+            m_fsd.SendPDU(PDUATCPosition(m_connectInfo.Callsign, freqs, NetworkFacility::OBS, 40, NetworkRating::OBS,
                                          m_userAircraftData.Latitude, m_userAircraftData.Longitude));
         }
         else {
@@ -684,9 +714,9 @@ namespace xpilot
         m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, to, ClientQueryType::Capabilities, caps));
     }
 
-    QPromise<QByteArray> NetworkManager::GetJwtToken()
+    QtPromise::QPromise<QByteArray> NetworkManager::GetJwtToken()
     {
-        return QPromise<QByteArray>{[&](const auto resolve, const auto reject)
+        return QtPromise::QPromise<QByteArray>{[&](const auto resolve, const auto reject)
             {
                 QJsonObject obj;
                 obj["cid"] = AppConfig::getInstance()->VatsimId;

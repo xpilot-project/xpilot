@@ -28,7 +28,7 @@ public:
     bool IsValid;
     bool IsValidATC;
 
-    bool operator==(const Controller& rhs)
+    bool operator==(const Controller& rhs) const
     {
       return Callsign == rhs.Callsign
               && Frequency == rhs.Frequency
@@ -42,7 +42,7 @@ public:
               && IsValidATC == rhs.IsValidATC;
     }
 
-    bool operator!=(const Controller& rhs)
+    bool operator!=(const Controller& rhs) const
     {
         return Callsign != rhs.Callsign
                 || Frequency != rhs.Frequency

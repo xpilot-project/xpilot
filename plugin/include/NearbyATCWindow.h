@@ -50,10 +50,12 @@ namespace xpilot {
 		void ClearList();
 	protected:
 		void buildInterface() override;
+		void RenderAtcStationEntry(xpilot::NearbyATCList& station);
 	private:
 		XPilot* m_env;
 		std::mutex m_mutex;
 		DataRefAccess<int> m_com1Frequency;
+		DataRefAccess<int> m_com2Frequency;
 	};
 }
 

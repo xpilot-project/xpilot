@@ -1,16 +1,9 @@
 [submodule "client/afv-native"]
 	path = client/afv-native
 	url = git@github.com:xpilot-project/afv-native.git
-[submodule "client/externals"]
-	path = client/externals
+[submodule "externals"]
+	path = externals
 	url = git@github.com:xpilot-project/externals.git
-[submodule "client/qtpromise"]
-	path = client/qtpromise
-	url = git@github.com:simonbrunel/qtpromise.git
-[submodule "client/3rdparty/qtpromise"]
-	path = client/3rdparty/qtpromise
-	url = git@github.com:simonbrunel/qtpromise.git
-[submodule "plugin/externals/imgui"]
-	path = plugin/externals/imgui
-	url = git@github.com:xpilot-project/imgui.git
-	branch = xpilot
+[submodule "plugin/3rdparty/XPMP2"]
+	path = plugin/3rdparty/XPMP2
+	url = git@github.com:xpilot-project/XPMP2.git

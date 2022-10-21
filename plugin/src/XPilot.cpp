@@ -27,7 +27,7 @@
 #include "SettingsWindow.h"
 #include "NotificationPanel.h"
 #include "TextMessageConsole.h"
-#include "XPMP2/XPMPMultiplayer.h"
+#include "XPMPMultiplayer.h"
 
 namespace xpilot {
 	XPilot::XPilot() :
@@ -44,6 +44,8 @@ namespace xpilot {
 		m_selcalCode("xpilot/selcal", ReadOnly),
 		m_selcalReceived("xpilot/selcal_received", ReadWrite),
 		m_selcalMuteOverride("xpilot/selcal_mute_override", ReadWrite),
+		m_com1StationCallsign("xpilot/com1_station_callsign", ReadOnly),
+		m_com2StationCallsign("xpilot/com2_station_callsign", ReadOnly),
 		m_frameRatePeriod("sim/operation/misc/frame_rate_period", ReadOnly),
 		m_com1Frequency("sim/cockpit2/radios/actuators/com1_frequency_hz_833", ReadWrite),
 		m_com2Frequency("sim/cockpit2/radios/actuators/com2_frequency_hz_833", ReadWrite),
@@ -119,15 +121,19 @@ namespace xpilot {
 			return;
 		}
 
-		nng_setopt_int(_socket, NNG_OPT_RECVBUF, 1000);
-		nng_setopt_int(_socket, NNG_OPT_SENDBUF, 1000);
+		nng_setopt_int(_socket, NNG_OPT_RECVBUF, 1024);
+		nng_setopt_int(_socket, NNG_OPT_SENDBUF, 1024);
 
-		std::string url = string_format("tcp://*:%s", Config::GetInstance().GetTcpPort().c_str());
+		std::string url = "ipc:///tmp//xpilot.ipc";
+		if (Config::GetInstance().GetUseTcpSocket() && Config::GetInstance().GetTcpPort() > 0) {
+			url = string_format("tcp://*:%i", Config::GetInstance().GetTcpPort());
+		}
+
 		if ((rv = nng_listen(_socket, url.c_str(), NULL, 0)) != 0) {
 			LOG_MSG(logERROR, "Socket listen error (%s): %s", url.c_str(), nng_strerror(rv));
 			return;
 		}
-		LOG_MSG(logMSG, "Now listening on port %s", Config::GetInstance().GetTcpPort().c_str());
+		LOG_MSG(logMSG, "Now listening on %s", url.c_str());
 
 		m_keepSocketAlive = true;
 		m_socketThread = std::make_unique<std::thread>(&XPilot::SocketWorker, this);
@@ -392,6 +398,8 @@ namespace xpilot {
 				m_networkCallsign.setValue(callsign);
 				m_selcalCode.setValue(selcal);
 				m_networkLoginStatus.setValue(true);
+				m_com1StationCallsign.setValue("");
+				m_com2StationCallsign.setValue("");
 			});
 		}
 		if (packet.type == dto::DISCONNECTED) {
@@ -404,6 +412,26 @@ namespace xpilot {
 				m_networkCallsign.setValue("");
 				m_selcalCode.setValue("");
 				m_networkLoginStatus.setValue(false);
+				m_com1StationCallsign.setValue("");
+				m_com2StationCallsign.setValue("");
+			});
+		}
+		if (packet.type == dto::STATION_CALLSIGN) {
+			ComStationCallsign dto;
+			packet.dto.convert(dto);
+
+			std::string callsign = dto.callsign;
+			int comStack = dto.com;
+
+			QueueCallback([=] {
+				switch (comStack) {
+				case 1:
+					m_com1StationCallsign.setValue(callsign);
+					break;
+				case 2:
+					m_com2StationCallsign.setValue(callsign);
+					break;
+				}
 			});
 		}
 	}

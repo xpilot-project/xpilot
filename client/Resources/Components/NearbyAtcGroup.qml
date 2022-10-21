@@ -1,7 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Controls 2.12
-import QtQuick.Controls.Material 2.12
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
 import "../Scripts/FrequencyUtils.js" as FrequencyUtils
 
 Column {
@@ -44,12 +43,12 @@ Column {
                     networkManager.requestControllerAtis(Callsign)
                 }
 
-                onClicked: {
+                onClicked: (mouse) => {
                     if(mouse.button === Qt.RightButton) {
                         ctxtMenu.popup()
                     }
                 }
-                onPressAndHold: {
+                onPressAndHold: (mouse) => {
                     if(mouse.source === Qt.MouseEventNotSynthesized) {
                         ctxtMenu.popup()
                     }
@@ -57,6 +56,12 @@ Column {
 
                 Menu {
                     id: ctxtMenu
+
+                    background: Rectangle {
+                        implicitWidth: 200
+                        implicitHeight: 40
+                        border.color: "black"
+                    }
 
                     MenuItem {
                         hoverEnabled: false
@@ -75,6 +80,7 @@ Column {
                     }
                     MenuSeparator{}
                     MenuItem {
+                        id: ctrlSendPrivateMessage
                         contentItem: Text {
                             text: "Send Private Message"
                             font.pixelSize: 13
@@ -90,9 +96,23 @@ Column {
                                 }
                             }
                         }
+                        background: Item {
+                            implicitWidth: 200
+                            implicitHeight: 40
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 1
+                                color: ctrlSendPrivateMessage.highlighted ? "#ADB5BD" : "transparent"
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                            }
+                        }
                         height: 35
                     }
                     MenuItem {
+                        id: ctrlRequestControllerInfo
                         contentItem: Text {
                             text: "Request Controller Info"
                             font.pixelSize: 13
@@ -108,9 +128,23 @@ Column {
                                 }
                             }
                         }
+                        background: Item {
+                            implicitWidth: 200
+                            implicitHeight: 40
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 1
+                                color: ctrlRequestControllerInfo.highlighted ? "#ADB5BD" : "transparent"
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                            }
+                        }
                         height: 35
                     }
                     MenuItem {
+                        id: ctrlTuneCom1
                         contentItem: Text {
                             text: "Tune COM1 Radio"
                             font.pixelSize: 13
@@ -127,9 +161,23 @@ Column {
                                 }
                             }
                         }
+                        background: Item {
+                            implicitWidth: 200
+                            implicitHeight: 40
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 1
+                                color: ctrlTuneCom1.highlighted ? "#ADB5BD" : "transparent"
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                            }
+                        }
                         height: 35
                     }
                     MenuItem {
+                        id: ctrlTuneCom2
                         contentItem: Text {
                             text: "Tune COM2 Radio"
                             font.pixelSize: 13
@@ -144,6 +192,19 @@ Column {
                                     xplaneAdapter.setCom2Frequency(freq)
                                     ctxtMenu.close()
                                 }
+                            }
+                        }
+                        background: Item {
+                            implicitWidth: 200
+                            implicitHeight: 40
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 1
+                                color: ctrlTuneCom2.highlighted ? "#ADB5BD" : "transparent"
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
                             }
                         }
                         height: 35

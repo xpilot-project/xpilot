@@ -78,8 +78,10 @@ public:
 
     int XplaneVersion() const { return m_xplaneVersion; }
 
+    void SetStationCallsign(int com, QString callsign);
+
 private:
-    void Subscribe();
+    void SubscribeDataRefs();
     void SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency);
     void setDataRefValue(std::string dataRef, float value);
     void sendCommand(std::string command);
@@ -137,6 +139,15 @@ private:
     QTimer m_heartbeatTimer;
     QTimer m_xplaneDataTimer;
 
+    QList<QString> m_subscribedDataRefs;
+
+    typedef struct rref_data_type {
+        int idx;
+        float val;
+    } rref_data_type;
+
+    #define SKIP_EMPTY(value) if(value == 0) continue;
+
     int m_xplaneVersion;
 
     bool m_keepSocketAlive = false;
@@ -161,11 +172,6 @@ private:
             }
         }
     }
-
-    typedef struct rref_data_type {
-        int idx;
-        float val;
-    } rref_data_type;
 };
 
 #endif

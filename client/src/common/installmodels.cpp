@@ -32,7 +32,7 @@ InstallModels::~InstallModels()
 
 QtPromise::QPromise<QString> InstallModels::ValidateToken(const QString &url, const QString& vatsimId, const QString &token)
 {
-    return QPromise<QString>{[&](const auto resolve, const auto reject)
+    return QtPromise::QPromise<QString>{[&](const auto resolve, const auto reject)
         {
             QNetworkRequest networkRequest(url);
             networkRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, true);
@@ -62,9 +62,9 @@ QtPromise::QPromise<QString> InstallModels::ValidateToken(const QString &url, co
         }};
 }
 
-QPromise<void> InstallModels::DownloadModels(const QString &url)
+QtPromise::QPromise<void> InstallModels::DownloadModels(const QString &url)
 {
-    return QPromise<void>{[&](const auto resolve, const auto reject)
+    return QtPromise::QPromise<void>{[&](const auto resolve, const auto reject)
         {
             emit downloadStarted();
 
@@ -115,9 +115,9 @@ QPromise<void> InstallModels::DownloadModels(const QString &url)
         }};
 }
 
-QPromise<void> InstallModels::UnzipModels(const QString &path)
+QtPromise::QPromise<void> InstallModels::UnzipModels(const QString &path)
 {
-    return QPromise<void>{[&](const auto resolve, const auto reject)
+    return QtPromise::QPromise<void>{[&](const auto resolve, const auto reject)
         {
             return QtConcurrent::run([=]
             {

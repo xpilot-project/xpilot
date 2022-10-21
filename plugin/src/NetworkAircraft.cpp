@@ -76,8 +76,7 @@ namespace xpilot {
 		const std::string& _livery,
 		XPMPPlaneID _modeS_id = 0,
 		const std::string& _modelName = "") :
-		XPMP2::Aircraft(_icaoType, _icaoAirline, _livery, _modeS_id, _modelName) {
-		label = _callsign;
+		XPMP2::Aircraft(_callsign, _icaoType, _icaoAirline, _livery, _modeS_id, _modelName) {
 		strScpy(acInfoTexts.tailNum, _callsign.c_str(), sizeof(acInfoTexts.tailNum));
 		strScpy(acInfoTexts.icaoAcType, acIcaoType.c_str(), sizeof(acInfoTexts.icaoAcType));
 		strScpy(acInfoTexts.icaoAirline, acIcaoAirline.c_str(), sizeof(acInfoTexts.icaoAirline));

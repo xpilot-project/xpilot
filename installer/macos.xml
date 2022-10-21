@@ -11,7 +11,8 @@
     <productDisplayName>xPilot</productDisplayName>
     <saveRelativePaths>1</saveRelativePaths>
     <vendor>xPilot for VATSIM</vendor>
-    <osxApplicationBundleIcon>../client/xpilot.icns</osxApplicationBundleIcon>  
+    <osxPlatforms>osx-x86_64 osx-arm64</osxPlatforms>
+    <osxApplicationBundleIcon>../client/icon.icns</osxApplicationBundleIcon>  
     <osxApplicationBundleIdentifier>org.vatsim.xpilot</osxApplicationBundleIdentifier>
     <osxSigningIdentity>${apple_signing_identity}</osxSigningIdentity>
     <osxSigningKeychainFile>/Users/runner/Library/Keychains/Signing keychain-db</osxSigningKeychainFile>

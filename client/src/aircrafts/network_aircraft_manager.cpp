@@ -227,7 +227,6 @@ namespace xpilot
     void AircraftManager::DeletePlane(const NetworkAircraft &aircraft, QString reason)
     {
         m_xplaneAdapter.DeleteAircraft(aircraft, reason);
-        m_aircraft.removeAll(aircraft);
     }
 
     void AircraftManager::SetUpNewAircraft(const QString &callsign, const AircraftVisualState &visualState)

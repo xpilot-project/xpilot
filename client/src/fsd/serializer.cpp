@@ -29,6 +29,8 @@ QString toQString(const NetworkRating &value)
             return "11";
         case NetworkRating::ADM:
             return "12";
+        default:
+            return "1";
     }
 }
 
@@ -108,6 +110,8 @@ QString toQString(const NetworkFacility &value)
             return "5";
         case NetworkFacility::CTR:
             return "6";
+        default:
+            return "0";
     }
 }
 
@@ -212,6 +216,8 @@ QString toQString(const SimulatorType &value)
             return "5";
         case SimulatorType::XPlane:
             return "6";
+        default:
+            return "0";
     }
 }
 

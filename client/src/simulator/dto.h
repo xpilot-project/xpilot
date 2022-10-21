@@ -31,6 +31,7 @@ namespace xpilot {
         const std::string CONNECTED = "CONN";
         const std::string DISCONNECTED = "DISCON";
         const std::string SHUTDOWN = "SHUTDOWN";
+        const std::string STATION_CALLSIGN = "STATION_CALLSIGN";
     }
 
     using namespace dto;
@@ -291,6 +292,16 @@ namespace xpilot {
 
         static std::string getName() {
             return SHUTDOWN;
+        }
+    };
+
+    struct ComStationCallsign {
+        int com;
+        std::string callsign;
+        MSGPACK_DEFINE(com, callsign);
+
+        static std::string getName() {
+            return STATION_CALLSIGN;
         }
     };
 

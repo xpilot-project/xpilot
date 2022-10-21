@@ -35,7 +35,7 @@ PDURadioMessage PDURadioMessage::fromTokens(const QStringList &tokens)
     QStringList freqs = tokens[1].split("&");
     QList<uint> freqInts;
     for(int i = 0; i < freqs.size(); i++) {
-        freqInts.push_back(freqs[i].midRef(1, freqs[i].length() - 1).toUInt());
+        freqInts.push_back(freqs[i].mid(1, freqs[i].length() - 1).toUInt());
     }
 
     QStringList messageTokens = tokens.mid(2);

@@ -366,7 +366,7 @@ namespace xpilot {
 
 						ImGui::SetNextWindowSize(ImVec2(400, 150), ImGuiCond_FirstUseEver);
 						if (ImGui::BeginPopupModal("Error Saving Settings", NULL, ImGuiWindowFlags_NoResize)) {
-							ImGui::TextWrapped("An error occured while trying to save the settings.\n\nMake sure read/write permissions are set properly for the \n\"Resources > Plugins > xPilot > Resources\" folder.\n\n");
+							ImGui::TextWrapped("%s", "An error occured while trying to save the settings.\n\nMake sure read/write permissions are set properly for the \n\"Resources > Plugins > xPilot > Resources\" folder.\n\n");
 
 							if (ImGui::Button("Close"))
 								ImGui::CloseCurrentPopup();

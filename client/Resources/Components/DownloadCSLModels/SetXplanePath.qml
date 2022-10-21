@@ -1,10 +1,9 @@
-import QtQuick 2.15
-import QtQuick.Controls 1.4
-import QtQuick.Controls.Styles 1.4
-import QtQuick.Controls 2.12
-import QtQuick.Window 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Dialogs 1.2
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Controls.Basic
+import QtQuick.Window
+import QtQuick.Layouts
+import QtQuick.Dialogs
 import AppConfig 1.0
 import "../../Controls"
 
@@ -17,6 +16,10 @@ Popup {
         modal: true
         focus: true
         closePolicy: Popup.NoAutoClose
+        background: Rectangle {
+            color: "white"
+            border.color: "black"
+        }
 
         signal closeWindow()
 
@@ -56,12 +59,11 @@ Popup {
             }
         }
 
-        FileDialog {
+        FolderDialog {
             id: xplanePath
             title: "Select X-Plane Folder"
-            selectFolder: true
             onAccepted: {
-                var path = xplanePath.folder.toString()
+                var path = xplanePath.selectedFolder.toString()
                 path = path.replace(/^file:\/{3}/,"")
                 xplanePathUrl.color = "black"
                 xplanePathUrl.text = `<b>Path:</b> ${path}`
@@ -92,7 +94,7 @@ Popup {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    installModels.validatePath(xplanePath.folder.toString())
+                    installModels.validatePath(xplanePath.selectedFolder.toString())
                 }
             }
         }

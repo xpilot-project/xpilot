@@ -6,6 +6,8 @@
 
 #include <QMap>
 
+#include <src/common/build_config.h>
+
 using namespace afv_native::afv;
 
 namespace xpilot
@@ -51,6 +53,7 @@ namespace xpilot
         m_rxTxQueryTimer.setInterval(50);
         m_vuTimer.setInterval(10);
         m_vuTimer.start();
+        m_audioDevicesTimer.setInterval(500);
 
 #ifdef Q_OS_WIN
         WORD wVersionRequested;
@@ -69,6 +72,9 @@ namespace xpilot
         {
             switch(evt)
             {
+                case afv_native::ClientEventType::AudioDisabled:
+                    emit notificationPosted((int)NotificationType::Error, "No speaker device detected. You will not be able to communicate on voice until you plug in a speaker device and configure it in the xPilot settings.");
+                    break;
                 case afv_native::ClientEventType::APIServerError:
                     if(data != nullptr) {
                         auto error = *reinterpret_cast<APISessionError*>(data);
@@ -132,31 +138,12 @@ namespace xpilot
         m_client->setEnableOutputEffects(!AppConfig::getInstance()->AudioEffectsDisabled);
         m_client->setEnableHfSquelch(AppConfig::getInstance()->HFSquelchEnabled);
 
-        m_audioDrivers = afv_native::audio::AudioDevice::getAPIs();
-        for(const auto& driver : m_audioDrivers)
-        {
-            if(QString(driver.second.c_str()) == AppConfig::getInstance()->AudioApi)
-            {
-                m_audioApi = driver.first;
-            }
-        }
+        configureAudioDevices();
+        setMicrophoneVolume(AppConfig::getInstance()->MicrophoneVolume);
+        setCom1Volume(AppConfig::getInstance()->Com1Volume);
+        setCom2Volume(AppConfig::getInstance()->Com2Volume);
 
-        QTimer::singleShot(0, this, [this]{
-            if(m_audioDrivers.empty())
-            {
-                emit notificationPosted((int)NotificationType::Error, "Could not initialize audio drivers or devices.");
-            }
-            else
-            {
-                setAudioApi(m_audioApi);
-
-                setMicrophoneVolume(AppConfig::getInstance()->MicrophoneVolume);
-
-                setCom1Volume(AppConfig::getInstance()->Com1Volume);
-                setCom2Volume(AppConfig::getInstance()->Com2Volume);
-            }
-        });
-
+        connect(&m_audioDevicesTimer, &QTimer::timeout, this, &AudioForVatsim::OnAudioDevicesTimer);
         connect(&m_transceiverTimer, &QTimer::timeout, this, &AudioForVatsim::OnTransceiverTimer);
         connect(&m_rxTxQueryTimer, &QTimer::timeout, this, [&]{
             emit radioRxChanged(0, m_radioStackState.Com1ReceiveEnabled && m_client->getRxActive(0));
@@ -253,6 +240,9 @@ namespace xpilot
                 case NotificationType::Warning:
                     m_xplaneAdapter.NotificationPosted(message, COLOR_ORANGE);
                     break;
+                case NotificationType::TextMessage:
+                case NotificationType::RadioMessageReceived:
+                    break;
             }
         });
 
@@ -284,25 +274,22 @@ namespace xpilot
         m_logDataStream.flush();
     }
 
-    void AudioForVatsim::setAudioApi(int api)
-    {
-        m_audioApi = api;
-        m_client->setAudioApi(api);
-        configureAudioDevices();
-    }
-
     void AudioForVatsim::setInputDevice(QString deviceName)
     {
-        m_client->stopAudio();
-        m_client->setAudioInputDevice(deviceName.toStdString().c_str());
-        m_client->startAudio();
+        if(!deviceName.isEmpty()) {
+            m_client->stopAudio();
+            m_client->setAudioInputDevice(deviceName.toStdString().c_str());
+            m_client->startAudio();
+        }
     }
 
     void AudioForVatsim::setOutputDevice(QString deviceName)
     {
-        m_client->stopAudio();
-        m_client->setAudioOutputDevice(deviceName.toStdString().c_str());
-        m_client->startAudio();
+        if(!deviceName.isEmpty()) {
+            m_client->stopAudio();
+            m_client->setAudioOutputDevice(deviceName.toStdString().c_str());
+            m_client->startAudio();
+        }
     }
 
     void AudioForVatsim::setCom1Volume(double volume)
@@ -370,6 +357,45 @@ namespace xpilot
         updateTransceivers();
     }
 
+    void AudioForVatsim::OnAudioDevicesTimer()
+    {
+        // output devices
+        QList<AudioDeviceInfo> newOutputDevices;
+        for(const auto& device: afv_native::audio::AudioDevice::getCompatibleOutputDevicesForApi(0))
+        {
+            AudioDeviceInfo audioDevice{};
+            audioDevice.DeviceName = device.second.name.c_str();
+            audioDevice.Id = (QChar)device.first;
+            newOutputDevices.append(audioDevice);
+        }
+
+        bool outputDeviceListChanged = !std::equal(std::begin(m_outputDevices), std::end(m_outputDevices),
+                                                std::begin(newOutputDevices), std::end(newOutputDevices));
+        if(outputDeviceListChanged) {
+            m_outputDevices.clear();
+            m_outputDevices = newOutputDevices;
+            emit outputDevicesChanged();
+        }
+
+        // input devices
+        QList<AudioDeviceInfo> newInputDevices;
+        for(const auto& device: afv_native::audio::AudioDevice::getCompatibleInputDevicesForApi(0))
+        {
+            AudioDeviceInfo audioDevice{};
+            audioDevice.DeviceName = device.second.name.c_str();
+            audioDevice.Id = (QChar)device.first;
+            newInputDevices.append(audioDevice);
+        }
+
+        bool inputDeviceListChanged = !std::equal(std::begin(m_inputDevices), std::end(m_inputDevices),
+                                                std::begin(newInputDevices), std::end(newInputDevices));
+        if(inputDeviceListChanged) {
+            m_inputDevices.clear();
+            m_inputDevices = newInputDevices;
+            emit inputDevicesChanged();
+        }
+    }
+
     void AudioForVatsim::configureAudioDevices()
     {
         m_client->stopAudio();
@@ -377,23 +403,23 @@ namespace xpilot
         m_outputDevices.clear();
         m_inputDevices.clear();
 
-        auto outputDevices = afv_native::audio::AudioDevice::getCompatibleOutputDevicesForApi(m_audioApi);
+        auto outputDevices = afv_native::audio::AudioDevice::getCompatibleOutputDevicesForApi(0);
         for(const auto& device: outputDevices)
         {
             AudioDeviceInfo audioDevice{};
             audioDevice.DeviceName = device.second.name.c_str();
-            audioDevice.Id = device.first;
+            audioDevice.Id = (QChar)device.first;
             m_outputDevices.append(audioDevice);
         }
 
         emit outputDevicesChanged();
 
-        auto inputDevices = afv_native::audio::AudioDevice::getCompatibleInputDevicesForApi(m_audioApi);
+        auto inputDevices = afv_native::audio::AudioDevice::getCompatibleInputDevicesForApi(0);
         for(const auto& device: inputDevices)
         {
             AudioDeviceInfo audioDevice{};
             audioDevice.DeviceName = device.second.name.c_str();
-            audioDevice.Id = device.first;
+            audioDevice.Id = (QChar)device.first;
             m_inputDevices.append(audioDevice);
         }
 
@@ -431,6 +457,16 @@ namespace xpilot
     void AudioForVatsim::setMicrophoneVolume(int volume)
     {
         m_client->setMicrophoneVolume(volume);
+    }
+
+    void AudioForVatsim::settingsWindowOpened()
+    {
+        m_audioDevicesTimer.start();
+    }
+
+    void AudioForVatsim::settingsWindowClosed()
+    {
+        m_audioDevicesTimer.stop();
     }
 
     bool AudioForVatsim::fuzzyMatchCallsign(const QString &callsign, const QString &compareTo) const

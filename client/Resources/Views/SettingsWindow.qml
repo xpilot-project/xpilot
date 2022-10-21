@@ -1,18 +1,19 @@
-import QtQuick 2.15
-import QtQuick.Window 2.2
-import QtQuick.Layouts 1.3
-import QtQuick.Controls 2.12
-import QtQuick.Dialogs 1.2
+import QtQuick
+import QtQuick.Window
+import QtQuick.Layouts
+import QtQuick.Controls
+import QtQuick.Controls.Basic
+import QtQuick.Dialogs
+
 import "../Components"
 import "../Controls"
-
 import AppConfig 1.0
 
 Window {
     id: formSettings
     title: "Settings"
     width: 670
-    height: 660
+    height: 615
     minimumHeight: height
     minimumWidth: width
     maximumHeight: height
@@ -20,12 +21,11 @@ Window {
     flags: Qt.Dialog
     modality: Qt.ApplicationModal
 
-    property var serverListLoaded: false
-    property var apiListLoaded: false
-    property var inputDeviceListLoaded: false
-    property var outputDeviceListLoaded: false
-    property var initialized: false
-    property var inputDeviceChanged: false
+    property bool serverListLoaded: false
+    property bool inputDeviceListLoaded: false
+    property bool outputDeviceListLoaded: false
+    property bool initialized: false
+    property bool inputDeviceChanged: false
 
     signal closeWindow()
 
@@ -33,9 +33,8 @@ Window {
         return value.replace(/[\n\r]/g, "")
     }
 
-    // @disable-check M16
-    onClosing: {
-        if(inputDeviceChanged) {
+    onClosing: (close) => {
+        if(inputDeviceChanged && inputDeviceList.currentIndex > -1) {
             close.accepted = false
             calibrationRequired.open()
         }
@@ -43,6 +42,7 @@ Window {
             AppConfig.saveConfig();
             closeWindow()
         }
+        audio.settingsWindowClosed()
     }
 
     Connections {
@@ -75,7 +75,6 @@ Window {
         networkServerCombobox.model = AppConfig.CachedServers;
         outputDeviceList.model = audio.OutputDevices;
         inputDeviceList.model = audio.InputDevices;
-        audioApiList.model = audio.AudioApis;
         com1Slider.volume = AppConfig.Com1Volume;
         com2Slider.volume = AppConfig.Com2Volume;
         microphoneVolume.volume = AppConfig.MicrophoneVolume;
@@ -99,23 +98,28 @@ Window {
                 y = screen.virtualY + 50
             }
             initialized = true
+            audio.settingsWindowOpened()
         }
     }
 
     Popup {
         id: calibrationRequired
         width: 500
-        height: 220
+        height: 200
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
         modal: true
         focus: true
         closePolicy: Popup.NoAutoClose
         margins: 20
+        background: Rectangle {
+            color: "white"
+            border.color: "black"
+        }
 
         Text {
             id: calibrationInfo
-            text: "<strong>Microphone Calibration Required</strong><br/><br/>Because your microphone device changed, you must confirm your microphone volume is at an acceptable level.<br/><br/>Please verify that the microphone volume level indicator stays green when you speak normally. Use the Mic Volume slider to adjust the microphone volume if necessary."
+            text: "<strong>Microphone Calibration Required</strong><br/><br/>Because your microphone device changed, you must confirm that your microphone volume is at an acceptable level.<br/><br/>Please verify that the microphone volume level indicator stays green when you speak normally. Use the Mic Volume slider to adjust the microphone volume as necessary."
             font.pixelSize: 14
             renderType: Text.NativeRendering
             width: parent.width
@@ -433,47 +437,6 @@ Window {
         }
 
         Item {
-            id: audioApi
-            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-            Layout.column: 0
-            Layout.columnSpan: 2
-            Layout.preferredWidth: 50
-            Layout.row: 6
-            Layout.fillWidth: true
-            Layout.preferredHeight: 50
-            Text {
-                id: audioApiLabel
-                color: "#333333"
-                text: qsTr("Audio API")
-                renderType: Text.NativeRendering
-                font.pixelSize: 13
-            }
-
-            CustomComboBox {
-                id: audioApiList
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: audioApiLabel.bottom
-                anchors.topMargin: 5
-                anchors.leftMargin: 0
-                anchors.rightMargin: 0
-                textRole: "name"
-                valueRole: "id"
-                onModelChanged: {
-                    currentIndex = audioApiList.find(AppConfig.AudioApi)
-                    apiListLoaded = true
-                }
-                onCurrentIndexChanged: {
-                    if(apiListLoaded) {
-                        AppConfig.AudioApi = audioApiList.textAt(currentIndex)
-                        var api = audioApiList.valueAt(currentIndex)
-                        audio.setAudioApi(api)
-                    }
-                }
-            }
-        }
-
-        Item {
             id: microphoneDevice
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.column: 0
@@ -652,7 +615,7 @@ Window {
                 VolumeSlider {
                     id: com1Slider
                     comLabel: "COM1"
-                    onVolumeValueChanged: {
+                    onVolumeValueChanged: function(volume) {
                         audio.setCom1Volume(volume)
                     }
                 }
@@ -660,7 +623,7 @@ Window {
                 VolumeSlider {
                     id: com2Slider
                     comLabel: "COM2"
-                    onVolumeValueChanged: {
+                    onVolumeValueChanged: function(volume) {
                         audio.setCom2Volume(volume)
                     }
                 }

@@ -1,12 +1,10 @@
-import QtQuick 2.15
-import QtQuick.Controls 1.4
-import QtQuick.Controls.Styles 1.4
-import QtQuick.Controls 2.12
-import QtQuick.Window 2.12
-import QtQuick.Layouts 1.12
-import QtWebSockets 1.2
-import QtMultimedia 5.12
-import QtQuick.Dialogs 1.2
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Controls.Basic
+import QtQuick.Dialogs
+import QtQuick.Window
+import QtQuick.Layouts
+import QtMultimedia
 
 import AppConfig 1.0
 import "../Scripts/FrequencyUtils.js" as FrequencyUtils
@@ -37,7 +35,6 @@ Window {
     property QtObject setXplanePathWindow // csl install
     property QtObject extractCslModelsWindow // csl install
     property int currentTab
-    property bool closing: false
     property bool networkConnected: false
     property string ourCallsign: ""
     property bool initialized: false
@@ -60,42 +57,42 @@ Window {
 
     SoundEffect {
         id: alertSound
-        source: "file:///" + appDataPath + "/Sounds/Alert.wav"
+        source: "file:" + appDataPath + "Sounds/Alert.wav"
     }
 
     SoundEffect {
         id: broadcastSound
-        source: "file:///" + appDataPath + "/Sounds/Broadcast.wav"
+        source: "file:" + appDataPath + "Sounds/Broadcast.wav"
     }
 
     SoundEffect {
         id: directRadioMessageSound
-        source: "file:///" + appDataPath + "/Sounds/DirectRadioMessage.wav"
+        source: "file:" + appDataPath + "Sounds/DirectRadioMessage.wav"
     }
 
     SoundEffect {
         id: errorSound
-        source: "file:///" + appDataPath + "/Sounds/Error.wav"
+        source: "file:" + appDataPath + "Sounds/Error.wav"
     }
 
     SoundEffect {
         id: newMessageSound
-        source: "file:///" + appDataPath + "/Sounds/NewMessage.wav"
+        source: "file:" + appDataPath + "Sounds/NewMessage.wav"
     }
 
     SoundEffect {
         id: privateMessageSound
-        source: "file:///" + appDataPath + "/Sounds/PrivateMessage.wav"
+        source: "file:" + appDataPath + "Sounds/PrivateMessage.wav"
     }
 
     SoundEffect {
         id: radioMessageSound
-        source: "file:///" + appDataPath + "/Sounds/RadioMessage.wav"
+        source: "file:" + appDataPath + "Sounds/RadioMessage.wav"
     }
 
     SoundEffect {
         id: selcalSound
-        source: "file:///" + appDataPath + "/Sounds/SELCAL.wav"
+        source: "file:" + appDataPath + "Sounds/SELCAL.wav"
     }
 
     NewVersionAvailable {
@@ -108,6 +105,7 @@ Window {
 
     DisconnectDialog {
         id: confirmClose
+        onExitApplication: Qt.exit(0)
     }
 
     MicrophoneCalibrationRequired {
@@ -167,10 +165,9 @@ Window {
         initialized = true;
     }
 
-    // @disable-check M16
-    onClosing: {
-        close.accepted = !networkConnected || closing
-        onTriggered: if(!closing && networkConnected) confirmClose.open()
+    onClosing: (close) => {
+        close.accepted = !networkConnected
+        onTriggered: if(networkConnected) confirmClose.open()
     }
 
     onXChanged: {
@@ -193,7 +190,7 @@ Window {
         }
     }
 
-    onVisibilityChanged: {
+    onVisibilityChanged: function(visibility) {
         if(initialized && visibility !== Window.Hidden) {
             var isMaximized = (visibility === Window.Maximized || visibility === Window.FullScreen)
             if(AppConfig.WindowConfig.Maximized && !isMaximized) {
@@ -863,7 +860,7 @@ Window {
                 ground: nearbyGround
                 delivery: nearbyDelivery
                 atis: nearbyAtis
-                onStartChatSession: {
+                onStartChatSession: function(callsign) {
                     focusOrCreateTab(callsign)
                 }
             }
@@ -1139,14 +1136,14 @@ Window {
 
                                 property var commandHistory: []
                                 property int historyIndex: -1
-                                property var commandLineValue: ""
+                                property string commandLineValue: ""
 
                                 background: Rectangle {
                                     color: 'transparent'
                                     border.color: '#5C5C5C'
                                 }
 
-                                Keys.onPressed: {
+                                Keys.onPressed: function(event) {
                                     if(event.key === Qt.Key_Escape) {
                                         cliTextField.clear()
                                     }
@@ -1475,7 +1472,7 @@ Window {
             moveable = false
         }
 
-        onPressed: {
+        onPressed: function(mouse) {
             if (mouse.button !== Qt.LeftButton
                     || mainWindow.visibility === Window.Maximized
                     || mainWindow.visibility === Window.FullScreen) {

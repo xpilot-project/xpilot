@@ -39,7 +39,9 @@
 #include <memory>
 #include <thread>
 
+#ifndef M_PI
 #define M_PI 3.14159265358979323846
+#endif
 
 #if !defined(XPLM200) || !defined(XPLM210) || !defined(XPLM300) || !defined(XPLM301)
 #error xPilot requires XPLM301 SDK or newer

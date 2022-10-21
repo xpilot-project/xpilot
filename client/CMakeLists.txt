@@ -1,29 +1,47 @@
 cmake_minimum_required(VERSION 3.19)
 project(xPilot LANGUAGES C CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-if(MSVC)
-    if(NOT DEFINED CONAN_LINK_RUNTIME AND DEFINED CONAN_SETTINGS_COMPILER_RUNTIME)
-        message(WARNING "Forcing MSVC runtime based on conan profile")
-        # this means Conan is not running the build, so we need to fix our linker flags ourself.... although we can probably cheat...
-        set(CONAN_LINK_RUNTIME "/${CONAN_SETTINGS_COMPILER_RUNTIME}")
-        conan_set_vs_runtime()
-    endif()
-endif(MSVC)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(Boost_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../externals/boost)
+
+if(APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")
+    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+endif()
+
+if(WIN32)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
+endif()
+
+# Configure Qt
+
+set(QT_MAJOR_VERSION 6)
+
+if(DEFINED ENV{Qt${QT_MAJOR_VERSION}_HOME})
+    message(STATUS "Looking for Qt in: " $ENV{Qt${QT_MAJOR_VERSION}_HOME})
+else()
+    message(STATUS "Qt${QT_MAJOR_VERSION}_HOME environment variable not set. Checking default paths.")
+endif()
+
+if("${QT_MAJOR_VERSION}" STREQUAL "6")
+    set(CMAKE_PREFIX_PATH $ENV{Qt${QT_MAJOR_VERSION}_HOME})
+endif()
+
+find_package(Qt${QT_MAJOR_VERSION} COMPONENTS Core Quick Network Svg REQUIRED PATHS $ENV{Qt${QT_MAJOR_VERSION}_HOME})
+
+# Read config variables
 file(READ ${CMAKE_SOURCE_DIR}/../xpilot.json XPILOT_JSON)
 
 string(JSON VERSION_URL GET ${XPILOT_JSON} version_url)
@@ -51,261 +69,6 @@ if (NOT CONFIG_ENCRYPTION_KEY)
     set(CONFIG_ENCRYPTION_KEY 0)
 endif ()
 
-if(NOT SENTRY_DSN)
-    set(SENTRY_DSN "")
-endif ()
-
-configure_file(src/common/build_config.cpp.in ${CMAKE_BINARY_DIR}/generated/build_config.cpp)
-include_directories(${CMAKE_BINARY_DIR}/generated)
-
-configure_file(xpilot.rc.in ${CMAKE_SOURCE_DIR}/xpilot.rc @ONLY)
-
-find_package(QT NAMES Qt5 COMPONENTS Core Quick Network Svg REQUIRED)
-find_package(Qt5 COMPONENTS Core Quick Network Svg REQUIRED)
-find_package(Qt5QuickCompiler)
-
-qtquick_compiler_add_resources(RESOURCES qml.qrc)
-
-set(FSD_SOURCES
-    src/fsd/enums.h
-    src/fsd/client_properties.h
-    src/fsd/fsd_client.cpp
-    src/fsd/fsd_client.h
-    src/fsd/serializer.h
-    src/fsd/serializer.cpp
-    src/fsd/pdu/pdu_format_exception.h
-    src/fsd/pdu/pdu_base.cpp
-    src/fsd/pdu/pdu_base.h
-    src/fsd/pdu/pdu_server_identification.cpp
-    src/fsd/pdu/pdu_server_identification.h
-    src/fsd/pdu/pdu_client_identification.cpp
-    src/fsd/pdu/pdu_client_identification.h
-    src/fsd/pdu/pdu_atc_position.h
-    src/fsd/pdu/pdu_atc_position.cpp
-    src/fsd/pdu/pdu_add_atc.h
-    src/fsd/pdu/pdu_add_atc.cpp
-    src/fsd/pdu/pdu_add_pilot.h
-    src/fsd/pdu/pdu_add_pilot.cpp
-    src/fsd/pdu/pdu_auth_challenge.h
-    src/fsd/pdu/pdu_auth_challenge.cpp
-    src/fsd/pdu/pdu_auth_response.h
-    src/fsd/pdu/pdu_auth_response.cpp
-    src/fsd/pdu/pdu_broadcast_message.h
-    src/fsd/pdu/pdu_broadcast_message.cpp
-    src/fsd/pdu/pdu_client_query.h
-    src/fsd/pdu/pdu_client_query.cpp
-    src/fsd/pdu/pdu_client_query_response.h
-    src/fsd/pdu/pdu_client_query_response.cpp
-    src/fsd/pdu/pdu_delete_atc.h
-    src/fsd/pdu/pdu_delete_atc.cpp
-    src/fsd/pdu/pdu_delete_pilot.h
-    src/fsd/pdu/pdu_delete_pilot.cpp
-    src/fsd/pdu/pdu_fast_pilot_position.h
-    src/fsd/pdu/pdu_fast_pilot_position.cpp
-    src/fsd/pdu/pdu_kill_request.h
-    src/fsd/pdu/pdu_kill_request.cpp
-    src/fsd/pdu/pdu_metar_request.h
-    src/fsd/pdu/pdu_metar_request.cpp
-    src/fsd/pdu/pdu_metar_response.h
-    src/fsd/pdu/pdu_metar_response.cpp
-    src/fsd/pdu/pdu_pilot_position.h
-    src/fsd/pdu/pdu_pilot_position.cpp
-    src/fsd/pdu/pdu_ping.h
-    src/fsd/pdu/pdu_ping.cpp
-    src/fsd/pdu/pdu_plane_info_request.h
-    src/fsd/pdu/pdu_plane_info_request.cpp
-    src/fsd/pdu/pdu_plane_info_response.h
-    src/fsd/pdu/pdu_plane_info_response.cpp
-    src/fsd/pdu/pdu_pong.h
-    src/fsd/pdu/pdu_pong.cpp
-    src/fsd/pdu/pdu_protocol_error.h
-    src/fsd/pdu/pdu_protocol_error.cpp
-    src/fsd/pdu/pdu_radio_message.h
-    src/fsd/pdu/pdu_radio_message.cpp
-    src/fsd/pdu/pdu_send_fast.h
-    src/fsd/pdu/pdu_send_fast.cpp
-    src/fsd/pdu/pdu_text_message.h
-    src/fsd/pdu/pdu_text_message.cpp
-    src/fsd/pdu/pdu_wallop.h
-    src/fsd/pdu/pdu_wallop.cpp
-    src/fsd/pdu/pdu_change_server.h
-    src/fsd/pdu/pdu_change_server.cpp)
-
-set(PROJECT_SOURCES
-    src/main.cpp
-    src/network/vatsim_auth.h
-    src/common/build_config.h
-    src/common/build_config.inc
-    ${CMAKE_BINARY_DIR}/generated/build_config.cpp
-    src/common/simplecrypt.h
-    src/common/simplecrypt.cpp
-    src/common/frequency_utils.h
-    src/common/qserializer.h
-    src/common/notificationtype.h
-    src/common/utils.h
-    src/common/versioncheck.h
-    src/common/versioncheck.cpp
-    src/common/installmodels.h
-    src/common/installmodels.cpp
-    src/common/typecodedatabase.h
-    src/common/typecodedatabase.cpp
-    src/common/libzippp.h
-    src/common/libzippp.cpp
-    src/common/runguard.h
-    src/common/runguard.cpp
-    src/config/appconfig.h
-    src/config/appconfig.cpp
-    src/config/windowconfig.h
-    src/appcore.h
-    src/appcore.cpp
-    src/audio/afv.cpp
-    src/audio/afv.h
-    src/audio/audiodeviceinfo.h
-    src/controllers/controller.h
-    src/controllers/controller_manager.h
-    src/controllers/controller_manager.cpp
-    src/network/networkmanager.h
-    src/network/networkmanager.cpp
-    src/network/connectinfo.h
-    src/network/serverlistmanager.h
-    src/network/serverlistmanager.cpp
-    src/network/nearbyatc.h
-    src/network/events/radio_message_received.h
-    src/simulator/xplane_adapter.h
-    src/simulator/xplane_adapter.cpp
-    src/simulator/dto.h
-    src/aircrafts/network_aircraft.h
-    src/aircrafts/aircraft_visual_state.h
-    src/aircrafts/velocity_vector.h
-    src/aircrafts/aircraft_configuration.h
-    src/aircrafts/aircraft_configuration.cpp
-    src/aircrafts/user_aircraft_data.h
-    src/aircrafts/user_aircraft_config_data.h
-    src/aircrafts/radio_stack_state.h
-    src/aircrafts/user_aircraft_manager.h
-    src/aircrafts/user_aircraft_manager.cpp
-    src/aircrafts/network_aircraft_manager.h
-    src/aircrafts/network_aircraft_manager.cpp)
-
-set(AFV_NATIVE_HEADERS
-    afv-native/include/afv-native/Client.h
-    afv-native/include/afv-native/event.h
-    afv-native/include/afv-native/Log.h
-    afv-native/include/afv-native/afv/APISession.h
-    afv-native/include/afv-native/afv/EffectResources.h
-    afv-native/include/afv-native/afv/params.h
-    afv-native/include/afv-native/afv/RadioSimulation.h
-    afv-native/include/afv-native/afv/RemoteVoiceSource.h
-    afv-native/include/afv-native/afv/RollingAverage.h
-    afv-native/include/afv-native/afv/VoiceCompressionSink.h
-    afv-native/include/afv-native/afv/VoiceSession.h
-    afv-native/include/afv-native/afv/dto/AuthRequest.h
-    afv-native/include/afv-native/afv/dto/PostCallsignResponse.h
-    afv-native/include/afv-native/afv/dto/Station.h
-    afv-native/include/afv-native/afv/dto/Transceiver.h
-    afv-native/include/afv-native/afv/dto/VoiceServerConnectionData.h
-    afv-native/include/afv-native/afv/dto/interfaces/IAudio.h
-    afv-native/include/afv-native/afv/dto/interfaces/IAudioDirect.h
-    afv-native/include/afv-native/afv/dto/interfaces/IAudioVoiceRoom.h
-    afv-native/include/afv-native/afv/dto/domain/RxTransceiver.h
-    afv-native/include/afv-native/afv/dto/domain/TxTransceiver.h
-    afv-native/include/afv-native/afv/dto/voice_server/AudioOnDirect.h
-    afv-native/include/afv-native/afv/dto/voice_server/AudioRxOnTransceivers.h
-    afv-native/include/afv-native/afv/dto/voice_server/AudioTxOnTransceivers.h
-    afv-native/include/afv-native/afv/dto/voice_server/Heartbeat.h
-    afv-native/include/afv-native/audio/audio_params.h
-    afv-native/include/afv-native/audio/AudioDevice.h
-    afv-native/include/afv-native/audio/BiQuadFilter.h
-    afv-native/include/afv-native/audio/FilterSource.h
-    afv-native/include/afv-native/audio/IFilter.h
-    afv-native/include/afv-native/audio/ISampleSink.h
-    afv-native/include/afv-native/audio/ISampleSource.h
-    afv-native/include/afv-native/audio/ISampleStorage.h
-    afv-native/include/afv-native/audio/OutputMixer.h
-    afv-native/include/afv-native/audio/RecordedSampleSource.h
-    afv-native/include/afv-native/audio/SimpleCompressorEffect.h
-    afv-native/include/afv-native/audio/SineToneSource.h
-    afv-native/include/afv-native/audio/SinkFrameSizeAdjuster.h
-    afv-native/include/afv-native/audio/SourceFrameSizeAdjuster.h
-    afv-native/include/afv-native/audio/SpeexPreprocessor.h
-    afv-native/include/afv-native/audio/VHFFilterSource.h
-    afv-native/include/afv-native/audio/WavFile.h
-    afv-native/include/afv-native/audio/WavSampleStorage.h
-    afv-native/include/afv-native/audio/WhiteNoiseGenerator.h
-    afv-native/include/afv-native/cryptodto/Channel.h
-    afv-native/include/afv-native/cryptodto/dto/ICryptoDTO.h
-    afv-native/include/afv-native/cryptodto/params.h
-    afv-native/include/afv-native/cryptodto/SequenceTest.h
-    afv-native/include/afv-native/cryptodto/UDPChannel.h
-    afv-native/include/afv-native/cryptodto/dto/ChannelConfig.h
-    afv-native/include/afv-native/cryptodto/dto/Header.h
-    afv-native/include/afv-native/event/EventTimer.h
-    afv-native/include/afv-native/event/EventCallbackTimer.h
-    afv-native/include/afv-native/http/EventTransferManager.h
-    afv-native/include/afv-native/http/http.h
-    afv-native/include/afv-native/http/Request.h
-    afv-native/include/afv-native/http/RESTRequest.h
-    afv-native/include/afv-native/http/TransferManager.h
-    afv-native/include/afv-native/util/base64.h
-    afv-native/include/afv-native/util/ChainedCallback.h
-    afv-native/include/afv-native/util/monotime.h
-    afv-native/include/afv-native/utility.h)
-
-set(AFV_NATIVE_AUDIO_SOURCES
-    afv-native/src/audio/PortAudioAudioDevice.cpp
-    afv-native/src/audio/PortAudioAudioDevice.h)
-
-set(AFV_NATIVE_SOURCES
-    afv-native/src/afv/APISession.cpp
-    afv-native/src/afv/EffectResources.cpp
-    afv-native/src/afv/RadioSimulation.cpp
-    afv-native/src/afv/RemoteVoiceSource.cpp
-    afv-native/src/afv/VoiceCompressionSink.cpp
-    afv-native/src/afv/VoiceSession.cpp
-    afv-native/src/afv/dto/AuthRequest.cpp
-    afv-native/src/afv/dto/PostCallsignResponse.cpp
-    afv-native/src/afv/dto/Station.cpp
-    afv-native/src/afv/dto/Transceiver.cpp
-    afv-native/src/afv/dto/VoiceServerConnectionData.cpp
-    afv-native/src/audio/AudioDevice.cpp
-    afv-native/src/audio/BiQuadFilter.cpp
-    afv-native/src/audio/FilterSource.cpp
-    afv-native/src/audio/OutputMixer.cpp
-    afv-native/src/audio/RecordedSampleSource.cpp
-    afv-native/src/audio/SimpleCompressorEffect.cpp
-    afv-native/src/audio/SineToneSource.cpp
-    afv-native/src/audio/SinkFrameSizeAdjuster.cpp
-    afv-native/src/audio/SourceFrameSizeAdjuster.cpp
-    afv-native/src/audio/SpeexPreprocessor.cpp
-    afv-native/src/audio/VHFFilterSource.cpp
-    afv-native/src/audio/WavFile.cpp
-    afv-native/src/audio/WavSampleStorage.cpp
-    afv-native/src/core/Client.cpp
-    afv-native/src/core/Log.cpp
-    afv-native/src/cryptodto/Channel.cpp
-    afv-native/src/cryptodto/SequenceTest.cpp
-    afv-native/src/cryptodto/UDPChannel.cpp
-    afv-native/src/cryptodto/dto/ChannelConfig.cpp
-    afv-native/src/cryptodto/dto/Header.cpp
-    afv-native/src/event/EventCallbackTimer.cpp
-    afv-native/src/event/EventTimer.cpp
-    afv-native/src/http/EventTransferManager.cpp
-    afv-native/src/http/TransferManager.cpp
-    afv-native/src/http/Request.cpp
-    afv-native/src/http/RESTRequest.cpp
-    afv-native/src/util/base64.cpp
-    afv-native/src/util/monotime.cpp
-    ${AFV_NATIVE_AUDIO_SOURCES})
-
-set(AFV_NATIVE_THIRDPARTY_SOURCES
-    afv-native/extern/compressor/compressor.c
-    afv-native/extern/compressor/compressor.h
-    afv-native/extern/compressor/mem.c
-    afv-native/extern/compressor/mem.h
-    afv-native/extern/compressor/sf_common.h
-    afv-native/extern/compressor/snd.c
-    afv-native/extern/compressor/snd.h)
-
 # Set some Win32 Specific Settings
 if (WIN32)
     set(GUI_TYPE WIN32)
@@ -316,21 +79,39 @@ if (APPLE)
     set(GUI_TYPE MACOSX_BUNDLE)
 endif ()
 
-add_executable(xPilot
-    ${GUI_TYPE}
-    ${PROJECT_SOURCES}
-    ${HEADERS}
-    ${FSD_SOURCES}
-    ${AFV_NATIVE_HEADERS}
-    ${AFV_NATIVE_SOURCES}
-    ${AFV_API_SOURCES}
-    ${AFV_NATIVE_THIRDPARTY_SOURCES}
-    xpilot.rc
-    qml.qrc)
+configure_file(src/common/build_config.cpp.in ${CMAKE_BINARY_DIR}/generated/build_config.cpp)
+include_directories(${CMAKE_BINARY_DIR}/generated)
+configure_file(xpilot.rc.in ${CMAKE_SOURCE_DIR}/xpilot.rc @ONLY)
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/afv-native/src PREFIX "AFV Sources" FILES ${AFV_NATIVE_SOURCES})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/afv-native/include PREFIX "AFV Headers" FILES ${AFV_NATIVE_HEADERS})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/afv-native/extern PREFIX "Third Party" FILES ${AFV_NATIVE_THIRDPARTY_SOURCES})
+file(GLOB_RECURSE xpilot_SRC CONFIGURE_DEPENDS
+    ${PROJECT_SOURCE_DIR}/src/*.cpp
+    ${PROJECT_SOURCE_DIR}/src/*.h
+    ${CMAKE_BINARY_DIR}/generated/build_config.cpp)
+
+file(
+    GLOB_RECURSE afv_HEADERS
+    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_SOURCE_DIR}/afv-native/include/*.h*"
+)
+
+file(
+    GLOB_RECURSE afv_SRC
+    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_SOURCE_DIR}/afv-native/src/*"
+    "${CMAKE_SOURCE_DIR}/afv-native/extern/compressor/*"
+)
+
+qt_add_resources(qrc_SOURCES qml.qrc)
+
+add_executable(${PROJECT_NAME} ${GUI_TYPE} ${xpilot_SRC} ${afv_HEADERS} ${afv_SRC} ${qrc_SOURCES} xpilot.rc)
+
+qt6_import_qml_plugins(${PROJECT_NAME})
+
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/afv-native/include")
+source_group("AFV Headers" FILES ${afv_HEADERS})
+
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/afv-native/src")
+source_group("AFV Sources" FILES ${afv_SRC})
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
@@ -340,46 +121,147 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC
     ${CMAKE_SOURCE_DIR}/afv-native/include)
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Core Qt5::Quick Qt5::Network Qt5::Svg)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/msgpack-c ${CMAKE_CURRENT_BINARY_DIR}/msgpack-c)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/json ${CMAKE_CURRENT_BINARY_DIR}/json)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/qtpromise ${CMAKE_CURRENT_BINARY_DIR}/qtpromise)
 
 if (WIN32)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32.lib)
-endif ()
 
-if (WIN32)
-    set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/vatsimauth.lib)
-    set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/opus.lib)
-    set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/portaudio.lib)
-    set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/windows/speexdsp.lib)
-    set(ALSA_LIBRARY "")
+    #vatsimauth
+    find_library(LIB_VATSIM_AUTH vatsimauth PATHS ${CMAKE_SOURCE_DIR}/../externals/windows NO_DEFAULT_PATH)
+    if(NOT LIB_VATSIM_AUTH)
+        message(FATAL_ERROR "vatsimauth library not found")
+    endif()
+    message(STATUS "vatsimauth: ${LIB_VATSIM_AUTH}")
 
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CONAN_BIN_DIRS_SENTRY-CRASHPAD}/crashpad_handler.exe"
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
-endif ()
+    #opus
+    find_library(LIB_OPUS opus PATHS ${CMAKE_SOURCE_DIR}/../externals/windows NO_DEFAULT_PATH )
+    if(NOT LIB_OPUS)
+        message(FATAL_ERROR "opus library not found")
+    endif()
+    message(STATUS "opus: ${LIB_OPUS}")
 
-if (UNIX)
-    set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/vatsimauth.a)
-    set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libopus.a)
-    set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libportaudio.a)
-    set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/linux/libspeexdsp.a)
+    #speexdsp
+    find_library(LIB_SPEEXDSP speexdsp PATHS ${CMAKE_SOURCE_DIR}/../externals/windows NO_DEFAULT_PATH )
+    if(NOT LIB_SPEEXDSP)
+        message(FATAL_ERROR "speexdsp library not found")
+    endif()
+    message(STATUS "speexdsp: ${LIB_SPEEXDSP}")
 
-    find_library(ALSA_LIBRARY NAMES asound)
+    #nng
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/nng/include)
+    find_library(LIB_NNG nng PATHS ${CMAKE_SOURCE_DIR}/../externals/windows/nng NO_DEFAULT_PATH )
+    if(NOT LIB_NNG)
+        message(FATAL_ERROR "nng library not found")
+    endif()
+    message(STATUS "nng: ${LIB_NNG}")
 
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CONAN_BIN_DIRS_SENTRY-CRASHPAD}/crashpad_handler"
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
-endif ()
+    #openssl
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/openssl/include)
+    find_library(LIB_CRYPTO libcrypto PATHS ${CMAKE_SOURCE_DIR}/../externals/windows/openssl NO_DEFAULT_PATH )
+    if(NOT LIB_CRYPTO)
+        message(FATAL_ERROR "libcrypto library not found")
+    endif()
+    message(STATUS "libcrypto: ${LIB_CRYPTO}")
 
-if (APPLE)
-    set(VATSIM_AUTH_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/vatsimauth.a)
-    set(OPUS_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libopus.a)
-    set(PORTAUDIO_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libportaudio.a)
-    set(SPEEX_LIBRARY ${CMAKE_SOURCE_DIR}/externals/macos/libspeexdsp.a)
-    set(ALSA_LIBRARY "")
+    find_library(LIB_SSL libssl PATHS ${CMAKE_SOURCE_DIR}/../externals/windows/openssl NO_DEFAULT_PATH)
+    if(NOT LIB_SSL)
+        message(FATAL_ERROR "libssl library not found")
+    endif()
+    message(STATUS "libssl: ${LIB_SSL}")
+
+    #libevent
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/libevent/include)
+    find_library(LIB_EVENT event PATHS ${CMAKE_SOURCE_DIR}/../externals/windows/libevent NO_DEFAULT_PATH )
+    if(NOT LIB_EVENT)
+        message(FATAL_ERROR "event library not found")
+    endif()
+    message(STATUS "event: ${LIB_EVENT}")
+
+    #libcurl
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/libcurl/include)
+    find_library(LIB_CURL libcurl PATHS ${CMAKE_SOURCE_DIR}/../externals/windows/libcurl NO_DEFAULT_PATH)
+    if(NOT LIB_CURL)
+        message(FATAL_ERROR "libcurl library not found")
+    endif()
+    message(STATUS "libcurl: ${LIB_CURL}")
+
+    #libzip
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/libzip/include)
+    find_library(LIB_ZIP zip PATHS ${CMAKE_SOURCE_DIR}/../externals/windows/libzip NO_DEFAULT_PATH)
+    if(NOT LIB_ZIP)
+        message(FATAL_ERROR "zip library not found")
+    endif()
+    message(STATUS "zip: ${LIB_ZIP}")
+
+elseif(APPLE)
+
+    #vatsimauth
+    find_library(LIB_VATSIM_AUTH vatsimauth PATHS ${CMAKE_SOURCE_DIR}/../externals/macos NO_DEFAULT_PATH )
+    if(NOT LIB_VATSIM_AUTH)
+        message(FATAL_ERROR "vatsimauth library not found")
+    endif()
+    message(STATUS "vatsimauth: ${LIB_VATSIM_AUTH}")
+
+    #opus
+    find_library(LIB_OPUS opus PATHS ${CMAKE_SOURCE_DIR}/../externals/macos NO_DEFAULT_PATH )
+    if(NOT LIB_OPUS)
+        message(FATAL_ERROR "opus library not found")
+    endif()
+    message(STATUS "opus: ${LIB_OPUS}")
+
+    #speexdsp
+    find_library(LIB_SPEEXDSP speexdsp PATHS ${CMAKE_SOURCE_DIR}/../externals/macos NO_DEFAULT_PATH )
+    if(NOT LIB_SPEEXDSP)
+        message(FATAL_ERROR "speexdsp library not found")
+    endif()
+    message(STATUS "speexdsp: ${LIB_SPEEXDSP}")
+
+    #nng
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/nng/include)
+    find_library(LIB_NNG nng PATHS ${CMAKE_SOURCE_DIR}/../externals/macos/nng NO_DEFAULT_PATH )
+    if(NOT LIB_NNG)
+        message(FATAL_ERROR "nng library not found")
+    endif()
+    message(STATUS "nng: ${LIB_NNG}")
+
+    #openssl
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/openssl/include)
+    find_library(LIB_CRYPTO crypto PATHS ${CMAKE_SOURCE_DIR}/../externals/macos/openssl NO_DEFAULT_PATH )
+    if(NOT LIB_CRYPTO)
+        message(FATAL_ERROR "crypto library not found")
+    endif()
+    message(STATUS "crypto: ${LIB_CRYPTO}")
+
+    find_library(LIB_SSL ssl PATHS ${CMAKE_SOURCE_DIR}/../externals/macos/openssl NO_DEFAULT_PATH)
+    if(NOT LIB_SSL)
+        message(FATAL_ERROR "ssl library not found")
+    endif()
+    message(STATUS "ssl: ${LIB_SSL}")
+
+    #libevent
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libevent/include)
+    find_library(LIB_EVENT event PATHS ${CMAKE_SOURCE_DIR}/../externals/macos/libevent NO_DEFAULT_PATH )
+    if(NOT LIB_EVENT)
+        message(FATAL_ERROR "event library not found")
+    endif()
+    message(STATUS "event: ${LIB_EVENT}")
+
+    #libcurl
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libcurl/include)
+    find_library(LIB_CURL curl PATHS ${CMAKE_SOURCE_DIR}/../externals/macos/libcurl NO_DEFAULT_PATH)
+    if(NOT LIB_CURL)
+        message(FATAL_ERROR "curl library not found")
+    endif()
+    message(STATUS "curl: ${LIB_CURL}")
+
+    #libzip
+    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/libzip/include)
+    find_library(LIB_ZIP zip PATHS ${CMAKE_SOURCE_DIR}/../externals/macos/libzip NO_DEFAULT_PATH)
+    if(NOT LIB_ZIP)
+        message(FATAL_ERROR "zip library not found")
+    endif()
+    message(STATUS "zip: ${LIB_ZIP}")
 
     find_library(COREFOUNDATION CoreFoundation)
     find_library(COREAUDIO CoreAudio)
@@ -389,39 +271,113 @@ if (APPLE)
 
     add_custom_target(osx_bundle_dirs
         COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources
-        COMMAND cp ${CMAKE_SOURCE_DIR}/xpilot.icns ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources/xpilot.icns)
+        COMMAND cp ${CMAKE_SOURCE_DIR}/icon.icns ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources/icon.icns)
 
     add_dependencies(${PROJECT_NAME} osx_bundle_dirs)
 
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CONAN_BIN_DIRS_SENTRY-CRASHPAD}/crashpad_handler"
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+else()
+
+      #vatsimauth
+      find_library(LIB_VATSIM_AUTH vatsimauth PATHS ${CMAKE_SOURCE_DIR}/../externals/linux NO_DEFAULT_PATH)
+      if(NOT LIB_VATSIM_AUTH)
+          message(FATAL_ERROR "vatsimauth library not found")
+      endif()
+      message(STATUS "vatsimauth: ${LIB_VATSIM_AUTH}")
+  
+      #opus
+      find_library(LIB_OPUS opus PATHS ${CMAKE_SOURCE_DIR}/../externals/linux NO_DEFAULT_PATH )
+      if(NOT LIB_OPUS)
+          message(FATAL_ERROR "opus library not found")
+      endif()
+      message(STATUS "opus: ${LIB_OPUS}")
+  
+      #speexdsp
+      find_library(LIB_SPEEXDSP speexdsp PATHS ${CMAKE_SOURCE_DIR}/../externals/linux NO_DEFAULT_PATH )
+      if(NOT LIB_SPEEXDSP)
+          message(FATAL_ERROR "speexdsp library not found")
+      endif()
+      message(STATUS "speexdsp: ${LIB_SPEEXDSP}")
+  
+      #nng
+      include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/nng/include)
+      find_library(LIB_NNG nng PATHS ${CMAKE_SOURCE_DIR}/../externals/linux/nng NO_DEFAULT_PATH )
+      if(NOT LIB_NNG)
+          message(FATAL_ERROR "nng library not found")
+      endif()
+      message(STATUS "nng: ${LIB_NNG}")
+  
+      #openssl
+      include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/openssl/include)
+      find_library(LIB_CRYPTO crypto PATHS ${CMAKE_SOURCE_DIR}/../externals/linux/openssl NO_DEFAULT_PATH )
+      if(NOT LIB_CRYPTO)
+          message(FATAL_ERROR "crypto library not found")
+      endif()
+      message(STATUS "crypto: ${LIB_CRYPTO}")
+  
+      find_library(LIB_SSL ssl PATHS ${CMAKE_SOURCE_DIR}/../externals/linux/openssl NO_DEFAULT_PATH)
+      if(NOT LIB_SSL)
+          message(FATAL_ERROR "ssl library not found")
+      endif()
+      message(STATUS "ssl: ${LIB_SSL}")
+  
+      #libevent
+      include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/libevent/include)
+      find_library(LIB_EVENT event PATHS ${CMAKE_SOURCE_DIR}/../externals/linux/libevent NO_DEFAULT_PATH )
+      if(NOT LIB_EVENT)
+          message(FATAL_ERROR "event library not found")
+      endif()
+      message(STATUS "event: ${LIB_EVENT}")
+  
+      #libcurl
+      include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/libcurl/include)
+      find_library(LIB_CURL curl PATHS ${CMAKE_SOURCE_DIR}/../externals/linux/libcurl NO_DEFAULT_PATH)
+      if(NOT LIB_CURL)
+          message(FATAL_ERROR "curl library not found")
+      endif()
+      message(STATUS "curl: ${LIB_CURL}")
+  
+      #libzip
+      include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/libzip/include)
+      find_library(LIB_ZIP zip PATHS ${CMAKE_SOURCE_DIR}/../externals/linux/libzip NO_DEFAULT_PATH)
+      if(NOT LIB_ZIP)
+          message(FATAL_ERROR "zip library not found")
+      endif()
+      message(STATUS "zip: ${LIB_ZIP}")
+
 endif ()
 
-add_subdirectory(3rdparty/qtpromise)
+if(APPLE)
+    target_link_libraries(${PROJECT_NAME}
+        PUBLIC
+        ${COREFOUNDATION}
+        ${COREAUDIO}
+        ${AUDIOTOOLBOX})
+endif()
 
-target_link_libraries(${PROJECT_NAME}
-    PUBLIC
-    CONAN_PKG::openssl
-    CONAN_PKG::msgpack-cxx
-    CONAN_PKG::nlohmann_json
-    CONAN_PKG::libcurl
-    CONAN_PKG::libevent
-    CONAN_PKG::sentry-native
-    CONAN_PKG::sentry-crashpad
-    CONAN_PKG::libzip
-    CONAN_PKG::nng
-    CONAN_PKG::boost
-    ${OPUS_LIBRARY}
-    ${PORTAUDIO_LIBRARY}
-    ${SPEEX_LIBRARY}
-    ${VATSIM_AUTH_LIBRARY}
-    ${COREFOUNDATION}
-    ${COREAUDIO}
-    ${AUDIOTOOLBOX}
-    ${ALSA_LIBRARY}
-    qtpromise)
+target_link_libraries(
+    ${PROJECT_NAME}
+    PRIVATE
+    Qt${QT_MAJOR_VERSION}::Core
+    Qt${QT_MAJOR_VERSION}::Quick
+    Qt${QT_MAJOR_VERSION}::Network
+    Qt${QT_MAJOR_VERSION}::Svg
+    ${LIB_OPUS}
+    ${LIB_VATSIM_AUTH}
+    ${LIB_EVENT}
+    ${LIB_CURL}
+    ${LIB_CRYPTO}
+    ${LIB_SSL}
+    ${LIB_SPEEXDSP}
+    ${LIB_VATSIM_AUTH}
+    ${LIB_NNG}
+    ${LIB_ZIP}
+    qtpromise
+    msgpackc-cxx
+    nlohmann_json
+)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
+add_definitions(-DCURL_STATICLIB -DNNG_STATIC_LIB)
 
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PUBLIC _USE_MATH_DEFINES)

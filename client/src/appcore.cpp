@@ -17,8 +17,6 @@
 #include "common/typecodedatabase.h"
 #include "common/installmodels.h"
 #include "common/runguard.h"
-#include "common/utils.h"
-#include "sentry.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -45,18 +43,10 @@ static QObject *appConfigSingleton(QQmlEngine *, QJSEngine *)
 
 int xpilot::Main(int argc, char* argv[])
 {
-    sentry_options_t *options = sentry_options_new();
-    sentry_options_set_dsn(options, BuildConfig::getSentryDsn().toStdString().c_str());
-    sentry_options_set_release(options, BuildConfig::getVersionString().toStdString().c_str());
-    sentry_init(options);
-
-    auto sentryClose = qScopeGuard([]{ sentry_close(); });
-
     QCoreApplication::setApplicationName("xPilot");
     QCoreApplication::setApplicationVersion(xpilot::BuildConfig::getVersionString());
     QCoreApplication::setOrganizationName("Justin Shannon");
     QCoreApplication::setOrganizationDomain("org.vatsim.xpilot");
-    QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
 
     RunGuard guard("org.vatsim.xpilot");
     if(!guard.tryToRun()) {
@@ -71,10 +61,9 @@ int xpilot::Main(int argc, char* argv[])
 
     app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));
 
-    QFontDatabase database;
-    if(!database.families().contains("Ubuntu"))
-    {
-        // we must check if Ubuntu is already instead (at least for Linux), otherwise the FileDialog gets all corrupted...
+    auto families = QFontDatabase::families();
+    if(!families.contains("Ubuntu")) {
+        // We must check if Ubuntu is already instead (at least for Linux), otherwise the FileDialog gets all corrupted...
         QFontDatabase::addApplicationFont(":/Resources/Fonts/Ubuntu-Regular.ttf");
     }
     app.setFont(QFont("Ubuntu", 10));
@@ -94,7 +83,7 @@ int xpilot::Main(int argc, char* argv[])
     AudioForVatsim audio(networkManager, xplaneAdapter, controllerManager);
 
     QTimer::singleShot(500, [&](){
-        serverListManager.PerformServerListDownload("https://data.vatsim.net/v3/vatsim-servers.json");
+        serverListManager.PerformServerListDownload("https://status.vatsim.net/status.json");
         versionCheck.PerformVersionCheck();
         typeCodeDatabase.PerformTypeCodeDownload();
     });

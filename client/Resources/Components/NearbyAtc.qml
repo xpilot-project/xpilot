@@ -1,7 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Controls 2.12
-import QtQuick.Controls.Material 2.12
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
+import QtQuick.Controls.Basic
 
 import "../Scripts/FrequencyUtils.js" as FrequencyUtils
 
@@ -62,7 +62,7 @@ Rectangle {
             NearbyAtcGroup {
                 internalModel: enroute
                 groupTitle: "Center"
-                onSendPrivateMessage: {
+                onSendPrivateMessage: (callsign) => {
                     startChatSession(callsign)
                 }
             }
@@ -71,7 +71,7 @@ Rectangle {
             NearbyAtcGroup {
                 internalModel: approach
                 groupTitle: "Approach/Departure"
-                onSendPrivateMessage: {
+                onSendPrivateMessage: (callsign) => {
                     startChatSession(callsign)
                 }
             }
@@ -80,7 +80,7 @@ Rectangle {
             NearbyAtcGroup {
                 internalModel: tower
                 groupTitle: "Tower"
-                onSendPrivateMessage: {
+                onSendPrivateMessage: (callsign) => {
                     startChatSession(callsign)
                 }
             }
@@ -89,7 +89,7 @@ Rectangle {
             NearbyAtcGroup {
                 internalModel: ground
                 groupTitle: "Ground"
-                onSendPrivateMessage: {
+                onSendPrivateMessage: (callsign) => {
                     startChatSession(callsign)
                 }
             }
@@ -98,7 +98,7 @@ Rectangle {
             NearbyAtcGroup {
                 internalModel: delivery
                 groupTitle: "Delivery"
-                onSendPrivateMessage: {
+                onSendPrivateMessage: (callsign) => {
                     startChatSession(callsign)
                 }
             }
@@ -107,7 +107,7 @@ Rectangle {
             NearbyAtcGroup {
                 internalModel: atis
                 groupTitle: "ATIS"
-                onSendPrivateMessage: {
+                onSendPrivateMessage: (callsign) => {
                     startChatSession(callsign)
                 }
             }

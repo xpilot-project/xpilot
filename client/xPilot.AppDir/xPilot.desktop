@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=xPilot
+GenericName=xPilot
+Comment=xPilot for VATSIM
+Icon=xpilot
+Exec=xpilot
+Terminal=false
+Type=Application
+Categories=Application;
