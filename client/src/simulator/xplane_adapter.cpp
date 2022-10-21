@@ -100,7 +100,7 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
     if(AppConfig::getInstance()->XplaneNetworkAddress.isEmpty() || localhostAddresses.contains(AppConfig::getInstance()->XplaneNetworkAddress.toLower())) {
         nng_dial(m_socket, "ipc:///tmp//xpilot.ipc", NULL, NNG_FLAG_NONBLOCK);
     } else {
-        QString url = QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress, AppConfig::getInstance()->XplanePluginPort);
+        QString url = QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort);
         nng_dial(m_socket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK);
     }
 
