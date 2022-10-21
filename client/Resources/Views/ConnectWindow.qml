@@ -191,7 +191,7 @@ Popup {
                 onTextChanged: {
                     text = text.toUpperCase()
                 }
-                Keys.onReleased: {
+                Keys.onReleased: function(event) {
                     if(event.key === Qt.Key_Escape) {
                         typeCodeResults.visible = false
                     }
