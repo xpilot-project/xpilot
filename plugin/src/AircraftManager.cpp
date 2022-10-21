@@ -65,10 +65,12 @@ namespace xpilot {
 		ThisThreadIsXplane();
 
 		XPLMRegisterFlightLoopCallback(&AircraftManager::AircraftMaintenanceCallback, -1.0f, this);
+		XPMPRegisterPlaneNotifierFunc(&AircraftManager::AircraftNotifierCallback, this);
 	}
 
 	AircraftManager::~AircraftManager() {
 		XPLMUnregisterFlightLoopCallback(&AircraftManager::AircraftMaintenanceCallback, nullptr);
+		XPMPUnregisterPlaneNotifierFunc(&AircraftManager::AircraftNotifierCallback, nullptr);
 	}
 
 	void AircraftManager::HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState,
@@ -243,12 +245,6 @@ namespace xpilot {
 					instance->m_audioEngine->SetChannelPaused(channel, ShouldPauseSound || !iter->second->IsEnginesRunning);
 					instance->m_audioEngine->SetChannelVolume(channel, soundVolume);
 				}
-
-				// confirm aircraft creation
-				if (iter->second->IsInstanciated() && !iter->second->AircraftAddedEventSent) {
-					instance->mEnv->AircraftAdded(iter->first);
-					iter->second->AircraftAddedEventSent = true;
-				}
 			}
 
 			if (instance->m_audioEngine != nullptr) {
@@ -258,6 +254,19 @@ namespace xpilot {
 		}
 
 		return -1.0f;
+	}
+
+	void AircraftManager::AircraftNotifierCallback(XPMPPlaneID inPlaneID, XPMPPlaneNotification inNotification, void* ref)
+	{
+		auto* instance = static_cast<AircraftManager*>(ref);
+		if (instance) {
+			XPMP2::Aircraft* pAc = XPMP2::AcFindByID(inPlaneID);
+			if (pAc) {
+				if (inNotification == xpmp_PlaneNotification_Created) {
+					instance->mEnv->AircraftAdded(pAc->label);
+				}
+			}
+		}
 	}
 
 	void AircraftManager::HandleFastPositionUpdate(const std::string& callsign, const AircraftVisualState& visualState,

@@ -69,6 +69,7 @@ namespace xpilot {
 
 		NetworkAircraft* GetAircraft(const std::string& callsign);
 		static float AircraftMaintenanceCallback(float, float, int, void* ref);
+		static void AircraftNotifierCallback(XPMPPlaneID inPlaneID, XPMPPlaneNotification inNotification, void* ref);
 
 		std::thread::id m_xplaneThread;
 		void ThisThreadIsXplane() {
