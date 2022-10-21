@@ -3,6 +3,8 @@ name: "Build xPilot"
 on:
   workflow_dispatch:
   push:
+    tags:
+      - 'v*'
 
 env:
   BUILD_TYPE: Release
