@@ -48,13 +48,13 @@ file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/include/*.h)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/../externals/imgui)
-include_directories(${CMAKE_SOURCE_DIR}/../externals/imgui-stdlib)
-include_directories(${CMAKE_SOURCE_DIR}/../externals/imgwindow)
-include_directories(${CMAKE_SOURCE_DIR}/../externals/font)
-include_directories(${CMAKE_SOURCE_DIR}/../externals/gmath)
-include_directories(${CMAKE_SOURCE_DIR}/../externals/fmod/include)
-include_directories(${CMAKE_SOURCE_DIR}/../externals/sdk/CHeaders/XPLM)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/imgui)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/imgui-stdlib)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/imgwindow)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/font)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gmath)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/fmod/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/sdk/CHeaders/XPLM)
 
 set(INCLUDES
   include/AircraftManager.h
@@ -96,29 +96,29 @@ set(SRC
   src/TerrainProbe.cpp
   src/TextMessageConsole.cpp
   src/XPilot.cpp
-  ../externals/imgui/imgui.cpp
-  ../externals/imgui/imgui_draw.cpp
-  ../externals/imgui/imgui_tables.cpp
-  ../externals/imgui/imgui_widgets.cpp
-  ../externals/imgui-stdlib/imgui_stdlib.cpp
-  ../externals/imgwindow/XPImgWindow.cpp
-  ../externals/imgwindow/ImgFontAtlas.cpp
-  ../externals/imgwindow/ImgWindow.cpp)
+  3rdparty/imgui/imgui.cpp
+  3rdparty/imgui/imgui_draw.cpp
+  3rdparty/imgui/imgui_tables.cpp
+  3rdparty/imgui/imgui_widgets.cpp
+  3rdparty/imgui-stdlib/imgui_stdlib.cpp
+  3rdparty/imgwindow/XPImgWindow.cpp
+  3rdparty/imgwindow/ImgFontAtlas.cpp
+  3rdparty/imgwindow/ImgWindow.cpp)
 
 source_group("Source Files" FILES ${SRC})
 set(ALL_FILES ${INCLUDES} ${SRC})
 add_library(${PROJECT_NAME} MODULE ${ALL_FILES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/../externals)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/3rdparty)
 
 if (APPLE)
-    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/sdk/Libraries/Mac")
+    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/3rdparty/sdk/Libraries/Mac")
 elseif (WIN32)
-    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/sdk/Libraries/Win")
+    list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/3rdparty/sdk/Libraries/Win")
 endif()
 
 # Link FMOD
-list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/../externals/fmod")
+list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/3rdparty/fmod")
 
 if(WIN32)
     find_library(FMOD_LIBRARY NAMES fmod_vc.lib REQUIRED)

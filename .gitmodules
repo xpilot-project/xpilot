@@ -7,3 +7,6 @@
 [submodule "plugin/3rdparty/XPMP2"]
 	path = plugin/3rdparty/XPMP2
 	url = git@github.com:xpilot-project/XPMP2.git
+[submodule "plugin/3rdparty/imgui"]
+	path = plugin/3rdparty/imgui
+	url = git@github.com:ocornut/imgui.git
