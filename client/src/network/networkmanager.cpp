@@ -172,7 +172,7 @@ namespace xpilot
     void NetworkManager::OnServerIdentificationReceived(PDUServerIdentification pdu)
     {
         m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, BuildConfig::VatsimClientId(), "xPilot", 2,1,
-                                              AppConfig::getInstance()->VatsimId, GetSystemUid(), ""));
+                                              AppConfig::getInstance()->VatsimId, QSysInfo::machineUniqueId(), ""));
 
         GetJwtToken().then([&](const QByteArray &response){
             auto json = QJsonDocument::fromJson(response).object();
@@ -251,7 +251,7 @@ namespace xpilot
                              AppConfig::getInstance()->VatsimId,
                              AppConfig::getInstance()->NameWithHomeAirport(),
                              m_publicIp,
-                             GetSystemUid(),
+                             QSysInfo::machineUniqueId(),
                              QString::number(m_userAircraftData.Latitude),
                              QString::number(m_userAircraftData.Longitude),
                              QString::number(m_userAircraftData.AltitudeMslM * 3.28084));

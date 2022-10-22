@@ -8,7 +8,6 @@ extern "C"
 
 const char* GenerateAuthResponse(const char* challenge, const unsigned short public_key, const char* private_key);
 const char* GenerateAuthChallenge();
-const char* GetSystemUid();
 
 #ifdef __cplusplus
 }
