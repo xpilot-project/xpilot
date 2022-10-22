@@ -103,7 +103,13 @@ file(
 
 qt_add_resources(qrc_SOURCES qml.qrc)
 
-add_executable(${PROJECT_NAME} ${GUI_TYPE} ${xpilot_SRC} ${afv_HEADERS} ${afv_SRC} ${qrc_SOURCES} xpilot.rc)
+if(APPLE)
+    set(MACOSX_BUNDLE_ICON_FILE icon.icns)
+    set(XPILOT_ICON ${CMAKE_CURRENT_SOURCE_DIR}/icon.icns)
+    set_source_files_properties(${XPILOT_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+endif()
+
+add_executable(${PROJECT_NAME} ${GUI_TYPE} ${XPILOT_ICON} ${xpilot_SRC} ${afv_HEADERS} ${afv_SRC} ${qrc_SOURCES} xpilot.rc)
 
 qt6_import_qml_plugins(${PROJECT_NAME})
 
@@ -268,13 +274,6 @@ elseif(APPLE)
     find_library(AUDIOTOOLBOX AudioToolbox)
 
     set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist")
-
-    add_custom_target(osx_bundle_dirs
-        COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources
-        COMMAND cp ${CMAKE_SOURCE_DIR}/icon.icns ${CMAKE_CURRENT_BINARY_DIR}/bin/xPilot.app/Contents/Resources/icon.icns)
-
-    add_dependencies(${PROJECT_NAME} osx_bundle_dirs)
-
 else()
 
       #vatsimauth
