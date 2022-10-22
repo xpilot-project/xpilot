@@ -160,7 +160,7 @@ jobs:
           cp ${{ env.PLUGIN_DIR }}/3rdparty/fmod/libfmod.dylib ${{ github.workspace }}/xPilot/mac_x64
           cp -R ${{ env.PLUGIN_DIR }}/Resources ${{ github.workspace }}/xPilot/
 
-      - name: Fix FMOD search path
+      - name: Fix FMOD rpath
         working-directory: ${{ github.workspace }}/xPilot/mac_x64
         run: |
           install_name_tool -id @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib libfmod.dylib
@@ -292,6 +292,13 @@ jobs:
         run: |
           objcopy --only-keep-debug xPilot.xpl xPilot.debug
           cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.debug ${{ github.workspace }}/xPilot/lin_x64
+
+      - name: Fix FMOD rpath
+        working-directory: ${{ github.workspace }}/xPilot/lin_x64
+        run: |
+          sudo apt-get install patchelf
+          patchelf --set-rpath '$ORIGIN' xPilot.xpl
+          patchelf --replace-needed libfmod.so.13 libfmod.so xPilot.xpl
 
       ### Build Client ###
 
