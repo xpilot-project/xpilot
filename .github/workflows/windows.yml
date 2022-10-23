@@ -1,0 +1,109 @@
+name: "Build xPilot for Windows"
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
+  VATSIM_CLIENT_KEY: ${{ secrets.VATSIM_CLIENT_KEY }}
+  CONFIG_ENCRYPTION_KEY: ${{ secrets.CONFIG_ENCRYPTION_KEY }}
+  CLIENT_DIR: ${{ github.workspace }}/client
+  PLUGIN_DIR: ${{ github.workspace }}/plugin
+  IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-windows-x64-installer.exe
+  IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      ### Buid Plugin ###
+
+      - name: Build plugin
+        working-directory: ${{ env.PLUGIN_DIR }}
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          cmake --build . --config ${{ env.BUILD_TYPE }}
+
+      - name: Package plugin
+        run: |
+          mkdir -p ${{ github.workspace }}/xPilot/win_x64
+          cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.xpl ${{ github.workspace }}/xPilot/win_x64
+          cp ${{ env.PLUGIN_DIR }}/build/win_x64/xPilot.pdb ${{ github.workspace }}/xPilot/win_x64
+          cp ${{ env.PLUGIN_DIR }}/3rdparty/fmod/fmod.dll ${{ github.workspace }}/xPilot/win_x64
+          cp -R ${{ env.PLUGIN_DIR }}/Resources ${{ github.workspace }}/xPilot/
+
+      ### Build Client ###
+
+      - name: Download Qt
+        uses: robinraju/release-downloader@v1.5
+        with:
+          repository: "xpilot-project/qt6"
+          tag: "v6.3.2"
+          fileName: "windows.7z"
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Setup Qt
+        run: |
+          7z x -oqt6 windows.7z
+          echo "Qt6_DIR=$(pwd)/qt6" >> $env:GITHUB_ENV
+          echo "QT_PLUGIN_PATH=$(pwd)/qt6/plugins" >> $env:GITHUB_ENV
+          echo "QML2_IMPORT_PATH=$(pwd)/qt6/qml" >> $env:GITHUB_ENV
+          echo "EXTERNAL_LIBS=$(pwd)/externals" >> $env:GITHUB_ENV
+
+      - name: Build client
+        working-directory: ${{ env.CLIENT_DIR }}
+        run: |
+          mkdir build
+          cd build
+          cmake .. `
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
+            -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} `
+            -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} `
+            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} `
+            -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} `
+            -DCMAKE_LIBRARY_PATH=${{ env.EXTERNAL_LIBS }}/windows/wmf
+          cmake --build . --config ${{ env.BUILD_TYPE }}
+
+      - name: Get version
+        shell: bash
+        run: |
+          echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
+
+      - name: Setup InstallBuilder
+        shell: bash
+        run: |
+          curl -k -L ${{ env.IB_URL }} --output ib.exe
+          ./ib.exe --mode unattended --prefix ../ib
+          ../ib/bin/builder-cli.exe --version
+          echo "$IB_LICENSE" > lic.xml
+          echo "CLIENT_BUILD_DIR=${{ env.CLIENT_DIR }}/build/Release" >> $GITHUB_ENV
+          echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
+
+      - name: Create installer
+        shell: bash
+        run: |
+          ../ib/bin/builder-cli.exe build installer/windows.xml \
+              --license lic.xml \
+              --setvars project.outputDirectory=$(pwd) \
+              --setvars project.version=${{ env.XPILOT_VERSION }}
+
+      - name: Rename Installer
+        shell: bash
+        run: |
+          mv xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe xPilot-${{ env.XPILOT_VERSION }}-Windows.exe
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: xPilot-${{ env.XPILOT_VERSION }}-Windows.zip
+          path: |
+            xPilot-${{ env.XPILOT_VERSION }}-Windows.exe

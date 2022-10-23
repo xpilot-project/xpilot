@@ -1,0 +1,136 @@
+name: "Build xPilot for macOS"
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+env:
+  MIN_OS_VERSION: 10.15
+  BUILD_TYPE: Release
+  VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
+  VATSIM_CLIENT_KEY: ${{ secrets.VATSIM_CLIENT_KEY }}
+  CONFIG_ENCRYPTION_KEY: ${{ secrets.CONFIG_ENCRYPTION_KEY }}
+  CLIENT_DIR: ${{ github.workspace }}/client
+  PLUGIN_DIR: ${{ github.workspace }}/plugin
+  IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-osx-installer.dmg
+  IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Load developer certificate
+        env:
+          CERTIFICATE: ${{ secrets.APPLE_SIGNING_CERTIFICATE }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
+        run: ./scripts/make_keychain.sh
+
+      ### Buid Plugin ###
+
+      - name: Build plugin
+        working-directory: ${{ env.PLUGIN_DIR }}
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_OS_VERSION }} && cmake --build . --config ${{ env.BUILD_TYPE }}
+
+      - name: Extract debug symbols
+        working-directory: ${{ env.PLUGIN_DIR }}/build/mac_x64
+        run: |
+          dsymutil xPilot.xpl -o xPilot.dSYM
+
+      - name: Package plugin
+        run: |
+          mkdir -p ${{ github.workspace }}/xPilot/mac_x64
+          cp ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.xpl ${{ github.workspace }}/xPilot/mac_x64
+          cp -R ${{ env.PLUGIN_DIR }}/build/mac_x64/xPilot.dSYM ${{ github.workspace }}/xPilot/mac_x64
+          cp ${{ env.PLUGIN_DIR }}/3rdparty/fmod/libfmod.dylib ${{ github.workspace }}/xPilot/mac_x64
+          cp -R ${{ env.PLUGIN_DIR }}/Resources ${{ github.workspace }}/xPilot/
+
+      - name: Fix FMOD rpath
+        working-directory: ${{ github.workspace }}/xPilot/mac_x64
+        run: |
+          install_name_tool -id @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib libfmod.dylib
+          install_name_tool -change @rpath/libfmod.dylib @executable_path/../../../Resources/plugins/xPilot/mac_x64/libfmod.dylib xPilot.xpl
+
+      ### Build Client ###
+
+      - name: Download Qt
+        uses: robinraju/release-downloader@v1.5
+        with:
+          repository: "xpilot-project/qt6"
+          tag: "v6.3.2"
+          fileName: "macos.7z"
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Setup Qt
+        run: |
+          7z x -oqt6 macos.7z
+          echo "Qt6_DIR=$(pwd)/qt6" >> $GITHUB_ENV
+          echo "QT_PLUGIN_PATH=$(pwd)/qt6/plugins" >> $GITHUB_ENV
+          echo "QML2_IMPORT_PATH=$(pwd)/qt6/qml" >> $GITHUB_ENV
+
+      - name: Build client
+        working-directory: ${{ env.CLIENT_DIR }}
+        run: |
+          mkdir build && cd build
+          cmake .. \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
+            -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
+            -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
+            -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} \
+            -DOPENSSL_ROOT_DIR=${{ github.workspace }}/externals/macos/openssl \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_OS_VERSION }}
+          cmake --build . --config ${{ env.BUILD_TYPE }}
+
+      - name: Get version
+        shell: bash
+        run: |
+          echo "XPILOT_VERSION=$(cat xpilot.json | jq -r 'if .is_beta == true then "\(.version.major).\(.version.minor).\(.version.patch)-beta.\(.beta_number)" else "\(.version.major).\(.version.minor).\(.version.patch)" end')" >> $GITHUB_ENV
+
+      - name: Setup InstallBuilder
+        shell: bash
+        run: |
+          curl -k -L ${{ env.IB_URL }} --output ib.dmg
+          hdiutil attach ib.dmg
+          /Volumes/InstallBuilder\ Enterprise/*.app/Contents/MacOS/installbuilder.sh --mode unattended --prefix ../ib
+          ../ib/bin/builder --version
+          echo "$IB_LICENSE" > lic.xml
+          echo "CLIENT_BUILD_DIR=${{ env.CLIENT_DIR }}/build" >> $GITHUB_ENV
+          echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
+
+      - name: Create installer
+        shell: bash
+        run: |
+          ../ib/bin/builder build installer/macos.xml \
+              --license lic.xml \
+              --setvars project.outputDirectory=$(pwd) \
+              --setvars project.version=${{ env.XPILOT_VERSION }} \
+              --setvars apple_signing_identity=${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }} \
+              --setvars password=${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
+
+      - name: Rename Installer
+        shell: bash
+        run: |
+          mv xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
+
+      - name: Notarize installer
+        shell: bash
+        run: |
+          xcrun altool --notarize-app \
+          --primary-bundle-id "org.vatsim.xpilot" \
+          --username "${{ secrets.NOTARIZATION_USERNAME }}" \
+          --password "${{ secrets.NOTARIZATION_PASSWORD }}" \
+          --file xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip
+          path: |
+            xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg

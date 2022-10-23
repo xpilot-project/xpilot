@@ -15,7 +15,6 @@ set(Boost_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../externals/boost)
 
 if(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")
     set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
 endif()
 
