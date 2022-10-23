@@ -360,6 +360,7 @@ target_link_libraries(
     Qt${QT_MAJOR_VERSION}::Quick
     Qt${QT_MAJOR_VERSION}::Network
     Qt${QT_MAJOR_VERSION}::Svg
+    Qt${QT_MAJOR_VERSION}::qmlfolderlistmodelplugin
     ${LIB_OPUS}
     ${LIB_VATSIM_AUTH}
     ${LIB_EVENT}
