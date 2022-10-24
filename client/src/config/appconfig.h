@@ -114,7 +114,7 @@ namespace xpilot
         Q_PROPERTY(bool AlertDirectRadioMessage MEMBER AlertDirectRadioMessage NOTIFY alertDirectRadioMessageChanged)
         Q_PROPERTY(bool AlertSelcal MEMBER AlertSelcal NOTIFY alertSelcalChanged)
         Q_PROPERTY(bool AlertNetworkBroadcast MEMBER AlertNetworkBroadcast NOTIFY alertNetworkBroadcastChanged)
-        Q_PROPERTY(bool AlertDisconnect MEMBER AlertDisconnect NOTIFY alertDisconnectChanged);
+        Q_PROPERTY(bool AlertDisconnect MEMBER AlertDisconnect NOTIFY alertDisconnectChanged)
         Q_PROPERTY(bool SilenceModelInstall MEMBER SilenceModelInstall)
         Q_PROPERTY(QStringList VisualMachines MEMBER VisualMachines)
         Q_PROPERTY(QString XplaneNetworkAddress MEMBER XplaneNetworkAddress)
