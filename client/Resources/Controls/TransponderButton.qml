@@ -12,7 +12,7 @@ Button {
     font.pixelSize: 13
     anchors.verticalCenter: parent.verticalCenter
     anchors.verticalCenterOffset: 0
-    width: metrics.advanceWidth + 20
+    width: text.contentWidth
     height: 30
     x: 20
 
@@ -40,11 +40,5 @@ Button {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         renderType: Text.NativeRendering
-    }
-
-    TextMetrics {
-        id: metrics
-        font: label.font
-        text: label.text
     }
 }

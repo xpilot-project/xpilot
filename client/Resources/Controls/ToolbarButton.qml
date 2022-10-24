@@ -11,7 +11,7 @@ Button {
     font.pixelSize: 13
     anchors.verticalCenter: parent.verticalCenter
     anchors.verticalCenterOffset: 0
-    width: textMetrics.advanceWidth + 20
+    width: text.contentWidth
     height: 30
 
     property bool active: false
@@ -30,7 +30,6 @@ Button {
     }
 
     contentItem: Text {
-        id: label
         color: (active || enabled) ? "#ffffff" : "#6c757d"
         text: button.text.toUpperCase()
         font.pixelSize: button.font.pixelSize
@@ -41,11 +40,5 @@ Button {
         font.styleName: Font.Normal
         font.family: robotoMono.name
         renderType: Text.NativeRendering
-    }
-
-    TextMetrics {
-        id: textMetrics
-        font: label.font
-        text: label.text
     }
 }
