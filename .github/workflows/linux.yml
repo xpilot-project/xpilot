@@ -102,15 +102,17 @@ jobs:
         run: |
           chmod +x AppRun
           chmod +x xPilot.desktop
-          mkdir usr/bin -p
-          cp ${{ env.CLIENT_DIR }}/build/xPilot usr/bin
-          mv usr/bin/xPilot usr/bin/xpilot
+          cp ${{ env.CLIENT_DIR }}/build/xPilot .
+
+      - name: Install LinuxDeploy
+        uses: miurahr/install-linuxdeploy-action@v1
+        with:
+          plugins: appimage
+          dir: ${{ github.workspace }}
 
       - name: Build AppImage
         run: |
-          wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-          chmod +x *.AppImage
-          ./appimagetool-x86_64.AppImage --comp gzip "${{ env.CLIENT_DIR }}/xPilot.AppDir" -n
+          ./linuxdeploy-x86_64.AppImage --output appimage --appdir ${{ env.CLIENT_DIR }}/xPilot.AppDir --desktop-file ${{ env.CLIENT_DIR }}/xPilot.AppDir/xPilot.desktop --icon-file ${{ env.CLIENT_DIR }}/xPilot.AppDir/xPilot.png
           mkdir dist
           mv xPilot*.AppImage* dist/xPilot.AppImage
 
