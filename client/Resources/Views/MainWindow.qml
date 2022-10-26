@@ -165,7 +165,7 @@ Window {
         initialized = true;
     }
 
-    onClosing: (close) => {
+    onClosing: function(close) {
         close.accepted = !networkConnected
         onTriggered: if(networkConnected) confirmClose.open()
     }
@@ -1217,20 +1217,27 @@ Window {
                                                 createCslDownloadWindow()
                                                 cliTextField.clear()
                                             }
-                                            else {
-
-                                                if(!simConnected) {
-                                                    throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
+                                            else if(cliTextField.text.startsWith(".clear")) {
+                                                clearMessages(currentTab)
+                                                cliTextField.clear()
+                                            }
+                                            else if(cliTextField.text.startsWith(".copy")) {
+                                                var text = []
+                                                var model = cliModel.get(currentTab)
+                                                for(var i = 0; i < model.attributes.rowCount(); i++) {
+                                                    text.push(model.attributes.get(i).message)
                                                 }
-
+                                                clipboard.setText(text.join("\n"))
+                                                appendMessage("Messages copied to clipboard.", colorYellow, currentTab)
+                                                cliTextField.clear()
+                                            }
+                                            else {
                                                 if(cliTextField.text.startsWith(".")) {
-                                                    // radio messages
+                                                    if(!simConnected) {
+                                                        throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
+                                                    }
                                                     switch(cmd[0].toLowerCase())
                                                     {
-                                                    case ".clear":
-                                                        clearMessages(currentTab)
-                                                        cliTextField.clear()
-                                                        break;
                                                     case ".chat":
                                                         if(cmd.length < 2) {
                                                             throw "Not enough parameters. Expected .chat CALLSIGN"
@@ -1333,7 +1340,7 @@ Window {
                                                     case ".towerview":
                                                         if(!simConnected)
                                                         {
-                                                            throw "xPilot is unable to connect to X-Plane. Please make sure X-Plane is running and a flight is loaded."
+                                                            throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
                                                         }
                                                         if(networkConnected)
                                                         {
@@ -1379,6 +1386,9 @@ Window {
                                                         return; // skip empty message
                                                     }
                                                     if(currentTab == 0) {
+                                                        if(!simConnected) {
+                                                            throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
+                                                        }
                                                         if(!networkConnected) {
                                                             throw "Not connected to network."
                                                         }
@@ -1392,6 +1402,9 @@ Window {
                                                         cliTextField.clear()
                                                     }
                                                     else {
+                                                        if(!simConnected) {
+                                                            throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
+                                                        }
                                                         if(!networkConnected) {
                                                             appendPrivateMessage(currentTab, "Not connected to network.", "", colorRed)
                                                             errorSound.play()

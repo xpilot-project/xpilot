@@ -17,6 +17,7 @@
 #include "common/typecodedatabase.h"
 #include "common/installmodels.h"
 #include "common/runguard.h"
+#include "common/clipboardadapter.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -71,6 +72,7 @@ int xpilot::Main(int argc, char* argv[])
     QQmlApplicationEngine engine;
     QQmlContext *context = engine.rootContext();
 
+    ClipboardAdapter clipboardAdapter;
     ServerListManager serverListManager;
     VersionCheck versionCheck;
     TypeCodeDatabase typeCodeDatabase;
@@ -95,6 +97,7 @@ int xpilot::Main(int argc, char* argv[])
     qRegisterMetaType<AudioDeviceInfo>("AudioDeviceInfo");
     qRegisterMetaType<TypeCodeInfo>("TypeCodeInfo");
 
+    context->setContextProperty("clipboard", &clipboardAdapter);
     context->setContextProperty("networkManager", &networkManager);
     context->setContextProperty("xplaneAdapter", &xplaneAdapter);
     context->setContextProperty("controllerManager", &controllerManager);
