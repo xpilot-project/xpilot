@@ -16,6 +16,7 @@
     <osxApplicationBundleIdentifier>org.vatsim.xpilot</osxApplicationBundleIdentifier>
     <osxSigningIdentity>${apple_signing_identity}</osxSigningIdentity>
     <osxSigningKeychainFile>/Users/runner/Library/Keychains/Signing keychain-db</osxSigningKeychainFile>
+    <enableDebugger>1</enableDebugger>
     <functionDefinitionList>
         <actionDefinition>
             <name>IsXpilotRunning</name>

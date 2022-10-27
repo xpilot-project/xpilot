@@ -16,6 +16,7 @@
     <uninstallerName>Uninstall</uninstallerName>
     <windowsSoftwareRegistryPrefix>xPilot for VATSIM</windowsSoftwareRegistryPrefix>
     <windowsARPRegistryPrefix>xPilot for VATSIM</windowsARPRegistryPrefix>
+    <enableDebugger>1</enableDebugger>
     <functionDefinitionList>
         <actionDefinition>
             <name>IsXpilotRunning</name>

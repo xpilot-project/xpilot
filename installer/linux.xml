@@ -11,6 +11,7 @@
     <productDisplayName>xPilot</productDisplayName>
     <saveRelativePaths>1</saveRelativePaths>
     <vendor>xPilot for VATSIM</vendor>
+    <enableDebugger>1</enableDebugger>
     <functionDefinitionList>
         <actionDefinition>
             <name>IsXpilotRunning</name>

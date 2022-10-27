@@ -96,25 +96,13 @@ jobs:
             -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} \
             -DOPENSSL_ROOT_DIR=${{ github.workspace }}/externals/linux/openssl
           cmake --build . --config ${{ env.BUILD_TYPE }}
-
-      - name: Prepare AppImage
-        working-directory: ${{ env.CLIENT_DIR }}/xPilot.AppDir
-        run: |
-          chmod +x AppRun
-          chmod +x xPilot.desktop
-          cp ${{ env.CLIENT_DIR }}/build/xPilot .
-
-      - name: Install LinuxDeploy
-        uses: miurahr/install-linuxdeploy-action@v1
-        with:
-          plugins: appimage
-          dir: ${{ github.workspace }}
+          mv ${{ env.CLIENT_DIR }}/build/xPilot ${{ env.CLIENT_DIR }}/build/xpilot
 
       - name: Build AppImage
+        working-directory: ${{ env.CLIENT_DIR }}
         run: |
-          ./linuxdeploy-x86_64.AppImage --output appimage --appdir ${{ env.CLIENT_DIR }}/xPilot.AppDir --desktop-file ${{ env.CLIENT_DIR }}/xPilot.AppDir/xPilot.desktop --icon-file ${{ env.CLIENT_DIR }}/xPilot.AppDir/xPilot.png
-          mkdir dist
-          mv xPilot*.AppImage* dist/xPilot.AppImage
+          chmod +x ../scripts/appimage.sh
+          ../scripts/appimage.sh
 
       - name: Get version
         run: |
@@ -144,7 +132,7 @@ jobs:
           chmod +x xPilot-${{ env.XPILOT_VERSION }}-Linux.run
 
       - name: Upload installer artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: xPilot-${{ env.XPILOT_VERSION }}-Linux.zip
           path: |
