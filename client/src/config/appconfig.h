@@ -138,7 +138,7 @@ namespace xpilot
         SimpleCrypt crypto;
         QString VatsimPassword;
 
-        int DefaultWidth = 800;
+        int DefaultWidth = 840;
         int DefaultHeight = 250;
     };
 }
