@@ -30,27 +30,68 @@ InstallModels::~InstallModels()
 
 }
 
-QtPromise::QPromise<QString> InstallModels::ValidateToken(const QString &url, const QString& vatsimId, const QString &token)
+QtPromise::QPromise<QString> InstallModels::GetAuthToken()
 {
     return QtPromise::QPromise<QString>{[&](const auto resolve, const auto reject)
         {
-            QNetworkRequest networkRequest(url);
-            networkRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, true);
-            networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-
             QJsonObject obj;
-            obj["id"] = vatsimId;
-            obj["token"] = token;
+            obj["cid"] = AppConfig::getInstance()->VatsimId;
+            obj["password"] = AppConfig::getInstance()->VatsimPasswordDecrypted;
             QJsonDocument doc(obj);
+            QByteArray data = doc.toJson();
 
-            m_reply = nam->post(networkRequest, doc.toJson());
+            const QUrl url(QStringLiteral("https://auth.vatsim.net/api/fsd-jwt"));
+            QNetworkRequest request(url);
+            request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+            m_reply = nam->post(request, data);
+
             QObject::connect(m_reply, &QNetworkReply::finished, [=]{
                 if(m_reply->error() == QNetworkReply::NoError) {
                     QJsonDocument jsonResponse = QJsonDocument::fromJson(m_reply->readAll());
                     QJsonObject jsonObject = jsonResponse.object();
 
-                    if(jsonObject.contains("status") && jsonObject["status"] == "error") {
-                        emit tokenValidationError(jsonObject["error"].toString());
+                    if(jsonObject.contains("success") && jsonObject["success"] == false) {
+                        QString error = jsonObject["error_msg"].toString();
+                        if(error == "Password is Incorrect") {
+                            emit errorEncountered("CSL Model Set Download Error: Your VATSIM password or ID is incorrect. Open the Settings and confirm your VATSIM ID and Password are correct.");
+                        }
+                        else {
+                            emit errorEncountered(error);
+                        }
+                    }
+                    else {
+                        QString token = jsonObject["token"].toString();
+                        resolve(token);
+                    }
+                }
+                m_reply->deleteLater();
+            });
+        }};
+}
+
+QtPromise::QPromise<QString> InstallModels::ValidateAuthToken(const QString &token)
+{
+    return QtPromise::QPromise<QString>{[&](const auto resolve, const auto reject)
+        {
+            QJsonObject obj;
+            obj["token"] = token;
+            QJsonDocument doc(obj);
+            QByteArray data = doc.toJson();
+
+            const QUrl url(QStringLiteral("https://xpilot-project.org/api/v3/DownloadModelSet"));
+            QNetworkRequest request(url);
+            request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+            m_reply = nam->post(request, data);
+
+            QObject::connect(m_reply, &QNetworkReply::finished, [=]{
+                if(m_reply->error() == QNetworkReply::NoError) {
+                    QJsonDocument jsonResponse = QJsonDocument::fromJson(m_reply->readAll());
+                    QJsonObject jsonObject = jsonResponse.object();
+
+                    if(jsonObject.contains("success") && jsonObject["success"] == false) {
+                        emit errorEncountered(jsonObject["error_msg"].toString());
                     }
                     else {
                         QString downloadUrl = jsonObject["download_url"].toString();
@@ -242,25 +283,24 @@ void InstallModels::DeleteTempDownload()
     }
 }
 
-void InstallModels::checkIfZipExists()
+void InstallModels::downloadModels()
 {
     QString tempPath = QDir::fromNativeSeparators(AppConfig::dataRoot());
-    if(QFile::exists(pathAppend(tempPath, "Bluebell.zip")))
-    {
+    if(QFile::exists(pathAppend(tempPath, "Bluebell.zip"))) {
         // zip already exists, don't download again
         emit setXplanePath();
     }
-}
-
-void InstallModels::downloadModels(QString token, QString vatsimId)
-{
-    ValidateToken("https://xpilot-project.org/ValidateCdnAuth", vatsimId, token).then([&](const QString& url){
-        DownloadModels(url).then([&]{
-            emit setXplanePath();
-        }).fail([&](const QString& err){
-            errorEncountered("Download error: " + err);
+    else {
+        GetAuthToken().then([&](const QString& token){
+            ValidateAuthToken(token).then([&](const QString& url) {
+                DownloadModels(url).then([&]{
+                    emit setXplanePath();
+                }).fail([&](const QString& err){
+                    errorEncountered("Download error: " + err);
+                });
+            });
         });
-    });
+    }
 }
 
 void InstallModels::validatePath(QString path)
@@ -270,7 +310,8 @@ void InstallModels::validatePath(QString path)
     QString localPath = QUrl(QDir::fromNativeSeparators(path)).toLocalFile();
     QDir xplanePath(localPath);
 
-    // instead of checking if the directory is readable (because that's not a reliable method according to the qt docs), create a temporary file to verify permissions instead
+    // instead of checking if the directory is readable (because that's not a reliable method according to the qt docs),
+    // create a temporary file to verify permissions instead
     QTemporaryFile temp(xplanePath.path() + "/");
     if(!temp.open()) {
         emit invalidXplanePath("The X-Plane folder is not readable. Verify the folder permissions and try again.");
@@ -307,7 +348,8 @@ void InstallModels::validatePath(QString path)
 
     QDir xpilotPath(pathAppend(xplanePath.path(), "Resources/plugins/xPilot"));
 
-    // instead of checking if the directory is readable (because that's not a reliable method according to the qt docs), create a temporary file to verify permissions instead
+    // instead of checking if the directory is readable (because that's not a reliable method according to the qt docs),
+    // create a temporary file to verify permissions instead
     QTemporaryFile temp2(xpilotPath.path() + "/");
     if(!temp2.open()) {
         QString err("The xPilot plugin resources folder (%1) is not readable. Verify the folder permissions and try again.");

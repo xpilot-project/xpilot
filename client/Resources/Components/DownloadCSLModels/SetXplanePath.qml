@@ -10,7 +10,7 @@ import "../../Controls"
 Popup {
         id: popup
         width: 600
-        height: 200
+        height: 180
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
         modal: true
@@ -49,7 +49,7 @@ Popup {
             font.pixelSize: 14
             anchors.left: lblXplanePath.right
             anchors.leftMargin: 10
-            y: 25
+            y: 23
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
@@ -78,7 +78,7 @@ Popup {
             font.pixelSize: 14
             renderType: Text.NativeRendering
             wrapMode: Text.WordWrap
-            width: 480
+            width: 500
         }
 
         BlueButton {
@@ -87,9 +87,10 @@ Popup {
             width: 80
             height: 30
             font.pixelSize: 14
-            anchors.topMargin: 25
-            anchors.top: xplanePathUrl.bottom
-            anchors.left: xplanePathUrl.left
+            anchors.bottomMargin: 10
+            anchors.leftMargin: 20
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
@@ -105,10 +106,10 @@ Popup {
             width: 80
             height: 30
             font.pixelSize: 14
-            anchors.topMargin: 25
-            anchors.top: xplanePathUrl.bottom
-            anchors.left: xplanePathBtnOk.right
+            anchors.bottomMargin: 10
             anchors.leftMargin: 10
+            anchors.bottom: parent.bottom
+            anchors.left: xplanePathBtnOk.right
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor

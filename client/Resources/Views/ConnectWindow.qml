@@ -21,8 +21,6 @@ Popup {
         border.color: "black"
     }
 
-    signal closeWindow()
-
     function trimLineBreaks(value) {
         return value.replace(/[\n\r]/g, "")
     }
@@ -74,7 +72,7 @@ Popup {
         AppConfig.RecentConnection.TypeCode = trimLineBreaks(txtTypeCode.text);
         AppConfig.RecentConnection.SelcalCode = trimLineBreaks(txtSelcal.text);
         AppConfig.saveConfig();
-        closeWindow()
+        close()
     }
 
     ListModel {
@@ -420,7 +418,7 @@ Popup {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        closeWindow()
+                        close()
                     }
                 }
             }

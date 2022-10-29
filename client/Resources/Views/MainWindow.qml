@@ -29,17 +29,16 @@ Window {
     x: Screen.width / 2 - width / 2
     y: Screen.height / 2 - height / 2
 
-    property QtObject connectWindow
-    property QtObject settingsWindow
     property QtObject downloadCslWindow // csl install
     property QtObject setXplanePathWindow // csl install
     property QtObject extractCslModelsWindow // csl install
-    property int currentTab
+
+    property int activeMessageTab
+    property string myCallsign
+    property var radioStackState
     property bool networkConnected: false
-    property string ourCallsign: ""
     property bool initialized: false
     property bool simConnected: false
-    property var radioStackState
 
     property string colorGreen: "#85a664"
     property string colorOrange: "#ffa500"
@@ -96,11 +95,11 @@ Window {
     }
 
     NewVersionAvailable {
-        id: modal_newVersionAvailable
+        id: newVersionAvailableDialog
     }
 
     DownloadingUpdate {
-        id: modal_downlodingUpdate;
+        id: downloadingUpdateDialog;
     }
 
     DisconnectDialog {
@@ -109,7 +108,19 @@ Window {
     }
 
     MicrophoneCalibrationRequired {
-        id: microphoneCalibrationRequired
+        id: micCalibrationRequiredDialog
+    }
+
+    ConfigRequiredDialog {
+        id: configRequiredDialog
+    }
+
+    SettingsWindow {
+        id: settingsWindowDialog
+    }
+
+    ConnectWindow {
+        id: connectWindowDialog
     }
 
     Connections {
@@ -145,7 +156,10 @@ Window {
             appendMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.", colorYellow)
         }
 
-        if(!AppConfig.SilenceModelInstall) {
+        if(AppConfig.configRequired()) {
+            configRequiredDialog.open()
+        }
+        else if(!AppConfig.SilenceModelInstall) {
             createCslDownloadWindow()
         }
 
@@ -235,11 +249,11 @@ Window {
         target: versionCheck
 
         function onNewVersionAvailable() {
-            modal_newVersionAvailable.open()
+            newVersionAvailableDialog.open()
         }
 
         function onDownloadStarted() {
-            modal_downlodingUpdate.open()
+            downloadingUpdateDialog.open()
         }
 
         function onNoUpdatesAvailable() {
@@ -276,7 +290,7 @@ Window {
 
         function onUnzipFinished() {
             extractCslModelsWindow.destroy()
-            appendMessage("CSL aircraft model package successfully installed! Please restart xPilot and X-Plane before connecting to the network.", colorYellow);
+            appendMessage("CSL aircraft model package successfully installed! Please restart xPilot and X-Plane before connecting to the network. If you need to install the model set for another X-Plane installation, enter the command .downloadcsl", colorYellow);
             AppConfig.SilenceModelInstall = true
         }
 
@@ -315,20 +329,6 @@ Window {
         target: extractCslModelsWindow
         function onCloseWindow() {
             extractCslModelsWindow.destroy()
-        }
-    }
-
-    Connections {
-        target: connectWindow
-        function onCloseWindow() {
-            connectWindow.destroy()
-        }
-    }
-
-    Connections {
-        target: settingsWindow
-        function onCloseWindow() {
-            settingsWindow.destroy()
         }
     }
 
@@ -449,11 +449,11 @@ Window {
         target: networkManager
 
         function onMicrophoneCalibrationRequired() {
-            microphoneCalibrationRequired.open()
+            micCalibrationRequiredDialog.open()
         }
 
         function onNetworkConnected(callsign) {
-            ourCallsign = callsign
+            myCallsign = callsign
             networkConnected = true;
         }
 
@@ -541,7 +541,7 @@ Window {
                 }
             }
             else {
-                if(currentTab !== tab) {
+                if(activeMessageTab !== tab) {
                     markTabUnread(from)
                 }
                 appendPrivateMessage(tab, message, from, colorWhite)
@@ -555,12 +555,12 @@ Window {
         function onPrivateMessageSent(to, message) {
             var tab = getChatTabIndex(to)
             if(tab !== null) {
-                appendPrivateMessage(tab, message, ourCallsign, colorCyan)
+                appendPrivateMessage(tab, message, myCallsign, colorCyan)
             }
             else {
                 createChatTab(to)
                 tab = getChatTabIndex(to)
-                appendPrivateMessage(tab, message, ourCallsign, colorCyan)
+                appendPrivateMessage(tab, message, myCallsign, colorCyan)
             }
         }
 
@@ -749,7 +749,7 @@ Window {
         var idx = getChatTabIndex(callsign)
         cliModel.append({tabName: callsign.toLowerCase(), tabId: idx, attributes: [], realName: false})
         tabListView.currentIndex = idx
-        currentTab = idx
+        activeMessageTab = idx
         networkManager.requestRealName(callsign)
     }
 
@@ -760,7 +760,7 @@ Window {
         }
         else {
             tabListView.currentIndex = idx
-            currentTab = idx
+            activeMessageTab = idx
         }
     }
 
@@ -982,7 +982,7 @@ Window {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 view.currentIndex = 0
-                                currentTab = 0
+                                activeMessageTab = 0
                                 cliModel.remove(itemIndex)
                                 tabModel.remove(itemIndex)
 
@@ -999,7 +999,7 @@ Window {
                         anchors.fill: parent
                         onClicked: {
                             hasUnread = false
-                            currentTab = itemIndex
+                            activeMessageTab = itemIndex
                             view.currentIndex = itemIndex
                         }
                         cursorShape: Qt.PointingHandCursor
@@ -1065,7 +1065,7 @@ Window {
                                 topPadding: 5
                                 rightPadding: 10
                                 bottomPadding: 5
-                                visible: tabId === currentTab
+                                visible: tabId === activeMessageTab
 
                                 onFocusChanged: {
                                     cliTextField.forceActiveFocus()
@@ -1132,7 +1132,7 @@ Window {
                                 Layout.fillHeight: true
                                 Layout.fillWidth: true
                                 selectByMouse: true
-                                visible: tabId === currentTab
+                                visible: tabId === activeMessageTab
 
                                 property var commandHistory: []
                                 property int historyIndex: -1
@@ -1188,12 +1188,12 @@ Window {
                                                 if(cmd.length > 1) {
                                                     AppConfig.XplaneNetworkAddress = cmd[1]
                                                     AppConfig.saveConfig()
-                                                    appendMessage(`X-Plane network address set to ${AppConfig.XplaneNetworkAddress}. You must restart xPilot for the changes to take effect.`, colorYellow, currentTab)
+                                                    appendMessage(`X-Plane network address set to ${AppConfig.XplaneNetworkAddress}. You must restart xPilot for the changes to take effect.`, colorYellow, activeMessageTab)
                                                 }
                                                 else {
                                                     AppConfig.XplaneNetworkAddress = "127.0.0.1"
                                                     AppConfig.saveConfig()
-                                                    appendMessage("X-Plane network address reset to localhost (127.0.0.1). You must restart xPilot for the changes to take effect.", colorYellow, currentTab)
+                                                    appendMessage("X-Plane network address reset to localhost (127.0.0.1). You must restart xPilot for the changes to take effect.", colorYellow, activeMessageTab)
                                                 }
                                                 cliTextField.clear()
                                             }
@@ -1201,7 +1201,7 @@ Window {
                                                 if(cmd.length < 2) {
                                                     AppConfig.VisualMachines = []
                                                     AppConfig.saveConfig()
-                                                    appendMessage("X-Plane visual machine addresses cleared. You must restart xPilot for the changes to take effect.", colorYellow, currentTab);
+                                                    appendMessage("X-Plane visual machine addresses cleared. You must restart xPilot for the changes to take effect.", colorYellow, activeMessageTab);
                                                 }
                                                 else {
                                                     AppConfig.VisualMachines = []
@@ -1209,26 +1209,31 @@ Window {
                                                         AppConfig.VisualMachines.push(cmd[x])
                                                     }
                                                     AppConfig.saveConfig()
-                                                    appendMessage(`X-Plane visual machine(s) set to ${AppConfig.VisualMachines.join(", ")}. You must restart xPilot for the changes to take effect.`, colorYellow, currentTab)
+                                                    appendMessage(`X-Plane visual machine(s) set to ${AppConfig.VisualMachines.join(", ")}. You must restart xPilot for the changes to take effect.`, colorYellow, activeMessageTab)
                                                 }
                                                 cliTextField.clear()
                                             }
                                             else if(cliTextField.text.startsWith(".downloadcsl")) {
-                                                createCslDownloadWindow()
+                                                if(AppConfig.configRequired()) {
+                                                    appendMessage("Before you can install the CSL model set, you must configure xPilot. Open the Settings window to configure xPilot.", colorRed, activeMessageTab)
+                                                }
+                                                else {
+                                                    createCslDownloadWindow()
+                                                }
                                                 cliTextField.clear()
                                             }
                                             else if(cliTextField.text.startsWith(".clear")) {
-                                                clearMessages(currentTab)
+                                                clearMessages(activeMessageTab)
                                                 cliTextField.clear()
                                             }
                                             else if(cliTextField.text.startsWith(".copy")) {
                                                 var text = []
-                                                var model = cliModel.get(currentTab)
+                                                var model = cliModel.get(activeMessageTab)
                                                 for(var i = 0; i < model.attributes.rowCount(); i++) {
                                                     text.push(model.attributes.get(i).message)
                                                 }
                                                 clipboard.setText(text.join("\n"))
-                                                appendMessage("Messages copied to clipboard.", colorYellow, currentTab)
+                                                appendMessage("Messages copied to clipboard.", colorYellow, activeMessageTab)
                                                 cliTextField.clear()
                                             }
                                             else {
@@ -1385,7 +1390,7 @@ Window {
                                                     if(!cliTextField.text || /^\s*$/.test(cliTextField.text)) {
                                                         return; // skip empty message
                                                     }
-                                                    if(currentTab == 0) {
+                                                    if(activeMessageTab == 0) {
                                                         if(!simConnected) {
                                                             throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
                                                         }
@@ -1396,7 +1401,7 @@ Window {
                                                         appendMessage(cliTextField.text, colorCyan)
                                                         cliTextField.clear()
                                                     }
-                                                    else if(currentTab == 1) {
+                                                    else if(activeMessageTab == 1) {
                                                         // notes
                                                         appendNote(cliTextField.text)
                                                         cliTextField.clear()
@@ -1406,11 +1411,11 @@ Window {
                                                             throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
                                                         }
                                                         if(!networkConnected) {
-                                                            appendPrivateMessage(currentTab, "Not connected to network.", "", colorRed)
+                                                            appendPrivateMessage(activeMessageTab, "Not connected to network.", "", colorRed)
                                                             errorSound.play()
                                                         }
                                                         else {
-                                                            var callsign = tabModel.get(currentTab).title;
+                                                            var callsign = tabModel.get(activeMessageTab).title;
                                                             networkManager.sendPrivateMessage(callsign, cliTextField.text)
                                                             cliTextField.clear()
                                                         }
@@ -1419,7 +1424,7 @@ Window {
                                             }
                                         }
                                         catch(err) {
-                                            appendMessage(err, colorRed, currentTab)
+                                            appendMessage(err, colorRed, activeMessageTab)
                                             cliTextField.clear()
                                         }
                                     }

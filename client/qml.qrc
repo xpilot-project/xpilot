@@ -43,5 +43,6 @@
         <file>Resources/Components/DisconnectDialog.qml</file>
         <file>Resources/Components/InvalidTypeCodeDialog.qml</file>
         <file>Resources/Components/MicrophoneCalibrationRequired.qml</file>
+        <file>Resources/Components/ConfigRequiredDialog.qml</file>
     </qresource>
 </RCC>

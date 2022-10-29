@@ -35,7 +35,7 @@ namespace xpilot
 
         Q_INVOKABLE bool saveConfig();
         Q_INVOKABLE void loadConfig();
-        bool configRequired();
+        Q_INVOKABLE bool configRequired();
         QString getNetworkServer();
 
         QString VatsimId;

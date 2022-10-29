@@ -9,7 +9,7 @@ import "../../Controls"
 Popup {
     id: popup
     width: 650
-    height: 220
+    height: 200
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
     modal: true
@@ -24,6 +24,15 @@ Popup {
 
     property double pctProgress: 0
 
+    Component.onCompleted: {
+        labelDownloading.visible = false
+        progressBar.visible = false
+        labelPercent.visible = false
+        btnCancelDownload.visible = false
+        labelAskDownload.visible = true
+        tokenValidationError.visible = false
+    }
+
     Connections {
         target: installModels
 
@@ -37,16 +46,7 @@ Popup {
             progressBar.visible = true
             labelPercent.visible = true
             btnCancelDownload.visible = true
-
             labelAskDownload.visible = false
-            labelToken.visible = false
-            labelDownloadToken.visible = false
-            labelDownloadTokenId.visible = false
-            downloadTokenId.visible = false
-            downloadToken.visible = false
-            btnBeginDownload.visible = false
-            btnGetToken.visible = false
-            btnCancelToken.visible = false
             tokenValidationError.visible = false
         }
     }
@@ -78,16 +78,11 @@ Popup {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: {
-                installModels.checkIfZipExists()
-
+                installModels.downloadModels()
                 btnNo.visible = false
                 btnYes.visible = false
                 labelAskDownload.visible = false
                 chkDontAskAgainModels.visible = false
-
-                btnGetToken.visible = true
-                btnCancelToken.visible = true
-                labelToken.visible = true
             }
         }
     }
@@ -152,150 +147,7 @@ Popup {
         }
     }
 
-    // Verify Identity
-
-    Text {
-        id: labelToken
-        text: "Before you can install the CSL model package, you must authenticate yourself using your VATSIM credentials. Click the \"Get Token\" button below to generate a download token. Your internet browser will open to a website with your download token."
-        visible: false
-        font.pixelSize: 14
-        renderType: Text.NativeRendering
-        width: 600
-        wrapMode: Text.Wrap
-        x: 15
-        y: 10
-    }
-
-    Label {
-        id: labelDownloadToken
-        color: "#333333"
-        text: "Token"
-        visible: false
-        renderType: Text.NativeRendering
-        font.pixelSize: 13
-        anchors.top: labelToken.bottom
-        anchors.topMargin: 15
-        x: 15
-    }
-
-    Item {
-        id: downloadToken
-        visible: false
-        anchors.top: labelDownloadToken.bottom
-        anchors.topMargin: 5
-        x: 15
-        width: 100
-
-        CustomTextField {
-            id: txtDownloadToken
-            maximumLength: 6
-            validator: RegularExpressionValidator {
-                regularExpression: /[0-9]+/
-            }
-        }
-    }
-
-    Label {
-        id: labelDownloadTokenId
-        color: "#333333"
-        text: "VATSIM ID"
-        visible: false
-        renderType: Text.NativeRendering
-        font.pixelSize: 13
-        anchors.top: labelToken.bottom
-        anchors.left: downloadToken.right
-        anchors.leftMargin: 10
-        anchors.topMargin: 15
-        x: 15
-    }
-
-    Item {
-        id: downloadTokenId
-        visible: false
-        anchors.left: downloadToken.right
-        anchors.top: labelDownloadTokenId.bottom
-        anchors.topMargin: 5
-        anchors.leftMargin: 10
-        x: 15
-        width: 100
-
-        CustomTextField {
-            id: txtDownloadTokenId
-            maximumLength: 8
-            validator: RegularExpressionValidator {
-                regularExpression: /[0-9]+/
-            }
-        }
-    }
-
-    BlueButton {
-        id: btnGetToken
-        visible: false
-        text: "Get Token"
-        width: 130
-        height: 30
-        font.pixelSize: 14
-        anchors.topMargin: 40
-        anchors.left: labelToken.left
-        anchors.top: labelToken.bottom
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                Qt.openUrlExternally("https://xpilot-project.org/CdnAuth")
-
-                btnGetToken.visible = false
-                btnBeginDownload.visible = true
-
-                labelDownloadToken.visible = true
-                downloadToken.visible = true
-
-                if(!AppConfig.VatsimId) {
-                    downloadTokenId.visible = true
-                    labelDownloadTokenId.visible = true
-                }
-            }
-        }
-    }
-
-    BlueButton {
-        id: btnBeginDownload
-        visible: false
-        text: "Begin Download"
-        width: 130
-        height: 30
-        font.pixelSize: 14
-        anchors.leftMargin: 20
-        anchors.left: downloadTokenId.visible ? downloadTokenId.right : downloadToken.right
-        anchors.top: downloadTokenId.visible ? downloadTokenId.top : downloadToken.top
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                installModels.downloadModels(txtDownloadToken.text, AppConfig.VatsimId || txtDownloadTokenId.text)
-            }
-        }
-    }
-
-    GrayButton {
-        id: btnCancelToken
-        visible: false
-        text: "Cancel"
-        width: 80
-        height: 30
-        font.pixelSize: 14
-        anchors.leftMargin: 15
-        anchors.left: btnBeginDownload.visible ? btnBeginDownload.right : btnGetToken.right
-        anchors.top: downloadToken.visible ? downloadToken.top : btnGetToken.top
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                installModels.cancel()
-                closeWindow()
-            }
-        }
-    }
+    // Downloading
 
     Label {
         id: tokenValidationError
@@ -304,13 +156,9 @@ Popup {
         color: '#D50005'
         renderType: Text.NativeRendering
         wrapMode: Text.WordWrap
-        anchors.top: downloadToken.bottom
-        anchors.topMargin: 50
+        anchors.top: chkDontAskAgainModels.bottom
         x: 15
     }
-
-
-    // Downloading
 
     Label {
         id: labelDownloading

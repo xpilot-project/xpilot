@@ -135,6 +135,7 @@ void AppConfig::loadConfig()
     MicrophoneCalibrated = jsonMap["MicrophoneCalibrated"].toBool();
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
+    CachedServers.clear();
     for(const auto & value : cachedServers) {
         QJsonObject item = value.toObject();
         NetworkServerInfo server;
@@ -270,7 +271,7 @@ bool AppConfig::saveConfig()
 
 bool AppConfig::configRequired()
 {
-    return VatsimId.isEmpty() || VatsimPasswordDecrypted.isEmpty() || Name.isEmpty();
+    return VatsimId.isEmpty() || VatsimPasswordDecrypted.isEmpty() || Name.isEmpty() || ServerName.isEmpty();
 }
 
 QString AppConfig::getNetworkServer()

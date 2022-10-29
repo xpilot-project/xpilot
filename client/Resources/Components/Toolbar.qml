@@ -3,6 +3,7 @@ import QtQuick.Window
 import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Controls.Basic
+import AppConfig 1.0
 import "../Controls"
 
 GridLayout {
@@ -12,7 +13,7 @@ GridLayout {
     property bool simConnected: false
     property bool networkConnected: false
     property string myCallsign: ""
-    property bool connectWindowOpen: false
+    property bool showAfterModelDownloadDialog: false
 
     Connections {
         target: xplaneAdapter
@@ -45,9 +46,12 @@ GridLayout {
     }
 
     Connections {
-        target: connectWindow
+        target: downloadCslWindow
         function onCloseWindow() {
-            connectWindowOpen = false;
+            if(showAfterModelDownloadDialog) {
+                connectWindowDialog.open()
+                showAfterModelDownloadDialog = false
+            }
         }
     }
 
@@ -65,18 +69,24 @@ GridLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    if(connectWindowOpen) {
+                    if(connectWindowDialog.visible) {
                         return
                     }
                     if(networkConnected) {
                         networkManager.disconnectFromNetwork();
                     }
                     else {
-                        var comp = Qt.createComponent("qrc:/Resources/Views/ConnectWindow.qml")
-                        if(comp.status === Component.Ready) {
-                            connectWindow = comp.createObject(mainWindow)
-                            connectWindow.open()
-                            connectWindowOpen = true
+                        if(AppConfig.configRequired()) {
+                            configRequiredDialog.open()
+                        }
+                        else {
+                            if(!AppConfig.SilenceModelInstall) {
+                                createCslDownloadWindow()
+                                showAfterModelDownloadDialog = true
+                            }
+                            else {
+                                connectWindowDialog.open()
+                            }
                         }
                     }
                 }
@@ -130,11 +140,7 @@ GridLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    var comp = Qt.createComponent("qrc:/Resources/Views/SettingsWindow.qml")
-                    if(comp.status === Component.Ready) {
-                        mainWindow.settingsWindow = comp.createObject(mainWindow)
-                        mainWindow.settingsWindow.show()
-                    }
+                    settingsWindowDialog.show()
                 }
             }
         }
