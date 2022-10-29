@@ -16,11 +16,11 @@ env:
   IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
 
 jobs:
-  build-macos:
+  build:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -129,7 +129,7 @@ jobs:
           --file xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
 
       - name: Upload installer artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip
           path: |

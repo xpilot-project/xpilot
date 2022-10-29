@@ -15,7 +15,7 @@ env:
   IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
 
 jobs:
-  build-linux:
+  build:
     runs-on: ubuntu-20.04
 
     steps:
@@ -32,7 +32,7 @@ jobs:
           gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl \
           gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 

@@ -15,11 +15,11 @@ env:
   IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
 
 jobs:
-  build-windows:
+  build:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -102,7 +102,7 @@ jobs:
           mv xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe xPilot-${{ env.XPILOT_VERSION }}-Windows.exe
 
       - name: Upload installer artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: xPilot-${{ env.XPILOT_VERSION }}-Windows.zip
           path: |
