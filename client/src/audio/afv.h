@@ -114,6 +114,10 @@ namespace xpilot
         bool m_com1Rx = false;
         bool m_com2Rx = false;
 
+        bool m_voiceTransmitDisabled = false;
+        void EnableVoiceTransmit();
+        void DisableVoiceTransmit();
+
         RadioStackState m_radioStackState;
         UserAircraftData m_userAircraftData;
 

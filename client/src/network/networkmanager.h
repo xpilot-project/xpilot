@@ -68,6 +68,7 @@ namespace xpilot
         void metarReceived(QString from, QString metar);
         void controllerDeleted(QString from);
         void pilotDeleted(QString from);
+        void disableVoiceTransmit();
         void serverMessageReceived(QString message);
         void privateMessageReceived(QString from, QString message);
         void privateMessageSent(QString from, QString message);

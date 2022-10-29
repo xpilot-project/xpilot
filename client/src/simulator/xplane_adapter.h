@@ -75,10 +75,10 @@ public:
     void PrivateMessageReceived(const QString from, const QString message);
     void NetworkConnected(QString callsign, QString selcal);
     void NetworkDisconnected();
-
-    int XplaneVersion() const { return m_xplaneVersion; }
-
     void SetStationCallsign(int com, QString callsign);
+    void DisableVoiceTransmit() { m_voiceTransmitDisabled = true; }
+    void EnableVoiceTransmit() { m_voiceTransmitDisabled = false; }
+    int XplaneVersion() const { return m_xplaneVersion; }
 
 private:
     void SubscribeDataRefs();
@@ -130,6 +130,7 @@ private:
     bool m_cslValidated = false;
     bool m_validCsl = true;
     bool m_simPaused = false;
+    bool m_voiceTransmitDisabled = false;
 
     UserAircraftData m_userAircraftData{};
     UserAircraftConfigData m_userAircraftConfigData{};

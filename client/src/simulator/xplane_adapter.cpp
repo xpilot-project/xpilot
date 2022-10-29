@@ -622,7 +622,7 @@ void XplaneAdapter::OnDataReceived()
                     }
                     break;
                 case DataRef::PushToTalk:
-                    (value > 0) ? emit pttPressed() : emit pttReleased();
+                    (value > 0 && !m_voiceTransmitDisabled) ? pttPressed() : pttReleased();
                     break;
                 case DataRef::SelcalMuteOverride:
                     m_radioStackState.SelcalMuteOverride = value > 0;

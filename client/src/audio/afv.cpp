@@ -161,6 +161,9 @@ namespace xpilot
         });
         connect(&m_networkManager, &NetworkManager::networkConnected, this, &AudioForVatsim::OnNetworkConnected);
         connect(&m_networkManager, &NetworkManager::networkDisconnected, this, &AudioForVatsim::OnNetworkDisconnected);
+        connect(&m_networkManager, &NetworkManager::disableVoiceTransmit, this, [&] {
+            DisableVoiceTransmit();
+        });
         connect(&m_xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, [&](RadioStackState state){
             if(state != m_radioStackState) {
                 m_radioStackState = state;
@@ -186,7 +189,12 @@ namespace xpilot
             }
         });
         connect(&m_xplaneAdapter, &XplaneAdapter::pttPressed, this, [&]{
-            m_client->setPtt(true);
+            if(m_voiceTransmitDisabled) {
+                m_client->setPtt(false);
+            }
+            else {
+                m_client->setPtt(true);
+            }
         });
         connect(&m_xplaneAdapter, &XplaneAdapter::pttReleased, this, [&]{
             m_client->setPtt(false);
@@ -339,6 +347,7 @@ namespace xpilot
         m_client->connect();
         m_transceiverTimer.start();
         m_rxTxQueryTimer.start();
+        m_xplaneAdapter.EnableVoiceTransmit();
     }
 
     void AudioForVatsim::OnNetworkDisconnected()
@@ -349,6 +358,7 @@ namespace xpilot
         m_client->disconnect();
         m_transceiverTimer.stop();
         m_rxTxQueryTimer.stop();
+        m_xplaneAdapter.EnableVoiceTransmit();
     }
 
     void AudioForVatsim::OnTransceiverTimer()
@@ -451,6 +461,18 @@ namespace xpilot
                                 m_radioStackState.AvionicsPowerOn ? (com2Alias > 0 ? com2Alias : m_radioStackState.Com2Frequency * 1000) : 0);
         m_client->setClientPosition(m_userAircraftData.Latitude, m_userAircraftData.Longitude, m_userAircraftData.AltitudeMslM,
                                     m_userAircraftData.AltitudeAglM);
+    }
+
+    void AudioForVatsim::EnableVoiceTransmit()
+    {
+        m_voiceTransmitDisabled = false;
+        m_xplaneAdapter.EnableVoiceTransmit();
+    }
+
+    void AudioForVatsim::DisableVoiceTransmit()
+    {
+        m_voiceTransmitDisabled = true;
+        m_xplaneAdapter.DisableVoiceTransmit();
     }
 
     void AudioForVatsim::setMicrophoneVolume(int volume)

@@ -393,6 +393,9 @@ namespace xpilot
 
     void NetworkManager::OnDeletePilotReceived(PDUDeletePilot pdu)
     {
+        if(pdu.From.toUpper() == m_connectInfo.Callsign.toUpper()) {
+            emit disableVoiceTransmit(); // disables AFV voice transmit
+        }
         emit pilotDeleted(pdu.From.toUpper());
     }
 
