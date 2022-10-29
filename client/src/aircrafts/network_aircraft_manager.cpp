@@ -2,10 +2,10 @@
 
 namespace xpilot
 {
-    AircraftManager::AircraftManager(NetworkManager &networkManager, XplaneAdapter &xplaneAdapter, QObject *parent) :
+    AircraftManager::AircraftManager(QObject *parent) :
         QObject(parent),
-        m_networkManager(networkManager),
-        m_xplaneAdapter(xplaneAdapter)
+        m_networkManager(*QInjection::Pointer<NetworkManager>().data()),
+        m_xplaneAdapter(*QInjection::Pointer<XplaneAdapter>().data())
     {
         InitializeTimers();
 

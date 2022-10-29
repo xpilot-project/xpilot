@@ -5,14 +5,14 @@
 
 using namespace xpilot;
 
-UserAircraftManager::UserAircraftManager(XplaneAdapter& xplaneAdapter, NetworkManager& networkManager, QObject* parent) :
+UserAircraftManager::UserAircraftManager(QObject* parent) :
     QObject(parent),
-    m_networkManager(networkManager),
-    m_xplaneAdapter(xplaneAdapter)
+    m_xplaneAdapter(*QInjection::Pointer<XplaneAdapter>().data()),
+    m_networkManager(*QInjection::Pointer<NetworkManager>().data())
 {
-    connect(&xplaneAdapter, &XplaneAdapter::userAircraftConfigDataChanged, this, &UserAircraftManager::OnUserAircraftConfigDataUpdated);
-    connect(&xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, &UserAircraftManager::OnRadioStackUpdated);
-    connect(&xplaneAdapter, &XplaneAdapter::simConnectionStateChanged, this, [&](bool connected) {
+    connect(&m_xplaneAdapter, &XplaneAdapter::userAircraftConfigDataChanged, this, &UserAircraftManager::OnUserAircraftConfigDataUpdated);
+    connect(&m_xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, &UserAircraftManager::OnRadioStackUpdated);
+    connect(&m_xplaneAdapter, &XplaneAdapter::simConnectionStateChanged, this, [&](bool connected) {
         if(!connected) {
             m_initialAircraftDataReceived = false;
         }

@@ -4,24 +4,14 @@
 #include <QRandomGenerator>
 #include <QDateTime>
 
-#include <src/fsd/pdu/pdu_metar_request.h>
-
 #include "networkmanager.h"
-#include "src/config/appconfig.h"
-#include "src/common/build_config.h"
-#include "src/common/frequency_utils.h"
-#include "src/common/notificationtype.h"
-#include "src/common/utils.h"
-#include "src/aircrafts/aircraft_visual_state.h"
-#include "src/aircrafts/velocity_vector.h"
-#include "src/network/vatsim_auth.h"
 
 namespace xpilot
 {
-    NetworkManager::NetworkManager(XplaneAdapter &xplaneAdapter, QObject *owner) :
+    NetworkManager::NetworkManager(QObject *owner) :
         QObject(owner),
-        m_xplaneAdapter(xplaneAdapter),
-        nam(new QNetworkAccessManager)
+        nam(new QNetworkAccessManager),
+        m_xplaneAdapter(*QInjection::Pointer<XplaneAdapter>().data())
     {
         QDir networkLogPath(pathAppend(AppConfig::getInstance()->dataRoot(), "NetworkLogs"));
         if(!networkLogPath.exists()) {
@@ -66,16 +56,16 @@ namespace xpilot
         connect(&m_fsd, &FsdClient::RaiseRawDataSent, this, &NetworkManager::OnRawDataSent);
         connect(&m_fsd, &FsdClient::RaiseRawDataReceived, this, &NetworkManager::OnRawDataReceived);
 
-        connect(&xplaneAdapter, &XplaneAdapter::userAircraftDataChanged, this, &NetworkManager::OnUserAircraftDataUpdated);
-        connect(&xplaneAdapter, &XplaneAdapter::userAircraftConfigDataChanged, this, &NetworkManager::OnUserAircraftConfigDataUpdated);
-        connect(&xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, &NetworkManager::OnRadioStackStateChanged);
-        connect(&xplaneAdapter, &XplaneAdapter::requestStationInfo, this, &NetworkManager::OnRequestControllerInfo);
-        connect(&xplaneAdapter, &XplaneAdapter::radioMessageSent, this, &NetworkManager::sendRadioMessage);
-        connect(&xplaneAdapter, &XplaneAdapter::privateMessageSent, this, &NetworkManager::sendPrivateMessage);
-        connect(&xplaneAdapter, &XplaneAdapter::requestMetar, this, &NetworkManager::RequestMetar);
-        connect(&xplaneAdapter, &XplaneAdapter::forceDisconnect, this, &NetworkManager::OnForceDisconnected);
-        connect(&xplaneAdapter, &XplaneAdapter::sendWallop, this, &NetworkManager::OnSendWallop);
-        connect(&xplaneAdapter, &XplaneAdapter::simPausedStateChanged, this, &NetworkManager::OnSimPaused);
+        connect(&m_xplaneAdapter, &XplaneAdapter::userAircraftDataChanged, this, &NetworkManager::OnUserAircraftDataUpdated);
+        connect(&m_xplaneAdapter, &XplaneAdapter::userAircraftConfigDataChanged, this, &NetworkManager::OnUserAircraftConfigDataUpdated);
+        connect(&m_xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, &NetworkManager::OnRadioStackStateChanged);
+        connect(&m_xplaneAdapter, &XplaneAdapter::requestStationInfo, this, &NetworkManager::OnRequestControllerInfo);
+        connect(&m_xplaneAdapter, &XplaneAdapter::radioMessageSent, this, &NetworkManager::sendRadioMessage);
+        connect(&m_xplaneAdapter, &XplaneAdapter::privateMessageSent, this, &NetworkManager::sendPrivateMessage);
+        connect(&m_xplaneAdapter, &XplaneAdapter::requestMetar, this, &NetworkManager::RequestMetar);
+        connect(&m_xplaneAdapter, &XplaneAdapter::forceDisconnect, this, &NetworkManager::OnForceDisconnected);
+        connect(&m_xplaneAdapter, &XplaneAdapter::sendWallop, this, &NetworkManager::OnSendWallop);
+        connect(&m_xplaneAdapter, &XplaneAdapter::simPausedStateChanged, this, &NetworkManager::OnSimPaused);
 
         connect(this, &NetworkManager::notificationPosted, this, [&](int type, QString message)
         {

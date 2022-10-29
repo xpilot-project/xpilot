@@ -5,6 +5,7 @@
 #include "velocity_vector.h"
 #include "src/simulator/xplane_adapter.h"
 #include "src/network/networkmanager.h"
+#include "src/qinjection/dependencypointer.h"
 
 #include <QObject>
 #include <QTimer>
@@ -17,7 +18,7 @@ namespace xpilot
         Q_OBJECT
 
     public:
-        AircraftManager(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, QObject* parent = nullptr);
+        AircraftManager(QObject* parent = nullptr);
 
     private:
         NetworkManager& m_networkManager;

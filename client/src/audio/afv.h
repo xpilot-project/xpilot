@@ -9,15 +9,17 @@
 #include <QVariantList>
 #include <QFile>
 #include <QTextStream>
+#include <QMap>
 
 #include <thread>
 #include <memory>
+#include <event2/event.h>
 
+#include "src/qinjection/dependencypointer.h"
 #include "src/network/networkmanager.h"
 #include "src/simulator/xplane_adapter.h"
 #include "src/controllers/controller_manager.h"
 #include "src/controllers/controller.h"
-#include <event2/event.h>
 #include "afv-native/Client.h"
 #include "audiodeviceinfo.h"
 
@@ -30,7 +32,7 @@ namespace xpilot
         Q_PROPERTY(QVariant InputDevices READ getInputDevices NOTIFY inputDevicesChanged)
 
     public:
-        AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, ControllerManager& controllerManager, QObject* parent = nullptr);
+        AudioForVatsim(QObject* parent = nullptr);
         ~AudioForVatsim();
 
         void afvLogger(QString message);
@@ -95,6 +97,8 @@ namespace xpilot
 
     private:
         XplaneAdapter& m_xplaneAdapter;
+        NetworkManager& m_networkManager;
+        ControllerManager& m_controllerManager;
         struct event_base* ev_base;
         bool m_keepAlive = false;
         std::shared_ptr<afv_native::Client> m_client;

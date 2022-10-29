@@ -3,10 +3,7 @@
 #include "src/config/appconfig.h"
 #include "src/common/notificationtype.h"
 #include "src/common/utils.h"
-
-#include <QMap>
-
-#include <src/common/build_config.h>
+#include "src/common/build_config.h"
 
 using namespace afv_native::afv;
 
@@ -25,10 +22,12 @@ namespace xpilot
 
     static afv_native::log_fn gLogger = defaultLogger;
 
-    AudioForVatsim::AudioForVatsim(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, ControllerManager& controllerManager, QObject* parent) :
+    AudioForVatsim::AudioForVatsim(QObject* parent) :
         QObject(parent),
-        m_xplaneAdapter(xplaneAdapter),
-        m_client()
+        m_client(),
+        m_networkManager(*QInjection::Pointer<NetworkManager>().data()),
+        m_xplaneAdapter(*QInjection::Pointer<XplaneAdapter>().data()),
+        m_controllerManager(*QInjection::Pointer<ControllerManager>().data())
     {
         QDir afvLogPath(pathAppend(AppConfig::getInstance()->dataRoot(), "AfvLogs"));
         if(!afvLogPath.exists()) {
@@ -160,9 +159,9 @@ namespace xpilot
                 m_xplaneAdapter.setVuDataref(vu);
             }
         });
-        connect(&networkManager, &NetworkManager::networkConnected, this, &AudioForVatsim::OnNetworkConnected);
-        connect(&networkManager, &NetworkManager::networkDisconnected, this, &AudioForVatsim::OnNetworkDisconnected);
-        connect(&xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, [&](RadioStackState state){
+        connect(&m_networkManager, &NetworkManager::networkConnected, this, &AudioForVatsim::OnNetworkConnected);
+        connect(&m_networkManager, &NetworkManager::networkDisconnected, this, &AudioForVatsim::OnNetworkDisconnected);
+        connect(&m_xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, [&](RadioStackState state){
             if(state != m_radioStackState) {
                 m_radioStackState = state;
 
@@ -181,23 +180,23 @@ namespace xpilot
                 updateTransceivers();
             }
         });
-        connect(&xplaneAdapter, &XplaneAdapter::userAircraftDataChanged, this, [&](UserAircraftData data){
+        connect(&m_xplaneAdapter, &XplaneAdapter::userAircraftDataChanged, this, [&](UserAircraftData data){
             if(data != m_userAircraftData) {
                 m_userAircraftData = data;
             }
         });
-        connect(&xplaneAdapter, &XplaneAdapter::pttPressed, this, [&]{
+        connect(&m_xplaneAdapter, &XplaneAdapter::pttPressed, this, [&]{
             m_client->setPtt(true);
         });
-        connect(&xplaneAdapter, &XplaneAdapter::pttReleased, this, [&]{
+        connect(&m_xplaneAdapter, &XplaneAdapter::pttReleased, this, [&]{
             m_client->setPtt(false);
         });
 
-        connect(&controllerManager, &ControllerManager::controllerAdded, this, [&](Controller controller)
+        connect(&m_controllerManager, &ControllerManager::controllerAdded, this, [&](Controller controller)
         {
             m_controllers.push_back(controller);
         });
-        connect(&controllerManager, &ControllerManager::controllerUpdated, this, [&](Controller controller)
+        connect(&m_controllerManager, &ControllerManager::controllerUpdated, this, [&](Controller controller)
         {
             auto it = std::find_if(m_controllers.begin(), m_controllers.end(), [=](Controller &c)
             {
@@ -209,7 +208,7 @@ namespace xpilot
                 *it = controller;
             }
         });
-        connect(&controllerManager, &ControllerManager::controllerDeleted, this, [&](Controller controller)
+        connect(&m_controllerManager, &ControllerManager::controllerDeleted, this, [&](Controller controller)
         {
             auto it = std::find_if(m_controllers.begin(), m_controllers.end(), [=](Controller &c)
             {

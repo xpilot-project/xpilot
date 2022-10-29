@@ -2,14 +2,13 @@
 #include <QJsonArray>
 
 #include "controller_manager.h"
-#include "src/common/frequency_utils.h"
 
 namespace xpilot
 {
-    ControllerManager::ControllerManager(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, QObject *parent) :
+    ControllerManager::ControllerManager(QObject *parent) :
         QObject(parent),
-        m_networkManager(networkManager),
-        m_xplaneAdapter(xplaneAdapter)
+        m_networkManager(*QInjection::Pointer<NetworkManager>().data()),
+        m_xplaneAdapter(*QInjection::Pointer<XplaneAdapter>().data())
     {
         connect(&m_xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, &ControllerManager::OnRadioStackStateChanged);
         connect(&m_networkManager, &NetworkManager::controllerUpdateReceived, this, &ControllerManager::OnControllerUpdateReceived);

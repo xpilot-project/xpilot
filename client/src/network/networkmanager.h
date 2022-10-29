@@ -13,14 +13,22 @@
 
 using namespace QtPromise;
 
-#include "connectinfo.h"
 #include "src/fsd/fsd_client.h"
+#include "src/network/vatsim_auth.h"
+#include "src/network/connectinfo.h"
+#include "src/network/events/radio_message_received.h"
 #include "src/simulator/xplane_adapter.h"
 #include "src/aircrafts/user_aircraft_data.h"
 #include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/aircraft_visual_state.h"
 #include "src/aircrafts/aircraft_configuration.h"
-#include "src/network/events/radio_message_received.h"
+#include "src/aircrafts/velocity_vector.h"
+#include "src/config/appconfig.h"
+#include "src/common/build_config.h"
+#include "src/common/frequency_utils.h"
+#include "src/common/notificationtype.h"
+#include "src/common/utils.h"
+#include "src/qinjection/dependencypointer.h"
 
 namespace xpilot
 {
@@ -29,7 +37,7 @@ namespace xpilot
         Q_OBJECT
 
     public:
-        NetworkManager(XplaneAdapter& xplaneAdapter, QObject *owner = nullptr);
+        NetworkManager(QObject *owner = nullptr);
         ~NetworkManager();
 
         Q_INVOKABLE void connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer);

@@ -11,6 +11,7 @@
 #include "src/aircrafts/user_aircraft_config_data.h"
 #include "src/aircrafts/radio_stack_state.h"
 #include "src/aircrafts/aircraft_configuration.h"
+#include "src/qinjection/dependencypointer.h"
 
 using namespace xpilot;
 
@@ -18,7 +19,7 @@ class UserAircraftManager : public QObject
 {
     Q_OBJECT
 public:
-    UserAircraftManager(XplaneAdapter& udpClient, NetworkManager& networkManager, QObject* parent = nullptr);
+    UserAircraftManager(QObject* parent = nullptr);
 
 private:
     void OnUserAircraftConfigDataUpdated(UserAircraftConfigData data);

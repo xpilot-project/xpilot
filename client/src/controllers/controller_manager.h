@@ -8,6 +8,8 @@
 #include "controller.h"
 #include "src/network/networkmanager.h"
 #include "src/simulator/xplane_adapter.h"
+#include "src/qinjection/dependencypointer.h"
+#include "src/common/frequency_utils.h"
 
 namespace xpilot
 {
@@ -16,7 +18,7 @@ namespace xpilot
         Q_OBJECT
 
     public:
-        ControllerManager(NetworkManager& networkManager, XplaneAdapter& xplaneAdapter, QObject* parent = nullptr);
+        ControllerManager(QObject* parent = nullptr);
         void ValidateController(Controller& controller);
 
     signals:
@@ -34,8 +36,8 @@ namespace xpilot
         void UpdateStationCallsigns();
 
     private:
-        NetworkManager &m_networkManager;
-        XplaneAdapter &m_xplaneAdapter;
+        NetworkManager& m_networkManager;
+        XplaneAdapter& m_xplaneAdapter;
         QList<Controller> m_controllers;
         QTimer m_nearbyAtcTimer;
         RadioStackState m_radioStackState;

@@ -35,6 +35,7 @@
 #include "pdu/pdu_fast_pilot_position.h"
 #include "pdu/pdu_pilot_position.h"
 #include "pdu/pdu_metar_response.h"
+#include "pdu/pdu_metar_request.h"
 #include "pdu/pdu_send_fast.h"
 
 namespace xpilot
