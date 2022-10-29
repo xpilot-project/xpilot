@@ -1236,6 +1236,10 @@ Window {
                                                 appendMessage("Messages copied to clipboard.", colorYellow, activeMessageTab)
                                                 cliTextField.clear()
                                             }
+                                            else if(cliTextField.text.startsWith(".appdata")) {
+                                                AppConfig.openAppDataFolder()
+                                                cliTextField.clear()
+                                            }
                                             else {
                                                 if(cliTextField.text.startsWith(".")) {
                                                     if(!simConnected) {

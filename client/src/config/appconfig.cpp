@@ -4,6 +4,7 @@
 #include <QScreen>
 #include <QStandardPaths>
 #include <QDir>
+#include <QDesktopServices>
 #include "appconfig.h"
 #include "src/common/build_config.h"
 
@@ -272,6 +273,11 @@ bool AppConfig::saveConfig()
 bool AppConfig::configRequired()
 {
     return VatsimId.isEmpty() || VatsimPasswordDecrypted.isEmpty() || Name.isEmpty() || ServerName.isEmpty();
+}
+
+void AppConfig::openAppDataFolder()
+{
+    QDesktopServices::openUrl(QUrl("file:///" + dataRoot()));
 }
 
 QString AppConfig::getNetworkServer()
