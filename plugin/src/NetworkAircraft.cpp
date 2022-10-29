@@ -434,7 +434,7 @@ namespace xpilot {
 		SetTireDeflection(flightModel.GEAR_DEFLECTION / 2.0f);
 		SetReversDeployRatio(Surfaces.reversRatio);
 		SetNoseWheelAngle(VisualState.NoseWheelAngle);
-		SetWeightOnWheels(IsReportedOnGround);
+		SetOnGrnd(IsReportedOnGround);
 
 		if (IsReportedOnGround) {
 			double rpm = (60 / (2 * M_PI * 3.2)) * abs(PositionalVelocities.X);
