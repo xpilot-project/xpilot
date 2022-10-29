@@ -68,7 +68,7 @@ jobs:
       ### Build Client ###
 
       - name: Download Qt
-        uses: robinraju/release-downloader@v1.5
+        uses: robinraju/release-downloader@v1.6
         with:
           repository: "xpilot-project/qt6"
           tag: "v6.3.2"

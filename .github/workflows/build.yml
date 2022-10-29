@@ -8,14 +8,17 @@ on:
 
 jobs:
 
-  build-windows:
+  windows:
     uses: ./.github/workflows/windows.yml
+    secrets: inherit
 
-  build-macos:
+  macos:
     uses: ./.github/workflows/macos.yml
+    secrets: inherit
 
-  build-linux:
+  linux:
     uses: ./.github/workflows/linux.yml
+    secrets: inherit
 
   ########################## Create Release ##########################
 
