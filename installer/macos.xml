@@ -247,9 +247,15 @@
         </actionGroup>
     </preInstallationActionList>
     <postInstallationActionList>
-        <createDirectory>
-            <path>${installdir}/.sentry-native</path>
-        </createDirectory>
+        <!-- delete old client files -->
+        <deleteFile path="${installdir}/.sentry-native" />
+        <deleteFile path="${installdir}/xPilot.app/Contents/Frameworks" />
+        <deleteFile path="${installdir}/xPilot.app/Contents/MacOS/crashpad_handler" />
+        <deleteFile path="${installdir}/xPilot.app/Contents/Plugins" />
+        <deleteFile path="${installdir}/xPilot.app/Contents/Resources/qml" />
+        <deleteFile path="${installdir}/xPilot.app/Contents/Resources/qt.conf" />
+        <deleteFile path="${installdir}/xPilot.app/Contents/Resources/xpilot.icns" />
+        <!-- //////////////////////// -->
         <createDirectory>
             <path>~/Library/Application Support/org.vatsim.xpilot</path>
             <ruleList>
