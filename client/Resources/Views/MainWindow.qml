@@ -20,12 +20,11 @@ Window {
     title: "xPilot"
     visible: true
     flags: Qt.Window | Qt.FramelessWindowHint
-    width: 840
-    height: 250
+    color: "#272C2E"
     minimumHeight: 250
     minimumWidth: 840
-    color: "#272C2E"
-
+    width: minimumWidth
+    height: minimumHeight
     x: Screen.width / 2 - width / 2
     y: Screen.height / 2 - height / 2
 
@@ -384,7 +383,7 @@ Window {
         }
 
         function onInvalidCslConfiguration() {
-            appendMessage("No valid CSL paths are configured or enabled, or you have no CSL models installed. Please verify the CSL configuration in X-Plane (Plugins > xPilot > Settings). If you need assistance configuring your CSL paths, see the \"CSL Configuration\" section in the xPilot Documentation (http://beta.xpilot-project.org). Restart X-Plane and xPilot after you have properly configured your CSL models.", colorRed)
+            appendMessage("No valid CSL paths are configured or enabled, or you have no CSL models installed. Please verify the CSL configuration in X-Plane (Plugins > xPilot > Settings). If you need assistance configuring your CSL paths, see the \"CSL Configuration\" section in the xPilot Documentation (http://beta.xpilot-project.org). Restart X-Plane and xPilot after you have properly configured your CSL models. You can have xPilot install a model set for you by entering the command .downloadcsl", colorRed)
             errorSound.play()
             mainWindow.alert(0)
         }
