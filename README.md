@@ -24,6 +24,7 @@ xPilot is licensed under the [GPLv3 open-source license](LICENSE).
 # Acknowledgments
 * [Qt](https://www.qt.io) cross platform C++ development kit
 * [AFV-Native](https://github.com/xsquawkbox/AFV-Native) cross platform Audio for VATSIM client implementation
+* [miniaudio](https://github.com/mackron/miniaudio) audio playback and capture library
 * [XPMP2](https://github.com/TwinFan/XPMP2) X-Plane multiplayer library
 * [MessagePack](https://msgpack.org/index.html) lightweight binary serialization format used for IPC messages
 * [nanomsg-NG](https://nng.nanomsg.org/) lightweight messaging library (used for IPC between xPilot and X-Plane)
