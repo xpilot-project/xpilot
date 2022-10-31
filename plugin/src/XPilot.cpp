@@ -112,7 +112,9 @@ namespace xpilot {
 
 	void XPilot::Initialize() {
 		InitializeXPMP();
-		TryGetTcasControl();
+		if (!Config::GetInstance().GetTcasDisabled()) {
+			TryGetTcasControl();
+		}
 		XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
 
 		int rv;
@@ -393,7 +395,9 @@ namespace xpilot {
 			QueueCallback([=] {
 				m_aircraftManager->RemoveAllPlanes();
 				m_frameRateMonitor->StartMonitoring();
-				TryGetTcasControl();
+				if (!Config::GetInstance().GetTcasDisabled()) {
+					TryGetTcasControl();
+				}
 				m_xplaneAtisEnabled = 0;
 				m_networkCallsign.setValue(callsign);
 				m_selcalCode.setValue(selcal);
