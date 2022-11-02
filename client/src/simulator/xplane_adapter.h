@@ -86,6 +86,7 @@ private:
     void setDataRefValue(std::string dataRef, float value);
     void sendCommand(std::string command);
 
+    void setupNngSocket();
     void processMessage(QString message);
     void processPacket(const BaseDto& packet);
     void clearSimConnection();
@@ -120,9 +121,11 @@ signals:
     void ignoreList(QStringList list);
     void sendWallop(QString message);
     void simPausedStateChanged(bool paused);
+    void nngSocketError(QString error);
 
 private:
-    QUdpSocket* socket;
+    QUdpSocket* m_udpSocket;
+    QHostAddress m_hostAddress;
     qint64 m_lastUdpTimestamp;
     bool m_simConnected = false;
     bool m_initialHandshake = false;

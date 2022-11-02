@@ -346,6 +346,11 @@ Window {
     Connections {
         target: xplaneAdapter
 
+        function onNngSocketError(error) {
+            appendMessage("Socket Error: " + error, colorRed)
+            errorSound.play()
+        }
+
         function onRadioStackStateChanged(stack) {
             if(radioStackState !== stack) {
                 radioStackState = stack;

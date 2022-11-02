@@ -74,13 +74,10 @@ enum DataRef
     XplaneVersionNumber
 };
 
-QHostAddress m_hostAddress;
-
 XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
 {
-    m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch() - HEARTBEAT_TIMEOUT_SECS; // initialize timestamp in the past to prevent ghost connection status
-
-    socket = new QUdpSocket(this);
+    // initialize timestamp in the past to prevent ghost connection status
+    m_lastUdpTimestamp = QDateTime::currentSecsSinceEpoch() - HEARTBEAT_TIMEOUT_SECS;
 
     m_hostAddress = QHostAddress(AppConfig::getInstance()->XplaneNetworkAddress);
     if(AppConfig::getInstance()->XplaneNetworkAddress.toLower() == "localhost")
@@ -88,67 +85,14 @@ XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
         // udp socket doesn't work if the address is "localhost" so we need to convert it
         m_hostAddress = QHostAddress::LocalHost;
     }
-    socket->bind(QHostAddress::AnyIPv4);
 
-    connect(socket, &QUdpSocket::readyRead, this, &XplaneAdapter::OnDataReceived);
+    m_udpSocket = new QUdpSocket(this);
+    m_udpSocket->bind(QHostAddress::AnyIPv4);
+    connect(m_udpSocket, &QUdpSocket::readyRead, this, &XplaneAdapter::OnDataReceived);
 
-    nng_pair1_open(&m_socket);
-    nng_setopt_int(m_socket, NNG_OPT_RECVBUF, 1024);
-    nng_setopt_int(m_socket, NNG_OPT_SENDBUF, 1024);
-
-    const QList<QString> localhostAddresses = {"127.0.0.1","localhost"};
-    if(AppConfig::getInstance()->XplaneNetworkAddress.isEmpty() || localhostAddresses.contains(AppConfig::getInstance()->XplaneNetworkAddress.toLower())) {
-        nng_dial(m_socket, "ipc:///tmp//xpilot.ipc", NULL, NNG_FLAG_NONBLOCK);
-    } else {
-        QString url = QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort);
-        nng_dial(m_socket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK);
-    }
-
-    m_keepSocketAlive = true;
-    m_socketThread = std::make_unique<std::thread>([&]{
-        while (m_keepSocketAlive) {
-            char* buffer;
-            size_t bufferLen;
-
-            int err;
-            err = nng_recv(m_socket, &buffer, &bufferLen, NNG_FLAG_ALLOC);
-
-            if(err == 0)
-            {
-                BaseDto dto;
-                auto obj = msgpack::unpack(reinterpret_cast<const char*>(buffer), bufferLen);
-
-                try {
-                    obj.get().convert(dto);
-                    processPacket(dto);
-                }
-                catch(const msgpack::type_error&e) {
-                    qDebug() << e.what();
-                }
-
-                nng_free(buffer, bufferLen);
-            }
-        }
+    QTimer::singleShot(500, this, [&] {
+        setupNngSocket();
     });
-
-    for(const QString &machine : qAsConst(AppConfig::getInstance()->VisualMachines)) {
-
-        nng_socket _visualSocket;
-
-        int rv;
-        if((rv = nng_pair1_open(&_visualSocket)) != 0) {
-            continue;
-        }
-
-        QString url = QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort);
-        if((rv = nng_dial(_visualSocket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK)) != 0) {
-            continue;
-        }
-
-        if(rv == 0) {
-            m_visualSockets.push_back(_visualSocket);
-        }
-    }
 
     connect(&m_heartbeatTimer, &QTimer::timeout, this, [&] {
         qint64 now = QDateTime::currentSecsSinceEpoch();
@@ -369,7 +313,7 @@ void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t 
     data.insert(13, dataRef.c_str());
     data.resize(413);
 
-    socket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
+    m_udpSocket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
 
     if(m_simConnected) {
         m_subscribedDataRefs.push_back(dataRef.c_str());
@@ -386,7 +330,7 @@ void XplaneAdapter::setDataRefValue(std::string dataRef, float value)
     data.insert(9, dataRef.c_str());
     data.resize(509);
 
-    socket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
+    m_udpSocket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
 }
 
 void XplaneAdapter::sendCommand(std::string command)
@@ -398,7 +342,75 @@ void XplaneAdapter::sendCommand(std::string command)
     data.insert(5, command.c_str());
     data.resize(command.length() + 6);
 
-    socket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
+    m_udpSocket->writeDatagram(data.data(), data.size(), m_hostAddress, AppConfig::getInstance()->XplaneUdpPort);
+}
+
+void XplaneAdapter::setupNngSocket()
+{
+    int result;
+
+    if(result = nng_pair1_open(&m_socket) != 0) {
+        emit nngSocketError(QString("Error opening socket: %1").arg(nng_strerror(result)));
+    }
+
+    nng_setopt_int(m_socket, NNG_OPT_RECVBUF, 1024);
+    nng_setopt_int(m_socket, NNG_OPT_SENDBUF, 1024);
+
+    const QList<QString> localhostAddresses = {"127.0.0.1","localhost"};
+    if(AppConfig::getInstance()->XplaneNetworkAddress.isEmpty() || localhostAddresses.contains(AppConfig::getInstance()->XplaneNetworkAddress.toLower())) {
+        if(result = nng_dial(m_socket, "ipc:///tmp//xpilot.ipc", NULL, NNG_FLAG_NONBLOCK) != 0) {
+            emit nngSocketError(QString("Error dialing socket: %1").arg(nng_strerror(result)));
+        }
+    } else {
+        QString url = QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort);
+        if(result = nng_dial(m_socket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK) != 0) {
+            emit nngSocketError(QString("Error dialing socket (%1): %2").arg(url, nng_strerror(result)));
+        }
+    }
+
+    m_keepSocketAlive = true;
+    m_socketThread = std::make_unique<std::thread>([&]{
+        while (m_keepSocketAlive) {
+            char* buffer;
+            size_t bufferLen;
+
+            int err;
+            err = nng_recv(m_socket, &buffer, &bufferLen, NNG_FLAG_ALLOC);
+
+            if(err == 0)
+            {
+                BaseDto dto;
+                auto obj = msgpack::unpack(reinterpret_cast<const char*>(buffer), bufferLen);
+
+                try {
+                    obj.get().convert(dto);
+                    processPacket(dto);
+                }
+                catch(...) {}
+
+                nng_free(buffer, bufferLen);
+            }
+        }
+    });
+
+    for(const QString &machine : qAsConst(AppConfig::getInstance()->VisualMachines)) {
+
+        nng_socket _visualSocket;
+        int result;
+
+        if(result = nng_pair1_open(&_visualSocket) != 0) {
+            emit nngSocketError(QString("Error opening visual machine socket: %1").arg(nng_strerror(result)));;
+            continue;
+        }
+
+        QString url = QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort);
+        if(result = nng_dial(_visualSocket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK) != 0) {
+            emit nngSocketError(QString("Error dialing visual machine socket (%1): %2").arg(url, nng_strerror(result)));;
+            continue;
+        }
+
+        m_visualSockets.push_back(_visualSocket);
+    }
 }
 
 void XplaneAdapter::setTransponderCode(int code)
@@ -437,8 +449,8 @@ void XplaneAdapter::OnDataReceived()
     QByteArray buffer;
     QHostAddress fromAddress;
 
-    buffer.resize(socket->pendingDatagramSize());
-    socket->readDatagram(buffer.data(), buffer.size(), &fromAddress);
+    buffer.resize(m_udpSocket->pendingDatagramSize());
+    m_udpSocket->readDatagram(buffer.data(), buffer.size(), &fromAddress);
 
     if(fromAddress.toIPv4Address() != m_hostAddress.toIPv4Address())
         return;
@@ -622,7 +634,12 @@ void XplaneAdapter::OnDataReceived()
                     }
                     break;
                 case DataRef::PushToTalk:
-                    (value > 0 && !m_voiceTransmitDisabled) ? pttPressed() : pttReleased();
+                    if(value > 0 && !m_voiceTransmitDisabled) {
+                        emit pttPressed();
+                    }
+                    else {
+                        emit pttReleased();
+                    }
                     break;
                 case DataRef::SelcalMuteOverride:
                     m_radioStackState.SelcalMuteOverride = value > 0;
