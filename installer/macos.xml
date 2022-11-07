@@ -318,12 +318,9 @@
         <directoryParameter>
             <name>xplane12path</name>
             <title>X-Plane 12 Location</title>
-            <description></description>
-            <explanation>Please browse to the folder where X-Plane 12 is installed so that the xPilot plugin can be installed.
+            <explanation>Please browse to the folder where X-Plane 12 is installed so that the xPilot plugin can be installed. Leave the folder path empty (and click Next) if you DO NOT use X-Plane 12.
 
-ADVANCED USERS: If X-Plane 12 is not installed on this computer, leave the folder path empty to skip installing the plugin. You will need to run the installer on the computer where X-Plane 12 is installed to install the plugin.
-
-Skip this step if you DO NOT use X-Plane 12.</explanation>
+ADVANCED USERS: If X-Plane 12 is not installed on this computer, leave the folder path empty to skip installing the plugin. You will need to run the installer on the computer where X-Plane 12 is installed to install the plugin.</explanation>
             <value></value>
             <default></default>
             <allowEmptyValue>1</allowEmptyValue>
@@ -351,12 +348,9 @@ Skip this step if you DO NOT use X-Plane 12.</explanation>
         <directoryParameter>
             <name>xplane11path</name>
             <title>X-Plane 11 Location</title>
-            <description></description>
-            <explanation>Please browse to the folder where X-Plane 11 is installed so that the xPilot plugin can be installed.
+            <explanation>Please browse to the folder where X-Plane 11 is installed so that the xPilot plugin can be installed. Leave the folder path empty (and click Next) if you DO NOT use X-Plane 11.
 
-ADVANCED USERS: If X-Plane 11 is not installed on this computer, leave the folder path empty to skip installing the plugin. You will need to run the installer on the computer where X-Plane 11 is installed to install the plugin.
-
-Skip this step if you DO NOT use X-Plane 11.</explanation>
+ADVANCED USERS: If X-Plane 11 is not installed on this computer, leave the folder path empty to skip installing the plugin. You will need to run the installer on the computer where X-Plane 11 is installed to install the plugin.</explanation>
             <value></value>
             <default></default>
             <allowEmptyValue>1</allowEmptyValue>
