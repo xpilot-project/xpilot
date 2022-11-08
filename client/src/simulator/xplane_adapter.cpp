@@ -349,7 +349,7 @@ void XplaneAdapter::setupNngSocket()
 {
     int result;
 
-    if(result = nng_pair1_open(&m_socket) != 0) {
+    if((result = nng_pair1_open(&m_socket)) != 0) {
         emit nngSocketError(QString("Error opening socket: %1").arg(nng_strerror(result)));
     }
 
@@ -358,12 +358,12 @@ void XplaneAdapter::setupNngSocket()
 
     const QList<QString> localhostAddresses = {"127.0.0.1","localhost"};
     if(AppConfig::getInstance()->XplaneNetworkAddress.isEmpty() || localhostAddresses.contains(AppConfig::getInstance()->XplaneNetworkAddress.toLower())) {
-        if(result = nng_dial(m_socket, "ipc:///tmp//xpilot.ipc", NULL, NNG_FLAG_NONBLOCK) != 0) {
+        if((result = nng_dial(m_socket, "ipc:///tmp//xpilot.ipc", NULL, NNG_FLAG_NONBLOCK)) != 0) {
             emit nngSocketError(QString("Error dialing socket: %1").arg(nng_strerror(result)));
         }
     } else {
         QString url = QString("tcp://%1:%2").arg(AppConfig::getInstance()->XplaneNetworkAddress).arg(AppConfig::getInstance()->XplanePluginPort);
-        if(result = nng_dial(m_socket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK) != 0) {
+        if((result = nng_dial(m_socket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK)) != 0) {
             emit nngSocketError(QString("Error dialing socket (%1): %2").arg(url, nng_strerror(result)));
         }
     }
@@ -398,13 +398,13 @@ void XplaneAdapter::setupNngSocket()
         nng_socket _visualSocket;
         int result;
 
-        if(result = nng_pair1_open(&_visualSocket) != 0) {
+        if((result = nng_pair1_open(&_visualSocket)) != 0) {
             emit nngSocketError(QString("Error opening visual machine socket: %1").arg(nng_strerror(result)));;
             continue;
         }
 
         QString url = QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort);
-        if(result = nng_dial(_visualSocket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK) != 0) {
+        if((result = nng_dial(_visualSocket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK)) != 0) {
             emit nngSocketError(QString("Error dialing visual machine socket (%1): %2").arg(url, nng_strerror(result)));;
             continue;
         }
