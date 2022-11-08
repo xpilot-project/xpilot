@@ -115,14 +115,14 @@ void VersionCheck::PerformVersionCheck()
                 return;
             }
 
-            for (const QJsonValue asset : assets)
+            for (const QJsonValue& asset : assets)
             {
                 QString name = asset[QLatin1String("name")].toString();
                 QString downloadUrl = asset[QLatin1String("browser_download_url")].toString();
 
                 if(BuildConfig::isRunningOnWindowsPlatform())
                 {
-                    if(name.toLower().contains("windows"))
+                    if(name.contains("windows", Qt::CaseInsensitive))
                     {
                         emit newVersionAvailable();
                         m_fileName = name;
@@ -131,7 +131,7 @@ void VersionCheck::PerformVersionCheck()
                 }
                 else if(BuildConfig::isRunningOnMacOSPlatform())
                 {
-                    if(name.toLower().contains("macos"))
+                    if(name.contains("macos", Qt::CaseInsensitive))
                     {
                         emit newVersionAvailable();
                         m_fileName = name;
@@ -140,9 +140,12 @@ void VersionCheck::PerformVersionCheck()
                 }
                 else if(BuildConfig::isRunningOnLinuxPlatform())
                 {
-                    emit newVersionAvailable();
-                    m_fileName = name;
-                    m_downloadUrl = downloadUrl;
+                    if(name.contains("linux", Qt::CaseInsensitive))
+                    {
+                        emit newVersionAvailable();
+                        m_fileName = name;
+                        m_downloadUrl = downloadUrl;
+                    }
                 }
             }
         }
