@@ -247,7 +247,7 @@
         </setInstallerVariable>
         <setInstallerVariable>
             <name>project.overwritePolicy</name>
-            <value>onlyIfNewer</value>
+            <value>always</value>
             <ruleList>
                 <fileTest condition="exists" path="${installdir}"/>
             </ruleList>
