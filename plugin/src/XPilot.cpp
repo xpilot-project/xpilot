@@ -305,7 +305,7 @@ namespace xpilot {
 			if (!dto.callsign.empty()) {
 				QueueCallback([=] {
 					m_aircraftManager->HandleFastPositionUpdate(dto.callsign,
-						visualState, positionalVector, rotationalVelocity, dto.speed);
+						visualState, positionalVector, rotationalVelocity, dto.speed, dto.ownAircraftElevation);
 				});
 			}
 		}

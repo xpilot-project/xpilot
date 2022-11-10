@@ -153,34 +153,8 @@ namespace xpilot
 
         void LoginToNetwork(QString password);
 
-        double CalculatePressureAltitude() const
-        {
-            if(m_xplaneAdapter.XplaneVersion() >= 120000) {
-                return m_userAircraftData.AltitudePressure;
-            }
-            const double deltaPressure = 1013.25 - m_userAircraftData.BarometerSeaLevel;
-            const double deltaAltitudeV = deltaPressure * 30.0; // 30.0 ft per millibar
-            return (m_userAircraftData.AltitudeMslM * 3.28084) + deltaAltitudeV;
-        }
-
-        double AdjustIncomingAltitude(double altitude) {
-            if(m_xplaneAdapter.XplaneVersion() < 120000) {
-                return altitude;
-            }
-
-            double verticalDistance = std::abs(m_userAircraftData.AltitudePressure - altitude);
-            if (verticalDistance > 6000.0) {
-                return altitude;
-            }
-
-            double weight = 1.0;
-            if (verticalDistance > 3000.0) {
-                weight = 1.0 - ((verticalDistance - 3000.0) / 3000.0);
-            }
-
-            double offset = m_userAircraftData.AltitudePressure - (m_userAircraftData.AltitudeMslM * 3.28084);
-            return altitude - (offset * weight);
-        }
+        bool IsXplane12() const { return m_xplaneAdapter.XplaneVersion() >= 120000; }
+        double GetPressureAltitude() const;
 
         const double POSITIONAL_VELOCITY_ZERO_TOLERANCE = 0.005;
         bool PositionalVelocityIsZero(UserAircraftData data)

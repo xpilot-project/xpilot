@@ -304,6 +304,9 @@ namespace xpilot {
 		}
 
 		AdjustedAltitude = PredictedVisualState.AltitudeTrue + TerrainOffset;
+
+		CompensateForXplane12Altimetry();
+
 		EnsureAboveGround();
 	}
 
@@ -311,6 +314,15 @@ namespace xpilot {
 		if (AdjustedAltitude < LocalTerrainElevation.value()) {
 			AdjustedAltitude = LocalTerrainElevation.value();
 		}
+	}
+
+	void NetworkAircraft::CompensateForXplane12Altimetry() {
+		if (!AdjustedAltitude.has_value())
+			return;
+
+		const double relativeAltitude = std::abs(AdjustedAltitude.value() - OwnAircraftElevation);
+		const double altitudeDeltaWeight = 2 - std::max(3000.0, std::min(6000.0, relativeAltitude)) / 3000;
+		AdjustedAltitude = AdjustedAltitude.value() * altitudeDeltaWeight;
 	}
 
 	void NetworkAircraft::ClearRotationalVelocities() {

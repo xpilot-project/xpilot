@@ -338,7 +338,7 @@ namespace xpilot
             AircraftVisualState visualState {};
             visualState.Latitude = pdu.Lat;
             visualState.Longitude = pdu.Lon;
-            visualState.Altitude = AdjustIncomingAltitude(pdu.TrueAltitude);
+            visualState.Altitude = pdu.TrueAltitude;
             visualState.Pitch = pdu.Pitch;
             visualState.Heading = pdu.Heading;
             visualState.Bank = pdu.Bank;
@@ -352,7 +352,7 @@ namespace xpilot
         AircraftVisualState visualState {};
         visualState.Latitude = pdu.Lat;
         visualState.Longitude = pdu.Lon;
-        visualState.Altitude = AdjustIncomingAltitude(pdu.AltitudeTrue);
+        visualState.Altitude = pdu.AltitudeTrue;
         visualState.AltitudeAgl = pdu.AltitudeAgl;
         visualState.Pitch = pdu.Pitch;
         visualState.Heading = pdu.Heading;
@@ -583,7 +583,7 @@ namespace xpilot
                                            m_userAircraftData.Latitude,
                                            m_userAircraftData.Longitude,
                                            m_userAircraftData.AltitudeMslM * 3.28084,
-                                           CalculatePressureAltitude(),
+                                           GetPressureAltitude(),
                                            m_userAircraftData.GroundSpeed,
                                            m_userAircraftData.Pitch,
                                            m_userAircraftData.Heading,
@@ -903,5 +903,14 @@ namespace xpilot
     void NetworkManager::OnSimPaused(bool isPaused)
     {
         m_simPaused = isPaused;
+    }
+
+    double NetworkManager::GetPressureAltitude() const
+    {
+        if(IsXplane12()) {
+            return m_userAircraftData.AltitudePressure;
+        }
+        const double deltaPressure = (1013.25 - m_userAircraftData.BarometerSeaLevel) * 30.0; // 30ft per mbar
+        return (m_userAircraftData.AltitudeMslM * 3.28084) + deltaPressure;
     }
 }

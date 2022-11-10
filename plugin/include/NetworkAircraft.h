@@ -137,6 +137,7 @@ namespace xpilot {
 		double TerrainOffsetMagnitude = 0.0;
 		std::list<TerrainElevationData> TerrainElevationHistory;
 		bool HasUsableTerrainElevationData;
+		double OwnAircraftElevation = 0.0;
 
 		int64_t LastUpdated;
 		AircraftVisualState VisualState;
@@ -157,6 +158,7 @@ namespace xpilot {
 		AircraftVisualState ExtrapolatePosition(Vector3 velocityVector, Vector3 rotationVector, double interval);
 		void PerformGroundClamping(float frameRate);
 		void EnsureAboveGround();
+		void CompensateForXplane12Altimetry();
 		void ClearRotationalVelocities();
 	};
 }

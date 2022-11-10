@@ -270,7 +270,7 @@ namespace xpilot {
 	}
 
 	void AircraftManager::HandleFastPositionUpdate(const std::string& callsign, const AircraftVisualState& visualState,
-		Vector3 positionalVector, Vector3 rotationalVector, double speed) {
+		Vector3 positionalVector, Vector3 rotationalVector, double speed, double ownAircraftElevation) {
 		auto aircraft = GetAircraft(callsign);
 		if (!aircraft)
 			return;
@@ -279,6 +279,7 @@ namespace xpilot {
 		aircraft->RotationalVelocities = rotationalVector;
 		aircraft->VisualState = visualState;
 		aircraft->GroundSpeed = speed;
+		aircraft->OwnAircraftElevation = ownAircraftElevation;
 		aircraft->UpdateVelocityVectors();
 	}
 

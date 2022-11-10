@@ -132,7 +132,8 @@ namespace xpilot {
         double vb;
         double noseWheelAngle;
         double speed;
-        MSGPACK_DEFINE(callsign, latitude, longitude, altitudeTrue, altitudeAgl, heading, bank, pitch, vx, vy, vz, vp, vh, vb, noseWheelAngle, speed);
+        double ownAircraftElevation;
+        MSGPACK_DEFINE(callsign, latitude, longitude, altitudeTrue, altitudeAgl, heading, bank, pitch, vx, vy, vz, vp, vh, vb, noseWheelAngle, speed, ownAircraftElevation);
 
         static std::string getName() {
             return FAST_POSITION_UPDATE;
