@@ -302,9 +302,15 @@ Window {
         }
 
         function onErrorEncountered(error) {
-            downloadCslWindow.destroy()
-            setXplanePathWindow.destroy()
-            extractCslModelsWindow.destroy()
+            if(downloadCslWindow != null) {
+                downloadCslWindow.destroy()
+            }
+            if(setXplanePathWindow != null) {
+                setXplanePathWindow.destroy()
+            }
+            if(extractCslModelsWindow != null) {
+                extractCslModelsWindow.destroy()
+            }
             appendMessage(error, colorRed);
             errorSound.play()
         }

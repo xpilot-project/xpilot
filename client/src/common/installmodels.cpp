@@ -54,10 +54,11 @@ QtPromise::QPromise<QString> InstallModels::GetAuthToken()
                     if(jsonObject.contains("success") && jsonObject["success"] == false) {
                         QString error = jsonObject["error_msg"].toString();
                         if(error == "Password is Incorrect") {
-                            emit errorEncountered("CSL Model Set Download Error: Your VATSIM password or ID is incorrect. Open the Settings and confirm your VATSIM ID and Password are correct.");
+                            emit errorEncountered("CSL Download Error: Your VATSIM ID or Password is incorrect. "
+                                                  "Open Settings and verify your VATSIM ID and Password are correct.");
                         }
                         else {
-                            emit errorEncountered(error);
+                            emit errorEncountered("CSL Download Error: " + error);
                         }
                     }
                     else {
