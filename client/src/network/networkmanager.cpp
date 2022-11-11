@@ -526,6 +526,11 @@ namespace xpilot
         {
             m_userAircraftData = data;
         }
+
+        if(IsXplane12())
+        {
+            m_altitudeDelta = CalculatePressureAltitude() - m_userAircraftData.AltitudePressure;
+        }
     }
 
     void NetworkManager::OnUserAircraftConfigDataUpdated(UserAircraftConfigData data)
@@ -582,7 +587,7 @@ namespace xpilot
                                            NetworkRating::OBS,
                                            m_userAircraftData.Latitude,
                                            m_userAircraftData.Longitude,
-                                           m_userAircraftData.AltitudeMslM * 3.28084,
+                                           (m_userAircraftData.AltitudeMslM * 3.28084) - m_altitudeDelta,
                                            GetPressureAltitude(),
                                            m_userAircraftData.GroundSpeed,
                                            m_userAircraftData.Pitch,
@@ -905,12 +910,17 @@ namespace xpilot
         m_simPaused = isPaused;
     }
 
+    double NetworkManager::CalculatePressureAltitude() const
+    {
+        const double deltaPressure = (1013.25 - m_userAircraftData.BarometerSeaLevel) * 30.0; // 30ft per mbar
+        return (m_userAircraftData.AltitudeMslM * 3.28084) + deltaPressure;
+    }
+
     double NetworkManager::GetPressureAltitude() const
     {
         if(IsXplane12()) {
             return m_userAircraftData.AltitudePressure;
         }
-        const double deltaPressure = (1013.25 - m_userAircraftData.BarometerSeaLevel) * 30.0; // 30ft per mbar
-        return (m_userAircraftData.AltitudeMslM * 3.28084) + deltaPressure;
+        return CalculatePressureAltitude();
     }
 }

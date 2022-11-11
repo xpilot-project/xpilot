@@ -105,6 +105,7 @@ namespace xpilot
         QFile m_networkLog;
         QTextStream m_rawDataStream;
         bool m_simPaused = false;
+        double m_altitudeDelta = 0.0;
 
         QNetworkAccessManager *nam = nullptr;
         QPointer<QNetworkReply> m_reply;
@@ -154,6 +155,7 @@ namespace xpilot
         void LoginToNetwork(QString password);
 
         bool IsXplane12() const { return m_xplaneAdapter.XplaneVersion() >= 120000; }
+        double CalculatePressureAltitude() const;
         double GetPressureAltitude() const;
 
         const double POSITIONAL_VELOCITY_ZERO_TOLERANCE = 0.005;
