@@ -400,7 +400,7 @@ namespace xpilot
 
 		PerformGroundClamping(1.0 / _frameRatePeriod);
 
-		SetLocation(PredictedVisualState.Lat, PredictedVisualState.Lon, AdjustedAltitude.has_value() ? AdjustedAltitude.value() : PredictedVisualState.AltitudeTrue);
+		SetLocation(PredictedVisualState.Lat, PredictedVisualState.Lon, AdjustedAltitude.value_or(PredictedVisualState.AltitudeTrue));
 		SetPitch(PredictedVisualState.Pitch);
 		SetRoll(PredictedVisualState.Bank);
 		SetHeading(PredictedVisualState.Heading);
@@ -441,9 +441,20 @@ namespace xpilot
 		SetReversDeployRatio(Surfaces.reversRatio);
 		SetThrustReversRatio(Surfaces.reversRatio);
 		SetNoseWheelAngle(VisualState.NoseWheelAngle);
-		SetOnGrnd(IsReportedOnGround);
 
-		if (IsReportedOnGround)
+		// Show tire smoke briefly upon touchdown
+		if (IsReportedOnGround && !IsOnGrnd())
+		{
+			if (LocalTerrainElevation.has_value() &&
+				AdjustedAltitude.value_or(PredictedVisualState.AltitudeTrue) <= LocalTerrainElevation.value())
+			{
+				SetOnGrnd(IsReportedOnGround, IsFirstRenderPending ? NAN : 2.0f);
+			}
+		}
+
+		if (IsReportedOnGround && 
+			LocalTerrainElevation.has_value() && 
+			AdjustedAltitude.value_or(PredictedVisualState.AltitudeTrue) <= LocalTerrainElevation.value())
 		{
 			double rpm = (60 / (2 * M_PI * 3.2)) * abs(PositionalVelocities.X);
 			double rpmDeg = RpmToDegree(GetTireRotRpm(), _frameRatePeriod);
