@@ -168,7 +168,7 @@ namespace xpilot
             auto json = QJsonDocument::fromJson(response).object();
             if(json.contains("success") && json["success"].toBool()) {
                 if(json.contains("token")) {
-                    QString m_jwtToken = json["token"].toString();
+                    m_jwtToken = json["token"].toString();
                     LoginToNetwork(m_jwtToken);
                 }
             }
@@ -887,8 +887,15 @@ namespace xpilot
 
     void NetworkManager::OnRawDataSent(QString data)
     {
-        m_rawDataStream << QString("[%1] >>> %2").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"),
-                                                      data.replace(AppConfig::getInstance()->VatsimPasswordDecrypted, "********"));
+        if(!AppConfig::getInstance()->VatsimPasswordDecrypted.isEmpty())
+        {
+            data = data.replace(AppConfig::getInstance()->VatsimPasswordDecrypted, "******");
+        }
+        if(data.startsWith("#AA" + m_connectInfo.Callsign, Qt::CaseInsensitive))
+        {
+            data = data.replace(m_jwtToken, "******");
+        }
+        m_rawDataStream << QString("[%1] >>> %2").arg(QDateTime::currentDateTimeUtc().toString("HH:mm:ss.zzz"), data);
         m_rawDataStream.flush();
     }
 
