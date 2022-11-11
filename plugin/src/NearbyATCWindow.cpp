@@ -23,25 +23,29 @@
 #include "XPilot.h"
 #include "Utilities.h"
 
-namespace xpilot {
-
+namespace xpilot
+{
 	static std::list<NearbyATCList> NearbyList;
 
 	NearbyATCWindow::NearbyATCWindow(XPilot* instance) :
 		XPImgWindow(WND_MODE_FLOAT_CENTERED, WND_STYLE_SOLID, WndRect(0, 300, 500, 0)),
 		m_com1Frequency("sim/cockpit2/radios/actuators/com1_frequency_hz_833", ReadWrite),
 		m_com2Frequency("sim/cockpit2/radios/actuators/com2_frequency_hz_833", ReadWrite),
-		m_env(instance) {
+		m_env(instance)
+	{
 		SetWindowTitle("Nearby ATC");
 		SetWindowResizingLimits(535, 300, 535, 300);
 	}
 
-	void NearbyATCWindow::UpdateList(const NearbyAtcDto data) {
+	void NearbyATCWindow::UpdateList(const NearbyAtcDto data)
+	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 		{
 			NearbyList.clear();
-			if (data.stations.size() > 0) {
-				for (auto& station : data.stations) {
+			if (data.stations.size() > 0)
+			{
+				for (auto& station : data.stations)
+				{
 					NearbyATCList atc;
 					atc.SetCallsign(station.callsign.c_str());
 					atc.SetFrequency(station.frequency.c_str());
@@ -53,14 +57,16 @@ namespace xpilot {
 		}
 	}
 
-	void NearbyATCWindow::ClearList() {
+	void NearbyATCWindow::ClearList()
+	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 		{
 			NearbyList.clear();
 		}
 	}
 
-	void NearbyATCWindow::buildInterface() {
+	void NearbyATCWindow::buildInterface()
+	{
 		static ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY;
 		static ImColor headerColor(1, 100, 173);
 		static ImColor white(255, 255, 255);
@@ -69,12 +75,15 @@ namespace xpilot {
 
 		std::lock_guard<std::mutex> lock(m_mutex);
 		{
-			if (ImGui::BeginChild("OnlineControllers")) {
-				auto ctrCount = std::count_if(NearbyList.begin(), NearbyList.end(), [](NearbyATCList& v) {
+			if (ImGui::BeginChild("OnlineControllers"))
+			{
+				auto ctrCount = std::count_if(NearbyList.begin(), NearbyList.end(), [](NearbyATCList& v)
+				{
 					return ends_with<std::string>(v.GetCallsign(), "_CTR") || ends_with<std::string>(v.GetCallsign(), "_FSS");
-					});
+				});
 
-				if (ctrCount > 0) {
+				if (ctrCount > 0)
+				{
 					ImGui::PushStyleColor(ImGuiCol_ChildBg, headerColor.Value);
 					ImGui::BeginChild("#Center", ImVec2(600, 21));
 					ImGui::AlignTextToFramePadding();
@@ -82,15 +91,18 @@ namespace xpilot {
 					ImGui::EndChild();
 					ImGui::PopStyleColor();
 
-					if (ImGui::BeginTable("#center", 4, ImGuiTableFlags_RowBg)) {
+					if (ImGui::BeginTable("#center", 4, ImGuiTableFlags_RowBg))
+					{
 						ImGui::TableSetupColumn("#callsign", ImGuiTableColumnFlags_WidthFixed, 110);
 						ImGui::TableSetupColumn("#frequency", ImGuiTableColumnFlags_WidthFixed, 100);
 						ImGui::TableSetupColumn("#name", ImGuiTableColumnFlags_WidthStretch);
 						ImGui::TableSetupColumn("#actions", ImGuiTableColumnFlags_WidthFixed, 90);
 
-						for (auto& station : NearbyList) {
-							if (ends_with<std::string>(station.GetCallsign(), "_CTR") || 
-								ends_with<std::string>(station.GetCallsign(), "_FSS")) {
+						for (auto& station : NearbyList)
+						{
+							if (ends_with<std::string>(station.GetCallsign(), "_CTR") ||
+								ends_with<std::string>(station.GetCallsign(), "_FSS"))
+							{
 								RenderAtcStationEntry(station);
 							}
 						}
@@ -98,11 +110,13 @@ namespace xpilot {
 					}
 				}
 
-				auto appCount = std::count_if(NearbyList.begin(), NearbyList.end(), [](NearbyATCList& v) {
+				auto appCount = std::count_if(NearbyList.begin(), NearbyList.end(), [](NearbyATCList& v)
+				{
 					return ends_with<std::string>(v.GetCallsign(), "_APP") || ends_with<std::string>(v.GetCallsign(), "_DEP");
-					});
+				});
 
-				if (appCount > 0) {
+				if (appCount > 0)
+				{
 					ImGui::PushStyleColor(ImGuiCol_ChildBg, headerColor.Value);
 					ImGui::BeginChild("#Approach", ImVec2(600, 21));
 					ImGui::AlignTextToFramePadding();
@@ -110,15 +124,18 @@ namespace xpilot {
 					ImGui::EndChild();
 					ImGui::PopStyleColor();
 
-					if (ImGui::BeginTable("#approach", 4, ImGuiTableFlags_RowBg)) {
+					if (ImGui::BeginTable("#approach", 4, ImGuiTableFlags_RowBg))
+					{
 						ImGui::TableSetupColumn("#callsign", ImGuiTableColumnFlags_WidthFixed, 110);
 						ImGui::TableSetupColumn("#frequency", ImGuiTableColumnFlags_WidthFixed, 100);
 						ImGui::TableSetupColumn("#name", ImGuiTableColumnFlags_WidthStretch);
 						ImGui::TableSetupColumn("#actions", ImGuiTableColumnFlags_WidthFixed, 90);
 
-						for (auto& station : NearbyList) {
-							if (ends_with<std::string>(station.GetCallsign(), "_APP") || 
-								ends_with<std::string>(station.GetCallsign(), "_DEP")) {
+						for (auto& station : NearbyList)
+						{
+							if (ends_with<std::string>(station.GetCallsign(), "_APP") ||
+								ends_with<std::string>(station.GetCallsign(), "_DEP"))
+							{
 								RenderAtcStationEntry(station);
 							}
 						}
@@ -126,11 +143,13 @@ namespace xpilot {
 					}
 				}
 
-				auto towerCount = std::count_if(NearbyList.begin(), NearbyList.end(), [](NearbyATCList& v) {
+				auto towerCount = std::count_if(NearbyList.begin(), NearbyList.end(), [](NearbyATCList& v)
+				{
 					return ends_with<std::string>(v.GetCallsign(), "_TWR");
-					});
+				});
 
-				if (towerCount > 0) {
+				if (towerCount > 0)
+				{
 					ImGui::PushStyleColor(ImGuiCol_ChildBg, headerColor.Value);
 					ImGui::BeginChild("#Tower", ImVec2(600, 21));
 					ImGui::AlignTextToFramePadding();
@@ -138,14 +157,17 @@ namespace xpilot {
 					ImGui::EndChild();
 					ImGui::PopStyleColor();
 
-					if (ImGui::BeginTable("#tower", 4, ImGuiTableFlags_RowBg)) {
+					if (ImGui::BeginTable("#tower", 4, ImGuiTableFlags_RowBg))
+					{
 						ImGui::TableSetupColumn("#callsign", ImGuiTableColumnFlags_WidthFixed, 110);
 						ImGui::TableSetupColumn("#frequency", ImGuiTableColumnFlags_WidthFixed, 100);
 						ImGui::TableSetupColumn("#name", ImGuiTableColumnFlags_WidthStretch);
 						ImGui::TableSetupColumn("#actions", ImGuiTableColumnFlags_WidthFixed, 90);
 
-						for (auto& station : NearbyList) {
-							if (ends_with<std::string>(station.GetCallsign(), "_TWR")) {
+						for (auto& station : NearbyList)
+						{
+							if (ends_with<std::string>(station.GetCallsign(), "_TWR"))
+							{
 								RenderAtcStationEntry(station);
 							}
 						}
@@ -153,11 +175,13 @@ namespace xpilot {
 					}
 				}
 
-				auto groundCount = std::count_if(NearbyList.begin(), NearbyList.end(), [](NearbyATCList& v) {
+				auto groundCount = std::count_if(NearbyList.begin(), NearbyList.end(), [](NearbyATCList& v)
+				{
 					return ends_with<std::string>(v.GetCallsign(), "_GND");
-					});
+				});
 
-				if (groundCount > 0) {
+				if (groundCount > 0)
+				{
 					ImGui::PushStyleColor(ImGuiCol_ChildBg, headerColor.Value);
 					ImGui::BeginChild("#ground", ImVec2(600, 21));
 					ImGui::AlignTextToFramePadding();
@@ -165,14 +189,17 @@ namespace xpilot {
 					ImGui::EndChild();
 					ImGui::PopStyleColor();
 
-					if (ImGui::BeginTable("#ground", 4, ImGuiTableFlags_RowBg)) {
+					if (ImGui::BeginTable("#ground", 4, ImGuiTableFlags_RowBg))
+					{
 						ImGui::TableSetupColumn("#callsign", ImGuiTableColumnFlags_WidthFixed, 110);
 						ImGui::TableSetupColumn("#frequency", ImGuiTableColumnFlags_WidthFixed, 100);
 						ImGui::TableSetupColumn("#name", ImGuiTableColumnFlags_WidthStretch);
 						ImGui::TableSetupColumn("#actions", ImGuiTableColumnFlags_WidthFixed, 90);
 
-						for (auto& station : NearbyList) {
-							if (ends_with<std::string>(station.GetCallsign(), "_GND")) {
+						for (auto& station : NearbyList)
+						{
+							if (ends_with<std::string>(station.GetCallsign(), "_GND"))
+							{
 								RenderAtcStationEntry(station);
 							}
 						}
@@ -180,11 +207,13 @@ namespace xpilot {
 					}
 				}
 
-				auto deliveryCount = std::count_if(NearbyList.begin(), NearbyList.end(), [](NearbyATCList& v) {
+				auto deliveryCount = std::count_if(NearbyList.begin(), NearbyList.end(), [](NearbyATCList& v)
+				{
 					return ends_with<std::string>(v.GetCallsign(), "_DEL");
-					});
+				});
 
-				if (deliveryCount > 0) {
+				if (deliveryCount > 0)
+				{
 					ImGui::PushStyleColor(ImGuiCol_ChildBg, headerColor.Value);
 					ImGui::BeginChild("#delivery", ImVec2(600, 21));
 					ImGui::AlignTextToFramePadding();
@@ -192,14 +221,17 @@ namespace xpilot {
 					ImGui::EndChild();
 					ImGui::PopStyleColor();
 
-					if (ImGui::BeginTable("#delivery", 4, ImGuiTableFlags_RowBg)) {
+					if (ImGui::BeginTable("#delivery", 4, ImGuiTableFlags_RowBg))
+					{
 						ImGui::TableSetupColumn("#callsign", ImGuiTableColumnFlags_WidthFixed, 110);
 						ImGui::TableSetupColumn("#frequency", ImGuiTableColumnFlags_WidthFixed, 100);
 						ImGui::TableSetupColumn("#name", ImGuiTableColumnFlags_WidthStretch);
 						ImGui::TableSetupColumn("#actions", ImGuiTableColumnFlags_WidthFixed, 90);
 
-						for (auto& station : NearbyList) {
-							if (ends_with<std::string>(station.GetCallsign(), "_DEL")) {
+						for (auto& station : NearbyList)
+						{
+							if (ends_with<std::string>(station.GetCallsign(), "_DEL"))
+							{
 								RenderAtcStationEntry(station);
 							}
 						}
@@ -207,11 +239,13 @@ namespace xpilot {
 					}
 				}
 
-				auto atisCount = std::count_if(NearbyList.begin(), NearbyList.end(), [](NearbyATCList& v) {
+				auto atisCount = std::count_if(NearbyList.begin(), NearbyList.end(), [](NearbyATCList& v)
+				{
 					return ends_with<std::string>(v.GetCallsign(), "_ATIS");
-					});
+				});
 
-				if (atisCount > 0) {
+				if (atisCount > 0)
+				{
 					ImGui::PushStyleColor(ImGuiCol_ChildBg, headerColor.Value);
 					ImGui::BeginChild("#atis", ImVec2(600, 21));
 					ImGui::AlignTextToFramePadding();
@@ -219,14 +253,17 @@ namespace xpilot {
 					ImGui::EndChild();
 					ImGui::PopStyleColor();
 
-					if (ImGui::BeginTable("#atis", 4, ImGuiTableFlags_RowBg)) {
+					if (ImGui::BeginTable("#atis", 4, ImGuiTableFlags_RowBg))
+					{
 						ImGui::TableSetupColumn("#callsign", ImGuiTableColumnFlags_WidthFixed, 110);
 						ImGui::TableSetupColumn("#frequency", ImGuiTableColumnFlags_WidthFixed, 100);
 						ImGui::TableSetupColumn("#name", ImGuiTableColumnFlags_WidthStretch);
 						ImGui::TableSetupColumn("#actions", ImGuiTableColumnFlags_WidthFixed, 90);
 
-						for (auto& station : NearbyList) {
-							if (ends_with<std::string>(station.GetCallsign(), "_ATIS")) {
+						for (auto& station : NearbyList)
+						{
+							if (ends_with<std::string>(station.GetCallsign(), "_ATIS"))
+							{
 								RenderAtcStationEntry(station);
 							}
 						}
@@ -234,9 +271,11 @@ namespace xpilot {
 					}
 				}
 
-				if (m_env->IsNetworkConnected()) {
+				if (m_env->IsNetworkConnected())
+				{
 					ImGui::PushStyleColor(ImGuiCol_TableRowBg, headerColor.Value);
-					if (ImGui::BeginTable("#unicom", 4, ImGuiTableFlags_RowBg)) {
+					if (ImGui::BeginTable("#unicom", 4, ImGuiTableFlags_RowBg))
+					{
 						ImGui::TableSetupColumn("#callsign", ImGuiTableColumnFlags_WidthFixed, 110);
 						ImGui::TableSetupColumn("#frequency", ImGuiTableColumnFlags_WidthFixed, 100);
 						ImGui::TableSetupColumn("#name", ImGuiTableColumnFlags_WidthStretch);
@@ -256,7 +295,8 @@ namespace xpilot {
 						ImGui::SameLine(22);
 						std::string btn1 = "Frequency1#UNICOM";
 						ImGui::PushID(btn1.c_str());
-						if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM1 Frequency")) {
+						if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM1 Frequency"))
+						{
 							m_com1Frequency = 122800;
 						}
 						ImGui::PopID();
@@ -264,7 +304,8 @@ namespace xpilot {
 						ImGui::SameLine();
 						std::string btn2 = "Frequency2#UNICOM";
 						ImGui::PushID(btn2.c_str());
-						if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM2 Frequency")) {
+						if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM2 Frequency"))
+						{
 							m_com2Frequency = 122800;
 						}
 						ImGui::PopID();
@@ -297,7 +338,8 @@ namespace xpilot {
 		ImGui::TableSetColumnIndex(3);
 		std::string btn1 = "RequestInfo#" + station.GetCallsign();
 		ImGui::PushID(btn1.c_str());
-		if (ImGui::ButtonIcon(ICON_FA_INFO, "Request Station Information")) {
+		if (ImGui::ButtonIcon(ICON_FA_INFO, "Request Station Information"))
+		{
 			m_env->RequestStationInfo(station.GetCallsign().c_str());
 		}
 		ImGui::PopID();
@@ -305,7 +347,8 @@ namespace xpilot {
 		ImGui::SameLine();
 		std::string btn2 = "Frequency1#" + station.GetCallsign();
 		ImGui::PushID(btn2.c_str());
-		if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM1 Frequency")) {
+		if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM1 Frequency"))
+		{
 			m_com1Frequency = station.GetXplaneFrequency();
 		}
 		ImGui::PopID();
@@ -313,7 +356,8 @@ namespace xpilot {
 		ImGui::SameLine();
 		std::string btn3 = "Frequency2#" + station.GetCallsign();
 		ImGui::PushID(btn3.c_str());
-		if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM2 Frequency")) {
+		if (ImGui::ButtonIcon(ICON_FA_HEADSET, "Tune COM2 Frequency"))
+		{
 			m_com2Frequency = station.GetXplaneFrequency();
 		}
 		ImGui::PopID();

@@ -21,7 +21,8 @@
 
 #include "Dto.h"
 
-namespace xpilot {
+namespace xpilot
+{
 	class XPilot;
 
 	class NearbyATCList
@@ -42,7 +43,8 @@ namespace xpilot {
 		int m_xplaneFrequency;
 	};
 
-	class NearbyATCWindow : public XPImgWindow {
+	class NearbyATCWindow : public XPImgWindow
+	{
 	public:
 		NearbyATCWindow(XPilot* instance);
 		~NearbyATCWindow() final = default;

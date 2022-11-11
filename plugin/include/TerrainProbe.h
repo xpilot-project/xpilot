@@ -24,7 +24,8 @@
 
 #include <array>
 
-namespace xpilot {
+namespace xpilot
+{
 	class TerrainProbe
 	{
 	public:

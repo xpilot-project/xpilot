@@ -27,30 +27,37 @@
 
 using json = nlohmann::json;
 
-namespace xpilot {
-	void to_json(json& j, const CslPackage& p) {
+namespace xpilot
+{
+	void to_json(json& j, const CslPackage& p)
+	{
 		j = json{ {"Path", RemoveSystemPath(p.path)},{"Enabled",p.enabled} };
 	}
 
-	void from_json(const json& j, CslPackage& p) {
+	void from_json(const json& j, CslPackage& p)
+	{
 		j.at("Path").get_to(p.path);
 		j.at("Enabled").get_to(p.enabled);
 	}
 
-	inline std::string json_to_string(const json& j) {
-		if (j.type() == json::value_t::string) {
+	inline std::string json_to_string(const json& j)
+	{
+		if (j.type() == json::value_t::string)
+		{
 			return j.get<std::string>();
 		}
 
 		return j.dump(1);
 	}
 
-	Config& Config::GetInstance() {
+	Config& Config::GetInstance()
+	{
 		static auto&& config = Config();
 		return config;
 	}
 
-	bool Config::LoadConfig() {
+	bool Config::LoadConfig()
+	{
 		std::string configPath(GetPluginPath() + "Resources/Config.json");
 		std::ifstream ifs(configPath);
 
@@ -58,79 +65,105 @@ namespace xpilot {
 			SaveConfig(); // create configuration file if it does not exist
 
 		json jf = json::parse(ifs, nullptr, false);
-		if (!jf.empty()) {
-			if (jf.contains("ShowAircraftLabels")) {
+		if (!jf.empty())
+		{
+			if (jf.contains("ShowAircraftLabels"))
+			{
 				SetShowHideLabels(jf["ShowAircraftLabels"]);
 			}
-			if (jf.contains("DefaultIcaoType")) {
+			if (jf.contains("DefaultIcaoType"))
+			{
 				SetDefaultAcIcaoType(jf["DefaultIcaoType"]);
 			}
-			if (jf.contains("PluginPort")) {
-				if (jf["PluginPort"].is_string()) {
-					try {
+			if (jf.contains("PluginPort"))
+			{
+				if (jf["PluginPort"].is_string())
+				{
+					try
+					{
 						int port = std::stoi(jf["PluginPort"].get<std::string>());
 						SetTcpPort(port);
 					}
-					catch (...) {
+					catch (...)
+					{
 						SetTcpPort(53100);
 					}
 				}
-				else {
+				else
+				{
 					SetTcpPort(jf["PluginPort"]);
 				}
 			}
-			if (jf.contains("UseTcpSocket")) {
+			if (jf.contains("UseTcpSocket"))
+			{
 				SetUseTcpSocket(jf["UseTcpSocket"]);
 			}
-			if (jf.contains("DebugModelMatching")) {
+			if (jf.contains("DebugModelMatching"))
+			{
 				SetDebugModelMatching(jf["DebugModelMatching"]);
 			}
-			if (jf.contains("EnableDefaultAtis")) {
+			if (jf.contains("EnableDefaultAtis"))
+			{
 				SetDefaultAtisEnabled(jf["EnableDefaultAtis"]);
 			}
-			if (jf.contains("ShowNotificationBar")) {
+			if (jf.contains("ShowNotificationBar"))
+			{
 				SetNotificationPanelVisible(jf["ShowNotificationBar"]);
 			}
-			if (jf.contains("NotificationBarDisappearTime")) {
+			if (jf.contains("NotificationBarDisappearTime"))
+			{
 				SetNotificationPanelTimeout(jf["NotificationBarDisappearTime"]);
 			}
-			if (jf.contains("NotificationPanelPosition")) {
+			if (jf.contains("NotificationPanelPosition"))
+			{
 				SetNotificationPanelPosition(jf["NotificationPanelPosition"]);
 			}
-			if (jf.contains("OverrideContactAtc")) {
+			if (jf.contains("OverrideContactAtc"))
+			{
 				SetOverrideContactAtcCommand(jf["OverrideContactAtc"]);
 			}
-			if (jf.contains("DisableTcas")) {
+			if (jf.contains("DisableTcas"))
+			{
 				SetTcasDisabled(jf["DisableTcas"]);
 			}
-			if (jf.contains("LabelColor")) {
+			if (jf.contains("LabelColor"))
+			{
 				SetAircraftLabelColor(jf["LabelColor"]);
 			}
-			if (jf.contains("MaxLabelDist")) {
+			if (jf.contains("MaxLabelDist"))
+			{
 				int dist = std::max(1, std::min(jf.at("MaxLabelDist").get<int>(), 20));
 				SetMaxLabelDistance(dist);
 			}
-			if (jf.contains("LabelCutoffVis")) {
+			if (jf.contains("LabelCutoffVis"))
+			{
 				SetLabelCutoffVis(jf["LabelCutoffVis"]);
 			}
-			if (jf.contains("LogLevel")) {
+			if (jf.contains("LogLevel"))
+			{
 				SetLogLevel(jf["LogLevel"]);
 			}
-			if (jf.contains("EnableTransmitIndicator")) {
+			if (jf.contains("EnableTransmitIndicator"))
+			{
 				SetTransmitIndicatorEnabled(jf["EnableTransmitIndicator"]);
 			}
-			if (jf.contains("EnableAircraftSounds")) {
+			if (jf.contains("EnableAircraftSounds"))
+			{
 				SetAircraftSoundsEnabled(jf["EnableAircraftSounds"]);
 			}
-			if (jf.contains("AircraftSoundVolume")) {
+			if (jf.contains("AircraftSoundVolume"))
+			{
 				int vol = std::max(0, std::min(jf.at("AircraftSoundVolume").get<int>(), 100));
 				SetAircraftSoundVolume(vol);
 			}
-			if (jf.contains("CSL")) {
+			if (jf.contains("CSL"))
+			{
 				json cslpackages = jf["CSL"];
-				for (auto& p : cslpackages) {
+				for (auto& p : cslpackages)
+				{
 					auto csl = p.get<CslPackage>();
-					if (std::find(m_cslPackages.begin(), m_cslPackages.end(), csl.path) == m_cslPackages.end()) {
+					if (std::find(m_cslPackages.begin(), m_cslPackages.end(), csl.path) == m_cslPackages.end())
+					{
 						m_cslPackages.emplace_back(csl);
 					}
 				}
@@ -143,7 +176,8 @@ namespace xpilot {
 		return false;
 	}
 
-	bool Config::SaveConfig() {
+	bool Config::SaveConfig()
+	{
 		std::string configPath(GetPluginPath() + "Resources/Config.json");
 		std::ofstream file(configPath);
 
@@ -170,9 +204,12 @@ namespace xpilot {
 		j["AircraftSoundVolume"] = GetAircraftSoundVolume();
 
 		auto jsonObjects = json::array();
-		if (!m_cslPackages.empty()) {
-			for (CslPackage& p : m_cslPackages) {
-				if (!p.path.empty()) {
+		if (!m_cslPackages.empty())
+		{
+			for (CslPackage& p : m_cslPackages)
+			{
+				if (!p.path.empty())
+				{
 					json j = p;
 					jsonObjects.push_back(j);
 				}
@@ -190,80 +227,96 @@ namespace xpilot {
 		return true;
 	}
 
-	bool Config::HasValidPaths() const {
-		return (std::count_if(m_cslPackages.begin(), m_cslPackages.end(), [](const CslPackage& p) {
+	bool Config::HasValidPaths() const
+	{
+		return (std::count_if(m_cslPackages.begin(), m_cslPackages.end(), [](const CslPackage& p)
+		{
 			return !p.path.empty() && p.enabled && CountFilesInPath(p.path) > 0;
-			}) > 0);
+		}) > 0);
 	}
 
-	std::vector<CslPackage> Config::GetCSLPackages() const {
+	std::vector<CslPackage> Config::GetCSLPackages() const
+	{
 		return m_cslPackages;
 	}
 
-	void Config::SaveCSLPath(int idx, std::string path) {
-		while (size_t(idx) >= m_cslPackages.size()) {
+	void Config::SaveCSLPath(int idx, std::string path)
+	{
+		while (size_t(idx) >= m_cslPackages.size())
+		{
 			m_cslPackages.push_back({});
 		}
 		m_cslPackages[idx].path = path;
 	}
 
-	void Config::SaveCSLEnabled(int idx, bool enabled) {
-		while (size_t(idx) >= m_cslPackages.size()) {
+	void Config::SaveCSLEnabled(int idx, bool enabled)
+	{
+		while (size_t(idx) >= m_cslPackages.size())
+		{
 			m_cslPackages.push_back({});
 		}
 		m_cslPackages[idx].enabled = enabled;
 	}
 
-	void Config::SetAircraftLabelColor(int color) {
-		if (color > 0 && color <= 0xFFFFFF) {
+	void Config::SetAircraftLabelColor(int color)
+	{
+		if (color > 0 && color <= 0xFFFFFF)
+		{
 			m_labelColor = color;
 		}
-		else {
+		else
+		{
 			m_labelColor = COLOR_YELLOW;
 		}
 	}
 
-	void Config::SetNotificationPanelTimeout(int timeout) {
-		switch (timeout) {
-		case 5:
-			m_notificationPanelTimeout = 0;
-			break;
-		case 10:
-			m_notificationPanelTimeout = 1;
-			break;
-		case 15:
-			m_notificationPanelTimeout = 2;
-			break;
-		case 30:
-			m_notificationPanelTimeout = 3;
-			break;
-		case 60:
-			m_notificationPanelTimeout = 4;
-			break;
-		default:
-			if (timeout <= 4) {
-				m_notificationPanelTimeout = timeout;
-			}
-			else {
+	void Config::SetNotificationPanelTimeout(int timeout)
+	{
+		switch (timeout)
+		{
+			case 5:
+				m_notificationPanelTimeout = 0;
+				break;
+			case 10:
+				m_notificationPanelTimeout = 1;
+				break;
+			case 15:
 				m_notificationPanelTimeout = 2;
-			}
-			break;
+				break;
+			case 30:
+				m_notificationPanelTimeout = 3;
+				break;
+			case 60:
+				m_notificationPanelTimeout = 4;
+				break;
+			default:
+				if (timeout <= 4)
+				{
+					m_notificationPanelTimeout = timeout;
+				}
+				else
+				{
+					m_notificationPanelTimeout = 2;
+				}
+				break;
 		}
 	}
 
-	int Config::GetActualMessagePreviewTime() const {
-		switch (m_notificationPanelTimeout) {
-		case 0:
-			return 5;
-		case 1:
-			return 10;
-		case 2:
-			return 15;
-		case 3:
-			return 30;
-		case 4:
-		default:
-			return 60;
+	int Config::GetActualMessagePreviewTime() const
+	{
+		switch (m_notificationPanelTimeout)
+		{
+			case 0:
+				return 5;
+			case 1:
+				return 10;
+			case 2:
+				return 15;
+			case 3:
+				return 30;
+			case 4:
+			default:
+				return 60;
 		}
 	}
 }

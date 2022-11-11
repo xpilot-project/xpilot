@@ -57,7 +57,6 @@ include_directories(${CMAKE_SOURCE_DIR}/3rdparty/sdk/CHeaders/XPLM)
 
 set(INCLUDES
   include/AircraftManager.h
-  include/AudioEngine.h
   include/Config.h
   include/Constants.h
   include/Dto.h
@@ -81,7 +80,6 @@ source_group("Header Files" FILES ${INCLUDES})
 
 set(SRC
   src/AircraftManager.cpp
-  src/AudioEngine.cpp
   src/Config.cpp
   src/DataRefAccess.cpp
   src/FrameRateMonitor.cpp

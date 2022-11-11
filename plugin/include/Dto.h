@@ -5,7 +5,8 @@
 #include <string>
 #include <optional>
 
-namespace dto {
+namespace dto
+{
 	const std::string ADD_AIRCRAFT = "ADD";
 	const std::string AIRCRAFT_ADDED = "ADDED";
 	const std::string AIRCRAFT_DELETED = "DELETED";
@@ -34,13 +35,15 @@ namespace dto {
 
 using namespace dto;
 
-struct BaseDto {
+struct BaseDto
+{
 	std::string type;
 	msgpack::object dto;
 	MSGPACK_DEFINE(type, dto)
 };
 
-struct AddAircraftDto {
+struct AddAircraftDto
+{
 	std::string callsign;
 	std::string airline;
 	std::string typeCode;
@@ -52,47 +55,57 @@ struct AddAircraftDto {
 	double pitch;
 	MSGPACK_DEFINE(callsign, airline, typeCode, latitude, longitude, altitudeTrue, heading, bank, pitch);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return ADD_AIRCRAFT;
 	}
 };
 
-struct AircraftAddedDto {
+struct AircraftAddedDto
+{
 	std::string callsign;
 	MSGPACK_DEFINE(callsign);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return AIRCRAFT_ADDED;
 	}
 };
 
-struct AircraftDeletedDto {
+struct AircraftDeletedDto
+{
 	std::string callsign;
 	MSGPACK_DEFINE(callsign);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return AIRCRAFT_DELETED;
 	}
 };
 
-struct DeleteAircraftDto {
+struct DeleteAircraftDto
+{
 	std::string callsign;
 	std::string reason;
 	MSGPACK_DEFINE(callsign, reason);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return DELETE_AIRCRAFT;
 	}
 };
 
-struct DeleteAllAircraftDto {
+struct DeleteAllAircraftDto
+{
 	MSGPACK_DEFINE();
-	static std::string getName() {
+	static std::string getName()
+	{
 		return DELETE_ALL_AIRCRAFT;
 	}
 };
 
-struct AircraftConfigDto {
+struct AircraftConfigDto
+{
 	std::string callsign;
 	std::optional<bool> fullConfig;
 	std::optional<bool> enginesOn;
@@ -108,12 +121,14 @@ struct AircraftConfigDto {
 	std::optional<bool> taxiLightsOn;
 	MSGPACK_DEFINE(callsign, fullConfig, enginesOn, enginesReversing, onGround, flaps, gearDown, beaconLightsOn, landingLightsOn, navLightsOn, strobeLightsOn, taxiLightsOn);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return AIRCRAFT_CONFIG;
 	}
 };
 
-struct FastPositionUpdateDto {
+struct FastPositionUpdateDto
+{
 	std::string callsign;
 	double latitude;
 	double longitude;
@@ -133,89 +148,107 @@ struct FastPositionUpdateDto {
 	double ownAircraftElevation;
 	MSGPACK_DEFINE(callsign, latitude, longitude, altitudeTrue, altitudeAgl, heading, bank, pitch, vx, vy, vz, vp, vh, vb, noseWheelAngle, speed, ownAircraftElevation);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return FAST_POSITION_UPDATE;
 	}
 };
 
-struct HeartbeatDto {
+struct HeartbeatDto
+{
 	std::string callsign;
 	MSGPACK_DEFINE(callsign);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return HEARTBEAT;
 	}
 };
 
-struct PluginVersionDto {
+struct PluginVersionDto
+{
 	int version;
 	MSGPACK_DEFINE(version);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return PLUGIN_VER;
 	}
 };
 
-struct ValidateCslDto {
+struct ValidateCslDto
+{
 	bool isValid;
 	MSGPACK_DEFINE(isValid);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return VALIDATE_CSL;
 	}
 };
 
-struct RadioMessageSentDto {
+struct RadioMessageSentDto
+{
 	std::string message;
 	MSGPACK_DEFINE(message);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return RADIO_MESSAGE_SENT;
 	}
 };
 
-struct RadioMessageReceivedDto {
+struct RadioMessageReceivedDto
+{
 	std::string from;
 	std::string message;
 	bool isDirect;
 	MSGPACK_DEFINE(from, message, isDirect);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return RADIO_MESSAGE_RECEIVED;
 	}
 };
 
-struct NotificationPostedDto {
+struct NotificationPostedDto
+{
 	std::string message;
 	int64_t color;
 	MSGPACK_DEFINE(message, color);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return NOTIFICATION_POSTED;
 	}
 };
 
-struct PrivateMessageSentDto {
+struct PrivateMessageSentDto
+{
 	std::string to;
 	std::string message;
 	MSGPACK_DEFINE(to, message);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return PRIVATE_MESSAGE_SENT;
 	}
 };
 
-struct PrivateMessageReceivedDto {
+struct PrivateMessageReceivedDto
+{
 	std::string from;
 	std::string message;
 	MSGPACK_DEFINE(from, message);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return PRIVATE_MESSAGE_RECEIVED;
 	}
 };
 
-struct NearbyAtcStationDto {
+struct NearbyAtcStationDto
+{
 	std::string callsign;
 	std::string name;
 	std::string frequency;
@@ -223,83 +256,101 @@ struct NearbyAtcStationDto {
 	MSGPACK_DEFINE(callsign, name, frequency, xplaneFrequency);
 };
 
-struct NearbyAtcDto {
+struct NearbyAtcDto
+{
 	std::vector<NearbyAtcStationDto> stations;
 	MSGPACK_DEFINE(stations);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return NEARBY_ATC;
 	}
 };
 
-struct RequestMetarDto {
+struct RequestMetarDto
+{
 	std::string station;
 	MSGPACK_DEFINE(station);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return REQUEST_METAR;
 	}
 };
 
-struct RequestStationInfoDto {
+struct RequestStationInfoDto
+{
 	std::string station;
 	MSGPACK_DEFINE(station);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return REQUEST_STATION_INFO;
 	}
 };
 
-struct WallopSentDto {
+struct WallopSentDto
+{
 	std::string message;
 	MSGPACK_DEFINE(message);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return WALLOP_SENT;
 	}
 };
 
-struct ForcedDisconnectDto {
+struct ForcedDisconnectDto
+{
 	std::string reason;
 	MSGPACK_DEFINE(reason);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return FORCE_DISCONNECT;
 	}
 };
 
-struct ConnectedDto {
+struct ConnectedDto
+{
 	std::string callsign;
 	std::string selcal;
 	MSGPACK_DEFINE(callsign, selcal);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return CONNECTED;
 	}
 };
 
-struct DisconnectedDto {
+struct DisconnectedDto
+{
 	MSGPACK_DEFINE();
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return DISCONNECTED;
 	}
 };
 
-struct ShutdownDto {
+struct ShutdownDto
+{
 	MSGPACK_DEFINE();
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return SHUTDOWN;
 	}
 };
 
-struct ComStationCallsign {
+struct ComStationCallsign
+{
 	int com;
 	std::string callsign;
 	MSGPACK_DEFINE(com, callsign);
 
-	static std::string getName() {
+	static std::string getName()
+	{
 		return STATION_CALLSIGN;
 	}
 };
@@ -307,7 +358,8 @@ struct ComStationCallsign {
 ////////
 
 template<class T>
-static bool encodeDto(msgpack::sbuffer& dtoBuf, const T& dto) {
+static bool encodeDto(msgpack::sbuffer& dtoBuf, const T& dto)
+{
 	msgpack::zone z;
 	BaseDto base{ dto.getName(),msgpack::object(dto, z) };
 
@@ -315,7 +367,8 @@ static bool encodeDto(msgpack::sbuffer& dtoBuf, const T& dto) {
 	// temp buffer, then copy it into the actual payload buffer.
 	msgpack::sbuffer dtoTempBuf;
 	msgpack::pack(dtoTempBuf, base);
-	if (dtoTempBuf.size() > UINT16_MAX) {
+	if (dtoTempBuf.size() > UINT16_MAX)
+	{
 		return false;
 	}
 

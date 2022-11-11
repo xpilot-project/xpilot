@@ -19,6 +19,8 @@
 #ifndef NetworkAircraft_h
 #define NetworkAircraft_h
 
+#define INCLUDE_FMOD_SOUND 1
+
 #include "XPilotAPI.h"
 #include "TerrainProbe.h"
 #include "Utilities.h"
@@ -34,7 +36,8 @@
 #include <queue>
 #include <mutex>
 
-namespace xpilot {
+namespace xpilot
+{
 	struct AircraftVisualState
 	{
 		double Lat;
@@ -61,15 +64,6 @@ namespace xpilot {
 		double LocalValue;
 	};
 
-	enum class EngineClassType
-	{
-		Helicopter,
-		PistonProp,
-		TurboProp,
-		JetEngine,
-		Unknown
-	};
-
 	struct FlightModelInfo
 	{
 		std::string category;
@@ -92,6 +86,55 @@ namespace xpilot {
 	constexpr long TERRAIN_ELEVATION_DATA_USABLE_AGE = 2000;
 	constexpr double MAX_USABLE_ALTITUDE_AGL = 100.0;
 	constexpr double TERRAIN_ELEVATION_MAX_SLOPE = 3.0;
+	constexpr double MIN_AGL_FOR_CLIMBOUT = 50.0;
+	constexpr double TERRAIN_OFFSET_WINDOW_LANDING = 2.0;
+	constexpr double TERRAIN_OFFSET_WINDOW_CLIMBOUT = 10.0;
+	constexpr double MIN_TERRAIN_OFFSET_MAGNITUDE = 0.1;
+
+	inline double CalculateNormalizedDelta(double start, double end, double lowerBound, double upperBound)
+	{
+		double range = upperBound - lowerBound;
+		double halfRange = range / 2.0;
+
+		if (abs(end - start) > halfRange)
+		{
+			end += (end > start ? -range : range);
+		}
+
+		return end - start;
+	}
+
+	inline double NormalizeDegrees(double value, double lowerBound, double upperBound)
+	{
+		double range = upperBound - lowerBound;
+		if (value < lowerBound)
+		{
+			return value + range;
+		}
+		if (value > upperBound)
+		{
+			return value - range;
+		}
+		return value;
+	}
+
+	inline float RpmToDegree(float rpm, double s)
+	{
+		return rpm / 60.0f * float(s) * 360.0f;
+	}
+
+	template<typename T>
+	void Interpolate(T& surface, const float& target, float _diffMs, float _moveTime, float _max = 1.0f)
+	{
+		const float f = surface - target;
+		if (abs(f) > std::numeric_limits<float>::epsilon())
+		{
+			const auto diffRemaining = target - surface;
+			const auto diffThisFrame = _diffMs / _moveTime;
+			surface += copysign(diffThisFrame, diffRemaining);
+			surface = (std::max)(0.0f, (std::min)(surface, _max));
+		}
+	}
 
 	class NetworkAircraft : public XPMP2::Aircraft
 	{
@@ -126,8 +169,7 @@ namespace xpilot {
 		int64_t PreviousSurfaceUpdateTime;
 		XPMPPlaneSurfaces_t Surfaces;
 		XPMPPlaneRadar_t Radar;
-
-		FlightModel flightModel;
+		FlightModel AircraftFlightModel;
 
 		TerrainProbe LocalTerrainProbe;
 		std::optional<double> LocalTerrainElevation = {};
@@ -149,9 +191,6 @@ namespace xpilot {
 		Vector3 RotationalErrorVelocities;
 		int64_t ApplyErrorVelocitiesUntil;
 		int64_t LastVelocityUpdate;
-
-		int SoundChannelId;
-		EngineClassType EngineClass;
 
 	protected:
 		virtual void UpdatePosition(float, int) override;

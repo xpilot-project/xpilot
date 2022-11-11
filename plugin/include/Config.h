@@ -19,25 +19,31 @@
 #ifndef Config_h
 #define Config_h
 
+#define INCLUDE_FMOD_SOUND 1 
+
 #include "Constants.h"
 #include "XPMPMultiplayer.h"
 
 #include <string>
 #include <vector>
 
-namespace xpilot {
+namespace xpilot
+{
 	struct CslPackage
 	{
 		std::string path;
 		bool enabled;
 
-		inline bool empty() const {
+		inline bool empty() const
+		{
 			return path.empty();
 		}
-		inline bool operator== (const CslPackage& o) const {
+		inline bool operator== (const CslPackage& o) const
+		{
 			return path == o.path;
 		}
-		inline bool operator== (const std::string& s) const {
+		inline bool operator== (const std::string& s) const
+		{
 			return path == s;
 		}
 	};
@@ -69,7 +75,8 @@ namespace xpilot {
 		bool HasValidPaths() const;
 
 		std::string GetDefaultAcIcaoType() const { return m_defaultAcIcaoType; }
-		void SetDefaultAcIcaoType(const std::string type) {
+		void SetDefaultAcIcaoType(const std::string type)
+		{
 			m_defaultAcIcaoType = type;
 			XPMPSetDefaultPlaneICAO(type.c_str());
 		}
@@ -119,10 +126,18 @@ namespace xpilot {
 		void SetTransmitIndicatorEnabled(bool enabled) { m_transmitIndicatorEnabled = enabled; }
 		bool GetTransmitIndicatorEnabled() const { return m_transmitIndicatorEnabled; }
 
-		void SetAircraftSoundsEnabled(bool enabled) { m_aircraftSoundsEnabled = enabled; }
+		void SetAircraftSoundsEnabled(bool enabled)
+		{
+			m_aircraftSoundsEnabled = enabled;
+			XPMPSoundEnable(enabled);
+		}
 		bool GetAircraftSoundsEnabled() const { return m_aircraftSoundsEnabled; }
 
-		void SetAircraftSoundVolume(int volume) { m_aircraftSoundsVolume = volume; }
+		void SetAircraftSoundVolume(int volume)
+		{
+			m_aircraftSoundsVolume = volume;
+			XPMPSoundSetMasterVolume(volume / 100.0f);
+		}
 		int GetAircraftSoundVolume() const { return std::max(0, std::min(m_aircraftSoundsVolume, 100)); }
 
 	private:

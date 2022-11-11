@@ -27,7 +27,8 @@
 #include <vector>
 #include <sstream>
 
-namespace xpilot {
+namespace xpilot
+{
 	class XPilot;
 
 	class FrameRateMonitor

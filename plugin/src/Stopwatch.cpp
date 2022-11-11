@@ -31,81 +31,97 @@
 
 #include "Stopwatch.h"
 
-namespace xpilot {
+namespace xpilot
+{
 	std::ostream&
-		operator<<(std::ostream& os, const Stopwatch& stopwatch) {
+		operator<<(std::ostream& os, const Stopwatch& stopwatch)
+	{
 		stopwatch.print("", Stopwatch::SECONDS, os);
 		return os;
 	}
 
-	Stopwatch::Stopwatch() {
+	Stopwatch::Stopwatch()
+	{
 		reset();
 	}
 
-	void Stopwatch::start() {
-		if (!isRunning()) {
+	void Stopwatch::start()
+	{
+		if (!isRunning())
+		{
 			_prev_elapsed += _end - _beg;  // store prev. time, if we resume
 			_end = _beg = get_timestamp(); // invariant: _end >= _beg
 			_running = true;               // we start running
 		}
 	}
 
-	void Stopwatch::stop() {
-		if (isRunning()) {
+	void Stopwatch::stop()
+	{
+		if (isRunning())
+		{
 			_end = get_timestamp(); // invariant: _end >= _beg
 			_running = false;       // we stopped running
 		}
 	}
 
-	bool Stopwatch::isRunning() const {
+	bool Stopwatch::isRunning() const
+	{
 		return _running;
 	}
 
-	double Stopwatch::elapsed(timeunit_t timeunit) const {
+	double Stopwatch::elapsed(timeunit_t timeunit) const
+	{
 		assert(correct_timeunit(timeunit));
 		return 1.0 * elapsed_timestamp() / timeunit;
 	}
 
-	Stopwatch::timestamp_t Stopwatch::elapsed_timestamp() const {
-		if (isRunning()) {
+	Stopwatch::timestamp_t Stopwatch::elapsed_timestamp() const
+	{
+		if (isRunning())
+		{
 			// get intermediate elapsed time; do not change _end, to be const
 			return get_timestamp() - _beg + _prev_elapsed;
-		} else {
+		}
+		else
+		{
 			// stopped before, get time of current measurment + last measurments
 			return _end - _beg + _prev_elapsed;
 		}
 	}
 
-	void Stopwatch::reset() {
+	void Stopwatch::reset()
+	{
 		_beg = 0; // invariant: _end >= _beg
 		_end = 0;
 		_prev_elapsed = 0; // erase all prev. measurments
 		_running = false;  // of course not running.
 	}
 
-	void Stopwatch::print(const char* msg, timeunit_t timeunit, std::ostream& os) const {
+	void Stopwatch::print(const char* msg, timeunit_t timeunit, std::ostream& os) const
+	{
 		assert(correct_timeunit(timeunit));
 		double e = elapsed(timeunit);
 		os << msg << e;
-		switch (timeunit) {
-		case MICROSEC:
-			os << " microsec.";
-			break;
-		case MILLISEC:
-			os << " millisec.";
-			break;
-		case SECONDS:
-			os << " sec.";
-			break;
-		case MINUTES:
-			os << " min.";
-			break;
-		case HOURS:
-			os << " h.";
-			break;
-		case DAYS:
-			os << " days.";
-			break;
+		switch (timeunit)
+		{
+			case MICROSEC:
+				os << " microsec.";
+				break;
+			case MILLISEC:
+				os << " millisec.";
+				break;
+			case SECONDS:
+				os << " sec.";
+				break;
+			case MINUTES:
+				os << " min.";
+				break;
+			case HOURS:
+				os << " h.";
+				break;
+			case DAYS:
+				os << " days.";
+				break;
 		}
 	}
 
@@ -117,12 +133,14 @@ namespace xpilot {
 #include <stdint.h> // portable: uint64_t   MSVC: __int64 
 
 	// MSVC defines this in winsock2.h!?
-	typedef struct timeval {
+	typedef struct timeval
+	{
 		long tv_sec;
 		long tv_usec;
 	} timeval;
 
-	int gettimeofday(struct timeval* tp, struct timezone* tzp) {
+	int gettimeofday(struct timeval* tp, struct timezone* tzp)
+	{
 		// Note: some broken versions only have 8 trailing zero's, the correct epoch has 9 trailing zero's
 		// This magic number is the number of 100 nanosecond intervals since January 1, 1601 (UTC)
 		// until 00:00:00 January 1, 1970 
@@ -144,7 +162,8 @@ namespace xpilot {
 
 #endif
 
-	Stopwatch::timestamp_t Stopwatch::get_timestamp() {
+	Stopwatch::timestamp_t Stopwatch::get_timestamp()
+	{
 		struct timeval now;
 		gettimeofday(&now, (struct timezone*)0);
 		return (Stopwatch::timestamp_t)now.tv_usec

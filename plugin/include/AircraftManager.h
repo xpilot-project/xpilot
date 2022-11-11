@@ -22,17 +22,19 @@
 #include "XPilot.h"
 #include "NetworkAircraft.h"
 #include "DataRefAccess.h"
-#include "AudioEngine.h"
 
 #include <string>
 #include <map>
 #include <mutex>
 
-namespace xpilot {
+namespace xpilot
+{
 	typedef std::map<std::string, std::unique_ptr<NetworkAircraft>> mapPlanesTy;
 	extern mapPlanesTy mapPlanes;
-	inline mapPlanesTy::iterator mapGetNextAircraft(mapPlanesTy::iterator iter) {
-		return std::find_if(std::next(iter), mapPlanes.end(), [](const mapPlanesTy::value_type& p) {
+	inline mapPlanesTy::iterator mapGetNextAircraft(mapPlanesTy::iterator iter)
+	{
+		return std::find_if(std::next(iter), mapPlanes.end(), [](const mapPlanesTy::value_type& p)
+		{
 			return p.second.get();
 		});
 	}
@@ -51,31 +53,19 @@ namespace xpilot {
 		void HandleRemovePlane(const std::string& callsign);
 		void RemoveAllPlanes();
 
-	protected:
-		DataRefAccess<int> m_soundOn;
-		DataRefAccess<int> m_simPaused;
-		DataRefAccess<float> m_masterVolumeRatio;
-		DataRefAccess<float> m_engineVolumeRatio;
-		DataRefAccess<float> m_exteriorVolumeRatio;
-		DataRefAccess<float> m_propVolumeRatio;
-		DataRefAccess<float> m_environmentVolumeRatio;
-		DataRefAccess<int> m_isViewExternal;
-		DataRefAccess<float> m_canopyOpenRatio;
-		DataRefAccess<std::vector<float>> m_userDoorOpenRatio;
-
 	private:
-		XPilot* mEnv;
-		std::unique_ptr<CAudioEngine> m_audioEngine;
-
 		NetworkAircraft* GetAircraft(const std::string& callsign);
 		static float AircraftMaintenanceCallback(float, float, int, void* ref);
 		static void AircraftNotifierCallback(XPMPPlaneID inPlaneID, XPMPPlaneNotification inNotification, void* ref);
+		XPilot* mEnv;
 
 		std::thread::id m_xplaneThread;
-		void ThisThreadIsXplane() {
+		void ThisThreadIsXplane()
+		{
 			m_xplaneThread = std::this_thread::get_id();
 		}
-		bool IsXplaneThread()const {
+		bool IsXplaneThread()const
+		{
 			return std::this_thread::get_id() == m_xplaneThread;
 		}
 	};

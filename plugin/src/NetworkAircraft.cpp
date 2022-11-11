@@ -25,49 +25,8 @@
 #include <regex>
 #include <cassert>
 
-namespace xpilot {
-	constexpr double MIN_AGL_FOR_CLIMBOUT = 50.0;
-	constexpr double TERRAIN_OFFSET_WINDOW_LANDING = 2.0;
-	constexpr double TERRAIN_OFFSET_WINDOW_CLIMBOUT = 10.0;
-	constexpr double MIN_TERRAIN_OFFSET_MAGNITUDE = 0.1;
-
-	double CalculateNormalizedDelta(double start, double end, double lowerBound, double upperBound) {
-		double range = upperBound - lowerBound;
-		double halfRange = range / 2.0;
-
-		if (abs(end - start) > halfRange) {
-			end += (end > start ? -range : range);
-		}
-
-		return end - start;
-	}
-
-	double NormalizeDegrees(double value, double lowerBound, double upperBound) {
-		double range = upperBound - lowerBound;
-		if (value < lowerBound) {
-			return value + range;
-		}
-		if (value > upperBound) {
-			return value - range;
-		}
-		return value;
-	}
-
-	float RpmToDegree(float rpm, double s) {
-		return rpm / 60.0f * float(s) * 360.0f;
-	}
-
-	template<typename T>
-	void Interpolate(T& surface, const float& target, float _diffMs, float _moveTime, float _max = 1.0f) {
-		const float f = surface - target;
-		if (abs(f) > std::numeric_limits<float>::epsilon()) {
-			const auto diffRemaining = target - surface;
-			const auto diffThisFrame = _diffMs / _moveTime;
-			surface += copysign(diffThisFrame, diffRemaining);
-			surface = (std::max)(0.0f, (std::min)(surface, _max));
-		}
-	}
-
+namespace xpilot
+{
 	NetworkAircraft::NetworkAircraft(
 		const std::string& _callsign,
 		const AircraftVisualState& _visualState,
@@ -76,7 +35,8 @@ namespace xpilot {
 		const std::string& _livery,
 		XPMPPlaneID _modeS_id = 0,
 		const std::string& _modelName = "") :
-		XPMP2::Aircraft(_callsign, _icaoType, _icaoAirline, _livery, _modeS_id, _modelName) {
+		XPMP2::Aircraft(_callsign, _icaoType, _icaoAirline, _livery, _modeS_id, _modelName)
+	{
 		strScpy(acInfoTexts.tailNum, _callsign.c_str(), sizeof(acInfoTexts.tailNum));
 		strScpy(acInfoTexts.icaoAcType, acIcaoType.c_str(), sizeof(acInfoTexts.icaoAcType));
 		strScpy(acInfoTexts.icaoAirline, acIcaoAirline.c_str(), sizeof(acInfoTexts.icaoAirline));
@@ -94,35 +54,14 @@ namespace xpilot {
 		VisualState = _visualState;
 		PositionalVelocities = Vector3::Zero();
 		RotationalVelocities = Vector3::Zero();
-
-		auto model = GetModelInfo();
-		flightModel = GetFlightModel(model);
-
-		EngineClass = EngineClassType::JetEngine;
-		if (model.doc8643Classification.size() > 0) {
-			// helicopter or gyrocopter
-			if (model.doc8643Classification[0] == 'H' || model.doc8643Classification[0] == 'G') {
-				EngineClass = EngineClassType::Helicopter;
-			}
-			// jet
-			else if (model.doc8643Classification.size() >= 2 && model.doc8643Classification[2] == 'J') {
-				EngineClass = EngineClassType::JetEngine;
-			}
-			// piston prop
-			else if (model.doc8643Classification.size() >= 2 && model.doc8643Classification[2] == 'P') {
-				EngineClass = EngineClassType::PistonProp;
-			}
-			// turbo prop
-			else if (model.doc8643Classification.size() >= 2 && model.doc8643Classification[2] == 'T') {
-				EngineClass = EngineClassType::TurboProp;
-			}
-		}
+		AircraftFlightModel = GetFlightModel(GetModelInfo());
 	}
 
 	AircraftVisualState NetworkAircraft::ExtrapolatePosition(
 		Vector3 velocityVector,
 		Vector3 rotationVector,
-		double interval) {
+		double interval)
+	{
 		double lat_change = MetersToDegrees(velocityVector.Z * interval);
 		double new_lat = NormalizeDegrees(PredictedVisualState.Lat + lat_change, -90.0, 90.0);
 
@@ -136,11 +75,14 @@ namespace xpilot {
 		double bank;
 		double heading;
 
-		if (rotationVector == Vector3::Zero()) {
+		if (rotationVector == Vector3::Zero())
+		{
 			pitch = PredictedVisualState.Pitch;
 			bank = PredictedVisualState.Bank;
 			heading = PredictedVisualState.Heading;
-		} else {
+		}
+		else
+		{
 			Quaternion current_orientation = Quaternion::FromEuler(
 				DegreesToRadians(PredictedVisualState.Pitch),
 				DegreesToRadians(PredictedVisualState.Heading),
@@ -179,34 +121,43 @@ namespace xpilot {
 		return predictedVisualState;
 	}
 
-	void NetworkAircraft::RecordTerrainElevationHistory(double currentTimestamp) {
+	void NetworkAircraft::RecordTerrainElevationHistory(double currentTimestamp)
+	{
 		if (!LocalTerrainElevation.has_value())
+		{
 			return;
+		}
 
 		HasUsableTerrainElevationData = false;
 
-		TerrainElevationHistory.remove_if([&](TerrainElevationData& meta) {
+		TerrainElevationHistory.remove_if([&](TerrainElevationData& meta)
+		{
 			return meta.Timestamp < (currentTimestamp - TERRAIN_ELEVATION_DATA_USABLE_AGE + 250);
 		});
 
-		if (VisualState.AltitudeAgl.has_value() && (VisualState.AltitudeAgl.value() <= MAX_USABLE_ALTITUDE_AGL)) {
+		if (VisualState.AltitudeAgl.has_value() && (VisualState.AltitudeAgl.value() <= MAX_USABLE_ALTITUDE_AGL))
+		{
 			TerrainElevationData data{};
 			data.Timestamp = currentTimestamp;
 			data.Location.Latitude = VisualState.Lat;
 			data.Location.Longitude = VisualState.Lon;
 			data.LocalValue = LocalTerrainElevation.value();
 			TerrainElevationHistory.push_back(data);
-		} else {
+		}
+		else
+		{
 			return;
 		}
 
-		if (TerrainElevationHistory.size() < 2) {
+		if (TerrainElevationHistory.size() < 2)
+		{
 			return;
 		}
 
 		auto startSample = TerrainElevationHistory.front();
 		auto endSample = TerrainElevationHistory.back();
-		if ((endSample.Timestamp - startSample.Timestamp) < TERRAIN_ELEVATION_DATA_USABLE_AGE) {
+		if ((endSample.Timestamp - startSample.Timestamp) < TERRAIN_ELEVATION_DATA_USABLE_AGE)
+		{
 			return;
 		}
 
@@ -216,20 +167,24 @@ namespace xpilot {
 		double remoteElevationDelta = abs(startSample.RemoteValue - endSample.RemoteValue);
 		double localElevationDelta = abs(startSample.LocalValue - endSample.LocalValue);
 		double remoteSlope = RadiansToDegrees(atan(remoteElevationDelta / distance));
-		if (remoteSlope > TERRAIN_ELEVATION_MAX_SLOPE) {
+		if (remoteSlope > TERRAIN_ELEVATION_MAX_SLOPE)
+		{
 			return;
 		}
 		double localSlope = RadiansToDegrees(atan(localElevationDelta / distance));
-		if (localSlope > TERRAIN_ELEVATION_MAX_SLOPE) {
+		if (localSlope > TERRAIN_ELEVATION_MAX_SLOPE)
+		{
 			return;
 		}
 
 		HasUsableTerrainElevationData = true;
 	}
 
-	void NetworkAircraft::UpdateVelocityVectors() {
+	void NetworkAircraft::UpdateVelocityVectors()
+	{
 		auto currentTimestamp = PrecisionTimestamp();
-		if (currentTimestamp - LastVelocityUpdate > 500) {
+		if (currentTimestamp - LastVelocityUpdate > 500)
+		{
 			ClearRotationalVelocities();
 		}
 		LastVelocityUpdate = currentTimestamp;
@@ -237,9 +192,11 @@ namespace xpilot {
 		UpdateErrorVectors(currentTimestamp);
 	}
 
-	void NetworkAircraft::PerformGroundClamping(float frameRate) {
+	void NetworkAircraft::PerformGroundClamping(float frameRate)
+	{
 		LocalTerrainElevation = {};
-		if (PredictedVisualState.AltitudeTrue < 18000.0) {
+		if (PredictedVisualState.AltitudeTrue < 18000.0)
+		{
 			LocalTerrainElevation = LocalTerrainProbe.GetTerrainElevation(
 				PredictedVisualState.Lat,
 				PredictedVisualState.Lon
@@ -248,12 +205,17 @@ namespace xpilot {
 
 		AdjustedAltitude = {};
 		if (!LocalTerrainElevation.has_value())
+		{
 			return;
+		}
 
 		double agl;
-		if (VisualState.AltitudeAgl.has_value()) {
+		if (VisualState.AltitudeAgl.has_value())
+		{
 			agl = VisualState.AltitudeAgl.value();
-		} else {
+		}
+		else
+		{
 			agl = PredictedVisualState.AltitudeTrue - LocalTerrainElevation.value();
 		}
 
@@ -261,43 +223,56 @@ namespace xpilot {
 		if (!HasUsableTerrainElevationData
 			&& !IsReportedOnGround
 			&& (TargetTerrainOffset == 0.0)
-			&& (TerrainOffset == 0.0)) {
+			&& (TerrainOffset == 0.0))
+		{
 			AdjustedAltitude = PredictedVisualState.AltitudeTrue;
 			EnsureAboveGround();
 			return;
 		}
 
 		double newTargetOffset;
-		if (HasUsableTerrainElevationData || IsReportedOnGround) {
+		if (HasUsableTerrainElevationData || IsReportedOnGround)
+		{
 			double remoteTerrainElevation = VisualState.AltitudeTrue - agl;
 			newTargetOffset = Round(LocalTerrainElevation.value() - remoteTerrainElevation, 2);
 
 			// correct for terrain elevation differences in X-Plane
-			if (IsReportedOnGround && (VisualState.AltitudeTrue + newTargetOffset > LocalTerrainElevation.value())) {
+			if (IsReportedOnGround && (VisualState.AltitudeTrue + newTargetOffset > LocalTerrainElevation.value()))
+			{
 				double adj = LocalTerrainElevation.value() - (VisualState.AltitudeTrue + newTargetOffset);
 				newTargetOffset += adj;
 			}
-		} else {
+		}
+		else
+		{
 			newTargetOffset = 0.0;
 		}
 
-		if (newTargetOffset != TargetTerrainOffset) {
+		if (newTargetOffset != TargetTerrainOffset)
+		{
 			TargetTerrainOffset = newTargetOffset;
 			TerrainOffsetMagnitude = abs(TargetTerrainOffset - TerrainOffset);
 			TerrainOffsetMagnitude = std::max(TerrainOffsetMagnitude, MIN_TERRAIN_OFFSET_MAGNITUDE);
 		}
 
-		if (TerrainOffset != TargetTerrainOffset) {
-			if (IsFirstRenderPending) {
+		if (TerrainOffset != TargetTerrainOffset)
+		{
+			if (IsFirstRenderPending)
+			{
 				TerrainOffset = TargetTerrainOffset;
-			} else {
+			}
+			else
+			{
 				double window = !IsReportedOnGround
 					&& (agl >= MIN_AGL_FOR_CLIMBOUT)
 					&& (TargetTerrainOffset == 0.0) ? TERRAIN_OFFSET_WINDOW_CLIMBOUT : TERRAIN_OFFSET_WINDOW_LANDING;
 				double step = TerrainOffsetMagnitude / (frameRate * window);
-				if (step >= abs(TargetTerrainOffset - TerrainOffset)) {
+				if (step >= abs(TargetTerrainOffset - TerrainOffset))
+				{
 					TerrainOffset = TargetTerrainOffset;
-				} else {
+				}
+				else
+				{
 					TerrainOffset += TargetTerrainOffset > TerrainOffset ? step : -step;
 				}
 			}
@@ -310,22 +285,28 @@ namespace xpilot {
 		EnsureAboveGround();
 	}
 
-	void NetworkAircraft::EnsureAboveGround() {
-		if (AdjustedAltitude < LocalTerrainElevation.value()) {
+	void NetworkAircraft::EnsureAboveGround()
+	{
+		if (AdjustedAltitude < LocalTerrainElevation.value())
+		{
 			AdjustedAltitude = LocalTerrainElevation.value();
 		}
 	}
 
-	void NetworkAircraft::CompensateForXplane12Altimetry() {
+	void NetworkAircraft::CompensateForXplane12Altimetry()
+	{
 		if (!AdjustedAltitude.has_value())
+		{
 			return;
+		}
 
 		const double relativeAltitude = std::abs(AdjustedAltitude.value() - OwnAircraftElevation);
 		const double altitudeDeltaWeight = 2 - std::max(3000.0, std::min(6000.0, relativeAltitude)) / 3000;
 		AdjustedAltitude = AdjustedAltitude.value() * altitudeDeltaWeight;
 	}
 
-	void NetworkAircraft::ClearRotationalVelocities() {
+	void NetworkAircraft::ClearRotationalVelocities()
+	{
 		RotationalVelocities = Vector3::Zero();
 		RotationalErrorVelocities = Vector3::Zero();
 		PredictedVisualState.Pitch = VisualState.Pitch;
@@ -333,7 +314,8 @@ namespace xpilot {
 		PredictedVisualState.Heading = VisualState.Heading;
 	}
 
-	void NetworkAircraft::UpdateErrorVectors(double currentTimestamp) {
+	void NetworkAircraft::UpdateErrorVectors(double currentTimestamp)
+	{
 		double latDelta = DegreesToMeters(CalculateNormalizedDelta(
 			PredictedVisualState.Lat,
 			VisualState.Lat,
@@ -359,9 +341,12 @@ namespace xpilot {
 
 		if (PredictedVisualState.Pitch == VisualState.Pitch &&
 			PredictedVisualState.Heading == VisualState.Heading &&
-			PredictedVisualState.Bank == VisualState.Bank) {
+			PredictedVisualState.Bank == VisualState.Bank)
+		{
 			RotationalErrorVelocities = Vector3::Zero();
-		} else {
+		}
+		else
+		{
 			Quaternion currentOrientation = Quaternion::FromEuler(
 				DegreesToRadians(PredictedVisualState.Pitch),
 				DegreesToRadians(PredictedVisualState.Heading),
@@ -384,22 +369,28 @@ namespace xpilot {
 		ApplyErrorVelocitiesUntil = currentTimestamp + 2000;
 	}
 
-	void NetworkAircraft::UpdatePosition(float _frameRatePeriod, int) {
+	void NetworkAircraft::UpdatePosition(float _frameRatePeriod, int)
+	{
 		auto currentTimestamp = PrecisionTimestamp();
 
-		if (IsFirstRenderPending) {
+		if (IsFirstRenderPending)
+		{
 			PredictedVisualState = VisualState;
 			PositionalErrorVelocities = Vector3::Zero();
 			RotationalErrorVelocities = Vector3::Zero();
-		} else {
-			if (currentTimestamp - LastVelocityUpdate > 500) {
+		}
+		else
+		{
+			if (currentTimestamp - LastVelocityUpdate > 500)
+			{
 				ClearRotationalVelocities();
 			}
 
 			Vector3 positionalVelocities = PositionalVelocities;
 			Vector3 rotationalVelocities = RotationalVelocities;
 
-			if (currentTimestamp <= ApplyErrorVelocitiesUntil) {
+			if (currentTimestamp <= ApplyErrorVelocitiesUntil)
+			{
 				positionalVelocities += PositionalErrorVelocities;
 				rotationalVelocities += RotationalErrorVelocities;
 			}
@@ -418,16 +409,19 @@ namespace xpilot {
 		TargetSpoilerPosition = IsSpoilersDeployed ? 1.0f : 0.0f;
 		TargetReverserPosition = IsEnginesReversing ? 1.0f : 0.0f;
 
-		if (IsFirstRenderPending) {
+		if (IsFirstRenderPending)
+		{
 			// Set initial aircraft surfaces
 			Surfaces.gearPosition = TargetGearPosition;
 			Surfaces.flapRatio = TargetFlapsPosition;
 			Surfaces.spoilerRatio = TargetSpoilerPosition;
-		} else {
+		}
+		else
+		{
 			const auto diffMs = currentTimestamp - PreviousSurfaceUpdateTime;
-			Interpolate(Surfaces.gearPosition, TargetGearPosition, diffMs, flightModel.GEAR_DURATION);
-			Interpolate(Surfaces.flapRatio, TargetFlapsPosition, diffMs, flightModel.FLAPS_DURATION);
-			Interpolate(Surfaces.spoilerRatio, TargetSpoilerPosition, diffMs, flightModel.FLAPS_DURATION);
+			Interpolate(Surfaces.gearPosition, TargetGearPosition, diffMs, AircraftFlightModel.GEAR_DURATION);
+			Interpolate(Surfaces.flapRatio, TargetFlapsPosition, diffMs, AircraftFlightModel.FLAPS_DURATION);
+			Interpolate(Surfaces.spoilerRatio, TargetSpoilerPosition, diffMs, AircraftFlightModel.FLAPS_DURATION);
 			Interpolate(Surfaces.reversRatio, TargetReverserPosition, diffMs, 1500);
 			PreviousSurfaceUpdateTime = currentTimestamp;
 		}
@@ -443,30 +437,38 @@ namespace xpilot {
 		SetSlatRatio(GetFlapRatio());
 		SetSpoilerRatio(Surfaces.spoilerRatio);
 		SetSpeedbrakeRatio(Surfaces.spoilerRatio);
-		SetTireDeflection(flightModel.GEAR_DEFLECTION / 2.0f);
+		SetTireDeflection(AircraftFlightModel.GEAR_DEFLECTION / 2.0f);
 		SetReversDeployRatio(Surfaces.reversRatio);
+		SetThrustReversRatio(Surfaces.reversRatio);
 		SetNoseWheelAngle(VisualState.NoseWheelAngle);
 		SetOnGrnd(IsReportedOnGround);
 
-		if (IsReportedOnGround) {
+		if (IsReportedOnGround)
+		{
 			double rpm = (60 / (2 * M_PI * 3.2)) * abs(PositionalVelocities.X);
 			double rpmDeg = RpmToDegree(GetTireRotRpm(), _frameRatePeriod);
 			SetTireRotRpm(rpm);
 			SetTireRotAngle(GetTireRotAngle() + rpmDeg);
 			while (GetTireRotAngle() >= 360.0f)
+			{
 				SetTireRotAngle(GetTireRotAngle() - 360.0f);
+			}
 		}
 
-		if (IsEnginesRunning) {
+		if (IsEnginesRunning)
+		{
 			SetEngineRotRpm(1200);
 			SetPropRotRpm(GetEngineRotRpm());
 			SetEngineRotAngle(GetEngineRotAngle() + RpmToDegree(GetEngineRotRpm(), _frameRatePeriod));
-			while (GetEngineRotAngle() >= 360.0f) {
+			while (GetEngineRotAngle() >= 360.0f)
+			{
 				SetEngineRotAngle(GetEngineRotAngle() - 360.0f);
 			}
 			SetPropRotAngle(GetEngineRotAngle());
 			SetThrustRatio(1.0f);
-		} else {
+		}
+		else
+		{
 			SetEngineRotRpm(0.0f);
 			SetPropRotRpm(0.0f);
 			SetEngineRotAngle(0.0f);
@@ -479,7 +481,8 @@ namespace xpilot {
 		IsFirstRenderPending = false;
 	}
 
-	void NetworkAircraft::copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const {
+	void NetworkAircraft::copyBulkData(XPilotAPIAircraft::XPilotAPIBulkData* pOut, size_t size) const
+	{
 		double lat, lon, alt;
 		GetLocation(lat, lon, alt);
 
@@ -508,14 +511,16 @@ namespace xpilot {
 		pOut->bits.filler3 = 0;
 	}
 
-	void NetworkAircraft::copyBulkData(XPilotAPIAircraft::XPilotAPIBulkInfoTexts* pOut, size_t size) const {
+	void NetworkAircraft::copyBulkData(XPilotAPIAircraft::XPilotAPIBulkInfoTexts* pOut, size_t size) const
+	{
 		pOut->keyNum = modeS_id;
 		STRCPY_ATMOST(pOut->callSign, label);
 		STRCPY_ATMOST(pOut->modelIcao, acIcaoType);
 		STRCPY_ATMOST(pOut->cslModel, GetModelName());
 		STRCPY_ATMOST(pOut->acClass, GetModelInfo().doc8643Classification);
 		STRCPY_ATMOST(pOut->wtc, GetModelInfo().doc8643WTC);
-		if (Radar.code > 0 || Radar.code <= 9999) {
+		if (Radar.code > 0 || Radar.code <= 9999)
+		{
 			char s[10];
 			snprintf(s, sizeof(s), "%04ld", Radar.code);
 			STRCPY_ATMOST(pOut->squawk, std::string(s));
@@ -524,7 +529,8 @@ namespace xpilot {
 		STRCPY_ATMOST(pOut->destination, Destination);
 	}
 
-	void FlightModel::InitializeModels() {
+	void FlightModel::InitializeModels()
+	{
 		// Huge Jets
 		modelMatches.push_back({ "HugeJets","^(H|J);L\\dJ;" });
 		modelMatches.push_back({ "HugeJets","^M;L4J;" });
@@ -557,15 +563,18 @@ namespace xpilot {
 		return IsReportedOnGround ? 0.0f : GetMass() * XPMP2::G_EARTH;
 	}
 
-	FlightModel NetworkAircraft::GetFlightModel(const XPMP2::CSLModelInfo_t model) {
+	FlightModel NetworkAircraft::GetFlightModel(const XPMP2::CSLModelInfo_t model)
+	{
 		std::string classification = string_format("%s;%s;%s;", model.doc8643WTC.c_str(), model.doc8643Classification.c_str(), model.icaoType.c_str());
 		std::string category = "MediumJets";
 
-		for (const auto& mapIt : FlightModel::modelMatches) {
+		for (const auto& mapIt : FlightModel::modelMatches)
+		{
 			std::smatch m;
 			std::regex re(mapIt.regex.c_str());
 			std::regex_search(classification, m, re);
-			if (m.size() > 0) {
+			if (m.size() > 0)
+			{
 				category = mapIt.category;
 				break;
 			}
@@ -574,27 +583,38 @@ namespace xpilot {
 		FlightModel flightModel = {};
 		flightModel.modelCategory = category;
 
-		if (category == "HugeJets") {
+		if (category == "HugeJets")
+		{
 			flightModel.FLAPS_DURATION = 10000;
 			flightModel.GEAR_DURATION = 10000;
 			flightModel.GEAR_DEFLECTION = 1.4;
-		} else if (category == "BizJet") {
+		}
+		else if (category == "BizJet")
+		{
 			flightModel.FLAPS_DURATION = 5000;
 			flightModel.GEAR_DURATION = 0.25;
 			flightModel.GEAR_DEFLECTION = 0.5;
-		} else if (category == "GA") {
+		}
+		else if (category == "GA")
+		{
 			flightModel.FLAPS_DURATION = 5000;
 			flightModel.GEAR_DURATION = 10000;
 			flightModel.GEAR_DEFLECTION = 0.25;
-		} else if (category == "LightAC") {
+		}
+		else if (category == "LightAC")
+		{
 			flightModel.FLAPS_DURATION = 5000;
 			flightModel.GEAR_DURATION = 10000;
 			flightModel.GEAR_DEFLECTION = 0.25;
-		} else if (category == "Heli") {
+		}
+		else if (category == "Heli")
+		{
 			flightModel.FLAPS_DURATION = 5000;
 			flightModel.GEAR_DURATION = 10000;
 			flightModel.GEAR_DEFLECTION = 0.25;
-		} else {
+		}
+		else
+		{
 			flightModel.FLAPS_DURATION = 5000;
 			flightModel.GEAR_DURATION = 10000;
 			flightModel.GEAR_DEFLECTION = 0.5;

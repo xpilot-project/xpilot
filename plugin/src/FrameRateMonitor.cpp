@@ -20,7 +20,8 @@
 #include "Utilities.h"
 #include "XPilot.h"
 
-namespace xpilot {
+namespace xpilot
+{
 	FrameRateMonitor::FrameRateMonitor(XPilot* env) :
 		m_environment(env),
 		m_frameRatePeriod("sim/operation/misc/frame_rate_period", ReadOnly),
@@ -31,36 +32,44 @@ namespace xpilot {
 		m_gaveFirstWarning(false),
 		m_gaveSecondWarning(false),
 		m_gaveDisconnectWarning(false),
-		m_gaveHealthyWarning(false) {
+		m_gaveHealthyWarning(false)
+	{
 		// give 30 second "warm-up" period after loading sim
 		XPLMRegisterFlightLoopCallback(FlightLoopCallback, 30.0f, this);
 	}
 
-	FrameRateMonitor::~FrameRateMonitor() {
+	FrameRateMonitor::~FrameRateMonitor()
+	{
 		XPLMUnregisterFlightLoopCallback(FlightLoopCallback, this);
 	}
 
-	void FrameRateMonitor::StartMonitoring() {
+	void FrameRateMonitor::StartMonitoring()
+	{
 		ResetFrameRateDetection();
 	}
 
-	void FrameRateMonitor::StopMonitoring() {
+	void FrameRateMonitor::StopMonitoring()
+	{
 		ResetFrameRateDetection();
 	}
 
-	float FrameRateMonitor::FlightLoopCallback(float, float, int, void* ref) {
+	float FrameRateMonitor::FlightLoopCallback(float, float, int, void* ref)
+	{
 		auto* monitor = static_cast<FrameRateMonitor*>(ref);
 
-		if (!monitor->m_environment->IsNetworkConnected() || monitor->SkipMonitoring()) {
+		if (!monitor->m_environment->IsNetworkConnected() || monitor->SkipMonitoring())
+		{
 			monitor->ResetFrameRateDetection();
 			return -1.0f;
 		}
 
 		float fps = 1 / monitor->m_frameRatePeriod;
 
-		if (fps < 20.0f) {
+		if (fps < 20.0f)
+		{
 			float elapsed = monitor->m_stopwatch.elapsed(xpilot::Stopwatch::SECONDS);
-			if (!monitor->m_stopwatch.isRunning()) {
+			if (!monitor->m_stopwatch.isRunning())
+			{
 				monitor->m_stopwatch.start();
 			}
 
@@ -73,20 +82,28 @@ namespace xpilot {
 				<< static_cast<int>(floor(30 - elapsed))
 				<< " seconds if this is not corrected.";
 
-			if (elapsed >= 10 && elapsed < 20) {
-				if (!monitor->m_gaveFirstWarning) {
+			if (elapsed >= 10 && elapsed < 20)
+			{
+				if (!monitor->m_gaveFirstWarning)
+				{
 					monitor->m_environment->NotificationPosted(warningMsg.str(), 241, 196, 15, true);
 					LOG_MSG(logMSG, warningMsg.str().c_str());
 					monitor->m_gaveFirstWarning = true;
 				}
-			} else if (elapsed >= 20 && elapsed < 30) {
-				if (monitor->m_gaveFirstWarning && !monitor->m_gaveSecondWarning) {
+			}
+			else if (elapsed >= 20 && elapsed < 30)
+			{
+				if (monitor->m_gaveFirstWarning && !monitor->m_gaveSecondWarning)
+				{
 					monitor->m_environment->NotificationPosted(warningMsg.str(), 241, 196, 15, true);
 					LOG_MSG(logMSG, warningMsg.str().c_str());
 					monitor->m_gaveSecondWarning = true;
 				}
-			} else if (elapsed >= 30) {
-				if (monitor->m_gaveFirstWarning && monitor->m_gaveSecondWarning && !monitor->m_gaveDisconnectWarning) {
+			}
+			else if (elapsed >= 30)
+			{
+				if (monitor->m_gaveFirstWarning && monitor->m_gaveSecondWarning && !monitor->m_gaveDisconnectWarning)
+				{
 					std::string msg = "Disconnecting from VATSIM because your frame rates have been less than 20fps for more than 30 seconds. Please adjust your X-Plane performance before reconnecting to the network.";
 					monitor->m_environment->NotificationPosted(msg, 241, 196, 15, true);
 					monitor->m_environment->ForceDisconnect(msg);
@@ -94,8 +111,11 @@ namespace xpilot {
 					monitor->m_gaveDisconnectWarning = true;
 				}
 			}
-		} else {
-			if ((monitor->m_gaveFirstWarning || monitor->m_gaveSecondWarning) && !monitor->m_gaveHealthyWarning) {
+		}
+		else
+		{
+			if ((monitor->m_gaveFirstWarning || monitor->m_gaveSecondWarning) && !monitor->m_gaveHealthyWarning)
+			{
 				std::string msg = "X-Plane is now running in real time. The automatic disconnect has been cancelled.";
 				monitor->m_environment->NotificationPosted(msg, 241, 196, 15, true);
 				LOG_MSG(logMSG, msg.c_str());
@@ -110,7 +130,8 @@ namespace xpilot {
 		return -1.0;
 	}
 
-	void FrameRateMonitor::ResetFrameRateDetection() {
+	void FrameRateMonitor::ResetFrameRateDetection()
+	{
 		m_gaveFirstWarning = false;
 		m_gaveSecondWarning = false;
 		m_gaveDisconnectWarning = false;
@@ -118,7 +139,8 @@ namespace xpilot {
 		m_stopwatch.reset();
 	}
 
-	bool FrameRateMonitor::SkipMonitoring() {
+	bool FrameRateMonitor::SkipMonitoring()
+	{
 		return m_groundSpeed < 10.0f || m_isExternalVisual == 1 || m_overridePlanePath[0] == 1 || m_timePaused == 1;
 	}
 }

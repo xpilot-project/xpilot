@@ -30,12 +30,10 @@
 #include "XPLMUtilities.h"
 #include "XPLMProcessing.h"
 #include "Utilities.h"
-
 #include "Dto.h"
-#include <msgpack.hpp>
-
-#include <nng/nng.h>
-#include <nng/protocol/pair1/pair.h>
+#include "msgpack.hpp"
+#include "nng/nng.h"
+#include "nng/protocol/pair1/pair.h"
 
 #include <deque>
 #include <thread>
@@ -46,7 +44,8 @@
 #include <algorithm>
 #include <iostream>
 
-namespace xpilot {
+namespace xpilot
+{
 	enum class dataRefs
 	{
 		DR_BULK_QUICK,
@@ -159,9 +158,11 @@ namespace xpilot {
 		std::unique_ptr<SettingsWindow> m_settingsWindow;
 
 		template<class T>
-		void SendDto(const T& dto) {
+		void SendDto(const T& dto)
+		{
 			msgpack::sbuffer dtoBuf;
-			if (encodeDto(dtoBuf, dto)) {
+			if (encodeDto(dtoBuf, dto))
+			{
 				if (dtoBuf.size() == 0)
 					return;
 

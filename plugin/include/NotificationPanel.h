@@ -26,7 +26,8 @@
 #include <list>
 #include <chrono>
 
-namespace xpilot {
+namespace xpilot
+{
 	class NotificationPanel : ImgWindow
 	{
 	public:

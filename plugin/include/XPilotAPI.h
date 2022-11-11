@@ -45,7 +45,8 @@ private:
 	std::string key;
 
 public:
-	struct XPilotAPIBulkData {
+	struct XPilotAPIBulkData
+	{
 	public:
 		uint64_t keyNum = 0;    // modeS identifier (xPilot assigns a unique and sequential hexadecimal number)
 		double lat = 0.0f; // latitude
@@ -61,7 +62,8 @@ public:
 		float bearing = 0.0f; // degrees from the camera position
 		float dist_nm = 0.0f; // distance to the camera
 
-		struct BulkBitsTy {
+		struct BulkBitsTy
+		{
 			bool onGnd : 1; // is the plane on the ground?
 			bool taxi : 1; // taxi lights
 			bool land : 1; // landing lights
@@ -78,7 +80,8 @@ public:
 	};
 
 	// Bulk text transfer structure
-	struct XPilotAPIBulkInfoTexts {
+	struct XPilotAPIBulkInfoTexts
+	{
 	public:
 		uint64_t keyNum;
 		// aircraft model/operator
@@ -95,7 +98,8 @@ public:
 		XPilotAPIBulkInfoTexts() { memset(this, 0, sizeof(*this)); }
 	};
 
-	struct XPilotLights {
+	struct XPilotLights
+	{
 		bool beacon : 1; // beacon lights
 		bool strobe : 1; // strobe lights
 		bool nav : 1; // navigation lights
@@ -222,7 +226,8 @@ protected:
 		std::unique_ptr<T[]>& vBulk);
 };
 
-class XPilotDataRef {
+class XPilotDataRef
+{
 protected:
 	std::string     sDataRef;           // dataRef name, passed in via constructor
 	XPLMDataRef     dataRef = NULL;     // dataRef identifier returned by X-Plane

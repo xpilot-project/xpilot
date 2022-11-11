@@ -49,7 +49,8 @@
 
 std::unique_ptr<XPilot> environment;
 
-static int DrawTransmitIndicator(XPLMDrawingPhase inPhase, int inIsBefore, void* inRefcon) {
+static int DrawTransmitIndicator(XPLMDrawingPhase inPhase, int inIsBefore, void* inRefcon)
+{
 	XPLMSetGraphicsState(0, 0, 0, 0, 1, 0, 0);
 
 	static float color[3] = { 0.19f, 0.80f, 0.19f }; // lime green
@@ -66,54 +67,66 @@ static int DrawTransmitIndicator(XPLMDrawingPhase inPhase, int inIsBefore, void*
 	glBegin(GL_LINES);
 	glLineWidth(5.0);
 	glColor3f(color[0], color[1], color[2]);
-	for (unsigned int i = 0; i <= triangleAmount; i++) {
+	for (unsigned int i = 0; i <= triangleAmount; i++)
+	{
 		glVertex2f(x, y);
 		glVertex2f(x + (radius * cos(i * twicePi / triangleAmount)), y + (radius * sin(i * twicePi / triangleAmount)));
 	}
 	glEnd();
 
-	if (environment != nullptr) {
+	if (environment != nullptr)
+	{
 		XPLMDrawString(color, 28, sy - 18, environment->GetTxRadio() == 6 ? (char*)"COM1" : (char*)"COM2", NULL, xplmFont_Proportional);
 	}
 
 	return 1;
 }
 
-void ShowTransmitIndicator() {
-	if (Config::GetInstance().GetTransmitIndicatorEnabled() && environment->IsNetworkConnected() && environment->IsRadiosPowered()) {
+void ShowTransmitIndicator()
+{
+	if (Config::GetInstance().GetTransmitIndicatorEnabled() && environment->IsNetworkConnected() && environment->IsRadiosPowered())
+	{
 		XPLMRegisterDrawCallback(DrawTransmitIndicator, xplm_Phase_Window, 1, nullptr);
 	}
 }
 
-void HideTransmitIndicator() {
+void HideTransmitIndicator()
+{
 	XPLMUnregisterDrawCallback(DrawTransmitIndicator, xplm_Phase_Window, 1, nullptr);
 }
 
-PLUGIN_API int XPluginStart(char* outName, char* outSignature, char* outDescription) {
+PLUGIN_API int XPluginStart(char* outName, char* outSignature, char* outDescription)
+{
 	strncpy_s(outName, 255, string_format("%s %s", PLUGIN_NAME, PLUGIN_VERSION_STRING).c_str(), 100);
 	strncpy_s(outSignature, 255, "org.vatsim.xpilot", 100);
 	strncpy_s(outDescription, 255, "X-Plane pilot client for VATSIM.", 100);
 
-	try {
+	try
+	{
 		XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);
 		XPMPSetPluginName(PLUGIN_NAME);
 		RegisterMenuItems();
 		LOG_MSG(logMSG, "xPilot version %s initialized", PLUGIN_VERSION_STRING);
 	}
-	catch (const std::exception& e) {
+	catch (const std::exception& e)
+	{
 		LOG_MSG(logERROR, "Exception in XPluginStart: %s", e.what());
 		return 0;
 	}
-	catch (...) {
+	catch (...)
+	{
 		return 0;
 	}
 
 	return 1;
 }
 
-PLUGIN_API int XPluginEnable(void) {
-	try {
-		if (environment) {
+PLUGIN_API int XPluginEnable(void)
+{
+	try
+	{
+		if (environment)
+		{
 			environment.reset();
 		}
 		XPImgWindowInit();
@@ -121,19 +134,23 @@ PLUGIN_API int XPluginEnable(void) {
 		environment = std::make_unique<xpilot::XPilot>();
 		LOG_MSG(logMSG, "xPilot plugin enabled");
 	}
-	catch (std::exception& e) {
+	catch (std::exception& e)
+	{
 		LOG_MSG(logERROR, "Exception in XPluginEnable: %s", e.what());
 		return 0;
 	}
-	catch (...) {
+	catch (...)
+	{
 		return 0;
 	}
 
 	return 1;
 }
 
-PLUGIN_API void XPluginDisable(void) {
-	try {
+PLUGIN_API void XPluginDisable(void)
+{
+	try
+	{
 		environment->DeleteAllAircraft();
 		environment->Shutdown();
 		environment.reset();
@@ -141,15 +158,19 @@ PLUGIN_API void XPluginDisable(void) {
 		XPMPMultiplayerCleanup();
 		LOG_MSG(logMSG, "xPilot plugin disabled");
 	}
-	catch (std::exception& e) {
+	catch (std::exception& e)
+	{
 		LOG_MSG(logERROR, "Exception in XPluginDisable: %s", e.what());
 	}
-	catch (...) {
+	catch (...)
+	{
 	}
 }
 
-PLUGIN_API void XPluginStop(void) {
-	try {
+PLUGIN_API void XPluginStop(void)
+{
+	try
+	{
 		XPImgWindowCleanup();
 		XPLMDestroyMenu(PluginMenu);
 		XPLMUnregisterCommandHandler(PttCommand, PttCommandHandler, 0, 0);
@@ -160,23 +181,31 @@ PLUGIN_API void XPluginStop(void) {
 		XPLMUnregisterCommandHandler(ToggleDefaultAtisCommand, ToggleDefaultAtisCommandHandler, 0, 0);
 		XPLMUnregisterCommandHandler(ToggleTcasCommand, ToggleTcasCommandHandler, 0, 0);
 	}
-	catch (const std::exception& e) {
+	catch (const std::exception& e)
+	{
 		LOG_MSG(logERROR, "Exception in XPluginStop: %s", e.what());
 	}
-	catch (...) {
+	catch (...)
+	{
 	}
 }
 
-PLUGIN_API void XPluginReceiveMessage(XPLMPluginID from, int msg, void* inParam) {
+PLUGIN_API void XPluginReceiveMessage(XPLMPluginID from, int msg, void* inParam)
+{
 
 }
 
-int ContactAtcCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon) {
-	if (xpilot::Config::GetInstance().GetOverrideContactAtcCommand()) {
-		if (inPhase == xplm_CommandContinue) {
+int ContactAtcCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
+{
+	if (xpilot::Config::GetInstance().GetOverrideContactAtcCommand())
+	{
+		if (inPhase == xplm_CommandContinue)
+		{
 			ShowTransmitIndicator();
 			environment->SetPttActive(1);
-		} else if (inPhase == xplm_CommandEnd) {
+		}
+		else if (inPhase == xplm_CommandEnd)
+		{
 			HideTransmitIndicator();
 			environment->SetPttActive(0);
 		}
@@ -185,58 +214,77 @@ int ContactAtcCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase,
 	return 1;
 }
 
-int  PttCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon) {
-	if (inPhase == xplm_CommandContinue) {
+int  PttCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
+{
+	if (inPhase == xplm_CommandContinue)
+	{
 		ShowTransmitIndicator();
 		environment->SetPttActive(1);
-	} else if (inPhase == xplm_CommandEnd) {
+	}
+	else if (inPhase == xplm_CommandEnd)
+	{
 		HideTransmitIndicator();
 		environment->SetPttActive(0);
 	}
 	return 0;
 }
 
-int ToggleNearbyATCWindowCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon) {
-	if (inPhase == xplm_CommandEnd) {
+int ToggleNearbyATCWindowCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
+{
+	if (inPhase == xplm_CommandEnd)
+	{
 		environment->ToggleNearbyAtcWindow();
 	}
 	return 0;
 }
 
-int ToggleMessagePreviewPanelCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon) {
-	if (inPhase == xplm_CommandEnd) {
+int ToggleMessagePreviewPanelCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
+{
+	if (inPhase == xplm_CommandEnd)
+	{
 		environment->SetNotificationPanelAlwaysVisible(!environment->GetNotificationPanelAlwaysVisible());
 	}
 	return 0;
 }
 
-int ToggleDefaultAtisCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon) {
-	if (inPhase == xplm_CommandEnd) {
+int ToggleDefaultAtisCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
+{
+	if (inPhase == xplm_CommandEnd)
+	{
 		environment->DisableXplaneAtis(environment->IsXplaneAtisDisabled());
 	}
 	return 0;
 }
 
-int ToggleTcasCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon) {
-	if (inPhase == xplm_CommandEnd) {
-		if (XPMPHasControlOfAIAircraft()) {
+int ToggleTcasCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
+{
+	if (inPhase == xplm_CommandEnd)
+	{
+		if (XPMPHasControlOfAIAircraft())
+		{
 			environment->ReleaseTcasControl();
-		} else {
+		}
+		else
+		{
 			environment->TryGetTcasControl();
 		}
 	}
 	return 0;
 }
 
-int ToggleMessageConsoleCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon) {
-	if (inPhase == xplm_CommandEnd) {
+int ToggleMessageConsoleCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
+{
+	if (inPhase == xplm_CommandEnd)
+	{
 		environment->ToggleTextMessageConsole();
 	}
 	return 0;
 }
 
-int ToggleAircraftLabelsCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon) {
-	if (inPhase == xplm_CommandEnd) {
+int ToggleAircraftLabelsCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
+{
+	if (inPhase == xplm_CommandEnd)
+	{
 		bool enabled = !xpilot::Config::GetInstance().GetShowHideLabels();
 		xpilot::Config::GetInstance().SetShowHideLabels(enabled);
 		xpilot::Config::GetInstance().SaveConfig();
@@ -245,13 +293,16 @@ int ToggleAircraftLabelsCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhas
 	return 0;
 }
 
-void MenuHandler(void* mRef, void* iRef) {
-	if (!strcmp((const char*)iRef, "Settings")) {
+void MenuHandler(void* mRef, void* iRef)
+{
+	if (!strcmp((const char*)iRef, "Settings"))
+	{
 		environment->ToggleSettingsWindow();
 	}
 }
 
-void RegisterMenuItems() {
+void RegisterMenuItems()
+{
 	PttCommand = XPLMCreateCommand("xpilot/ptt", "xPilot: Radio Push-to-Talk (PTT)");
 	XPLMRegisterCommandHandler(PttCommand, PttCommandHandler, 1, (void*)0);
 
@@ -287,7 +338,8 @@ void RegisterMenuItems() {
 	MenuToggleAircraftLabels = XPLMAppendMenuItemWithCommand(PluginMenu, "Aircraft Labels", ToggleAircraftLabelsCommand);
 }
 
-void UpdateMenuItems() {
+void UpdateMenuItems()
+{
 	XPLMSetMenuItemName(PluginMenu, MenuDefaultAtis, environment->IsXplaneAtisDisabled() ? "X-Plane ATIS: Disabled" : "X-Plane ATIS: Enabled", 0);
 	XPLMSetMenuItemName(PluginMenu, MenuToggleTcas, XPMPHasControlOfAIAircraft() ? "Release TCAS Control" : "Request TCAS Control", 0);
 	XPLMSetMenuItemName(PluginMenu, MenuToggleAircraftLabels, xpilot::Config::GetInstance().GetShowHideLabels() ? "Aircraft Labels: On" : "Aircraft Labels: Off", 0);
@@ -295,7 +347,8 @@ void UpdateMenuItems() {
 
 #ifdef _WIN32
 #include <Windows.h>
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved) {
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
+{
 	return TRUE;
 }
 #endif // _WIN32

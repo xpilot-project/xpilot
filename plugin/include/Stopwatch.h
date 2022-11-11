@@ -28,7 +28,8 @@
 #include <iostream>
 #include <stdint.h>
 
-namespace xpilot {
+namespace xpilot
+{
 	class Stopwatch
 	{
 	public:
@@ -116,7 +117,8 @@ namespace xpilot {
 		static timestamp_t get_timestamp();
 	};
 
-	inline bool Stopwatch::correct_timeunit(timeunit_t t) {
+	inline bool Stopwatch::correct_timeunit(timeunit_t t)
+	{
 		return t == MICROSEC || t == MILLISEC || t == SECONDS || t == MINUTES || t == HOURS || t == DAYS;
 	}
 }

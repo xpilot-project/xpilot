@@ -19,7 +19,8 @@
 #ifndef SettingsWindow_h
 #define SettingsWindow_h
 
-namespace xpilot {
+namespace xpilot
+{
 	class SettingsWindow : public XPImgWindow
 	{
 	public:

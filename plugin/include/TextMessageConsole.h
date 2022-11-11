@@ -23,7 +23,8 @@
 
 #include <list>
 
-namespace xpilot {
+namespace xpilot
+{
 
 	class XPilot;
 
@@ -78,7 +79,6 @@ namespace xpilot {
 		bool m_scrollToBottom;
 		XPilot* m_env;
 	};
-
 }
 
 #endif // !TextMessageConsole_h
