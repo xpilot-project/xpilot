@@ -88,6 +88,11 @@ jobs:
             -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_OS_VERSION }}
           cmake --build . --config ${{ env.BUILD_TYPE }}
 
+      - name: Code sign application
+        working-directory: ${{ env.CLIENT_DIR }}/build
+        run: |
+          codesign --preserve-metadata=identifier,entitlements --force -s "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" -o runtime --timestamp xPilot.app
+
       - name: Get version
         shell: bash
         run: |
