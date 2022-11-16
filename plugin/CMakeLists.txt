@@ -10,6 +10,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 
 set(Boost_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../externals/boost)
 
+set (INCLUDE_FMOD_SOUND 1)              
+add_compile_definitions(INCLUDE_FMOD_SOUND=1)
+
 file(READ ${CMAKE_SOURCE_DIR}/../xpilot.json XPILOT_JSON)
 string(JSON IS_BETA_VERSION GET ${XPILOT_JSON} is_beta)
 string(JSON BETA_NUMBER GET ${XPILOT_JSON} beta_number)
@@ -40,7 +43,6 @@ endif()
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/msgpack-c ${CMAKE_CURRENT_BINARY_DIR}/msgpack-c)
 add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/json ${CMAKE_CURRENT_BINARY_DIR}/json)
-add_subdirectory(3rdparty/XPMP2)
 
 file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/src/*.cpp
@@ -52,7 +54,6 @@ include_directories(${CMAKE_SOURCE_DIR}/3rdparty/imgui-stdlib)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/imgwindow)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/font)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gmath)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/fmod/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/sdk/CHeaders/XPLM)
 
 set(INCLUDES
@@ -113,34 +114,24 @@ if (APPLE)
 elseif (WIN32)
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/3rdparty/sdk/Libraries/Win")
 endif()
+list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmod")
 
-# Link FMOD
-list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/3rdparty/fmod")
-
-if(WIN32)
-    find_library(FMOD_LIBRARY NAMES fmod_vc.lib REQUIRED)
-    message ("FMOD_LIBRARY = ${FMOD_LIBRARY}")
-    target_link_libraries(${PROJECT_NAME} ${FMOD_LIBRARY})
-elseif(APPLE)
-    find_library(FMOD_LIBRARY NAMES libfmod.dylib REQUIRED)
-    message ("FMOD_LIBRARY = ${FMOD_LIBRARY}")
-    target_link_libraries(${PROJECT_NAME} ${FMOD_LIBRARY})
-elseif(UNIX AND NOT APPLE)
-    find_library(FMOD_LIBRARY NAMES libfmod.so REQUIRED)
-    message ("FMOD_LIBRARY = ${FMOD_LIBRARY}")
-    target_link_libraries(${PROJECT_NAME} ${FMOD_LIBRARY})
-endif()
-
-target_link_libraries(${PROJECT_NAME} 
-    msgpackc-cxx
-    nlohmann_json
-    XPMP2
-    ${LIB_NNG})
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/XPMP2/inc")
+add_subdirectory(3rdparty/XPMP2)
+add_dependencies(${CMAKE_PROJECT_NAME} XPMP2)
+target_link_libraries(${CMAKE_PROJECT_NAME} XPMP2)
 
 if (WIN32 OR APPLE)
-    find_library(XPLM_LIBRARY NAMES XPLM XPLM_64.lib)
-    target_link_libraries(${PROJECT_NAME} ${XPLM_LIBRARY})
-endif()
+    # FMOD for sound
+    find_library(FMOD_LIBRARY NAMES fmod_vc.lib libfmod.dylib REQUIRED)
+    message ("FMOD_LIBRARY                  = ${FMOD_LIBRARY}")
+
+    # XPLM, the X-Plane SDK
+    find_library(XPLM_LIBRARY NAMES XPLM XPLM_64.lib REQUIRED)
+    target_link_libraries(${PROJECT_NAME} ${XPLM_LIBRARY} ${FMOD_LIBRARY})
+endif ()
+
+target_link_libraries(${PROJECT_NAME} msgpackc-cxx nlohmann_json ${LIB_NNG})
 
 if (WIN32)
     set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
