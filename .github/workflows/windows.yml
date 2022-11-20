@@ -107,3 +107,16 @@ jobs:
           name: xPilot-${{ env.XPILOT_VERSION }}-Windows.zip
           path: |
             xPilot-${{ env.XPILOT_VERSION }}-Windows.exe
+
+      - name: Create artifacts archive
+        shell: bash
+        run: |
+          mkdir -p windows/plugin
+          cp -R "${{ github.workspace }}/xPilot" windows/plugin/
+          cp -R "${{ env.CLIENT_DIR }}/build/Release/xPilot.exe" windows/xPilot.exe
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Windows.zip
+          path: ${{ github.workspace }}/windows

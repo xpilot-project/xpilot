@@ -139,3 +139,15 @@ jobs:
           name: xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip
           path: |
             xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
+
+      - name: Create artifacts archive
+        run: |
+          mkdir -p macos/plugin
+          cp -R ${{ github.workspace }}/xPilot macos/plugin/
+          cp -R ${{ env.CLIENT_DIR }}/build/xPilot.app macos/xPilot.app
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: MacOS.zip
+          path: ${{ github.workspace }}/macos

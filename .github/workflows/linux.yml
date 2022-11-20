@@ -137,3 +137,15 @@ jobs:
           name: xPilot-${{ env.XPILOT_VERSION }}-Linux.zip
           path: |
             xPilot-${{ env.XPILOT_VERSION }}-Linux.run
+
+      - name: Create artifacts archive
+        run: |
+          mkdir -p linux/plugin
+          cp -R ${{ github.workspace }}/xPilot linux/plugin/
+          cp ${{ env.CLIENT_DIR }}/build/xpilot linux/xPilot
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Linux.zip
+          path: ${{ github.workspace }}/linux

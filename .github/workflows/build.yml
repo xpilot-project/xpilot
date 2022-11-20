@@ -38,8 +38,12 @@ jobs:
       - name: Reorganize
         run: mv xPilot*/* . && rmdir xPilot*/
 
-      - name: List directory contents
-        run: ls -R
+      - name: Merge artifacts
+        run: |
+          mkdir -p artifacts/Linux && mv Linux.zip/* artifacts/Linux
+          mkdir -p artifacts/Windows && mv Windows.zip/* artifacts/Windows
+          mkdir -p artifacts/MacOS && mv MacOS.zip/* artifacts/MacOS
+          cd artifacts && zip -r ../Artifacts-${{ steps.get_version.outputs.version-without-v }}.zip .
 
       - name: Create release
         uses: softprops/action-gh-release@v1
@@ -49,4 +53,6 @@ jobs:
           name: xPilot ${{ steps.get_version.outputs.version }}
           prerelease: true
           draft: true
-          files: xPilot*
+          files: |
+            xPilot*
+            Artifacts*.zip
