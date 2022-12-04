@@ -891,7 +891,7 @@ namespace xpilot
         {
             data = data.replace(AppConfig::getInstance()->VatsimPasswordDecrypted, "******");
         }
-        if(data.startsWith("#AA" + m_connectInfo.Callsign, Qt::CaseInsensitive))
+        if(data.startsWith("#AA", Qt::CaseInsensitive) || data.startsWith("#AP", Qt::CaseInsensitive))
         {
             data = data.replace(m_jwtToken, "******");
         }
