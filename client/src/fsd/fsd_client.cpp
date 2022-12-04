@@ -215,7 +215,7 @@ namespace xpilot
                 }
             }
             catch(PDUFormatException &e) {
-                emit RaiseNetworkError(QString("%1 (Raw packet: %2)").arg(e.getError()).arg(e.getRawMessage()));
+                emit RaiseNetworkError(QString("%1 (Raw packet: %2)").arg(e.getError(), e.getRawMessage()));
             }
         }
     }
