@@ -115,8 +115,8 @@ namespace xpilot
         bool m_challengeServer;
         QString m_partialPacket = "";
 
-        QString m_clientAuthSessionKey;
-        QString m_clientAuthChallengeKey;
+        std::string m_clientAuthSessionKey;
+        std::string m_clientAuthChallengeKey;
 
         static int constexpr m_slowPositionTimerInterval = 5000;
         static int constexpr m_fastPositionTimerInterval = 200;

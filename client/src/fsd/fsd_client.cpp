@@ -111,8 +111,9 @@ namespace xpilot
                     if(pduTypeId == "$DI")
                     {
                         auto pdu = PDUServerIdentification::fromTokens(fields);
-                        m_clientAuthSessionKey = GenerateAuthResponse(pdu.InitialChallengeKey.toStdString().c_str(), BuildConfig::VatsimClientId(),
-                                                                      BuildConfig::VatsimClientKey().toStdString().c_str());
+                        m_clientAuthSessionKey = GenerateAuthResponse(pdu.InitialChallengeKey.toStdString(),
+                                                                      BuildConfig::VatsimClientId(),
+                                                                      BuildConfig::VatsimClientKey().toStdString());
                         m_clientAuthChallengeKey = m_clientAuthSessionKey;
                         emit RaiseServerIdentificationReceived(pdu);
                     }
@@ -180,11 +181,12 @@ namespace xpilot
                     else if(pduTypeId == "$ZC")
                     {
                         auto pdu = PDUAuthChallenge::fromTokens(fields);
-                        QString response = GenerateAuthResponse(pdu.ChallengeKey.toStdString().c_str(), BuildConfig::VatsimClientId(),
-                                                                m_clientAuthChallengeKey.toStdString().c_str());
-                        std::string combined = m_clientAuthSessionKey.toStdString() + response.toStdString();
-                        m_clientAuthChallengeKey = toMd5(combined.c_str());
-                        SendPDU(PDUAuthResponse(pdu.To, pdu.From, response));
+                        std::string authResponse = GenerateAuthResponse(pdu.ChallengeKey.toStdString(),
+                                                                        BuildConfig::VatsimClientId(),
+                                                                        m_clientAuthChallengeKey);
+                        std::string combined = m_clientAuthSessionKey + authResponse;
+                        m_clientAuthChallengeKey = toMd5(combined.c_str()).toStdString();
+                        SendPDU(PDUAuthResponse(pdu.To, pdu.From, QString::fromStdString(authResponse)));
                     }
                     else if(pduTypeId == "$!!")
                     {
