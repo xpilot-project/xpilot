@@ -91,7 +91,7 @@ jobs:
       - name: Code sign application
         working-directory: ${{ env.CLIENT_DIR }}/build
         run: |
-          codesign --preserve-metadata=identifier,entitlements --force -s "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" -o runtime --timestamp xPilot.app
+          codesign --force --options runtime --timestamp --sign "${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }}" --entitlements ../entitlements.plist xPilot.app
 
       - name: Get version
         shell: bash
@@ -119,11 +119,6 @@ jobs:
               --setvars apple_signing_identity=${{ secrets.APPLE_SIGNING_CERTIFICATE_IDENTITY }} \
               --setvars password=${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
 
-      - name: Rename Installer
-        shell: bash
-        run: |
-          mv xPilot-${{ env.XPILOT_VERSION }}-osx-installer.dmg xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
-
       - name: Notarize installer
         shell: bash
         run: |
@@ -131,14 +126,14 @@ jobs:
           --primary-bundle-id "org.vatsim.xpilot" \
           --username "${{ secrets.NOTARIZATION_USERNAME }}" \
           --password "${{ secrets.NOTARIZATION_PASSWORD }}" \
-          --file xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
+          --file xPilot.dmg
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v3
         with:
           name: xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip
           path: |
-            xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
+            xPilot.dmg
 
       - name: Create artifacts archive
         run: |
