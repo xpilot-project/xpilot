@@ -128,12 +128,16 @@ jobs:
           --password "${{ secrets.NOTARIZATION_PASSWORD }}" \
           --file xPilot.dmg
 
+      - name: Rename dmg
+        run: |
+          mv xPilot.dmg xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
+
       - name: Upload installer artifact
         uses: actions/upload-artifact@v3
         with:
           name: xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip
           path: |
-            xPilot.dmg
+            xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
 
       - name: Create artifacts archive
         run: |
