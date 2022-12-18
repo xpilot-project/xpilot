@@ -531,6 +531,10 @@ namespace xpilot
         {
             m_altitudeDelta = CalculatePressureAltitude() - m_userAircraftData.AltitudePressure;
         }
+        else
+        {
+            m_altitudeDelta = 0;
+        }
     }
 
     void NetworkManager::OnUserAircraftConfigDataUpdated(UserAircraftConfigData data)
