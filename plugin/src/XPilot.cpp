@@ -36,7 +36,7 @@ namespace xpilot
 		m_pttPressed("xpilot/ptt", ReadWrite),
 		m_rxCom1("xpilot/audio/com1_rx", ReadWrite),
 		m_rxCom2("xpilot/audio/com2_rx", ReadWrite),
-		m_networkLoginStatus("xpilot/login/status", ReadOnly),
+		m_networkLoginStatus("xpilot/login/status", ReadOnly), // 0=Disconnected, 1=Pilot, 2=Observer
 		m_networkCallsign("xpilot/login/callsign", ReadWrite),
 		m_volumeSignalLevel("xpilot/audio/vu", ReadWrite),
 		m_aiControlled("xpilot/ai_controlled", ReadOnly),
@@ -443,9 +443,6 @@ namespace xpilot
 			ConnectedDto dto;
 			packet.dto.convert(dto);
 
-			std::string callsign = dto.callsign;
-			std::string selcal = dto.selcal;
-
 			QueueCallback([=]
 			{
 				m_aircraftManager->RemoveAllPlanes();
@@ -455,9 +452,9 @@ namespace xpilot
 					TryGetTcasControl();
 				}
 				m_xplaneAtisEnabled = 0;
-				m_networkCallsign.setValue(callsign);
-				m_selcalCode.setValue(selcal);
-				m_networkLoginStatus.setValue(true);
+				m_networkCallsign.setValue(dto.callsign);
+				m_selcalCode.setValue(dto.selcal);
+				m_networkLoginStatus.setValue(dto.isObserver ? 2 : 1);
 				m_com1StationCallsign.setValue("");
 				m_com2StationCallsign.setValue("");
 			});
@@ -473,7 +470,7 @@ namespace xpilot
 				m_xplaneAtisEnabled = 1;
 				m_networkCallsign.setValue("");
 				m_selcalCode.setValue("");
-				m_networkLoginStatus.setValue(false);
+				m_networkLoginStatus.setValue(0);
 				m_com1StationCallsign.setValue("");
 				m_com2StationCallsign.setValue("");
 			});
@@ -499,25 +496,6 @@ namespace xpilot
 				}
 			});
 		}
-	}
-
-	void XPilot::OnNetworkConnected()
-	{
-		m_aircraftManager->RemoveAllPlanes();
-		m_frameRateMonitor->StartMonitoring();
-		m_xplaneAtisEnabled = 0;
-		m_networkLoginStatus = 1;
-		TryGetTcasControl();
-	}
-
-	void XPilot::OnNetworkDisconnected()
-	{
-		m_aircraftManager->RemoveAllPlanes();
-		m_frameRateMonitor->StopMonitoring();
-		m_xplaneAtisEnabled = 1;
-		m_networkLoginStatus = 0;
-		m_networkCallsign = "";
-		ReleaseTcasControl();
 	}
 
 	void XPilot::ForceDisconnect(std::string reason)

@@ -73,7 +73,7 @@ public:
     void NotificationPosted(const QString message, qint64 color);
     void SendPrivateMessage(const QString to, const QString message);
     void PrivateMessageReceived(const QString from, const QString message);
-    void NetworkConnected(QString callsign, QString selcal);
+    void NetworkConnected(const QString callsign, const QString selcal, bool isObserver);
     void NetworkDisconnected();
     void SetStationCallsign(int com, QString callsign);
     void DisableVoiceTransmit() { m_voiceTransmitDisabled = true; }

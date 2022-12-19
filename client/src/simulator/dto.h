@@ -273,7 +273,8 @@ namespace xpilot {
     struct ConnectedDto {
         std::string callsign;
         std::string selcal;
-        MSGPACK_DEFINE(callsign, selcal);
+        bool isObserver;
+        MSGPACK_DEFINE(callsign, selcal, isObserver);
 
         static std::string getName() {
             return CONNECTED;

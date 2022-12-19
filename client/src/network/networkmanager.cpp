@@ -116,7 +116,7 @@ namespace xpilot
         emit networkConnected(m_connectInfo.Callsign, !m_connectInfo.TowerViewMode);
 
         if(!m_connectInfo.TowerViewMode) {
-            m_xplaneAdapter.NetworkConnected(m_connectInfo.Callsign, m_connectInfo.SelcalCode);
+            m_xplaneAdapter.NetworkConnected(m_connectInfo.Callsign, m_connectInfo.SelcalCode, m_connectInfo.ObserverMode);
         }
     }
 

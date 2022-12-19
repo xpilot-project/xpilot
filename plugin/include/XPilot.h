@@ -71,8 +71,6 @@ namespace xpilot
 		void TryGetTcasControl();
 		void ReleaseTcasControl();
 
-		void OnNetworkDisconnected();
-		void OnNetworkConnected();
 		void ForceDisconnect(std::string reason = "");
 		void DisableXplaneAtis(bool disabled);
 		bool IsXplaneAtisDisabled() const { return !m_xplaneAtisEnabled; }

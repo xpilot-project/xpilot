@@ -943,11 +943,12 @@ void XplaneAdapter::PrivateMessageReceived(const QString from, const QString mes
     SendDto(dto);
 }
 
-void XplaneAdapter::NetworkConnected(QString callsign, QString selcal)
+void XplaneAdapter::NetworkConnected(const QString callsign, const QString selcal, bool isObserver)
 {
     ConnectedDto dto;
     dto.callsign = callsign.toStdString();
     dto.selcal = selcal.toStdString();
+    dto.isObserver = isObserver;
 
     SendDto(dto);
 }
