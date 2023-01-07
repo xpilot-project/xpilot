@@ -182,6 +182,8 @@ namespace xpilot
 			return Config::GetInstance().GetContrailLifeTime();
 		if (!strcmp(item, XPMP_CFG_ITM_CONTR_MULTI))
 			return Config::GetInstance().GetContrailMultiEnabled();
+		if (!strcmp(item, XPMP_CFG_ITM_ACTIVATE_SOUND))
+			return Config::GetInstance().GetAircraftSoundsEnabled();
 		return defaultVal;
 	}
 
