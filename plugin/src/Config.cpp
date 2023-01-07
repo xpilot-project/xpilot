@@ -156,6 +156,29 @@ namespace xpilot
 				int vol = std::max(0, std::min(jf.at("AircraftSoundVolume").get<int>(), 100));
 				SetAircraftSoundVolume(vol);
 			}
+			if (jf.contains("ContrailEnabled"))
+			{
+				SetContrailEnabled(jf.at("ContrailEnabled").get<bool>());
+			}
+			if (jf.contains("ContrailMinAltitude"))
+			{
+				int alt = std::max(0, std::min(jf.at("ContrailMinAltitude").get<int>(), 90000));
+				SetContrailMinAltitude(alt);
+			}
+			if (jf.contains("ContrailMaxAltitude"))
+			{
+				int alt = std::max(0, std::min(jf.at("ContrailMaxAltitude").get<int>(), 90000));
+				SetContrailMaxAltitude(alt);
+			}
+			if (jf.contains("ContrailLifeTime"))
+			{
+				int lifetime = std::max(5, std::min(jf.at("ContrailLifeTime").get<int>(), 300));
+				SetContrailLifeTime(lifetime);
+			}
+			if (jf.contains("ContrailMultiEnabled"))
+			{
+				SetContrailMultiEnabled(jf["ContrailMultiEnabled"].get<bool>());
+			}
 			if (jf.contains("CSL"))
 			{
 				json cslpackages = jf["CSL"];
@@ -202,6 +225,11 @@ namespace xpilot
 		j["EnableTransmitIndicator"] = GetTransmitIndicatorEnabled();
 		j["EnableAircraftSounds"] = GetAircraftSoundsEnabled();
 		j["AircraftSoundVolume"] = GetAircraftSoundVolume();
+		j["ContrailEnabled"] = GetContrailEnabled();
+		j["ContrailMinAltitude"] = GetContrailMinAltitude();
+		j["ContrailMaxAltitude"] = GetContrailMaxAltitude();
+		j["ContrailLifeTime"] = GetContrailLifeTime();
+		j["ContrailMultiEnabled"] = GetContrailMultiEnabled();
 
 		auto jsonObjects = json::array();
 		if (!m_cslPackages.empty())

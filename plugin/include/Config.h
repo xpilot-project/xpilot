@@ -140,6 +140,36 @@ namespace xpilot
 		}
 		int GetAircraftSoundVolume() const { return std::max(0, std::min(m_aircraftSoundsVolume, 100)); }
 
+		void SetContrailEnabled(bool enabled)
+		{
+			m_contrailEnabled = enabled;
+		}
+		bool GetContrailEnabled() const { return m_contrailEnabled; }
+
+		void SetContrailMinAltitude(int alt)
+		{
+			m_contrailMinAltitude = alt;
+		}
+		int GetContrailMinAltitude() const { return m_contrailMinAltitude; }
+
+		void SetContrailMaxAltitude(int alt)
+		{
+			m_contrailMaxAltitude = alt;
+		}
+		int GetContrailMaxAltitude() const { return m_contrailMaxAltitude; }
+
+		void SetContrailLifeTime(int time)
+		{
+			m_contrailLifeTime = time;
+		}
+		int GetContrailLifeTime() const { return m_contrailLifeTime; }
+
+		void SetContrailMultiEnabled(bool enabled)
+		{
+			m_contrailMulti = enabled;
+		}
+		bool GetContrailMultiEnabled() const { return m_contrailMulti; }
+
 	private:
 		Config() = default;
 		std::vector<CslPackage> m_cslPackages;
@@ -161,6 +191,11 @@ namespace xpilot
 		bool m_aircraftSoundsEnabled = true;
 		int m_aircraftSoundsVolume = 50;
 		int m_logLevel = 2; // 0=Debug, 1=Info, 2=Warning, 3=Error, 4=Fatal, 5=Msg
+		bool m_contrailEnabled = true;
+		int m_contrailMinAltitude = 25000;
+		int m_contrailMaxAltitude = 45000;
+		int m_contrailLifeTime = 25;
+		bool m_contrailMulti = false;
 	};
 }
 

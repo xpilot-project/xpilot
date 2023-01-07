@@ -42,6 +42,11 @@ namespace xpilot
 	static bool enableTransmitIndicator = false;
 	static bool enableAircraftSounds = true;
 	static int aircraftSoundVolume = 50;
+	static bool contrailEnabled = true;
+	static int contrailMinAltitude = 25000;
+	static int contrailMaxAltitude = 45000;
+	static int contrailLifeTime = 25;
+	static bool contrailMulti = false;
 	static float lblCol[4];
 	ImGui::FileBrowser fileBrowser(ImGuiFileBrowserFlags_SelectDirectory);
 
@@ -49,10 +54,10 @@ namespace xpilot
 	static int currentNode = -1;
 
 	SettingsWindow::SettingsWindow(WndMode _mode) :
-		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 370, 600, 0))
+		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 395, 600, 0))
 	{
 		SetWindowTitle(string_format("xPilot %s Settings", PLUGIN_VERSION_STRING));
-		SetWindowResizingLimits(600, 370, 600, 370);
+		SetWindowResizingLimits(600, 395, 600, 395);
 
 		fileBrowser.SetTitle("Browse...");
 		fileBrowser.SetWindowSize(450, 250);
@@ -86,6 +91,11 @@ namespace xpilot
 		enableTransmitIndicator = xpilot::Config::GetInstance().GetTransmitIndicatorEnabled();
 		enableAircraftSounds = xpilot::Config::GetInstance().GetAircraftSoundsEnabled();
 		aircraftSoundVolume = xpilot::Config::GetInstance().GetAircraftSoundVolume();
+		contrailEnabled = xpilot::Config::GetInstance().GetContrailEnabled();
+		contrailMinAltitude = xpilot::Config::GetInstance().GetContrailMinAltitude();
+		contrailMaxAltitude = xpilot::Config::GetInstance().GetContrailMaxAltitude();
+		contrailLifeTime = xpilot::Config::GetInstance().GetContrailLifeTime();
+		contrailMulti = xpilot::Config::GetInstance().GetContrailMultiEnabled();
 		HexToRgb(xpilot::Config::GetInstance().GetAircraftLabelColor(), lblCol);
 	}
 
@@ -339,9 +349,109 @@ namespace xpilot
 			nodeToClose = -1;
 		}
 
-		if (ImGui::CollapsingHeader("CSL Configuration"))
+		if (ImGui::CollapsingHeader("Contrails"))
 		{
 			if (currentNode == 1)
+			{
+				if (ImGui::BeginTable("##Settings", 2, ImGuiTableFlags_BordersInnerH))
+				{
+					ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoSort, 315);
+					ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoSort);
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Enable Contrails");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Enable jet aircraft contrails.");
+					ImGui::TableSetColumnIndex(1);
+					if (ImGui::Checkbox("##EnableContrails", &contrailEnabled))
+					{
+						XPMPEnableContrails(contrailEnabled);
+						xpilot::Config::GetInstance().SetContrailEnabled(contrailEnabled);
+						Save();
+					}
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Minimum Altitude");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "The minimum altitude at which contrails are visible for jet aircraft.");
+					ImGui::TableSetColumnIndex(1);
+					if (ImGui::InputInt("##ContrailsMinAlt", &contrailMinAltitude, 1000))
+					{
+						contrailMinAltitude = std::clamp<int>(contrailMinAltitude, 0, 90000);
+						xpilot::Config::GetInstance().SetContrailMinAltitude(contrailMinAltitude);
+						Save();
+					}
+					ImGui::SameLine();
+					ImGui::Text("ft");
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Maximum Altitude");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "The maximum altitude at which contrails are visible for jet aircraft.");
+					ImGui::TableSetColumnIndex(1);
+					if (ImGui::InputInt("##ContrailsMaxAlt", &contrailMaxAltitude, 1000))
+					{
+						contrailMaxAltitude = std::clamp<int>(contrailMaxAltitude, 0, 90000);
+						xpilot::Config::GetInstance().SetContrailMaxAltitude(contrailMaxAltitude);
+						Save();
+					}
+					ImGui::SameLine();
+					ImGui::Text("ft");
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Life Time");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "How long (in seconds) does a contrail \"puff\" survive?");
+					ImGui::TableSetColumnIndex(1);
+					ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+					if (ImGui::SliderInt("##ContrailLifeTime", &contrailLifeTime, 5, 300, "%d s"))
+					{
+						contrailLifeTime = (contrailLifeTime + (5 / 2)) / 5 * 5;
+						xpilot::Config::GetInstance().SetContrailLifeTime(contrailLifeTime);
+						Save();
+					}
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Multiple Contrails");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Enable one contrail per aircraft engine (more realistic, but may affect frame rate).");
+					ImGui::TableSetColumnIndex(1);
+					if (ImGui::Checkbox("##MultipleContrails", &contrailMulti))
+					{
+						XPMPEnableMultipleContrails(contrailMulti);
+						xpilot::Config::GetInstance().SetContrailMultiEnabled(contrailMulti);
+						Save();
+					}
+
+					ImGui::EndTable();
+				}
+			}
+			else
+			{
+				nodeToClose = currentNode;
+				currentNode = 1;
+			}
+		}
+
+		if (nodeToClose == 2)
+		{
+			ImGui::SetNextItemOpen(false, ImGuiCond_Always);
+			nodeToClose = -1;
+		}
+
+		if (ImGui::CollapsingHeader("CSL Configuration"))
+		{
+			if (currentNode == 2)
 			{
 				ImGui::Text("CSL Model Configuration");
 				ImGui::Text("** You must restart X-Plane after making changes to the CSL Paths **");
@@ -426,11 +536,11 @@ namespace xpilot
 			else
 			{
 				nodeToClose = currentNode;
-				currentNode = 1;
+				currentNode = 2;
 			}
 		}
 
-		if (nodeToClose == 2)
+		if (nodeToClose == 3)
 		{
 			ImGui::SetNextItemOpen(false, ImGuiCond_Always);
 			nodeToClose = -1;
@@ -438,7 +548,7 @@ namespace xpilot
 
 		if (ImGui::CollapsingHeader("Advanced Options"))
 		{
-			if (currentNode == 2)
+			if (currentNode == 3)
 			{
 				if (ImGui::BeginTable("##Settings", 2, ImGuiTableFlags_BordersInnerH))
 				{
@@ -491,7 +601,7 @@ namespace xpilot
 			else
 			{
 				nodeToClose = currentNode;
-				currentNode = 2;
+				currentNode = 3;
 			}
 		}
 

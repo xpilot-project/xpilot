@@ -174,6 +174,14 @@ namespace xpilot
 			return Config::GetInstance().GetLogLevel();
 		if (!strcmp(item, XPMP_CFG_ITM_CLAMPALL))
 			return 0;
+		if (!strcmp(item, XPMP_CFG_ITM_CONTR_MIN_ALT))
+			return Config::GetInstance().GetContrailMinAltitude();
+		if (!strcmp(item, XPMP_CFG_ITM_CONTR_MAX_ALT))
+			return Config::GetInstance().GetContrailMaxAltitude();
+		if (!strcmp(item, XPMP_CFG_ITM_CONTR_LIFE))
+			return Config::GetInstance().GetContrailLifeTime();
+		if (!strcmp(item, XPMP_CFG_ITM_CONTR_MULTI))
+			return Config::GetInstance().GetContrailMultiEnabled();
 		return defaultVal;
 	}
 
