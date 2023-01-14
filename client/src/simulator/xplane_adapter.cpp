@@ -847,7 +847,7 @@ void XplaneAdapter::UpdateControllers(QList<Controller> &controllers)
     NearbyAtcDto dto{};
     for(auto &controller : controllers)
     {
-        if(controller.IsValid)
+        if(controller.IsValid())
         {
             NearbyAtcStationDto station;
             station.callsign = controller.Callsign.toStdString();

@@ -23,10 +23,14 @@ public:
     quint32  FrequencyHz;
     double Latitude;
     double Longitude;
-    qint64 LastUpdate;
+    qint64 LastUpdateReceived;
     QString RealName;
-    bool IsValid;
     bool IsValidATC;
+    bool IsDeletePending;
+
+    bool IsValid() {
+        return IsValidATC && Frequency != 199998;
+    }
 
     bool operator==(const Controller& rhs) const
     {
@@ -36,10 +40,10 @@ public:
               && FrequencyHz == rhs.FrequencyHz
               && Latitude == rhs.Latitude
               && Longitude == rhs.Longitude
-              && LastUpdate == rhs.LastUpdate
+              && LastUpdateReceived == rhs.LastUpdateReceived
               && RealName == rhs.RealName
-              && IsValid == rhs.IsValid
-              && IsValidATC == rhs.IsValidATC;
+              && IsValidATC == rhs.IsValidATC
+              && IsDeletePending == rhs.IsDeletePending;
     }
 
     bool operator!=(const Controller& rhs) const
@@ -50,10 +54,10 @@ public:
                 || FrequencyHz != rhs.FrequencyHz
                 || Latitude != rhs.Latitude
                 || Longitude != rhs.Longitude
-                || LastUpdate != rhs.LastUpdate
+                || LastUpdateReceived != rhs.LastUpdateReceived
                 || RealName != rhs.RealName
-                || IsValid != rhs.IsValid
-                || IsValidATC != rhs.IsValidATC;
+                || IsValidATC != rhs.IsValidATC
+                || IsDeletePending != rhs.IsDeletePending;
     }
 };
 

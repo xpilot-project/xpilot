@@ -24,10 +24,9 @@ namespace xpilot
             m_nearbyAtcTimer.stop();
         });
         connect(&m_nearbyAtcTimer, &QTimer::timeout, this, [&]{
-
             QList<Controller> temp;
             for(auto &controller : m_controllers) {
-                if(QDateTime::currentSecsSinceEpoch() - controller.LastUpdate > 60) {
+                if(controller.IsDeletePending || (QDateTime::currentSecsSinceEpoch() - controller.LastUpdateReceived > 60)) {
                     temp.append(controller);
                 }
             }
@@ -44,27 +43,28 @@ namespace xpilot
 
     void ControllerManager::OnControllerUpdateReceived(QString from, uint frequency, double lat, double lon)
     {
-        auto itr = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
-            return n.Callsign == from;
+        QList<Controller>::iterator itr = std::find_if(m_controllers.begin(), m_controllers.end(), [&](Controller o){
+            return o.Callsign == from.toUpper();
         });
 
-        if(itr != m_controllers.end())
-        {
+        if(itr != m_controllers.end()) {
             bool hasFrequencyChanged = (uint)frequency != itr->Frequency;
             bool hasLocationChanged = lat != itr->Latitude || lon != itr->Longitude;
+
             itr->Frequency = frequency;
             itr->FrequencyHz = frequency * 1000;
             itr->Latitude = lat;
             itr->Longitude = lon;
-            itr->LastUpdate = QDateTime::currentSecsSinceEpoch();
+            itr->LastUpdateReceived = QDateTime::currentSecsSinceEpoch();
 
-            ValidateController(*itr);
-
-            if(hasFrequencyChanged || hasLocationChanged)
+            if(hasFrequencyChanged || hasLocationChanged) {
+                if(!itr->IsValid()) {
+                    itr->IsDeletePending = true;
+                }
                 RefreshController(*itr);
+            }
         }
-        else
-        {
+        else {
             Controller controller {};
             controller.Callsign = from.toUpper();
             controller.Frequency = frequency;
@@ -73,7 +73,7 @@ namespace xpilot
             controller.RealName = "Unknown";
             controller.Latitude = lat;
             controller.Longitude = lon;
-            controller.LastUpdate = QDateTime::currentSecsSinceEpoch();
+            controller.LastUpdateReceived = QDateTime::currentSecsSinceEpoch();
             m_controllers.push_back(controller);
 
             m_networkManager.requestRealName(from);
@@ -84,27 +84,29 @@ namespace xpilot
 
     void ControllerManager::IsValidATCReceived(QString callsign)
     {
-        auto itr = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
-            return n.Callsign == callsign;
+        QList<Controller>::iterator itr = std::find_if(m_controllers.begin(), m_controllers.end(), [&](Controller o){
+            return o.Callsign == callsign.toUpper();
         });
 
         if(itr != m_controllers.end()) {
             itr->IsValidATC = true;
-            ValidateController(*itr);
+            if(itr->IsValid()) {
+                RefreshController(*itr);
+            }
         }
     }
 
     void ControllerManager::OnRealNameReceived(QString callsign, QString realName)
     {
-        auto itr = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
-            return n.Callsign == callsign;
+        QList<Controller>::iterator itr = std::find_if(m_controllers.begin(), m_controllers.end(), [&](Controller o){
+            return o.Callsign == callsign.toUpper();
         });
-        if(itr != m_controllers.end())
-        {
-            itr->RealName = realName;
 
-            if(itr->IsValid)
+        if(itr != m_controllers.end()) {
+            itr->RealName = realName;
+            if(itr->IsValid()) {
                 RefreshController(*itr);
+            }
         }
     }
 
@@ -116,26 +118,24 @@ namespace xpilot
 
     void ControllerManager::OnControllerDeleted(QString callsign)
     {
-        auto itr = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
-            return n.Callsign == callsign;
+        QList<Controller>::iterator itr = std::find_if(m_controllers.begin(), m_controllers.end(), [&](Controller o){
+            return o.Callsign == callsign.toUpper();
         });
-        if(itr != m_controllers.end())
-        {
+
+        if(itr != m_controllers.end()) {
             if(m_radioStackState.Com1Frequency == itr->Frequency) {
                 m_xplaneAdapter.SetStationCallsign(1, "");
             }
             if(m_radioStackState.Com2Frequency == itr->Frequency) {
                 m_xplaneAdapter.SetStationCallsign(2, "");
             }
-            emit controllerDeleted(*itr);
-            m_controllers.removeAll(*itr);
+            itr->IsDeletePending = true;
         }
     }
 
     void ControllerManager::OnRadioStackStateChanged(RadioStackState radioStack)
     {
-        if(m_radioStackState != radioStack)
-        {
+        if(m_radioStackState != radioStack) {
             m_radioStackState = radioStack;
             UpdateStationCallsigns();
         }
@@ -143,7 +143,7 @@ namespace xpilot
 
     void ControllerManager::UpdateStationCallsigns()
     {
-        auto com1 = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
+        QList<Controller>::iterator com1 = std::find_if(m_controllers.begin(), m_controllers.end(), [&](Controller n){
             return n.Frequency == m_radioStackState.Com1Frequency;
         });
 
@@ -151,18 +151,12 @@ namespace xpilot
             m_xplaneAdapter.SetStationCallsign(1, com1->Callsign);
         }
 
-        auto com2 = std::find_if(m_controllers.begin(), m_controllers.end(), [=](const Controller& n){
+        QList<Controller>::iterator com2 = std::find_if(m_controllers.begin(), m_controllers.end(), [&](Controller n){
             return n.Frequency == m_radioStackState.Com2Frequency;
         });
 
         if(com2 != m_controllers.end()) {
             m_xplaneAdapter.SetStationCallsign(2, com2->Callsign);
         }
-    }
-
-    void ControllerManager::ValidateController(Controller &controller)
-    {
-        bool isValid = controller.IsValidATC && (controller.Frequency >= 118000 && controller.Frequency <= 136975);
-        controller.IsValid = isValid;
     }
 }
