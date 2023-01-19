@@ -169,6 +169,8 @@ namespace xpilot
                     abs(data.AltitudeVelocity) < POSITIONAL_VELOCITY_ZERO_TOLERANCE &&
                     abs(data.HeadingVelocity) < POSITIONAL_VELOCITY_ZERO_TOLERANCE);
         }
+
+        double AdjustIncomingAltitude(double altitude);
     };
 }
 

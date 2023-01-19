@@ -885,7 +885,6 @@ void XplaneAdapter::SendFastPositionUpdate(const NetworkAircraft &aircraft, cons
     dto.vb = rotationalVelocityVector.Z;
     dto.noseWheelAngle = visualState.NoseWheelAngle;
     dto.speed = aircraft.Speed;
-    dto.ownAircraftElevation = m_userAircraftData.AltitudeMslM * 3.28084;
 
     SendDto(dto);
 }

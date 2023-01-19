@@ -338,7 +338,7 @@ namespace xpilot
             AircraftVisualState visualState {};
             visualState.Latitude = pdu.Lat;
             visualState.Longitude = pdu.Lon;
-            visualState.Altitude = pdu.TrueAltitude;
+            visualState.Altitude = AdjustIncomingAltitude(pdu.TrueAltitude);
             visualState.Pitch = pdu.Pitch;
             visualState.Heading = pdu.Heading;
             visualState.Bank = pdu.Bank;
@@ -352,7 +352,7 @@ namespace xpilot
         AircraftVisualState visualState {};
         visualState.Latitude = pdu.Lat;
         visualState.Longitude = pdu.Lon;
-        visualState.Altitude = pdu.AltitudeTrue;
+        visualState.Altitude = AdjustIncomingAltitude(pdu.AltitudeTrue);
         visualState.AltitudeAgl = pdu.AltitudeAgl;
         visualState.Pitch = pdu.Pitch;
         visualState.Heading = pdu.Heading;
@@ -933,5 +933,25 @@ namespace xpilot
             return m_userAircraftData.AltitudePressure;
         }
         return CalculatePressureAltitude();
+    }
+
+    double NetworkManager::AdjustIncomingAltitude(double altitude)
+    {
+        if(!IsXplane12()) {
+            return altitude;
+        }
+
+        double verticalDistance = std::abs(m_userAircraftData.AltitudePressure - altitude);
+        if(verticalDistance > 6000.0) {
+            return altitude;
+        }
+
+        double weight = 1.0;
+        if(verticalDistance > 3000.0) {
+            weight = 1.0 - ((verticalDistance - 3000.0) / 3000.0);
+        }
+
+        double offset = m_userAircraftData.AltitudePressure - (m_userAircraftData.AltitudeMslM * 3.28084);
+        return altitude - (offset * weight);
     }
 }

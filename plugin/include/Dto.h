@@ -145,8 +145,7 @@ struct FastPositionUpdateDto
 	double vb;
 	double noseWheelAngle;
 	double speed;
-	double ownAircraftElevation;
-	MSGPACK_DEFINE(callsign, latitude, longitude, altitudeTrue, altitudeAgl, heading, bank, pitch, vx, vy, vz, vp, vh, vb, noseWheelAngle, speed, ownAircraftElevation);
+	MSGPACK_DEFINE(callsign, latitude, longitude, altitudeTrue, altitudeAgl, heading, bank, pitch, vx, vy, vz, vp, vh, vb, noseWheelAngle, speed);
 
 	static std::string getName()
 	{
