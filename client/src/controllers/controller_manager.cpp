@@ -168,6 +168,9 @@ namespace xpilot
         if(com1 != m_controllers.end()) {
             m_xplaneAdapter.SetStationCallsign(1, com1->Callsign);
         }
+        else {
+            m_xplaneAdapter.SetStationCallsign(1, "");
+        }
 
         QList<Controller>::iterator com2 = std::find_if(m_controllers.begin(), m_controllers.end(), [&](Controller n){
             return n.Frequency == m_radioStackState.Com2Frequency;
@@ -175,6 +178,9 @@ namespace xpilot
 
         if(com2 != m_controllers.end()) {
             m_xplaneAdapter.SetStationCallsign(2, com2->Callsign);
+        }
+        else {
+            m_xplaneAdapter.SetStationCallsign(2, "");
         }
     }
 }
