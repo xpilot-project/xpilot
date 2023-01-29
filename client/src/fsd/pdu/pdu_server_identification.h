@@ -31,7 +31,7 @@ public:
 
     static PDUServerIdentification fromTokens(const QStringList& fields);
 
-    static QString pdu() { return "#DI"; }
+    static QString pdu() { return "$DI"; }
 
     QString Version;
     QString InitialChallengeKey;
