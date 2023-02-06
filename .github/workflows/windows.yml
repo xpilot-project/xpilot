@@ -11,7 +11,7 @@ env:
   CONFIG_ENCRYPTION_KEY: ${{ secrets.CONFIG_ENCRYPTION_KEY }}
   CLIENT_DIR: ${{ github.workspace }}/client
   PLUGIN_DIR: ${{ github.workspace }}/plugin
-  IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-22.8.0-windows-x64-installer.exe
+  IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-23.1.0-windows-x64-installer.exe
   IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
 
 jobs:
