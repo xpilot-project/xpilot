@@ -42,12 +42,12 @@ namespace xpilot
             return DownloadServerList(serverUrl);
         }).then([&](QVector<NetworkServerInfo> serverList){
             if(serverList.size() > 0) {
-                emit serverListDownloaded(serverList.size());
                 AppConfig::getInstance()->CachedServers.clear();
                 for(auto & server: serverList) {
                     AppConfig::getInstance()->CachedServers.append(server);
                 }
                 AppConfig::getInstance()->saveConfig();
+                emit serverListDownloaded(serverList.size());
             }
         }).fail([&](const QString &err){
             emit serverListDownloadError(err);

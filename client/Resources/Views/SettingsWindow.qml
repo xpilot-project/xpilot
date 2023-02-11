@@ -67,6 +67,14 @@ Window {
         }
     }
 
+    Connections {
+        target: serverListManager
+
+        function onServerListDownloaded() {
+            networkServerCombobox.model = AppConfig.CachedServers;
+        }
+    }
+
     Component.onCompleted: {
         txtVatsimId.text = AppConfig.VatsimId;
         txtVatsimPassword.text = AppConfig.VatsimPasswordDecrypted;
