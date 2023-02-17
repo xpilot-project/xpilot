@@ -959,6 +959,10 @@ namespace xpilot
             return altitude;
         }
 
+        if(m_userAircraftData.AltitudePressure < 0) {
+            return altitude;
+        }
+
         double verticalDistance = std::abs(m_userAircraftData.AltitudePressure - altitude);
         if(verticalDistance > 6000.0) {
             return altitude;
