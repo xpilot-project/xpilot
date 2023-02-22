@@ -47,6 +47,7 @@ Window {
     property string colorRed: "#eb2f06"
     property string colorCyan: "#00ffff"
     property string colorBrightGreen: "#00c000"
+    property string colorMagenta: "#ff00ff"
 
     FontLoader {
         id: robotoMono
@@ -503,7 +504,11 @@ Window {
         }
 
         function onServerMessageReceived(message) {
-            appendMessage(`SERVER: ${message}`, colorGreen)
+            if(message.includes("donate.vatsim.net")) {
+                appendMessage(`SERVER: ${message}`, colorMagenta)
+            } else {
+                appendMessage(`SERVER: ${message}`, colorGreen)
+            }
         }
 
         function onBroadcastMessageReceived(from, message) {
