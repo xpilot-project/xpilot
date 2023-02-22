@@ -290,7 +290,7 @@ bool AppConfig::saveConfig()
 
 bool AppConfig::configRequired()
 {
-    return VatsimId.isEmpty() || VatsimPasswordDecrypted.isEmpty() || Name.isEmpty() || ServerName.isEmpty();
+    return VatsimId.isEmpty() || VatsimPasswordDecrypted.isEmpty() || Name.isEmpty();
 }
 
 void AppConfig::openAppDataFolder()

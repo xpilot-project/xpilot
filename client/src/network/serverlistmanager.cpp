@@ -45,6 +45,9 @@ namespace xpilot
                 AppConfig::getInstance()->CachedServers.clear();
                 for(auto & server: serverList) {
                     AppConfig::getInstance()->CachedServers.append(server);
+                    if(server.Name == "AUTOMATIC") {
+                        AppConfig::getInstance()->ServerName = "AUTOMATIC";
+                    }
                 }
                 AppConfig::getInstance()->saveConfig();
                 emit serverListDownloaded(serverList.size());
