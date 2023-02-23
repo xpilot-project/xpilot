@@ -31,6 +31,7 @@ public:
     double AltitudeAglM;
     double AltitudePressure;
     double BarometerSeaLevel;
+    double AltimeterTemperatureError;
     double GroundSpeed;
     double Pitch;
     double Heading;
@@ -51,6 +52,7 @@ public:
                 AltitudeAglM != other.AltitudeAglM ||
                 AltitudePressure != other.AltitudePressure ||
                 BarometerSeaLevel != other.BarometerSeaLevel ||
+                AltimeterTemperatureError != other.AltimeterTemperatureError ||
                 GroundSpeed != other.GroundSpeed ||
                 Pitch != other.Pitch ||
                 Heading != other.Heading ||
@@ -72,6 +74,7 @@ public:
                 AltitudeAglM == other.AltitudeAglM &&
                 AltitudePressure == other.AltitudePressure &&
                 BarometerSeaLevel == other.BarometerSeaLevel &&
+                AltimeterTemperatureError == other.AltimeterTemperatureError &&
                 GroundSpeed == other.GroundSpeed &&
                 Pitch == other.Pitch &&
                 Heading == other.Heading &&

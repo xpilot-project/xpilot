@@ -547,7 +547,7 @@ namespace xpilot
 
         if(IsXplane12())
         {
-            m_altitudeDelta = CalculatePressureAltitude() - m_userAircraftData.AltitudePressure;
+            m_altitudeDelta = m_userAircraftData.AltimeterTemperatureError;
         }
         else
         {
@@ -609,7 +609,7 @@ namespace xpilot
                                            NetworkRating::OBS,
                                            m_userAircraftData.Latitude,
                                            m_userAircraftData.Longitude,
-                                           (m_userAircraftData.AltitudeMslM * 3.28084) - m_altitudeDelta,
+                                           (m_userAircraftData.AltitudeMslM * 3.28084) + m_altitudeDelta,
                                            GetPressureAltitude(),
                                            m_userAircraftData.GroundSpeed,
                                            m_userAircraftData.Pitch,
@@ -626,7 +626,7 @@ namespace xpilot
                                                m_connectInfo.Callsign,
                                                m_userAircraftData.Latitude,
                                                m_userAircraftData.Longitude,
-                                               m_userAircraftData.AltitudeMslM * 3.28084,
+                                               (m_userAircraftData.AltitudeMslM * 3.28084) + m_altitudeDelta,
                                                m_userAircraftData.AltitudeAglM * 3.28084,
                                                m_userAircraftData.Pitch,
                                                m_userAircraftData.Heading,
@@ -648,7 +648,7 @@ namespace xpilot
                                                m_connectInfo.Callsign,
                                                m_userAircraftData.Latitude,
                                                m_userAircraftData.Longitude,
-                                               m_userAircraftData.AltitudeMslM * 3.28084,
+                                               (m_userAircraftData.AltitudeMslM * 3.28084) + m_altitudeDelta,
                                                m_userAircraftData.AltitudeAglM * 3.28084,
                                                m_userAircraftData.Pitch,
                                                m_userAircraftData.Heading,
@@ -671,7 +671,7 @@ namespace xpilot
                                                m_connectInfo.Callsign,
                                                m_userAircraftData.Latitude,
                                                m_userAircraftData.Longitude,
-                                               m_userAircraftData.AltitudeMslM * 3.28084,
+                                               (m_userAircraftData.AltitudeMslM * 3.28084) + m_altitudeDelta,
                                                m_userAircraftData.AltitudeAglM * 3.28084,
                                                m_userAircraftData.Pitch,
                                                m_userAircraftData.Heading,
@@ -959,11 +959,11 @@ namespace xpilot
             return altitude;
         }
 
-        if(m_userAircraftData.AltitudePressure < 0) {
-            return altitude;
-        }
+        // sim/flightmodel/position/elevation is true altitude corrected for temperature
+        // for comparison we need to add the error back in 
+        double userTrueAltitude = m_userAircraftData.AltitudeMslM * 3.28084 + m_userAircraftData.AltimeterTemperatureError;
 
-        double verticalDistance = std::abs(m_userAircraftData.AltitudePressure - altitude);
+        double verticalDistance = std::abs(userTrueAltitude - altitude);
         if(verticalDistance > 6000.0) {
             return altitude;
         }
@@ -973,7 +973,7 @@ namespace xpilot
             weight = 1.0 - ((verticalDistance - 3000.0) / 3000.0);
         }
 
-        double offset = m_userAircraftData.AltitudePressure - (m_userAircraftData.AltitudeMslM * 3.28084);
-        return altitude - (offset * weight);
+        // Network altitude is uncorrected, we need to substract the error
+        return altitude - (m_userAircraftData.AltimeterTemperatureError * weight);
     }
 }
