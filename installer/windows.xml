@@ -232,13 +232,6 @@
             <value>${xplane12path}</value>
         </setInstallerVariable>
         <setInstallerVariable>
-            <name>project.parameter(installdir).ask</name>
-            <value>0</value>
-            <ruleList>
-                <fileTest condition="exists" path="${installdir}"/>
-            </ruleList>
-        </setInstallerVariable>
-        <setInstallerVariable>
             <name>isUpgradeMode</name>
             <value>1</value>
             <ruleList>
@@ -477,6 +470,20 @@ ADVANCED USERS: If X-Plane 11 is not installed on this computer, leave the folde
             <mustBeWritable>1</mustBeWritable>
             <mustExist>0</mustExist>
             <width>40</width>
+            <validationActionList>
+                <throwError>
+                    <text>Error: Installing xPilot in the root X-Plane folder is not recommended. Please choose a different folder to install xPilot.
+
+The recommended installation path folder is:
+
+${platform_install_prefix}\${product_fullname}
+                    </text>
+                    <ruleList>
+                        <fileExists negate="0" path="${installdir}/X-Plane.exe"/>
+                        <platformTest type="windows"/>
+                    </ruleList>
+                </throwError>
+            </validationActionList>
         </directoryParameter>
     </parameterList>
 </project>
