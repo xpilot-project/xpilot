@@ -87,6 +87,7 @@ jobs:
           echo "$IB_LICENSE" > lic.xml
           echo "CLIENT_BUILD_DIR=${{ env.CLIENT_DIR }}/build/Release" >> $GITHUB_ENV
           echo "PLUGIN_BUILD_DIR=${{ github.workspace }}/xPilot" >> $GITHUB_ENV
+          cp "${{ env.CLIENT_DIR }}/icon.ico" "${{ env.CLIENT_DIR }}/build/Release"
 
       - name: Create installer
         shell: bash
