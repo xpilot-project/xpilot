@@ -172,6 +172,7 @@ namespace xpilot
         void OnFastPositionTimerElapsed();
 
         void LoginToNetwork(QString password);
+        QtPromise::QPromise<QString> GetBestFsdServer();
 
         bool IsXplane12() const { return m_xplaneAdapter.XplaneVersion() >= 120000; }
         double CalculatePressureAltitude() const;

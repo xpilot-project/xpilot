@@ -222,6 +222,31 @@ namespace xpilot
         m_slowPositionTimer.start();
     }
 
+    QtPromise::QPromise<QString> NetworkManager::GetBestFsdServer()
+    {
+        return QtPromise::QPromise<QString>{[&](const auto resolve, const auto reject)
+        {
+            QNetworkRequest request(QUrl("http://fsd-http.connect.vatsim.net"));
+            m_reply = nam->get(request);
+
+            QObject::connect(m_reply, &QNetworkReply::finished, [=]() {
+               if(m_reply->error() == QNetworkReply::NoError) {
+                   QHostAddress address(m_reply->readAll().trimmed());
+                   if(QAbstractSocket::IPv4Protocol == address.protocol()) {
+                       resolve(address.toString());
+                   }
+                   else {
+                       reject();
+                   }
+               }
+               else {
+                   reject();
+               }
+               m_reply->deleteLater();
+            });
+        }};
+    }
+
     void NetworkManager::OnClientQueryReceived(PDUClientQuery pdu)
     {
         switch(pdu.QueryType)
@@ -751,14 +776,13 @@ namespace xpilot
                 m_reply = nam->post(request, data);
 
                 QObject::connect(m_reply, &QNetworkReply::finished, [=]() {
-                    if(m_reply->error() == QNetworkReply::NoError)
-                    {
+                    if(m_reply->error() == QNetworkReply::NoError) {
                         resolve(m_reply->readAll());
                     }
-                    else
-                    {
+                    else {
                         reject(QString{m_reply->errorString()});
                     }
+                    m_reply->deleteLater();
                 });
             }};
     }
@@ -843,7 +867,18 @@ namespace xpilot
             m_connectInfo = connectInfo;
 
             emit notificationPosted((int)NotificationType::Info, "Connecting to network...");
-            m_fsd.Connect(AppConfig::getInstance()->getNetworkServer(), 6809);
+
+            QString serverName = AppConfig::getInstance()->getNetworkServer();
+            if(AppConfig::getInstance()->ServerName == "AUTOMATIC") {
+                GetBestFsdServer().then([&](const QString& bestServer) {
+                    m_fsd.Connect(bestServer, 6809);
+                }).fail([&, serverName](){
+                    m_fsd.Connect(serverName, 6809);
+                });
+            }
+            else {
+                m_fsd.Connect(serverName, 6809);
+            }
         }
         else
         {
