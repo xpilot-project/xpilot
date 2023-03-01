@@ -37,7 +37,7 @@ QStringList PDUChangeServer::toTokens() const
 
 PDUChangeServer PDUChangeServer::fromTokens(const QStringList &fields)
 {
-    if(fields.size() < 6) {
+    if(fields.size() < 3) {
         throw PDUFormatException("Invalid field count.", Reassemble(fields));
     }
 
