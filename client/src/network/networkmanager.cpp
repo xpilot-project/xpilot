@@ -179,7 +179,7 @@ namespace xpilot
 
     void NetworkManager::OnServerIdentificationReceived(PDUServerIdentification pdu)
     {
-        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, BuildConfig::VatsimClientId(), "xPilot", 2,1,
+        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, BuildConfig::VatsimClientId(), "xPilot", 2, 2,
                                               AppConfig::getInstance()->VatsimId, QSysInfo::machineUniqueId(), ""));
 
         GetJwtToken().then([&](const QByteArray &response){
