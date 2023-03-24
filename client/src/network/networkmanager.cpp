@@ -226,7 +226,7 @@ namespace xpilot
     {
         return QtPromise::QPromise<QString>{[&](const auto resolve, const auto reject)
         {
-            QNetworkRequest request(QUrl("http://fsd-http.connect.vatsim.net"));
+            QNetworkRequest request(QUrl("http://fsd.vatsim.net"));
             m_reply = nam->get(request);
 
             QObject::connect(m_reply, &QNetworkReply::finished, [=]() {
