@@ -85,7 +85,7 @@ namespace xpilot
 
         ev_base = event_base_new();
         m_client = std::make_shared<afv_native::Client>(ev_base, 2, clientName.toStdString().c_str());
-        m_client->ClientEventCallback.addCallback(nullptr, [&](afv_native::ClientEventType evt, void* data)
+        m_client->ClientEventCallback.addCallback(nullptr, [&](afv_native::ClientEventType evt, void* data, void* data2)
         {
             switch(evt)
             {
@@ -308,13 +308,29 @@ namespace xpilot
         }
     }
 
-    void AudioForVatsim::setOutputDevice(QString deviceName)
+    void AudioForVatsim::setSpeakerDevice(QString deviceName)
     {
         if(!deviceName.isEmpty()) {
             m_client->stopAudio();
-            m_client->setAudioOutputDevice(deviceName.toStdString().c_str());
+            m_client->setSpeakerDevice(deviceName.toStdString().c_str());
             m_client->startAudio();
         }
+    }
+
+    void AudioForVatsim::setHeadsetDevice(QString deviceName)
+    {
+        if(!deviceName.isEmpty()) {
+            m_client->stopAudio();
+            m_client->setHeadsetDevice(deviceName.toStdString().c_str());
+            m_client->startAudio();
+        }
+    }
+
+    void AudioForVatsim::setSplitAudioChannels(bool split)
+    {
+        m_client->stopAudio();
+        m_client->setSplitAudioChannels(split);
+        m_client->startAudio();
     }
 
     void AudioForVatsim::setCom1Volume(double volume)
@@ -457,9 +473,9 @@ namespace xpilot
             m_client->setAudioInputDevice(AppConfig::getInstance()->InputDevice.toStdString());
         }
 
-        if(!AppConfig::getInstance()->OutputDevice.isEmpty())
+        if(!AppConfig::getInstance()->SpeakerDevice.isEmpty())
         {
-            m_client->setAudioOutputDevice(AppConfig::getInstance()->OutputDevice.toStdString());
+            m_client->setSpeakerDevice(AppConfig::getInstance()->SpeakerDevice.toStdString());
         }
 
         m_client->startAudio();
