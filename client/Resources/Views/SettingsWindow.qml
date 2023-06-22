@@ -5,15 +5,15 @@ import QtQuick.Controls
 import QtQuick.Controls.Basic
 import QtQuick.Dialogs
 
+import org.vatsim.xpilot
 import "../Components"
 import "../Controls"
-import AppConfig 1.0
 
 Window {
-    id: formSettings
+    id: settingsWindow
     title: "Settings"
     width: 670
-    height: 615
+    height: 740
     minimumHeight: height
     minimumWidth: width
     maximumHeight: height
@@ -34,12 +34,12 @@ Window {
     }
 
     onClosing: (close) => {
-        if(inputDeviceChanged && inputDeviceList.currentIndex > -1) {
+        if (inputDeviceChanged && inputDeviceList.currentIndex > -1) {
             close.accepted = false
             calibrationRequired.open()
         }
         else {
-            AppConfig.saveConfig();
+            AppConfig.saveConfig()
             closeWindow()
         }
         audio.settingsWindowClosed()
@@ -49,16 +49,16 @@ Window {
         target: audio
 
         function onInputDevicesChanged() {
-            if(inputDeviceListLoaded) {
-                inputDeviceList.model = audio.InputDevices;
-                inputDeviceList.currentIndex = -1;
+            if (inputDeviceListLoaded) {
+                inputDeviceList.model = audio.InputDevices
+                inputDeviceList.currentIndex = -1
             }
         }
 
         function onOutputDevicesChanged() {
-            if(outputDeviceListLoaded) {
-                outputDeviceList.model = audio.OutputDevices;
-                outputDeviceList.currentIndex = -1;
+            if (outputDeviceListLoaded) {
+                outputDeviceList.model = audio.OutputDevices
+                outputDeviceList.currentIndex = -1
             }
         }
 
@@ -71,38 +71,38 @@ Window {
         target: serverListManager
 
         function onServerListDownloaded() {
-            networkServerCombobox.model = AppConfig.CachedServers;
+            networkServerCombobox.model = AppConfig.CachedServers
         }
     }
 
     Component.onCompleted: {
-        txtVatsimId.text = AppConfig.VatsimId;
-        txtVatsimPassword.text = AppConfig.VatsimPasswordDecrypted;
-        txtYourName.text = AppConfig.Name;
-        txtHomeAirport.text = AppConfig.HomeAirport;
-        networkServerCombobox.model = AppConfig.CachedServers;
-        outputDeviceList.model = audio.OutputDevices;
-        inputDeviceList.model = audio.InputDevices;
-        com1Slider.volume = AppConfig.Com1Volume;
-        com2Slider.volume = AppConfig.Com2Volume;
-        microphoneVolume.volume = AppConfig.MicrophoneVolume;
-        switchEnableHfSquelch.checked = AppConfig.HFSquelchEnabled;
-        switchDisableRadioEffects.checked = AppConfig.AudioEffectsDisabled;
-        switchAutoModeC.checked = AppConfig.AutoModeC;
-        switchAlertBroadcast.checked = AppConfig.AlertNetworkBroadcast;
-        switchAlertRadioMessage.checked = AppConfig.AlertRadioMessage;
-        switchAlertDirectRadioMessage.checked = AppConfig.AlertDirectRadioMessage;
-        switchAlertPrivateMessage.checked = AppConfig.AlertPrivateMessage;
-        switchAlertSelcal.checked = AppConfig.AlertSelcal;
-        switchAlertDisconnect.checked = AppConfig.AlertDisconnect;
+        txtVatsimId.text = AppConfig.VatsimId
+        txtVatsimPassword.text = AppConfig.VatsimPasswordDecrypted
+        txtYourName.text = AppConfig.Name
+        txtHomeAirport.text = AppConfig.HomeAirport
+        networkServerCombobox.model = AppConfig.CachedServers
+        outputDeviceList.model = audio.OutputDevices
+        inputDeviceList.model = audio.InputDevices
+        com1Slider.volume = AppConfig.Com1Volume
+        com2Slider.volume = AppConfig.Com2Volume
+        microphoneVolume.volume = AppConfig.MicrophoneVolume
+        switchEnableHfSquelch.checked = AppConfig.HFSquelchEnabled
+        switchDisableRadioEffects.checked = AppConfig.AudioEffectsDisabled
+        switchAutoModeC.checked = AppConfig.AutoModeC
+        switchAlertBroadcast.checked = AppConfig.AlertNetworkBroadcast
+        switchAlertRadioMessage.checked = AppConfig.AlertRadioMessage
+        switchAlertDirectRadioMessage.checked = AppConfig.AlertDirectRadioMessage
+        switchAlertPrivateMessage.checked = AppConfig.AlertPrivateMessage
+        switchAlertSelcal.checked = AppConfig.AlertSelcal
+        switchAlertDisconnect.checked = AppConfig.AlertDisconnect
         switchKeepWindowVisible.checked = AppConfig.KeepWindowVisible
         switchAircraftVolumeKnobs.checked = AppConfig.AircraftRadioStackControlsVolume
     }
 
     onAfterRendering: {
-        if(!initialized) {
+        if (!initialized) {
             // prevent window from opening outside of screen bounds
-            if((y - 50) < screen.virtualY) {
+            if ((y - 50) < screen.virtualY) {
                 y = screen.virtualY + 50
             }
             initialized = true
@@ -166,8 +166,8 @@ Window {
         anchors.bottomMargin: 15
         anchors.topMargin: 15
         columnSpacing: 15
-        rowSpacing: 10
-        rows: 8
+        rowSpacing: 20
+        rows: 10
         columns: 2
 
         Item {
@@ -239,7 +239,7 @@ Window {
                 id: txtYourName
                 y: 20
                 onTextChanged: {
-                    AppConfig.Name = trimLineBreaks(txtYourName.text.trim());
+                    AppConfig.Name = trimLineBreaks(txtYourName.text.trim())
                 }
             }
         }
@@ -298,11 +298,11 @@ Window {
                 textRole: "name"
                 valueRole: "address"
                 onModelChanged: {
-                    currentIndex = find(AppConfig.ServerName);
-                    serverListLoaded = true;
+                    currentIndex = find(AppConfig.ServerName)
+                    serverListLoaded = true
                 }
                 onCurrentIndexChanged: {
-                    if(serverListLoaded) {
+                    if (serverListLoaded) {
                         AppConfig.ServerName = networkServerCombobox.textAt(currentIndex)
                     }
                 }
@@ -330,18 +330,6 @@ Window {
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
                 spacing: 0
-
-                CustomSwitch {
-                    id: switchAutoModeC
-                    text: "Automatically set transponder to Mode C on takeoff"
-                    font.pixelSize: 13
-                    clip: false
-                    Layout.preferredHeight: 38
-                    Layout.preferredWidth: 287
-                    onCheckedChanged: {
-                        AppConfig.AutoModeC = switchAutoModeC.checked
-                    }
-                }
 
                 CustomSwitch {
                     id: switchAlertPrivateMessage
@@ -441,21 +429,33 @@ Window {
                         audio.disableAudioEffects(switchDisableRadioEffects.checked)
                     }
                 }
+
+                CustomSwitch {
+                    id: switchAutoModeC
+                    text: "Automatically set transponder to Mode C on takeoff"
+                    font.pixelSize: 13
+                    clip: false
+                    Layout.preferredHeight: 38
+                    Layout.preferredWidth: 287
+                    onCheckedChanged: {
+                        AppConfig.AutoModeC = switchAutoModeC.checked
+                    }
+                }
             }
         }
 
         Item {
-            id: microphoneDevice
+            id: soundApi
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-            Layout.column: 0
             Layout.preferredWidth: 50
+            Layout.column: 0
             Layout.row: 7
             Layout.fillWidth: true
             Layout.preferredHeight: 50
             Text {
                 id: text7
                 color: "#333333"
-                text: qsTr("Microphone Device")
+                text: qsTr("Sound API")
                 renderType: Text.NativeRendering
                 font.pixelSize: 13
             }
@@ -475,7 +475,7 @@ Window {
                     inputDeviceListLoaded = true
                 }
                 onCurrentIndexChanged: {
-                    if(inputDeviceListLoaded) {
+                    if (inputDeviceListLoaded) {
                         var device = inputDeviceList.textAt(currentIndex)
                         AppConfig.InputDevice = device
                         audio.setInputDevice(device)
@@ -486,17 +486,155 @@ Window {
         }
 
         Item {
-            id: listenDevice
+            id: radioHardware
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+            Layout.preferredWidth: 50
             Layout.column: 1
             Layout.row: 7
+            Layout.fillWidth: true
+            Layout.preferredHeight: 50
+            Text {
+                id: text12
+                color: "#333333"
+                text: qsTr("Radio Hardware")
+                renderType: Text.NativeRendering
+                font.pixelSize: 13
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+
+                    onEntered: {
+                        text12.ToolTip.visible = true
+                    }
+
+                    onExited: {
+                        text12.ToolTip.visible = false
+                    }
+                }
+
+                ToolTip.visible: false
+                ToolTip.text: "This setting simulates how incoming audio\nsounds based on different real-world radio hardware."
+            }
+
+            CustomComboBox {
+                id: radioHardwareList
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: text12.bottom
+                anchors.topMargin: 5
+                anchors.leftMargin: 0
+                anchors.rightMargin: 0
+                textRole: "name"
+                valueRole: "name"
+                onModelChanged: {
+                    currentIndex = inputDeviceList.indexOfValue(AppConfig.InputDevice)
+                    inputDeviceListLoaded = true
+                }
+                onCurrentIndexChanged: {
+                    if (inputDeviceListLoaded) {
+                        var device = inputDeviceList.textAt(currentIndex)
+                        AppConfig.InputDevice = device
+                        audio.setInputDevice(device)
+                        inputDeviceChanged = true
+                    }
+                }
+            }
+        }
+
+        Item {
+            id: microphoneDevice
+            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+            Layout.column: 0
+            Layout.preferredWidth: 50
+            Layout.row: 8
+            Layout.fillWidth: true
+            Layout.preferredHeight: 50
+            Text {
+                id: text11
+                color: "#333333"
+                text: qsTr("Microphone Device")
+                renderType: Text.NativeRendering
+                font.pixelSize: 13
+            }
+
+            CustomComboBox {
+                id: audioApiList
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: text11.bottom
+                anchors.topMargin: 5
+                anchors.leftMargin: 0
+                anchors.rightMargin: 0
+                textRole: "name"
+                valueRole: "name"
+                onModelChanged: {
+                    currentIndex = inputDeviceList.indexOfValue(AppConfig.InputDevice)
+                    inputDeviceListLoaded = true
+                }
+                onCurrentIndexChanged: {
+                    if (inputDeviceListLoaded) {
+                        var device = inputDeviceList.textAt(currentIndex)
+                        AppConfig.InputDevice = device
+                        audio.setInputDevice(device)
+                        inputDeviceChanged = true
+                    }
+                }
+            }
+        }
+
+        Item {
+            id: speakerDevice
+            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+            Layout.column: 1
+            Layout.row: 8
+            Layout.preferredWidth: 50
+            Layout.fillWidth: true
+            Layout.preferredHeight: 50
+            Text {
+                id: text10
+                color: "#333333"
+                text: qsTr("Speaker Device")
+                renderType: Text.NativeRendering
+                font.pixelSize: 13
+            }
+
+            CustomComboBox {
+                id: speakerDeviceList
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: text10.bottom
+                anchors.topMargin: 5
+                anchors.leftMargin: 0
+                anchors.rightMargin: 0
+                textRole: "name"
+                valueRole: "name"
+                onModelChanged: {
+                    currentIndex = speakerDeviceList.indexOfValue(AppConfig.OutputDevice)
+                    outputDeviceListLoaded = true
+                }
+                onCurrentIndexChanged: {
+                    if (outputDeviceListLoaded) {
+                        var device = speakerDeviceList.textAt(currentIndex)
+                        AppConfig.OutputDevice = device
+                        audio.setOutputDevice(device)
+                    }
+                }
+            }
+        }
+
+        Item {
+            id: headsetDevice
+            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+            Layout.column: 0
+            Layout.row: 9
             Layout.preferredWidth: 50
             Layout.fillWidth: true
             Layout.preferredHeight: 50
             Text {
                 id: text9
                 color: "#333333"
-                text: qsTr("Listen Device")
+                text: qsTr("Headset Device")
                 renderType: Text.NativeRendering
                 font.pixelSize: 13
             }
@@ -516,7 +654,7 @@ Window {
                     outputDeviceListLoaded = true
                 }
                 onCurrentIndexChanged: {
-                    if(outputDeviceListLoaded) {
+                    if (outputDeviceListLoaded) {
                         var device = outputDeviceList.textAt(currentIndex)
                         AppConfig.OutputDevice = device
                         audio.setOutputDevice(device)
@@ -525,12 +663,51 @@ Window {
             }
         }
 
+        Item {
+            id: headsetPlaybackChannel
+            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+            Layout.column: 1
+            Layout.row: 9
+            Layout.preferredWidth: 50
+            Layout.fillWidth: true
+            Layout.preferredHeight: 50
+            Text {
+                id: text13
+                color: "#333333"
+                text: qsTr("Headset Playback Channel")
+                renderType: Text.NativeRendering
+                font.pixelSize: 13
+            }
+
+            CustomComboBox {
+                id: headsetPlaybackChannelList
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: text13.bottom
+                anchors.topMargin: 5
+                anchors.leftMargin: 0
+                anchors.rightMargin: 0
+                textRole: "name"
+                valueRole: "name"
+                onModelChanged: {
+                    currentIndex = outputDeviceList.indexOfValue(AppConfig.OutputDevice)
+                    outputDeviceListLoaded = true
+                }
+                onCurrentIndexChanged: {
+                    if (outputDeviceListLoaded) {
+                        var device = outputDeviceList.textAt(currentIndex)
+                        AppConfig.OutputDevice = device
+                        audio.setOutputDevice(device)
+                    }
+                }
+            }
+        }
 
         Item {
             id: microphoneLevel
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.column: 0
-            Layout.row: 8
+            Layout.row: 10
             Layout.fillWidth: true
 
             ColumnLayout {
@@ -538,7 +715,7 @@ Window {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.topMargin: -10
+                anchors.topMargin: 0
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
 
@@ -592,7 +769,7 @@ Window {
                     linkColor: "#0164AD"
                     font.pixelSize: 13
                     color: "#333333"
-                    topPadding: 5
+                    topPadding: 10
 
                     MouseArea {
                         anchors.fill: parent
@@ -609,7 +786,7 @@ Window {
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.fillWidth: true
             Layout.column: 1
-            Layout.row: 8
+            Layout.row: 10
             ColumnLayout {
                 id: columnLayout4
                 anchors.left: parent.left

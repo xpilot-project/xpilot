@@ -16,8 +16,8 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef ENUMS_H
-#define ENUMS_H
+#ifndef FSD_ENUMS_H
+#define FSD_ENUMS_H
 
 enum class NetworkFacility
 {

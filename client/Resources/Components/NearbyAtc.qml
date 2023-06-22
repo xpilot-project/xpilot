@@ -26,7 +26,7 @@ Rectangle {
     Text {
         id: title
         color: "#ffffff"
-        text: qsTr("Nearby ATC")
+        text: "Controllers in Range"
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top

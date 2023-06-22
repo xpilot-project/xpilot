@@ -17,9 +17,7 @@
 */
 
 #include "afv.h"
-#include "appcore.h"
 #include "config/appconfig.h"
-#include "common/notificationtype.h"
 #include "common/utils.h"
 #include "common/build_config.h"
 
@@ -42,10 +40,10 @@ namespace xpilot
 
     AudioForVatsim::AudioForVatsim(QObject* parent) :
         QObject(parent),
-        m_client(),
-        m_networkManager(*QInjection::Pointer<NetworkManager>().data()),
         m_xplaneAdapter(*QInjection::Pointer<XplaneAdapter>().data()),
-        m_controllerManager(*QInjection::Pointer<ControllerManager>().data())
+        m_networkManager(*QInjection::Pointer<NetworkManager>().data()),
+        m_controllerManager(*QInjection::Pointer<ControllerManager>().data()),
+        m_client()
     {
         QDir afvLogPath(pathAppend(AppConfig::getInstance()->dataRoot(), "AfvLogs"));
         if(!afvLogPath.exists()) {
@@ -90,7 +88,7 @@ namespace xpilot
             switch(evt)
             {
                 case afv_native::ClientEventType::AudioDisabled:
-                    emit notificationPosted((int)NotificationType::Error, "No speaker device detected. You will not be able to communicate on voice until you plug in a speaker device and configure it in the xPilot settings.");
+                emit notificationPosted("No speaker device detected. You will not be able to communicate on voice until you plug in a speaker device and configure it in the xPilot settings.", MessageType::Error);
                     break;
                 case afv_native::ClientEventType::APIServerError:
                     if(data != nullptr) {
@@ -98,13 +96,13 @@ namespace xpilot
                         switch(error) {
                             case APISessionError::BadPassword:
                             case APISessionError::RejectedCredentials:
-                                emit notificationPosted((int)NotificationType::Error, "Error connecting to voice server. Please check your VATSIM credentials and try again.");
+                                emit notificationPosted("Error connecting to voice server. Please check your VATSIM credentials and try again.", MessageType::Error);
                                 break;
                             case APISessionError::ConnectionError:
-                                emit notificationPosted((int)NotificationType::Error, "Error initiating voice server connection.");
+                                emit notificationPosted("Error initiating voice server connection.", MessageType::Error);
                                 break;
                             case APISessionError::AuthTokenExpiryTimeInPast:
-                                emit notificationPosted((int)NotificationType::Error, "Voice server auth token expiry time is in the past. Please make sure your system clock is synchronized.");
+                                emit notificationPosted("Voice server auth token expiry time is in the past. Please make sure your system clock is synchronized.", MessageType::Error);
                                 break;
                             default:
                                 break;
@@ -114,7 +112,7 @@ namespace xpilot
                 case afv_native::ClientEventType::VoiceServerChannelError:
                     if(data != nullptr) {
                         int error = *reinterpret_cast<int*>(data);
-                        emit notificationPosted((int)NotificationType::Error, QString("Voice server error: %s").arg(error));
+                        emit notificationPosted(QString("Voice server error: %s").arg(error), MessageType::Error);
                     }
                     break;
                 case afv_native::ClientEventType::VoiceServerError:
@@ -122,13 +120,13 @@ namespace xpilot
                         auto error = *reinterpret_cast<VoiceSessionError*>(data);
                         switch(error) {
                             case VoiceSessionError::BadResponseFromAPIServer:
-                                emit notificationPosted((int)NotificationType::Error, "Voice server error: BadResponseFromAPIServer");
+                                emit notificationPosted("Voice server error: BadResponseFromAPIServer", MessageType::Error);
                                 break;
                             case VoiceSessionError::Timeout:
-                                emit notificationPosted((int)NotificationType::Error, "Voice server error: Timeout");
+                                emit notificationPosted("Voice server error: Timeout", MessageType::Error);
                                 break;
                             case VoiceSessionError::UDPChannelError:
-                                emit notificationPosted((int)NotificationType::Error, "Voice server error: UDPChannelError");
+                                emit notificationPosted("Voice server error: UDPChannelError", MessageType::Error);
                                 break;
                             default:
                                 break;
@@ -142,10 +140,10 @@ namespace xpilot
                     }
                     break;
                 case afv_native::ClientEventType::VoiceServerConnected:
-                    emit notificationPosted((int)NotificationType::Info, "Connected to voice server.");
+                    emit notificationPosted("Connected to voice server.", MessageType::Info);
                     break;
                 case afv_native::ClientEventType::VoiceServerDisconnected:
-                    emit notificationPosted((int)NotificationType::Info, "Disconnected from voice server.");
+                    emit notificationPosted("Disconnected from voice server.", MessageType::Info);
                     break;
                 default:
                     break;
@@ -245,30 +243,9 @@ namespace xpilot
                 m_controllers.removeAll(*it);
             }
         });
-        connect(this, &AudioForVatsim::notificationPosted, this, [&](int type, QString message)
+        connect(this, &AudioForVatsim::notificationPosted, this, [&](QString message, MessageType type)
         {
-            auto msgType = static_cast<NotificationType>(type);
-            switch(msgType)
-            {
-                case NotificationType::Error:
-                    m_xplaneAdapter.NotificationPosted(message, COLOR_RED);
-                    break;
-                case NotificationType::Info:
-                    m_xplaneAdapter.NotificationPosted(message, COLOR_YELLOW);
-                    break;
-                case NotificationType::RadioMessageSent:
-                    m_xplaneAdapter.NotificationPosted(message, COLOR_CYAN);
-                    break;
-                case NotificationType::ServerMessage:
-                    m_xplaneAdapter.NotificationPosted(message, COLOR_GREEN);
-                    break;
-                case NotificationType::Warning:
-                    m_xplaneAdapter.NotificationPosted(message, COLOR_ORANGE);
-                    break;
-                case NotificationType::TextMessage:
-                case NotificationType::RadioMessageReceived:
-                    break;
-            }
+            m_xplaneAdapter.NotificationPosted(message, toColorHex(type));
         });
 
         m_keepAlive = true;

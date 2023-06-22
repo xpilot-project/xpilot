@@ -3,7 +3,8 @@ import QtQuick.Window
 import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Controls.Basic
-import AppConfig 1.0
+
+import org.vatsim.xpilot
 import "../Controls"
 
 GridLayout {

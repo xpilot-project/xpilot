@@ -4,7 +4,8 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Controls.Basic
 import QtQuick.Dialogs
-import AppConfig 1.0
+
+import org.vatsim.xpilot
 import "../Components"
 import "../Controls"
 
@@ -43,15 +44,15 @@ Popup {
 
         function onTypeCodeResults(results) {
             typeCodeList.clear()
-            for(var i = 0; i < results.length; i++) {
-                var item = results[i];
-                typeCodeList.append({name: item.name, icao: item.typeCode, manufacturer: item.manufacturer});
+            for (var i = 0; i < results.length; i++) {
+                var item = results[i]
+                typeCodeList.append({ name: item.name, icao: item.typeCode, manufacturer: item.manufacturer })
             }
             typeCodeResults.visible = typeCodeList.count > 0
         }
 
         function onValidateTypeCode(valid) {
-            if(valid) {
+            if (valid) {
                 connectToNetwork()
             }
             else {
@@ -61,17 +62,17 @@ Popup {
     }
 
     Component.onCompleted: {
-        txtCallsign.text = trimLineBreaks(AppConfig.RecentConnection.Callsign);
-        txtTypeCode.text = trimLineBreaks(AppConfig.RecentConnection.TypeCode);
-        txtSelcal.text = trimLineBreaks(AppConfig.RecentConnection.SelcalCode);
+        txtCallsign.text = trimLineBreaks(AppConfig.RecentConnection.Callsign)
+        txtTypeCode.text = trimLineBreaks(AppConfig.RecentConnection.TypeCode)
+        txtSelcal.text = trimLineBreaks(AppConfig.RecentConnection.SelcalCode)
     }
 
     function connectToNetwork() {
-        networkManager.connectToNetwork(trimLineBreaks(txtCallsign.text), trimLineBreaks(txtTypeCode.text), trimLineBreaks(txtSelcal.text), observerMode.checked);
-        AppConfig.RecentConnection.Callsign = trimLineBreaks(txtCallsign.text);
-        AppConfig.RecentConnection.TypeCode = trimLineBreaks(txtTypeCode.text);
-        AppConfig.RecentConnection.SelcalCode = trimLineBreaks(txtSelcal.text);
-        AppConfig.saveConfig();
+        networkManager.connectToNetwork(trimLineBreaks(txtCallsign.text), trimLineBreaks(txtTypeCode.text), trimLineBreaks(txtSelcal.text), observerMode.checked)
+        AppConfig.RecentConnection.Callsign = trimLineBreaks(txtCallsign.text)
+        AppConfig.RecentConnection.TypeCode = trimLineBreaks(txtTypeCode.text)
+        AppConfig.RecentConnection.SelcalCode = trimLineBreaks(txtSelcal.text)
+        AppConfig.saveConfig()
         close()
     }
 
@@ -90,7 +91,7 @@ Popup {
         closePolicy: Popup.NoAutoClose
         margins: 20
 
-        property var errorMessage: ""
+        property string errorMessage: ""
 
         Text {
             id: errorLabel
@@ -190,12 +191,12 @@ Popup {
                     text = text.toUpperCase()
                 }
                 Keys.onReleased: function(event) {
-                    if(event.key === Qt.Key_Escape) {
+                    if (event.key === Qt.Key_Escape) {
                         typeCodeResults.visible = false
                     }
                     else {
-                        if(txtTypeCode.text.length > 0) {
-                            typeCodeDatabase.searchTypeCodes(txtTypeCode.text.toUpperCase());
+                        if (txtTypeCode.text.length > 0) {
+                            typeCodeDatabase.searchTypeCodes(txtTypeCode.text.toUpperCase())
                         }
                         else {
                             typeCodeResults.visible = false
@@ -226,7 +227,9 @@ Popup {
                     id: typeCodeListView
                     currentIndex: -1
                     anchors.fill: parent
-                    highlight: Rectangle { color: "lightsteelblue"; }
+                    highlight: Rectangle {
+                        color: "lightsteelblue"
+                    }
                     model: typeCodeList
                     delegate: Component {
                         id: contactDelegate
@@ -312,7 +315,7 @@ Popup {
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
                 onCheckedChanged: {
-                    txtCallsign.text = observerMode.checked ? txtCallsign.text.substring(0,8) : txtCallsign.text.substring(0,7);
+                    txtCallsign.text = observerMode.checked ? txtCallsign.text.substring(0, 8) : txtCallsign.text.substring(0, 7)
                 }
             }
         }
@@ -343,17 +346,17 @@ Popup {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        if(txtCallsign.text === "") {
+                        if (txtCallsign.text === "") {
                             validationPopup.errorMessage = "Callsign is required"
                             validationPopup.open()
                             return
                         }
-                        if(txtTypeCode.text === "") {
+                        if (txtTypeCode.text === "") {
                             validationPopup.errorMessage = "Aircraft type code is required"
                             validationPopup.open()
                             return
                         }
-                        if(txtSelcal.text !== "") {
+                        if (txtSelcal.text !== "") {
                             const prohibitedChars = ["I", "N", "O"]
                             var selcal = txtSelcal.text
                             selcal = selcal.replace("-", "")

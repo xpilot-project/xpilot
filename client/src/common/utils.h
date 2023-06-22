@@ -26,6 +26,8 @@
 #include <QChar>
 #include <QDir>
 
+#include "common/enums.h"
+
 constexpr qint64 COLOR_GREEN = 0x85a664;
 constexpr qint64 COLOR_ORANGE = 0xffa500;
 constexpr qint64 COLOR_WHITE = 0xffffff;
@@ -47,6 +49,36 @@ template <class F> bool containsChar(const QString &s, F predicate)
 inline QString pathAppend(const QString& path1, const QString& path2)
 {
     return QDir::cleanPath(path1 + QDir::separator() + path2);
+}
+
+static inline qint64 toColorHex(const enums::MessageType& type)
+{
+    switch(type) {
+    case enums::MessageType::Server:
+        return 0x85a664; // Green
+    case enums::MessageType::IncomingPrivate:
+        return 0x00ffff; // Cyan
+    case enums::MessageType::OutgoingPrivate:
+        return 0xc0c0c0; // Gray
+    case enums::MessageType::TextOverride:
+        return 0xcd5c5c; // IndianRed
+    case enums::MessageType::IncomingRadioPrimary:
+        return 0xffffff; // White
+    case enums::MessageType::IncomingRadioSecondary:
+        return 0xc0c0c0; // Gray
+    case enums::MessageType::OutgoingRadio:
+        return 0x00ffff; // Cyan
+    case enums::MessageType::Broadcast:
+        return 0xffa500; // Orange
+    case enums::MessageType::Wallop:
+        return 0xff0000; // Red
+    case enums::MessageType::Info:
+        return 0xffff00; // Yellow
+    case enums::MessageType::Error:
+        return 0xff0000; // Red
+    default:
+        return 0xffff00; // Yellow
+    }
 }
 
 #endif // UTILS_H

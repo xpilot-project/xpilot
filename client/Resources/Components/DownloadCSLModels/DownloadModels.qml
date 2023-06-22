@@ -3,7 +3,8 @@ import QtQuick.Controls
 import QtQuick.Controls.Basic
 import QtQuick.Window
 import QtQuick.Layouts
-import AppConfig 1.0
+
+import org.vatsim.xpilot
 import "../../Controls"
 
 Popup {

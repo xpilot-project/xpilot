@@ -41,6 +41,9 @@
 #include "controllers/controller.h"
 #include "afv-native/Client.h"
 #include "audiodeviceinfo.h"
+#include "common/enums.h"
+
+using namespace enums;
 
 namespace xpilot
 {
@@ -103,7 +106,7 @@ namespace xpilot
         void OnAudioDevicesTimer();
 
     signals:
-        void notificationPosted(int type, QString message);
+        void notificationPosted(QString message, MessageType type);
         void radioRxChanged(uint radio, bool active);
         void outputDevicesChanged();
         void inputDevicesChanged();

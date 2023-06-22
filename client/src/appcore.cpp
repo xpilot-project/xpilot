@@ -35,8 +35,12 @@
 #include <QFont>
 #include <QFontDatabase>
 #include <QCommandLineParser>
+#include <QtQml/qqml.h>
+
+#include <qinjection/dependencypool.h>
 
 #include "appcore.h"
+#include "common/enums.h"
 #include "common/build_config.h"
 #include "common/versioncheck.h"
 #include "common/typecodedatabase.h"
@@ -52,7 +56,6 @@
 #include "aircrafts/user_aircraft_manager.h"
 #include "aircrafts/network_aircraft_manager.h"
 #include "aircrafts/radio_stack_state.h"
-#include "qinjection/dependencypool.h"
 
 using namespace xpilot;
 
@@ -110,7 +113,9 @@ int xpilot::Main(int argc, char* argv[])
         typeCodeDatabase.PerformTypeCodeDownload();
     });
 
-    qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", appConfigSingleton);
+    qmlRegisterSingletonType<AppConfig>("org.vatsim.xpilot", 1, 0, "AppConfig", appConfigSingleton);
+    qmlRegisterUncreatableMetaObject(enums::staticMetaObject, "org.vatsim.xpilot", 1, 0, "Enum", "Only enums can be registered");
+    qRegisterMetaType<MessageType>("MessageType");
     qRegisterMetaType<ConnectInfo>("ConnectInfo");
     qRegisterMetaType<ClientWindowConfig>("ClientWindowConfig");
     qRegisterMetaType<RadioStackState>("RadioStackState");

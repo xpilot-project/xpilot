@@ -6,14 +6,16 @@ import QtQuick.Window
 import QtQuick.Layouts
 import QtMultimedia
 
-import AppConfig 1.0
+import org.vatsim.xpilot
+
 import "../Scripts/FrequencyUtils.js" as FrequencyUtils
 import "../Scripts/TimestampUtils.js" as TimestampUtils
 import "../Scripts/StringUtils.js" as StringUtils
+import "../Ui/Colors.js" as Colors
+import "../Controls"
 import "../Components"
 import "../Components/DownloadCSLModels"
 import "../Components/VersionCheck"
-import "../Controls"
 
 Window {
     id: mainWindow
@@ -26,26 +28,17 @@ Window {
     width: minimumWidth
     height: minimumHeight
 
-    property QtObject downloadCslWindow // csl install
-    property QtObject setXplanePathWindow // csl install
-    property QtObject extractCslModelsWindow // csl install
+    // CSL installation
+    property QtObject downloadCslWindow
+    property QtObject setXplanePathWindow
+    property QtObject extractCslModelsWindow
 
     property int activeMessageTab
-    property string myCallsign
+    property string networkCallsign
     property var radioStackState
     property bool networkConnected: false
     property bool initialized: false
     property bool simConnected: false
-
-    property string colorGreen: "#85a664"
-    property string colorOrange: "#ffa500"
-    property string colorWhite: "#ffffff"
-    property string colorGray: "#c0c0c0"
-    property string colorYellow: "#ffff00"
-    property string colorRed: "#eb2f06"
-    property string colorCyan: "#00ffff"
-    property string colorBrightGreen: "#00c000"
-    property string colorMagenta: "#ff00ff"
 
     FontLoader {
         id: robotoMono
@@ -97,7 +90,7 @@ Window {
     }
 
     DownloadingUpdate {
-        id: downloadingUpdateDialog;
+        id: downloadingUpdateDialog
     }
 
     DisconnectDialog {
@@ -125,12 +118,12 @@ Window {
         target: AppConfig
 
         function onPermissionError(error) {
-            appendMessage("Configuration Error: " + error, colorRed)
+            appendMessage(`Configuration Error ${error}`, Enum.MessageType.Error)
             errorSound.play()
         }
 
         function onSettingsChanged() {
-            if(AppConfig.KeepWindowVisible) {
+            if (AppConfig.KeepWindowVisible) {
                 mainWindow.flags |= Qt.WindowStaysOnTopHint
             } else {
                 mainWindow.flags &= ~Qt.WindowStaysOnTopHint
@@ -147,65 +140,66 @@ Window {
         // we call this again so we can present the permission error if applicable
         AppConfig.loadConfig()
 
-        appendMessage(`Welcome to xPilot v${appVersion}`, colorYellow)
-        if(AppConfig.XplaneNetworkAddress !== "127.0.0.1" && AppConfig.XplaneNetworkAddress !== "localhost") {
-            appendMessage(`Waiting for X-Plane connection (${AppConfig.XplaneNetworkAddress})... Please make sure X-Plane is running and a flight is loaded.`, colorYellow)
+        appendMessage(`Welcome to xPilot v${appVersion}`, Enum.MessageType.Info)
+        if (AppConfig.XplaneNetworkAddress !== "127.0.0.1" && AppConfig.XplaneNetworkAddress !== "localhost") {
+            appendMessage(`Waiting for X-Plane connection (${AppConfig.XplaneNetworkAddress})...
+                          Please make sure X-Plane is running and a flight is loaded.`, Enum.MessageType.Info)
         } else {
-            appendMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.", colorYellow)
+            appendMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.", Enum.MessageType.Info)
         }
 
-        if(AppConfig.configRequired()) {
+        if (AppConfig.configRequired()) {
             configRequiredDialog.open()
         }
-        else if(!AppConfig.SilenceModelInstall) {
+        else if (!AppConfig.SilenceModelInstall) {
             createCslDownloadWindow()
         }
 
-        if(AppConfig.KeepWindowVisible) {
+        if (AppConfig.KeepWindowVisible) {
             mainWindow.flags |= Qt.WindowStaysOnTopHint
         }
 
-        if(AppConfig.WindowConfig.Maximized) {
+        if (AppConfig.WindowConfig.Maximized) {
             mainWindow.showFullScreen()
         }
         else {
             width = Math.max(minimumWidth, AppConfig.WindowConfig.Width)
             height = Math.max(minimumHeight, AppConfig.WindowConfig.Height)
-            x = AppConfig.WindowConfig.X;
-            y = AppConfig.WindowConfig.Y;
+            x = AppConfig.WindowConfig.X
+            y = AppConfig.WindowConfig.Y
         }
-        initialized = true;
+        initialized = true
     }
 
     onClosing: function(close) {
         close.accepted = !networkConnected
-        onTriggered: if(networkConnected) confirmClose.open()
+        onTriggered: if (networkConnected) confirmClose.open()
     }
 
     onXChanged: {
-        if(initialized) {
-            if(visibility === Window.Maximized || visibility === Window.FullScreen) {
-                return;
+        if (initialized) {
+            if (visibility === Window.Maximized || visibility === Window.FullScreen) {
+                return
             }
-            AppConfig.WindowConfig.X = x;
+            AppConfig.WindowConfig.X = x
             AppConfig.saveConfig()
         }
     }
 
     onYChanged: {
-        if(initialized) {
-            if(visibility === Window.Maximized || visibility === Window.FullScreen) {
-                return;
+        if (initialized) {
+            if (visibility === Window.Maximized || visibility === Window.FullScreen) {
+                return
             }
-            AppConfig.WindowConfig.Y = y;
+            AppConfig.WindowConfig.Y = y
             AppConfig.saveConfig()
         }
     }
 
     onVisibilityChanged: function(visibility) {
-        if(initialized && visibility !== Window.Hidden) {
+        if (initialized && visibility !== Window.Hidden) {
             var isMaximized = (visibility === Window.Maximized || visibility === Window.FullScreen)
-            if(AppConfig.WindowConfig.Maximized && !isMaximized) {
+            if (AppConfig.WindowConfig.Maximized && !isMaximized) {
                 width = minimumWidth
                 height = minimumHeight
                 var center = Qt.point(Screen.width / 2 - width / 2, Screen.height / 2 - height / 2)
@@ -222,23 +216,23 @@ Window {
     }
 
     onHeightChanged: {
-        if(visibility === Window.Maximized || visibility === Window.FullScreen) {
-            return;
+        if (visibility === Window.Maximized || visibility === Window.FullScreen) {
+            return
         }
 
-        if(initialized) {
-            AppConfig.WindowConfig.Height = height;
+        if (initialized) {
+            AppConfig.WindowConfig.Height = height
             AppConfig.saveConfig()
         }
     }
 
     onWidthChanged: {
-        if(visibility === Window.Maximized || visibility === Window.FullScreen) {
-            return;
+        if (visibility === Window.Maximized || visibility === Window.FullScreen) {
+            return
         }
 
-        if(initialized) {
-            AppConfig.WindowConfig.Width = width;
+        if (initialized) {
+            AppConfig.WindowConfig.Width = width
             AppConfig.saveConfig()
         }
     }
@@ -255,11 +249,11 @@ Window {
         }
 
         function onNoUpdatesAvailable() {
-            appendMessage("Version check complete. You are running the latest version of xPilot.", colorYellow)
+            appendMessage("Version check complete. You are running the latest version of xPilot.", Enum.MessageType.Info)
         }
 
         function onErrorEncountered(error) {
-            appendMessage(error, colorRed)
+            appendMessage(error, Enum.MessageType.Error)
             errorSound.play()
         }
     }
@@ -268,7 +262,7 @@ Window {
         target: typeCodeDatabase
 
         function onTypeCodeDownloadError(error) {
-            appendMessage(error, colorRed)
+            appendMessage(error, Enum.MessageType.Error)
             errorSound.play()
         }
     }
@@ -288,7 +282,8 @@ Window {
 
         function onUnzipFinished() {
             extractCslModelsWindow.destroy()
-            appendMessage("CSL aircraft model package successfully installed! Please restart xPilot and X-Plane before connecting to the network. If you need to install the model set for another X-Plane installation, enter the command .downloadcsl", colorYellow);
+            appendMessage(`CSL aircraft model package successfully installed! Please restart xPilot and X-Plane before connecting to the network.
+                          If you need to install the model set for another X-Plane installation, enter the command .downloadcsl`, Enum.MessageType.Info)
             AppConfig.SilenceModelInstall = true
         }
 
@@ -301,16 +296,16 @@ Window {
         }
 
         function onErrorEncountered(error) {
-            if(downloadCslWindow != null) {
+            if (downloadCslWindow != null) {
                 downloadCslWindow.destroy()
             }
-            if(setXplanePathWindow != null) {
+            if (setXplanePathWindow != null) {
                 setXplanePathWindow.destroy()
             }
-            if(extractCslModelsWindow != null) {
+            if (extractCslModelsWindow != null) {
                 extractCslModelsWindow.destroy()
             }
-            appendMessage(error, colorRed);
+            appendMessage(error, Enum.MessageType.Error)
             errorSound.play()
         }
     }
@@ -340,11 +335,11 @@ Window {
         target: serverListManager
 
         function onServerListDownloaded(count) {
-            appendMessage(`Server list download succeeded. ${count} servers found.`, colorYellow)
+            appendMessage(`Server list download succeeded. ${count} servers found.`, Enum.MessageType.Info)
         }
 
         function onServerListDownloadError(count) {
-            appendMessage("Server list download failed. Using previously-cached server list.", colorRed)
+            appendMessage("Server list download failed. Using previously-cached server list.", Enum.MessageType.Error)
         }
     }
 
@@ -352,34 +347,34 @@ Window {
         target: xplaneAdapter
 
         function onNngSocketError(error) {
-            appendMessage("Socket Error: " + error, colorRed)
+            appendMessage(`Socket Error: ${error}`, Enum.MessageType.Error)
             errorSound.play()
         }
 
         function onRadioStackStateChanged(stack) {
-            if(radioStackState !== stack) {
-                radioStackState = stack;
+            if (radioStackState !== stack) {
+                radioStackState = stack
             }
         }
 
         function onSimConnectionStateChanged(state) {
-            if(!simConnected && state) {
-                appendMessage("X-Plane connection established.", colorYellow)
+            if (!simConnected && state) {
+                appendMessage("X-Plane connection established.", Enum.MessageType.Info)
             }
-            else if(simConnected && !state) {
+            else if (simConnected && !state) {
                 networkManager.disconnectFromNetwork()
-                appendMessage("X-Plane connection lost. Please make sure X-Plane is running and a flight is loaded.", colorRed)
-                mainWindow.alert(0);
+                appendMessage("X-Plane connection lost. Please make sure X-Plane is running and a flight is loaded.", Enum.MessageType.Error)
+                mainWindow.alert(0)
                 errorSound.play()
             }
-            simConnected = state;
+            simConnected = state
         }
 
         function onReplayModeDetected() {
-            if(networkConnected) {
+            if (networkConnected) {
                 networkManager.disconnectFromNetwork()
-                appendMessage("You have been disconnected from the network because Replay Mode is enabled.", colorRed)
-                if(AppConfig.AlertDisconnect) {
+                appendMessage("You have been disconnected from the network because Replay Mode is enabled.", Enum.MessageType.Error)
+                if (AppConfig.AlertDisconnect) {
                     mainWindow.alert(0)
                     errorSound.play()
                 }
@@ -387,45 +382,50 @@ Window {
         }
 
         function onInvalidPluginVersion() {
-            appendMessage("Unsupported xPilot plugin version detected. Please close X-Plane and reinstall the latest version of xPilot.", colorRed)
+            appendMessage(`Unsupported xPilot plugin version detected.
+                          Please close X-Plane and reinstall the latest version of xPilot.`, Enum.MessageType.Error)
             errorSound.play()
             mainWindow.alert(0)
         }
 
         function onInvalidCslConfiguration() {
-            appendMessage("No valid CSL paths are configured or enabled, or you have no CSL models installed. Please verify the CSL configuration in X-Plane (Plugins > xPilot > Settings). If you need assistance configuring your CSL paths, see the \"CSL Configuration\" section in the xPilot Documentation (http://beta.xpilot-project.org). Restart X-Plane and xPilot after you have properly configured your CSL models. You can have xPilot install a model set for you by entering the command .downloadcsl", colorRed)
+            appendMessage(`No valid CSL paths are configured or enabled, or you have no CSL models installed.
+                          Please verify the CSL configuration in X-Plane (Plugins > xPilot > Settings). If you need assistance configuring your CSL paths,
+                          see the "CSL Configuration" section in the xPilot Documentation (http://xpilot-project.org).
+                          Restart X-Plane and xPilot after you have properly configured your CSL models.
+                          You can have xPilot install a model set for you by entering the command .downloadcsl`, Enum.MessageType.Error)
             errorSound.play()
             mainWindow.alert(0)
         }
 
         function onRadioMessageSent(message) {
-            appendMessage(message, colorCyan)
+            appendMessage(message, Enum.MessageType.OutgoingRadio)
         }
 
         function onAircraftIgnored(callsign) {
-            appendMessage(`${callsign} has been added to the ignore list.`, colorYellow)
+            appendMessage(`${callsign} has been added to the ignore list.`, Enum.MessageType.Info)
         }
 
         function onAircraftAlreadyIgnored(callsign) {
-            appendMessage(`${callsign} is already in the ignore list.`, colorRed)
+            appendMessage(`${callsign} is already in the ignore list.`, Enum.MessageType.Error)
             errorSound.play()
         }
 
         function onAircraftUnignored(callsign) {
-            appendMessage(`${callsign} has been removed from the ignore list.`, colorYellow)
+            appendMessage(`${callsign} has been removed from the ignore list.`, Enum.MessageType.Info)
         }
 
         function onAircraftNotIgnored(callsign) {
-            appendMessage(`${callsign} was not found in the ignore list.`, colorRed)
+            appendMessage(`${callsign} was not found in the ignore list.`, Enum.MessageType.Error)
             errorSound.play()
         }
 
         function onIgnoreList(list) {
-            if(list.length > 0) {
-                appendMessage(`The following aircraft are currently ignored: ${list.join(", ")}`, colorYellow)
+            if (list.length > 0) {
+                appendMessage(`The following aircraft are currently ignored: ${list.join(", ")}`, Enum.MessageType.Info)
             }
             else {
-                appendMessage("The ignore list is currently empty.", colorYellow)
+                appendMessage("The ignore list is currently empty.", Enum.MessageType.Info)
             }
         }
     }
@@ -433,24 +433,8 @@ Window {
     Connections {
         target: audio
 
-        function onNotificationPosted(type, message) {
-            switch(type) {
-            case 0: // info
-                appendMessage(message, colorYellow)
-                break;
-            case 1: // warning
-                appendMessage(message, colorOrange)
-                break;
-            case 2: // error
-                appendMessage(message, colorRed)
-                break;
-            case 3: // text message
-                appendMessage(message, colorGray);
-                break;
-            default:
-                appendMessage(message, colorYellow);
-                break;
-            }
+        function onNotificationPosted(message, type) {
+            appendMessage(message, type)
         }
     }
 
@@ -462,12 +446,12 @@ Window {
         }
 
         function onNetworkConnected(callsign) {
-            myCallsign = callsign
-            networkConnected = true;
+            networkCallsign = callsign
+            networkConnected = true
         }
 
         function onNetworkDisconnected(forced) {
-            networkConnected = false;
+            networkConnected = false
             nearbyEnroute.clear()
             nearbyApproach.clear()
             nearbyTower.clear()
@@ -475,89 +459,69 @@ Window {
             nearbyDelivery.clear()
             nearbyAtis.clear()
 
-            if(forced && AppConfig.AlertDisconnect) {
+            if (forced && AppConfig.AlertDisconnect) {
                 errorSound.play()
                 mainWindow.alert(0)
             }
         }
 
-        function onNotificationPosted(type, message) {
-            switch(type) {
-            case 0: // info
-                appendMessage(message, colorYellow)
-                break;
-            case 1: // warning
-                appendMessage(message, colorOrange)
-                break;
-            case 2: // error
-                appendMessage(message, colorRed)
-                break;
-            case 3: // text message
-                appendMessage(message, colorGray);
-                break;
-            default:
-                appendMessage(message, colorYellow);
-                break;
-            }
+        function onNotificationPosted(message, type) {
+            appendMessage(message, type)
         }
 
         function onServerMessageReceived(message) {
-            if(message.includes("donate.vatsim.net")) {
-                appendMessage(`SERVER: ${message}`, colorMagenta)
+            if (message.includes("donate.vatsim.net")) {
+                appendMessage(`SERVER: ${message}`, Colors.Magenta)
             } else {
-                appendMessage(`SERVER: ${message}`, colorGreen)
+                appendMessage(`SERVER: ${message}`, Enum.MessageType.Server)
             }
         }
 
         function onBroadcastMessageReceived(from, message) {
-            appendMessage(`[BROADCAST] ${from}: ${message}`, colorOrange)
-            if(AppConfig.AlertNetworkBroadcast) {
+            appendMessage(`[BROADCAST] ${from}: ${message}`, Enum.MessageType.Broadcast)
+            if (AppConfig.AlertNetworkBroadcast) {
                 broadcastSound.play()
                 mainWindow.alert(0)
             }
         }
 
         function onWallopSent(message) {
-            appendMessage(`[WALLOP] ${message}`, colorRed)
+            appendMessage(`[WALLOP] ${message}`, Enum.MessageType.Wallop)
         }
 
         function onSelcalAlertReceived(from, frequencies) {
-            appendMessage(`SELCAL alert received on ${FrequencyUtils.fromNetworkFormat(frequencies[0])}`, colorYellow)
-            if(AppConfig.AlertSelcal) {
+            appendMessage(`SELCAL alert received on ${FrequencyUtils.fromNetworkFormat(frequencies[0])}`, Enum.MessageType.Info)
+            if (AppConfig.AlertSelcal) {
                 mainWindow.alert(0)
-                if(!radioStackState.SelcalMuteOverride) {
+                if (!radioStackState.SelcalMuteOverride) {
                     selcalSound.play()
                 }
             }
         }
 
         function onRealNameReceived(callsign, name) {
-            var idx = getChatTabIndex(callsign)
-            if(idx > 0) {
-                var model = cliModel.get(idx)
-                if(!model.realName) {
-                    model.attributes.insert(0, {message:`Name: ${name}`, msgColor: colorYellow})
-                    model.realName = true
+            var tabIdx = getChatTabIndex(callsign)
+            if (tabIdx !== undefined) {
+                var model = tabModel.get(tabIdx)
+                if(!model.realNameReceived) {
+                    model.messages.insert(0, { message: `<font style="color:${Colors.Yellow}">Name: ${name}</font>` })
+                    model.realNameReceived = true
                 }
             }
         }
 
         function onPrivateMessageReceived(from, message) {
-            var tab = getChatTabIndex(from)
-            if(tab === null) {
+            var tabIdx = getChatTabIndex(from)
+            if(tabIdx === undefined) {
                 createChatTab(from)
-                tab = getChatTabIndex(from)
-                appendPrivateMessage(tab, message, from, colorWhite)
+                tabIdx = getChatTabIndex(from)
+                appendMessage(`${from}: ${message}`, Enum.MessageType.IncomingPrivate, tabIdx)
                 if(AppConfig.AlertPrivateMessage) {
                     mainWindow.alert(0)
                     newMessageSound.play()
                 }
-            }
-            else {
-                if(activeMessageTab !== tab) {
-                    markTabUnread(from)
-                }
-                appendPrivateMessage(tab, message, from, colorWhite)
+            } else {
+                appendMessage(`${from}: ${message}`, Enum.MessageType.IncomingPrivate, tabIdx)
                 if(AppConfig.AlertPrivateMessage) {
                     mainWindow.alert(0)
                     privateMessageSound.play()
@@ -566,108 +530,105 @@ Window {
         }
 
         function onPrivateMessageSent(to, message) {
-            var tab = getChatTabIndex(to)
-            if(tab !== null) {
-                appendPrivateMessage(tab, message, myCallsign, colorCyan)
-            }
-            else {
+            var tabIdx = getChatTabIndex(to)
+            if(tabIdx === undefined) {
                 createChatTab(to)
-                tab = getChatTabIndex(to)
-                appendPrivateMessage(tab, message, myCallsign, colorCyan)
+                tabIdx = getChatTabIndex(to)
             }
+            appendMessage(message, Enum.MessageType.OutgoingPrivate, tabIdx)
         }
 
         function onRadioMessageReceived(args) {
-            var message = "";
-            if(args.DualReceiver) {
-                var freqString = "";
-                if(args.Frequencies.length > 1) {
+            var message = ""
+            if (args.DualReceiver) {
+                var freqString = ""
+                if (args.Frequencies.length > 1) {
                     freqString = `${FrequencyUtils.fromNetworkFormat(args.Frequencies[0])} & ${FrequencyUtils.fromNetworkFormat(args.Frequencies[1])}`;
                 }
                 else {
-                    freqString = FrequencyUtils.fromNetworkFormat(args.Frequencies[0]);
+                    freqString = FrequencyUtils.fromNetworkFormat(args.Frequencies[0])
                 }
-                message = `${args.From} on ${freqString}: ${args.Message}`;
+                message = `${args.From} on ${freqString}: ${args.Message}`
             }
             else {
-                message = `${args.From}: ${args.Message}`;
+                message = `${args.From}: ${args.Message}`
             }
 
-            appendMessage(message, args.IsDirect ? colorWhite : colorGray)
+            appendMessage(message, args.IsDirect ? Enum.MessageType.IncomingRadioPrimary : Enum.MessageType.IncomingRadioSecondary)
 
-            if(args.IsDirect) {
-                if(AppConfig.AlertDirectRadioMessage) {
-                    mainWindow.alert(0);
-                    directRadioMessageSound.play();
+            if (args.IsDirect) {
+                if (AppConfig.AlertDirectRadioMessage) {
+                    mainWindow.alert(0)
+                    directRadioMessageSound.play()
                 }
             }
             else {
-                if(AppConfig.AlertRadioMessage) {
-                    radioMessageSound.play();
+                if (AppConfig.AlertRadioMessage) {
+                    radioMessageSound.play()
                 }
             }
         }
 
         function onControllerAtisReceived(callsign, atis) {
-            appendMessage(`${callsign} ATIS:`, colorBrightGreen)
-            atis.forEach(function(line) {
-                appendMessage(line, colorBrightGreen)
+            appendMessage(`${callsign} ATIS:`, Colors.Orange)
+            atis.forEach(function (line) {
+                appendMessage(line, Colors.Orange)
             })
         }
 
         function onMetarReceived(station, metar) {
-            appendMessage(`METAR: ${metar}`, colorBrightGreen)
+            appendMessage(`METAR: ${metar}`, Colors.Orange)
         }
     }
 
     Connections {
         target: controllerManager
 
-        function findController(myModel, callsign) {
-            for(var i = 0; i < myModel.count; i++) {
-                var element = myModel.get(i);
-                if(callsign === element.Callsign) {
-                    return i;
+        function findController(controllers, callsign) {
+            for (var i = 0; i < controllers.count; i++) {
+                var controller = controllers.get(i)
+                if (callsign === controller.Callsign) {
+                    return i
                 }
             }
-            return -1;
+            return undefined
         }
 
         function onControllerAdded(controller) {
-            var idx;
-            if(controller.Callsign.endsWith("_CTR") || controller.Callsign.endsWith("_FSS")) {
+            var idx
+            if (controller.Callsign.endsWith("_CTR") || controller.Callsign.endsWith("_FSS")) {
                 idx = findController(nearbyEnroute, controller.Callsign)
-                if(idx < 0) {
+                if (idx === undefined) {
                     nearbyEnroute.append(controller)
                 }
             }
-            else if(controller.Callsign.endsWith("_APP") || controller.Callsign.endsWith("_DEP")) {
+            else if (controller.Callsign.endsWith("_APP") || controller.Callsign.endsWith("_DEP")) {
                 idx = findController(nearbyApproach, controller.Callsign)
-                if(idx < 0) {
+                if (idx === undefined) {
                     nearbyApproach.append(controller)
                 }
             }
-            else if(controller.Callsign.endsWith("_TWR")) {
+            else if (controller.Callsign.endsWith("_TWR")) {
                 idx = findController(nearbyTower, controller.Callsign)
-                if(idx < 0) {
+                if (idx === undefined) {
                     nearbyTower.append(controller)
                 }
             }
-            else if(controller.Callsign.endsWith("_GND")) {
+            else if (controller.Callsign.endsWith("_GND")) {
                 idx = findController(nearbyGround, controller.Callsign)
-                if(idx < 0) {
+                if (idx === undefined) {
                     nearbyGround.append(controller)
                 }
             }
-            else if(controller.Callsign.endsWith("_DEL")) {
+            else if (controller.Callsign.endsWith("_DEL")) {
                 idx = findController(nearbyDelivery, controller.Callsign)
-                if(idx < 0) {
+                if (idx === undefined) {
                     nearbyDelivery.append(controller)
                 }
             }
-            else if(controller.Callsign.endsWith("_ATIS")) {
+            else if (controller.Callsign.endsWith("_ATIS")) {
                 idx = findController(nearbyAtis, controller.Callsign)
-                if(idx < 0) {
+                if (idx === undefined) {
                     nearbyAtis.append(controller)
                 }
             }
@@ -675,114 +636,116 @@ Window {
 
         function onControllerDeleted(controller) {
             var idx;
-            if(controller.Callsign.endsWith("_CTR") || controller.Callsign.endsWith("_FSS")) {
+            if (controller.Callsign.endsWith("_CTR") || controller.Callsign.endsWith("_FSS")) {
                 idx = findController(nearbyEnroute, controller.Callsign)
-                if(idx >= 0) {
+                if (idx !== undefined) {
                     nearbyEnroute.remove(idx)
                 }
             }
-            else if(controller.Callsign.endsWith("_APP") || controller.Callsign.endsWith("_DEP")) {
+            else if (controller.Callsign.endsWith("_APP") || controller.Callsign.endsWith("_DEP")) {
                 idx = findController(nearbyApproach, controller.Callsign)
-                if(idx >= 0) {
+                if (idx !== undefined) {
                     nearbyApproach.remove(idx)
                 }
             }
-            else if(controller.Callsign.endsWith("_TWR")) {
+            else if (controller.Callsign.endsWith("_TWR")) {
                 idx = findController(nearbyTower, controller.Callsign)
-                if(idx >= 0) {
+                if (idx !== undefined) {
                     nearbyTower.remove(idx)
                 }
             }
-            else if(controller.Callsign.endsWith("_GND")) {
+            else if (controller.Callsign.endsWith("_GND")) {
                 idx = findController(nearbyGround, controller.Callsign)
-                if(idx >= 0) {
+                if (idx !== undefined) {
                     nearbyGround.remove(idx)
                 }
             }
-            else if(controller.Callsign.endsWith("_DEL")) {
+            else if (controller.Callsign.endsWith("_DEL")) {
                 idx = findController(nearbyDelivery, controller.Callsign)
-                if(idx >= 0) {
+                if (idx !== undefined) {
                     nearbyDelivery.remove(idx)
                 }
             }
-            else if(controller.Callsign.endsWith("_ATIS")) {
+            else if (controller.Callsign.endsWith("_ATIS")) {
                 idx = findController(nearbyAtis, controller.Callsign)
-                if(idx >= 0) {
+                if (idx !== undefined) {
                     nearbyAtis.remove(idx)
                 }
             }
         }
     }
 
-    function appendMessage(message, color = colorGray, tabIdx = 0) {
-        var model = cliModel.get(tabIdx)
-        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message.linkify()}`, msgColor: color})
-    }
-
-    function appendPrivateMessage(tabIdx, message, from, color = colorCyan) {
-        for(var i = 0; i < tabModel.count; i++) {
-            var tab = tabModel.get(i)
-            if(tabIdx === i) {
-                for(var j = 0; j < cliModel.count; j++) {
-                    var cli = cliModel.get(j)
-                    if(cli.tabName.toLowerCase() === tab.title.toLowerCase()) {
-                        if(from) {
-                            cli.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${from}: ${message.linkify()}`, msgColor: color})
-                        }
-                        else {
-                            cli.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message.linkify()}`, msgColor: color})
-                        }
-                    }
-                }
+    function appendMessage(message, type = Enum.MessageType.Info, tabIdx = 0) {
+        var textColor = Colors.Yellow
+        switch (type) {
+            case Enum.MessageType.Server:
+                textColor = Colors.Green
+                break
+            case Enum.MessageType.IncomingPrivate:
+                textColor = Colors.Cyan
+                break
+            case Enum.MessageType.OutgoingPrivate:
+                textColor = Colors.LightGray
+                break
+            case Enum.MessageType.TextOverride:
+                textColor = Colors.IndianRed
+                break
+            case Enum.MessageType.IncomingRadioPrimary:
+                textColor = Colors.White
+                break
+            case Enum.MessageType.IncomingRadioSecondary:
+                textColor = Colors.Gray
+                break
+            case Enum.MessageType.OutgoingRadio:
+                textColor = Colors.Cyan
+                break
+            case Enum.MessageType.Broadcast:
+                textColor = Colors.Orange
+                break
+            case Enum.MessageType.Wallop:
+                textColor = Colors.Red
+                break
+            case Enum.MessageType.Info:
+                textColor = Colors.Yellow
+                break
+            case Enum.MessageType.Error:
+                textColor = Colors.Red
+                break
+            default:
+                textColor = type
+        }
+        var model = tabModel.get(tabIdx)
+        if (model) {
+            model.messages.append({ message: `<font color="${textColor}">[${TimestampUtils.currentTimestamp()}] ${message.linkify()}</font>` })
+            if(tabControl.currentTabIndex !== tabIdx) {
+                model.hasMessageWaiting = true
             }
         }
-    }
-
-    function appendNote(message) {
-        var model = cliModel.get(1)
-        model.attributes.append({message:`[${TimestampUtils.currentTimestamp()}] ${message}`})
-    }
-
-    function clearMessages(tabIdx) {
-        var model = cliModel.get(tabIdx)
-        model.attributes.clear()
     }
 
     function getChatTabIndex(callsign) {
-        for(var i = 0; i < tabModel.count; i++) {
-            if(tabModel.get(i).title.toUpperCase() === callsign.toUpperCase()) {
+        for (var i = 2; i < tabModel.count; i++) {
+            if (tabModel.get(i).title.toUpperCase() === callsign.toUpperCase()) {
                 return i
             }
         }
-        return null
+        return undefined
     }
 
     function createChatTab(callsign) {
-        tabModel.append({title: callsign.toUpperCase(), disposable: true, hasUnread: false})
-        var idx = getChatTabIndex(callsign)
-        cliModel.append({tabName: callsign.toLowerCase(), tabId: idx, attributes: [], realName: false})
-        tabListView.currentIndex = idx
-        activeMessageTab = idx
+        tabModel.append({ title: callsign.toUpperCase(), isCloseable: true, messages: [], hasMessageWaiting: false, realNameReceived: false })
+        tabControl.currentTabIndex = tabModel.count - 1
+        tabControl.callsign = callsign.toUpperCase()
         networkManager.requestRealName(callsign)
     }
 
     function focusOrCreateTab(callsign) {
-        var idx = getChatTabIndex(callsign)
-        if(idx === null) {
+        var tabIdx = getChatTabIndex(callsign)
+        if (tabIdx === undefined) {
             createChatTab(callsign)
-        }
-        else {
-            tabListView.currentIndex = idx
-            activeMessageTab = idx
-        }
-    }
-
-    function markTabUnread(callsign) {
-        for(var i = 0; i < tabModel.count; i++) {
-            var tab = tabModel.get(i)
-            if(tab.title.toUpperCase() === callsign.toUpperCase()) {
-                tab.hasUnread = true
-            }
+        } else {
+            tabControl.currentTabIndex = tabIdx
+            tabControl.callsign = callsign
         }
     }
 
@@ -790,7 +753,7 @@ Window {
         id: windowFrame
         anchors.fill: parent
         color: "transparent"
-        border.color: Qt.platform.os === 'osx' ? 'transparent' : '#000000'
+        border.color: Qt.platform.os === "osx" ? "transparent" : "#000000"
         z: 200
     }
 
@@ -879,6 +842,22 @@ Window {
             }
         }
 
+        ListModel {
+            id: tabModel
+            ListElement{
+                title: "Messages"
+                isCloseable: false
+                messages: []
+                hasMessageWaiting: false
+            }
+            ListElement {
+                title: "Notes"
+                isCloseable: false
+                messages: []
+                hasMessageWaiting: false
+            }
+        }
+
         Rectangle {
             id: msgControl
             Layout.fillWidth: true
@@ -887,584 +866,257 @@ Window {
             Layout.column: 1
             color: "#141618"
 
-            Rectangle {
-                anchors.fill: parent
-                anchors.margins: 10
-                anchors.topMargin: 39
-                border.color: "#5c5c5c"
-                border.width: 1
-                color: "transparent"
-            }
-
-            ListModel {
-                id: tabModel
-                ListElement {
-                    title: "Messages"
-                    disposable: false
-                    hasUnread: false
-                }
-                ListElement {
-                    title: "Notes"
-                    disposable: false
-                    hasUnread: false
-                }
-            }
-
-            Component {
-                id: tabDelegate
-                Item {
-                    id: tab
-
-                    property color frameColor: "#5C5C5C"
-                    property color fillColor: "#141618"
-
-                    property var view: ListView.view
-                    property int itemIndex: index
-
-                    implicitWidth: disposable ? text.width + 45 : text.width + 20
-                    implicitHeight: 30
-
-                    Rectangle {
-                        id: topRect
-                        anchors.fill: parent
-                        radius: 8
-                        color: fillColor
-                        border.width: 1
-                        border.color: frameColor
-                    }
-
-                    Rectangle {
-                        id: bottomRect
-                        anchors.bottom: parent.bottom
-                        anchors.left: topRect.left
-                        anchors.right: topRect.right
-                        height: 1 / 2 * parent.height
-                        color: fillColor
-                        border.width: 1
-                        border.color: frameColor
-                    }
-
-                    // remove weird line that runs through the middle of the tab
-                    Rectangle {
-                        anchors {
-                            fill: bottomRect
-                            leftMargin: bottomRect.border.width
-                            bottomMargin: bottomRect.border.width
-                            rightMargin: bottomRect.border.width
-                        }
-                        color: fillColor
-                    }
-
-                    // hides bottom border on active tab
-                    Rectangle {
-                        visible: itemIndex === view.currentIndex
-                        width: tab.width - 2
-                        height: 2
-                        color: fillColor
-                        y: parent.height - 2
-                        x: (tab.width - tab.width) + 1
-                    }
-
-                    Text {
-                        id: text
-                        anchors.left: parent.left
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.leftMargin: 10
-                        text: title
-                        color: itemIndex === view.currentIndex ? "white" : (hasUnread ? "yellow" : frameColor)
-                        font.family: robotoMono.name
-                        font.pixelSize: 13
-                    }
-
-                    WindowControlButton {
-                        id: btnClose
-                        visible: disposable
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.rightMargin: 0
-                        z: 100
-
-                        icon.source: "../Icons/CloseIcon.svg"
-                        icon.color: "transparent"
-                        icon.width: 18
-                        icon.height: 18
-                        onHoveredChanged: hovered ? icon.color = "white" : icon.color = "transparent"
-
-                        MouseArea {
-                            anchors.fill: btnClose
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                view.currentIndex = 0
-                                activeMessageTab = 0
-                                cliModel.remove(itemIndex)
-                                tabModel.remove(itemIndex)
-
-                                for(var i = 0; i < cliModel.count; i++) {
-                                    var cli = cliModel.get(i)
-                                    cli.tabId = i
-                                }
-                            }
-                        }
-                    }
-
-                    MouseArea {
-                        id: mouseArea
-                        anchors.fill: parent
-                        onClicked: {
-                            hasUnread = false
-                            activeMessageTab = itemIndex
-                            view.currentIndex = itemIndex
-                        }
-                        cursorShape: Qt.PointingHandCursor
-                    }
-                }
-            }
-
-            ListView {
-                id: tabListView
+            TabControl {
+                id: tabControl
                 model: tabModel
-                delegate: tabDelegate
                 anchors.fill: parent
                 anchors.margins: 10
-                orientation: ListView.Horizontal
-                spacing: -1
-                clip: true
-            }
 
-            ListModel {
-                id: cliModel
-                ListElement {
-                    tabName: "messages"
-                    tabId: 0 // messages
-                    attributes: []
-                }
-                ListElement {
-                    tabName: "notes"
-                    tabId: 1 // notes
-                    attributes: []
-                }
-            }
+                onCommandSubmitted: function(message, tabIndex) {
 
-            Component {
-                id: cliDelegate
+                    var model = tabModel.get(tabIndex)
 
-                Rectangle {
-                    id: messages
-                    color: 'transparent'
-                    anchors.fill: parent
-                    anchors.margins: 10
-                    anchors.topMargin: 39
+                    if(message.startsWith(".clear")) {
+                        if(model) {
+                            model.messages.clear()
+                        }
+                        return
+                    }
+                    else if(message.startsWith(".copy")) {
+                        var temp = []
+                        for(var i = 0; i < model.messages.count; i++) {
+                            temp.push(model.messages.get(i).message)
+                        }
+                        clipboard.setText(temp.join("\n"))
+                        appendMessage("Messages copied to clipboard.", Enum.MessageType.Info, tabIndex)
+                        return
+                    }
 
-                    GridLayout {
-                        anchors.fill: parent
-                        rows: 2
-                        columns: 1
+                    if(tabIndex === 0) {
+                        try {
+                            var cmd = message.split(" ").filter(function(i){return i})
 
-                        RowLayout {
-                            id: rowMessages
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            Layout.preferredHeight: 300
-                            Layout.column: 0
-                            Layout.row: 0
-
-                            ScrollView
-                            {
-                                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                                Layout.fillHeight: true
-                                Layout.fillWidth: true
-                                clip: true
-                                leftPadding: 10
-                                topPadding: 5
-                                rightPadding: 10
-                                bottomPadding: 5
-                                visible: tabId === activeMessageTab
-
-                                onFocusChanged: {
-                                    cliTextField.forceActiveFocus()
+                            if(message.startsWith(".simip")) {
+                                if(cmd.length > 2) {
+                                    throw "Too many parameters. Expected .simip IP"
                                 }
-
-                                ListView {
-                                    id: listView
-                                    model: attributes
-                                    delegate: Rectangle {
-                                        anchors.left: listView.contentItem.left
-                                        anchors.right: listView.contentItem.right
-                                        height: textHistory.contentHeight
-                                        color: 'transparent'
-
-                                        Text {
-                                            id: textHistory
-                                            text: message
-                                            width: parent.width
-                                            wrapMode: Text.Wrap
-                                            font.family: robotoMono.name
-                                            renderType: Text.NativeRendering
-                                            font.pixelSize: 13
-                                            color: msgColor || '#ffffff'
-                                            linkColor: '#ffffff'
-                                            onLinkActivated: Qt.openUrlExternally(link)
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                acceptedButtons: Qt.NoButton
-                                                cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                if(cmd.length > 1) {
+                                    AppConfig.XplaneNetworkAddress = cmd[1]
+                                    AppConfig.saveConfig()
+                                    appendMessage(`X-Plane network address set to ${AppConfig.XplaneNetworkAddress}.
+                                                  You must restart xPilot for the changes to take effect.`, Enum.MessageType.Info, tabIndex)
+                                }
+                                else {
+                                    AppConfig.XplaneNetworkAddress = "127.0.0.1"
+                                    AppConfig.saveConfig()
+                                    appendMessage(`X-Plane network address reset to localhost (127.0.0.1).
+                                                  You must restart xPilot for the changes to take effect.`, Enum.MessageType.Info, tabIndex)
+                                }
+                            }
+                            else if(message.startsWith(".visualip")) {
+                                if(cmd.length < 2) {
+                                    AppConfig.VisualMachines = []
+                                    AppConfig.saveConfig()
+                                    appendMessage(`X-Plane visual machine addresses cleared.
+                                                  You must restart xPilot for the changes to take effect.`, Enum.MessageType.Info, tabIndex)
+                                }
+                                else {
+                                    AppConfig.VisualMachines = []
+                                    for(var vm = 1; vm < cmd.length; vm++) {
+                                        AppConfig.VisualMachines.push(cmd[vm])
+                                    }
+                                    AppConfig.saveConfig()
+                                    appendMessage(`X-Plane visual machine(s) set to ${AppConfig.VisualMachines.join(", ")}.
+                                                  You must restart xPilot for the changes to take effect.`, Enum.MessageType.Info, tabIndex)
+                                }
+                            }
+                            else if(message === ".downloadcsl") {
+                                if(AppConfig.configRequired()) {
+                                    appendMessage(`Before you can install the CSL model set, you must configure xPilot.
+                                                  Open the Settings window to configure xPilot.`, Enum.MessageType.Error, tabIndex)
+                                }
+                                else {
+                                    createCslDownloadWindow()
+                                }
+                            }
+                            else if(message === ".appdata") {
+                                AppConfig.openAppDataFolder()
+                            }
+                            else {
+                                if(message.startsWith(".")) {
+                                    if(!simConnected) {
+                                        throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
+                                    }
+                                    switch(cmd[0].toLowerCase()) {
+                                    case ".chat":
+                                        if(cmd.length < 2) {
+                                            throw "Not enough parameters. Expected .chat CALLSIGN"
+                                        }
+                                        if(cmd[1].length > 12) {
+                                            throw "Callsign too long."
+                                        }
+                                        focusOrCreateTab(cmd[1])
+                                        break
+                                    case ".msg":
+                                        if(cmd.length < 3) {
+                                            throw "Not enough parameters. Expected .msg CALLSIGN MESSAGE"
+                                        }
+                                        if(!networkConnected) {
+                                            throw "Not connected to network."
+                                        }
+                                        if(cmd[1].length > 12) {
+                                            throw "Callsign too long."
+                                        }
+                                        focusOrCreateTab(cmd[1])
+                                        networkManager.sendPrivateMessage(cmd[1], cmd.slice(2).join(" "))
+                                        break
+                                    case ".wallop":
+                                        if(cmd.length < 2) {
+                                            throw "Not enough parameters. Expected .wallop MESSAGE"
+                                        }
+                                        if(!networkConnected) {
+                                            throw "Not connected to network."
+                                        }
+                                        networkManager.sendWallop(cmd.slice(1).join(" "))
+                                        break
+                                    case ".wx":
+                                    case ".metar":
+                                        if(cmd.length < 2) {
+                                            throw `Not enough parameters. Expected ${cmd[0]} STATION`
+                                        }
+                                        if(!networkConnected) {
+                                            throw "Not connected to network."
+                                        }
+                                        networkManager.requestMetar(cmd[1])
+                                        break
+                                    case ".atis":
+                                        if(cmd.length < 2) {
+                                            throw "Not enough parameters. Expected .atis CALLSIGN"
+                                        }
+                                        if(!networkConnected) {
+                                            throw "Not connected to network."
+                                        }
+                                        networkManager.requestControllerAtis(cmd[1])
+                                        break
+                                    case ".com1":
+                                    case ".com2":
+                                        if(cmd.length < 2) {
+                                            throw `Not enough parameters. Expected ${cmd[0]} FREQUENCY`
+                                        }
+                                        if (!/^1\d\d[\.\,]\d{1,3}$/.test(cmd[1])) {
+                                            throw "Invalid frequency format."
+                                        }
+                                        var frequency = FrequencyUtils.frequencyToInt(cmd[1])
+                                        var radio = cmd[0].toLowerCase() === ".com1" ? 1 : 2
+                                        if(radio === 1) {
+                                            xplaneAdapter.setCom1Frequency(frequency)
+                                        } else {
+                                            xplaneAdapter.setCom2Frequency(frequency)
+                                        }
+                                        break
+                                    case ".tx":
+                                        if(cmd.length < 2) {
+                                            throw "Not enough parameters. Expected .tx com1|com2"
+                                        }
+                                        if(cmd[1].toLowerCase() !== "com1" && cmd[1].toLowerCase() !== "com2") {
+                                            throw "Invalid parameters. Expected .tx com1|com2"
+                                        }
+                                        var radio = cmd[1].toLowerCase() === "com1" ? 1 : 2
+                                        xplaneAdapter.setAudioComSelection(radio)
+                                        break
+                                    case ".rx":
+                                        if(cmd.length < 3) {
+                                            throw `Not enough parameters. Expected .rx com1|com2 on|off`
+                                        }
+                                        if(cmd[1].toLowerCase() !== "com1" && cmd[1].toLowerCase() !== "com2") {
+                                            throw `Invalid parameters. Expected .rx com<n> on|off`
+                                        }
+                                        if(cmd[2].toLowerCase() !== "on" && cmd[2].toLowerCase() !== "off") {
+                                            throw `Invalid parameters. Expected .rx com<n> on|off`
+                                        }
+                                        var radio = cmd[1].toLowerCase() === "com1" ? 1 : 2
+                                        var status = cmd[2].toLowerCase() === "on" ? 1 : 0
+                                        xplaneAdapter.setAudioSelection(radio, status)
+                                        break
+                                    case ".x":
+                                    case ".xpndr":
+                                    case ".xpdr":
+                                    case ".squawk":
+                                    case ".sq":
+                                        if(cmd.length < 2) {
+                                            throw `Not enough parameters. Expected ${cmd[0]} CODE`
+                                        }
+                                        if (!/^[0-7]{4}$/.test(cmd[1])) {
+                                            throw "Invalid transponder code format."
+                                        }
+                                        var code = parseInt(cmd[1])
+                                        xplaneAdapter.setTransponderCode(code)
+                                        appendMessage(`Transponder code set to ${cmd[1]}.`, Enum.MessageType.Info)
+                                        break
+                                    case ".towerview":
+                                        if(networkConnected) {
+                                            throw "You must first disconnect from the network before using TowerView."
+                                        }
+                                        var tvServerAddress = "localhost"
+                                        var tvCallsign = "TOWER"
+                                        if(cmd.length >= 2) {
+                                            tvServerAddress = cmd[1]
+                                            if(cmd.length >= 3) {
+                                                tvCallsign = cmd[2].toUpperCase()
                                             }
                                         }
+                                        networkManager.connectTowerView(tvCallsign, tvServerAddress)
+                                        break
+                                    case ".ignore":
+                                        if(cmd.length < 2) {
+                                            throw "Not enough parameters. Expected .ignore CALLSIGN"
+                                        }
+                                        xplaneAdapter.ignoreAircraft(cmd[1])
+                                        break
+                                    case ".ignorelist":
+                                        xplaneAdapter.showIgnoreList()
+                                        break
+                                    case ".unignore":
+                                        if(cmd.length < 2) {
+                                            throw "Not enough parameters. Expected .unignore CALLSIGN"
+                                        }
+                                        xplaneAdapter.unignoreAircraft(cmd[1])
+                                        break
+                                    default:
+                                        throw `Unknown command: ${cmd[0].toLowerCase()}`
                                     }
-                                    onCountChanged: {
-                                        var newIndex = count - 1
-                                        positionViewAtEnd()
-                                        currentIndex = newIndex
+                                }
+                                else {
+                                    if(!networkConnected) {
+                                        throw "Not connected to network."
                                     }
+                                    networkManager.sendRadioMessage(message)
+                                    appendMessage(message, Enum.MessageType.OutgoingRadio)
                                 }
                             }
                         }
-
-                        RowLayout {
-                            id: commandLine
-                            Layout.fillWidth: true
-                            clip: true
-                            Layout.column: 0
-                            Layout.row: 1
-                            Layout.maximumHeight: 30
-                            Layout.minimumHeight: 30
-
-                            TextField {
-                                id: cliTextField
-                                font.pixelSize: 13
-                                font.family: robotoMono.name
-                                renderType: Text.NativeRendering
-                                color: '#ffffff'
-                                selectionColor: "#0164AD"
-                                selectedTextColor: "#ffffff"
-                                topPadding: 0
-                                padding: 6
-                                Layout.bottomMargin: -5
-                                Layout.rightMargin: -5
-                                Layout.leftMargin: -5
-                                Layout.fillHeight: true
-                                Layout.fillWidth: true
-                                selectByMouse: true
-                                visible: tabId === activeMessageTab
-
-                                property var commandHistory: []
-                                property int historyIndex: -1
-                                property string commandLineValue: ""
-
-                                background: Rectangle {
-                                    color: 'transparent'
-                                    border.color: '#5C5C5C'
-                                }
-
-                                Keys.onPressed: function(event) {
-                                    if(event.key === Qt.Key_Escape) {
-                                        cliTextField.clear()
-                                    }
-                                    else if(event.key === Qt.Key_Down) {
-                                        if(historyIndex == -1) {
-                                            commandLineValue = cliTextField.text
-                                        }
-                                        historyIndex--
-                                        if(historyIndex < 0) {
-                                            historyIndex = -1
-                                            cliTextField.text = commandLineValue
-                                            return
-                                        }
-                                        cliTextField.text = commandHistory[historyIndex]
-                                        return
-                                    }
-                                    else if(event.key === Qt.Key_Up) {
-                                        if(historyIndex == -1) {
-                                            commandLineValue = cliTextField.text
-                                        }
-                                        historyIndex++
-                                        if(historyIndex >= commandHistory.length) {
-                                            historyIndex = -1
-                                            cliTextField.text = commandLineValue
-                                            return
-                                        }
-                                        cliTextField.text = commandHistory[historyIndex]
-                                        return
-                                    }
-                                    else if(event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
-                                        var cmd = cliTextField.text.split(" ").filter(function(i) { return i })
-
-                                        commandHistory.unshift(cliTextField.text)
-                                        historyIndex = -1
-
-                                        try {
-
-                                            if(cliTextField.text.startsWith(".simip")) {
-                                                if(cmd.length > 2) {
-                                                    throw `Too many parameters. Expected .simip IP`
-                                                }
-                                                if(cmd.length > 1) {
-                                                    AppConfig.XplaneNetworkAddress = cmd[1]
-                                                    AppConfig.saveConfig()
-                                                    appendMessage(`X-Plane network address set to ${AppConfig.XplaneNetworkAddress}. You must restart xPilot for the changes to take effect.`, colorYellow, activeMessageTab)
-                                                }
-                                                else {
-                                                    AppConfig.XplaneNetworkAddress = "127.0.0.1"
-                                                    AppConfig.saveConfig()
-                                                    appendMessage("X-Plane network address reset to localhost (127.0.0.1). You must restart xPilot for the changes to take effect.", colorYellow, activeMessageTab)
-                                                }
-                                                cliTextField.clear()
-                                            }
-                                            else if(cliTextField.text.startsWith(".visualip")) {
-                                                if(cmd.length < 2) {
-                                                    AppConfig.VisualMachines = []
-                                                    AppConfig.saveConfig()
-                                                    appendMessage("X-Plane visual machine addresses cleared. You must restart xPilot for the changes to take effect.", colorYellow, activeMessageTab);
-                                                }
-                                                else {
-                                                    AppConfig.VisualMachines = []
-                                                    for(var x = 1; x < cmd.length; x++) {
-                                                        AppConfig.VisualMachines.push(cmd[x])
-                                                    }
-                                                    AppConfig.saveConfig()
-                                                    appendMessage(`X-Plane visual machine(s) set to ${AppConfig.VisualMachines.join(", ")}. You must restart xPilot for the changes to take effect.`, colorYellow, activeMessageTab)
-                                                }
-                                                cliTextField.clear()
-                                            }
-                                            else if(cliTextField.text.startsWith(".downloadcsl")) {
-                                                if(AppConfig.configRequired()) {
-                                                    appendMessage("Before you can install the CSL model set, you must configure xPilot. Open the Settings window to configure xPilot.", colorRed, activeMessageTab)
-                                                }
-                                                else {
-                                                    createCslDownloadWindow()
-                                                }
-                                                cliTextField.clear()
-                                            }
-                                            else if(cliTextField.text.startsWith(".clear")) {
-                                                clearMessages(activeMessageTab)
-                                                cliTextField.clear()
-                                            }
-                                            else if(cliTextField.text.startsWith(".copy")) {
-                                                var text = []
-                                                var model = cliModel.get(activeMessageTab)
-                                                for(var i = 0; i < model.attributes.rowCount(); i++) {
-                                                    text.push(model.attributes.get(i).message)
-                                                }
-                                                clipboard.setText(text.join("\n"))
-                                                appendMessage("Messages copied to clipboard.", colorYellow, activeMessageTab)
-                                                cliTextField.clear()
-                                            }
-                                            else if(cliTextField.text.startsWith(".appdata")) {
-                                                AppConfig.openAppDataFolder()
-                                                cliTextField.clear()
-                                            }
-                                            else {
-                                                if(cliTextField.text.startsWith(".")) {
-                                                    if(!simConnected) {
-                                                        throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
-                                                    }
-                                                    switch(cmd[0].toLowerCase())
-                                                    {
-                                                    case ".chat":
-                                                        if(cmd.length < 2) {
-                                                            throw "Not enough parameters. Expected .chat CALLSIGN"
-                                                        }
-                                                        if(cmd[1].length > 10) {
-                                                            throw "Callsign too long."
-                                                        }
-                                                        focusOrCreateTab(cmd[1])
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".msg":
-                                                        if(cmd.length < 3) {
-                                                            throw "Not enough parameters. Expected .msg CALLSIGN MESSAGE"
-                                                        }
-                                                        if(!networkConnected) {
-                                                            throw "Not connected to network."
-                                                        }
-                                                        if(cmd[1].length > 10) {
-                                                            throw "Callsign too long."
-                                                        }
-                                                        focusOrCreateTab(cmd[1])
-                                                        networkManager.sendPrivateMessage(cmd[1], cmd.slice(2).join(" "))
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".wallop":
-                                                        if(cmd.length < 2) {
-                                                            throw "Not enough parameters. Expected .wallop MESSAGE"
-                                                        }
-                                                        networkManager.sendWallop(cmd.slice(1).join(" "))
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".wx":
-                                                    case ".metar":
-                                                        if(cmd.length < 2) {
-                                                            throw `Not enough parameters. Expected ${cmd[0]} STATION-ID`
-                                                        }
-                                                        networkManager.requestMetar(cmd[1])
-                                                        cliTextField.clear();
-                                                        break;
-                                                    case ".atis":
-                                                        if(cmd.length < 2) {
-                                                            throw `Not enough parameters. Expected .atis CALLSIGN`
-                                                        }
-                                                        networkManager.requestControllerAtis(cmd[1])
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".com1":
-                                                    case ".com2":
-                                                        if (!/^1\d\d[\.\,]\d{1,3}$/.test(cmd[1])) {
-                                                            throw "Invalid frequency format.";
-                                                        }
-                                                        var freq = FrequencyUtils.frequencyToInt(cmd[1])
-                                                        var radio = cmd[0].toLowerCase() === ".com1" ? 1 : 2
-                                                        if(radio === 1) {
-                                                            xplaneAdapter.setCom1Frequency(freq);
-                                                        }
-                                                        else {
-                                                            xplaneAdapter.setCom2Frequency(freq);
-                                                        }
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".tx":
-                                                        if(cmd.length < 2) {
-                                                            throw `Not enough parameters. Expected .tx com1 or .tx com2`
-                                                        }
-                                                        var radio = cmd[1].toLowerCase() === "com1" ? 1 : 2
-                                                        xplaneAdapter.setAudioComSelection(radio)
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".rx":
-                                                        if(cmd.length < 3) {
-                                                            throw `Not enough parameters. Expected .rx com<n> on|off`
-                                                        }
-                                                        if(cmd[1].toLowerCase() !== "com1" && cmd[1].toLowerCase() !== "com2") {
-                                                            throw `Invalid parameters. Expected .rx com<n> on|off`
-                                                        }
-                                                        if(cmd[2].toLowerCase() !== "on" && cmd[2].toLowerCase() !== "off") {
-                                                            throw `Invalid parameters. Expected .rx com<n> on|off`
-                                                        }
-                                                        var radio = cmd[1].toLowerCase() === "com1" ? 1 : 2
-                                                        var status = cmd[2].toLowerCase() === "on" ? 1 : 0
-                                                        xplaneAdapter.setAudioSelection(radio, status)
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".x":
-                                                    case ".xpndr":
-                                                    case ".xpdr":
-                                                    case ".squawk":
-                                                    case ".sq":
-                                                        if(cmd.length < 2) {
-                                                            throw `Not enough parameters. Expected ${cmd[0]} SQUAWK-CODE`
-                                                        }
-                                                        if (!/^[0-7]{4}$/.test(cmd[1])) {
-                                                            throw "Invalid transponder code format.";
-                                                        }
-                                                        var code = parseInt(cmd[1])
-                                                        xplaneAdapter.setTransponderCode(code)
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".towerview":
-                                                        if(!simConnected)
-                                                        {
-                                                            throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
-                                                        }
-                                                        if(networkConnected)
-                                                        {
-                                                            throw "You must first disconnect from the network before using TowerView"
-                                                        }
-                                                        var tvServerAddress = "localhost"
-                                                        var tvCallsign = "TOWER"
-                                                        if(cmd.length >= 2)
-                                                        {
-                                                            tvServerAddress = cmd[1]
-                                                            if(cmd.length >= 3)
-                                                            {
-                                                                tvCallsign = cmd[2].toUpperCase()
-                                                            }
-                                                        }
-                                                        networkManager.connectTowerView(tvCallsign, tvServerAddress)
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".ignore":
-                                                        if(cmd.length < 2) {
-                                                            throw `Not enough parameters. Expected .ignore CALLSIGN`
-                                                        }
-                                                        xplaneAdapter.ignoreAircraft(cmd[1])
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".ignorelist":
-                                                        xplaneAdapter.showIgnoreList()
-                                                        cliTextField.clear()
-                                                        break;
-                                                    case ".unignore":
-                                                        if(cmd.length < 2) {
-                                                            throw `Not enough parameters. Expected .unignore CALLSIGN`
-                                                        }
-                                                        xplaneAdapter.unignoreAircraft(cmd[1])
-                                                        cliTextField.clear()
-                                                        break;
-                                                    default:
-                                                        throw `Unknown command: ${cmd[0].toLowerCase()}`
-                                                    }
-                                                }
-                                                else {
-                                                    if(!cliTextField.text || /^\s*$/.test(cliTextField.text)) {
-                                                        return; // skip empty message
-                                                    }
-                                                    if(activeMessageTab == 0) {
-                                                        if(!simConnected) {
-                                                            throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
-                                                        }
-                                                        if(!networkConnected) {
-                                                            throw "Not connected to network."
-                                                        }
-                                                        networkManager.sendRadioMessage(cliTextField.text)
-                                                        appendMessage(cliTextField.text, colorCyan)
-                                                        cliTextField.clear()
-                                                    }
-                                                    else if(activeMessageTab == 1) {
-                                                        // notes
-                                                        appendNote(cliTextField.text)
-                                                        cliTextField.clear()
-                                                    }
-                                                    else {
-                                                        if(!simConnected) {
-                                                            throw "X-Plane connection not found. Please make sure X-Plane is running and a flight is loaded."
-                                                        }
-                                                        if(!networkConnected) {
-                                                            appendPrivateMessage(activeMessageTab, "Not connected to network.", "", colorRed)
-                                                            errorSound.play()
-                                                        }
-                                                        else {
-                                                            var callsign = tabModel.get(activeMessageTab).title;
-                                                            networkManager.sendPrivateMessage(callsign, cliTextField.text)
-                                                            cliTextField.clear()
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        catch(err) {
-                                            appendMessage(err, colorRed, activeMessageTab)
-                                            cliTextField.clear()
-                                        }
-                                    }
-                                    historyIndex = -1
-                                }
+                        catch(err) {
+                            appendMessage(err, Enum.MessageType.Error, tabIndex)
+                        }
+                    }
+                    else if(tabIndex === 1) {
+                        appendMessage(message, Enum.MessageType.Info, tabIndex)
+                    }
+                    else {
+                        if(message === ".close") {
+                            tabModel.remove(tabIndex)
+                            tabControl.currentTabIndex = 0
+                        }
+                        else {
+                            if(!networkConnected) {
+                                appendMessage("Not connected to network.", Enum.MessageType.Error, tabIndex)
                             }
+                            networkManager.sendPrivateMessage(tabControl.callsign, message)
                         }
                     }
                 }
-            }
-
-            Repeater {
-                model: cliModel
-                delegate: cliDelegate
-                anchors.fill: parent
-                anchors.margins: 10
             }
         }
-    }
-
-    function absoluteMousePos(mouseArea) {
-        var windowAbs = mouseArea.mapToItem(null, mouseArea.mouseX, mouseArea.mouseY)
-        return Qt.point(windowAbs.x + mainWindow.x, windowAbs.y + mainWindow.y)
     }
 
     MouseArea {
@@ -1478,9 +1130,9 @@ Window {
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton
 
-        property var startMousePos;
-        property var startWindowPos;
-        property var startWindowSize;
+        property var startMousePos
+        property var startWindowPos
+        property var startWindowSize
 
         cursorShape: {
             const p = Qt.point(mouseX, mouseY)
@@ -1509,8 +1161,8 @@ Window {
 
         onPressed: function(mouse) {
             if (mouse.button !== Qt.LeftButton
-                    || mainWindow.visibility === Window.Maximized
-                    || mainWindow.visibility === Window.FullScreen) {
+                || mainWindow.visibility === Window.Maximized
+                || mainWindow.visibility === Window.FullScreen) {
                 return
             }
             activeEdges = 0
@@ -1554,22 +1206,22 @@ Window {
                 return
             }
 
-            var abs;
-            var newWidth;
-            var newX;
+            var abs
+            var newWidth
+            var newX
 
-            if(activeEdges & Qt.RightEdge) {
+            if (activeEdges & Qt.RightEdge) {
                 abs = absoluteMousePos(this)
                 newWidth = Math.max(mainWindow.minimumWidth, startWindowSize.width + (abs.x - startMousePos.x))
                 mainWindow.setGeometry(mainWindow.x, mainWindow.y, newWidth, mainWindow.height)
             }
-            else if(activeEdges & Qt.LeftEdge) {
+            else if (activeEdges & Qt.LeftEdge) {
                 abs = absoluteMousePos(this)
                 newWidth = Math.max(mainWindow.minimumWidth, startWindowSize.width - (abs.x - startMousePos.x))
                 newX = startWindowPos.x - (newWidth - startWindowSize.width)
                 mainWindow.setGeometry(newX, mainWindow.y, newWidth, mainWindow.height)
             }
-            else if(moveable) {
+            else if (moveable) {
                 mainWindow.x += (mouseX - lastMouseX)
             }
         }
@@ -1584,30 +1236,35 @@ Window {
                 return
             }
 
-            var abs;
-            var newHeight;
-            var newY;
+            var abs
+            var newHeight
+            var newY
 
-            if(activeEdges & Qt.TopEdge) {
+            if (activeEdges & Qt.TopEdge) {
                 abs = absoluteMousePos(this)
                 newHeight = Math.max(mainWindow.minimumHeight, startWindowSize.height - (abs.y - startMousePos.y))
                 newY = startWindowPos.y - (newHeight - startWindowSize.height)
                 mainWindow.setGeometry(mainWindow.x, newY, mainWindow.width, newHeight)
             }
-            else if(activeEdges & Qt.BottomEdge) {
+            else if (activeEdges & Qt.BottomEdge) {
                 abs = absoluteMousePos(this)
                 newHeight = Math.max(mainWindow.minimumHeight, startWindowSize.height + (abs.y - startMousePos.y))
                 mainWindow.setGeometry(mainWindow.x, mainWindow.y, mainWindow.width, newHeight)
             }
-            else if(moveable) {
+            else if (moveable) {
                 mainWindow.y += (mouseY - lastMouseY)
             }
+        }
+
+        function absoluteMousePos(mouseArea) {
+            var windowAbs = mouseArea.mapToItem(null, mouseArea.mouseX, mouseArea.mouseY)
+            return Qt.point(windowAbs.x + mainWindow.x, windowAbs.y + mainWindow.y)
         }
     }
 
     function createCslDownloadWindow() {
         var comp = Qt.createComponent("qrc:/Resources/Components/DownloadCSLModels/DownloadModels.qml")
-        if(comp.status === Component.Ready) {
+        if (comp.status === Component.Ready) {
             downloadCslWindow = comp.createObject(mainWindow)
             downloadCslWindow.open()
         }
@@ -1615,7 +1272,7 @@ Window {
 
     function createSetXplanePathWindow() {
         var comp = Qt.createComponent("qrc:/Resources/Components/DownloadCSLModels/SetXplanePath.qml")
-        if(comp.status === Component.Ready) {
+        if (comp.status === Component.Ready) {
             setXplanePathWindow = comp.createObject(mainWindow)
             setXplanePathWindow.open()
         }
@@ -1623,7 +1280,7 @@ Window {
 
     function createExtractCslModelsWindow() {
         var comp = Qt.createComponent("qrc:/Resources/Components/DownloadCSLModels/ExtractModels.qml")
-        if(comp.status === Component.Ready) {
+        if (comp.status === Component.Ready) {
             extractCslModelsWindow = comp.createObject(mainWindow)
             extractCslModelsWindow.open()
         }

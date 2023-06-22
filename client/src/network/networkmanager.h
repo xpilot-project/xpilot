@@ -44,9 +44,11 @@
 #include "common/frequency_utils.h"
 #include "common/notificationtype.h"
 #include "common/utils.h"
+#include "common/enums.h"
 #include "qinjection/dependencypointer.h"
 
 using namespace QtPromise;
+using namespace enums;
 
 namespace xpilot
 {
@@ -82,7 +84,7 @@ namespace xpilot
     signals:
         void networkConnected(QString callsign, bool enableVoice);
         void networkDisconnected(bool forced);
-        void notificationPosted(int type, QString message);
+        void notificationPosted(QString message, MessageType type);
         void metarReceived(QString from, QString metar);
         void controllerDeleted(QString from);
         void pilotDeleted(QString from);

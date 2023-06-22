@@ -86,6 +86,8 @@ configure_file(src/common/build_config.cpp.in ${CMAKE_BINARY_DIR}/generated/buil
 include_directories(${CMAKE_BINARY_DIR}/generated)
 configure_file(xpilot.rc.in ${CMAKE_SOURCE_DIR}/xpilot.rc @ONLY)
 
+include_directories(${Qt6Quick_PRIVATE_INCLUDE_DIRS})
+
 file(GLOB_RECURSE xpilot_SRC CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/src/*.cpp
     ${PROJECT_SOURCE_DIR}/src/*.h

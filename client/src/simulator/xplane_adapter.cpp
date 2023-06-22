@@ -31,7 +31,6 @@
 #include "xplane_adapter.h"
 #include "config/appconfig.h"
 #include "common/build_config.h"
-#include "common/utils.h"
 
 using namespace xpilot;
 
