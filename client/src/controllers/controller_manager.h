@@ -24,10 +24,10 @@
 #include <QTimer>
 
 #include "controller.h"
-#include "src/network/networkmanager.h"
-#include "src/simulator/xplane_adapter.h"
-#include "src/qinjection/dependencypointer.h"
-#include "src/common/frequency_utils.h"
+#include "network/networkmanager.h"
+#include "simulator/xplane_adapter.h"
+#include "qinjection/dependencypointer.h"
+#include "common/frequency_utils.h"
 
 namespace xpilot
 {

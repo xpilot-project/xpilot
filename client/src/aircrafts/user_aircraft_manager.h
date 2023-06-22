@@ -19,17 +19,18 @@
 #ifndef USER_AIRCRAFT_MANAGER_H
 #define USER_AIRCRAFT_MANAGER_H
 
-#include <QObject>
-#include <QTimer>
 #include <optional>
 
-#include "src/network/networkmanager.h"
-#include "src/simulator/xplane_adapter.h"
-#include "src/aircrafts/user_aircraft_data.h"
-#include "src/aircrafts/user_aircraft_config_data.h"
-#include "src/aircrafts/radio_stack_state.h"
-#include "src/aircrafts/aircraft_configuration.h"
-#include "src/qinjection/dependencypointer.h"
+#include <QObject>
+#include <QTimer>
+
+#include "network/networkmanager.h"
+#include "simulator/xplane_adapter.h"
+#include "aircrafts/user_aircraft_data.h"
+#include "aircrafts/user_aircraft_config_data.h"
+#include "aircrafts/radio_stack_state.h"
+#include "aircrafts/aircraft_configuration.h"
+#include "qinjection/dependencypointer.h"
 
 using namespace xpilot;
 

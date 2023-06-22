@@ -17,12 +17,8 @@
 */
 
 #include "fsd_client.h"
-#include "src/common/build_config.h"
-#include "src/network/vatsim_auth.h"
-
-#include <src/fsd/pdu/pdu_auth_challenge.h>
-#include <src/fsd/pdu/pdu_auth_response.h>
-#include <src/fsd/pdu/pdu_change_server.h>
+#include "common/build_config.h"
+#include "network/vatsim_auth.h"
 
 namespace xpilot
 {

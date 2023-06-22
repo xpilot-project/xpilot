@@ -19,7 +19,6 @@
 #ifndef PDU_CLIENTQUERYRESPONSE_H
 #define PDU_CLIENTQUERYRESPONSE_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUClientQueryResponse : public PDUBase

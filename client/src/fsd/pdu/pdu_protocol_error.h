@@ -19,8 +19,6 @@
 #ifndef PDU_PROTOCOL_ERROR_H
 #define PDU_PROTOCOL_ERROR_H
 
-#include <QString>
-#include <QVector>
 #include "pdu_base.h"
 
 class PDUProtocolError: public PDUBase

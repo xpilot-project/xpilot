@@ -1,8 +1,10 @@
 #ifndef DEPENDENCYCREATOR_H
 #define DEPENDENCYCREATOR_H
 
-#include <QObject>
 #include <functional>
+
+#include <QObject>
+
 #define CLASS_NAME(T) T::staticMetaObject.className()
 
 namespace QInjection {

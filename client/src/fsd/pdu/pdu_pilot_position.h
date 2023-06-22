@@ -19,7 +19,6 @@
 #ifndef PDU_PILOTPOS_H
 #define PDU_PILOTPOS_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUPilotPosition: public PDUBase

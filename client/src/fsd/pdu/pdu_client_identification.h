@@ -19,7 +19,6 @@
 #ifndef PDU_CLIENTIDENTIFICATION_H
 #define PDU_CLIENTIDENTIFICATION_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUClientIdentification: public PDUBase

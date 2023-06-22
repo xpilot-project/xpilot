@@ -70,12 +70,12 @@ endif ()
 
 # Set some Win32 Specific Settings
 if (WIN32)
-    set(GUI_TYPE WIN32)
+    set(gui_TYPE WIN32)
 endif (WIN32)
 
 # Set some Apple MacOS Specific settings
 if (APPLE)
-    set(GUI_TYPE MACOSX_BUNDLE)
+    set(gui_TYPE MACOSX_BUNDLE)
 endif ()
 
 configure_file(src/common/build_config.cpp.in ${CMAKE_BINARY_DIR}/generated/build_config.cpp)
@@ -85,7 +85,8 @@ configure_file(xpilot.rc.in ${CMAKE_SOURCE_DIR}/xpilot.rc @ONLY)
 file(GLOB_RECURSE xpilot_SRC CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/src/*.cpp
     ${PROJECT_SOURCE_DIR}/src/*.h
-    ${CMAKE_BINARY_DIR}/generated/build_config.cpp)
+    ${CMAKE_BINARY_DIR}/generated/build_config.cpp
+)
 
 file(
     GLOB_RECURSE afv_HEADERS
@@ -104,11 +105,11 @@ qt_add_resources(qrc_SOURCES qml.qrc)
 
 if(APPLE)
     set(MACOSX_BUNDLE_ICON_FILE icon.icns)
-    set(XPILOT_ICON ${CMAKE_CURRENT_SOURCE_DIR}/icon.icns)
-    set_source_files_properties(${XPILOT_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+    set(xpilot_ICON ${CMAKE_CURRENT_SOURCE_DIR}/icon.icns)
+    set_source_files_properties(${xpilot_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 endif()
 
-add_executable(${PROJECT_NAME} ${GUI_TYPE} ${XPILOT_ICON} ${xpilot_SRC} ${afv_HEADERS} ${afv_SRC} ${qrc_SOURCES} xpilot.rc)
+add_executable(${PROJECT_NAME} ${gui_TYPE} ${xpilot_ICON} ${xpilot_SRC} ${afv_HEADERS} ${afv_SRC} ${qrc_SOURCES} xpilot.rc)
 
 qt6_import_qml_plugins(${PROJECT_NAME})
 
@@ -117,6 +118,9 @@ source_group("AFV Headers" FILES ${afv_HEADERS})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/afv-native/src")
 source_group("AFV Sources" FILES ${afv_SRC})
+
+# Include the /src/ directory as a system include directory
+target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE

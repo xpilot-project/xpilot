@@ -16,14 +16,16 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "serverlistmanager.h"
-#include "src/config/appconfig.h"
+#include <random>
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QEventLoop>
 #include <QtDebug>
-#include <random>
+
+#include "serverlistmanager.h"
+#include "config/appconfig.h"
 
 using namespace QtPromise;
 

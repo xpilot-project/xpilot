@@ -22,6 +22,8 @@
 #include <QString>
 #include <QStringList>
 #include <QStringBuilder>
+#include <QVector>
+#include <QList>
 #include <QDebug>
 
 #include "pdu_format_exception.h"

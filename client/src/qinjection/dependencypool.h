@@ -3,6 +3,7 @@
 
 #include <QMap>
 #include <QObject>
+
 #include "dependencycreator.h"
 
 #define dep ::QInjection

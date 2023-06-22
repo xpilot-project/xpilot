@@ -19,6 +19,9 @@
 #ifndef AFV_H
 #define AFV_H
 
+#include <thread>
+#include <memory>
+
 #include <QtGlobal>
 #include <QObject>
 #include <QTimer>
@@ -29,15 +32,13 @@
 #include <QTextStream>
 #include <QMap>
 
-#include <thread>
-#include <memory>
 #include <event2/event.h>
 
-#include "src/qinjection/dependencypointer.h"
-#include "src/network/networkmanager.h"
-#include "src/simulator/xplane_adapter.h"
-#include "src/controllers/controller_manager.h"
-#include "src/controllers/controller.h"
+#include "qinjection/dependencypointer.h"
+#include "network/networkmanager.h"
+#include "simulator/xplane_adapter.h"
+#include "controllers/controller_manager.h"
+#include "controllers/controller.h"
 #include "afv-native/Client.h"
 #include "audiodeviceinfo.h"
 

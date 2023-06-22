@@ -19,7 +19,6 @@
 #ifndef PDU_PLANEINFOREQ_H
 #define PDU_PLANEINFOREQ_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUPlaneInfoRequest: public PDUBase

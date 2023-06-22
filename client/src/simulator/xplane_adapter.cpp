@@ -16,22 +16,22 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "xplane_adapter.h"
-#include "src/config/appconfig.h"
-#include "src/common/build_config.h"
-#include "src/common/utils.h"
-
 #include <iostream>
 #include <istream>
 #include <iomanip>
 #include <string>
+#include <cmath>
 
 #include <QTimer>
 #include <QtEndian>
 #include <QDateTime>
 #include <QJsonObject>
 #include <QJsonDocument>
-#include <cmath>
+
+#include "xplane_adapter.h"
+#include "config/appconfig.h"
+#include "common/build_config.h"
+#include "common/utils.h"
 
 using namespace xpilot;
 

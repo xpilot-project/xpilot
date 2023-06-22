@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <chrono>
 #include <random>
+
 #include <QRandomGenerator>
 #include <QDateTime>
 

@@ -29,24 +29,24 @@
 #include <QPointer>
 #include <QtPromise>
 
-using namespace QtPromise;
+#include "fsd/fsd_client.h"
+#include "network/vatsim_auth.h"
+#include "network/connectinfo.h"
+#include "network/events/radio_message_received.h"
+#include "simulator/xplane_adapter.h"
+#include "aircrafts/user_aircraft_data.h"
+#include "aircrafts/user_aircraft_config_data.h"
+#include "aircrafts/aircraft_visual_state.h"
+#include "aircrafts/aircraft_configuration.h"
+#include "aircrafts/velocity_vector.h"
+#include "config/appconfig.h"
+#include "common/build_config.h"
+#include "common/frequency_utils.h"
+#include "common/notificationtype.h"
+#include "common/utils.h"
+#include "qinjection/dependencypointer.h"
 
-#include "src/fsd/fsd_client.h"
-#include "src/network/vatsim_auth.h"
-#include "src/network/connectinfo.h"
-#include "src/network/events/radio_message_received.h"
-#include "src/simulator/xplane_adapter.h"
-#include "src/aircrafts/user_aircraft_data.h"
-#include "src/aircrafts/user_aircraft_config_data.h"
-#include "src/aircrafts/aircraft_visual_state.h"
-#include "src/aircrafts/aircraft_configuration.h"
-#include "src/aircrafts/velocity_vector.h"
-#include "src/config/appconfig.h"
-#include "src/common/build_config.h"
-#include "src/common/frequency_utils.h"
-#include "src/common/notificationtype.h"
-#include "src/common/utils.h"
-#include "src/qinjection/dependencypointer.h"
+using namespace QtPromise;
 
 namespace xpilot
 {

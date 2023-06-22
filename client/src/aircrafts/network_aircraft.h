@@ -19,12 +19,13 @@
 #ifndef AIRCRAFT_H
 #define AIRCRAFT_H
 
-#include "aircraft_visual_state.h"
-#include "aircraft_configuration.h"
+#include <optional>
 
 #include <QString>
 #include <QDateTime>
-#include <optional>
+
+#include "aircraft_visual_state.h"
+#include "aircraft_configuration.h"
 
 enum class AircraftStatus
 {

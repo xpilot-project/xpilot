@@ -29,6 +29,7 @@
 #include <QMetaEnum>
 #include <QHash>
 #include <QCryptographicHash>
+#include <QStringEncoder>
 
 #include "pdu/pdu_base.h"
 #include "pdu/pdu_add_atc.h"
@@ -55,6 +56,9 @@
 #include "pdu/pdu_metar_response.h"
 #include "pdu/pdu_metar_request.h"
 #include "pdu/pdu_send_fast.h"
+#include "pdu/pdu_auth_challenge.h"
+#include "pdu/pdu_auth_response.h"
+#include "pdu/pdu_change_server.h"
 
 namespace xpilot
 {

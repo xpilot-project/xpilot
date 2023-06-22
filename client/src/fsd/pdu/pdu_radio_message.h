@@ -19,9 +19,6 @@
 #ifndef PDU_RADIO_MESSAGE_H
 #define PDU_RADIO_MESSAGE_H
 
-#include <QString>
-#include <QVector>
-#include <QList>
 #include "pdu_base.h"
 
 class PDURadioMessage: public PDUBase

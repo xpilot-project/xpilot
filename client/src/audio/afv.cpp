@@ -17,11 +17,11 @@
 */
 
 #include "afv.h"
-#include "src/appcore.h"
-#include "src/config/appconfig.h"
-#include "src/common/notificationtype.h"
-#include "src/common/utils.h"
-#include "src/common/build_config.h"
+#include "appcore.h"
+#include "config/appconfig.h"
+#include "common/notificationtype.h"
+#include "common/utils.h"
+#include "common/build_config.h"
 
 using namespace afv_native::afv;
 

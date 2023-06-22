@@ -23,8 +23,10 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QDesktopServices>
+#include <QStringEncoder>
+
 #include "appconfig.h"
-#include "src/common/build_config.h"
+#include "common/build_config.h"
 
 using namespace xpilot;
 

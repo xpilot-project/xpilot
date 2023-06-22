@@ -40,19 +40,18 @@
 #include <QMutex>
 #include <QTimer>
 
-#include <msgpack.hpp>
-
 #include <nng/nng.h>
 #include <nng/protocol/pair1/pair.h>
+#include <msgpack.hpp>
 
-#include "src/config/appconfig.h"
-#include "src/aircrafts/network_aircraft.h"
-#include "src/aircrafts/velocity_vector.h"
-#include "src/aircrafts/user_aircraft_data.h"
-#include "src/aircrafts/user_aircraft_config_data.h"
-#include "src/aircrafts/radio_stack_state.h"
-#include "src/controllers/controller.h"
-#include "src/simulator/dto.h"
+#include "config/appconfig.h"
+#include "aircrafts/network_aircraft.h"
+#include "aircrafts/velocity_vector.h"
+#include "aircrafts/user_aircraft_data.h"
+#include "aircrafts/user_aircraft_config_data.h"
+#include "aircrafts/radio_stack_state.h"
+#include "controllers/controller.h"
+#include "simulator/dto.h"
 
 using namespace xpilot;
 

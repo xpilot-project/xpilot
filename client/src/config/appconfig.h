@@ -31,9 +31,9 @@
 #include <QJsonObject>
 
 #include "windowconfig.h"
-#include "src/common/simplecrypt.h"
-#include "src/network/serverlistmanager.h"
-#include "src/network/connectinfo.h"
+#include "common/simplecrypt.h"
+#include "network/serverlistmanager.h"
+#include "network/connectinfo.h"
 
 #define DEFAULT_XPLANE_NETWORK_ADDRESS "127.0.0.1"
 #define DEFAULT_PLUGIN_PORT 53100
