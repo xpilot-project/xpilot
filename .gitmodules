@@ -1,12 +1,12 @@
 [submodule "client/afv-native"]
 	path = client/afv-native
 	url = git@github.com:xpilot-project/afv-native.git
-[submodule "externals"]
-	path = externals
-	url = git@github.com:xpilot-project/externals.git
 [submodule "plugin/3rdparty/XPMP2"]
 	path = plugin/3rdparty/XPMP2
 	url = git@github.com:xpilot-project/XPMP2.git
 [submodule "plugin/3rdparty/imgui"]
 	path = plugin/3rdparty/imgui
 	url = git@github.com:ocornut/imgui.git
+[submodule "dependencies"]
+	path = dependencies
+	url = git@github.com:xpilot-project/dependencies.git

@@ -13,6 +13,7 @@ env:
   PLUGIN_DIR: ${{ github.workspace }}/plugin
   IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-23.1.0-linux-x64-installer.run
   IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
+  QT_VERSION: "v6.5.1"
 
 jobs:
   build:
@@ -35,6 +36,17 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+
+      - name: Delete dummy auth library
+        shell: bash
+        run: rm -rf dependencies/vatsim-auth
+
+      - name: Checkout auth library
+        uses: actions/checkout@v3
+        with:
+          repository: xpilot-project/vatsim-auth
+          path: dependencies/vatsim-auth
+          token: ${{ secrets.GH_TOKEN }}
 
         ### Buid Plugin ###
 
@@ -71,7 +83,7 @@ jobs:
         uses: robinraju/release-downloader@v1.6
         with:
           repository: "xpilot-project/qt6"
-          tag: "v6.3.2"
+          tag: ${{ env.QT_VERSION }}
           fileName: "linux.7z"
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
@@ -94,7 +106,7 @@ jobs:
             -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
             -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
             -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} \
-            -DOPENSSL_ROOT_DIR=${{ github.workspace }}/externals/linux/openssl
+            -DOPENSSL_ROOT_DIR=${{ github.workspace }}/dependencies/linux/openssl
           cmake --build . --config ${{ env.BUILD_TYPE }}
           mv ${{ env.CLIENT_DIR }}/build/xPilot ${{ env.CLIENT_DIR }}/build/xpilot
 
