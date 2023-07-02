@@ -373,8 +373,8 @@ void XplaneAdapter::setupNngSocket()
         emit nngSocketError(QString("Error opening socket: %1").arg(nng_strerror(result)));
     }
 
-    nng_setopt_int(m_socket, NNG_OPT_RECVBUF, 1024);
-    nng_setopt_int(m_socket, NNG_OPT_SENDBUF, 1024);
+    nng_setopt_int(m_socket, NNG_OPT_RECVBUF, 8192);
+    nng_setopt_int(m_socket, NNG_OPT_SENDBUF, 8192);
 
     const QList<QString> localhostAddresses = {"127.0.0.1","localhost"};
     if(AppConfig::getInstance()->XplaneNetworkAddress.isEmpty() || localhostAddresses.contains(AppConfig::getInstance()->XplaneNetworkAddress.toLower())) {
@@ -422,6 +422,9 @@ void XplaneAdapter::setupNngSocket()
             emit nngSocketError(QString("Error opening visual machine socket: %1").arg(nng_strerror(result)));;
             continue;
         }
+
+        nng_setopt_int(_visualSocket, NNG_OPT_RECVBUF, 8192);
+        nng_setopt_int(_visualSocket, NNG_OPT_SENDBUF, 8192);
 
         QString url = QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort);
         if((result = nng_dial(_visualSocket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK)) != 0) {

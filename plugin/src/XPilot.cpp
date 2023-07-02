@@ -129,8 +129,8 @@ namespace xpilot
 			return;
 		}
 
-		nng_setopt_int(_socket, NNG_OPT_RECVBUF, 1024);
-		nng_setopt_int(_socket, NNG_OPT_SENDBUF, 1024);
+		nng_setopt_int(_socket, NNG_OPT_RECVBUF, 8192);
+		nng_setopt_int(_socket, NNG_OPT_SENDBUF, 8192);
 
 		std::string url = "ipc:///tmp//xpilot.ipc";
 		if (Config::GetInstance().GetUseTcpSocket() && Config::GetInstance().GetTcpPort() > 0)
