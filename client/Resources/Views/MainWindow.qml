@@ -25,8 +25,6 @@ Window {
     minimumWidth: 840
     width: minimumWidth
     height: minimumHeight
-    x: Screen.width / 2 - width / 2
-    y: Screen.height / 2 - height / 2
 
     property QtObject downloadCslWindow // csl install
     property QtObject setXplanePathWindow // csl install
