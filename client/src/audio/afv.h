@@ -89,13 +89,16 @@ namespace xpilot
             return QVariant::fromValue(itemList);
         }
 
-        Q_INVOKABLE void setInputDevice(QString deviceId);
-        Q_INVOKABLE void setOutputDevice(QString deviceId);
+        Q_INVOKABLE void setInputDevice(QString deviceName);
+        Q_INVOKABLE void setSpeakerDevice(QString deviceName);
+        Q_INVOKABLE void setHeadsetDevice(QString deviceName);
+        Q_INVOKABLE void setSplitAudioChannels(bool split);
         Q_INVOKABLE void setCom1Volume(double volume);
         Q_INVOKABLE void setCom2Volume(double volume);
         Q_INVOKABLE void disableAudioEffects(bool disabled);
         Q_INVOKABLE void enableHfSquelch(bool enabled);
         Q_INVOKABLE void setMicrophoneVolume(int volume);
+        Q_INVOKABLE void setOnHeadset(unsigned int radio, bool onHeadset);
         Q_INVOKABLE void settingsWindowOpened();
         Q_INVOKABLE void settingsWindowClosed();
 

@@ -8,7 +8,7 @@ import "../Controls"
 Popup {
     id: popup
     width: 550
-    height: 150
+    height: 160
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
     modal: true
@@ -44,7 +44,7 @@ Popup {
             cursorShape: Qt.PointingHandCursor
             onClicked: {
                 popup.close()
-                settingsWindowDialog.show()
+                createSettingsWindow()
             }
         }
     }

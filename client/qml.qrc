@@ -2,7 +2,7 @@
     <qresource prefix="/">
         <file>Resources/Components/Toolbar.qml</file>
         <file>Resources/Controls/ToolbarButton.qml</file>
-        <file>Resources/Controls/WindowControlButton.qml</file>
+        <file>Resources/Controls/TransparentButton.qml</file>
         <file>Resources/Fonts/Roboto-Mono.ttf</file>
         <file>Resources/Fonts/Ubuntu-Regular.ttf</file>
         <file>Resources/Icons/AppIcon.ico</file>
@@ -45,5 +45,17 @@
         <file>Resources/Components/ConfigRequiredDialog.qml</file>
         <file>Resources/Ui/Colors.js</file>
         <file>Resources/Controls/TabControl.qml</file>
+        <file>Resources/Controls/VerticalTabBar.qml</file>
+        <file>Resources/Controls/VerticalTabButton.qml</file>
+        <file>Resources/Views/Settings/SettingsNetwork.qml</file>
+        <file>Resources/Views/Settings/SettingsNotifications.qml</file>
+        <file>Resources/Views/Settings/SettingsAudio.qml</file>
+        <file>Resources/Views/Settings/SettingsMiscellaneous.qml</file>
+        <file>Resources/Controls/CustomBorder.qml</file>
+        <file>Resources/Controls/StandardButton.qml</file>
+        <file>Resources/Fonts/OpenSans.ttf</file>
+        <file>Resources/Icons/HeadsetIcon.svg</file>
+        <file>Resources/Icons/SpeakerIcon.svg</file>
+        <file>Resources/Icons/ChevronDown.svg</file>
     </qresource>
 </RCC>

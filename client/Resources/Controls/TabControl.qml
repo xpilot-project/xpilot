@@ -430,7 +430,7 @@ Item {
                 color: tabIndex === view.currentIndex ? "white" : (hasMessageWaiting ? "yellow" : frameColor)
             }
 
-            WindowControlButton {
+            TransparentButton {
                 id: btnClose
                 visible: isCloseable
                 anchors.right: parent.right

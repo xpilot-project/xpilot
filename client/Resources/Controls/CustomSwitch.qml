@@ -4,7 +4,8 @@ import QtQuick.Controls.Basic
 
 Switch {
     id: control
-    text: qsTr("Switch")
+
+    property string tooltipText: ""
 
     indicator: Rectangle {
         implicitWidth: 30
@@ -14,6 +15,7 @@ Switch {
         radius: 18
         color: control.checked ? "#0164AD" : "#ffffff"
         border.color: control.checked ? "#0164AD" : "#ADB5BD"
+        z: 100
 
         Rectangle {
             x: control.checked ? parent.width - width : 0
@@ -26,13 +28,38 @@ Switch {
     }
 
     contentItem: Text {
+        id: label
         text: control.text
         font.pixelSize: 13
         opacity: enabled ? 1.0 : 0.3
-        color: "#333333"
+        color: "#000000"
         verticalAlignment: Text.AlignVCenter
         leftPadding: control.indicator.width + control.spacing
         wrapMode: Text.WordWrap
         renderType: Text.NativeRendering
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: tooltipText !== ""
+            propagateComposedEvents: true
+
+            onEntered: {
+                label.ToolTip.visible = true
+            }
+
+            onExited: {
+                label.ToolTip.visible = false
+            }
+
+            onClicked: (mouse) => mouse.accepted = false
+            onPressed: (mouse) => mouse.accepted = false
+            onReleased: (mouse) => mouse.accepted = false
+            onDoubleClicked: (mouse) => mouse.accepted = false
+            onPositionChanged: (mouse) => mouse.accepted = false
+            onPressAndHold: (mouse) => mouse.accepted = false
+        }
+
+        ToolTip.visible: false
+        ToolTip.text: tooltipText
     }
 }

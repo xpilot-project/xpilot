@@ -33,6 +33,8 @@ Window {
     property QtObject setXplanePathWindow
     property QtObject extractCslModelsWindow
 
+    property QtObject settingsWindow
+
     property int activeMessageTab
     property string networkCallsign
     property var radioStackState
@@ -106,12 +108,17 @@ Window {
         id: configRequiredDialog
     }
 
-    SettingsWindow {
-        id: settingsWindowDialog
-    }
-
     ConnectWindow {
         id: connectWindowDialog
+    }
+
+    Connections {
+        target: settingsWindow
+
+        function onCloseWindow() {
+            settingsWindow.destroy()
+            settingsWindow = null
+        }
     }
 
     Connections {
@@ -132,7 +139,6 @@ Window {
 
         function onInputDeviceChanged() {
             AppConfig.MicrophoneCalibrated = false
-            AppConfig.saveConfig()
         }
     }
 
@@ -1283,6 +1289,14 @@ Window {
         if (comp.status === Component.Ready) {
             extractCslModelsWindow = comp.createObject(mainWindow)
             extractCslModelsWindow.open()
+        }
+    }
+
+    function createSettingsWindow() {
+        var comp = Qt.createComponent("qrc:/Resources/Views/SettingsWindow.qml")
+        if (comp.status === Component.Ready) {
+            settingsWindow = comp.createObject(mainWindow)
+            settingsWindow.show()
         }
     }
 }

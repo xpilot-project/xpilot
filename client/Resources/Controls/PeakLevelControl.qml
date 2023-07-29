@@ -11,7 +11,7 @@ Rectangle {
 
     width: parent.width
     height: 15
-    color: '#e6e7e8'
+    color: '#ced0d2'
     radius: 20
 
     Rectangle {

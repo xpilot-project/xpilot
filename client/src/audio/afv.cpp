@@ -87,9 +87,6 @@ namespace xpilot
         {
             switch(evt)
             {
-                case afv_native::ClientEventType::AudioDisabled:
-                emit notificationPosted("No speaker device detected. You will not be able to communicate on voice until you plug in a speaker device and configure it in the xPilot settings.", MessageType::Error);
-                    break;
                 case afv_native::ClientEventType::APIServerError:
                     if(data != nullptr) {
                         auto error = *reinterpret_cast<APISessionError*>(data);
@@ -144,6 +141,14 @@ namespace xpilot
                     break;
                 case afv_native::ClientEventType::VoiceServerDisconnected:
                     emit notificationPosted("Disconnected from voice server.", MessageType::Info);
+                    break;
+                case afv_native::ClientEventType::AudioError:
+                    if(data != nullptr) {
+                        const char* error = reinterpret_cast<const char*>(data);
+                        QMetaObject::invokeMethod(this, [this, error]() {
+                            emit notificationPosted(error, MessageType::Error);
+                        }, Qt::QueuedConnection);
+                    }
                     break;
                 default:
                     break;
@@ -455,6 +460,16 @@ namespace xpilot
             m_client->setSpeakerDevice(AppConfig::getInstance()->SpeakerDevice.toStdString());
         }
 
+        if(!AppConfig::getInstance()->HeadsetDevice.isEmpty())
+        {
+            m_client->setHeadsetDevice(AppConfig::getInstance()->HeadsetDevice.toStdString());
+        }
+
+        m_client->setSplitAudioChannels(AppConfig::getInstance()->SplitAudioChannels);
+
+        m_client->setOnHeadset(0, AppConfig::getInstance()->Com1OnHeadset);
+        m_client->setOnHeadset(1, AppConfig::getInstance()->Com2OnHeadset);
+
         m_client->startAudio();
     }
 
@@ -489,6 +504,20 @@ namespace xpilot
     void AudioForVatsim::setMicrophoneVolume(int volume)
     {
         m_client->setMicrophoneVolume(volume);
+    }
+
+    void AudioForVatsim::setOnHeadset(unsigned int radio, bool onHeadset)
+    {
+        m_client->setOnHeadset(radio, onHeadset);
+
+        if(radio == 0) {
+            AppConfig::getInstance()->Com1OnHeadset = onHeadset;
+        }
+        else {
+            AppConfig::getInstance()->Com2OnHeadset = onHeadset;
+        }
+
+        AppConfig::getInstance()->saveConfig();
     }
 
     void AudioForVatsim::settingsWindowOpened()

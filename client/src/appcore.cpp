@@ -85,11 +85,11 @@ int xpilot::Main(int argc, char* argv[])
     app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));
 
     auto families = QFontDatabase::families();
-    if(!families.contains("Ubuntu")) {
-        // We must check if Ubuntu is already instead (at least for Linux), otherwise the FileDialog gets all corrupted...
-        QFontDatabase::addApplicationFont(":/Resources/Fonts/Ubuntu-Regular.ttf");
+    if(!families.contains("Open Sans")) {
+        // We must check if Open Sans is already instead (at least for Linux), otherwise the FileDialog gets all corrupted...
+        QFontDatabase::addApplicationFont(":/Resources/Fonts/OpenSans.ttf");
     }
-    app.setFont(QFont("Ubuntu", 10));
+    app.setFont(QFont("Open Sans", 10));
 
     QQmlApplicationEngine engine;
     QQmlContext *context = engine.rootContext();

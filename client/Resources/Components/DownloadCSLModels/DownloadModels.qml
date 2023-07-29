@@ -10,7 +10,7 @@ import "../../Controls"
 Popup {
     id: popup
     width: 650
-    height: 200
+    height: 230
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
     modal: true
@@ -169,7 +169,7 @@ Popup {
         renderType: Text.NativeRendering
         wrapMode: Text.WordWrap
         x: 20
-        y: 40
+        y: 50
     }
 
     ProgressBar {
@@ -217,7 +217,7 @@ Popup {
         id: btnCancelDownload
         visible: false
         text: "Cancel Download"
-        width: 120
+        width: 130
         height: 30
         font.pixelSize: 14
         anchors.left: progressBar.left
