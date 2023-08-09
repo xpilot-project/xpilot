@@ -191,16 +191,15 @@ Popup {
             }
         }
 
-        Item {
-            id: selcal
-            Layout.preferredHeight: 35
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            Layout.topMargin: 0
+        CustomTextField {
+            id: txtSelcal
             Layout.column: 2
-            maximumLength: 5
+            Layout.row: 1
             fieldLabel: "SELCAL"
             isUppercase: true
+            validator: RegularExpressionValidator {
+                regularExpression: /^[A-Za-z-]+$/
+            }
         }
 
         Item {

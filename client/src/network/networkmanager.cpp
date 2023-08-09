@@ -480,13 +480,13 @@ namespace xpilot
 
         if(frequencies.size() == 0) return;
 
-        static QRegularExpression re("^SELCAL ([A-Z][A-Z]-?[A-Z][A-Z])$");
+        static QRegularExpression re("^SELCAL ([A-Za-z][A-Za-z]-?[A-Za-z][A-Za-z])$");
         QRegularExpressionMatch match = re.match(pdu.Messages);
 
         if(match.hasMatch())
         {
-            QString selcal = QString("SELCAL %1").arg(match.captured(1).replace("-",""));
-            if(!m_connectInfo.SelcalCode.isEmpty() && selcal == "SELCAL " + m_connectInfo.SelcalCode.replace("-",""))
+            QString selcal = QString("SELCAL %1").arg(match.captured(1).replace("-","")).toUpper();
+            if(!m_connectInfo.SelcalCode.isEmpty() && selcal == "SELCAL " + m_connectInfo.SelcalCode.toUpper().replace("-",""))
             {
                 emit selcalAlertReceived(pdu.From.toUpper(), frequencies);
                 m_xplaneAdapter.selcalAlertReceived();
