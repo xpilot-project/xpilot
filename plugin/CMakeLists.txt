@@ -5,10 +5,10 @@ set(CMAKE_CXX_STANDARD 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD_REQUIRED 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD 17)
 
+set(MSGPACK_USE_BOOST OFF CACHE INTERNAL "" FORCE)
+
 set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-
-set(Boost_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../externals/boost)
 
 set (INCLUDE_FMOD_SOUND 1)              
 add_compile_definitions(INCLUDE_FMOD_SOUND=1)
@@ -31,18 +31,18 @@ endif()
 configure_file(${CMAKE_SOURCE_DIR}/include/Constants.h.in ${CMAKE_SOURCE_DIR}/include/Constants.h @ONLY)
 
 if(WIN32)
-    include_directories(${CMAKE_SOURCE_DIR}/../externals/windows/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/windows/nng)
+    include_directories(${CMAKE_SOURCE_DIR}/../dependencies/platform/windows/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../dependencies/platform/windows/nng)
 elseif(APPLE)
-    include_directories(${CMAKE_SOURCE_DIR}/../externals/macos/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/macos/nng)
+    include_directories(${CMAKE_SOURCE_DIR}/../dependencies/platform/macos/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../dependencies/platform/macos/nng)
 elseif(UNIX)
-    include_directories(${CMAKE_SOURCE_DIR}/../externals/linux/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../externals/linux/nng)
+    include_directories(${CMAKE_SOURCE_DIR}/../dependencies/platform/linux/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../dependencies/platform/linux/nng)
 endif()
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/msgpack-c ${CMAKE_CURRENT_BINARY_DIR}/msgpack-c)
-add_subdirectory(${CMAKE_SOURCE_DIR}/../externals/json ${CMAKE_CURRENT_BINARY_DIR}/json)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../dependencies/msgpack-c ${CMAKE_CURRENT_BINARY_DIR}/msgpack-c)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../dependencies/json ${CMAKE_CURRENT_BINARY_DIR}/json)
 
 file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/src/*.cpp
@@ -131,7 +131,7 @@ if (WIN32 OR APPLE)
     target_link_libraries(${PROJECT_NAME} ${XPLM_LIBRARY} ${FMOD_LIBRARY})
 endif ()
 
-target_link_libraries(${PROJECT_NAME} msgpackc-cxx nlohmann_json ${LIB_NNG})
+target_link_libraries(${PROJECT_NAME} msgpack-cxx nlohmann_json ${LIB_NNG})
 
 if (WIN32)
     set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
