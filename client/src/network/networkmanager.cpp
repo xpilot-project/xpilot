@@ -296,9 +296,9 @@ namespace xpilot
                     {
                         emit controllerAtisReceived(pdu.From.toUpper(), m_mapAtisMessages[pdu.From.toUpper()]);
 
-                        m_xplaneAdapter.NotificationPosted(pdu.From.toUpper() + " ATIS:", COLOR_BRIGHT_GREEN);
+                        m_xplaneAdapter.NotificationPosted(pdu.From.toUpper() + " ATIS:", COLOR_ORANGE);
                         for(const auto& line : qAsConst(m_mapAtisMessages[pdu.From.toUpper()])) {
-                            m_xplaneAdapter.NotificationPosted(line, COLOR_BRIGHT_GREEN);
+                            m_xplaneAdapter.NotificationPosted(line, COLOR_ORANGE);
                         }
 
                         m_mapAtisMessages.remove(pdu.From.toUpper());
@@ -411,7 +411,7 @@ namespace xpilot
     void NetworkManager::OnMetarResponseReceived(PDUMetarResponse pdu)
     {
         emit metarReceived(pdu.From.toUpper(), pdu.Metar);
-        m_xplaneAdapter.NotificationPosted(QString("METAR: %1").arg(pdu.Metar), COLOR_BRIGHT_GREEN);
+        m_xplaneAdapter.NotificationPosted(QString("METAR: %1").arg(pdu.Metar), COLOR_ORANGE);
     }
 
     void NetworkManager::OnDeletePilotReceived(PDUDeletePilot pdu)
@@ -437,7 +437,7 @@ namespace xpilot
         if(pdu.From.toUpper() == "SERVER")
         {
             emit serverMessageReceived(pdu.Message);
-            m_xplaneAdapter.NotificationPosted(pdu.Message, COLOR_GREEN);
+            m_xplaneAdapter.NotificationPosted(pdu.Message, pdu.Message.contains("donate.vatsim.net") ? COLOR_MAGENTA : COLOR_GREEN);
         }
         else
         {

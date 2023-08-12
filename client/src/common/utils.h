@@ -35,7 +35,7 @@ constexpr qint64 COLOR_GRAY = 0xc0c0c0;
 constexpr qint64 COLOR_YELLOW = 0xffff00;
 constexpr qint64 COLOR_RED = 0xeb2f06;
 constexpr qint64 COLOR_CYAN = 0x00ffff;
-constexpr qint64 COLOR_BRIGHT_GREEN = 0x00c000;
+constexpr qint64 COLOR_MAGENTA = 0xff00ff;
 
 // is 0-9 char?
 inline bool is09(const QChar &c) { return c >= u'0' && c <= u'9'; }
