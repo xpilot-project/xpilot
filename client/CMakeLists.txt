@@ -10,6 +10,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(MSGPACK_USE_BOOST OFF CACHE INTERNAL "" FORCE)
 
 if(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
@@ -230,9 +231,9 @@ target_link_libraries(${PROJECT_NAME}
     ${LIB_NNG}
     ${LIB_ZIP}
     ${LIB_ZLIB}
+    msgpack-cxx
     vatsim-auth
     qtpromise
-    msgpackc-cxx
     nlohmann_json
 )
 
