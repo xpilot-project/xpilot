@@ -32,12 +32,11 @@
 namespace xpilot
 {
 	XPilot::XPilot() :
-		m_xplaneAtisEnabled("sim/atc/atis_enabled", ReadWrite),
 		m_pttPressed("xpilot/ptt", ReadWrite),
-		m_rxCom1("xpilot/audio/com1_rx", ReadWrite),
-		m_rxCom2("xpilot/audio/com2_rx", ReadWrite),
-		m_networkLoginStatus("xpilot/login/status", ReadOnly), // 0=Disconnected, 1=Pilot, 2=Observer
+		m_networkLoginStatus("xpilot/login/status", ReadOnly),
 		m_networkCallsign("xpilot/login/callsign", ReadWrite),
+		m_rxCom1("xpilot/audio/com1_rx", ReadWrite),
+		m_rxCom2("xpilot/audio/com2_rx", ReadWrite), // 0=Disconnected, 1=Pilot, 2=Observer
 		m_volumeSignalLevel("xpilot/audio/vu", ReadWrite),
 		m_aiControlled("xpilot/ai_controlled", ReadOnly),
 		m_aircraftCount("xpilot/num_aircraft", ReadOnly),
@@ -47,6 +46,7 @@ namespace xpilot
 		m_selcalMuteOverride("xpilot/selcal_mute_override", ReadWrite),
 		m_com1StationCallsign("xpilot/com1_station_callsign", ReadOnly),
 		m_com2StationCallsign("xpilot/com2_station_callsign", ReadOnly),
+		m_xplaneAtisEnabled("sim/atc/atis_enabled", ReadWrite),
 		m_frameRatePeriod("sim/operation/misc/frame_rate_period", ReadOnly),
 		m_com1Frequency("sim/cockpit2/radios/actuators/com1_frequency_hz_833", ReadWrite),
 		m_com2Frequency("sim/cockpit2/radios/actuators/com2_frequency_hz_833", ReadWrite),
@@ -123,14 +123,14 @@ namespace xpilot
 		XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
 
 		int rv;
-		if ((rv = nng_pair1_open(&_socket)) != 0)
+		if ((rv = nng_pair1_open(&m_socket)) != 0)
 		{
 			LOG_MSG(logERROR, "Error opening socket: %s", nng_strerror(rv));
 			return;
 		}
 
-		nng_setopt_int(_socket, NNG_OPT_RECVBUF, 8192);
-		nng_setopt_int(_socket, NNG_OPT_SENDBUF, 8192);
+		nng_setopt_int(m_socket, NNG_OPT_RECVBUF, 8192);
+		nng_setopt_int(m_socket, NNG_OPT_SENDBUF, 8192);
 
 		std::string url = "ipc:///tmp//xpilot.ipc";
 		if (Config::GetInstance().GetUseTcpSocket() && Config::GetInstance().GetTcpPort() > 0)
@@ -138,7 +138,7 @@ namespace xpilot
 			url = string_format("tcp://*:%i", Config::GetInstance().GetTcpPort());
 		}
 
-		if ((rv = nng_listen(_socket, url.c_str(), NULL, 0)) != 0)
+		if ((rv = nng_listen(m_socket, url.c_str(), NULL, 0)) != 0)
 		{
 			LOG_MSG(logERROR, "Socket listen error (%s): %s", url.c_str(), nng_strerror(rv));
 			return;
@@ -156,8 +156,8 @@ namespace xpilot
 
 		m_keepSocketAlive = false;
 
-		nng_close(_socket);
-		_socket = NNG_SOCKET_INITIALIZER;
+		nng_close(m_socket);
+		m_socket = NNG_SOCKET_INITIALIZER;
 		nng_fini();
 
 		if (m_socketThread)
@@ -203,7 +203,7 @@ namespace xpilot
 		if (!Config::GetInstance().HasValidPaths())
 		{
 			std::string err = "There are no valid CSL paths configured. Please verify your CSL configuration in X-Plane (Plugins > xPilot > Settings > CSL Configuration).";
-			NotificationPosted(err.c_str(), 192, 57, 43, true);
+			AddNotificationShowPanel(err, Colors::Red);
 			LOG_MSG(logERROR, err.c_str());
 		}
 		else
@@ -262,7 +262,7 @@ namespace xpilot
 			size_t bufferLen;
 
 			int err;
-			err = nng_recv(_socket, &buffer, &bufferLen, NNG_FLAG_ALLOC);
+			err = nng_recv(m_socket, &buffer, &bufferLen, NNG_FLAG_ALLOC);
 
 			if (err == 0)
 			{
@@ -392,51 +392,42 @@ namespace xpilot
 			NotificationPostedDto dto;
 			packet.dto.convert(dto);
 
-			long color = dto.color;
-			int red = ((color >> 16) & 0xff);
-			int green = ((color >> 8) & 0xff);
-			int blue = ((color) & 0xff);
+			int red = ((dto.color >> 16) & 0xff);
+			int green = ((dto.color >> 8) & 0xff);
+			int blue = ((dto.color) & 0xff);
 
-			NotificationPosted(dto.message.c_str(), red, green, blue);
+			AddNotificationMessage(dto.message, rgb{ red,green,blue });
 		}
 		if (packet.type == dto::RADIO_MESSAGE_SENT)
 		{
 			RadioMessageSentDto dto;
 			packet.dto.convert(dto);
 
-			std::string msg = dto.message.c_str();
-			NotificationPosted(msg, 0, 255, 255);
+			AddNotificationMessage(dto.message, Colors::Cyan);
 		}
 		if (packet.type == dto::RADIO_MESSAGE_RECEIVED)
 		{
 			RadioMessageReceivedDto dto;
 			packet.dto.convert(dto);
 
-			double r = dto.isDirect ? 255 : 192;
-			double g = dto.isDirect ? 255 : 192;
-			double b = dto.isDirect ? 255 : 192;
 			std::string msg = string_format("%s: %s", dto.from.c_str(), dto.message.c_str());
-			NotificationPosted(msg, r, g, b);
+			AddNotificationMessage(msg, dto.isDirect ? Colors::White : Colors::Gray);
 		}
 		if (packet.type == dto::PRIVATE_MESSAGE_SENT)
 		{
 			PrivateMessageSentDto dto;
 			packet.dto.convert(dto);
 
-			std::string msg = dto.message;
-			std::string to = dto.to;
-			AddPrivateMessage(to, msg, ConsoleTabType::Sent);
-			AddNotificationPanelMessage(string_format("%s [pvt]: %s", m_networkCallsign.value().c_str(), msg.c_str()), 0, 255, 255);
+			AddNotificationMessage(string_format("%s [pvt]: %s", m_networkCallsign.value().c_str(), dto.message.c_str()), Colors::Cyan, false);
+			PrivateMessageSent(dto.to, dto.message);
 		}
 		if (packet.type == dto::PRIVATE_MESSAGE_RECEIVED)
 		{
 			PrivateMessageReceivedDto dto;
 			packet.dto.convert(dto);
 
-			std::string msg = dto.message;
-			std::string from = dto.from;
-			AddPrivateMessage(from, msg, ConsoleTabType::Received);
-			AddNotificationPanelMessage(string_format("%s [pvt]: %s", from.c_str(), msg.c_str()), 255, 255, 255);
+			AddNotificationMessage(string_format("%s [pvt]: %s", dto.from.c_str(), dto.message.c_str()), Colors::White, false);
+			PrivateMessageReceived(dto.from, dto.message);
 		}
 		if (packet.type == dto::NEARBY_ATC)
 		{
@@ -514,16 +505,21 @@ namespace xpilot
 		SendDto(dto);
 	}
 
-	void XPilot::RequestStationInfo(std::string station)
+	void XPilot::RequestStationInfo(const std::string& station)
 	{
 		RequestStationInfoDto dto{ station };
 		SendDto(dto);
 	}
 
-	void XPilot::RequestMetar(std::string station)
+	void XPilot::RequestMetar(const std::string& station)
 	{
 		RequestMetarDto dto{ station };
 		SendDto(dto);
+	}
+
+	void XPilot::SetPttActive(bool active)
+	{
+		m_pttPressed = active;
 	}
 
 	void XPilot::SetCom1Frequency(int frequency)
@@ -579,13 +575,13 @@ namespace xpilot
 		m_xplaneAtisEnabled = (int)disabled;
 	}
 
-	void XPilot::SendWallop(std::string message)
+	void XPilot::SendWallop(const std::string& message)
 	{
 		WallopSentDto dto{ message };
 		SendDto(dto);
 	}
 
-	void XPilot::SendRadioMessage(std::string message)
+	void XPilot::SendRadioMessage(const std::string& message)
 	{
 		if (!IsNetworkConnected())
 			return;
@@ -594,7 +590,7 @@ namespace xpilot
 		SendDto(dto);
 	}
 
-	void XPilot::SendPrivateMessage(std::string to, std::string message)
+	void XPilot::SendPrivateMessage(const std::string& to, const std::string& message)
 	{
 		if (!IsNetworkConnected())
 			return;
@@ -603,52 +599,13 @@ namespace xpilot
 		SendDto(dto);
 	}
 
-	void XPilot::AddPrivateMessage(const std::string& recipient, const std::string& msg, ConsoleTabType tabType)
-	{
-		if (!recipient.empty() && !msg.empty())
-		{
-			QueueCallback([=]()
-			{
-				m_textMessageConsole->HandlePrivateMessage(recipient, msg, tabType);
-			});
-		}
-	}
-
-	void XPilot::RadioMessageReceived(const std::string& msg, double red, double green, double blue)
-	{
-		if (!msg.empty())
-		{
-			QueueCallback([=]()
-			{
-				m_textMessageConsole->RadioMessageReceived(msg.c_str(), red, green, blue);
-			});
-		}
-	}
-
-	void XPilot::AddNotificationPanelMessage(const std::string& msg, double red, double green, double blue, bool forceShow)
-	{
-		if (!msg.empty())
-		{
-			QueueCallback([=]()
-			{
-				m_notificationPanel->AddNotificationPanelMessage(msg, red, green, blue, forceShow);
-			});
-		}
-	}
-
-	void XPilot::NotificationPosted(const std::string& msg, double red, double green, double blue, bool forceShow)
-	{
-		RadioMessageReceived(msg, red, green, blue);
-		AddNotificationPanelMessage(msg, red, green, blue, forceShow);
-	}
-
-	void XPilot::AircraftDeleted(std::string callsign)
+	void XPilot::AircraftDeleted(const std::string& callsign)
 	{
 		AircraftDeletedDto dto{ callsign };
 		SendDto(dto);
 	}
 
-	void XPilot::AircraftAdded(std::string callsign)
+	void XPilot::AircraftAdded(const std::string& callsign)
 	{
 		AircraftAddedDto dto{ callsign };
 		SendDto(dto);
@@ -657,6 +614,58 @@ namespace xpilot
 	void XPilot::DeleteAllAircraft()
 	{
 		m_aircraftManager->RemoveAllPlanes();
+	}
+
+	void XPilot::AddNotificationMessage(const std::string& message, const rgb& color, bool addToConsole)
+	{
+		if (message.empty())
+			return;
+
+		QueueCallback([=]()
+		{
+			m_notificationPanel->AddMessage(message, color);
+			if (addToConsole)
+			{
+				m_textMessageConsole->AddMessage(message, color);
+			}
+		});
+	}
+
+	void XPilot::AddNotificationShowPanel(const std::string& message, const rgb& color, bool addToConsole)
+	{
+		if (message.empty())
+			return;
+
+		QueueCallback([=]()
+		{
+			m_notificationPanel->AddMessage(message, color, true);
+			if (addToConsole)
+			{
+				m_textMessageConsole->AddMessage(message, color);
+			}
+		});
+	}
+
+	void XPilot::PrivateMessageReceived(const std::string& from, const std::string& message)
+	{
+		if (from.empty() || message.empty())
+			return;
+
+		QueueCallback([=]()
+		{
+			m_textMessageConsole->HandlePrivateMessage(from, message, ConsoleTabType::Received);
+		});
+	}
+
+	void XPilot::PrivateMessageSent(const std::string& to, const std::string& message)
+	{
+		if (to.empty() || message.empty())
+			return;
+
+		QueueCallback([=]()
+		{
+			m_textMessageConsole->HandlePrivateMessage(to, message, ConsoleTabType::Sent);
+		});
 	}
 
 	void XPilot::QueueCallback(const std::function<void()>& cb)
@@ -717,7 +726,7 @@ namespace xpilot
 			auto err = XPMPMultiplayerEnable(callbackRequestTcasAgain);
 			if (*err)
 			{
-				NotificationPosted(err, 231, 76, 60, true);
+				AddNotificationShowPanel(err, Colors::Red);
 				LOG_MSG(logERROR, err);
 			}
 		}

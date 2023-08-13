@@ -32,18 +32,12 @@ namespace xpilot
 	{
 	public:
 		std::string GetMessage() { return m_message; }
-		float GetRed() { return m_red / 255; }
-		float GetGreen() { return m_green / 255; }
-		float GetBlue() { return m_blue / 255; }
 		void SetMessage(std::string value) { m_message = value; }
-		void SetRed(double value) { m_red = value; }
-		void setGreen(double value) { m_green = value; }
-		void setBlue(double value) { m_blue = value; }
+		void SetColor(rgb color) { m_color = color; }
+		ImVec4 GetColor() const { return ImVec4(m_color.red / 255.0f, m_color.green / 255.0f, m_color.blue / 255.0f, 1.0f); }
 	private:
 		std::string m_message;
-		double m_red;
-		double m_green;
-		double m_blue;
+		rgb m_color;
 	};
 
 	struct Tab
@@ -66,8 +60,8 @@ namespace xpilot
 	public:
 		TextMessageConsole(XPilot* instance);
 		void CreateNonExistingTab(const std::string& tabName);
-		void HandlePrivateMessage(const std::string& msg, const std::string& recipient, ConsoleTabType tabType);
-		void RadioMessageReceived(std::string message, double red = 255, double green = 255, double blue = 255);
+		void HandlePrivateMessage(const std::string& recipient, const std::string& message, ConsoleTabType tabType);
+		void AddMessage(const std::string& message, const rgb& color = Colors::White);
 		void SendRadioMessage(const std::string& msg);
 		void SendPrivateMessage(const std::string& tabName, const std::string& msg);
 		void PrivateMessageError(std::string tabName, std::string error);

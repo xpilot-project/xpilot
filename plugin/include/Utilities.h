@@ -38,6 +38,29 @@
 #include <cstdarg>
 #include <cmath>
 
+struct rgb
+{
+	int red;
+	int green;
+	int blue;
+};
+
+namespace Colors
+{
+	constexpr rgb Cyan = { 0, 255, 255 };
+	constexpr rgb Gray = { 192, 192, 192 };
+	constexpr rgb Green = { 133, 166, 100 };
+	constexpr rgb IndianRed = { 205, 92, 92 };
+	constexpr rgb LightGray = { 224, 224, 224 };
+	constexpr rgb LimeGreen = { 0, 192, 0 };
+	constexpr rgb Magenta = { 255, 0, 255 };
+	constexpr rgb Orange = { 255, 165, 0 };
+	constexpr rgb Plum = { 221, 160, 221 };
+	constexpr rgb Red = { 255, 0, 0 };
+	constexpr rgb White = { 255, 255, 255 };
+	constexpr rgb Yellow = { 255, 255, 0 };
+}
+
 template <typename... Args>
 inline std::string string_format(const std::string& format, Args... args)
 {
@@ -209,19 +232,12 @@ inline int64_t PrecisionTimestamp()
 	return duration_cast<milliseconds>(dur).count();
 }
 
-struct rgb
-{
-	float r;
-	float g;
-	float b;
-};
-
 inline rgb IntToRgb(int v)
 {
 	rgb result{};
-	result.r = (v >> 0) & 255;
-	result.g = (v >> 8) & 255;
-	result.b = (v >> 16) & 255;
+	result.red = (v >> 0) & 255;
+	result.green = (v >> 8) & 255;
+	result.blue = (v >> 16) & 255;
 	return result;
 }
 

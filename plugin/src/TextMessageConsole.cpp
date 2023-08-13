@@ -81,27 +81,23 @@ namespace xpilot
 		}
 	}
 
-	void TextMessageConsole::RadioMessageReceived(std::string msg, double red, double green, double blue)
+	void TextMessageConsole::AddMessage(const std::string& message, const rgb& color)
 	{
-		if (!msg.empty())
-		{
-			ConsoleMessage m;
-			m.SetMessage(string_format("[%s] %s", UtcTimestamp().c_str(), msg.c_str()));
-			m.SetRed(red);
-			m.setGreen(green);
-			m.setBlue(blue);
-			m_messageHistory.push_back(m);
-			m_scrollToBottom = true;
-		}
+		if (message.empty())
+			return;
+
+		ConsoleMessage m;
+		m.SetMessage(string_format("[%s] %s", UtcTimestamp().c_str(), message.c_str()));
+		m.SetColor(color);
+		m_messageHistory.push_back(m);
+		m_scrollToBottom = true;
 	}
 
 	void TextMessageConsole::ShowErrorMessage(std::string error)
 	{
 		ConsoleMessage m;
 		m.SetMessage(string_format("[%s] %s", UtcTimestamp().c_str(), error.c_str()));
-		m.SetRed(192);
-		m.setGreen(57);
-		m.setBlue(43);
+		m.SetColor(Colors::Red);
 		m_messageHistory.push_back(m);
 		m_scrollToBottom = true;
 	}
@@ -110,9 +106,7 @@ namespace xpilot
 	{
 		ConsoleMessage m;
 		m.SetMessage(string_format("[%s] %s", UtcTimestamp().c_str(), error.c_str()));
-		m.SetRed(192);
-		m.setGreen(57);
-		m.setBlue(43);
+		m.SetColor(Colors::Red);
 
 		auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&tabName](const Tab& t)
 		{
@@ -127,10 +121,10 @@ namespace xpilot
 
 	void TextMessageConsole::SendPrivateMessage(const std::string& to, const std::string& message)
 	{
-		if (!to.empty() && !message.empty())
-		{
-			m_env->SendPrivateMessage(to, message);
-		}
+		if (to.empty() || message.empty())
+			return;
+
+		m_env->SendPrivateMessage(to, message);
 	}
 
 	void TextMessageConsole::CloseTab(const std::string& tabName)
@@ -162,17 +156,15 @@ namespace xpilot
 		}
 	}
 
-	void TextMessageConsole::HandlePrivateMessage(const std::string& recipient, const std::string& msg, ConsoleTabType tabType)
+	void TextMessageConsole::HandlePrivateMessage(const std::string& recipient, const std::string& message, ConsoleTabType tabType)
 	{
 		switch (tabType)
 		{
 			case ConsoleTabType::Sent:
 			{
 				ConsoleMessage m;
-				m.SetMessage(string_format("[%s] %s: %s", UtcTimestamp().c_str(), m_env->OurCallsign().c_str(), msg.c_str()));
-				m.SetRed(0);
-				m.setGreen(255);
-				m.setBlue(255);
+				m.SetMessage(string_format("[%s] %s: %s", UtcTimestamp().c_str(), m_env->NetworkCallsign().c_str(), message.c_str()));
+				m.SetColor(Colors::Gray);
 
 				auto it = std::find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t)
 				{
@@ -187,17 +179,15 @@ namespace xpilot
 				else
 				{
 					CreateNonExistingTab(recipient);
-					HandlePrivateMessage(recipient, msg, ConsoleTabType::Sent);
+					HandlePrivateMessage(recipient, message, ConsoleTabType::Sent);
 				}
 			}
 			break;
 			case ConsoleTabType::Received:
 			{
 				ConsoleMessage m;
-				m.SetMessage(string_format("[%s] %s: %s", UtcTimestamp().c_str(), recipient.c_str(), msg.c_str()));
-				m.SetRed(255);
-				m.setGreen(255);
-				m.setBlue(255);
+				m.SetMessage(string_format("[%s] %s: %s", UtcTimestamp().c_str(), recipient.c_str(), message.c_str()));
+				m.SetColor(Colors::Cyan);
 
 				auto it = find_if(m_tabs.begin(), m_tabs.end(), [&recipient](const Tab& t)
 				{
@@ -212,7 +202,7 @@ namespace xpilot
 				else
 				{
 					CreateNonExistingTab(recipient);
-					HandlePrivateMessage(recipient, msg, ConsoleTabType::Received);
+					HandlePrivateMessage(recipient, message, ConsoleTabType::Received);
 				}
 			}
 			break;
@@ -231,8 +221,7 @@ namespace xpilot
 				{
 					for (auto& e : m_messageHistory)
 					{
-						const ImVec4& color = ImVec4(e.GetRed(), e.GetGreen(), e.GetBlue(), 1.0f);
-						ImGui::PushStyleColor(ImGuiCol_Text, color);
+						ImGui::PushStyleColor(ImGuiCol_Text, e.GetColor());
 						ImGui::TextWrapped("%s", e.GetMessage().c_str());
 						ImGui::PopStyleColor();
 					}
@@ -493,8 +482,7 @@ namespace xpilot
 						{
 							for (auto& e : it->messageHistory)
 							{
-								const ImVec4& color = ImVec4(e.GetRed(), e.GetGreen(), e.GetBlue(), 1.0f);
-								ImGui::PushStyleColor(ImGuiCol_Text, color);
+								ImGui::PushStyleColor(ImGuiCol_Text, e.GetColor());
 								ImGui::TextWrapped("%s", e.GetMessage().c_str());
 								ImGui::PopStyleColor();
 							}

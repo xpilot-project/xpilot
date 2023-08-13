@@ -133,24 +133,23 @@ namespace xpilot
 		return -1.0f;
 	}
 
-	void NotificationPanel::AddNotificationPanelMessage(const std::string& message, float red, float green, float blue, bool forceShow)
+	void NotificationPanel::AddMessage(const std::string& message, rgb color, bool showPanel)
 	{
-		if (!message.empty())
-		{
-			NotificationTy notification;
-			notification.message = string_format("[%s] %s", UtcTimestamp().c_str(), message.c_str());
-			notification.red = red / 255;
-			notification.green = green / 255;
-			notification.blue = blue / 255;
-			NotificationHistory.push_back(notification);
-			m_scrollToBottom = true;
+		if (message.empty())
+			return;
 
-			if (Config::GetInstance().GetNotificationPanelVisible() || forceShow)
-			{
-				SetVisible(true);
-				m_disappearTime = std::chrono::system_clock::now() +
-					std::chrono::milliseconds(Config::GetInstance().GetActualMessagePreviewTime() * 1000);
-			}
+		NotificationTy notification;
+		notification.message = string_format("[%s] %s", UtcTimestamp().c_str(), message.c_str());
+		notification.red = color.red / static_cast<float>(255);
+		notification.green = color.green / static_cast<float>(255);
+		notification.blue = color.blue / static_cast<float>(255);
+		NotificationHistory.push_back(notification);
+		m_scrollToBottom = true;
+
+		if (Config::GetInstance().GetNotificationPanelVisible() || showPanel)
+		{
+			SetVisible(true);
+			m_disappearTime = std::chrono::system_clock::now() + std::chrono::milliseconds(Config::GetInstance().GetActualMessagePreviewTime() * 1000);
 		}
 	}
 

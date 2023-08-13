@@ -71,31 +71,35 @@ namespace xpilot
 		void TryGetTcasControl();
 		void ReleaseTcasControl();
 
-		void ForceDisconnect(std::string reason = "");
-		void DisableXplaneAtis(bool disabled);
+		std::string NetworkCallsign() const { return m_networkCallsign; }
 		bool IsXplaneAtisDisabled() const { return !m_xplaneAtisEnabled; }
-		std::string OurCallsign() const { return m_networkCallsign; }
 		bool IsNetworkConnected() const { return m_networkLoginStatus; }
-		void SetPttActive(bool active) { m_pttPressed = active; }
-		int GetTxRadio() const { return m_audioComSelection; }
 		bool IsRadiosPowered() const { return m_avionicsPower && (m_audioComSelection == 6 || m_audioComSelection == 7); }
+		int GetTxRadio() const { return m_audioComSelection; }
+
+		void SetPttActive(bool active);
 		void SetCom1Frequency(int frequency);
 		void SetCom2Frequency(int frequency);
 		void SetAudioComSelection(int radio);
 		void SetAudioSelection(int radio, bool on);
 		void SetTransponderCode(int code);
-		void SendWallop(std::string message);
-		void SendRadioMessage(std::string message);
-		void SendPrivateMessage(std::string to, std::string message);
-		void RadioMessageReceived(const std::string& msg, double red = 255, double green = 255, double blue = 255);
-		void AddPrivateMessage(const std::string& recipient, const std::string& msg, ConsoleTabType tabType);
-		void AddNotificationPanelMessage(const std::string& msg, double red = 255, double green = 255, double blue = 255, bool forceShow = false);
-		void NotificationPosted(const std::string& msg, double red = 255, double green = 255, double blue = 255, bool forceShow = false);
-		void RequestStationInfo(std::string station);
-		void RequestMetar(std::string station);
-		void AircraftDeleted(std::string callsign);
-		void AircraftAdded(std::string callsign);
+		void RequestStationInfo(const std::string& station);
+		void RequestMetar(const std::string& station);
+		void AircraftDeleted(const std::string& callsign);
+		void AircraftAdded(const std::string& callsign);
 		void DeleteAllAircraft();
+
+		void ForceDisconnect(std::string reason = "");
+		void DisableXplaneAtis(bool disabled);
+
+		void SendRadioMessage(const std::string& message);
+		void SendPrivateMessage(const std::string& to, const std::string& message);
+		void SendWallop(const std::string& message);
+
+		void AddNotificationMessage(const std::string& message, const rgb& color = Colors::White, bool addToConsole = true);
+		void AddNotificationShowPanel(const std::string& message, const rgb& color = Colors::White, bool addToConsole = true);
+		void PrivateMessageReceived(const std::string& from, const std::string& message);
+		void PrivateMessageSent(const std::string& to, const std::string& message);
 
 		void ToggleSettingsWindow();
 		void ToggleNearbyAtcWindow();
@@ -134,7 +138,7 @@ namespace xpilot
 		bool InitializeXPMP();
 
 		bool m_keepSocketAlive = false;
-		nng_socket _socket;
+		nng_socket m_socket;
 		std::unique_ptr<std::thread> m_socketThread;
 
 		void SocketWorker();
@@ -165,7 +169,7 @@ namespace xpilot
 					return;
 
 				std::vector<unsigned char> dgBuffer(dtoBuf.data(), dtoBuf.data() + dtoBuf.size());
-				nng_send(_socket, reinterpret_cast<char*>(dgBuffer.data()), dgBuffer.size(), NNG_FLAG_NONBLOCK);
+				nng_send(m_socket, reinterpret_cast<char*>(dgBuffer.data()), dgBuffer.size(), NNG_FLAG_NONBLOCK);
 			}
 		}
 	};

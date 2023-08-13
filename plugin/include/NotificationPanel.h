@@ -22,6 +22,7 @@
 #include "ImgWindow.h"
 #include "XplaneCommand.h"
 #include "Config.h"
+#include "Utilities.h"
 
 #include <list>
 #include <chrono>
@@ -33,7 +34,7 @@ namespace xpilot
 	public:
 		NotificationPanel(int left, int top, int right, int bottom);
 		~NotificationPanel();
-		void AddNotificationPanelMessage(const std::string& message, float red = 255, float green = 255, float blue = 255, bool forceShow = false);
+		void AddMessage(const std::string& message, rgb color = { 255,255,255 }, bool showPanel = false);
 		void Toggle();
 		bool IsAlwaysVisible()const { return m_alwaysVisible; }
 		void SetAlwaysVisible(bool visible) { m_alwaysVisible = visible; }
