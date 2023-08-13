@@ -68,6 +68,15 @@ namespace xpilot
 		static ImColor green(40, 167, 69);
 		static ImColor greenHover(40, 167, 69, 200);
 
+		if (m_env->IsNetworkConnected())
+		{
+			SetWindowTitle(string_format("Nearby ATC: %s", m_env->NetworkCallsign()));
+		}
+		else
+		{
+			SetWindowTitle("Nearby ATC");
+		}
+
 		std::lock_guard<std::mutex> lock(m_mutex);
 		{
 			if (ImGui::BeginChild("OnlineControllers"))
