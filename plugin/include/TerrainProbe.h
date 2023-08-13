@@ -18,11 +18,6 @@
 
 #pragma once
 
-#include <XPLMScenery.h>
-#include <XPLMGraphics.h>
-
-#include <array>
-
 namespace xpilot
 {
 	class TerrainProbe

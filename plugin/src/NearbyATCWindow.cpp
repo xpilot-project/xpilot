@@ -16,12 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include <list>
-#include <mutex>
-#include "XPImgWindow.h"
 #include "NearbyATCWindow.h"
-#include "XPilot.h"
-#include "Utilities.h"
 
 namespace xpilot
 {

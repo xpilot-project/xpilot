@@ -23,8 +23,6 @@
  * THE SOFTWARE.
  */
 
-#include <cassert>
-
 #ifndef _WIN32
 #include <sys/time.h>
 #endif

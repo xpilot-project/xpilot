@@ -16,17 +16,15 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "Plugin.h"
-#include "XPilot.h"
-#include "Config.h"
-#include "Utilities.h"
 #include "AircraftManager.h"
-#include "NetworkAircraft.h"
+#include "Config.h"
 #include "FrameRateMonitor.h"
+#include "NetworkAircraft.h"
 #include "NearbyATCWindow.h"
-#include "SettingsWindow.h"
 #include "NotificationPanel.h"
-#include "TextMessageConsole.h"
+#include "Plugin.h"
+#include "SettingsWindow.h"
+#include "XPilot.h"
 #include "XPMPMultiplayer.h"
 
 namespace xpilot

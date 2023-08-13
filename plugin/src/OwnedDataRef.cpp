@@ -27,9 +27,6 @@
  * either expressed or implied, of the FreeBSD Project.
 */
 
-#include <cstring>
-#include <algorithm>
-
 #include "OwnedDataRef.h"
 
 using namespace xpilot;

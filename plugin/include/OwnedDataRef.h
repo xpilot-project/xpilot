@@ -29,13 +29,7 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <stdexcept>
-
 #include "DataRefAccess.h"
-#include "XPLMDataAccess.h"
-#include "XPLMPlugin.h"
 
 namespace xpilot {
 	template <typename T>

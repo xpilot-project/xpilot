@@ -17,12 +17,6 @@
 */
 
 #include "AircraftManager.h"
-#include "NetworkAircraft.h"
-#include "Utilities.h"
-#include "GeoCalc.hpp"
-#include "Quaternion.hpp"
-#include "XPilot.h"
-#include <chrono>
 
 namespace xpilot
 {

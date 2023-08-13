@@ -18,24 +18,8 @@
 
 #pragma once
 
-#include "Constants.h"
 #include "Config.h"
-#include "XPLMPlugin.h"
-#include "XPLMUtilities.h"
-#include "XPLMDataAccess.h"
-
-#include <ctime>
-#include <string>
-#include <memory>
-#include <chrono>
-#include <iostream>
-#include <sstream>
-#include <thread>
-#include <algorithm>
-#include <vector>
-#include <cstring>
-#include <cstdarg>
-#include <cmath>
+#include "Constants.h"
 
 struct rgb
 {

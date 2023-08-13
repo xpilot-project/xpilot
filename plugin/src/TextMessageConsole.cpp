@@ -16,13 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include <algorithm>
-#include <string>
-#include <list>
-#include <regex>
-
 #include "TextMessageConsole.h"
-#include "Utilities.h"
 #include "XPilot.h"
 
 namespace xpilot

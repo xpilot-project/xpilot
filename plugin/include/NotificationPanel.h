@@ -18,13 +18,10 @@
 
 #pragma once
 
-#include "ImgWindow.h"
-#include "XplaneCommand.h"
 #include "Config.h"
+#include "ImgWindow.h"
 #include "Utilities.h"
-
-#include <list>
-#include <chrono>
+#include "XplaneCommand.h"
 
 namespace xpilot
 {

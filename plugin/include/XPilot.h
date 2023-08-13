@@ -18,30 +18,12 @@
 
 #pragma once
 
-#include "imgui.h"
-#include "imgui_stdlib.h"
-#include "imfilebrowser.h"
-#include "XPImgWindow.h"
 #include "DataRefAccess.h"
+#include "Dto.h"
 #include "OwnedDataRef.h"
 #include "TextMessageConsole.h"
-#include "XPLMMenus.h"
-#include "XPLMUtilities.h"
-#include "XPLMProcessing.h"
 #include "Utilities.h"
-#include "Dto.h"
-#include "msgpack.hpp"
-#include "nng/nng.h"
-#include "nng/protocol/pair1/pair.h"
-
-#include <deque>
-#include <thread>
-#include <mutex>
-#include <functional>
-#include <map>
-#include <atomic>
-#include <algorithm>
-#include <iostream>
+#include "XPImgWindow.h"
 
 namespace xpilot
 {

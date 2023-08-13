@@ -16,9 +16,8 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "NotificationPanel.h"
-#include "Utilities.h"
 #include "Config.h"
+#include "NotificationPanel.h"
 
 namespace xpilot
 {

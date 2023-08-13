@@ -20,20 +20,13 @@
 
 #define INCLUDE_FMOD_SOUND 1
 
-#include "XPilotAPI.h"
-#include "TerrainProbe.h"
 #include "Utilities.h"
 #include "Vector3.hpp"
+#include "TerrainProbe.h"
 #include "XPCAircraft.h"
+#include "XPilotAPI.h"
 #include "XPMPAircraft.h"
 #include "XPMPMultiplayer.h"
-
-#include <deque>
-#include <optional>
-#include <thread>
-#include <atomic>
-#include <queue>
-#include <mutex>
 
 namespace xpilot
 {

@@ -26,11 +26,6 @@
  * either expressed or implied, of the FreeBSD Project.
 */
 
-#include <cstring>
-#include <cmath>
-#include <climits>
-#include <limits>
-
 #include "DataRefAccess.h"
 
 using namespace xpilot;

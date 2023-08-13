@@ -18,11 +18,6 @@
 
 #pragma once
 
-#include "XPLMPlugin.h"
-#include "XPLMMenus.h"
-
-#include <stddef.h>
-
 void RegisterMenuItems();
 void UpdateMenuItems();
 

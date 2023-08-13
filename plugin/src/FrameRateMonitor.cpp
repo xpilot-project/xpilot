@@ -17,8 +17,6 @@
 */
 
 #include "FrameRateMonitor.h"
-#include "Utilities.h"
-#include "XPilot.h"
 
 namespace xpilot
 {

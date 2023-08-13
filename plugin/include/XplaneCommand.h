@@ -18,10 +18,6 @@
 
 #pragma once
 
-#include "XPLMUtilities.h"
-
-#include <functional>
-
 namespace xpilot
 {
 	class XplaneCommand

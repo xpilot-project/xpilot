@@ -24,9 +24,6 @@
 
 #pragma once
 
-#include <iostream>
-#include <stdint.h>
-
 namespace xpilot
 {
 	class Stopwatch

@@ -16,14 +16,10 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
+#include "Config.h"
 #include "Plugin.h"
 #include "XPilot.h"
-#include "Config.h"
-#include "Utilities.h"
-#include "Constants.h"
 #include "XPMPMultiplayer.h"
-#include "XPLMPlugin.h"
-#include "XPLMGraphics.h"
 
 #if APL == 1
 #include <OpenGL/OpenGL.h>
@@ -35,9 +31,6 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #endif
-
-#include <memory>
-#include <thread>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

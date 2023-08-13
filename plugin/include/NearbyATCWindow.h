@@ -19,6 +19,8 @@
 #pragma once
 
 #include "Dto.h"
+#include "XPilot.h"
+#include "XPImgWindow.h"
 
 namespace xpilot
 {

@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "XPImgWindow.h"
+
 namespace xpilot
 {
 	class SettingsWindow : public XPImgWindow

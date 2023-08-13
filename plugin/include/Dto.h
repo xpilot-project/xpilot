@@ -1,9 +1,5 @@
 #pragma once
 
-#include <msgpack.hpp>
-#include <string>
-#include <optional>
-
 namespace dto
 {
 	const std::string ADD_AIRCRAFT = "ADD";

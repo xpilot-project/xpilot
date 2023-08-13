@@ -23,9 +23,6 @@
 #include "Constants.h"
 #include "XPMPMultiplayer.h"
 
-#include <string>
-#include <vector>
-
 namespace xpilot
 {
 	struct CslPackage

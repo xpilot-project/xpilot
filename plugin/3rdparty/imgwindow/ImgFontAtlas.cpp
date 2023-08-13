@@ -33,7 +33,6 @@
 */
 
 #include "ImgFontAtlas.h"
-#include <XPLMGraphics.h>
 
 ImgFontAtlas::ImgFontAtlas() :
 	mOurAtlas(nullptr),

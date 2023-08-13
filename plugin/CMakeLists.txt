@@ -75,7 +75,8 @@ set(INCLUDES
   include/Utilities.h
   include/XPilot.h
   include/XPilotAPI.h
-  include/XplaneCommand.h)
+  include/XplaneCommand.h
+  include/stdafx.h)
 
 source_group("Header Files" FILES ${INCLUDES})
 
@@ -204,6 +205,8 @@ elseif (APPLE)
 elseif (UNIX)
    set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lin_x64")
 endif()
+
+target_precompile_headers(${PROJECT_NAME} PRIVATE "include/stdafx.h")
 
 set_target_properties(${PROJECT_NAME}
     PROPERTIES

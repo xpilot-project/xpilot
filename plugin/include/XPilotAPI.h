@@ -26,15 +26,6 @@
 
 #pragma once
 
-#include "XPLMDataAccess.h"
-
-#include <cstring>
-#include <memory>
-#include <string>
-#include <list>
-#include <map>
-#include <chrono>
-
 class XPilotDataRef;
 
 class XPilotAPIAircraft

@@ -16,14 +16,11 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "NetworkAircraft.h"
-#include "Utilities.h"
 #include "Config.h"
 #include "GeoCalc.hpp"
+#include "NetworkAircraft.h"
 #include "Quaternion.hpp"
-#include <chrono>
-#include <regex>
-#include <cassert>
+#include "Utilities.h"
 
 namespace xpilot
 {

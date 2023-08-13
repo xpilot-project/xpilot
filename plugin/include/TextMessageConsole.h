@@ -20,8 +20,6 @@
 
 #include "XPImgWindow.h"
 
-#include <list>
-
 namespace xpilot
 {
 

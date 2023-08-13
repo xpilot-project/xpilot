@@ -16,11 +16,6 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include <string>
-#include "imfilebrowser.h"
-#include "imgui_stdlib.h"
-#include "XPImgWindow.h"
-#include "Utilities.h"
 #include "Config.h"
 #include "SettingsWindow.h"
 
