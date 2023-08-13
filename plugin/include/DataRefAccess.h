@@ -27,8 +27,7 @@
  * either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef DataRefAccess_h
-#define DataRefAccess_h
+#pragma once
 
 #include <string>
 #include <vector>
@@ -507,5 +506,3 @@ namespace xpilot {
 	template<>
 	void DataRefAccess<std::string>::reserve();
 }
-
-#endif // !DataRefAccess_h

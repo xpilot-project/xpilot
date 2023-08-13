@@ -16,8 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef XPilot_h
-#define XPilot_h
+#pragma once
 
 #include "imgui.h"
 #include "imgui_stdlib.h"
@@ -174,5 +173,3 @@ namespace xpilot
 		}
 	};
 }
-
-#endif // !XPilot_h

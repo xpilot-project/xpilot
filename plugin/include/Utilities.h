@@ -16,8 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
-#ifndef Utilities_h
-#define Utilities_h
+#pragma once
 
 #include "Constants.h"
 #include "Config.h"
@@ -300,5 +299,3 @@ inline void Log(logLevel level, const char* msg, ...)
 			Log(lvl, __VA_ARGS__);								\
 		}														\
 	}
-
-#endif // !Utilities_h

@@ -16,8 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef AircraftManager_h
-#define AircraftManager_h
+#pragma once
 
 #include "XPilot.h"
 #include "NetworkAircraft.h"
@@ -70,5 +69,3 @@ namespace xpilot
 		}
 	};
 }
-
-#endif // !AircraftManager_h

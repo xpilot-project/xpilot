@@ -16,8 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef FrameRateMonitor_h
-#define FrameRateMonitor_h
+#pragma once
 
 #include "DataRefAccess.h"
 #include "Stopwatch.h"
@@ -57,5 +56,3 @@ namespace xpilot
 		bool m_gaveHealthyWarning;
 	};
 }
-
-#endif // !FrameRateMonitor_h

@@ -22,8 +22,7 @@
  *
 */
 
-#ifndef STOPWATCH_H
-#define STOPWATCH_H
+#pragma once
 
 #include <iostream>
 #include <stdint.h>
@@ -122,5 +121,3 @@ namespace xpilot
 		return t == MICROSEC || t == MILLISEC || t == SECONDS || t == MINUTES || t == HOURS || t == DAYS;
 	}
 }
-
-#endif /* STOPWATCH_H */

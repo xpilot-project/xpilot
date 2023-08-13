@@ -16,8 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef SettingsWindow_h
-#define SettingsWindow_h
+#pragma once
 
 namespace xpilot
 {
@@ -31,5 +30,3 @@ namespace xpilot
 		void LoadConfig();
 	};
 }
-
-#endif // !PreferencesWindow_h

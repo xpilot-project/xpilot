@@ -16,8 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef Plugin_h
-#define Plugin_h
+#pragma once
 
 #include "XPLMPlugin.h"
 #include "XPLMMenus.h"
@@ -62,5 +61,3 @@ static int MenuTextMessageConsole = 0;
 static int MenuNotificationPanel = 0;
 static int MenuToggleTcas = 0;
 static int MenuToggleAircraftLabels = 0;
-
-#endif // !Plugin_h

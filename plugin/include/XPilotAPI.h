@@ -24,8 +24,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef XPilotAPI_h
-#define XPilotAPI_h
+#pragma once
 
 #include "XPLMDataAccess.h"
 
@@ -267,5 +266,3 @@ public:
 	// Writes a float vlue to the dataRef
 	void    set(float f);
 };
-
-#endif // !XPilotAPI_h

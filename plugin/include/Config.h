@@ -16,8 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef Config_h
-#define Config_h
+#pragma once
 
 #define INCLUDE_FMOD_SOUND 1 
 
@@ -198,5 +197,3 @@ namespace xpilot
 		bool m_contrailMulti = false;
 	};
 }
-
-#endif // !Config_h

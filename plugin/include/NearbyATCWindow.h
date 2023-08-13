@@ -16,8 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef NearbyATCWindow_h
-#define NearbyATCWindow_h
+#pragma once
 
 #include "Dto.h"
 
@@ -60,5 +59,3 @@ namespace xpilot
 		DataRefAccess<int> m_com2Frequency;
 	};
 }
-
-#endif // !NearbyATCWindow_h

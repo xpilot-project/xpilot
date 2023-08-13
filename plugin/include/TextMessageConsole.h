@@ -16,8 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef TextMessageConsole_h
-#define TextMessageConsole_h
+#pragma once
 
 #include "XPImgWindow.h"
 
@@ -74,5 +73,3 @@ namespace xpilot
 		XPilot* m_env;
 	};
 }
-
-#endif // !TextMessageConsole_h

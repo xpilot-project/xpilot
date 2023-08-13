@@ -16,8 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef XplaneCommand_h
-#define XplaneCommand_h
+#pragma once
 
 #include "XPLMUtilities.h"
 
@@ -52,5 +51,3 @@ namespace xpilot
 		XPLMCommandRef m_command;
 	};
 }
-
-#endif // !XplaneCommand_h

@@ -27,8 +27,7 @@
  * either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef OwnedDataRef_h
-#define OwnedDataRef_h
+#pragma once
 
 #include <string>
 #include <vector>
@@ -207,5 +206,3 @@ namespace xpilot {
 	template <>
 	void OwnedDataRef<std::vector<float> >::registerReadWrite();
 }
-
-#endif // OwnedDataRef_h

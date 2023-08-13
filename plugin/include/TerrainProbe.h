@@ -16,8 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef TerrainProbe_h
-#define TerrainProbe_h
+#pragma once
 
 #include <XPLMScenery.h>
 #include <XPLMGraphics.h>
@@ -36,5 +35,3 @@ namespace xpilot
 		XPLMProbeRef m_probeRef = nullptr;
 	};
 }
-
-#endif // !TerrainProbe_h

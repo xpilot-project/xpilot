@@ -1,5 +1,4 @@
-#ifndef DTO_h
-#define DTO_h
+#pragma once
 
 #include <msgpack.hpp>
 #include <string>
@@ -377,5 +376,3 @@ static bool encodeDto(msgpack::sbuffer& dtoBuf, const T& dto)
 	assert(dtoBuf.size() == dtoTempBuf.size());
 	return true;
 }
-
-#endif // !DTO_h

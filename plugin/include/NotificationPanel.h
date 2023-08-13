@@ -16,8 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef NotificationPanel_h
-#define NotificationPanel_h
+#pragma once
 
 #include "ImgWindow.h"
 #include "XplaneCommand.h"
@@ -49,7 +48,3 @@ namespace xpilot
 		bool m_alwaysVisible;
 	};
 }
-
-#endif // !NotificationPanel_h
-
-
