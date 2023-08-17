@@ -45,8 +45,8 @@
   * If it cannot be determined if it exists, just attempt to include it.
   */
 #ifdef __has_include
-#   if __has_include("Vector3.hpp")
-#       include "Vector3.hpp"
+#   if __has_include("vector3.hpp")
+#       include "vector3.hpp"
 #   elif !defined(GMATH_VECTOR3)
 #define GMATH_VECTOR3
 struct Vector3
@@ -123,7 +123,7 @@ inline Vector3 operator*(Vector3 lhs, const double rhs)
 }
 #   endif
 #else
-#   include "Vector3.hpp"
+#   include "vector3.hpp"
 #endif
 
 
