@@ -19,7 +19,7 @@
  * THE SOFTWARE.
 */
 
-#include "XPImgWindow.h"
+#include "xp_img_window.h"
 
 #define FATAL_COULD_NOT_LOAD_FONT "Could not load GUI font %s"
 #define WARN_NOT_LOADED_ICON_FONT "Could not load icon font, icons will not be displayed properly"

@@ -16,7 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "TerrainProbe.h"
+#include "terrain_probe.h"
 
 namespace xpilot
 {

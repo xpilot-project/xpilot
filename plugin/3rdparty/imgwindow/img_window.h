@@ -35,18 +35,8 @@
 #ifndef IMGWINDOW_H
 #define IMGWINDOW_H
 
-#include "SystemGL.h"
-
-#include <climits>
-#include <string>
-#include <memory>
-
-#include <XPLMDisplay.h>
-#include <XPLMProcessing.h>
-#include <imgui.h>
-#include <queue>
-
-#include "ImgFontAtlas.h"
+#include "system_gl.h"
+#include "img_font_atlas.h"
 
 /** ImgWindow is a Window for creating dear imgui widgets within.
  *

@@ -16,9 +16,10 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "Config.h"
-#include "Plugin.h"
-#include "XPilot.h"
+#include "config.h"
+#include "plugin.h"
+#include "xpilot.h"
+
 #include "XPMPMultiplayer.h"
 
 #if APL == 1

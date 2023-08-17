@@ -26,7 +26,7 @@
  * either expressed or implied, of the FreeBSD Project.
 */
 
-#include "DataRefAccess.h"
+#include "data_ref_access.h"
 
 using namespace xpilot;
 

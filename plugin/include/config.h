@@ -20,7 +20,7 @@
 
 #define INCLUDE_FMOD_SOUND 1 
 
-#include "Constants.h"
+#include "constants.h"
 #include "XPMPMultiplayer.h"
 
 namespace xpilot

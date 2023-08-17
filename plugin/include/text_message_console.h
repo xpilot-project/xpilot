@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "XPImgWindow.h"
+#include "xp_img_window.h"
 
 namespace xpilot
 {

@@ -20,11 +20,10 @@
 
 #define INCLUDE_FMOD_SOUND 1
 
-#include "Utilities.h"
-#include "Vector3.hpp"
-#include "TerrainProbe.h"
-#include "XPCAircraft.h"
-#include "XPilotAPI.h"
+#include "vector3.hpp"
+#include "terrain_probe.h"
+#include "xpilot_api.h"
+
 #include "XPMPAircraft.h"
 #include "XPMPMultiplayer.h"
 

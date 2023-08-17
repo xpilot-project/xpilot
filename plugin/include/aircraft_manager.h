@@ -18,9 +18,8 @@
 
 #pragma once
 
-#include "DataRefAccess.h"
-#include "NetworkAircraft.h"
-#include "XPilot.h"
+#include "network_aircraft.h"
+#include "xpilot.h"
 
 namespace xpilot
 {

@@ -32,7 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ImgFontAtlas.h"
+#include "img_font_atlas.h"
 
 ImgFontAtlas::ImgFontAtlas() :
 	mOurAtlas(nullptr),

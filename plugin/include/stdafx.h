@@ -43,6 +43,7 @@
 
 // XPLM SDK
 #include "XPLMDataAccess.h"
+#include "XPLMDisplay.h"
 #include "XPLMGraphics.h"
 #include "XPLMMenus.h"
 #include "XPLMPlugin.h"

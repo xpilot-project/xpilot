@@ -16,8 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#ifndef Constants_h
-#define Constants_h
+#pragma once
 
 constexpr int COLOR_YELLOW = 0xFFFF00;
 constexpr int COLOR_RED = 0xFF0000;
@@ -28,5 +27,3 @@ constexpr int COLOR_BLUE = 0x00F0F0;
 #define PLUGIN_VERSION @VERSION_MAJOR@@VERSION_MINOR@@VERSION_PATCH@
 #define PLUGIN_VERSION_STRING "@VERSION_STRING@"
 #define CONFIG_VERSION 3
-
-#endif // !Constants_h

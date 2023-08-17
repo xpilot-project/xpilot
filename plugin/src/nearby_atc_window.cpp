@@ -16,7 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "NearbyATCWindow.h"
+#include "nearby_atc_window.h"
 
 namespace xpilot
 {

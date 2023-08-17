@@ -18,12 +18,11 @@
 
 #pragma once
 
-#include "DataRefAccess.h"
-#include "Dto.h"
-#include "OwnedDataRef.h"
-#include "TextMessageConsole.h"
-#include "Utilities.h"
-#include "XPImgWindow.h"
+#include "data_ref_access.h"
+#include "dto.h"
+#include "owned_data_ref.h"
+#include "text_message_console.h"
+#include "utilities.h"
 
 namespace xpilot
 {

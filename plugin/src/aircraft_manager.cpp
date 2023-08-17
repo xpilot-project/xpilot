@@ -16,7 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "AircraftManager.h"
+#include "aircraft_manager.h"
 
 namespace xpilot
 {

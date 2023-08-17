@@ -27,7 +27,7 @@
 #include <sys/time.h>
 #endif
 
-#include "Stopwatch.h"
+#include "stopwatch.h"
 
 namespace xpilot
 {

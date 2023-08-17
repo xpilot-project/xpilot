@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "Config.h"
-#include "Constants.h"
+#include "config.h"
+#include "constants.h"
 
 struct rgb
 {

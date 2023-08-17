@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include "DataRefAccess.h"
-#include "Stopwatch.h"
-#include "XPilot.h"
+#include "data_ref_access.h"
+#include "stopwatch.h"
+#include "xpilot.h"
 
 namespace xpilot
 {

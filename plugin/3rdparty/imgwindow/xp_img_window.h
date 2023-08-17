@@ -23,14 +23,11 @@
 #ifndef XPImgWindow_h
 #define XPImgWindow_h
 
-#include "imgui.h"
-#include "Utilities.h"
+#include "utilities.h"
 #include "font/fa-solid-900.inc"
 #include "font/IconsFontAwesome5.h"
-#include "ImgWindow.h"
-#include "DataRefAccess.h"
-#include "XPLMDisplay.h"
-#include <cmath>
+#include "img_window.h"
+#include "data_ref_access.h"
 
 #define WND_STANDARD_FONT "Resources/fonts/DejaVuSans.ttf"
 constexpr int WND_FONT_SIZE = 15;

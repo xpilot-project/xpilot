@@ -16,8 +16,8 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "TextMessageConsole.h"
-#include "XPilot.h"
+#include "text_message_console.h"
+#include "xpilot.h"
 
 namespace xpilot
 {

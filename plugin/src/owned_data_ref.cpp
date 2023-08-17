@@ -27,7 +27,7 @@
  * either expressed or implied, of the FreeBSD Project.
 */
 
-#include "OwnedDataRef.h"
+#include "owned_data_ref.h"
 
 using namespace xpilot;
 

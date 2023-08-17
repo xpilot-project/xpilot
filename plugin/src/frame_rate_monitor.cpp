@@ -16,7 +16,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "FrameRateMonitor.h"
+#include "frame_rate_monitor.h"
 
 namespace xpilot
 {

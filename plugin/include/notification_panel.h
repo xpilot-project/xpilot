@@ -18,10 +18,9 @@
 
 #pragma once
 
-#include "Config.h"
-#include "ImgWindow.h"
-#include "Utilities.h"
-#include "XplaneCommand.h"
+#include "img_window.h"
+#include "utilities.h"
+#include "xplane_command.h"
 
 namespace xpilot
 {
