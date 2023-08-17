@@ -28,7 +28,7 @@ else()
     set(VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 endif()
 
-configure_file(${CMAKE_SOURCE_DIR}/include/Constants.h.in ${CMAKE_SOURCE_DIR}/include/Constants.h @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/include/constants.h.in ${CMAKE_SOURCE_DIR}/include/constants.h @ONLY)
 
 if(WIN32)
     include_directories(${CMAKE_SOURCE_DIR}/../dependencies/platform/windows/nng/include)
@@ -53,56 +53,57 @@ include_directories(${CMAKE_SOURCE_DIR}/3rdparty/imgui)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/imgui-stdlib)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/imgwindow)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/font)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gl)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gmath)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/sdk/CHeaders/XPLM)
 
 set(INCLUDES
-  include/AircraftManager.h
-  include/Config.h
-  include/Constants.h
-  include/Dto.h
-  include/DataRefAccess.h
-  include/FrameRateMonitor.h
-  include/NearbyATCWindow.h
-  include/NetworkAircraft.h
-  include/NotificationPanel.h
-  include/OwnedDataRef.h
-  include/Plugin.h
-  include/SettingsWindow.h
-  include/Stopwatch.h
-  include/TerrainProbe.h
-  include/TextMessageConsole.h
-  include/Utilities.h
-  include/XPilot.h
-  include/XPilotAPI.h
-  include/XplaneCommand.h
+  include/aircraft_manager.h
+  include/config.h
+  include/constants.h
+  include/dto.h
+  include/data_ref_access.h
+  include/frame_rate_monitor.h
+  include/nearby_atc_window.h
+  include/network_aircraft.h
+  include/notification_panel.h
+  include/owned_data_ref.h
+  include/plugin.h
+  include/settings_window.h
+  include/stopwatch.h
+  include/terrain_probe.h
+  include/text_message_console.h
+  include/utilities.h
+  include/xpilot.h
+  include/xpilot_api.h
+  include/xplane_command.h
   include/stdafx.h)
 
 source_group("Header Files" FILES ${INCLUDES})
 
 set(SRC
-  src/AircraftManager.cpp
-  src/Config.cpp
-  src/DataRefAccess.cpp
-  src/FrameRateMonitor.cpp
-  src/NearbyATCWindow.cpp
-  src/NetworkAircraft.cpp
-  src/NotificationPanel.cpp
-  src/OwnedDataRef.cpp
-  src/Plugin.cpp
-  src/SettingsWindow.cpp
-  src/Stopwatch.cpp
-  src/TerrainProbe.cpp
-  src/TextMessageConsole.cpp
-  src/XPilot.cpp
+  src/aircraft_manager.cpp
+  src/config.cpp
+  src/data_ref_access.cpp
+  src/frame_rate_monitor.cpp
+  src/nearby_atc_window.cpp
+  src/network_aircraft.cpp
+  src/notification_panel.cpp
+  src/owned_data_ref.cpp
+  src/plugin.cpp
+  src/settings_window.cpp
+  src/stopwatch.cpp
+  src/terrain_probe.cpp
+  src/text_message_console.cpp
+  src/xpilot.cpp
   3rdparty/imgui/imgui.cpp
   3rdparty/imgui/imgui_draw.cpp
   3rdparty/imgui/imgui_tables.cpp
   3rdparty/imgui/imgui_widgets.cpp
   3rdparty/imgui-stdlib/imgui_stdlib.cpp
-  3rdparty/imgwindow/XPImgWindow.cpp
-  3rdparty/imgwindow/ImgFontAtlas.cpp
-  3rdparty/imgwindow/ImgWindow.cpp)
+  3rdparty/imgwindow/xp_img_window.cpp
+  3rdparty/imgwindow/img_font_atlas.cpp
+  3rdparty/imgwindow/img_window.cpp)
 
 source_group("Source Files" FILES ${SRC})
 set(ALL_FILES ${INCLUDES} ${SRC})
@@ -155,7 +156,7 @@ elseif (APPLE)
       ${OpenGL_LIBRARY})
 
     # Restrict set of symbols exported from the plugin to the ones required by XPLM:
-    target_link_libraries(${PROJECT_NAME} "-exported_symbols_list ${CMAKE_SOURCE_DIR}/src/Xpilot.sym_mac")
+    target_link_libraries(${PROJECT_NAME} "-exported_symbols_list ${CMAKE_SOURCE_DIR}/src/xpilot.sym_mac")
 elseif (UNIX)
     # Link library for dynamic loading of shared objects on UNIX systems.
     find_library(DL_LIBRARY dl REQUIRED)
@@ -166,7 +167,7 @@ elseif (UNIX)
     target_link_libraries(${PROJECT_NAME} ${DL_LIBRARY} Threads::Threads)
     # Specify additional runtime search paths for dynamically-linked libraries.
     # Restrict set of symbols exported from the plugin to the ones required by XPLM:
-    target_link_libraries(${PROJECT_NAME} -Wl,--version-script -Wl,${CMAKE_SOURCE_DIR}/src/Xpilot.sym)
+    target_link_libraries(${PROJECT_NAME} -Wl,--version-script -Wl,${CMAKE_SOURCE_DIR}/src/xpilot.sym)
 endif ()
 
 # Link OpenGL
