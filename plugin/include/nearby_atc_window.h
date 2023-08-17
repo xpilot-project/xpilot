@@ -26,34 +26,35 @@ namespace xpilot
 {
 	class XPilot;
 
-	class NearbyATCList
+	class NearbyAtcList
 	{
 	public:
-		std::string GetCallsign() { return m_callsign; }
-		std::string GetFrequency() { return m_frequency; }
-		std::string GetRealName() { return m_realName; }
-		int GetXplaneFrequency() { return m_xplaneFrequency; }
-		void SetCallsign(std::string value) { m_callsign = value; }
-		void SetFrequency(std::string value) { m_frequency = value; }
-		void SetRealName(std::string value) { m_realName = value; }
-		void SetXplaneFrequency(int value) { m_xplaneFrequency = value; }
+		std::string GetCallsign() const { return m_callsign; }
+		std::string GetFrequency() const { return m_frequency; }
+		std::string GetRealName() const { return m_realName; }
+		int GetXplaneFrequency() const { return m_xplaneFrequency; }
+		void SetCallsign(const std::string& value) { m_callsign = value; }
+		void SetFrequency(const std::string& value) { m_frequency = value; }
+		void SetRealName(const std::string& value) { m_realName = value; }
+		void SetXplaneFrequency(const int value) { m_xplaneFrequency = value; }
 	private:
 		std::string m_callsign;
 		std::string m_frequency;
 		std::string m_realName;
-		int m_xplaneFrequency;
+		int m_xplaneFrequency = 0;
 	};
 
-	class NearbyATCWindow : public XPImgWindow
+	class NearbyAtcWindow : public XPImgWindow
 	{
 	public:
-		NearbyATCWindow(XPilot* instance);
-		~NearbyATCWindow() final = default;
-		void UpdateList(const NearbyAtcDto data);
+		NearbyAtcWindow(XPilot* instance);
+		~NearbyAtcWindow() final = default;
+		void UpdateList(const NearbyAtcDto& data);
 		void ClearList();
 	protected:
 		void buildInterface() override;
-		void RenderAtcStationEntry(xpilot::NearbyATCList& station);
+		void RenderAtcStationEntry(const NearbyAtcList& station);
+		void RenderAtcTable(const std::string& headerText, const std::vector<std::string>& callsignSuffixes);
 	private:
 		XPilot* m_env;
 		std::mutex m_mutex;

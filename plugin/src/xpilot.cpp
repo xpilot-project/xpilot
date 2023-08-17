@@ -95,7 +95,7 @@ namespace xpilot
 		bottom = top - 100; /*height*/
 		m_notificationPanel = std::make_unique<NotificationPanel>(left, top, right, bottom);
 		m_textMessageConsole = std::make_unique<TextMessageConsole>(this);
-		m_nearbyAtcWindow = std::make_unique<NearbyATCWindow>(this);
+		m_nearbyAtcWindow = std::make_unique<NearbyAtcWindow>(this);
 		m_settingsWindow = std::make_unique<SettingsWindow>();
 		m_frameRateMonitor = std::make_unique<FrameRateMonitor>(this);
 		m_aircraftManager = std::make_unique<AircraftManager>(this);
