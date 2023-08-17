@@ -66,7 +66,7 @@ namespace xpilot
 
 		if (m_env->IsNetworkConnected())
 		{
-			SetWindowTitle(string_format("Nearby ATC: %s", m_env->NetworkCallsign()));
+			SetWindowTitle(string_format("Nearby ATC: %s", m_env->NetworkCallsign().c_str()));
 		}
 		else
 		{
