@@ -34,7 +34,7 @@ jobs:
         with:
           repository: xpilot-project/vatsim-auth
           path: dependencies/vatsim-auth
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Load developer certificate
         env:
