@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.25)
 project(xPilot LANGUAGES C CXX)
 
 set(CMAKE_AUTOUIC ON)
@@ -20,17 +20,16 @@ endif()
 if(WIN32)
     set(CMAKE_CXX_EXTENSIONS OFF)
 
-    # Release mode flags
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
-
-    # Debug mode flags
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebug")
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MTd")
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebug")
+    endif()
 endif()
 
 # Configure Qt
-
 set(QT_MAJOR_VERSION 6)
 
 if(DEFINED ENV{Qt${QT_MAJOR_VERSION}_HOME})
@@ -142,38 +141,25 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/../dependencies/json ${CMAKE_CURRENT_BINARY
 add_subdirectory(${CMAKE_SOURCE_DIR}/../dependencies/qtpromise ${CMAKE_CURRENT_BINARY_DIR}/qtpromise)
 add_subdirectory(${CMAKE_SOURCE_DIR}/../dependencies/vatsim-auth ${CMAKE_CURRENT_BINARY_DIR}/vatsim-auth)
 
-# Set library search paths for each platform
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(LIB_SEARCH_PATHS
-        ${CMAKE_SOURCE_DIR}/../dependencies/platform/windows
-        ${CMAKE_SOURCE_DIR}/../dependencies/platform/windows/nng
-        ${CMAKE_SOURCE_DIR}/../dependencies/platform/windows/openssl
-        ${CMAKE_SOURCE_DIR}/../dependencies/platform/windows/libevent
-        ${CMAKE_SOURCE_DIR}/../dependencies/platform/windows/libcurl
-        ${CMAKE_SOURCE_DIR}/../dependencies/platform/windows/libzip
-        ${CMAKE_SOURCE_DIR}/../dependencies/platform/windows/zlib
-    )
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set(LIB_SEARCH_PATHS
-        ${CMAKE_SOURCE_DIR}/../dependencies/macos
-        ${CMAKE_SOURCE_DIR}/../dependencies/macos/nng
-        ${CMAKE_SOURCE_DIR}/../dependencies/macos/openssl
-        ${CMAKE_SOURCE_DIR}/../dependencies/macos/libevent
-        ${CMAKE_SOURCE_DIR}/../dependencies/macos/libcurl
-        ${CMAKE_SOURCE_DIR}/../dependencies/macos/libzip
-        ${CMAKE_SOURCE_DIR}/../dependencies/macos/zlib
-    )
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(LIB_SEARCH_PATHS
-        ${CMAKE_SOURCE_DIR}/../dependencies/linux
-        ${CMAKE_SOURCE_DIR}/../dependencies/linux/nng
-        ${CMAKE_SOURCE_DIR}/../dependencies/linux/openssl
-        ${CMAKE_SOURCE_DIR}/../dependencies/linux/libevent
-        ${CMAKE_SOURCE_DIR}/../dependencies/linux/libcurl
-        ${CMAKE_SOURCE_DIR}/../dependencies/linux/libzip
-        ${CMAKE_SOURCE_DIR}/../dependencies/linux/zlib
-    )
+# Check the system name and set the platform variable
+set(MY_PLATFORM "")
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(MY_PLATFORM "windows")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(MY_PLATFORM "linux")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(MY_PLATFORM "macos")
 endif()
+
+# Set library search paths for each platform
+set(LIB_SEARCH_PATHS
+    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}
+    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/nng
+    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/openssl
+    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/libevent
+    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/libcurl
+    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/libzip
+)
 
 # Library finding function
 function(find_and_set_library VAR_NAME LIB_NAME)
@@ -188,21 +174,20 @@ endfunction()
 find_and_set_library(LIB_OPUS opus)
 find_and_set_library(LIB_SPEEXDSP speexdsp)
 find_and_set_library(LIB_NNG nng)
-find_and_set_library(LIB_CRYPTO libcrypto)
-find_and_set_library(LIB_SSL libssl)
+find_and_set_library(LIB_CRYPTO crypto)
+find_and_set_library(LIB_SSL ssl)
 find_and_set_library(LIB_EVENT event)
-find_and_set_library(LIB_CURL libcurl)
+find_and_set_library(LIB_CURL curl)
 find_and_set_library(LIB_ZIP zip)
-find_and_set_library(LIB_ZLIB zlib)
 
 # Include directories
 include_directories(
-    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${CMAKE_SYSTEM_NAME}/nng/include
-    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${CMAKE_SYSTEM_NAME}/openssl/include
-    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${CMAKE_SYSTEM_NAME}/libevent/include
-    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${CMAKE_SYSTEM_NAME}/libcurl/include
-    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${CMAKE_SYSTEM_NAME}/libzip/include
-    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${CMAKE_SYSTEM_NAME}/zlib/include
+    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/nng/include
+    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/openssl/include
+    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/libevent/include
+    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/libcurl/include
+    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/libzip/include
+    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/zlib/include
 )
 
 if(APPLE)
