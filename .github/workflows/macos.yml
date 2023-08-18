@@ -85,6 +85,8 @@ jobs:
           echo "Qt6_DIR=$(pwd)/qt6" >> $GITHUB_ENV
           echo "QT_PLUGIN_PATH=$(pwd)/qt6/plugins" >> $GITHUB_ENV
           echo "QML2_IMPORT_PATH=$(pwd)/qt6/qml" >> $GITHUB_ENV
+          echo "$(pwd)/qt6/bin" >> $GITHUB_PATH
+          chmod -R +x qt6
 
       - name: Build client
         working-directory: ${{ env.CLIENT_DIR }}
