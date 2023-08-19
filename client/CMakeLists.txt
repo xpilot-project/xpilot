@@ -209,8 +209,8 @@ target_link_libraries(${PROJECT_NAME}
     ${LIB_OPUS}
     ${LIB_EVENT}
     ${LIB_CURL}
-    ${LIB_CRYPTO}
     ${LIB_SSL}
+    ${LIB_CRYPTO}
     ${LIB_SPEEXDSP}
     ${LIB_VATSIM_AUTH}
     ${LIB_NNG}
