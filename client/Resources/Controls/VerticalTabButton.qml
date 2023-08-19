@@ -5,6 +5,7 @@ TabButton {
     id: control
     width: parent.width
     padding: 0
+    font.pixelSize: 13
 
     contentItem: Text {
         text: control.text
