@@ -135,12 +135,7 @@ jobs:
 
       - name: Notarize installer
         shell: bash
-        run: |
-          xcrun altool --notarize-app \
-          --primary-bundle-id "org.vatsim.xpilot" \
-          --username "${{ secrets.NOTARIZATION_USERNAME }}" \
-          --password "${{ secrets.NOTARIZATION_PASSWORD }}" \
-          --file xPilot.dmg
+        run: xcrun notarytool submit xPilot.dmg --apple-id "${{ secrets.NOTARIZATION_USERNAME }}" --password "${{ secrets.NOTARIZATION_PASSWORD }}" --team-id "${{ secrets.APPLE_TEAM_ID }}"
 
       - name: Rename dmg
         run: |
@@ -158,9 +153,14 @@ jobs:
           mkdir -p macos/plugin
           cp -R ${{ github.workspace }}/xPilot macos/plugin/
           cp -R ${{ env.CLIENT_DIR }}/build/xPilot.app macos/xPilot.app
+          cd macos
+          zip -r ../macOS.zip plugin xPilot.app
+
+      - name: Notarize artifacts archive
+        run: |
+          xcrun notarytool submit macOS.zip --apple-id "${{ secrets.NOTARIZATION_USERNAME }}" --password "${{ secrets.NOTARIZATION_PASSWORD }}" --team-id "${{ secrets.APPLE_TEAM_ID }}"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: MacOS.zip
-          path: ${{ github.workspace }}/macos
+          path: ${{ github.workspace }}/macOS.zip
