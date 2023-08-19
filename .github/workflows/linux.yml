@@ -31,7 +31,7 @@ jobs:
           libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev \
           gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
           gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl \
-          gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+          gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio libharfbuzz-dev libpulse-dev
 
       - uses: actions/checkout@v3
         with:
@@ -50,32 +50,32 @@ jobs:
 
         ### Buid Plugin ###
 
-      - name: Build plugin
-        working-directory: ${{ env.PLUGIN_DIR }}
-        run: |
-          mkdir build && cd build
-          cmake .. && cmake --build . --config ${{ env.BUILD_TYPE }}
+      # - name: Build plugin
+      #   working-directory: ${{ env.PLUGIN_DIR }}
+      #   run: |
+      #     mkdir build && cd build
+      #     cmake .. && cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Package plugin
-        run: |
-          mkdir -p ${{ github.workspace }}/xPilot/lin_x64
-          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.xpl ${{ github.workspace }}/xPilot/lin_x64
-          cp ${{ env.PLUGIN_DIR }}/3rdparty/fmod/libfmod.so ${{ github.workspace }}/xPilot/lin_x64
-          cp -R ${{ env.PLUGIN_DIR }}/Resources ${{ github.workspace }}/xPilot/
+      # - name: Package plugin
+      #   run: |
+      #     mkdir -p ${{ github.workspace }}/xPilot/lin_x64
+      #     cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.xpl ${{ github.workspace }}/xPilot/lin_x64
+      #     cp ${{ env.PLUGIN_DIR }}/3rdparty/fmod/libfmod.so ${{ github.workspace }}/xPilot/lin_x64
+      #     cp -R ${{ env.PLUGIN_DIR }}/Resources ${{ github.workspace }}/xPilot/
 
-      - name: Extract debug symbols
-        if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
-        working-directory: ${{ env.PLUGIN_DIR }}/build/lin_x64
-        run: |
-          objcopy --only-keep-debug xPilot.xpl xPilot.debug
-          cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.debug ${{ github.workspace }}/xPilot/lin_x64
+      # - name: Extract debug symbols
+      #   if: github.ref_type == 'tag' && contains(github.ref_name, 'v')
+      #   working-directory: ${{ env.PLUGIN_DIR }}/build/lin_x64
+      #   run: |
+      #     objcopy --only-keep-debug xPilot.xpl xPilot.debug
+      #     cp ${{ env.PLUGIN_DIR }}/build/lin_x64/xPilot.debug ${{ github.workspace }}/xPilot/lin_x64
 
-      - name: Fix FMOD rpath
-        working-directory: ${{ github.workspace }}/xPilot/lin_x64
-        run: |
-          sudo apt-get install patchelf
-          patchelf --set-rpath '$ORIGIN' xPilot.xpl
-          patchelf --replace-needed libfmod.so.13 libfmod.so xPilot.xpl
+      # - name: Fix FMOD rpath
+      #   working-directory: ${{ github.workspace }}/xPilot/lin_x64
+      #   run: |
+      #     sudo apt-get install patchelf
+      #     patchelf --set-rpath '$ORIGIN' xPilot.xpl
+      #     patchelf --replace-needed libfmod.so.13 libfmod.so xPilot.xpl
 
       ### Build Client ###
 
