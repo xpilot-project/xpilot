@@ -187,7 +187,6 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/libevent/include
     ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/libcurl/include
     ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/libzip/include
-    ${CMAKE_SOURCE_DIR}/../dependencies/platform/${MY_PLATFORM}/zlib/include
 )
 
 if(APPLE)
@@ -215,7 +214,6 @@ target_link_libraries(${PROJECT_NAME}
     ${LIB_VATSIM_AUTH}
     ${LIB_NNG}
     ${LIB_ZIP}
-    ${LIB_ZLIB}
     msgpack-cxx
     vatsim-auth
     qtpromise
