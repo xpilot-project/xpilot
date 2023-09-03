@@ -201,6 +201,19 @@ public:
      */
     bool IsInsideWindowDragArea(int x, int y) const;
 
+    /**
+     * Set current thread as main XP thread
+     */
+    void ThisThreadIsXP()
+    {
+        xpThread = std::this_thread::get_id();
+    }
+
+    /**
+     * Is this thread XP's main thread? 
+     */
+    bool IsXPThread() const { return std::this_thread::get_id() == xpThread; }
+
 protected:
     /** mFirstRender can be checked during buildInterface() to see if we're
      * being rendered for the first time or not.  This is particularly
@@ -302,6 +315,8 @@ protected:
 
 private:
     std::shared_ptr<ImgFontAtlas> mFontAtlas;
+
+    std::thread::id xpThread;
 
     static void DrawWindowCB(XPLMWindowID inWindowID, void* inRefcon);
 

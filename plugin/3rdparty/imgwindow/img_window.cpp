@@ -63,6 +63,9 @@ ImgWindow::ImgWindow(
 	mFontAtlas(sFontAtlas),
 	mPreferredLayer(layer),
 	bHandleWndResize(xplm_WindowDecorationSelfDecoratedResizable == decoration) {
+
+	ThisThreadIsXP();
+
 	ImFontAtlas* iFontAtlas = nullptr;
 	if (mFontAtlas) {
 		mFontAtlas->bindTexture();
@@ -178,7 +181,9 @@ ImgWindow::~ImgWindow() {
 		glDeleteTextures(1, &mFontTexture);
 	}
 	ImGui::DestroyContext(mImGuiContext);
-	XPLMDestroyWindow(mWindowID);
+	if (IsXPThread()) {
+		XPLMDestroyWindow(mWindowID);
+	}
 }
 
 void
