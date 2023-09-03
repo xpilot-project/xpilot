@@ -197,6 +197,8 @@ QtPromise::QPromise<void> InstallModels::UnzipModels(const QString &path)
 
                 QString xplanePath = QDir::fromNativeSeparators(pathAppend(path, "Resources/plugins/xPilot/Resources/CSL"));
 
+                QDir().mkdir(xplanePath); // create CSL directory if it doesn't exist
+
                 std::vector<ZipEntry> entries = zf.getEntries();
                 std::vector<ZipEntry>::iterator it;
                 ZipEntry entry;
