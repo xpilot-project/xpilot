@@ -96,6 +96,9 @@ Popup {
             fieldLabel: "Callsign"
             maximumLength: 10
             isUppercase: true
+            validator: RegularExpressionValidator {
+                regularExpression: /^[a-zA-Z0-9]+$/
+            }
         }
 
         Item {
