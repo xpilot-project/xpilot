@@ -21,6 +21,10 @@
 #include "common/utils.h"
 #include "common/build_config.h"
 
+#ifdef Q_OS_WIN
+#include <Windows.h>
+#endif
+
 using namespace afv_native::afv;
 
 namespace xpilot
@@ -264,7 +268,11 @@ namespace xpilot
             while(m_keepAlive)
             {
                 event_base_loop(ev_base, EVLOOP_NONBLOCK);
+#ifdef Q_OS_WIN
+                Sleep(10);
+#else
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
+#endif
             }
         });
         m_workerThread->start();
