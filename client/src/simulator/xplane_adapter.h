@@ -76,6 +76,8 @@ public:
     Q_INVOKABLE void unignoreAircraft(QString callsign);
     Q_INVOKABLE void showIgnoreList();
     Q_INVOKABLE void selcalAlertReceived();
+    Q_INVOKABLE void setCom1OnHeadset(bool onHeadset);
+    Q_INVOKABLE void setCom2OnHeadset(bool onHeadset);
 
     void AddAircraftToSimulator(const NetworkAircraft& aircraft);
     void PlaneConfigChanged(const NetworkAircraft& aircraft);
@@ -139,6 +141,8 @@ signals:
     void sendWallop(QString message);
     void simPausedStateChanged(bool paused);
     void nngSocketError(QString error);
+    void com1OnHeadsetChanged(bool onHeadset);
+    void com2OnHeadsetChanged(bool onHeadset);
 
 private:
     QUdpSocket* m_udpSocket;

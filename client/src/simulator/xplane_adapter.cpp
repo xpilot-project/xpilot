@@ -89,7 +89,9 @@ enum DataRef
     Paused,
     PushToTalk,
     SelcalMuteOverride,
-    XplaneVersionNumber
+    XplaneVersionNumber,
+    Com1OnHeadset,
+    Com2OnHeadset
 };
 
 XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
@@ -315,6 +317,8 @@ void XplaneAdapter::SubscribeDataRefs()
     SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 15);
     SubscribeDataRef("xpilot/selcal_mute_override", DataRef::SelcalMuteOverride, 5);
     SubscribeDataRef("sim/version/xplane_internal_version", DataRef::XplaneVersionNumber, 1);
+    SubscribeDataRef("xpilot/audio/com1_on_headset", DataRef::Com1OnHeadset, 5);
+    SubscribeDataRef("xpilot/audio/com2_on_headset", DataRef::Com2OnHeadset, 5);
 }
 
 void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
@@ -673,6 +677,16 @@ void XplaneAdapter::OnDataReceived()
                     SKIP_EMPTY(value);
                     m_xplaneVersion = value;
                     break;
+                case DataRef::Com1OnHeadset:
+                    if(value != AppConfig::getInstance()->Com1OnHeadset) {
+                        emit com1OnHeadsetChanged(value);
+                    }
+                    break;
+                case DataRef::Com2OnHeadset:
+                    if(value != AppConfig::getInstance()->Com2OnHeadset) {
+                        emit com2OnHeadsetChanged(value);
+                    }
+                    break;
             }
         }
     }
@@ -767,6 +781,16 @@ void XplaneAdapter::selcalAlertReceived()
     QTimer::singleShot(1000, this, [&]{
         setDataRefValue("xpilot/selcal_received", 0);
     });
+}
+
+void XplaneAdapter::setCom1OnHeadset(bool onHeadset)
+{
+    setDataRefValue("xpilot/audio/com1_on_headset", (int)onHeadset);
+}
+
+void XplaneAdapter::setCom2OnHeadset(bool onHeadset)
+{
+    setDataRefValue("xpilot/audio/com2_on_headset", (int)onHeadset);
 }
 
 void XplaneAdapter::AddAircraftToSimulator(const NetworkAircraft &aircraft)

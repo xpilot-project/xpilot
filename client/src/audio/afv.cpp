@@ -220,6 +220,12 @@ namespace xpilot
         connect(&m_xplaneAdapter, &XplaneAdapter::pttReleased, this, [&]{
             m_client->setPtt(false);
         });
+        connect(&m_xplaneAdapter, &XplaneAdapter::com1OnHeadsetChanged, this, [&](bool onHeadset) {
+            setOnHeadset(0, onHeadset);
+        });
+        connect(&m_xplaneAdapter, &XplaneAdapter::com2OnHeadsetChanged, this, [&](bool onHeadset) {
+            setOnHeadset(1, onHeadset);
+        });
 
         connect(&m_controllerManager, &ControllerManager::controllerAdded, this, [&](Controller controller)
         {
@@ -467,8 +473,8 @@ namespace xpilot
 
         m_client->setSplitAudioChannels(AppConfig::getInstance()->SplitAudioChannels);
 
-        m_client->setOnHeadset(0, AppConfig::getInstance()->Com1OnHeadset);
-        m_client->setOnHeadset(1, AppConfig::getInstance()->Com2OnHeadset);
+        setOnHeadset(0, AppConfig::getInstance()->Com1OnHeadset);
+        setOnHeadset(1, AppConfig::getInstance()->Com2OnHeadset);
 
         m_client->startAudio();
     }
@@ -512,9 +518,11 @@ namespace xpilot
 
         if(radio == 0) {
             AppConfig::getInstance()->Com1OnHeadset = onHeadset;
+            m_xplaneAdapter.setCom1OnHeadset(onHeadset);
         }
         else {
             AppConfig::getInstance()->Com2OnHeadset = onHeadset;
+            m_xplaneAdapter.setCom2OnHeadset(onHeadset);
         }
 
         AppConfig::getInstance()->saveConfig();

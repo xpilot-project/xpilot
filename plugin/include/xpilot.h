@@ -102,6 +102,8 @@ namespace xpilot
 		OwnedDataRef<int> m_selcalMuteOverride;
 		OwnedDataRef<std::string> m_com1StationCallsign;
 		OwnedDataRef<std::string> m_com2StationCallsign;
+		OwnedDataRef<int> m_com1OnHeadset;
+		OwnedDataRef<int> m_com2OnHeadset;
 		DataRefAccess<int> m_xplaneAtisEnabled;
 		DataRefAccess<float> m_frameRatePeriod;
 		DataRefAccess<int> m_com1Frequency;
