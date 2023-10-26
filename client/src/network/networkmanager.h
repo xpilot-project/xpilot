@@ -29,6 +29,7 @@
 #include <QPointer>
 #include <QtPromise>
 
+#include "fsd/client_properties.h"
 #include "fsd/fsd_client.h"
 #include "network/vatsim_auth.h"
 #include "network/connectinfo.h"
@@ -61,7 +62,7 @@ namespace xpilot
         ~NetworkManager();
 
         Q_INVOKABLE void connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer);
-        Q_INVOKABLE void connectTowerView(QString callsign, QString address);
+        Q_INVOKABLE void connectTowerView();
         Q_INVOKABLE void disconnectFromNetwork();
         Q_INVOKABLE void sendRadioMessage(QString message);
         Q_INVOKABLE void sendPrivateMessage(QString to, QString message);
@@ -83,6 +84,7 @@ namespace xpilot
 
     signals:
         void networkConnected(QString callsign, bool enableVoice);
+        void towerviewConnected();
         void networkDisconnected(bool forced);
         void notificationPosted(QString message, MessageType type);
         void metarReceived(QString from, QString metar);
@@ -173,6 +175,8 @@ namespace xpilot
         void OnSlowPositionTimerElapsed();
         void OnFastPositionTimerElapsed();
 
+        ClientProperties m_clientProperties;
+
         void LoginToNetwork(QString password);
         QtPromise::QPromise<QString> GetBestFsdServer();
 
@@ -192,6 +196,9 @@ namespace xpilot
         }
 
         double AdjustIncomingAltitude(double altitude);
+
+        const int FSD_VERSION_MAJOR = 2;
+        const int FSD_VERSION_MINOR = 2;
     };
 }
 

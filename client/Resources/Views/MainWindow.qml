@@ -41,6 +41,7 @@ Window {
     property bool networkConnected: false
     property bool initialized: false
     property bool simConnected: false
+    property bool towerviewConnection: false
 
     FontLoader {
         id: robotoMono
@@ -456,8 +457,13 @@ Window {
             networkConnected = true
         }
 
+        function onTowerviewConnected() {
+            towerviewConnection = true
+        }
+
         function onNetworkDisconnected(forced) {
             networkConnected = false
+            towerviewConnection = false
             nearbyEnroute.clear()
             nearbyApproach.clear()
             nearbyTower.clear()
@@ -961,6 +967,9 @@ Window {
                                         if(cmd[1].length > 12) {
                                             throw "Callsign too long."
                                         }
+                                        if(towerviewConnection) {
+                                            throw "Cannot send private messages in tower view mode."
+                                        }
                                         focusOrCreateTab(cmd[1])
                                         break
                                     case ".msg":
@@ -973,6 +982,9 @@ Window {
                                         if(cmd[1].length > 12) {
                                             throw "Callsign too long."
                                         }
+                                        if(towerviewConnection) {
+                                            throw "Cannot send private messages in tower view mode."
+                                        }
                                         focusOrCreateTab(cmd[1])
                                         networkManager.sendPrivateMessage(cmd[1], cmd.slice(2).join(" "))
                                         break
@@ -982,6 +994,9 @@ Window {
                                         }
                                         if(!networkConnected) {
                                             throw "Not connected to network."
+                                        }
+                                        if(towerviewConnection) {
+                                            throw "Cannot send wallop messages in tower view mode."
                                         }
                                         networkManager.sendWallop(cmd.slice(1).join(" "))
                                         break
@@ -1063,15 +1078,7 @@ Window {
                                         if(networkConnected) {
                                             throw "You must first disconnect from the network before using TowerView."
                                         }
-                                        var tvServerAddress = "localhost"
-                                        var tvCallsign = "TOWER"
-                                        if(cmd.length >= 2) {
-                                            tvServerAddress = cmd[1]
-                                            if(cmd.length >= 3) {
-                                                tvCallsign = cmd[2].toUpperCase()
-                                            }
-                                        }
-                                        networkManager.connectTowerView(tvCallsign, tvServerAddress)
+                                        networkManager.connectTowerView()
                                         break
                                     case ".ignore":
                                         if(cmd.length < 2) {
@@ -1096,6 +1103,9 @@ Window {
                                     if(!networkConnected) {
                                         throw "Not connected to network."
                                     }
+                                    if(towerviewConnection) {
+                                        throw "Cannot send text radio messages in tower view mode."
+                                    }
                                     networkManager.sendRadioMessage(message)
                                     appendMessage(message, Enum.MessageType.OutgoingRadio)
                                 }
@@ -1116,6 +1126,9 @@ Window {
                         else {
                             if(!networkConnected) {
                                 appendMessage("Not connected to network.", Enum.MessageType.Error, tabIndex)
+                            }
+                            if(towerviewConnection) {
+                                throw "Cannot send private messages in tower view mode."
                             }
                             networkManager.sendPrivateMessage(tabControl.callsign, message)
                         }

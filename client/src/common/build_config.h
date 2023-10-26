@@ -27,6 +27,7 @@ namespace xpilot
     class BuildConfig
     {
     public:
+        static const ushort TowerviewClientId();
         static const ushort VatsimClientId();
         static const QString VatsimClientKey();
         static const quint64 ConfigEncryptionKey();

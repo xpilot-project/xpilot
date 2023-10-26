@@ -27,6 +27,11 @@ namespace xpilot
         connectSocketSignals();
     }
 
+    void FsdClient::SetClientProperties(ClientProperties clientProperties)
+    {
+        m_clientProperties = clientProperties;
+    }
+
     void FsdClient::connectSocketSignals()
     {
         connect(m_socket.get(), &QTcpSocket::readyRead, this, &FsdClient::handleDataReceived);
@@ -36,7 +41,7 @@ namespace xpilot
 
     void FsdClient::Connect(QString address, quint32 port, bool challengeServer)
     {
-        if(BuildConfig::VatsimClientId() == 0 || BuildConfig::VatsimClientKey().isEmpty()) {
+        if(BuildConfig::TowerviewClientId() == 0 || BuildConfig::VatsimClientId() == 0 || BuildConfig::VatsimClientKey().isEmpty()) {
             emit RaiseNetworkError("Invalid pilot client build. Please download a new copy from the xPilot website.");
             return;
         }
@@ -126,8 +131,8 @@ namespace xpilot
                     {
                         auto pdu = PDUServerIdentification::fromTokens(fields);
                         m_clientAuthSessionKey = GenerateAuthResponse(pdu.InitialChallengeKey.toStdString(),
-                                                                      BuildConfig::VatsimClientId(),
-                                                                      BuildConfig::VatsimClientKey().toStdString());
+                                                                      m_clientProperties.ClientID,
+                                                                      m_clientProperties.PrivateKey.toStdString());
                         m_clientAuthChallengeKey = m_clientAuthSessionKey;
                         emit RaiseServerIdentificationReceived(pdu);
                     }
@@ -196,7 +201,7 @@ namespace xpilot
                     {
                         auto pdu = PDUAuthChallenge::fromTokens(fields);
                         std::string authResponse = GenerateAuthResponse(pdu.ChallengeKey.toStdString(),
-                                                                        BuildConfig::VatsimClientId(),
+                                                                        m_clientProperties.ClientID,
                                                                         m_clientAuthChallengeKey);
                         std::string combined = m_clientAuthSessionKey + authResponse;
                         m_clientAuthChallengeKey = toMd5(combined.c_str()).toStdString();

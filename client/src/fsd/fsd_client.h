@@ -31,6 +31,8 @@
 #include <QCryptographicHash>
 #include <QStringEncoder>
 
+#include "client_properties.h"
+
 #include "pdu/pdu_base.h"
 #include "pdu/pdu_add_atc.h"
 #include "pdu/pdu_server_identification.h"
@@ -69,6 +71,7 @@ namespace xpilot
     public:
         explicit FsdClient(QObject *parent = nullptr);
 
+        void SetClientProperties(ClientProperties clientProperties);
         void Connect(QString address, quint32 port, bool challengeServer = true);
         void Disconnect();
 
@@ -142,6 +145,8 @@ namespace xpilot
 
         static int constexpr m_slowPositionTimerInterval = 5000;
         static int constexpr m_fastPositionTimerInterval = 200;
+
+        ClientProperties m_clientProperties;
     };
 }
 

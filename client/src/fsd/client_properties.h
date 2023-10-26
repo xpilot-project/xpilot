@@ -23,12 +23,8 @@
 
 class ClientProperties
 {
-    QString Name;
-    int VersionMajor;
-    int VersionMinor;
-    ushort ClientID;
-    QString PrivateKey;
-
+public:
+    ClientProperties(){}
     ClientProperties(QString name, int versionMajor, int versionMinor, ushort clientId, QString key)
     {
         Name = name;
@@ -37,6 +33,12 @@ class ClientProperties
         ClientID = clientId;
         PrivateKey = key;
     }
+
+    QString Name;
+    int VersionMajor;
+    int VersionMinor;
+    ushort ClientID;
+    QString PrivateKey;
 };
 
 #endif

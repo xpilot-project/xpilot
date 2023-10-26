@@ -107,11 +107,15 @@ namespace xpilot
             emit notificationPosted("Connected to network in observer mode.", MessageType::Info);
         }
         else if(m_connectInfo.TowerViewMode) {
-            emit notificationPosted("Connected to TowerView proxy.", MessageType::Info);
+            emit notificationPosted("Connected to network in tower view mode.", MessageType::Info);
         } else {
             emit notificationPosted("Connected to network.", MessageType::Info);
         }
         emit networkConnected(m_connectInfo.Callsign, !m_connectInfo.TowerViewMode);
+
+        if(m_connectInfo.TowerViewMode) {
+            emit towerviewConnected();
+        }
 
         if(!m_connectInfo.TowerViewMode) {
             m_xplaneAdapter.NetworkConnected(m_connectInfo.Callsign, m_connectInfo.SelcalCode, m_connectInfo.ObserverMode);
@@ -123,21 +127,16 @@ namespace xpilot
         m_fastPositionTimer.stop();
         m_slowPositionTimer.stop();
 
-        if(m_connectInfo.TowerViewMode) {
-            emit notificationPosted("Disconnected from TowerView proxy.", MessageType::Info);
-        }
-        else {
-            if(m_forcedDisconnect) {
-                if(!m_forcedDisconnectReason.isEmpty()) {
-                    emit notificationPosted("Forcibly disconnected from network: " + m_forcedDisconnectReason, MessageType::Error);
-                }
-                else {
-                    emit notificationPosted("Forcibly disconnected from network.", MessageType::Error);
-                }
+        if(m_forcedDisconnect) {
+            if(!m_forcedDisconnectReason.isEmpty()) {
+                emit notificationPosted("Forcibly disconnected from network: " + m_forcedDisconnectReason, MessageType::Error);
             }
             else {
-                emit notificationPosted("Disconnected from network.", MessageType::Info);
+                emit notificationPosted("Forcibly disconnected from network.", MessageType::Error);
             }
+        }
+        else {
+            emit notificationPosted("Disconnected from network.", MessageType::Info);
         }
 
         m_xplaneAdapter.NetworkDisconnected();
@@ -159,7 +158,7 @@ namespace xpilot
 
     void NetworkManager::OnServerIdentificationReceived(PDUServerIdentification pdu)
     {
-        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, BuildConfig::VatsimClientId(), "xPilot", 2, 2,
+        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, m_clientProperties.ClientID, "xPilot", FSD_VERSION_MAJOR, FSD_VERSION_MINOR,
                                               AppConfig::getInstance()->VatsimId, QSysInfo::machineUniqueId(), ""));
 
         GetJwtToken().then([&](const QByteArray &response){
@@ -185,7 +184,7 @@ namespace xpilot
 
     void NetworkManager::LoginToNetwork(QString password)
     {
-        if(m_connectInfo.ObserverMode) {
+        if(m_connectInfo.ObserverMode || m_connectInfo.TowerViewMode) {
             m_fsd.SendPDU(PDUAddATC(m_connectInfo.Callsign, AppConfig::getInstance()->Name, AppConfig::getInstance()->VatsimId,
                                     password, NetworkRating::OBS, ProtocolRevision::Vatsim2022));
         }
@@ -441,6 +440,11 @@ namespace xpilot
         }
         else
         {
+            if(m_connectInfo.TowerViewMode)
+            {
+                m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, pdu.From.toUpper(), "This is a xPilot tower view connection. The user is unable to respond to this message. Please contact them through their ATC client connection."));
+                return;
+            }
             emit privateMessageReceived(pdu.From, pdu.Message);
             m_xplaneAdapter.PrivateMessageReceived(pdu.From.toUpper(), pdu.Message);
         }
@@ -845,6 +849,9 @@ namespace xpilot
             connectInfo.ObserverMode = observer;
             m_connectInfo = connectInfo;
 
+            m_clientProperties = {"xPilot", FSD_VERSION_MAJOR, FSD_VERSION_MINOR, BuildConfig::VatsimClientId(), BuildConfig::VatsimClientKey()};
+            m_fsd.SetClientProperties(m_clientProperties);
+
             emit notificationPosted("Connecting to network...", MessageType::Info);
 
             QString serverName = AppConfig::getInstance()->getNetworkServer();
@@ -865,21 +872,33 @@ namespace xpilot
         }
     }
 
-    void NetworkManager::connectTowerView(QString callsign, QString address)
+    void NetworkManager::connectTowerView()
     {
         if(AppConfig::getInstance()->configRequired()) {
             emit notificationPosted("It looks like this may be the first time you've run xPilot on this computer. Some configuration items are required before you can connect to the network. Open Settings and verify your network credentials are saved.", MessageType::Error);
             return;
         }
-        if(!callsign.isEmpty() && !address.isEmpty())
-        {
-            ConnectInfo connectInfo{};
-            connectInfo.Callsign = callsign;
-            connectInfo.TowerViewMode = true;
-            m_connectInfo = connectInfo;
 
-            emit notificationPosted("Connecting to TowerView proxy...", MessageType::Info);
-            m_fsd.Connect(address, 6809, false);
+        ConnectInfo connectInfo{};
+        connectInfo.Callsign = AppConfig::getInstance()->VatsimId + "_TV";
+        connectInfo.TowerViewMode = true;
+        m_connectInfo = connectInfo;
+
+        m_clientProperties = {"xPilot", FSD_VERSION_MAJOR, FSD_VERSION_MINOR, BuildConfig::TowerviewClientId(), BuildConfig::VatsimClientKey()};
+        m_fsd.SetClientProperties(m_clientProperties);
+
+        emit notificationPosted("Connecting to network...", MessageType::Info);
+
+        QString serverName = AppConfig::getInstance()->getNetworkServer();
+        if(AppConfig::getInstance()->ServerName == "AUTOMATIC") {
+            GetBestFsdServer().then([&](const QString& bestServer) {
+                m_fsd.Connect(bestServer, 6809);
+            }).fail([&, serverName](){
+                m_fsd.Connect(serverName, 6809);
+            });
+        }
+        else {
+            m_fsd.Connect(serverName, 6809);
         }
     }
 
