@@ -166,6 +166,12 @@ namespace xpilot
 		}
 		bool GetContrailMultiEnabled() const { return m_contrailMulti; }
 
+		void SetAudioDevice(const std::string& device)
+		{
+			m_audioDevice = device;
+		}
+		std::string GetAudioDevice() const { return m_audioDevice; }
+
 	private:
 		Config() = default;
 		std::vector<CslPackage> m_cslPackages;
@@ -192,5 +198,6 @@ namespace xpilot
 		int m_contrailMaxAltitude = 45000;
 		int m_contrailLifeTime = 25;
 		bool m_contrailMulti = false;
+		std::string m_audioDevice;
 	};
 }

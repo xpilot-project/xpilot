@@ -173,6 +173,10 @@ namespace xpilot
 			{
 				SetContrailMultiEnabled(jf["ContrailMultiEnabled"].get<bool>());
 			}
+			if(jf.contains("AudioDevice"))
+			{
+				SetAudioDevice(jf["AudioDevice"].get<std::string>());
+			}
 			if (jf.contains("CSL"))
 			{
 				json cslpackages = jf["CSL"];
@@ -224,6 +228,7 @@ namespace xpilot
 		j["ContrailMaxAltitude"] = GetContrailMaxAltitude();
 		j["ContrailLifeTime"] = GetContrailLifeTime();
 		j["ContrailMultiEnabled"] = GetContrailMultiEnabled();
+		j["AudioDevice"] = GetAudioDevice();
 
 		auto jsonObjects = json::array();
 		if (!m_cslPackages.empty())

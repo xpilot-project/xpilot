@@ -43,16 +43,17 @@ namespace xpilot
 	static int contrailLifeTime = 25;
 	static bool contrailMulti = false;
 	static float lblCol[4];
+	static std::string audioDevice;
 	ImGui::FileBrowser fileBrowser(ImGuiFileBrowserFlags_SelectDirectory);
 
 	static int nodeToClose = -1;
 	static int currentNode = -1;
 
 	SettingsWindow::SettingsWindow(WndMode _mode) :
-		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 395, 600, 0))
+		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 420, 600, 0))
 	{
 		SetWindowTitle(string_format("xPilot %s Settings", PLUGIN_VERSION_STRING));
-		SetWindowResizingLimits(600, 395, 600, 395);
+		SetWindowResizingLimits(600, 420, 600, 420);
 
 		fileBrowser.SetTitle("Browse...");
 		fileBrowser.SetWindowSize(450, 250);
@@ -91,6 +92,7 @@ namespace xpilot
 		contrailMaxAltitude = xpilot::Config::GetInstance().GetContrailMaxAltitude();
 		contrailLifeTime = xpilot::Config::GetInstance().GetContrailLifeTime();
 		contrailMulti = xpilot::Config::GetInstance().GetContrailMultiEnabled();
+		audioDevice = xpilot::Config::GetInstance().GetAudioDevice();
 		HexToRgb(xpilot::Config::GetInstance().GetAircraftLabelColor(), lblCol);
 	}
 
@@ -257,7 +259,7 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::SliderInt("##MaxDist", &labelMaxDistance, 1, 20, "%d nm"))
 					{
-						XPMPSetAircraftLabelDist(float(labelMaxDistance), labelVisibilityCutoff);
+						XPMPSetAircraftLabelDist(static_cast<float>(labelMaxDistance), labelVisibilityCutoff);
 						xpilot::Config::GetInstance().SetMaxLabelDistance(labelMaxDistance);
 						Save();
 					}
@@ -271,7 +273,7 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##HideLabelsVisibility", &labelVisibilityCutoff))
 					{
-						XPMPSetAircraftLabelDist(float(labelMaxDistance), labelVisibilityCutoff);
+						XPMPSetAircraftLabelDist(static_cast<float>(labelMaxDistance), labelVisibilityCutoff);
 						xpilot::Config::GetInstance().SetLabelCutoffVis(labelVisibilityCutoff);
 						Save();
 					}
@@ -302,32 +304,6 @@ namespace xpilot
 						Save();
 					}
 
-					ImGui::TableNextRow();
-					ImGui::TableSetColumnIndex(0);
-					ImGui::AlignTextToFramePadding();
-					ImGui::Text("Enable Aircraft Engine Sounds");
-					ImGui::SameLine();
-					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Enable this option to add ambient engine sounds to other aircraft.");
-					ImGui::TableSetColumnIndex(1);
-					if (ImGui::Checkbox("##EnableAircraftSounds", &enableAircraftSounds))
-					{
-						xpilot::Config::GetInstance().SetAircraftSoundsEnabled(enableAircraftSounds);
-						Save();
-					}
-
-					ImGui::TableNextRow();
-					ImGui::TableSetColumnIndex(0);
-					ImGui::AlignTextToFramePadding();
-					ImGui::Text("Aircraft Engine Sound Volume");
-					ImGui::SameLine();
-					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Use this slider to adjust the engine volume of other aircraft.");
-					ImGui::TableSetColumnIndex(1);
-					if (ImGui::SliderInt("##AircraftEngineVolume", &aircraftSoundVolume, 0, 100, "%d%%"))
-					{
-						xpilot::Config::GetInstance().SetAircraftSoundVolume(aircraftSoundVolume);
-						Save();
-					}
-
 					ImGui::EndTable();
 				}
 			}
@@ -344,9 +320,97 @@ namespace xpilot
 			nodeToClose = -1;
 		}
 
+		if(ImGui::CollapsingHeader("Sounds"))
+		{
+			if(currentNode == 1)
+			{
+				if(ImGui::BeginTable("##Sounds", 2, ImGuiTableFlags_BordersInnerH))
+				{
+					ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoSort, 315);
+					ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoSort);
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Enable Aircraft Engine Sounds");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Enable this option to add ambient engine sounds to other aircraft.");
+					ImGui::TableSetColumnIndex(1);
+					if (ImGui::Checkbox("##EnableAircraftSounds", &enableAircraftSounds))
+					{
+						xpilot::Config::GetInstance().SetAircraftSoundsEnabled(enableAircraftSounds);
+						XPMPSetAudioDevice(Config::GetInstance().GetAudioDevice());
+						Save();
+					}
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Aircraft Engine Sound Volume");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Use this slider to adjust the engine volume of other aircraft.");
+					ImGui::TableSetColumnIndex(1);
+					if (ImGui::SliderInt("##AircraftEngineVolume", &aircraftSoundVolume, 0, 100, "%d%%"))
+					{
+						xpilot::Config::GetInstance().SetAircraftSoundVolume(aircraftSoundVolume);
+						Save();
+					}
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Aircraft Sound Playback Device");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Select the audio device where you want the aircraft engine sounds to play. If left blank, xPilot will use the system's default audio device.");
+					ImGui::TableSetColumnIndex(1);
+					if(ImGui::BeginCombo("##AudioDevice", audioDevice.c_str()))
+					{
+						int size;
+						const char** devices = XPMPGetAudioDevices(&size);
+
+						if(size == 0)
+						{
+							audioDevice = "";
+							xpilot::Config::GetInstance().SetAudioDevice(audioDevice);
+							xpilot::Config::GetInstance().SaveConfig();
+						}
+						else
+						{
+							for (int i = 0; i < size; ++i)
+							{
+								if (ImGui::Selectable(devices[i], audioDevice == devices[i]))
+								{
+									audioDevice = devices[i];
+									XPMPSetAudioDevice(audioDevice);
+									xpilot::Config::GetInstance().SetAudioDevice(audioDevice);
+									xpilot::Config::GetInstance().SaveConfig();
+								}
+							}
+						}
+						delete[] devices;
+
+						ImGui::EndCombo();
+					}
+
+					ImGui::EndTable();
+				}
+			}
+			else
+			{
+				nodeToClose = currentNode;
+				currentNode = 1;
+			}
+		}
+
+		if (nodeToClose == 2)
+		{
+			ImGui::SetNextItemOpen(false, ImGuiCond_Always);
+			nodeToClose = -1;
+		}
+
 		if (ImGui::CollapsingHeader("Contrails"))
 		{
-			if (currentNode == 1)
+			if (currentNode == 2)
 			{
 				if (ImGui::BeginTable("##Settings", 2, ImGuiTableFlags_BordersInnerH))
 				{
@@ -434,11 +498,11 @@ namespace xpilot
 			else
 			{
 				nodeToClose = currentNode;
-				currentNode = 1;
+				currentNode = 2;
 			}
 		}
 
-		if (nodeToClose == 2)
+		if (nodeToClose == 3)
 		{
 			ImGui::SetNextItemOpen(false, ImGuiCond_Always);
 			nodeToClose = -1;
@@ -446,7 +510,7 @@ namespace xpilot
 
 		if (ImGui::CollapsingHeader("CSL Configuration"))
 		{
-			if (currentNode == 2)
+			if (currentNode == 3)
 			{
 				ImGui::Text("CSL Model Configuration");
 				ImGui::Text("** You must restart X-Plane after making changes to the CSL Paths **");
@@ -512,9 +576,9 @@ namespace xpilot
 						}
 
 						ImGui::SetNextWindowSize(ImVec2(400, 150), ImGuiCond_FirstUseEver);
-						if (ImGui::BeginPopupModal("Error Saving Settings", NULL, ImGuiWindowFlags_NoResize))
+						if (ImGui::BeginPopupModal("Error Saving Settings", nullptr, ImGuiWindowFlags_NoResize))
 						{
-							ImGui::TextWrapped("%s", "An error occured while trying to save the settings.\n\nMake sure read/write permissions are set properly for the \n\"Resources > Plugins > xPilot > Resources\" folder.\n\n");
+							ImGui::TextWrapped("%s", "An error occurred while trying to save the settings.\n\nMake sure read/write permissions are set properly for the \n\"Resources > Plugins > xPilot > Resources\" folder.\n\n");
 
 							if (ImGui::Button("Close"))
 								ImGui::CloseCurrentPopup();
@@ -531,11 +595,11 @@ namespace xpilot
 			else
 			{
 				nodeToClose = currentNode;
-				currentNode = 2;
+				currentNode = 3;
 			}
 		}
 
-		if (nodeToClose == 3)
+		if (nodeToClose == 4)
 		{
 			ImGui::SetNextItemOpen(false, ImGuiCond_Always);
 			nodeToClose = -1;
@@ -543,7 +607,7 @@ namespace xpilot
 
 		if (ImGui::CollapsingHeader("Advanced Options"))
 		{
-			if (currentNode == 3)
+			if (currentNode == 4)
 			{
 				if (ImGui::BeginTable("##Settings", 2, ImGuiTableFlags_BordersInnerH))
 				{
@@ -596,7 +660,7 @@ namespace xpilot
 			else
 			{
 				nodeToClose = currentNode;
-				currentNode = 3;
+				currentNode = 4;
 			}
 		}
 

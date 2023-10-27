@@ -231,6 +231,8 @@ namespace xpilot
 
 		XPMPEnableAircraftLabels(Config::GetInstance().GetShowHideLabels());
 		XPMPSetAircraftLabelDist(Config::GetInstance().GetMaxLabelDistance(), Config::GetInstance().GetLabelCutoffVis());
+		XPMPSetAudioDevice(Config::GetInstance().GetAudioDevice());
+
 		return true;
 	}
 
