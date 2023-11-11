@@ -60,6 +60,10 @@ else()
     set(IS_BETA_VERSION false)
 endif()
 
+if (NOT VATSIM_TOWERVIEW_CLIENT_ID)
+    set(VATSIM_TOWERVIEW_CLIENT_ID 0)
+endif ()
+
 if (NOT VATSIM_CLIENT_ID)
     set(VATSIM_CLIENT_ID 0)
 endif ()
