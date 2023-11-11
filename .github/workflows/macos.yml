@@ -9,6 +9,7 @@ env:
   BUILD_TYPE: Release
   VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
   VATSIM_CLIENT_KEY: ${{ secrets.VATSIM_CLIENT_KEY }}
+  VATSIM_TOWERVIEW_CLIENT_ID: ${{ secrets.VATSIM_TOWERVIEW_CLIENT_ID }}
   CONFIG_ENCRYPTION_KEY: ${{ secrets.CONFIG_ENCRYPTION_KEY }}
   CLIENT_DIR: ${{ github.workspace }}/client
   PLUGIN_DIR: ${{ github.workspace }}/plugin
