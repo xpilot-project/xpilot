@@ -21,10 +21,6 @@
 
 #include "pdu_base.h"
 
-#include <QString>
-#include <QStringList>
-#include <QVector>
-
 class PDUAddATC : public PDUBase
 {
 public:

@@ -40,19 +40,18 @@
 #include <QMutex>
 #include <QTimer>
 
-#include <msgpack.hpp>
-
 #include <nng/nng.h>
 #include <nng/protocol/pair1/pair.h>
+#include <msgpack.hpp>
 
-#include "src/config/appconfig.h"
-#include "src/aircrafts/network_aircraft.h"
-#include "src/aircrafts/velocity_vector.h"
-#include "src/aircrafts/user_aircraft_data.h"
-#include "src/aircrafts/user_aircraft_config_data.h"
-#include "src/aircrafts/radio_stack_state.h"
-#include "src/controllers/controller.h"
-#include "src/simulator/dto.h"
+#include "config/appconfig.h"
+#include "aircrafts/network_aircraft.h"
+#include "aircrafts/velocity_vector.h"
+#include "aircrafts/user_aircraft_data.h"
+#include "aircrafts/user_aircraft_config_data.h"
+#include "aircrafts/radio_stack_state.h"
+#include "controllers/controller.h"
+#include "simulator/dto.h"
 
 using namespace xpilot;
 
@@ -77,6 +76,8 @@ public:
     Q_INVOKABLE void unignoreAircraft(QString callsign);
     Q_INVOKABLE void showIgnoreList();
     Q_INVOKABLE void selcalAlertReceived();
+    Q_INVOKABLE void setCom1OnHeadset(bool onHeadset);
+    Q_INVOKABLE void setCom2OnHeadset(bool onHeadset);
 
     void AddAircraftToSimulator(const NetworkAircraft& aircraft);
     void PlaneConfigChanged(const NetworkAircraft& aircraft);
@@ -140,6 +141,8 @@ signals:
     void sendWallop(QString message);
     void simPausedStateChanged(bool paused);
     void nngSocketError(QString error);
+    void com1OnHeadsetChanged(bool onHeadset);
+    void com2OnHeadsetChanged(bool onHeadset);
 
 private:
     QUdpSocket* m_udpSocket;

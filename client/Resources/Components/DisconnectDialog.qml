@@ -3,13 +3,12 @@ import QtQuick.Controls
 import QtQuick.Controls.Basic
 import QtQuick.Window
 import QtQuick.Layouts
-import AppConfig 1.0
 import "../Controls"
 
 Popup {
     id: popup
     width: 550
-    height: 125
+    height: 150
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
     modal: true

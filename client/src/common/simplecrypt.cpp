@@ -24,13 +24,15 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "simplecrypt.h"
+
 #include <QByteArray>
 #include <QtDebug>
 #include <QtGlobal>
 #include <QDateTime>
 #include <QCryptographicHash>
 #include <QDataStream>
+
+#include "simplecrypt.h"
 
 SimpleCrypt::SimpleCrypt():
     m_key(0),

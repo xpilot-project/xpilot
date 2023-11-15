@@ -8,11 +8,13 @@ env:
   BUILD_TYPE: Release
   VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
   VATSIM_CLIENT_KEY: ${{ secrets.VATSIM_CLIENT_KEY }}
+  VATSIM_TOWERVIEW_CLIENT_ID: ${{ secrets.VATSIM_TOWERVIEW_CLIENT_ID }}
   CONFIG_ENCRYPTION_KEY: ${{ secrets.CONFIG_ENCRYPTION_KEY }}
   CLIENT_DIR: ${{ github.workspace }}/client
   PLUGIN_DIR: ${{ github.workspace }}/plugin
   IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-23.1.0-linux-x64-installer.run
   IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
+  QT_VERSION: "v6.5.2"
 
 jobs:
   build:
@@ -21,20 +23,25 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev \
-          libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev \
-          libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev \
-          libxcb-render-util0-dev libxcb-util-dev libxcb-xinerama0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev \
+          sudo apt-get update && sudo apt-get install \
+          libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-cursor-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-util-dev libxcb-xinerama0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev xorg-dev \
           libglu1-mesa-dev freeglut3-dev mesa-common-dev libglfw3-dev libgles2-mesa-dev \
-          libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev \
-          gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
-          gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl \
-          gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+          libpulse-dev
 
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+
+      - name: Delete dummy auth library
+        shell: bash
+        run: rm -rf dependencies/vatsim-auth
+
+      - name: Checkout auth library
+        uses: actions/checkout@v3
+        with:
+          repository: xpilot-project/vatsim-auth
+          path: dependencies/vatsim-auth
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
         ### Buid Plugin ###
 
@@ -71,7 +78,7 @@ jobs:
         uses: robinraju/release-downloader@v1.6
         with:
           repository: "xpilot-project/qt6"
-          tag: "v6.3.2"
+          tag: ${{ env.QT_VERSION }}
           fileName: "linux.7z"
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
@@ -92,9 +99,10 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DVATSIM_CLIENT_ID=${{ env.VATSIM_CLIENT_ID }} \
             -DVATSIM_CLIENT_KEY=${{ env.VATSIM_CLIENT_KEY }} \
+            -DVATSIM_TOWERVIEW_CLIENT_ID=${{ env.VATSIM_TOWERVIEW_CLIENT_ID }} \
             -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
             -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} \
-            -DOPENSSL_ROOT_DIR=${{ github.workspace }}/externals/linux/openssl
+            -DOPENSSL_ROOT_DIR=${{ github.workspace }}/dependencies/linux/openssl
           cmake --build . --config ${{ env.BUILD_TYPE }}
           mv ${{ env.CLIENT_DIR }}/build/xPilot ${{ env.CLIENT_DIR }}/build/xpilot
 

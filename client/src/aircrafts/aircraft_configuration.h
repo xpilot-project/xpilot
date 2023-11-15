@@ -19,9 +19,10 @@
 #ifndef AIRCRAFT_CONFIGURATION_H
 #define AIRCRAFT_CONFIGURATION_H
 
+#include <optional>
+
 #include <QJsonObject>
 #include <QJsonDocument>
-#include <optional>
 
 #include "user_aircraft_config_data.h"
 

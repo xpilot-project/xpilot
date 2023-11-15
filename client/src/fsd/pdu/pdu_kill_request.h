@@ -19,7 +19,6 @@
 #ifndef PDU_KILLREQUEST_H
 #define PDU_KILLREQUEST_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUKillRequest: public PDUBase

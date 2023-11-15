@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <chrono>
 #include <random>
+
 #include <QRandomGenerator>
 #include <QDateTime>
 
@@ -28,8 +29,8 @@ namespace xpilot
 {
     NetworkManager::NetworkManager(QObject *owner) :
         QObject(owner),
-        nam(new QNetworkAccessManager),
-        m_xplaneAdapter(*QInjection::Pointer<XplaneAdapter>().data())
+        m_xplaneAdapter(*QInjection::Pointer<XplaneAdapter>().data()),
+        nam(new QNetworkAccessManager)
     {
         QDir networkLogPath(pathAppend(AppConfig::getInstance()->dataRoot(), "NetworkLogs"));
         if(!networkLogPath.exists()) {
@@ -85,30 +86,9 @@ namespace xpilot
         connect(&m_xplaneAdapter, &XplaneAdapter::sendWallop, this, &NetworkManager::OnSendWallop);
         connect(&m_xplaneAdapter, &XplaneAdapter::simPausedStateChanged, this, &NetworkManager::OnSimPaused);
 
-        connect(this, &NetworkManager::notificationPosted, this, [&](int type, QString message)
+        connect(this, &NetworkManager::notificationPosted, this, [&](QString message, MessageType type)
         {
-            auto msgType = static_cast<NotificationType>(type);
-            switch(msgType)
-            {
-                case NotificationType::Error:
-                    m_xplaneAdapter.NotificationPosted(message, COLOR_RED);
-                    break;
-                case NotificationType::Info:
-                    m_xplaneAdapter.NotificationPosted(message, COLOR_YELLOW);
-                    break;
-                case NotificationType::RadioMessageSent:
-                    m_xplaneAdapter.NotificationPosted(message, COLOR_CYAN);
-                    break;
-                case NotificationType::ServerMessage:
-                    m_xplaneAdapter.NotificationPosted(message, COLOR_GREEN);
-                    break;
-                case NotificationType::Warning:
-                    m_xplaneAdapter.NotificationPosted(message, COLOR_ORANGE);
-                    break;
-                case NotificationType::TextMessage:
-                case NotificationType::RadioMessageReceived:
-                    break;
-            }
+            m_xplaneAdapter.NotificationPosted(message, toColorHex(type));
         });
 
         connect(&m_slowPositionTimer, &QTimer::timeout, this, &NetworkManager::OnSlowPositionTimerElapsed);
@@ -124,14 +104,18 @@ namespace xpilot
     void NetworkManager::OnNetworkConnected()
     {
         if(m_connectInfo.ObserverMode) {
-            emit notificationPosted((int)NotificationType::Info, "Connected to network in observer mode.");
+            emit notificationPosted("Connected to network in observer mode.", MessageType::Info);
         }
         else if(m_connectInfo.TowerViewMode) {
-            emit notificationPosted((int)NotificationType::Info, "Connected to TowerView proxy.");
+            emit notificationPosted("Connected to network in tower view mode.", MessageType::Info);
         } else {
-            emit notificationPosted((int)NotificationType::Info, "Connected to network.");
+            emit notificationPosted("Connected to network.", MessageType::Info);
         }
         emit networkConnected(m_connectInfo.Callsign, !m_connectInfo.TowerViewMode);
+
+        if(m_connectInfo.TowerViewMode) {
+            emit towerviewConnected();
+        }
 
         if(!m_connectInfo.TowerViewMode) {
             m_xplaneAdapter.NetworkConnected(m_connectInfo.Callsign, m_connectInfo.SelcalCode, m_connectInfo.ObserverMode);
@@ -143,21 +127,16 @@ namespace xpilot
         m_fastPositionTimer.stop();
         m_slowPositionTimer.stop();
 
-        if(m_connectInfo.TowerViewMode) {
-            emit notificationPosted((int)NotificationType::Info, "Disconnected from TowerView proxy.");
-        }
-        else {
-            if(m_forcedDisconnect) {
-                if(!m_forcedDisconnectReason.isEmpty()) {
-                    emit notificationPosted((int)NotificationType::Error, "Forcibly disconnected from network: " + m_forcedDisconnectReason);
-                }
-                else {
-                    emit notificationPosted((int)NotificationType::Error, "Forcibly disconnected from network.");
-                }
+        if(m_forcedDisconnect) {
+            if(!m_forcedDisconnectReason.isEmpty()) {
+                emit notificationPosted("Forcibly disconnected from network: " + m_forcedDisconnectReason, MessageType::Error);
             }
             else {
-                emit notificationPosted((int)NotificationType::Info, "Disconnected from network.");
+                emit notificationPosted("Forcibly disconnected from network.", MessageType::Error);
             }
+        }
+        else {
+            emit notificationPosted("Disconnected from network.", MessageType::Info);
         }
 
         m_xplaneAdapter.NetworkDisconnected();
@@ -179,7 +158,7 @@ namespace xpilot
 
     void NetworkManager::OnServerIdentificationReceived(PDUServerIdentification pdu)
     {
-        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, BuildConfig::VatsimClientId(), "xPilot", 2, 2,
+        m_fsd.SendPDU(PDUClientIdentification(m_connectInfo.Callsign, m_clientProperties.ClientID, "xPilot", FSD_VERSION_MAJOR, FSD_VERSION_MINOR,
                                               AppConfig::getInstance()->VatsimId, QSysInfo::machineUniqueId(), ""));
 
         GetJwtToken().then([&](const QByteArray &response){
@@ -192,12 +171,12 @@ namespace xpilot
             }
             else {
                 QString jwtError = json["error_msg"].toString();
-                emit notificationPosted((int)NotificationType::Error, QString("Network authentication error: %1").arg(jwtError));
+                emit notificationPosted(QString("Network authentication error: %1").arg(jwtError), MessageType::Error);
                 emit networkDisconnected(true);
                 m_fsd.Disconnect();
             }
         }).fail([&](const QString &err){
-            emit notificationPosted((int)NotificationType::Error, QString("Network authentication error: %1").arg(err));
+            emit notificationPosted(QString("Network authentication error: %1").arg(err), MessageType::Error);
             emit networkDisconnected(true);
             m_fsd.Disconnect();
         });
@@ -205,7 +184,7 @@ namespace xpilot
 
     void NetworkManager::LoginToNetwork(QString password)
     {
-        if(m_connectInfo.ObserverMode) {
+        if(m_connectInfo.ObserverMode || m_connectInfo.TowerViewMode) {
             m_fsd.SendPDU(PDUAddATC(m_connectInfo.Callsign, AppConfig::getInstance()->Name, AppConfig::getInstance()->VatsimId,
                                     password, NetworkRating::OBS, ProtocolRevision::Vatsim2022));
         }
@@ -316,9 +295,9 @@ namespace xpilot
                     {
                         emit controllerAtisReceived(pdu.From.toUpper(), m_mapAtisMessages[pdu.From.toUpper()]);
 
-                        m_xplaneAdapter.NotificationPosted(pdu.From.toUpper() + " ATIS:", COLOR_BRIGHT_GREEN);
+                        m_xplaneAdapter.NotificationPosted(pdu.From.toUpper() + " ATIS:", COLOR_ORANGE);
                         for(const auto& line : qAsConst(m_mapAtisMessages[pdu.From.toUpper()])) {
-                            m_xplaneAdapter.NotificationPosted(line, COLOR_BRIGHT_GREEN);
+                            m_xplaneAdapter.NotificationPosted(line, COLOR_ORANGE);
                         }
 
                         m_mapAtisMessages.remove(pdu.From.toUpper());
@@ -431,7 +410,7 @@ namespace xpilot
     void NetworkManager::OnMetarResponseReceived(PDUMetarResponse pdu)
     {
         emit metarReceived(pdu.From.toUpper(), pdu.Metar);
-        m_xplaneAdapter.NotificationPosted(QString("METAR: %1").arg(pdu.Metar), COLOR_BRIGHT_GREEN);
+        m_xplaneAdapter.NotificationPosted(QString("METAR: %1").arg(pdu.Metar), COLOR_ORANGE);
     }
 
     void NetworkManager::OnDeletePilotReceived(PDUDeletePilot pdu)
@@ -457,10 +436,15 @@ namespace xpilot
         if(pdu.From.toUpper() == "SERVER")
         {
             emit serverMessageReceived(pdu.Message);
-            m_xplaneAdapter.NotificationPosted(pdu.Message, COLOR_GREEN);
+            m_xplaneAdapter.NotificationPosted(pdu.Message, pdu.Message.contains("donate.vatsim.net") ? COLOR_MAGENTA : COLOR_GREEN);
         }
         else
         {
+            if(m_connectInfo.TowerViewMode)
+            {
+                m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, pdu.From.toUpper(), "This is a xPilot tower view connection. The user is unable to respond to this message. Please contact them through their ATC client connection."));
+                return;
+            }
             emit privateMessageReceived(pdu.From, pdu.Message);
             m_xplaneAdapter.PrivateMessageReceived(pdu.From.toUpper(), pdu.Message);
         }
@@ -500,13 +484,13 @@ namespace xpilot
 
         if(frequencies.size() == 0) return;
 
-        static QRegularExpression re("^SELCAL ([A-Z][A-Z]-?[A-Z][A-Z])$");
+        static QRegularExpression re("^SELCAL ([A-Za-z][A-Za-z]-?[A-Za-z][A-Za-z])$");
         QRegularExpressionMatch match = re.match(pdu.Messages);
 
         if(match.hasMatch())
         {
-            QString selcal = QString("SELCAL %1").arg(match.captured(1).replace("-",""));
-            if(!m_connectInfo.SelcalCode.isEmpty() && selcal == "SELCAL " + m_connectInfo.SelcalCode.replace("-",""))
+            QString selcal = QString("SELCAL %1").arg(match.captured(1).replace("-","")).toUpper();
+            if(!m_connectInfo.SelcalCode.isEmpty() && selcal == "SELCAL " + m_connectInfo.SelcalCode.toUpper().replace("-",""))
             {
                 emit selcalAlertReceived(pdu.From.toUpper(), frequencies);
                 m_xplaneAdapter.selcalAlertReceived();
@@ -847,8 +831,7 @@ namespace xpilot
     void NetworkManager::connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer)
     {
         if(AppConfig::getInstance()->configRequired()) {
-            emit notificationPosted((int)NotificationType::Error, "It looks like this may be the first time you've run xPilot on this computer. "
-"Some configuration items are required before you can connect to the network. Open Settings and verify your network credentials are saved.");
+            emit notificationPosted("It looks like this may be the first time you've run xPilot on this computer. Some configuration items are required before you can connect to the network. Open Settings and verify your network credentials are saved.", MessageType::Error);
             return;
         }
         if(!AppConfig::getInstance()->MicrophoneCalibrated)
@@ -866,7 +849,10 @@ namespace xpilot
             connectInfo.ObserverMode = observer;
             m_connectInfo = connectInfo;
 
-            emit notificationPosted((int)NotificationType::Info, "Connecting to network...");
+            m_clientProperties = {"xPilot", FSD_VERSION_MAJOR, FSD_VERSION_MINOR, BuildConfig::VatsimClientId(), BuildConfig::VatsimClientKey()};
+            m_fsd.SetClientProperties(m_clientProperties);
+
+            emit notificationPosted("Connecting to network...", MessageType::Info);
 
             QString serverName = AppConfig::getInstance()->getNetworkServer();
             if(AppConfig::getInstance()->ServerName == "AUTOMATIC") {
@@ -882,26 +868,37 @@ namespace xpilot
         }
         else
         {
-            emit notificationPosted((int)NotificationType::Error, "Callsign and Type Code are required.");
+            emit notificationPosted("Callsign and Type Code are required.", MessageType::Error);
         }
     }
 
-    void NetworkManager::connectTowerView(QString callsign, QString address)
+    void NetworkManager::connectTowerView()
     {
         if(AppConfig::getInstance()->configRequired()) {
-            emit notificationPosted((int)NotificationType::Error, "It looks like this may be the first time you've run xPilot on this computer. "
-"Some configuration items are required before you can connect to the network. Open Settings and verify your network credentials are saved.");
+            emit notificationPosted("It looks like this may be the first time you've run xPilot on this computer. Some configuration items are required before you can connect to the network. Open Settings and verify your network credentials are saved.", MessageType::Error);
             return;
         }
-        if(!callsign.isEmpty() && !address.isEmpty())
-        {
-            ConnectInfo connectInfo{};
-            connectInfo.Callsign = callsign;
-            connectInfo.TowerViewMode = true;
-            m_connectInfo = connectInfo;
 
-            emit notificationPosted((int)NotificationType::Info, "Connecting to TowerView proxy...");
-            m_fsd.Connect(address, 6809, false);
+        ConnectInfo connectInfo{};
+        connectInfo.Callsign = AppConfig::getInstance()->VatsimId + "_TV";
+        connectInfo.TowerViewMode = true;
+        m_connectInfo = connectInfo;
+
+        m_clientProperties = {"xPilot", FSD_VERSION_MAJOR, FSD_VERSION_MINOR, BuildConfig::TowerviewClientId(), BuildConfig::VatsimClientKey()};
+        m_fsd.SetClientProperties(m_clientProperties);
+
+        emit notificationPosted("Connecting to network...", MessageType::Info);
+
+        QString serverName = AppConfig::getInstance()->getNetworkServer();
+        if(AppConfig::getInstance()->ServerName == "AUTOMATIC") {
+            GetBestFsdServer().then([&](const QString& bestServer) {
+                m_fsd.Connect(bestServer, 6809);
+            }).fail([&, serverName](){
+                m_fsd.Connect(serverName, 6809);
+            });
+        }
+        else {
+            m_fsd.Connect(serverName, 6809);
         }
     }
 
@@ -934,12 +931,12 @@ namespace xpilot
 
     void NetworkManager::OnNetworkError(QString error)
     {
-        emit notificationPosted((int)NotificationType::Error, error);
+        emit notificationPosted(error, MessageType::Error);
     }
 
     void NetworkManager::OnProtocolErrorReceived(PDUProtocolError error)
     {
-        emit notificationPosted((int)NotificationType::Error, QString("Network Error: %1").arg(error.Message));
+        emit notificationPosted(QString("Network Error: %1").arg(error.Message), MessageType::Error);
     }
 
     void NetworkManager::OnRawDataSent(QString data)

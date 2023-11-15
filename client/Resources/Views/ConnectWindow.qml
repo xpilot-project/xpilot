@@ -4,25 +4,26 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Controls.Basic
 import QtQuick.Dialogs
-import AppConfig 1.0
+
+import org.vatsim.xpilot
 import "../Components"
 import "../Controls"
 
 Popup {
     id: popup
     width: 500
-    height: 180
+    height: 200
     x: Math.round((parent.width - width) / 2)
     y: Math.round((parent.height - height) / 2)
     focus: true
+    modal: true
     closePolicy: Popup.NoAutoClose
+
+    property string errorMessage: ""
+
     background: Rectangle {
         color: "white"
         border.color: "black"
-    }
-
-    function trimLineBreaks(value) {
-        return value.replace(/[\n\r]/g, "")
     }
 
     MouseArea {
@@ -43,15 +44,15 @@ Popup {
 
         function onTypeCodeResults(results) {
             typeCodeList.clear()
-            for(var i = 0; i < results.length; i++) {
-                var item = results[i];
-                typeCodeList.append({name: item.name, icao: item.typeCode, manufacturer: item.manufacturer});
+            for (var i = 0; i < results.length; i++) {
+                var item = results[i]
+                typeCodeList.append({ name: item.name, icao: item.typeCode, manufacturer: item.manufacturer })
             }
             typeCodeResults.visible = typeCodeList.count > 0
         }
 
         function onValidateTypeCode(valid) {
-            if(valid) {
+            if (valid) {
                 connectToNetwork()
             }
             else {
@@ -61,67 +62,22 @@ Popup {
     }
 
     Component.onCompleted: {
-        txtCallsign.text = trimLineBreaks(AppConfig.RecentConnection.Callsign);
-        txtTypeCode.text = trimLineBreaks(AppConfig.RecentConnection.TypeCode);
-        txtSelcal.text = trimLineBreaks(AppConfig.RecentConnection.SelcalCode);
+        txtCallsign.fieldValue = AppConfig.RecentConnection.Callsign
+        txtTypeCode.fieldValue = AppConfig.RecentConnection.TypeCode
+        txtSelcal.fieldValue = AppConfig.RecentConnection.SelcalCode
     }
 
     function connectToNetwork() {
-        networkManager.connectToNetwork(trimLineBreaks(txtCallsign.text), trimLineBreaks(txtTypeCode.text), trimLineBreaks(txtSelcal.text), observerMode.checked);
-        AppConfig.RecentConnection.Callsign = trimLineBreaks(txtCallsign.text);
-        AppConfig.RecentConnection.TypeCode = trimLineBreaks(txtTypeCode.text);
-        AppConfig.RecentConnection.SelcalCode = trimLineBreaks(txtSelcal.text);
-        AppConfig.saveConfig();
+        networkManager.connectToNetwork(txtCallsign.fieldValue, txtTypeCode.fieldValue, txtSelcal.fieldValue, observerMode.checked)
+        AppConfig.RecentConnection.Callsign = txtCallsign.fieldValue
+        AppConfig.RecentConnection.TypeCode = txtTypeCode.fieldValue
+        AppConfig.RecentConnection.SelcalCode = txtSelcal.fieldValue
+        AppConfig.saveConfig()
         close()
     }
 
     ListModel {
         id: typeCodeList
-    }
-
-    Popup {
-        id: validationPopup
-        width: 400
-        height: 120
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        modal: true
-        focus: true
-        closePolicy: Popup.NoAutoClose
-        margins: 20
-
-        property var errorMessage: ""
-
-        Text {
-            id: errorLabel
-            text: validationPopup.errorMessage
-            font.pixelSize: 14
-            renderType: Text.NativeRendering
-            width: parent.width
-            height: 55
-            wrapMode: Text.Wrap
-            color: "#C0392B"
-            verticalAlignment: Text.AlignVCenter
-            bottomPadding: 10
-            leftPadding: 10
-        }
-
-        GrayButton {
-            id: btnOK
-            text: "OK"
-            width: 80
-            height: 30
-            font.pixelSize: 14
-            anchors.top: errorLabel.bottom
-            x: 10
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    validationPopup.close()
-                }
-            }
-        }
     }
 
     GridLayout {
@@ -131,40 +87,22 @@ Popup {
         anchors.bottomMargin: 15
         anchors.topMargin: 15
         columns: 3
-        rows: 3
+        rows: 4
 
-        Item {
-            id: callsign
-            Layout.preferredHeight: 35
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            Layout.topMargin: 0
+        CustomTextField {
+            id: txtCallsign
             Layout.column: 0
             Layout.row: 1
-
-            Text {
-                color: "#000"
-                text: qsTr("Callsign")
-                font.pixelSize: 13
-                renderType: Text.NativeRendering
-            }
-
-
-            CustomTextField {
-                id: txtCallsign
-                height: 28
-                anchors.top: callsign.bottom
-                anchors.topMargin: -5
-                selectByMouse: true
-                maximumLength: observerMode.checked ? 8 : 7
-                onTextChanged: {
-                    text = text.toUpperCase()
-                }
+            fieldLabel: "Callsign"
+            maximumLength: 10
+            isUppercase: true
+            validator: RegularExpressionValidator {
+                regularExpression: /^[a-zA-Z0-9]+$/
             }
         }
 
         Item {
-            id: typeCode
+            id: typeCodeContainer
             Layout.preferredHeight: 35
             Layout.fillHeight: true
             Layout.fillWidth: true
@@ -173,29 +111,21 @@ Popup {
             Layout.row: 1
             z: 100
 
-            Text {
-                color: "#000"
-                text: qsTr("Type Code")
-                font.pixelSize: 13
-                renderType: Text.NativeRendering
-            }
-
             CustomTextField {
                 id: txtTypeCode
                 height: 28
-                anchors.top: typeCode.bottom
-                anchors.topMargin: -5
-                selectByMouse: true
-                onTextChanged: {
-                    text = text.toUpperCase()
-                }
+                width: typeCodeContainer.width
+                anchors.fill: typeCodeContainer
+                fieldLabel: "Type Code"
+                maximumLength: observerMode.checked ? 8 : 7
+                isUppercase: true
                 Keys.onReleased: function(event) {
-                    if(event.key === Qt.Key_Escape) {
+                    if (event.key === Qt.Key_Escape) {
                         typeCodeResults.visible = false
                     }
                     else {
-                        if(txtTypeCode.text.length > 0) {
-                            typeCodeDatabase.searchTypeCodes(txtTypeCode.text.toUpperCase());
+                        if (txtTypeCode.fieldValue.length > 0) {
+                            typeCodeDatabase.searchTypeCodes(txtTypeCode.fieldValue)
                         }
                         else {
                             typeCodeResults.visible = false
@@ -226,7 +156,9 @@ Popup {
                     id: typeCodeListView
                     currentIndex: -1
                     anchors.fill: parent
-                    highlight: Rectangle { color: "lightsteelblue"; }
+                    highlight: Rectangle {
+                        color: "lightsteelblue"
+                    }
                     model: typeCodeList
                     delegate: Component {
                         id: contactDelegate
@@ -251,7 +183,7 @@ Popup {
                                 onEntered: typeCodeListView.currentIndex = index
                                 onClicked: {
                                     typeCodeListView.currentIndex = index
-                                    txtTypeCode.text = typeCodeList.get(typeCodeListView.currentIndex).icao
+                                    txtTypeCode.fieldValue = typeCodeList.get(typeCodeListView.currentIndex).icao
                                     typeCodeResults.visible = false
                                 }
                             }
@@ -262,45 +194,24 @@ Popup {
             }
         }
 
-        Item {
-            id: selcal
-            Layout.preferredHeight: 35
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            Layout.topMargin: 0
+        CustomTextField {
+            id: txtSelcal
             Layout.column: 2
             Layout.row: 1
-
-            Text {
-                color: "#000"
-                text: qsTr("SELCAL")
-                font.pixelSize: 13
-                renderType: Text.NativeRendering
-            }
-
-
-            CustomTextField {
-                id: txtSelcal
-                height: 28
-                anchors.top: selcal.bottom
-                anchors.topMargin: -5
-                selectByMouse: true
-                maximumLength: 5
-                onTextChanged: {
-                    text = text.toUpperCase()
-                }
+            fieldLabel: "SELCAL"
+            isUppercase: true
+            validator: RegularExpressionValidator {
+                regularExpression: /^[A-Za-z-]+$/
             }
         }
 
         Item {
-            id: connectObserver
             Layout.preferredHeight: 40
             Layout.fillHeight: true
             Layout.column: 0
             Layout.row: 2
             Layout.columnSpan: 3
             Layout.fillWidth: true
-            Layout.topMargin: 20
 
             CustomCheckBox {
                 id: observerMode
@@ -312,8 +223,23 @@ Popup {
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
                 onCheckedChanged: {
-                    txtCallsign.text = observerMode.checked ? txtCallsign.text.substring(0,8) : txtCallsign.text.substring(0,7);
+                    txtCallsign.fieldValue = observerMode.checked ? txtCallsign.fieldValue.substring(0, 8) : txtCallsign.fieldValue.substring(0, 7)
                 }
+            }
+        }
+
+        Item {
+            Layout.preferredHeight: 40
+            Layout.fillHeight: true
+            Layout.column: 0
+            Layout.row: 3
+            Layout.columnSpan: 3
+            Layout.fillWidth: true
+            visible: errorMessage !== ""
+
+            Text {
+                text: errorMessage
+                color: "#ff0000"
             }
         }
 
@@ -322,13 +248,13 @@ Popup {
             Layout.preferredHeight: 40
             Layout.fillHeight: true
             Layout.columnSpan: 2
-            Layout.row: 3
+            Layout.row: 4
             Layout.column: 0
             Layout.fillWidth: true
 
             BlueButton {
                 id: blueButton
-                text: qsTr("Connect to VATSIM")
+                text: "Connect to VATSIM"
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
@@ -343,52 +269,46 @@ Popup {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        if(txtCallsign.text === "") {
-                            validationPopup.errorMessage = "Callsign is required"
-                            validationPopup.open()
+                        if (txtCallsign.fieldValue === "") {
+                            errorMessage = "Callsign is required"
                             return
                         }
-                        if(txtTypeCode.text === "") {
-                            validationPopup.errorMessage = "Aircraft type code is required"
-                            validationPopup.open()
+                        if (txtTypeCode.fieldValue === "") {
+                            errorMessage = "Aircraft type code is required"
                             return
                         }
-                        if(txtSelcal.text !== "") {
+                        if (txtSelcal.fieldValue !== "") {
                             const prohibitedChars = ["I", "N", "O"]
-                            var selcal = txtSelcal.text
+                            var selcal = txtSelcal.fieldValue
                             selcal = selcal.replace("-", "")
                             selcal = selcal.toUpperCase()
                             const chars = selcal.split("")
                             if (/([a-zA-Z]).*?\1/.test(selcal)) {
-                                validationPopup.errorMessage = "SELCAL cannot contain repeating characters."
-                                validationPopup.open()
+                                errorMessage = "SELCAL cannot contain repeating characters."
                                 return
                             }
                             for (let i = 1; i < chars.length; i += 2) {
                                 if (chars[i] > 'S') {
-                                    validationPopup.errorMessage = "SELCAL can only contain characters A through S."
-                                    validationPopup.open()
+                                    errorMessage = "SELCAL can only contain characters A through S."
                                     return
                                 }
                                 if (chars[i - 1] > 'R') {
-                                    validationPopup.errorMessage = "SELCAL can only contain characters A through S."
-                                    validationPopup.open()
+                                    errorMessage = "SELCAL can only contain characters A through S."
                                     return
                                 }
                                 if (prohibitedChars.includes(chars[i])) {
-                                    validationPopup.errorMessage = "SELCAL cannot contain characters I, N or O."
-                                    validationPopup.open()
+                                    errorMessage = "SELCAL cannot contain characters I, N or O."
                                     return
                                 }
                                 if (chars[i] < chars[i - 1]) {
-                                    validationPopup.errorMessage = "SELCAL characters must be in ascending, alphabetical order."
-                                    validationPopup.open()
+                                    errorMessage = "SELCAL characters must be in ascending, alphabetical order."
                                     return
                                 }
                             }
                         }
 
-                        typeCodeDatabase.validateTypeCodeBeforeConnect(txtTypeCode.text.toUpperCase())
+                        errorMessage = ""
+                        typeCodeDatabase.validateTypeCodeBeforeConnect(txtTypeCode.fieldValue)
                     }
                 }
             }
@@ -399,12 +319,12 @@ Popup {
             Layout.preferredHeight: 30
             Layout.fillHeight: true
             Layout.columnSpan: 1
-            Layout.row: 3
+            Layout.row: 4
             Layout.column: 2
             Layout.fillWidth: true
 
             GrayButton {
-                text: qsTr("Cancel")
+                text: "Cancel"
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left

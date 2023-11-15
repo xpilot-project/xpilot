@@ -19,7 +19,6 @@
 #ifndef PDU_DELETEATC_H
 #define PDU_DELETEATC_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUDeleteATC : public PDUBase

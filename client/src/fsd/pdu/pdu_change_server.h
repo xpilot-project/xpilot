@@ -19,7 +19,6 @@
 #ifndef PDU_CHANGE_SERVER_H
 #define PDU_CHANGE_SERVER_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUChangeServer : public PDUBase

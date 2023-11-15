@@ -16,11 +16,6 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "versioncheck.h"
-#include "src/common/utils.h"
-#include "src/common/build_config.h"
-#include "src/config/appconfig.h"
-
 #include <QStringLiteral>
 #include <QStringBuilder>
 #include <QJsonDocument>
@@ -30,6 +25,11 @@
 #include <QNetworkAccessManager>
 #include <QProcess>
 #include <QDirIterator>
+
+#include "versioncheck.h"
+#include "common/utils.h"
+#include "common/build_config.h"
+#include "config/appconfig.h"
 
 using namespace xpilot;
 using namespace QtPromise;
@@ -259,21 +259,26 @@ void VersionCheck::LaunchInstaller()
         executable.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner| QFile::ReadGroup | QFile::ExeGroup | QFile::ReadOther | QFile::ExeOther);
     }
 
+    QProcess *process = new QProcess();
+
     if(BuildConfig::isRunningOnMacOSPlatform()) {
-        // macos: we have to mount the disk image
-        QProcess p;
-        p.setProgram("hdiutil");
-        p.setArguments(QStringList() << "attach" << path << "-autoopen");
-        p.startDetached();
-        p.waitForStarted();
-        QCoreApplication::quit();
+        // macOS: Mount installer disk image then launch installer
+        process->setProgram("hdiutil");
+        process->setArguments(QStringList() << "attach" << path << "-autoopen");
     }
     else {
-        // windows: we can directly launch the installer
-        QProcess p;
-        p.setProgram(path);
-        p.startDetached();
-        p.waitForStarted();
-        QCoreApplication::quit();
+        // Windows and Linux: launch installer directly
+        process->setProgram(path);
     }
+
+    connect(process, &QProcess::errorOccurred, this, [this](auto error){
+        emit errorEncountered("Error starting update process: " + error);
+    });
+
+    auto thread = new QThread;
+    process->moveToThread(thread);
+    process->startDetached();
+    process->waitForStarted();
+
+    qApp->quit();
 }

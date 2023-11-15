@@ -16,12 +16,6 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "installmodels.h"
-#include "libzippp.h"
-#include "utils.h"
-#include "build_config.h"
-#include "src/config/appconfig.h"
-
 #include <fstream>
 
 #include <QFile>
@@ -31,6 +25,12 @@
 #include <QNetworkReply>
 #include <QJsonObject>
 #include <QJsonDocument>
+
+#include "installmodels.h"
+#include "libzippp.h"
+#include "utils.h"
+#include "build_config.h"
+#include "config/appconfig.h"
 
 using namespace libzippp;
 using namespace QtPromise;
@@ -196,6 +196,8 @@ QtPromise::QPromise<void> InstallModels::UnzipModels(const QString &path)
                 }
 
                 QString xplanePath = QDir::fromNativeSeparators(pathAppend(path, "Resources/plugins/xPilot/Resources/CSL"));
+
+                QDir().mkdir(xplanePath); // create CSL directory if it doesn't exist
 
                 std::vector<ZipEntry> entries = zf.getEntries();
                 std::vector<ZipEntry>::iterator it;

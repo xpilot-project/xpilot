@@ -19,6 +19,9 @@
 #ifndef AFV_H
 #define AFV_H
 
+#include <thread>
+#include <memory>
+
 #include <QtGlobal>
 #include <QObject>
 #include <QTimer>
@@ -29,17 +32,18 @@
 #include <QTextStream>
 #include <QMap>
 
-#include <thread>
-#include <memory>
 #include <event2/event.h>
 
-#include "src/qinjection/dependencypointer.h"
-#include "src/network/networkmanager.h"
-#include "src/simulator/xplane_adapter.h"
-#include "src/controllers/controller_manager.h"
-#include "src/controllers/controller.h"
+#include "qinjection/dependencypointer.h"
+#include "network/networkmanager.h"
+#include "simulator/xplane_adapter.h"
+#include "controllers/controller_manager.h"
+#include "controllers/controller.h"
 #include "afv-native/Client.h"
 #include "audiodeviceinfo.h"
+#include "common/enums.h"
+
+using namespace enums;
 
 namespace xpilot
 {
@@ -85,13 +89,16 @@ namespace xpilot
             return QVariant::fromValue(itemList);
         }
 
-        Q_INVOKABLE void setInputDevice(QString deviceId);
-        Q_INVOKABLE void setOutputDevice(QString deviceId);
+        Q_INVOKABLE void setInputDevice(QString deviceName);
+        Q_INVOKABLE void setSpeakerDevice(QString deviceName);
+        Q_INVOKABLE void setHeadsetDevice(QString deviceName);
+        Q_INVOKABLE void setSplitAudioChannels(bool split);
         Q_INVOKABLE void setCom1Volume(double volume);
         Q_INVOKABLE void setCom2Volume(double volume);
         Q_INVOKABLE void disableAudioEffects(bool disabled);
         Q_INVOKABLE void enableHfSquelch(bool enabled);
         Q_INVOKABLE void setMicrophoneVolume(int volume);
+        Q_INVOKABLE void setOnHeadset(unsigned int radio, bool onHeadset);
         Q_INVOKABLE void settingsWindowOpened();
         Q_INVOKABLE void settingsWindowClosed();
 
@@ -102,7 +109,7 @@ namespace xpilot
         void OnAudioDevicesTimer();
 
     signals:
-        void notificationPosted(int type, QString message);
+        void notificationPosted(QString message, MessageType type);
         void radioRxChanged(uint radio, bool active);
         void outputDevicesChanged();
         void inputDevicesChanged();

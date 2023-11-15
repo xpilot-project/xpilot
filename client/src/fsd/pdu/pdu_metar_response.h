@@ -19,7 +19,6 @@
 #ifndef PDU_METARRESPONSE_H
 #define PDU_METARRESPONSE_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUMetarResponse: public PDUBase

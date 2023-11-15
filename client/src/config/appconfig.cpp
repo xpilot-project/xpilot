@@ -23,8 +23,10 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QDesktopServices>
+#include <QStringEncoder>
+
 #include "appconfig.h"
-#include "src/common/build_config.h"
+#include "common/build_config.h"
 
 using namespace xpilot;
 
@@ -71,16 +73,13 @@ void AppConfig::loadConfig()
     }
 
     QScreen *primaryScreen = QGuiApplication::primaryScreen();
+    QRect primaryGeometry = primaryScreen->availableGeometry();
 
     QFile configFile(dataRoot() + "AppConfig.json");
     if(!configFile.open(QIODevice::ReadOnly)) {
-
-        int x = (primaryScreen->size().width() / 2) - (DefaultWidth / 2);
-        int y = (primaryScreen->size().height() / 2) - (DefaultHeight / 2);
-
         // set default values
-        WindowConfig.X = x;
-        WindowConfig.Y = y;
+        WindowConfig.X = primaryGeometry.center().x() - DefaultWidth / 2;
+        WindowConfig.Y = primaryGeometry.center().y() - DefaultHeight / 2;
         WindowConfig.Width = DefaultWidth;
         WindowConfig.Height = DefaultHeight;
         WindowConfig.Maximized = false;
@@ -94,6 +93,8 @@ void AppConfig::loadConfig()
         AutoModeC = true;
         Com1Volume = 50;
         Com2Volume = 50;
+        Com1OnHeadset = true;
+        Com2OnHeadset = true;
         MicrophoneVolume = 0;
         HFSquelchEnabled = false;
         XplaneNetworkAddress = DEFAULT_XPLANE_NETWORK_ADDRESS;
@@ -101,8 +102,9 @@ void AppConfig::loadConfig()
         XplaneUdpPort = XPLANE_UDP_PORT;
         SilenceModelInstall = false;
         KeepWindowVisible = false;
-        AircraftRadioStackControlsVolume = true;
+        AircraftRadioStackControlsVolume = false;
         MicrophoneCalibrated = false;
+        SplitAudioChannels = false;
 
         if(!saveConfig()) {
             emit permissionError("Failed to write configuration file. Please make sure you have correct read/write permissions to " + dataRoot());
@@ -125,33 +127,37 @@ void AppConfig::loadConfig()
 
     crypto.setKey(BuildConfig::ConfigEncryptionKey());
 
-    VatsimId = jsonMap["VatsimId"].toString();
-    VatsimPassword = jsonMap["VatsimPassword"].toString();
-    Name = jsonMap["Name"].toString();
-    HomeAirport = jsonMap["HomeAirport"].toString();
-    ServerName = jsonMap["ServerName"].toString();
-    InputDevice = jsonMap["InputDevice"].toString();
-    OutputDevice = jsonMap["OutputDevice"].toString();
-    Com1Volume = qMin(qMax(jsonMap["Com1Volume"].toInt(), 0), 100);
-    Com2Volume = qMin(qMax(jsonMap["Com2Volume"].toInt(), 0), 100);
-    MicrophoneVolume = qMin(qMax(jsonMap["MicrophoneVolume"].toInt(), -60), 18);
-    AudioEffectsDisabled = jsonMap["AudioEffectsDisabled"].toBool();
-    HFSquelchEnabled = jsonMap["HFSquelchEnabled"].toBool();
-    AutoModeC = jsonMap["AutoModeC"].toBool();
-    AlertPrivateMessage = jsonMap["AlertPrivateMessage"].toBool();
-    AlertRadioMessage = jsonMap["AlertRadioMessage"].toBool();
-    AlertDirectRadioMessage = jsonMap["AlertDirectRadioMessage"].toBool();
-    AlertSelcal = jsonMap["AlertSelcal"].toBool();
-    AlertDisconnect = jsonMap["AlertDisconnect"].toBool();
-    AlertNetworkBroadcast = jsonMap["AlertNetworkBroadcast"].toBool();
-    XplaneNetworkAddress = jsonMap["XplaneNetworkAddress"].toString();
-    XplanePluginPort = jsonMap["XplanePluginPort"].toInt();
-    XplaneUdpPort = jsonMap["XplaneUdpPort"].toInt();
-    SilenceModelInstall = jsonMap["SilenceModelInstall"].toBool();
-    VisualMachines = jsonMap["VisualMachines"].toStringList();
-    KeepWindowVisible = jsonMap["KeepWindowVisible"].toBool();
-    AircraftRadioStackControlsVolume = jsonMap["AircraftRadioStackControlsVolume"].toBool();
-    MicrophoneCalibrated = jsonMap["MicrophoneCalibrated"].toBool();
+    VatsimId = getJsonValue(jsonMap, "VatsimId", QString());
+    VatsimPassword = getJsonValue(jsonMap, "VatsimPassword", QString());
+    Name = getJsonValue(jsonMap, "Name", QString());
+    HomeAirport = getJsonValue(jsonMap, "HomeAirport", QString());
+    ServerName = getJsonValue(jsonMap, "ServerName", QString());
+    InputDevice = getJsonValue(jsonMap, "InputDevice", QString());
+    SpeakerDevice = getJsonValue(jsonMap, "SpeakerDevice", QString());
+    HeadsetDevice = getJsonValue(jsonMap, "HeadsetDevice", QString());
+    SplitAudioChannels = getJsonValue(jsonMap, "SplitAudioChannels", false);
+    Com1Volume = qMin(qMax(getJsonValue<int>(jsonMap, "Com1Volume", 50), 0), 100);
+    Com2Volume = qMin(qMax(getJsonValue<int>(jsonMap, "Com2Volume", 50), 0), 100);
+    Com1OnHeadset = getJsonValue(jsonMap, "Com1OnHeadset", true);
+    Com2OnHeadset = getJsonValue(jsonMap, "Com2OnHeadset", true);
+    MicrophoneVolume = qMin(qMax(getJsonValue(jsonMap, "MicrophoneVolume", 0), -60), 18);
+    AudioEffectsDisabled = getJsonValue(jsonMap, "AudioEffectsDisabled", false);
+    HFSquelchEnabled = getJsonValue(jsonMap, "HFSquelchEnabled", false);
+    AutoModeC = getJsonValue(jsonMap, "AutoModeC", true);
+    AlertPrivateMessage = getJsonValue(jsonMap, "AlertPrivateMessage", true);
+    AlertRadioMessage = getJsonValue(jsonMap, "AlertRadioMessage", true);
+    AlertDirectRadioMessage = getJsonValue(jsonMap, "AlertDirectRadioMessage", true);
+    AlertSelcal = getJsonValue(jsonMap, "AlertSelcal", true);
+    AlertDisconnect = getJsonValue(jsonMap, "AlertDisconnect", true);
+    AlertNetworkBroadcast = getJsonValue(jsonMap, "AlertNetworkBroadcast", true);
+    XplaneNetworkAddress = getJsonValue(jsonMap, "XplaneNetworkAddress", QString(DEFAULT_XPLANE_NETWORK_ADDRESS));
+    XplanePluginPort = getJsonValue<int>(jsonMap, "XplanePluginPort", 53100);
+    XplaneUdpPort = getJsonValue<int>(jsonMap, "XplaneUdpPort", 49000);
+    SilenceModelInstall = getJsonValue(jsonMap, "SilenceModelInstall", false);
+    VisualMachines = getJsonValue(jsonMap, "VisualMachines", QStringList());
+    KeepWindowVisible = getJsonValue(jsonMap, "KeepWindowVisible", false);
+    AircraftRadioStackControlsVolume = getJsonValue(jsonMap, "AircraftRadioStackControlsVolume", false);
+    MicrophoneCalibrated = getJsonValue(jsonMap, "MicrophoneCalibrated", false);
 
     QJsonArray cachedServers = jsonMap["CachedServers"].toJsonArray();
     CachedServers.clear();
@@ -176,30 +182,19 @@ void AppConfig::loadConfig()
     WindowConfig.Maximized = window["Maximized"].toBool();
 
     // make sure window is actually within the screen geometry bounds
-    QRect windowRect(WindowConfig.X, WindowConfig.Y, WindowConfig.Width, WindowConfig.Height);
-    auto screens = QGuiApplication::screens();
-
-    bool hasValidScreenPosition = false;
-    for(auto &screen : screens) {
-        int minX = screen->availableGeometry().x();
-        int minY = screen->availableGeometry().y();
-        int availableWidth = screen->availableGeometry().x() + screen->availableGeometry().width();
-        int availableHeight = screen->availableGeometry().y() + screen->availableGeometry().height();
-
-        // force the window to reposition if:
-        // - the window position is not within the screen geometory,
-        // - or if less than 1/4 of the window position within the screen geometry
-        if((abs(windowRect.x()) > minX && windowRect.x() < availableWidth - (DefaultWidth / 4)) &&
-                (abs(windowRect.y()) > minY && windowRect.y() < availableHeight - (DefaultHeight / 4)))
-        {
-            hasValidScreenPosition = true;
+    bool isValidScreenPosition = false;
+    QList<QScreen*> screens = QGuiApplication::screens();
+    foreach(QScreen *screen, screens) {
+        if(screen->geometry().contains(WindowConfig.X, WindowConfig.Y)) {
+            isValidScreenPosition = true;
+            break;
         }
     }
 
     // reposition the window centered on the primary screen
-    if(!hasValidScreenPosition) {
-        WindowConfig.X = (primaryScreen->size().width() / 2) - (DefaultWidth / 2);
-        WindowConfig.Y = (primaryScreen->size().height() / 2) - (DefaultHeight / 2);
+    if(!isValidScreenPosition) {
+        WindowConfig.X = primaryGeometry.center().x() - DefaultWidth / 2;
+        WindowConfig.Y = primaryGeometry.center().y() - DefaultHeight / 2;
         WindowConfig.Width = DefaultWidth;
         WindowConfig.Height = DefaultHeight;
         WindowConfig.Maximized = false;
@@ -208,24 +203,30 @@ void AppConfig::loadConfig()
     if(!VatsimPassword.isEmpty()) {
         VatsimPasswordDecrypted = crypto.decryptToString(VatsimPassword);
     }
+
+    setInitialTempValues();
 }
 
 bool AppConfig::saveConfig()
 {
     QJsonObject jsonObj;
-    jsonObj["VatsimId"] = VatsimId;
+    jsonObj["VatsimId"] = trim(VatsimId);
     if(!VatsimPasswordDecrypted.isEmpty()) {
         jsonObj["VatsimPassword"] = crypto.encryptToString(VatsimPasswordDecrypted);
     } else {
         jsonObj["VatsimPassword"] = "";
     }
-    jsonObj["Name"] = Name;
-    jsonObj["HomeAirport"] = HomeAirport;
-    jsonObj["ServerName"] = ServerName;
-    jsonObj["InputDevice"] = InputDevice;
-    jsonObj["OutputDevice"] = OutputDevice;
+    jsonObj["Name"] = trim(Name);
+    jsonObj["HomeAirport"] = trim(HomeAirport);
+    jsonObj["ServerName"] = trim(ServerName);
+    jsonObj["InputDevice"] = trim(InputDevice);
+    jsonObj["SpeakerDevice"] = trim(SpeakerDevice);
+    jsonObj["HeadsetDevice"] = trim(HeadsetDevice);
+    jsonObj["SplitAudioChannels"] = SplitAudioChannels;
     jsonObj["Com1Volume"] = qMin(qMax(Com1Volume, 0), 100);
     jsonObj["Com2Volume"] = qMin(qMax(Com2Volume, 0), 100);
+    jsonObj["Com1OnHeadset"] = Com1OnHeadset;
+    jsonObj["Com2OnHeadset"] = Com2OnHeadset;
     jsonObj["MicrophoneVolume"] = qMin(qMax(MicrophoneVolume, -60), 18);
     jsonObj["AudioEffectsDisabled"] = AudioEffectsDisabled;
     jsonObj["HFSquelchEnabled"] = HFSquelchEnabled;
@@ -236,7 +237,7 @@ bool AppConfig::saveConfig()
     jsonObj["AlertDirectRadioMessage"] = AlertDirectRadioMessage;
     jsonObj["AlertSelcal"] = AlertSelcal;
     jsonObj["AlertDisconnect"] = AlertDisconnect;
-    jsonObj["XplaneNetworkAddress"] = XplaneNetworkAddress.isEmpty() ? DEFAULT_XPLANE_NETWORK_ADDRESS : XplaneNetworkAddress;
+    jsonObj["XplaneNetworkAddress"] = XplaneNetworkAddress.isEmpty() ? DEFAULT_XPLANE_NETWORK_ADDRESS : trim(XplaneNetworkAddress);
     jsonObj["XplanePluginPort"] = XplanePluginPort == 0 ? DEFAULT_PLUGIN_PORT : XplanePluginPort;
     jsonObj["XplaneUdpPort"] = XplaneUdpPort == 0 ? XPLANE_UDP_PORT : XplaneUdpPort;
     jsonObj["SilenceModelInstall"] = SilenceModelInstall;
@@ -298,6 +299,33 @@ void AppConfig::openAppDataFolder()
     QDesktopServices::openUrl(QUrl("file:///" + dataRoot()));
 }
 
+void AppConfig::applySettings()
+{
+    VatsimId = tempVatsimId;
+    VatsimPasswordDecrypted = tempVatsimPasswordDecrypted;
+    Name = tempName;
+    HomeAirport = tempHomeAirport;
+    ServerName = tempServerName;
+    SpeakerDevice = tempSpeakerDevice;
+    HeadsetDevice = tempHeadsetDevice;
+    InputDevice = tempInputDevice;
+    SplitAudioChannels = tempSplitAudioChannels;
+    Com1Volume = tempCom1Volume;
+    Com2Volume = tempCom2Volume;
+    MicrophoneVolume = tempMicrophoneVolume;
+    AudioEffectsDisabled = tempAudioEffectsDisabled;
+    HFSquelchEnabled = tempHFSquelchEnabled;
+    AutoModeC = tempAutoModeC;
+    AlertPrivateMessage = tempAlertPrivateMessage;
+    AlertDirectRadioMessage = tempAlertDirectRadioMessage;
+    AlertRadioMessage = tempAlertRadioMessage;
+    AlertNetworkBroadcast = tempAlertNetworkBroadcast;
+    AlertSelcal = tempAlertSelcal;
+    AlertDisconnect = tempAlertDisconnect;
+    KeepWindowVisible = tempKeepWindowVisible;
+    AircraftRadioStackControlsVolume = tempAircraftRadioStackControlsVolume;
+}
+
 QString AppConfig::getNetworkServer()
 {
     if(ServerName.isEmpty() || CachedServers.isEmpty()) return "";
@@ -310,4 +338,31 @@ QString AppConfig::getNetworkServer()
     }
 
     return "";
+}
+
+void AppConfig::setInitialTempValues()
+{
+    tempVatsimId = VatsimId;
+    tempVatsimPasswordDecrypted = VatsimPasswordDecrypted;
+    tempName = Name;
+    tempHomeAirport = HomeAirport;
+    tempServerName = ServerName;
+    tempSpeakerDevice = SpeakerDevice;
+    tempHeadsetDevice = HeadsetDevice;
+    tempInputDevice = InputDevice;
+    tempSplitAudioChannels = SplitAudioChannels;
+    tempCom1Volume = Com1Volume;
+    tempCom2Volume = Com2Volume;
+    tempMicrophoneVolume = MicrophoneVolume;
+    tempAudioEffectsDisabled = AudioEffectsDisabled;
+    tempHFSquelchEnabled = HFSquelchEnabled;
+    tempAutoModeC = AutoModeC;
+    tempAlertPrivateMessage = AlertPrivateMessage;
+    tempAlertDirectRadioMessage = AlertDirectRadioMessage;
+    tempAlertRadioMessage = AlertRadioMessage;
+    tempAlertNetworkBroadcast = AlertNetworkBroadcast;
+    tempAlertSelcal = AlertSelcal;
+    tempAlertDisconnect = AlertDisconnect;
+    tempKeepWindowVisible = KeepWindowVisible;
+    tempAircraftRadioStackControlsVolume = AircraftRadioStackControlsVolume;
 }

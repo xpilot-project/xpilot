@@ -19,7 +19,6 @@
 #ifndef PDU_ADDPILOT_H
 #define PDU_ADDPILOT_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUAddPilot : public PDUBase

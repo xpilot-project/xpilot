@@ -12,8 +12,12 @@ Rectangle {
     property string comLabel: "COM1"
     signal volumeValueChanged(real volume)
 
-    width: 295
+    property bool initializing: true
+
     height: 30
+    color: "transparent"
+
+    Component.onCompleted: initializing = false
 
     Row {
         Label {
@@ -31,12 +35,16 @@ Rectangle {
             from: minValue
             to: maxValue
 
-            onMoved: volumeValueChanged(value)
+            onMoved: {
+                if(!initializing) {
+                    volumeValueChanged(value)
+                }
+            }
 
             background: Rectangle {
                 x: control.leftPadding
                 y: control.topPadding + control.availableHeight / 2 - height / 2
-                implicitWidth: 230
+                implicitWidth: 200
                 implicitHeight: 4
                 width: control.availableWidth
                 height: implicitHeight

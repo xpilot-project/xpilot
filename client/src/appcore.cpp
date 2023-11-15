@@ -35,24 +35,27 @@
 #include <QFont>
 #include <QFontDatabase>
 #include <QCommandLineParser>
+#include <QtQml/qqml.h>
 
-#include "src/appcore.h"
-#include "src/common/build_config.h"
-#include "src/common/versioncheck.h"
-#include "src/common/typecodedatabase.h"
-#include "src/common/installmodels.h"
-#include "src/common/runguard.h"
-#include "src/common/clipboardadapter.h"
-#include "src/config/appconfig.h"
-#include "src/audio/afv.h"
-#include "src/controllers/controller_manager.h"
-#include "src/network/networkmanager.h"
-#include "src/network/serverlistmanager.h"
-#include "src/simulator/xplane_adapter.h"
-#include "src/aircrafts/user_aircraft_manager.h"
-#include "src/aircrafts/network_aircraft_manager.h"
-#include "src/aircrafts/radio_stack_state.h"
-#include "src/qinjection/dependencypool.h"
+#include <qinjection/dependencypool.h>
+
+#include "appcore.h"
+#include "common/enums.h"
+#include "common/build_config.h"
+#include "common/versioncheck.h"
+#include "common/typecodedatabase.h"
+#include "common/installmodels.h"
+#include "common/runguard.h"
+#include "common/clipboardadapter.h"
+#include "config/appconfig.h"
+#include "audio/afv.h"
+#include "controllers/controller_manager.h"
+#include "network/networkmanager.h"
+#include "network/serverlistmanager.h"
+#include "simulator/xplane_adapter.h"
+#include "aircrafts/user_aircraft_manager.h"
+#include "aircrafts/network_aircraft_manager.h"
+#include "aircrafts/radio_stack_state.h"
 
 using namespace xpilot;
 
@@ -82,11 +85,11 @@ int xpilot::Main(int argc, char* argv[])
     app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));
 
     auto families = QFontDatabase::families();
-    if(!families.contains("Ubuntu")) {
-        // We must check if Ubuntu is already instead (at least for Linux), otherwise the FileDialog gets all corrupted...
-        QFontDatabase::addApplicationFont(":/Resources/Fonts/Ubuntu-Regular.ttf");
+    if(!families.contains("Open Sans")) {
+        // We must check if Open Sans is already instead (at least for Linux), otherwise the FileDialog gets all corrupted...
+        QFontDatabase::addApplicationFont(":/Resources/Fonts/OpenSans.ttf");
     }
-    app.setFont(QFont("Ubuntu", 10));
+    app.setFont(QFont("Open Sans", 10));
 
     QQmlApplicationEngine engine;
     QQmlContext *context = engine.rootContext();
@@ -110,7 +113,9 @@ int xpilot::Main(int argc, char* argv[])
         typeCodeDatabase.PerformTypeCodeDownload();
     });
 
-    qmlRegisterSingletonType<AppConfig>("AppConfig", 1, 0, "AppConfig", appConfigSingleton);
+    qmlRegisterSingletonType<AppConfig>("org.vatsim.xpilot", 1, 0, "AppConfig", appConfigSingleton);
+    qmlRegisterUncreatableMetaObject(enums::staticMetaObject, "org.vatsim.xpilot", 1, 0, "Enum", "Only enums can be registered");
+    qRegisterMetaType<MessageType>("MessageType");
     qRegisterMetaType<ConnectInfo>("ConnectInfo");
     qRegisterMetaType<ClientWindowConfig>("ClientWindowConfig");
     qRegisterMetaType<RadioStackState>("RadioStackState");

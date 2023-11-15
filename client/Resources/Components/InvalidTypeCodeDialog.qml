@@ -3,7 +3,6 @@ import QtQuick.Controls
 import QtQuick.Controls.Basic
 import QtQuick.Window
 import QtQuick.Layouts
-import AppConfig 1.0
 import "../Controls"
 
 Popup {
@@ -15,9 +14,14 @@ Popup {
     modal: true
     focus: true
     closePolicy: Popup.NoAutoClose
+
     background: Rectangle {
         color: "white"
         border.color: "black"
+    }
+
+    Overlay.modal: Rectangle {
+        color: "transparent"
     }
 
     signal useInvalidTypeCode()

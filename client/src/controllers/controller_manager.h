@@ -24,10 +24,10 @@
 #include <QTimer>
 
 #include "controller.h"
-#include "src/network/networkmanager.h"
-#include "src/simulator/xplane_adapter.h"
-#include "src/qinjection/dependencypointer.h"
-#include "src/common/frequency_utils.h"
+#include "network/networkmanager.h"
+#include "simulator/xplane_adapter.h"
+#include "qinjection/dependencypointer.h"
+#include "common/frequency_utils.h"
 
 namespace xpilot
 {
@@ -39,9 +39,9 @@ namespace xpilot
         ControllerManager(QObject* parent = nullptr);
 
     signals:
-        void controllerAdded(Controller& controller);
-        void controllerDeleted(Controller& controller);
-        void controllerUpdated(Controller& controller);
+        void controllerAdded(Controller controller);
+        void controllerDeleted(Controller controller);
+        void controllerUpdated(Controller controller);
 
     private:
         void OnControllerUpdateReceived(QString from, uint frequency, double lat, double lon);

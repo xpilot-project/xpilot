@@ -22,6 +22,7 @@
 #include <QGuiApplication>
 #include <QClipboard>
 #include <QObject>
+#include <QRegularExpression>
 
 class ClipboardAdapter : public QObject
 {
@@ -33,6 +34,8 @@ public:
     }
 
     Q_INVOKABLE void setText(QString text){
+        static QRegularExpression htmlTags("<[^>]*>");
+        text.remove(htmlTags);
         clipboard->setText(text, QClipboard::Clipboard);
     }
     Q_INVOKABLE QString getText(){

@@ -1,6 +1,11 @@
 #include "src/common/build_config.h"
 #include <QString>
 
+const ushort xpilot::BuildConfig::TowerviewClientId()
+{
+    return @VATSIM_TOWERVIEW_CLIENT_ID@;
+}
+
 const ushort xpilot::BuildConfig::VatsimClientId()
 {
     return @VATSIM_CLIENT_ID@;

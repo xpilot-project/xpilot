@@ -19,7 +19,6 @@
 #ifndef PDU_DELETEPILOT_H
 #define PDU_DELETEPILOT_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUDeletePilot : public PDUBase

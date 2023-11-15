@@ -16,22 +16,21 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "xplane_adapter.h"
-#include "src/config/appconfig.h"
-#include "src/common/build_config.h"
-#include "src/common/utils.h"
-
 #include <iostream>
 #include <istream>
 #include <iomanip>
 #include <string>
+#include <cmath>
 
 #include <QTimer>
 #include <QtEndian>
 #include <QDateTime>
 #include <QJsonObject>
 #include <QJsonDocument>
-#include <cmath>
+
+#include "xplane_adapter.h"
+#include "config/appconfig.h"
+#include "common/build_config.h"
 
 using namespace xpilot;
 
@@ -90,7 +89,9 @@ enum DataRef
     Paused,
     PushToTalk,
     SelcalMuteOverride,
-    XplaneVersionNumber
+    XplaneVersionNumber,
+    Com1OnHeadset,
+    Com2OnHeadset
 };
 
 XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
@@ -316,6 +317,8 @@ void XplaneAdapter::SubscribeDataRefs()
     SubscribeDataRef("xpilot/ptt", DataRef::PushToTalk, 15);
     SubscribeDataRef("xpilot/selcal_mute_override", DataRef::SelcalMuteOverride, 5);
     SubscribeDataRef("sim/version/xplane_internal_version", DataRef::XplaneVersionNumber, 1);
+    SubscribeDataRef("xpilot/audio/com1_on_headset", DataRef::Com1OnHeadset, 5);
+    SubscribeDataRef("xpilot/audio/com2_on_headset", DataRef::Com2OnHeadset, 5);
 }
 
 void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
@@ -373,8 +376,8 @@ void XplaneAdapter::setupNngSocket()
         emit nngSocketError(QString("Error opening socket: %1").arg(nng_strerror(result)));
     }
 
-    nng_setopt_int(m_socket, NNG_OPT_RECVBUF, 1024);
-    nng_setopt_int(m_socket, NNG_OPT_SENDBUF, 1024);
+    nng_setopt_int(m_socket, NNG_OPT_RECVBUF, 8192);
+    nng_setopt_int(m_socket, NNG_OPT_SENDBUF, 8192);
 
     const QList<QString> localhostAddresses = {"127.0.0.1","localhost"};
     if(AppConfig::getInstance()->XplaneNetworkAddress.isEmpty() || localhostAddresses.contains(AppConfig::getInstance()->XplaneNetworkAddress.toLower())) {
@@ -422,6 +425,9 @@ void XplaneAdapter::setupNngSocket()
             emit nngSocketError(QString("Error opening visual machine socket: %1").arg(nng_strerror(result)));;
             continue;
         }
+
+        nng_setopt_int(_visualSocket, NNG_OPT_RECVBUF, 8192);
+        nng_setopt_int(_visualSocket, NNG_OPT_SENDBUF, 8192);
 
         QString url = QString("tcp://%1:%2").arg(machine).arg(AppConfig::getInstance()->XplanePluginPort);
         if((result = nng_dial(_visualSocket, url.toStdString().c_str(), NULL, NNG_FLAG_NONBLOCK)) != 0) {
@@ -671,6 +677,16 @@ void XplaneAdapter::OnDataReceived()
                     SKIP_EMPTY(value);
                     m_xplaneVersion = value;
                     break;
+                case DataRef::Com1OnHeadset:
+                    if(value != AppConfig::getInstance()->Com1OnHeadset) {
+                        emit com1OnHeadsetChanged(value);
+                    }
+                    break;
+                case DataRef::Com2OnHeadset:
+                    if(value != AppConfig::getInstance()->Com2OnHeadset) {
+                        emit com2OnHeadsetChanged(value);
+                    }
+                    break;
             }
         }
     }
@@ -765,6 +781,16 @@ void XplaneAdapter::selcalAlertReceived()
     QTimer::singleShot(1000, this, [&]{
         setDataRefValue("xpilot/selcal_received", 0);
     });
+}
+
+void XplaneAdapter::setCom1OnHeadset(bool onHeadset)
+{
+    setDataRefValue("xpilot/audio/com1_on_headset", (int)onHeadset);
+}
+
+void XplaneAdapter::setCom2OnHeadset(bool onHeadset)
+{
+    setDataRefValue("xpilot/audio/com2_on_headset", (int)onHeadset);
 }
 
 void XplaneAdapter::AddAircraftToSimulator(const NetworkAircraft &aircraft)

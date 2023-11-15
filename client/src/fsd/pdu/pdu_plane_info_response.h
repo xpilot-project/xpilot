@@ -19,7 +19,6 @@
 #ifndef PDU_PLANEINFORESPONSE_H
 #define PDU_PLANEINFORESPONSE_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUPlaneInfoResponse: public PDUBase
@@ -33,14 +32,15 @@ public:
 
     static QString pdu() { return "#SB"; }
 
-    static inline QString FindValue(const QStringList& fields, QString key)
+    static inline QString FindValue(const QStringList& fields, const QString& key)
     {
-        for(auto &field : fields) {
-            if(field.toUpper().startsWith(key.toUpper() + "=")) {
-                return field.mid(key.length() + 1);
+        const QString upperKey = key.toUpper() + "=";
+        for (const auto& field : fields) {
+            if (field.startsWith(upperKey, Qt::CaseInsensitive)) {
+                return field.mid(upperKey.length());
             }
         }
-        return "";
+        return QString();
     }
 
     QString Equipment;

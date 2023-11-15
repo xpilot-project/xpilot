@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Controls.Basic
+
+import org.vatsim.xpilot
 import "../Controls"
 import "../Scripts/FrequencyUtils.js" as FrequencyUtils
 
@@ -19,6 +21,14 @@ ColumnLayout {
 
     property real com1Hf: 0
     property real com2Hf: 0
+
+    property bool com1Headset: false
+    property bool com2Headset: false
+
+    Component.onCompleted: {
+        com1Headset = AppConfig.Com1OnHeadset
+        com2Headset = AppConfig.Com2OnHeadset
+    }
 
     Connections {
         target: xplaneAdapter
@@ -104,6 +114,7 @@ ColumnLayout {
             font.bold: true
             font.family: robotoMono.name
             renderType: Text.NativeRendering
+            leftPadding: 10
         }
         Text {
             id: com1FreqLabel
@@ -133,7 +144,7 @@ ColumnLayout {
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            rightPadding: 15
+            rightPadding: 10
         }
         RadioStackIndicator{
             id: com1Tx
@@ -149,6 +160,23 @@ ColumnLayout {
             isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com1ReceiveEnabled
             isActive: isCom1Rx
             label: "RX"
+        }
+        TransparentButton {
+            icon.source: com1Headset ? "../Icons/HeadsetIcon.svg" : "../Icons/SpeakerIcon.svg"
+            icon.color: "#141618"
+            icon.width: 20
+            icon.height: 20
+            onHoveredChanged: hovered ? icon.color = "#ffffff" : icon.color = "#141618"
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                hoverEnabled: true
+                onClicked: {
+                    com1Headset = !com1Headset
+                    audio.setOnHeadset(0, com1Headset)
+                }
+            }
         }
     }
     // com2
@@ -170,6 +198,7 @@ ColumnLayout {
             font.bold: true
             font.family: robotoMono.name
             renderType: Text.NativeRendering
+            leftPadding: 10
         }
         Text {
             id: com2FreqLabel
@@ -199,7 +228,7 @@ ColumnLayout {
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            rightPadding: 15
+            rightPadding: 10
         }
         RadioStackIndicator{
             id: com2Tx
@@ -215,6 +244,23 @@ ColumnLayout {
             isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com2ReceiveEnabled
             isActive: isCom2Rx
             label: "RX"
+        }
+        TransparentButton {
+            icon.source: com2Headset ? "../Icons/HeadsetIcon.svg" : "../Icons/SpeakerIcon.svg"
+            icon.color: "#141618"
+            icon.width: 20
+            icon.height: 20
+            onHoveredChanged: hovered ? icon.color = "#ffffff" : icon.color = "#141618"
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                hoverEnabled: true
+                onClicked: {
+                    com2Headset = !com2Headset
+                    audio.setOnHeadset(1, com2Headset)
+                }
+            }
         }
     }
 }

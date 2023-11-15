@@ -29,24 +29,27 @@
 #include <QPointer>
 #include <QtPromise>
 
-using namespace QtPromise;
+#include "fsd/client_properties.h"
+#include "fsd/fsd_client.h"
+#include "network/vatsim_auth.h"
+#include "network/connectinfo.h"
+#include "network/events/radio_message_received.h"
+#include "simulator/xplane_adapter.h"
+#include "aircrafts/user_aircraft_data.h"
+#include "aircrafts/user_aircraft_config_data.h"
+#include "aircrafts/aircraft_visual_state.h"
+#include "aircrafts/aircraft_configuration.h"
+#include "aircrafts/velocity_vector.h"
+#include "config/appconfig.h"
+#include "common/build_config.h"
+#include "common/frequency_utils.h"
+#include "common/notificationtype.h"
+#include "common/utils.h"
+#include "common/enums.h"
+#include "qinjection/dependencypointer.h"
 
-#include "src/fsd/fsd_client.h"
-#include "src/network/vatsim_auth.h"
-#include "src/network/connectinfo.h"
-#include "src/network/events/radio_message_received.h"
-#include "src/simulator/xplane_adapter.h"
-#include "src/aircrafts/user_aircraft_data.h"
-#include "src/aircrafts/user_aircraft_config_data.h"
-#include "src/aircrafts/aircraft_visual_state.h"
-#include "src/aircrafts/aircraft_configuration.h"
-#include "src/aircrafts/velocity_vector.h"
-#include "src/config/appconfig.h"
-#include "src/common/build_config.h"
-#include "src/common/frequency_utils.h"
-#include "src/common/notificationtype.h"
-#include "src/common/utils.h"
-#include "src/qinjection/dependencypointer.h"
+using namespace QtPromise;
+using namespace enums;
 
 namespace xpilot
 {
@@ -59,7 +62,7 @@ namespace xpilot
         ~NetworkManager();
 
         Q_INVOKABLE void connectToNetwork(QString callsign, QString typeCode, QString selcal, bool observer);
-        Q_INVOKABLE void connectTowerView(QString callsign, QString address);
+        Q_INVOKABLE void connectTowerView();
         Q_INVOKABLE void disconnectFromNetwork();
         Q_INVOKABLE void sendRadioMessage(QString message);
         Q_INVOKABLE void sendPrivateMessage(QString to, QString message);
@@ -81,8 +84,9 @@ namespace xpilot
 
     signals:
         void networkConnected(QString callsign, bool enableVoice);
+        void towerviewConnected();
         void networkDisconnected(bool forced);
-        void notificationPosted(int type, QString message);
+        void notificationPosted(QString message, MessageType type);
         void metarReceived(QString from, QString metar);
         void controllerDeleted(QString from);
         void pilotDeleted(QString from);
@@ -171,6 +175,8 @@ namespace xpilot
         void OnSlowPositionTimerElapsed();
         void OnFastPositionTimerElapsed();
 
+        ClientProperties m_clientProperties;
+
         void LoginToNetwork(QString password);
         QtPromise::QPromise<QString> GetBestFsdServer();
 
@@ -190,6 +196,9 @@ namespace xpilot
         }
 
         double AdjustIncomingAltitude(double altitude);
+
+        const int FSD_VERSION_MAJOR = 2;
+        const int FSD_VERSION_MINOR = 2;
     };
 }
 

@@ -1,10 +1,10 @@
 #ifndef DEPENDENCYPOINTER_H
 #define DEPENDENCYPOINTER_H
 
-#include "dependencypool.h"
-
 #include <QVariant>
 #include <QObject>
+
+#include "dependencypool.h"
 
 namespace QInjection {
 

@@ -19,9 +19,10 @@
 #ifndef DTO_H
 #define DTO_H
 
-#include <msgpack.hpp>
 #include <string>
 #include <optional>
+
+#include <msgpack.hpp>
 
 namespace xpilot {
 

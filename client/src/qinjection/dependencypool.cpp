@@ -1,7 +1,7 @@
-#include "dependencypool.h"
-
 #include <QDebug>
 #include <QThread>
+
+#include "dependencypool.h"
 
 namespace QInjection {
 

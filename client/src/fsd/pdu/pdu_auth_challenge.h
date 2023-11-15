@@ -19,7 +19,6 @@
 #ifndef PDU_AUTHCHALLENGE_H
 #define PDU_AUTHCHALLENGE_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUAuthChallenge : public PDUBase

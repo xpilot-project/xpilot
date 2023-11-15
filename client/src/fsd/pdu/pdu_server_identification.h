@@ -19,7 +19,6 @@
 #ifndef PDU_SERVERIDENTIFICATION_H
 #define PDU_SERVERIDENTIFICATION_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUServerIdentification: public PDUBase

@@ -19,7 +19,6 @@
 #ifndef PDU_FASTPILOTPOSITION_H
 #define PDU_FASTPILOTPOSITION_H
 
-#include <QString>
 #include "pdu_base.h"
 
 enum class FastPilotPositionType

@@ -21,6 +21,7 @@
 
 #include <QtGlobal>
 #include <QString>
+
 #include "enums.h"
 
 template<typename T>

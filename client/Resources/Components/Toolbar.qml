@@ -3,7 +3,8 @@ import QtQuick.Window
 import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Controls.Basic
-import AppConfig 1.0
+
+import org.vatsim.xpilot
 import "../Controls"
 
 GridLayout {
@@ -140,7 +141,7 @@ GridLayout {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    settingsWindowDialog.show()
+                    createSettingsWindow()
                 }
             }
         }
@@ -165,7 +166,7 @@ GridLayout {
         layoutDirection: Qt.RightToLeft
         spacing: -10
 
-        WindowControlButton {
+        TransparentButton {
             id: btnClose
             icon.source: "../Icons/CloseIcon.svg"
             icon.color: "transparent"
@@ -184,7 +185,7 @@ GridLayout {
             }
         }
 
-        WindowControlButton {
+        TransparentButton {
             id: btnMinimize
             icon.source: "../Icons/MinimizeIcon.svg"
             icon.color: "transparent"

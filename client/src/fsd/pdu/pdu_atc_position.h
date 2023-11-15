@@ -19,8 +19,6 @@
 #ifndef PDU_ATCPOSITION_H
 #define PDU_ATCPOSITION_H
 
-#include <QString>
-#include <QList>
 #include "pdu_base.h"
 
 class PDUATCPosition : public PDUBase

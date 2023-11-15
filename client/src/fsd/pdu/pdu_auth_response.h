@@ -19,7 +19,6 @@
 #ifndef PDU_AUTHRESPONSE_H
 #define PDU_AUTHRESPONSE_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUAuthResponse : public PDUBase

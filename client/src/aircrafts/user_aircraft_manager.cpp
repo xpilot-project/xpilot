@@ -19,7 +19,7 @@
 #include <QTimer>
 
 #include "user_aircraft_manager.h"
-#include "src/config/appconfig.h"
+#include "config/appconfig.h"
 
 using namespace xpilot;
 

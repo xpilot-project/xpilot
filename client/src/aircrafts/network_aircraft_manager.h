@@ -19,15 +19,15 @@
 #ifndef AIRCRAFT_MANAGER_H
 #define AIRCRAFT_MANAGER_H
 
-#include "network_aircraft.h"
-#include "velocity_vector.h"
-#include "src/simulator/xplane_adapter.h"
-#include "src/network/networkmanager.h"
-#include "src/qinjection/dependencypointer.h"
-
 #include <QObject>
 #include <QTimer>
 #include <QList>
+
+#include "network_aircraft.h"
+#include "velocity_vector.h"
+#include "simulator/xplane_adapter.h"
+#include "network/networkmanager.h"
+#include "qinjection/dependencypointer.h"
 
 namespace xpilot
 {

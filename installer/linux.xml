@@ -12,24 +12,31 @@
     <saveRelativePaths>1</saveRelativePaths>
     <vendor>xPilot for VATSIM</vendor>
     <enableDebugger>1</enableDebugger>
+    <enableGtkDarkThemesSupport>1</enableGtkDarkThemesSupport>
     <functionDefinitionList>
         <actionDefinition>
             <name>IsXpilotRunning</name>
             <actionList>
                 <showProgressDialog>
-                    <title>Waiting for xPilot to exit</title>
+                    <title>Waiting for xPilot to Close</title>
                     <actionList>
                         <while>
+                            <conditionRuleEvaluationLogic>or</conditionRuleEvaluationLogic>
+                            <progressText>xPilot must be closed before the installation can proceed.</progressText>
                             <actionList>
-                                <wait ms="50" progressText="xPilot must be closed before the installation can proceed."/>
+                                <wait>
+                                    <ms>1000</ms>
+                                </wait>
                             </actionList>
                             <conditionRuleList>
-                                <ruleGroup>
-                                    <ruleList>
-                                        <processTest logic="is_running" name="xPilot.AppImage"/>
-                                        <platformTest type="linux"/>
-                                    </ruleList>
-                                </ruleGroup>
+                                <processTest>
+                                    <logic>is_running</logic>
+                                    <name>xpilot</name>
+                                </processTest>
+                                <processTest>
+                                    <logic>is_running</logic>
+                                    <name>xPilot</name>
+                                </processTest>
                             </conditionRuleList>
                         </while>
                     </actionList>

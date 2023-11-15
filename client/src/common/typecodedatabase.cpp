@@ -16,11 +16,6 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "typecodedatabase.h"
-#include "src/common/utils.h"
-#include "src/common/build_config.h"
-#include "src/config/appconfig.h"
-
 #include <QStringLiteral>
 #include <QStringBuilder>
 #include <QJsonDocument>
@@ -30,6 +25,11 @@
 #include <QNetworkAccessManager>
 #include <QProcess>
 #include <QCryptographicHash>
+
+#include "typecodedatabase.h"
+#include "common/utils.h"
+#include "common/build_config.h"
+#include "config/appconfig.h"
 
 using namespace xpilot;
 using namespace QtPromise;

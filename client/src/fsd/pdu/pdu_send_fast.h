@@ -19,7 +19,6 @@
 #ifndef PDU_SEND_FAST_H
 #define PDU_SEND_FAST_H
 
-#include <QString>
 #include "pdu_base.h"
 
 class PDUSendFast : public PDUBase
