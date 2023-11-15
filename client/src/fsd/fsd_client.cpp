@@ -285,15 +285,10 @@ namespace xpilot
             return;
 
         const QString error = this->socketErrorString(socketError);
+        emit RaiseNetworkError(error);
 
-        switch(socketError)
-        {
-            case QAbstractSocket::RemoteHostClosedError:
-                this->Disconnect();
-                break;
-            default:
-                emit RaiseNetworkError(error);
-                break;
+        if(socketError == QAbstractSocket::RemoteHostClosedError) {
+            this->Disconnect();
         }
     }
 
