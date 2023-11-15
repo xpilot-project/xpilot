@@ -42,7 +42,7 @@ jobs:
         run: |
           mkdir -p artifacts/Linux && mv Linux.zip/* artifacts/Linux
           mkdir -p artifacts/Windows && mv Windows.zip/* artifacts/Windows
-          mkdir -p artifacts/MacOS && mv MacOS.zip/* artifacts/MacOS
+          mkdir -p artifacts/macOS && mv macOS.zip/* artifacts/macOS
           cd artifacts && zip -r ../Artifacts-${{ steps.get_version.outputs.version-without-v }}.zip .
 
       - name: Create release notes
@@ -52,12 +52,6 @@ jobs:
           - [Windows](https://github.com/xpilot-project/xpilot/releases/download/${{ steps.get_version.outputs.version }}/xPilot-${{ steps.get_version.outputs.version-without-v }}-Windows.exe)
           - [macOS](https://github.com/xpilot-project/xpilot/releases/download/${{ steps.get_version.outputs.version }}/xPilot-${{ steps.get_version.outputs.version-without-v }}-MacOS.dmg)
           - [Linux](https://github.com/xpilot-project/xpilot/releases/download/${{ steps.get_version.outputs.version }}/xPilot-${{ steps.get_version.outputs.version-without-v }}-Linux.run)
-
-          ---
-
-          If you enjoy using xPilot, please considering donating to support the future development of the project. Thank you for your support.
-
-          <a href="https://www.paypal.com/donate/?business=7MD45Q2CGTVDS&no_recurring=0&item_name=Thank+you+for+supporting+the+development+of+xPilot.&currency_code=USD"><img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif"></a>
 
           ---
 
