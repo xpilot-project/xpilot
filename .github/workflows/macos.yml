@@ -165,4 +165,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
+          name: macOS.zip
           path: ${{ github.workspace }}/macOS.zip
