@@ -150,9 +150,9 @@ Window {
         appendMessage(`Welcome to xPilot v${appVersion}`, Enum.MessageType.Info)
         if (AppConfig.XplaneNetworkAddress !== "127.0.0.1" && AppConfig.XplaneNetworkAddress !== "localhost") {
             appendMessage(`Waiting for X-Plane connection (${AppConfig.XplaneNetworkAddress})...
-                          Please make sure X-Plane is running and a flight is loaded.`, Enum.MessageType.Info)
+                          Please make sure X-Plane is running and a flight is loaded. If you're having trouble connecting xPilot to X-Plane, please see the xPilot FAQ: https://xpilot-project.org/waiting-for-connection`, Enum.MessageType.Info)
         } else {
-            appendMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded.", Enum.MessageType.Info)
+            appendMessage("Waiting for X-Plane connection... Please make sure X-Plane is running and a flight is loaded. If you're having trouble connecting xPilot to X-Plane, please see the xPilot FAQ: https://xpilot-project.org/waiting-for-connection", Enum.MessageType.Info)
         }
 
         if (AppConfig.configRequired()) {
