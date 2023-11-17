@@ -100,7 +100,7 @@ jobs:
             -DVATSIM_TOWERVIEW_CLIENT_ID=${{ env.VATSIM_TOWERVIEW_CLIENT_ID }} \
             -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
             -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} \
-            -DOPENSSL_ROOT_DIR=${{ github.workspace }}/dependencies/macos/openssl \
+            -DOPENSSL_ROOT_DIR=${{ github.workspace }}/dependencies/platform/macos/openssl \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MIN_OS_VERSION }}
           cmake --build . --config ${{ env.BUILD_TYPE }}
 

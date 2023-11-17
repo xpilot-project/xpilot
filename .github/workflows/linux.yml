@@ -102,7 +102,7 @@ jobs:
             -DVATSIM_TOWERVIEW_CLIENT_ID=${{ env.VATSIM_TOWERVIEW_CLIENT_ID }} \
             -DCONFIG_ENCRYPTION_KEY=${{ env.CONFIG_ENCRYPTION_KEY }} \
             -DCMAKE_PREFIX_PATH=${{ env.Qt6_DIR }} \
-            -DOPENSSL_ROOT_DIR=${{ github.workspace }}/dependencies/linux/openssl
+            -DOPENSSL_ROOT_DIR=${{ github.workspace }}/dependencies/platform/linux/openssl
           cmake --build . --config ${{ env.BUILD_TYPE }}
           mv ${{ env.CLIENT_DIR }}/build/xPilot ${{ env.CLIENT_DIR }}/build/xpilot
 
