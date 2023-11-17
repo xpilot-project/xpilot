@@ -194,6 +194,7 @@ include_directories(
 )
 
 if(APPLE)
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist")
     target_link_libraries(${PROJECT_NAME}
         PUBLIC
         ${COREFOUNDATION}
