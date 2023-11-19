@@ -56,6 +56,14 @@ ColumnLayout {
             isCom1Tx = false
             isCom2Tx = false
         }
+
+        function onCom1OnHeadsetChanged(onHeadset) {
+            com1Headset = onHeadset
+        }
+
+        function onCom2OnHeadsetChanged(onHeadset) {
+            com2Headset = onHeadset
+        }
     }
 
     Connections {

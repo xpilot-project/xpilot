@@ -260,6 +260,8 @@ void XplaneAdapter::clearSimConnection()
     emit simConnectionStateChanged(false);
     m_initialHandshake = false;
     m_simConnected = false;
+    m_com1HeadsetStateSet = false;
+    m_com2HeadsetStateSet = false;
     m_subscribedDataRefs.clear();
 }
 
@@ -678,12 +680,12 @@ void XplaneAdapter::OnDataReceived()
                     m_xplaneVersion = value;
                     break;
                 case DataRef::Com1OnHeadset:
-                    if(value != AppConfig::getInstance()->Com1OnHeadset) {
+                    if(value != AppConfig::getInstance()->Com1OnHeadset && m_com1HeadsetStateSet) {
                         emit com1OnHeadsetChanged(value);
                     }
                     break;
                 case DataRef::Com2OnHeadset:
-                    if(value != AppConfig::getInstance()->Com2OnHeadset) {
+                    if(value != AppConfig::getInstance()->Com2OnHeadset && m_com2HeadsetStateSet) {
                         emit com2OnHeadsetChanged(value);
                     }
                     break;
@@ -786,11 +788,13 @@ void XplaneAdapter::selcalAlertReceived()
 void XplaneAdapter::setCom1OnHeadset(bool onHeadset)
 {
     setDataRefValue("xpilot/audio/com1_on_headset", (int)onHeadset);
+    m_com1HeadsetStateSet = true;
 }
 
 void XplaneAdapter::setCom2OnHeadset(bool onHeadset)
 {
     setDataRefValue("xpilot/audio/com2_on_headset", (int)onHeadset);
+    m_com2HeadsetStateSet = true;
 }
 
 void XplaneAdapter::AddAircraftToSimulator(const NetworkAircraft &aircraft)

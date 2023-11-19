@@ -156,6 +156,9 @@ private:
     bool m_simPaused = false;
     bool m_voiceTransmitDisabled = false;
 
+    bool m_com1HeadsetStateSet = false;
+    bool m_com2HeadsetStateSet = false;
+
     UserAircraftData m_userAircraftData{};
     UserAircraftConfigData m_userAircraftConfigData{};
     RadioStackState m_radioStackState{};
