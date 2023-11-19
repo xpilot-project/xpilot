@@ -153,6 +153,7 @@ Item {
                             signal selectionChanged
 
                             anchors.fill: parent
+                            anchors.rightMargin: 15
                             enabled: !scrollBar.hovered
                             cursorShape: enabled ? Qt.IBeamCursor : Qt.ArrowCursor
                             hoverEnabled: true
