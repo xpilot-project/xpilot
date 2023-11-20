@@ -197,7 +197,7 @@ namespace xpilot
         m_fsd.SendPDU(PDUClientQuery(m_connectInfo.Callsign, "SERVER", ClientQueryType::PublicIP));
         SendSlowPositionPacket();
         SendStoppedFastPositionPacket();
-        m_slowPositionTimer.setInterval(m_connectInfo.ObserverMode ? 15000 : 5000);
+        m_slowPositionTimer.setInterval(m_connectInfo.ObserverMode || m_connectInfo.TowerViewMode ? 15000 : 5000);
         m_slowPositionTimer.start();
     }
 
@@ -252,7 +252,7 @@ namespace xpilot
                 {
                     QStringList realName;
                     realName.append(AppConfig::getInstance()->NameWithHomeAirport());
-                    realName.append("");
+                    realName.append(m_connectInfo.TowerViewMode ? "xPilot tower view connection" : "");
                     realName.append(QString::number((int)NetworkRating::OBS));
                     m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, pdu.From, ClientQueryType::RealName, realName));
                 }
@@ -355,7 +355,7 @@ namespace xpilot
     {
         QRegularExpression re("^"+ QRegularExpression::escape(pdu.From) +"[A-Z]$");
 
-        if(!m_connectInfo.ObserverMode || !re.match(m_connectInfo.Callsign).hasMatch())
+        if(!m_connectInfo.ObserverMode || m_connectInfo.TowerViewMode || !re.match(m_connectInfo.Callsign).hasMatch())
         {
             AircraftVisualState visualState {};
             visualState.Latitude = pdu.Lat;
@@ -605,7 +605,7 @@ namespace xpilot
 
     void NetworkManager::SendSlowPositionPacket()
     {
-        if(m_connectInfo.ObserverMode) {
+        if(m_connectInfo.ObserverMode || m_connectInfo.TowerViewMode) {
             QList<int> freqs = {99998};
             m_fsd.SendPDU(PDUATCPosition(m_connectInfo.Callsign, freqs, NetworkFacility::OBS, 40, NetworkRating::OBS,
                                          m_userAircraftData.Latitude, m_userAircraftData.Longitude));
