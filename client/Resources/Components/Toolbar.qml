@@ -150,7 +150,7 @@ GridLayout {
             id: myCallsignLabel
             text: myCallsign
             font.family: robotoMono.name
-            font.pixelSize: 16
+            font.pixelSize: (myCallsign.length > 8) ? 14 : 16
             renderType: Text.NativeRendering
             color: "white"
             leftPadding: 5
