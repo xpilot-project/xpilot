@@ -797,6 +797,13 @@ void XplaneAdapter::setCom2OnHeadset(bool onHeadset)
     m_com2HeadsetStateSet = true;
 }
 
+void XplaneAdapter::overrideRadioPower(bool hasPower)
+{
+    if(m_radioStackState.OverrideRadioPower != hasPower) {
+        m_radioStackState.OverrideRadioPower = hasPower;
+    }
+}
+
 void XplaneAdapter::AddAircraftToSimulator(const NetworkAircraft &aircraft)
 {
     AddAircraftDto dto{};

@@ -78,6 +78,7 @@ public:
     Q_INVOKABLE void selcalAlertReceived();
     Q_INVOKABLE void setCom1OnHeadset(bool onHeadset);
     Q_INVOKABLE void setCom2OnHeadset(bool onHeadset);
+    Q_INVOKABLE void overrideRadioPower(bool hasPower);
 
     void AddAircraftToSimulator(const NetworkAircraft& aircraft);
     void PlaneConfigChanged(const NetworkAircraft& aircraft);
