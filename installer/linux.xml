@@ -268,25 +268,6 @@
             </ruleList>
         </createDirectory>
         <writeFile>
-            <encoding>utf-8</encoding>
-            <path>${desktop_prefix}/xPilot.desktop</path>
-            <text>
-[Desktop Entry]
-Encoding=UTF-8
-Name=xPilot
-GenericName=xPilot
-Comment=xPilot
-Icon=${installdir}/xpilot.png
-Exec=${installdir}/xPilot.AppImage
-Terminal=false
-Type=Application
-Categories=Application;
-            </text> 
-            <ruleList>
-                <platformTest type="linux"/>
-            </ruleList>
-        </writeFile>
-        <writeFile>
             <path>~/.local/share/org.vatsim.xpilot/lastinstallpath.txt</path>
             <text>${installdir}</text>
             <ruleList>
