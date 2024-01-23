@@ -16,6 +16,9 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
+#include <QDnsLookup>
+#include <QEventLoop>
+
 #include "fsd_client.h"
 #include "common/build_config.h"
 #include "network/vatsim_auth.h"
@@ -41,12 +44,21 @@ namespace xpilot
 
     void FsdClient::Connect(QString address, quint32 port, bool challengeServer)
     {
+        // perform dns lookup
+        m_fsdServerAddress = performDnsLookup(address);
+
+        if(m_fsdServerAddress.isEmpty()) {
+            emit RaiseNetworkError("Network server address returned null, possibly due to a failed DNS lookup.");
+            return;
+        }
+
         if(BuildConfig::TowerviewClientId() == 0 || BuildConfig::VatsimClientId() == 0 || BuildConfig::VatsimClientKey().isEmpty()) {
             emit RaiseNetworkError("Invalid pilot client build. Please download a new copy from the xPilot website.");
             return;
         }
+
         m_challengeServer = challengeServer;
-        m_socket->connectToHost(address, port);
+        m_socket->connectToHost(m_fsdServerAddress, port);
         m_partialPacket = "";
     }
 
@@ -320,7 +332,9 @@ namespace xpilot
                 Disconnect();
             }
         });
-        newSocket->connectToHost(pdu.NewServer, m_socket->peerPort());
+
+        QString newServerAddress = performDnsLookup(pdu.NewServer);
+        newSocket->connectToHost(newServerAddress, m_socket->peerPort());
         m_partialPacket =  "";
     }
 
@@ -328,6 +342,34 @@ namespace xpilot
     {
         static const QMetaEnum metaEnum = QMetaEnum::fromType<QAbstractSocket::SocketError>();
         return metaEnum.valueToKey(error);
+    }
+
+    QString FsdClient::performDnsLookup(const QString address)
+    {
+        QHostAddress hostAddress(address);
+        if(QAbstractSocket::IPv4Protocol == hostAddress.protocol()) {
+            return address; // address is already an ipv4
+        }
+
+        QEventLoop eventLoop;
+        QDnsLookup *dnsLookup = new QDnsLookup(this);
+        dnsLookup->setType(QDnsLookup::A);
+        dnsLookup->setName(address);
+
+        QString dnsAddress;
+
+        QObject::connect(dnsLookup, &QDnsLookup::finished, this, [&]() {
+            if(dnsLookup->error() == QDnsLookup::NoError && !dnsLookup->hostAddressRecords().isEmpty()) {
+                dnsAddress = dnsLookup->hostAddressRecords().constFirst().value().toString();
+            }
+            dnsLookup->deleteLater();
+            eventLoop.quit();
+        });
+
+        dnsLookup->lookup();
+        eventLoop.exec(); // wait for dns lookup to finish
+
+        return dnsAddress;
     }
 
     QString FsdClient::toMd5(QString value)

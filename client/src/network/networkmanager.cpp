@@ -20,8 +20,9 @@
 #include <chrono>
 #include <random>
 
-#include <QRandomGenerator>
 #include <QDateTime>
+#include <QDnsLookup>
+#include <QRandomGenerator>
 
 #include "networkmanager.h"
 
@@ -205,23 +206,38 @@ namespace xpilot
     {
         return QtPromise::QPromise<QString>{[&](const auto resolve, const auto reject)
         {
-            QNetworkRequest request(QUrl("http://fsd.vatsim.net"));
-            m_reply = nam->get(request);
+            QDnsLookup *dnsLookup = new QDnsLookup(this);
+            dnsLookup->setType(QDnsLookup::A);
+            dnsLookup->setName("fsd.vatsim.net");
+            dnsLookup->lookup();
 
-            QObject::connect(m_reply, &QNetworkReply::finished, [=]() {
-               if(m_reply->error() == QNetworkReply::NoError) {
-                   QHostAddress address(m_reply->readAll().trimmed());
-                   if(QAbstractSocket::IPv4Protocol == address.protocol()) {
-                       resolve(address.toString());
-                   }
-                   else {
-                       reject();
-                   }
-               }
-               else {
-                   reject();
-               }
-               m_reply->deleteLater();
+            QObject::connect(dnsLookup, &QDnsLookup::finished, this, [=]() {
+                if(dnsLookup->error() == QDnsLookup::NoError && !dnsLookup->hostAddressRecords().isEmpty()) {
+                    const QString ipAddress = dnsLookup->hostAddressRecords().constFirst().value().toString();
+                    QNetworkRequest request(QUrl("http://" + ipAddress));
+                    m_reply = nam->get(request);
+
+                    QObject::connect(m_reply, &QNetworkReply::finished, [=]() {
+                        if(m_reply->error() == QNetworkReply::NoError) {
+                            QHostAddress address(m_reply->readAll().trimmed());
+                            if(QAbstractSocket::IPv4Protocol == address.protocol()) {
+                                resolve(address.toString());
+                            }
+                            else {
+                                reject();
+                            }
+                        }
+                        else {
+                            reject();
+                        }
+                        m_reply->deleteLater();
+                        dnsLookup->deleteLater();
+                    });
+                }
+                else {
+                    reject();
+                    dnsLookup->deleteLater();
+                }
             });
         }};
     }
