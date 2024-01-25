@@ -20,7 +20,7 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QProcess>
 #include <QTimer>
@@ -35,6 +35,8 @@
 #include <QFont>
 #include <QFontDatabase>
 #include <QCommandLineParser>
+#include <QOperatingSystemVersion>
+#include <QMessageBox>
 #include <QtQml/qqml.h>
 
 #include <qinjection/dependencypool.h>
@@ -76,13 +78,25 @@ int xpilot::Main(int argc, char* argv[])
         return 0;
     }
 
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
+
+    app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));
+
+#if defined(Q_OS_WIN)
+    if(QOperatingSystemVersion::current() < QOperatingSystemVersion::Windows10) {
+        QMessageBox::critical(nullptr, "Unsupported Windows Version", "Your Windows version is not supported. xPilot requires Windows 10 or newer.");
+        return 1;
+    }
+#elif defined(Q_OS_MACOS)
+    if(QOperatingSystemVersion::current() < QOperatingSystemVersion::MacOSBigSur) {
+        QMessageBox::critical(nullptr, "Unsupported macOS Version", "Your macOS version is not supported. xPilot requires macOS 11 or newer.");
+        return 1;
+    }
+#endif
 
     QCommandLineParser parser;
     parser.addVersionOption();
     parser.process(app);
-
-    app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));
 
     auto families = QFontDatabase::families();
     if(!families.contains("Open Sans")) {
