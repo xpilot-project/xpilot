@@ -72,11 +72,10 @@ void AppConfig::loadConfig()
         }
     }
 
-    QScreen *primaryScreen = QGuiApplication::primaryScreen();
-    QRect primaryGeometry = primaryScreen->availableGeometry();
-
     QFile configFile(dataRoot() + "AppConfig.json");
     if(!configFile.open(QIODevice::ReadOnly)) {
+        QScreen *primaryScreen = QGuiApplication::primaryScreen();
+        QRect primaryGeometry = primaryScreen->availableGeometry();
         // set default values
         WindowConfig.X = primaryGeometry.center().x() - DefaultWidth / 2;
         WindowConfig.Y = primaryGeometry.center().y() - DefaultHeight / 2;
@@ -181,25 +180,6 @@ void AppConfig::loadConfig()
     WindowConfig.Height = qMax(window["Height"].toInt(), DefaultHeight);
     WindowConfig.Maximized = window["Maximized"].toBool();
 
-    // make sure window is actually within the screen geometry bounds
-    bool isValidScreenPosition = false;
-    QList<QScreen*> screens = QGuiApplication::screens();
-    foreach(QScreen *screen, screens) {
-        if(screen->geometry().contains(WindowConfig.X, WindowConfig.Y)) {
-            isValidScreenPosition = true;
-            break;
-        }
-    }
-
-    // reposition the window centered on the primary screen
-    if(!isValidScreenPosition) {
-        WindowConfig.X = primaryGeometry.center().x() - DefaultWidth / 2;
-        WindowConfig.Y = primaryGeometry.center().y() - DefaultHeight / 2;
-        WindowConfig.Width = DefaultWidth;
-        WindowConfig.Height = DefaultHeight;
-        WindowConfig.Maximized = false;
-    }
-
     if(!VatsimPassword.isEmpty()) {
         VatsimPasswordDecrypted = crypto.decryptToString(VatsimPassword);
     }
@@ -269,8 +249,8 @@ bool AppConfig::saveConfig()
     QJsonObject window;
     window["X"] = WindowConfig.X;
     window["Y"] = WindowConfig.Y;
-    window["Width"] = qMax(WindowConfig.Width, DefaultWidth);
-    window["Height"] = qMax(WindowConfig.Height, DefaultHeight);
+    window["Width"] = WindowConfig.Maximized ? DefaultWidth : qMax(WindowConfig.Width, DefaultWidth);
+    window["Height"] = WindowConfig.Maximized ? DefaultHeight : qMax(WindowConfig.Height, DefaultHeight);
     window["Maximized"] = WindowConfig.Maximized;
     jsonObj["WindowConfig"] = window;
 

@@ -203,30 +203,19 @@ Window {
         }
     }
 
-    onVisibilityChanged: function(visibility) {
-        if (initialized && visibility !== Window.Hidden) {
-            var isMaximized = (visibility === Window.Maximized || visibility === Window.FullScreen)
-            if (AppConfig.WindowConfig.Maximized && !isMaximized) {
-                width = minimumWidth
-                height = minimumHeight
-                var center = Qt.point(Screen.width / 2 - width / 2, Screen.height / 2 - height / 2)
-                x = center.x
-                y = center.y
-                AppConfig.WindowConfig.X = center.x
-                AppConfig.WindowConfig.Y = center.y
-                AppConfig.WindowConfig.Width = width
-                AppConfig.WindowConfig.Height = height
+    onVisibilityChanged: {
+        if(initialized && mainWindow.visibility !== Window.Hidden) {
+            var isFullscreen = (mainWindow.visibility === Window.Maximized || mainWindow.visibility === Window.FullScreen)
+            if(AppConfig.WindowConfig.Maximized && !isFullscreen) {
+                AppConfig.WindowConfig.Width = minimumWidth
+                AppConfig.WindowConfig.Height = minimumHeight
             }
-            AppConfig.WindowConfig.Maximized = isMaximized
+            AppConfig.WindowConfig.Maximized = (mainWindow.visibility === Window.Maximized || mainWindow.visibility === Window.FullScreen)
             AppConfig.saveConfig()
         }
     }
 
     onHeightChanged: {
-        if (visibility === Window.Maximized || visibility === Window.FullScreen) {
-            return
-        }
-
         if (initialized) {
             AppConfig.WindowConfig.Height = height
             AppConfig.saveConfig()
@@ -234,10 +223,6 @@ Window {
     }
 
     onWidthChanged: {
-        if (visibility === Window.Maximized || visibility === Window.FullScreen) {
-            return
-        }
-
         if (initialized) {
             AppConfig.WindowConfig.Width = width
             AppConfig.saveConfig()
@@ -1170,12 +1155,16 @@ Window {
         }
 
         onDoubleClicked: {
-            if (mainWindow.visibility == Window.Maximized || mainWindow.visibility == Window.FullScreen) {
+            if(mainWindow.visibility === Window.Maximized || mainWindow.visibility === Window.FullScreen) {
+                mainWindow.width = mainWindow.minimumWidth
+                mainWindow.height = mainWindow.minimumHeight
+                mainWindow.x = (Screen.width / 2 - mainWindow.width / 2)
+                mainWindow.y = (Screen.height / 2 - mainWindow.height / 2)
                 mainWindow.showNormal()
-            } else {
+            }
+            else {
                 mainWindow.showFullScreen()
             }
-            moveable = false
         }
 
         onPressed: function(mouse) {
