@@ -43,6 +43,10 @@ Window {
     property bool simConnected: false
     property bool towerviewConnection: false
 
+    WindowLayoutSave {
+        id: mainWindowState
+    }
+
     FontLoader {
         id: robotoMono
         source: "../Fonts/Roboto-Mono.ttf"
@@ -165,68 +169,11 @@ Window {
         if (AppConfig.KeepWindowVisible) {
             mainWindow.flags |= Qt.WindowStaysOnTopHint
         }
-
-        if (AppConfig.WindowConfig.Maximized) {
-            mainWindow.showFullScreen()
-        }
-        else {
-            width = Math.max(minimumWidth, AppConfig.WindowConfig.Width)
-            height = Math.max(minimumHeight, AppConfig.WindowConfig.Height)
-            x = AppConfig.WindowConfig.X
-            y = AppConfig.WindowConfig.Y
-        }
-        initialized = true
     }
 
     onClosing: function(close) {
         close.accepted = !networkConnected
         onTriggered: if (networkConnected) confirmClose.open()
-    }
-
-    onXChanged: {
-        if (initialized) {
-            if (visibility === Window.Maximized || visibility === Window.FullScreen) {
-                return
-            }
-            AppConfig.WindowConfig.X = x
-            AppConfig.saveConfig()
-        }
-    }
-
-    onYChanged: {
-        if (initialized) {
-            if (visibility === Window.Maximized || visibility === Window.FullScreen) {
-                return
-            }
-            AppConfig.WindowConfig.Y = y
-            AppConfig.saveConfig()
-        }
-    }
-
-    onVisibilityChanged: {
-        if(initialized && mainWindow.visibility !== Window.Hidden) {
-            var isFullscreen = (mainWindow.visibility === Window.Maximized || mainWindow.visibility === Window.FullScreen)
-            if(AppConfig.WindowConfig.Maximized && !isFullscreen) {
-                AppConfig.WindowConfig.Width = minimumWidth
-                AppConfig.WindowConfig.Height = minimumHeight
-            }
-            AppConfig.WindowConfig.Maximized = (mainWindow.visibility === Window.Maximized || mainWindow.visibility === Window.FullScreen)
-            AppConfig.saveConfig()
-        }
-    }
-
-    onHeightChanged: {
-        if (initialized) {
-            AppConfig.WindowConfig.Height = height
-            AppConfig.saveConfig()
-        }
-    }
-
-    onWidthChanged: {
-        if (initialized) {
-            AppConfig.WindowConfig.Width = width
-            AppConfig.saveConfig()
-        }
     }
 
     Connections {

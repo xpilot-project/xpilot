@@ -57,5 +57,6 @@
         <file>Resources/Icons/HeadsetIcon.svg</file>
         <file>Resources/Icons/SpeakerIcon.svg</file>
         <file>Resources/Icons/ChevronDown.svg</file>
+        <file>Resources/Controls/WindowLayoutSave.qml</file>
     </qresource>
 </RCC>
