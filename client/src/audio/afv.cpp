@@ -189,6 +189,13 @@ namespace xpilot
         connect(&m_networkManager, &NetworkManager::disableVoiceTransmit, this, [&] {
             DisableVoiceTransmit();
         });
+        connect(&m_networkManager, &NetworkManager::muteReceived, this, [&](bool mute) {
+            if(mute) {
+                DisableVoiceTransmit();
+            } else {
+                EnableVoiceTransmit();
+            }
+        });
         connect(&m_xplaneAdapter, &XplaneAdapter::radioStackStateChanged, this, [&](RadioStackState state){
             if(state != m_radioStackState) {
                 m_radioStackState = state;

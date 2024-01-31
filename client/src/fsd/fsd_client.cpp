@@ -231,6 +231,10 @@ namespace xpilot
                     {
                         handleChangeServer(fields);
                     }
+                    else if(pduTypeId == "#MU")
+                    {
+                        emit RaiseMuteReceived(PDUMute::fromTokens(fields));
+                    }
                 }
             }
             catch(PDUFormatException &e) {
