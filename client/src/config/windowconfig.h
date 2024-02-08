@@ -32,6 +32,7 @@ namespace xpilot
         Q_PROPERTY(int Width MEMBER Width)
         Q_PROPERTY(int Height MEMBER Height)
         Q_PROPERTY(bool Maximized MEMBER Maximized)
+        Q_PROPERTY(QString ScreenName MEMBER ScreenName)
 
     public:
         int X = 10;
@@ -39,14 +40,15 @@ namespace xpilot
         int Width = 800;
         int Height = 250;
         bool Maximized = false;
+        QString ScreenName;
 
         bool operator==(ClientWindowConfig& rhs) const
         {
-            return X == rhs.X && Y == rhs.Y && Width == rhs.Width && Height == rhs.Height && Maximized == rhs.Maximized;
+            return X == rhs.X && Y == rhs.Y && Width == rhs.Width && Height == rhs.Height && Maximized == rhs.Maximized && ScreenName == rhs.ScreenName;
         }
         bool operator!=(ClientWindowConfig& rhs) const
         {
-            return X != rhs.X || Y != rhs.Y || Width != rhs.Width || Height != rhs.Height || Maximized != rhs.Maximized;
+            return X != rhs.X || Y != rhs.Y || Width != rhs.Width || Height != rhs.Height || Maximized != rhs.Maximized || ScreenName != rhs.ScreenName;
         }
     };
 }

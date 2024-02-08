@@ -25,13 +25,32 @@ Item {
     }
 
     function restoreSettings() {
+        let screenFound = false
+        for(let i = 0; i < Qt.application.screens.length; i++) {
+            const screen = Qt.application.screens[i]
+            if(screen.name === AppConfig.WindowConfig.ScreenName) {
+                const isInWidth = AppConfig.WindowConfig.X >= screen.virtualX && AppConfig.WindowConfig.X <= screen.virtualX + screen.width
+                const isInHeight = AppConfig.WindowConfig.Y >= screen.virtualY && AppConfig.WindowConfig.Y <= screen.virtualY + screen.width
+                if(isInWidth && isInHeight) {
+                    target.screen = screen
+                    screenFound = true
+                    break
+                }
+            }
+        }
+
+        if(!screenFound) {
+            centerWindow()
+        }
+
         // Ensure window position is valid
-        if (AppConfig.WindowConfig.X < 0 || AppConfig.WindowConfig.X >= Screen.desktopAvailableWidth - target.width) {
-            centerWindow()
-        }
-        if (AppConfig.WindowConfig.Y < 0 || AppConfig.WindowConfig.Y >= Screen.desktopAvailableHeight - target.height) {
-            centerWindow()
-        }
+        // if (AppConfig.WindowConfig.X < 0 || AppConfig.WindowConfig.X >= Screen.desktopAvailableWidth - target.width) {
+        //     centerWindow()
+        // }
+        // if (AppConfig.WindowConfig.Y < 0 || AppConfig.WindowConfig.Y >= Screen.desktopAvailableHeight - target.height) {
+        //     centerWindow()
+        // }
+
         if (AppConfig.WindowConfig.Width > Screen.desktopAvailableWidth) {
             AppConfig.WindowConfig.Width = Screen.desktopAvailableWidth - AppConfig.WindowConfig.X
         }
@@ -57,6 +76,7 @@ Item {
         AppConfig.WindowConfig.Width = target.width
         AppConfig.WindowConfig.Height = target.height
         AppConfig.WindowConfig.Maximized = (target.visibility === Window.FullScreen || target.visibility === Window.Maximized)
+        AppConfig.WindowConfig.ScreenName = target.screen.name
         AppConfig.saveConfig()
     }
 
