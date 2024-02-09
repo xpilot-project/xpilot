@@ -1105,8 +1105,12 @@ Window {
             if(mainWindow.visibility === Window.Maximized || mainWindow.visibility === Window.FullScreen) {
                 mainWindow.width = mainWindow.minimumWidth
                 mainWindow.height = mainWindow.minimumHeight
-                mainWindow.x = (Screen.width / 2 - mainWindow.width / 2)
-                mainWindow.y = (Screen.height / 2 - mainWindow.height / 2)
+
+                let screenX = (mainWindow.screen.virtualX + mainWindow.screen.width / 2) - (mainWindow.width / 2)
+                let screenY = (mainWindow.screen.virtualY + mainWindow.screen.height / 2) - (mainWindow.height / 2)
+                mainWindow.x = screenX
+                mainWindow.y = screenY
+
                 mainWindow.showNormal()
             }
             else {

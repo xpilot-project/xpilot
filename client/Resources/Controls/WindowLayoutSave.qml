@@ -6,51 +6,26 @@ import org.vatsim.xpilot
 Item {
     id: root
 
-    property QtObject target: Window.window
+    property QtObject window: Window.window
     property bool initialized: false
 
     Connections {
-        target: root.target
+        target: root.window
         function onXChanged() { saveSettings() }
         function onYChanged() { saveSettings() }
         function onWidthChanged() { saveSettings() }
         function onHeightChanged() { saveSettings() }
         function onVisibilityChanged() { saveSettings() }
+        function onScreenChanged() { saveSettings() }
     }
 
-    function centerWindow() {
-        AppConfig.WindowConfig.X = Screen.width / 2 - target.width / 2
-        AppConfig.WindowConfig.Y = Screen.height / 2 - target.height / 2
+    function centerDefaultWindow() {
+        AppConfig.WindowConfig.X = Screen.width / 2 - window.width / 2
+        AppConfig.WindowConfig.Y = Screen.height / 2 - window.height / 2
         AppConfig.WindowConfig.Maximized = false
     }
 
     function restoreSettings() {
-        let screenFound = false
-        for(let i = 0; i < Qt.application.screens.length; i++) {
-            const screen = Qt.application.screens[i]
-            if(screen.name === AppConfig.WindowConfig.ScreenName) {
-                const isInWidth = AppConfig.WindowConfig.X >= screen.virtualX && AppConfig.WindowConfig.X <= screen.virtualX + screen.width
-                const isInHeight = AppConfig.WindowConfig.Y >= screen.virtualY && AppConfig.WindowConfig.Y <= screen.virtualY + screen.width
-                if(isInWidth && isInHeight) {
-                    target.screen = screen
-                    screenFound = true
-                    break
-                }
-            }
-        }
-
-        if(!screenFound) {
-            centerWindow()
-        }
-
-        // Ensure window position is valid
-        // if (AppConfig.WindowConfig.X < 0 || AppConfig.WindowConfig.X >= Screen.desktopAvailableWidth - target.width) {
-        //     centerWindow()
-        // }
-        // if (AppConfig.WindowConfig.Y < 0 || AppConfig.WindowConfig.Y >= Screen.desktopAvailableHeight - target.height) {
-        //     centerWindow()
-        // }
-
         if (AppConfig.WindowConfig.Width > Screen.desktopAvailableWidth) {
             AppConfig.WindowConfig.Width = Screen.desktopAvailableWidth - AppConfig.WindowConfig.X
         }
@@ -60,23 +35,50 @@ Item {
 
         // Apply window geometry
         if(AppConfig.WindowConfig.Width && AppConfig.WindowConfig.Height && !initialized) {
-            target.x = AppConfig.WindowConfig.X
-            target.y = AppConfig.WindowConfig.Y
-            target.width = AppConfig.WindowConfig.Width
-            target.height = AppConfig.WindowConfig.Height
-            target.visibility = AppConfig.WindowConfig.Maximized ? Window.FullScreen : Window.Windowed
+            window.x = AppConfig.WindowConfig.X
+            window.y = AppConfig.WindowConfig.Y
+            window.width = AppConfig.WindowConfig.Width
+            window.height = AppConfig.WindowConfig.Height
+            window.visibility = AppConfig.WindowConfig.Maximized ? Window.FullScreen : Window.Windowed
             initialized = true
+        }
+
+        let screenFound = false
+        for(let i = 0; i < Qt.application.screens.length; i++) {
+            const screen = Qt.application.screens[i]
+            if(screen.name === AppConfig.WindowConfig.ScreenName) {
+                window.screen = screen
+                screenFound = true
+                break
+            }
+        }
+
+        if(!screenFound) {
+            centerDefaultWindow()
+        }
+
+        let offset = 100
+        let isXinvalid = (window.x + window.width < window.screen.virtualX + offset) || (window.x > window.screen.virtualX + window.screen.width - offset)
+        let isYinvalid = (window.y < window.screen.virtualY) || (window.y > window.screen.virtualY + window.screen.height - offset)
+
+        if(isXinvalid || isYinvalid) {
+            // center on active screen
+            let screenX = (window.screen.virtualX + window.screen.width / 2) - (window.width / 2)
+            let screenY = (window.screen.virtualY + window.screen.height / 2) - (window.height / 2)
+            window.x = screenX
+            window.y = screenY
+            window.visibility = Window.Windowed
         }
     }
 
     function saveSettings() {
-        if(!initialized || !target.visible) return
-        AppConfig.WindowConfig.X = target.x
-        AppConfig.WindowConfig.Y = target.y
-        AppConfig.WindowConfig.Width = target.width
-        AppConfig.WindowConfig.Height = target.height
-        AppConfig.WindowConfig.Maximized = (target.visibility === Window.FullScreen || target.visibility === Window.Maximized)
-        AppConfig.WindowConfig.ScreenName = target.screen.name
+        if(!initialized || !window.visible) return
+        AppConfig.WindowConfig.X = window.x
+        AppConfig.WindowConfig.Y = window.y
+        AppConfig.WindowConfig.Width = window.width
+        AppConfig.WindowConfig.Height = window.height
+        AppConfig.WindowConfig.Maximized = (window.visibility === Window.FullScreen || window.visibility === Window.Maximized)
+        AppConfig.WindowConfig.ScreenName = window.screen.name
         AppConfig.saveConfig()
     }
 
