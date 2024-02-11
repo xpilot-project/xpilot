@@ -28,9 +28,13 @@ Item {
     function restoreSettings() {
         if (AppConfig.WindowConfig.Width > Screen.desktopAvailableWidth) {
             AppConfig.WindowConfig.Width = Screen.desktopAvailableWidth - AppConfig.WindowConfig.X
+            appendMessage(`AppConfig.WindowConfig.Width > Screen.desktopAvailableWidth: ${JSON.stringify(Screen)}`,
+                          Enum.MessageType.IncomingRadioPrimary, getChatTabIndex("Logs"))
         }
         if (AppConfig.WindowConfig.Height > Screen.desktopAvailableHeight) {
             AppConfig.WindowConfig.Height = Screen.desktopAvailableHeight - AppConfig.WindowConfig.Y
+            appendMessage(`AppConfig.WindowConfig.Height > Screen.desktopAvailableHeight: ${JSON.stringify(Screen)}`,
+                          Enum.MessageType.IncomingRadioPrimary, getChatTabIndex("Logs"))
         }
 
         // Apply window geometry
@@ -41,7 +45,12 @@ Item {
             window.height = AppConfig.WindowConfig.Height
             window.visibility = AppConfig.WindowConfig.Maximized ? Window.FullScreen : Window.Windowed
             initialized = true
+
+            var geometryJson = {x:window.x,y:window.y,width:window.width,height:window.height,visibility:window.visibility}
+            appendMessage(`Applying window geometry: ${JSON.stringify(geometryJson)}`, Enum.MessageType.IncomingRadioPrimary, getChatTabIndex("Logs"))
         }
+
+        appendMessage(`Available screens: ${JSON.stringify(Qt.application.screens)}`, Enum.MessageType.IncomingRadioPrimary, getChatTabIndex("Logs"))
 
         let screenFound = false
         for(let i = 0; i < Qt.application.screens.length; i++) {
@@ -49,11 +58,13 @@ Item {
             if(screen.name === AppConfig.WindowConfig.ScreenName) {
                 window.screen = screen
                 screenFound = true
+                appendMessage(`Found screen: ${JSON.stringify(window.screen)}`, Enum.MessageType.IncomingRadioPrimary, getChatTabIndex("Logs"))
                 break
             }
         }
 
         if(!screenFound) {
+            appendMessage(`Screen not found. Centering windwo on default screen.`, Enum.MessageType.IncomingRadioPrimary, getChatTabIndex("Logs"))
             centerDefaultWindow()
         }
 
@@ -68,6 +79,7 @@ Item {
             window.x = screenX
             window.y = screenY
             window.visibility = Window.Windowed
+            appendMessage(`isXinvalid ${isXinvalid}, isYinvalid ${isYinvalid}`, Enum.MessageType.IncomingRadioPrimary, getChatTabIndex("Logs"))
         }
     }
 
@@ -80,7 +92,11 @@ Item {
         AppConfig.WindowConfig.Maximized = (window.visibility === Window.FullScreen || window.visibility === Window.Maximized)
         AppConfig.WindowConfig.ScreenName = window.screen.name
         AppConfig.saveConfig()
+        appendMessage(`SaveWindowGeometry: ${JSON.stringify(AppConfig.WindowConfig)}`, Enum.MessageType.IncomingRadioPrimary, getChatTabIndex("Logs"))
     }
 
-    Component.onCompleted: restoreSettings()
+    Component.onCompleted: {
+        focusOrCreateTab("Logs")
+        restoreSettings()
+    }
 }
