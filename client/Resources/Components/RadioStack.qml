@@ -126,7 +126,7 @@ ColumnLayout {
         }
         Text {
             id: com1FreqLabel
-            text: simConnected && radioStackState.AvionicsPowerOn ? FrequencyUtils.printFrequency(radioStackState.Com1Frequency) : "---.---"
+            text: simConnected && (radioStackState.AvionicsPowerOn || radioStackState.OverrideRadioPower) ? FrequencyUtils.printFrequency(radioStackState.Com1Frequency) : "---.---"
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
             leftPadding: 5
@@ -156,7 +156,7 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com1Tx
-            isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com1TransmitEnabled
+            isEnabled: simConnected && (radioStackState.AvionicsPowerOn || radioStackState.OverrideRadioPower) && radioStackState.Com1TransmitEnabled
             isActive: networkConnected && isCom1Tx
             label: "TX"
         }
@@ -165,7 +165,7 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com1Rx
-            isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com1ReceiveEnabled
+            isEnabled: simConnected && (radioStackState.AvionicsPowerOn || radioStackState.OverrideRadioPower) && radioStackState.Com1ReceiveEnabled
             isActive: isCom1Rx
             label: "RX"
         }
@@ -210,7 +210,7 @@ ColumnLayout {
         }
         Text {
             id: com2FreqLabel
-            text: simConnected && radioStackState.AvionicsPowerOn ? FrequencyUtils.printFrequency(radioStackState.Com2Frequency) : "---.---"
+            text: simConnected && (radioStackState.AvionicsPowerOn || radioStackState.OverrideRadioPower) ? FrequencyUtils.printFrequency(radioStackState.Com2Frequency) : "---.---"
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
             leftPadding: 5
@@ -240,7 +240,7 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com2Tx
-            isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com2TransmitEnabled
+            isEnabled: simConnected && (radioStackState.AvionicsPowerOn || radioStackState.OverrideRadioPower) && radioStackState.Com2TransmitEnabled
             isActive: networkConnected && isCom2Tx
             label: "TX"
         }
@@ -249,7 +249,7 @@ ColumnLayout {
         }
         RadioStackIndicator{
             id: com2Rx
-            isEnabled: simConnected && radioStackState.AvionicsPowerOn && radioStackState.Com2ReceiveEnabled
+            isEnabled: simConnected && (radioStackState.AvionicsPowerOn || radioStackState.OverrideRadioPower) && radioStackState.Com2ReceiveEnabled
             isActive: isCom2Rx
             label: "RX"
         }

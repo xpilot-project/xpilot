@@ -1065,6 +1065,16 @@ Window {
                                         var status = cmd[2].toLowerCase() === "on" ? 1 : 0
                                         xplaneAdapter.setAudioSelection(radio, status)
                                         break
+                                    case ".radios":
+                                        if(cmd.length < 2) {
+                                            throw `Not enough parameters. Expected .radios on|off`
+                                        }
+                                        if(cmd[1].toLowerCase() !== "on" && cmd[1].toLowerCase() !== "off") {
+                                            throw `Not enough parameters. Expected .radios on|off`
+                                        }
+                                        var hasPower = cmd[1].toLowerCase() === "on" ? 1 : 0
+                                        xplaneAdapter.overrideRadioPower(hasPower)
+                                        break;
                                     case ".x":
                                     case ".xpndr":
                                     case ".xpdr":

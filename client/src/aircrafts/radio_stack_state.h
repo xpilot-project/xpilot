@@ -38,8 +38,10 @@ public:
     bool SquawkingIdent;
     ushort TransponderCode;
     bool SelcalMuteOverride;
+    bool OverrideRadioPower;
 
     Q_PROPERTY(bool AvionicsPowerOn MEMBER AvionicsPowerOn)
+    Q_PROPERTY(bool OverrideRadioPower MEMBER OverrideRadioPower)
 
     Q_PROPERTY(bool Com1TransmitEnabled MEMBER Com1TransmitEnabled)
     Q_PROPERTY(bool Com1ReceiveEnabled MEMBER Com1ReceiveEnabled)
@@ -59,6 +61,7 @@ public:
     bool operator==(RadioStackState &other) const
     {
         return AvionicsPowerOn == other.AvionicsPowerOn
+                && OverrideRadioPower == other.OverrideRadioPower
                 && Com1Frequency == other.Com1Frequency
                 && Com1TransmitEnabled == other.Com1TransmitEnabled
                 && Com1ReceiveEnabled == other.Com1ReceiveEnabled
@@ -76,6 +79,7 @@ public:
     bool operator!=(RadioStackState &other) const
     {
         return AvionicsPowerOn != other.AvionicsPowerOn
+                || OverrideRadioPower != other.OverrideRadioPower
                 || Com1Frequency != other.Com1Frequency
                 || Com1TransmitEnabled != other.Com1TransmitEnabled
                 || Com1ReceiveEnabled != other.Com1ReceiveEnabled
