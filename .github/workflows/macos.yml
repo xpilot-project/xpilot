@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 env:
-  MIN_OS_VERSION: 10.15
+  MIN_OS_VERSION: 11.0
   BUILD_TYPE: Release
   VATSIM_CLIENT_ID: ${{ secrets.VATSIM_CLIENT_ID }}
   VATSIM_CLIENT_KEY: ${{ secrets.VATSIM_CLIENT_KEY }}

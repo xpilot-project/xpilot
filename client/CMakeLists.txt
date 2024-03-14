@@ -200,6 +200,7 @@ if(APPLE)
         ${COREFOUNDATION}
         ${COREAUDIO}
         ${AUDIOTOOLBOX}
+        OpenGL::GL
     )
 endif()
 
