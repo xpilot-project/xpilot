@@ -130,6 +130,8 @@ namespace xpilot
         QString socketErrorString(QAbstractSocket::SocketError error) const;
         static QString socketErrorToQString(QAbstractSocket::SocketError error);
 
+        QString performDnsLookup(const QString address);
+
         QString toMd5(QString value);
 
     private:
@@ -139,6 +141,8 @@ namespace xpilot
 
         bool m_challengeServer;
         QString m_partialPacket = "";
+
+        QString m_fsdServerAddress = "";
 
         std::string m_clientAuthSessionKey;
         std::string m_clientAuthChallengeKey;
