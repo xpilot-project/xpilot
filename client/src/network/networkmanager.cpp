@@ -452,12 +452,18 @@ namespace xpilot
 
     void NetworkManager::OnBroadcastMessageReceived(PDUBroadcastMessage pdu)
     {
+        if(m_connectInfo.TowerViewMode)
+            return;
+
         emit broadcastMessageReceived(pdu.From.toUpper(), pdu.Message);
         m_xplaneAdapter.NotificationPosted(QString("[BROADCAST] %1: %2").arg(pdu.From.toUpper(), pdu.Message), COLOR_ORANGE);
     }
 
     void NetworkManager::OnRadioMessageReceived(PDURadioMessage pdu)
     {
+        if(m_connectInfo.TowerViewMode)
+            return;
+
         QList<uint> frequencies;
 
         for(int i = 0; i < pdu.Frequencies.size(); i++) {
@@ -574,6 +580,9 @@ namespace xpilot
 
     void NetworkManager::OnRadioStackStateChanged(RadioStackState radioStack)
     {
+        if(m_connectInfo.TowerViewMode)
+            return;
+
         if(m_radioStackState != radioStack)
         {
             m_radioStackState = radioStack;
@@ -947,6 +956,9 @@ namespace xpilot
 
     void NetworkManager::sendRadioMessage(QString message)
     {
+        if(m_connectInfo.TowerViewMode)
+            return;
+
         if(m_transmitFreqs.size() > 0) {
             m_fsd.SendPDU(PDURadioMessage(m_connectInfo.Callsign, m_transmitFreqs, message));
             m_xplaneAdapter.SendRadioMessage(message);
@@ -955,6 +967,9 @@ namespace xpilot
 
     void NetworkManager::sendPrivateMessage(QString to, QString message)
     {
+        if(m_connectInfo.TowerViewMode)
+            return;
+
         m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, to.toUpper(), message));
         m_xplaneAdapter.SendPrivateMessage(to, message);
         emit privateMessageSent(to, message);
@@ -992,6 +1007,9 @@ namespace xpilot
 
     void NetworkManager::OnSendWallop(QString message)
     {
+        if(m_connectInfo.TowerViewMode)
+            return;
+
         m_fsd.SendPDU(PDUWallop(m_connectInfo.Callsign, message));
         emit wallopSent(message);
         m_xplaneAdapter.NotificationPosted(QString("[WALLOP] %1").arg(message), COLOR_RED);
