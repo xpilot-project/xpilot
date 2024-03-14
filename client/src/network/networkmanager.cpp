@@ -75,6 +75,7 @@ namespace xpilot
         connect(&m_fsd, &FsdClient::RaiseSendFastReceived, this, &NetworkManager::OnSendFastReceived);
         connect(&m_fsd, &FsdClient::RaiseRawDataSent, this, &NetworkManager::OnRawDataSent);
         connect(&m_fsd, &FsdClient::RaiseRawDataReceived, this, &NetworkManager::OnRawDataReceived);
+        connect(&m_fsd, &FsdClient::RaiseMuteReceived, this, &NetworkManager::OnMuteReceived);
 
         connect(&m_xplaneAdapter, &XplaneAdapter::userAircraftDataChanged, this, &NetworkManager::OnUserAircraftDataUpdated);
         connect(&m_xplaneAdapter, &XplaneAdapter::userAircraftConfigDataChanged, this, &NetworkManager::OnUserAircraftConfigDataUpdated);
@@ -1034,6 +1035,11 @@ namespace xpilot
     void NetworkManager::OnSimPaused(bool isPaused)
     {
         m_simPaused = isPaused;
+    }
+
+    void NetworkManager::OnMuteReceived(PDUMute pdu)
+    {
+        emit muteReceived(pdu.Mute);
     }
 
     double NetworkManager::CalculatePressureAltitude() const

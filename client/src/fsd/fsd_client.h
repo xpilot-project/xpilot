@@ -61,6 +61,7 @@
 #include "pdu/pdu_auth_challenge.h"
 #include "pdu/pdu_auth_response.h"
 #include "pdu/pdu_change_server.h"
+#include "pdu/pdu_mute.h"
 
 namespace xpilot
 {
@@ -114,6 +115,7 @@ namespace xpilot
         void RaiseSendFastReceived(PDUSendFast pdu);
         void RaiseRawDataSent(QString data);
         void RaiseRawDataReceived(QString data);
+        void RaiseMuteReceived(PDUMute pdu);
 
     private:
         void connectSocketSignals();

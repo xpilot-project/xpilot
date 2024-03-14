@@ -110,6 +110,7 @@ namespace xpilot
         void fastPositionUpdateReceived(QString callsign, AircraftVisualState visualState, VelocityVector positionalVelocityVector, VelocityVector rotationalVelocityVector);
         void aircraftInfoReceived(QString callsign, QString equipment, QString airline);
         void microphoneCalibrationRequired();
+        void muteReceived(bool mute);
 
     private:
         FsdClient m_fsd { this };
@@ -162,6 +163,7 @@ namespace xpilot
         void OnRawDataReceived(QString data);
         void OnSendWallop(QString message);
         void OnSimPaused(bool isPaused);
+        void OnMuteReceived(PDUMute pdu);
 
         void OnUserAircraftDataUpdated(UserAircraftData data);
         void OnUserAircraftConfigDataUpdated(UserAircraftConfigData data);
