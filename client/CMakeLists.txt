@@ -42,7 +42,7 @@ if("${QT_MAJOR_VERSION}" STREQUAL "6")
     set(CMAKE_PREFIX_PATH $ENV{Qt${QT_MAJOR_VERSION}_HOME})
 endif()
 
-find_package(Qt${QT_MAJOR_VERSION} COMPONENTS Core Quick Network Svg REQUIRED PATHS $ENV{Qt${QT_MAJOR_VERSION}_HOME})
+find_package(Qt${QT_MAJOR_VERSION} COMPONENTS Core Quick Network Svg Widgets REQUIRED PATHS $ENV{Qt${QT_MAJOR_VERSION}_HOME})
 
 # Read config variables
 file(READ ${CMAKE_SOURCE_DIR}/../xpilot.json XPILOT_JSON)
@@ -210,6 +210,7 @@ target_link_libraries(${PROJECT_NAME}
     Qt${QT_MAJOR_VERSION}::Quick
     Qt${QT_MAJOR_VERSION}::Network
     Qt${QT_MAJOR_VERSION}::Svg
+    Qt${QT_MAJOR_VERSION}::Widgets
     Qt${QT_MAJOR_VERSION}::qmlfolderlistmodelplugin
     ${LIB_OPUS}
     ${LIB_EVENT}
