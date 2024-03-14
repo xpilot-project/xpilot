@@ -954,6 +954,12 @@ Window {
                             else if(message === ".appdata") {
                                 AppConfig.openAppDataFolder()
                             }
+                            else if(message.startsWith(".ctaf")) {
+                                if(cmd.length < 2) {
+                                    throw "Not enough parameters. Expected: .ctaf AIRPORT-ID"
+                                }
+                                networkManager.requestCtafFrequency(cmd[1])
+                            }
                             else {
                                 if(message.startsWith(".")) {
                                     if(!simConnected) {
