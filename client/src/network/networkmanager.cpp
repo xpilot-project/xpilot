@@ -800,6 +800,37 @@ namespace xpilot
         OnSendWallop(message);
     }
 
+    void NetworkManager::requestCtafFrequency(QString station)
+    {
+        station = station.toUpper();
+        QNetworkRequest request(QUrl("https://my.vatsim.net/api/v2/aip/airports/"+station+"/stations"));
+        m_reply = nam->get(request);
+        QObject::connect(m_reply, &QNetworkReply::finished, [=]() {
+            if(m_reply->error() == QNetworkReply::NoError) {
+                QJsonDocument json = QJsonDocument::fromJson(m_reply->readAll());
+                if (json.isNull()) {
+                    emit notificationPosted(QString("No CTAF frequency was found for %1.").arg(station), MessageType::Error);
+                } else {
+                    QJsonObject rootObject = json.object();
+                    QJsonArray dataArray = rootObject["data"].toArray();
+                    for (const QJsonValue &value : dataArray) {
+                        QJsonObject obj = value.toObject();
+                        if (obj["ctaf"].toBool()) {
+                            emit notificationPosted(QString("The CTAF frequency for %1 is %2.").arg(station, obj["frequency"].toString()), MessageType::Info);
+                        }
+                    }
+                }
+            } else {
+                if (m_reply->error() == QNetworkReply::ContentNotFoundError) {
+                    emit notificationPosted(QString("No AIP data was returned for %1.").arg(station), MessageType::Error);
+                } else {
+                    emit notificationPosted(QString("Error retrieving CTAF frequency for %1: %2").arg(station, m_reply->errorString()), MessageType::Error);
+                }
+            }
+            m_reply->deleteLater();
+        });
+    }
+
     void NetworkManager::RequestIsValidATC(QString callsign)
     {
         QStringList args;
