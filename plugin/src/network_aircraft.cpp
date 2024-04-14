@@ -19,7 +19,7 @@
 #include "config.h"
 #include "geo_calc.hpp"
 #include "network_aircraft.h"
-#include "quaternion.hpp"
+#include "abacus.hpp"
 #include "utilities.h"
 
 namespace xpilot
@@ -74,21 +74,21 @@ namespace xpilot
 
 		if (rotationVector == Vector3::Zero())
 		{
-			pitch = PredictedVisualState.Pitch;
-			bank = PredictedVisualState.Bank;
-			heading = PredictedVisualState.Heading;
+			pitch = GetPitch();
+			bank = GetRoll();
+			heading = GetHeading();
 		}
 		else
 		{
-			Quaternion current_orientation = Quaternion::FromEuler(
-				DegreesToRadians(PredictedVisualState.Pitch),
+			Quaternion current_orientation = Quaternion::CreateFromEuler(
 				DegreesToRadians(PredictedVisualState.Heading),
+				DegreesToRadians(PredictedVisualState.Pitch),
 				DegreesToRadians(PredictedVisualState.Bank)
 			);
 
-			Quaternion rotation = Quaternion::FromEuler(
-				rotationVector.X,
+			Quaternion rotation = Quaternion::CreateFromEuler(
 				rotationVector.Y,
+				rotationVector.X,
 				rotationVector.Z
 			);
 
@@ -100,7 +100,7 @@ namespace xpilot
 
 			Quaternion result = current_orientation * slerp;
 
-			Vector3 new_orientation = Quaternion::ToEuler(result);
+			Vector3 new_orientation = Quaternion::ExtractEulerAngles(result);
 
 			pitch = RadiansToDegrees(new_orientation.X);
 			heading = RadiansToDegrees(new_orientation.Y);
@@ -330,21 +330,21 @@ namespace xpilot
 		}
 		else
 		{
-			Quaternion currentOrientation = Quaternion::FromEuler(
-				DegreesToRadians(PredictedVisualState.Pitch),
+			Quaternion currentOrientation = Quaternion::CreateFromEuler(
 				DegreesToRadians(PredictedVisualState.Heading),
+				DegreesToRadians(PredictedVisualState.Pitch),
 				DegreesToRadians(PredictedVisualState.Bank)
 			);
 
-			Quaternion targetOrientation = Quaternion::FromEuler(
-				DegreesToRadians(VisualState.Pitch),
+			Quaternion targetOrientation = Quaternion::CreateFromEuler(
 				DegreesToRadians(VisualState.Heading),
+				DegreesToRadians(VisualState.Pitch),
 				DegreesToRadians(VisualState.Bank)
 			);
 
 			Quaternion delta = Quaternion::Inverse(currentOrientation) * targetOrientation;
 
-			Vector3 result = Quaternion::ToEuler(delta);
+			Vector3 result = Quaternion::ExtractEulerAngles(delta);
 
 			RotationalErrorVelocities = Vector3(result.X / 2.0, result.Y / 2.0, result.Z / 2.0);
 		}
