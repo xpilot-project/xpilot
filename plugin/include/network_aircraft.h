@@ -27,6 +27,11 @@
 #include "XPMPAircraft.h"
 #include "XPMPMultiplayer.h"
 
+#include <optional>
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 namespace xpilot
 {
 	struct AircraftVisualState

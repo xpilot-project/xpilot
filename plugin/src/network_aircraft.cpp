@@ -22,6 +22,8 @@
 #include "abacus.hpp"
 #include "utilities.h"
 
+#include <regex>
+
 namespace xpilot
 {
 	NetworkAircraft::NetworkAircraft(

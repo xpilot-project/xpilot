@@ -2,7 +2,6 @@
 
 #include "vector3.hpp"
 
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <algorithm>
 
