@@ -620,6 +620,12 @@ Window {
                     nearbyGround.append(controller)
                 }
             }
+            else if (controller.Callsign.endsWith("_RMP")) {
+                idx = findController(nearbyRamp, controller.Callsign)
+                if (idx === undefined) {
+                    nearbyRamp.append(controller)
+                }
+            }
             else if (controller.Callsign.endsWith("_DEL")) {
                 idx = findController(nearbyDelivery, controller.Callsign)
                 if (idx === undefined) {
@@ -630,6 +636,12 @@ Window {
                 idx = findController(nearbyAtis, controller.Callsign)
                 if (idx === undefined) {
                     nearbyAtis.append(controller)
+                }
+            }
+            else {
+                idx = findController(nearbyObservers, controller.Callsign)
+                if (idx === undefined) {
+                    nearbyObservers.append(controller)
                 }
             }
         }
@@ -660,6 +672,12 @@ Window {
                     nearbyGround.remove(idx)
                 }
             }
+            else if (controller.Callsign.endsWith("_RMP")) {
+                idx = findController(nearbyRamp, controller.Callsign)
+                if (idx !== undefined) {
+                    nearbyRamp.remove(idx)
+                }
+            }
             else if (controller.Callsign.endsWith("_DEL")) {
                 idx = findController(nearbyDelivery, controller.Callsign)
                 if (idx !== undefined) {
@@ -670,6 +688,12 @@ Window {
                 idx = findController(nearbyAtis, controller.Callsign)
                 if (idx !== undefined) {
                     nearbyAtis.remove(idx)
+                }
+            }
+            else {
+                idx = findController(nearbyObservers, controller.Callsign)
+                if (idx !== undefined) {
+                    nearbyObservers.remove(idx)
                 }
             }
         }
@@ -820,11 +844,19 @@ Window {
             }
 
             ListModel {
+                id: nearbyRamp
+            }
+
+            ListModel {
                 id: nearbyDelivery
             }
 
             ListModel {
                 id: nearbyAtis
+            }
+
+            ListModel {
+                id: nearbyObservers
             }
 
             NearbyAtc {
@@ -834,8 +866,10 @@ Window {
                 approach: nearbyApproach
                 tower: nearbyTower
                 ground: nearbyGround
+                ramp: nearbyRamp
                 delivery: nearbyDelivery
                 atis: nearbyAtis
+                observers: nearbyObservers
                 onStartChatSession: function(callsign) {
                     focusOrCreateTab(callsign)
                 }

@@ -18,8 +18,10 @@ Rectangle {
     property variant approach;
     property variant tower;
     property variant ground;
+    property variant ramp;
     property variant delivery;
     property variant atis;
+    property variant observers;
 
     signal startChatSession(string callsign)
 
@@ -94,6 +96,15 @@ Rectangle {
                 }
             }
 
+            // Ramp
+            NearbyAtcGroup {
+                internalModel: ramp
+                groupTitle: "Ramp"
+                onSendPrivateMessage: (callsign) => {
+                    startChatSession(callsign)
+                }
+            }
+
             // Clearance Delivery
             NearbyAtcGroup {
                 internalModel: delivery
@@ -107,6 +118,15 @@ Rectangle {
             NearbyAtcGroup {
                 internalModel: atis
                 groupTitle: "ATIS"
+                onSendPrivateMessage: (callsign) => {
+                    startChatSession(callsign)
+                }
+            }
+
+            // Observers
+            NearbyAtcGroup {
+                internalModel: observers
+                groupTitle: "Observers"
                 onSendPrivateMessage: (callsign) => {
                     startChatSession(callsign)
                 }
