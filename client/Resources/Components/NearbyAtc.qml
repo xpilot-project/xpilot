@@ -94,10 +94,10 @@ Rectangle {
                 }
             }
 
-            // Delivery
+            // Clearance Delivery
             NearbyAtcGroup {
                 internalModel: delivery
-                groupTitle: "Delivery"
+                groupTitle: "Clearance Delivery"
                 onSendPrivateMessage: (callsign) => {
                     startChatSession(callsign)
                 }
