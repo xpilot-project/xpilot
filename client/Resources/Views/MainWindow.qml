@@ -147,7 +147,7 @@ Window {
         // we call this again so we can present the permission error if applicable
         AppConfig.loadConfig()
 
-        appendMessage(`Welcome to xPilot v${appVersion}`, Enum.MessageType.Info)
+        appendMessage(`xPilot v${appVersion}`, Enum.MessageType.Info)
         if (AppConfig.XplaneNetworkAddress !== "127.0.0.1" && AppConfig.XplaneNetworkAddress !== "localhost") {
             appendMessage(`Waiting for X-Plane connection (${AppConfig.XplaneNetworkAddress})...
                           Please make sure X-Plane is running and a flight is loaded. If you're having trouble connecting xPilot to X-Plane, please see the xPilot FAQ: https://xpilot-project.org/waiting-for-connection`, Enum.MessageType.Info)
@@ -255,10 +255,6 @@ Window {
             downloadingUpdateDialog.open()
         }
 
-        function onNoUpdatesAvailable() {
-            appendMessage("Version check complete. You are running the latest version of xPilot.", Enum.MessageType.Info)
-        }
-
         function onErrorEncountered(error) {
             appendMessage(error, Enum.MessageType.Error)
             errorSound.play()
@@ -340,14 +336,6 @@ Window {
 
     Connections {
         target: serverListManager
-
-        function onServerListDownloaded(count) {
-            appendMessage(`Server list download succeeded. ${count} servers found.`, Enum.MessageType.Info)
-        }
-
-        function onServerListDownloadError(count) {
-            appendMessage("Server list download failed. Using previously-cached server list.", Enum.MessageType.Error)
-        }
     }
 
     Connections {
