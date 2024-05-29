@@ -200,8 +200,8 @@ namespace xpilot
 
         double AdjustIncomingAltitude(double altitude);
 
-        const int FSD_VERSION_MAJOR = 2;
-        const int FSD_VERSION_MINOR = 2;
+        const int FSD_VERSION_MAJOR = 3;
+        const int FSD_VERSION_MINOR = 0;
     };
 }
 
