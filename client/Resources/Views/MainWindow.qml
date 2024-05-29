@@ -644,6 +644,15 @@ Window {
                     nearbyObservers.append(controller)
                 }
             }
+
+            listModelSort(nearbyEnroute, (a,b) => a.Callsign.localeCompare(b.Callsign))
+            listModelSort(nearbyApproach, (a,b) => a.Callsign.localeCompare(b.Callsign))
+            listModelSort(nearbyTower, (a,b) => a.Callsign.localeCompare(b.Callsign))
+            listModelSort(nearbyGround, (a,b) => a.Callsign.localeCompare(b.Callsign))
+            listModelSort(nearbyRamp, (a,b) => a.Callsign.localeCompare(b.Callsign))
+            listModelSort(nearbyDelivery, (a,b) => a.Callsign.localeCompare(b.Callsign))
+            listModelSort(nearbyAtis, (a,b) => a.Callsign.localeCompare(b.Callsign))
+            listModelSort(nearbyObservers, (a,b) => a.Callsign.localeCompare(b.Callsign))
         }
 
         function onControllerDeleted(controller) {
@@ -1349,5 +1358,18 @@ Window {
             settingsWindow = comp.createObject(mainWindow)
             settingsWindow.show()
         }
+    }
+
+    function listModelSort(listModel, compareFunction) {
+        let indexes = [ ...Array(listModel.count).keys() ]
+        indexes.sort( (a, b) => compareFunction( listModel.get(a), listModel.get(b) ) )
+        let sorted = 0
+        while ( sorted < indexes.length && sorted === indexes[sorted] ) sorted++
+        if ( sorted === indexes.length ) return
+        for ( let i = sorted; i < indexes.length; i++ ) {
+            listModel.move( indexes[i], listModel.count - 1, 1 )
+            listModel.insert( indexes[i], { } )
+        }
+        listModel.remove( sorted, indexes.length - sorted )
     }
 }
