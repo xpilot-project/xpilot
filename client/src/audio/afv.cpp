@@ -37,7 +37,10 @@ namespace xpilot
     static void defaultLogger(const char *subsystem, const char *file, int line, const char *outputLine, void* ref)
     {
         auto *self = reinterpret_cast<AudioForVatsim *>(ref);
-        self->afvLogger(QString("%1: %2: %3\r\n").arg(QDateTime::currentDateTimeUtc().toString("MMM dd HH:mm:ss yyyy")).arg(subsystem).arg(outputLine));
+        self->afvLogger(QString("%1: %2: %3\r\n")
+                            .arg(QDateTime::currentDateTimeUtc().toString("MMM dd HH:mm:ss yyyy"))
+                            .arg(QString::fromUtf8(subsystem).leftJustified(20, ' '))
+                            .arg(outputLine));
     }
 
     static afv_native::log_fn gLogger = defaultLogger;
@@ -177,12 +180,9 @@ namespace xpilot
             m_xplaneAdapter.setComRxDataref(1, m_client->getRxActive(1));
         });
         connect(&m_vuTimer, &QTimer::timeout, this, [=]{
-            if(!AppConfig::getInstance()->InputDevice.isEmpty())
-            {
-                double vu = m_client->getInputPeak();
-                emit inputVuChanged(vu);
-                m_xplaneAdapter.setVuDataref(vu);
-            }
+            double vu = m_client->getInputPeak();
+            emit inputVuChanged(vu);
+            m_xplaneAdapter.setVuDataref(vu);
         });
         connect(&m_networkManager, &NetworkManager::networkConnected, this, &AudioForVatsim::OnNetworkConnected);
         connect(&m_networkManager, &NetworkManager::networkDisconnected, this, &AudioForVatsim::OnNetworkDisconnected);
@@ -305,27 +305,24 @@ namespace xpilot
     void AudioForVatsim::setInputDevice(QString deviceName)
     {
         if(!deviceName.isEmpty()) {
-            m_client->stopAudio();
-            m_client->setAudioInputDevice(deviceName.toStdString().c_str());
-            m_client->startAudio();
+            m_client->setMicrophoneDevice(deviceName.toStdString().c_str());
+            m_client->startMicrophone();
         }
     }
 
     void AudioForVatsim::setSpeakerDevice(QString deviceName)
     {
         if(!deviceName.isEmpty()) {
-            m_client->stopAudio();
             m_client->setSpeakerDevice(deviceName.toStdString().c_str());
-            m_client->startAudio();
+            m_client->startSpeaker();
         }
     }
 
     void AudioForVatsim::setHeadsetDevice(QString deviceName)
     {
         if(!deviceName.isEmpty()) {
-            m_client->stopAudio();
             m_client->setHeadsetDevice(deviceName.toStdString().c_str());
-            m_client->startAudio();
+            m_client->startHeadset();
         }
     }
 
@@ -473,7 +470,7 @@ namespace xpilot
 
         if(!AppConfig::getInstance()->InputDevice.isEmpty())
         {
-            m_client->setAudioInputDevice(AppConfig::getInstance()->InputDevice.toStdString());
+            m_client->setMicrophoneDevice(AppConfig::getInstance()->InputDevice.toStdString());
         }
 
         if(!AppConfig::getInstance()->SpeakerDevice.isEmpty())
