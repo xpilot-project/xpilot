@@ -54,10 +54,11 @@ include_directories(${CMAKE_SOURCE_DIR}/3rdparty/imgui-stdlib)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/imgwindow)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/font)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gl)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gmath)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/sdk/CHeaders/XPLM)
 
 set(INCLUDES
+  include/abacus.hpp
+  include/vector3.hpp
   include/aircraft_manager.h
   include/config.h
   include/constants.h
