@@ -50,6 +50,7 @@ namespace xpilot
         static AppConfig *getInstance();
         const static QString &dataRoot();
         const static QString &xplanePath();
+        const static QString &soundsPath();
 
         Q_INVOKABLE bool saveConfig();
         Q_INVOKABLE void loadConfig();
@@ -71,6 +72,7 @@ namespace xpilot
         QString SpeakerDevice;
         QString HeadsetDevice;
         QString InputDevice;
+        QString NotificationAudioDevice;
         bool Com1OnHeadset = true;
         bool Com2OnHeadset = true;
         bool SplitAudioChannels;
@@ -127,6 +129,7 @@ namespace xpilot
         Q_PROPERTY(QString SpeakerDevice READ getSpeakerDevice WRITE setSpeakerDevice NOTIFY speakerDeviceChanged)
         Q_PROPERTY(QString HeadsetDevice READ getHeadsetDevice WRITE setHeadsetDevice NOTIFY headsetDeviceChanged)
         Q_PROPERTY(QString InputDevice READ getInputDevice WRITE setInputDevice NOTIFY inputDeviceChanged)
+        Q_PROPERTY(QString NotificationAudioDevice READ getNotificationAudioDevice WRITE setNotificationAudioDevice NOTIFY notificationAudioDeviceChanged)
         Q_PROPERTY(bool SplitAudioChannels READ getSplitAudioChannels WRITE setSplitAudioChannels NOTIFY splitAudioChannelsChanged)
         Q_PROPERTY(int Com1Volume READ getCom1Volume WRITE setCom1Volume NOTIFY com1VolumeChanged)
         Q_PROPERTY(int Com2Volume READ getCom2Volume WRITE setCom2Volume NOTIFY com2VolumeChanged)
@@ -165,6 +168,7 @@ namespace xpilot
         void setSpeakerDevice(const QString &value) { tempSpeakerDevice = value; }
         void setHeadsetDevice(const QString &value) { tempHeadsetDevice = value; }
         void setInputDevice(const QString &value) { tempInputDevice = value; }
+        void setNotificationAudioDevice(const QString &value) { tempNotificationAudioDevice = value; }
         void setSplitAudioChannels(bool value) { tempSplitAudioChannels = value; }
         void setCom1Volume(int value) { tempCom1Volume = value; }
         void setCom2Volume(int value) { tempCom2Volume = value; }
@@ -192,6 +196,7 @@ namespace xpilot
         QString getSpeakerDevice() const { return SpeakerDevice; }
         QString getHeadsetDevice() const { return HeadsetDevice; }
         QString getInputDevice() const { return InputDevice; }
+        QString getNotificationAudioDevice() const { return NotificationAudioDevice; }
         bool getSplitAudioChannels() const { return SplitAudioChannels; }
         int getCom1Volume() const { return Com1Volume; }
         int getCom2Volume() const { return Com2Volume; }
@@ -220,6 +225,7 @@ namespace xpilot
         void serverNameChanged();
         void speakerDeviceChanged();
         void headsetDeviceChanged();
+        void notificationAudioDeviceChanged();
         void splitAudioChannelsChanged();
         void com1VolumeChanged();
         void com2VolumeChanged();
@@ -252,6 +258,7 @@ namespace xpilot
         QString tempSpeakerDevice;
         QString tempHeadsetDevice;
         QString tempInputDevice;
+        QString tempNotificationAudioDevice;
         bool tempSplitAudioChannels;
         int tempCom1Volume;
         int tempCom2Volume;

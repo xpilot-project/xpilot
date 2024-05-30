@@ -48,46 +48,6 @@ Window {
         source: "../Fonts/Roboto-Mono.ttf"
     }
 
-    SoundEffect {
-        id: alertSound
-        source: "file:" + appDataPath + "Sounds/Alert.wav"
-    }
-
-    SoundEffect {
-        id: broadcastSound
-        source: "file:" + appDataPath + "Sounds/Broadcast.wav"
-    }
-
-    SoundEffect {
-        id: directRadioMessageSound
-        source: "file:" + appDataPath + "Sounds/DirectRadioMessage.wav"
-    }
-
-    SoundEffect {
-        id: errorSound
-        source: "file:" + appDataPath + "Sounds/Error.wav"
-    }
-
-    SoundEffect {
-        id: newMessageSound
-        source: "file:" + appDataPath + "Sounds/NewMessage.wav"
-    }
-
-    SoundEffect {
-        id: privateMessageSound
-        source: "file:" + appDataPath + "Sounds/PrivateMessage.wav"
-    }
-
-    SoundEffect {
-        id: radioMessageSound
-        source: "file:" + appDataPath + "Sounds/RadioMessage.wav"
-    }
-
-    SoundEffect {
-        id: selcalSound
-        source: "file:" + appDataPath + "Sounds/SELCAL.wav"
-    }
-
     NewVersionAvailable {
         id: newVersionAvailableDialog
     }
@@ -127,7 +87,7 @@ Window {
 
         function onPermissionError(error) {
             appendMessage(`Configuration Error ${error}`, Enum.MessageType.Error)
-            errorSound.play()
+            notificationSoundEngine.playError()
         }
 
         function onSettingsChanged() {
@@ -257,7 +217,7 @@ Window {
 
         function onErrorEncountered(error) {
             appendMessage(error, Enum.MessageType.Error)
-            errorSound.play()
+            notificationSoundEngine.playError()
         }
     }
 
@@ -266,7 +226,7 @@ Window {
 
         function onTypeCodeDownloadError(error) {
             appendMessage(error, Enum.MessageType.Error)
-            errorSound.play()
+            notificationSoundEngine.playError()
         }
     }
 
@@ -309,7 +269,7 @@ Window {
                 extractCslModelsWindow.destroy()
             }
             appendMessage(error, Enum.MessageType.Error)
-            errorSound.play()
+            notificationSoundEngine.playError()
         }
     }
 
@@ -343,7 +303,7 @@ Window {
 
         function onNngSocketError(error) {
             appendMessage(`Socket Error: ${error}`, Enum.MessageType.Error)
-            errorSound.play()
+            notificationSoundEngine.playError()
         }
 
         function onRadioStackStateChanged(stack) {
@@ -360,7 +320,7 @@ Window {
                 networkManager.disconnectFromNetwork()
                 appendMessage("X-Plane connection lost. Please make sure X-Plane is running and a flight is loaded.", Enum.MessageType.Error)
                 mainWindow.alert(0)
-                errorSound.play()
+                notificationSoundEngine.playError()
             }
             simConnected = state
         }
@@ -371,7 +331,7 @@ Window {
                 appendMessage("You have been disconnected from the network because Replay Mode is enabled.", Enum.MessageType.Error)
                 if (AppConfig.AlertDisconnect) {
                     mainWindow.alert(0)
-                    errorSound.play()
+                    notificationSoundEngine.playError()
                 }
             }
         }
@@ -379,7 +339,7 @@ Window {
         function onInvalidPluginVersion() {
             appendMessage(`Unsupported xPilot plugin version detected.
                           Please close X-Plane and reinstall the latest version of xPilot.`, Enum.MessageType.Error)
-            errorSound.play()
+            notificationSoundEngine.playError()
             mainWindow.alert(0)
         }
 
@@ -389,7 +349,7 @@ Window {
                           see the "CSL Configuration" section in the xPilot Documentation (http://xpilot-project.org).
                           Restart X-Plane and xPilot after you have properly configured your CSL models.
                           You can have xPilot install a model set for you by entering the command .downloadcsl`, Enum.MessageType.Error)
-            errorSound.play()
+            notificationSoundEngine.playError()
             mainWindow.alert(0)
         }
 
@@ -403,7 +363,7 @@ Window {
 
         function onAircraftAlreadyIgnored(callsign) {
             appendMessage(`${callsign} is already in the ignore list.`, Enum.MessageType.Error)
-            errorSound.play()
+            notificationSoundEngine.playError()
         }
 
         function onAircraftUnignored(callsign) {
@@ -412,7 +372,7 @@ Window {
 
         function onAircraftNotIgnored(callsign) {
             appendMessage(`${callsign} was not found in the ignore list.`, Enum.MessageType.Error)
-            errorSound.play()
+            notificationSoundEngine.playError()
         }
 
         function onIgnoreList(list) {
@@ -460,7 +420,7 @@ Window {
             nearbyAtis.clear()
 
             if (forced && AppConfig.AlertDisconnect) {
-                errorSound.play()
+                notificationSoundEngine.playError()
                 mainWindow.alert(0)
             }
         }
@@ -480,7 +440,7 @@ Window {
         function onBroadcastMessageReceived(from, message) {
             appendMessage(`[BROADCAST] ${from}: ${message}`, Enum.MessageType.Broadcast)
             if (AppConfig.AlertNetworkBroadcast) {
-                broadcastSound.play()
+                notificationSoundEngine.playBroadcast()
                 mainWindow.alert(0)
             }
         }
@@ -494,7 +454,7 @@ Window {
             if (AppConfig.AlertSelcal) {
                 mainWindow.alert(0)
                 if (!radioStackState.SelcalMuteOverride) {
-                    selcalSound.play()
+                    notificationSoundEngine.playSelcal()
                 }
             }
         }
@@ -518,13 +478,13 @@ Window {
                 appendMessage(`${from}: ${message}`, Enum.MessageType.IncomingPrivate, tabIdx)
                 if(AppConfig.AlertPrivateMessage) {
                     mainWindow.alert(0)
-                    newMessageSound.play()
+                    notificationSoundEngine.playNewMessage()
                 }
             } else {
                 appendMessage(`${from}: ${message}`, Enum.MessageType.IncomingPrivate, tabIdx)
                 if(AppConfig.AlertPrivateMessage) {
                     mainWindow.alert(0)
-                    privateMessageSound.play()
+                    notificationSoundEngine.playPrivateMessage()
                 }
             }
         }
@@ -559,12 +519,12 @@ Window {
             if (args.IsDirect) {
                 if (AppConfig.AlertDirectRadioMessage) {
                     mainWindow.alert(0)
-                    directRadioMessageSound.play()
+                    notificationSoundEngine.playDirectRadioMessage()
                 }
             }
             else {
                 if (AppConfig.AlertRadioMessage) {
-                    radioMessageSound.play()
+                    notificationSoundEngine.playRadioMessage()
                 }
             }
         }
@@ -1160,6 +1120,7 @@ Window {
                         }
                         catch(err) {
                             appendMessage(err, Enum.MessageType.Error, tabIndex)
+                            notificationSoundEngine.playError()
                         }
                     }
                     else if(tabIndex === 1) {

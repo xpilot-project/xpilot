@@ -51,6 +51,7 @@
 #include "common/clipboardadapter.h"
 #include "config/appconfig.h"
 #include "audio/afv.h"
+#include "audio/notification_sound_engine.h"
 #include "controllers/controller_manager.h"
 #include "network/networkmanager.h"
 #include "network/serverlistmanager.h"
@@ -113,6 +114,7 @@ int xpilot::Main(int argc, char* argv[])
     VersionCheck versionCheck;
     TypeCodeDatabase typeCodeDatabase;
     InstallModels installModels;
+    NotificationSoundEngine notificationSoundEngine;
 
     QInjection::addSingleton(new XplaneAdapter);
     QInjection::addSingleton(new NetworkManager);
@@ -146,6 +148,7 @@ int xpilot::Main(int argc, char* argv[])
     context->setContextProperty("versionCheck", &versionCheck);
     context->setContextProperty("serverListManager", &serverListManager);
     context->setContextProperty("typeCodeDatabase", &typeCodeDatabase);
+    context->setContextProperty("notificationSoundEngine", &notificationSoundEngine);
     context->setContextProperty("appDataPath", AppConfig::getInstance()->dataRoot());
 
     QObject::connect(&app, &QCoreApplication::aboutToQuit, &app, [&](){

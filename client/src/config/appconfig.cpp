@@ -62,6 +62,13 @@ const QString &AppConfig::xplanePath()
     return path;
 }
 
+const QString &AppConfig::soundsPath()
+{
+    QString folder("/org.vatsim.xpilot/Sounds/");
+    static const QString path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + folder;
+    return path;
+}
+
 void AppConfig::loadConfig()
 {
     QDir dir(dataRoot());
@@ -135,6 +142,7 @@ void AppConfig::loadConfig()
     InputDevice = getJsonValue(jsonMap, "InputDevice", QString());
     SpeakerDevice = getJsonValue(jsonMap, "SpeakerDevice", QString());
     HeadsetDevice = getJsonValue(jsonMap, "HeadsetDevice", QString());
+    NotificationAudioDevice = getJsonValue(jsonMap, "NotificationAudioDevice", QString());
     SplitAudioChannels = getJsonValue(jsonMap, "SplitAudioChannels", false);
     Com1Volume = qMin(qMax(getJsonValue<int>(jsonMap, "Com1Volume", 50), 0), 100);
     Com2Volume = qMin(qMax(getJsonValue<int>(jsonMap, "Com2Volume", 50), 0), 100);
@@ -222,6 +230,7 @@ bool AppConfig::saveConfig()
     jsonObj["InputDevice"] = trim(InputDevice);
     jsonObj["SpeakerDevice"] = trim(SpeakerDevice);
     jsonObj["HeadsetDevice"] = trim(HeadsetDevice);
+    jsonObj["NotificationAudioDevice"] = trim(NotificationAudioDevice);
     jsonObj["SplitAudioChannels"] = SplitAudioChannels;
     jsonObj["Com1Volume"] = qMin(qMax(Com1Volume, 0), 100);
     jsonObj["Com2Volume"] = qMin(qMax(Com2Volume, 0), 100);
@@ -309,6 +318,7 @@ void AppConfig::applySettings()
     SpeakerDevice = tempSpeakerDevice;
     HeadsetDevice = tempHeadsetDevice;
     InputDevice = tempInputDevice;
+    NotificationAudioDevice = tempNotificationAudioDevice;
     SplitAudioChannels = tempSplitAudioChannels;
     Com1Volume = tempCom1Volume;
     Com2Volume = tempCom2Volume;
@@ -350,6 +360,7 @@ void AppConfig::setInitialTempValues()
     tempSpeakerDevice = SpeakerDevice;
     tempHeadsetDevice = HeadsetDevice;
     tempInputDevice = InputDevice;
+    tempNotificationAudioDevice = NotificationAudioDevice;
     tempSplitAudioChannels = SplitAudioChannels;
     tempCom1Volume = Com1Volume;
     tempCom2Volume = Com2Volume;

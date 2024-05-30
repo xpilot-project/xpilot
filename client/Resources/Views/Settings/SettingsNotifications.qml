@@ -9,6 +9,8 @@ Item {
 
     signal applyChanges()
 
+    property bool audioDeviceListLoaded: false
+
     Component.onCompleted: {
         switchAlertPrivateMessage.checked = AppConfig.AlertPrivateMessage
         switchAlertRadioMessage.checked = AppConfig.AlertRadioMessage
@@ -16,11 +18,20 @@ Item {
         switchAlertBroadcast.checked = AppConfig.AlertNetworkBroadcast
         switchAlertSelcal.checked = AppConfig.AlertSelcal
         switchAlertDisconnect.checked = AppConfig.AlertDisconnect
+        notificationAudioDevice.model = notificationSoundEngine.AudioDevices
+    }
+
+    Connections {
+        target: notificationSoundEngine
+
+        function onOutputDevicesChanged() {
+            notificationAudioDevice.model = notificationSoundEngine.AudioDevices
+        }
     }
 
     ColumnLayout {
         spacing: 10
-        width: parent.width
+        width: 500
 
         CustomSwitch {
             id: switchAlertPrivateMessage
@@ -79,6 +90,24 @@ Item {
             onCheckedChanged: {
                 AppConfig.AlertDisconnect = switchAlertDisconnect.checked
                 applyChanges()
+            }
+        }
+
+        CustomComboBox {
+            id: notificationAudioDevice
+            fieldLabel: "Notification Audio Device"
+            valueRole: "name"
+            textRole: "name"
+            onModelChanged: {
+                currentIndex = indexOfValue(AppConfig.NotificationAudioDevice)
+                audioDeviceListLoaded = true
+            }
+            onSelectedValueChanged: function(value) {
+                if(audioDeviceListLoaded) {
+                    notificationSoundEngine.setNotificationAudioDevice(value)
+                    AppConfig.NotificationAudioDevice = value
+                    applyChanges()
+                }
             }
         }
     }
