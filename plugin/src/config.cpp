@@ -65,6 +65,10 @@ namespace xpilot
 			{
 				SetShowHideLabels(jf["ShowAircraftLabels"]);
 			}
+			if (jf.contains("AircraftLabelType"))
+			{
+				SetAircraftLabelType(jf["AircraftLabelType"]);
+			}
 			if (jf.contains("DefaultIcaoType"))
 			{
 				SetDefaultAcIcaoType(jf["DefaultIcaoType"]);
@@ -206,6 +210,7 @@ namespace xpilot
 
 		j["Version"] = CONFIG_VERSION;
 		j["ShowAircraftLabels"] = GetShowHideLabels();
+		j["AircraftLabelType"] = GetAircraftLabelType();
 		j["DefaultIcaoType"] = GetDefaultAcIcaoType();
 		j["PluginPort"] = GetTcpPort();
 		j["UseTcpSocket"] = GetUseTcpSocket();

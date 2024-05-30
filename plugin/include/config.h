@@ -52,6 +52,14 @@ namespace xpilot
 		BottomRight
 	};
 
+	enum class AircraftLabelType
+	{
+		Callsign,
+		AircraftType,
+		CallsignAircraftType,
+		AircraftTypeAirlineCode
+	};
+
 	class Config
 	{
 	public:
@@ -79,6 +87,9 @@ namespace xpilot
 
 		void SetShowHideLabels(bool status) { m_showHideLabels = status; }
 		bool GetShowHideLabels() const { return m_showHideLabels; }
+
+		void SetAircraftLabelType(AircraftLabelType type) { m_aircraftLabelType = type; }
+		AircraftLabelType GetAircraftLabelType() const { return m_aircraftLabelType; }
 
 		void SetDebugModelMatching(bool status) { m_debugModelMatching = status; }
 		bool GetDebugModelMatching() const { return m_debugModelMatching; }
@@ -176,6 +187,7 @@ namespace xpilot
 		Config() = default;
 		std::vector<CslPackage> m_cslPackages;
 		std::string m_defaultAcIcaoType = "A320";
+		AircraftLabelType m_aircraftLabelType = AircraftLabelType::Callsign;
 		bool m_showHideLabels = true;
 		bool m_debugModelMatching = false;
 		bool m_defaultAtisEnabled = false;

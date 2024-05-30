@@ -32,6 +32,7 @@ namespace xpilot
 	static bool showMessagePreview = true;
 	static int notificationPanelTimeout = 2;
 	static int notificationPanelPosition = (int)NotificationPanelPosition::TopRight;
+	static int aircraftLabelType = (int)AircraftLabelType::Callsign;
 	static int labelMaxDistance = 3;
 	static bool labelVisibilityCutoff = true;
 	static bool enableTransmitIndicator = false;
@@ -50,10 +51,10 @@ namespace xpilot
 	static int currentNode = -1;
 
 	SettingsWindow::SettingsWindow(WndMode _mode) :
-		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 420, 600, 0))
+		XPImgWindow(_mode, WND_STYLE_SOLID, WndRect(0, 420, 620, 0))
 	{
 		SetWindowTitle(string_format("xPilot %s Settings", PLUGIN_VERSION_STRING));
-		SetWindowResizingLimits(600, 420, 600, 420);
+		SetWindowResizingLimits(620, 420, 620, 420);
 
 		fileBrowser.SetTitle("Browse...");
 		fileBrowser.SetWindowSize(450, 250);
@@ -76,6 +77,7 @@ namespace xpilot
 
 		debugModelMatching = xpilot::Config::GetInstance().GetDebugModelMatching();
 		showHideLabels = xpilot::Config::GetInstance().GetShowHideLabels();
+		aircraftLabelType = (int)xpilot::Config::GetInstance().GetAircraftLabelType();
 		fallbackTypeCode = xpilot::Config::GetInstance().GetDefaultAcIcaoType();
 		showMessagePreview = xpilot::Config::GetInstance().GetNotificationPanelVisible();
 		notificationPanelTimeout = xpilot::Config::GetInstance().GetNotificationPanelTimeout();
@@ -182,14 +184,30 @@ namespace xpilot
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text("Show Callsign Labels");
+					ImGui::Text("Show Aircraft Labels");
 					ImGui::SameLine();
-					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Enable this option to show callsign above other aircraft.");
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Enable this option to show callsign labels above other aircraft.");
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##ShowAircraftLabels", &showHideLabels))
 					{
 						XPMPEnableAircraftLabels(showHideLabels);
 						xpilot::Config::GetInstance().SetShowHideLabels(showHideLabels);
+						Save();
+					}
+
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("Aircraft Label Type");
+					ImGui::SameLine();
+					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Select the type of label to show above other aircraft.");
+					ImGui::TableSetColumnIndex(1);
+					const float labelTypeCbWith = ImGui::CalcTextSize("Callsign____________________________").x;
+					ImGui::SetNextItemWidth(labelTypeCbWith);
+					const char* labelTypeOptions[] = { "Callsign", "Aircraft Type", "Callsign + Aircraft Type", "Airline Code + Aircraft Type" };
+					if (ImGui::Combo("##AircraftLabelType", &aircraftLabelType, labelTypeOptions, IM_ARRAYSIZE(labelTypeOptions)))
+					{
+						xpilot::Config::GetInstance().SetAircraftLabelType((AircraftLabelType)aircraftLabelType);
 						Save();
 					}
 

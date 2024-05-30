@@ -191,6 +191,26 @@ namespace xpilot
 		UpdateErrorVectors(currentTimestamp);
 	}
 
+	#define ADD_LABEL(b,txt) if (b && !txt.empty()) { aircraftLabel += txt; aircraftLabel += ' '; }
+	void NetworkAircraft::UpdateStaticLabel()
+	{
+		aircraftLabel.clear();
+
+		std::string callsign(acInfoTexts.tailNum);
+		std::string acType(acInfoTexts.icaoAcType);
+		std::string airlineCode(acInfoTexts.icaoAirline);
+
+		bool showCallsign = Config::GetInstance().GetAircraftLabelType() == AircraftLabelType::Callsign || Config::GetInstance().GetAircraftLabelType() == AircraftLabelType::CallsignAircraftType;
+		bool showAcType = Config::GetInstance().GetAircraftLabelType() == AircraftLabelType::AircraftType || Config::GetInstance().GetAircraftLabelType() == AircraftLabelType::CallsignAircraftType || Config::GetInstance().GetAircraftLabelType() == AircraftLabelType::AircraftTypeAirlineCode;
+		bool showAirlineCode = Config::GetInstance().GetAircraftLabelType() == AircraftLabelType::AircraftTypeAirlineCode;
+
+		ADD_LABEL(showCallsign, callsign);
+		ADD_LABEL(showAirlineCode, airlineCode);
+		ADD_LABEL(showAcType, acType);
+
+		label = aircraftLabel;
+	}
+
 	void NetworkAircraft::PerformGroundClamping(float frameRate)
 	{
 		LocalTerrainElevation = {};
@@ -472,6 +492,7 @@ namespace xpilot
 			SetThrustRatio(0.0f);
 		}
 
+		UpdateStaticLabel();
 		HexToRgb(Config::GetInstance().GetAircraftLabelColor(), colLabel);
 
 		IsFirstRenderPending = false;

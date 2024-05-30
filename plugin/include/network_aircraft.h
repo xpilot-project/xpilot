@@ -145,6 +145,8 @@ namespace xpilot
 		void RecordTerrainElevationHistory(double currentTimestamp);
 		void UpdateVelocityVectors();
 
+		void UpdateStaticLabel();
+
 		float GetLift() const override;
 
 		FlightModel GetFlightModel(const XPMP2::CSLModelInfo_t model);
@@ -193,5 +195,6 @@ namespace xpilot
 		void PerformGroundClamping(float frameRate);
 		void EnsureAboveGround();
 		void ClearRotationalVelocities();
+		std::string aircraftLabel;
 	};
 }
