@@ -1,9 +1,9 @@
 {
     "version_url": "https://xpilot-project.org/api/v3/VersionCheck",
-    "is_beta": true,
-    "beta_number": 53,
+    "is_beta": false,
+    "beta_number": 0,
     "version": {
-        "major": 2,
+        "major": 3,
         "minor": 0,
         "patch": 0
     }
