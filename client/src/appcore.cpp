@@ -83,7 +83,7 @@ int xpilot::Main(int argc, char* argv[])
     app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));
 
 #if defined(Q_OS_WIN)
-    if(QOperatingSystemVersion::current() < QOperatingSystemVersion::Windows10) {
+    if(QOperatingSystemVersion::current() < QOperatingSystemVersion::Windows10_1809) {
         QMessageBox::critical(nullptr, "Unsupported Windows Version", "Your Windows version is not supported. xPilot requires Windows 10 or newer.");
         return 1;
     }
