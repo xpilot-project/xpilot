@@ -49,6 +49,7 @@ namespace xpilot
 		m_com2OnHeadset("xpilot/audio/com2_on_headset", ReadWrite),
 		m_splitAudioChannels("xpilot/audio/split_audio_channels", ReadWrite),
 		m_xplaneAtisEnabled("sim/atc/atis_enabled", ReadWrite),
+		m_overrideAutoTune("sim/operation/override/override_autotune", ReadWrite),
 		m_frameRatePeriod("sim/operation/misc/frame_rate_period", ReadOnly),
 		m_com1Frequency("sim/cockpit2/radios/actuators/com1_frequency_hz_833", ReadWrite),
 		m_com2Frequency("sim/cockpit2/radios/actuators/com2_frequency_hz_833", ReadWrite),
@@ -457,6 +458,7 @@ namespace xpilot
 					TryGetTcasControl();
 				}
 				m_xplaneAtisEnabled = 0;
+				m_overrideAutoTune = 1;
 				m_networkCallsign.setValue(dto.callsign);
 				m_selcalCode.setValue(dto.selcal);
 				m_networkLoginStatus.setValue(dto.isObserver ? 2 : 1);
@@ -473,6 +475,7 @@ namespace xpilot
 				m_nearbyAtcWindow->UpdateList({});
 				ReleaseTcasControl();
 				m_xplaneAtisEnabled = 1;
+				m_overrideAutoTune = 0;
 				m_networkCallsign.setValue("");
 				m_selcalCode.setValue("");
 				m_networkLoginStatus.setValue(0);

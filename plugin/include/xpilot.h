@@ -107,6 +107,7 @@ namespace xpilot
 		OwnedDataRef<int> m_com2OnHeadset;
 		OwnedDataRef<int> m_splitAudioChannels;
 		DataRefAccess<int> m_xplaneAtisEnabled;
+		DataRefAccess<int> m_overrideAutoTune;
 		DataRefAccess<float> m_frameRatePeriod;
 		DataRefAccess<int> m_com1Frequency;
 		DataRefAccess<int> m_com2Frequency;
