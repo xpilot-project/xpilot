@@ -230,7 +230,7 @@ Item {
 
         Text {
             id: name
-            text: "Your Push to Talk (PTT) must be assigned in X-Plane using the joystick or keyboard command bindings. <a href='https://vats.im/xpilot-ptt'>Learn more about how to set your PTT</a>"
+            text: "Your Push to Talk (PTT) must be assigned in X-Plane using the joystick or keyboard command bindings. <a href='http://xpilot-project.org/ptt-setup'>Learn more about how to set your PTT</a>"
             onLinkActivated: (link) => Qt.openUrlExternally(link)
             renderType: Text.NativeRendering
             wrapMode: Text.WordWrap
