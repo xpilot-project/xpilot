@@ -121,7 +121,7 @@ int xpilot::Main(int argc, char* argv[])
     QInjection::addSingleton(new UserAircraftManager);
     QInjection::addSingleton(new AudioForVatsim);
 
-    QTimer::singleShot(500, [&] {
+    QTimer::singleShot(500, &app, [&] {
         serverListManager.PerformServerListDownload("https://status.vatsim.net/status.json");
         versionCheck.PerformVersionCheck();
         typeCodeDatabase.PerformTypeCodeDownload();
@@ -148,7 +148,7 @@ int xpilot::Main(int argc, char* argv[])
     context->setContextProperty("typeCodeDatabase", &typeCodeDatabase);
     context->setContextProperty("appDataPath", AppConfig::getInstance()->dataRoot());
 
-    QObject::connect(&app, &QCoreApplication::aboutToQuit, [&](){
+    QObject::connect(&app, &QCoreApplication::aboutToQuit, &app, [&](){
         QInjection::Pointer<NetworkManager> network;
         QInjection::Pointer<XplaneAdapter> xplaneAdapter;
 
