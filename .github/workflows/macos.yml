@@ -13,7 +13,7 @@ env:
   CONFIG_ENCRYPTION_KEY: ${{ secrets.CONFIG_ENCRYPTION_KEY }}
   CLIENT_DIR: ${{ github.workspace }}/client
   PLUGIN_DIR: ${{ github.workspace }}/plugin
-  IB_URL: https://xpilot-project.org/ib/installbuilder-enterprise-23.1.0-osx-installer.dmg
+  IB_URL: https://releases.installbuilder.com/installbuilder/installbuilder-enterprise-24.3.0-osx-installer.dmg
   IB_LICENSE: ${{ secrets.INSTALLBUILDER_LICENSE }}
   QT_VERSION: "v6.5.2"
 
