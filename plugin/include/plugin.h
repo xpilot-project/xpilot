@@ -26,6 +26,9 @@ static void MenuHandler(void* mRef, void* iRef);
 inline XPLMCommandRef PttCommand = NULL;
 inline int PttCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon);
 
+inline XPLMCommandRef SplitAudioChannelCommand = NULL;
+inline int SplitAudioChannelCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon);
+
 inline XPLMCommandRef ToggleNearbyATCWindowCommand = NULL;
 inline int ToggleNearbyATCWindowCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon);
 

@@ -91,7 +91,8 @@ enum DataRef
     SelcalMuteOverride,
     XplaneVersionNumber,
     Com1OnHeadset,
-    Com2OnHeadset
+    Com2OnHeadset,
+    SplitAudioChannels
 };
 
 XplaneAdapter::XplaneAdapter(QObject* parent) : QObject(parent)
@@ -262,6 +263,7 @@ void XplaneAdapter::clearSimConnection()
     m_simConnected = false;
     m_com1HeadsetStateSet = false;
     m_com2HeadsetStateSet = false;
+    m_splitAudioChannelsStateSet = false;
     m_subscribedDataRefs.clear();
 }
 
@@ -321,6 +323,7 @@ void XplaneAdapter::SubscribeDataRefs()
     SubscribeDataRef("sim/version/xplane_internal_version", DataRef::XplaneVersionNumber, 1);
     SubscribeDataRef("xpilot/audio/com1_on_headset", DataRef::Com1OnHeadset, 5);
     SubscribeDataRef("xpilot/audio/com2_on_headset", DataRef::Com2OnHeadset, 5);
+    SubscribeDataRef("xpilot/audio/split_audio_channels", DataRef::SplitAudioChannels, 5);
 }
 
 void XplaneAdapter::SubscribeDataRef(std::string dataRef, uint32_t id, uint32_t frequency)
@@ -689,6 +692,12 @@ void XplaneAdapter::OnDataReceived()
                         emit com2OnHeadsetChanged(value);
                     }
                     break;
+                case DataRef::SplitAudioChannels:
+                    if((bool)value != m_splitAudioChannelsStateSet) {
+                        emit splitAudioChannelsChanged(value);
+                        m_splitAudioChannelsStateSet = (bool)value;
+                    }
+                    break;
             }
         }
     }
@@ -802,6 +811,11 @@ void XplaneAdapter::overrideRadioPower(bool hasPower)
     if(m_radioStackState.OverrideRadioPower != hasPower) {
         m_radioStackState.OverrideRadioPower = hasPower;
     }
+}
+
+void XplaneAdapter::setSplitAudioChannels(bool split)
+{
+    setDataRefValue("xpilot/audio/split_audio_channels", (int)split);
 }
 
 void XplaneAdapter::AddAircraftToSimulator(const NetworkAircraft &aircraft)

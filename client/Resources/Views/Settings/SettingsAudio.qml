@@ -34,6 +34,14 @@ Item {
         }
     }
 
+    Connections {
+        target: xplaneAdapter
+
+        function onSplitAudioChannelsChanged(split) {
+            switchSplitComChannels.checked = split
+        }
+    }
+
     Component.onCompleted: {
         inputDeviceList.model = audio.InputDevices
         headsetDeviceList.model = audio.OutputDevices

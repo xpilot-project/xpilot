@@ -62,6 +62,7 @@ namespace xpilot
 		void SetCom2Frequency(int frequency);
 		void SetAudioComSelection(int radio);
 		void SetAudioSelection(int radio, bool on);
+		void ToggleSplitAudioChannels();
 		void SetTransponderCode(int code);
 		void RequestStationInfo(const std::string& station);
 		void RequestMetar(const std::string& station);
@@ -104,6 +105,7 @@ namespace xpilot
 		OwnedDataRef<std::string> m_com2StationCallsign;
 		OwnedDataRef<int> m_com1OnHeadset;
 		OwnedDataRef<int> m_com2OnHeadset;
+		OwnedDataRef<int> m_splitAudioChannels;
 		DataRefAccess<int> m_xplaneAtisEnabled;
 		DataRefAccess<float> m_frameRatePeriod;
 		DataRefAccess<int> m_com1Frequency;

@@ -47,6 +47,7 @@ namespace xpilot
 		m_com2StationCallsign("xpilot/com2_station_callsign", ReadOnly),
 		m_com1OnHeadset("xpilot/audio/com1_on_headset", ReadWrite),
 		m_com2OnHeadset("xpilot/audio/com2_on_headset", ReadWrite),
+		m_splitAudioChannels("xpilot/audio/split_audio_channels", ReadWrite),
 		m_xplaneAtisEnabled("sim/atc/atis_enabled", ReadWrite),
 		m_frameRatePeriod("sim/operation/misc/frame_rate_period", ReadOnly),
 		m_com1Frequency("sim/cockpit2/radios/actuators/com1_frequency_hz_833", ReadWrite),
@@ -554,6 +555,14 @@ namespace xpilot
 					m_audioSelectionCom2 = (int)on;
 					break;
 			}
+		});
+	}
+
+	void XPilot::ToggleSplitAudioChannels()
+	{
+		QueueCallback([=]
+		{
+			m_splitAudioChannels = !m_splitAudioChannels;
 		});
 	}
 

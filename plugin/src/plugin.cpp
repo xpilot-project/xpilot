@@ -168,6 +168,7 @@ PLUGIN_API void XPluginStop(void)
 		XPImgWindowCleanup();
 		XPLMDestroyMenu(PluginMenu);
 		XPLMUnregisterCommandHandler(PttCommand, PttCommandHandler, 0, 0);
+		XPLMUnregisterCommandHandler(SplitAudioChannelCommand, SplitAudioChannelCommandHandler, 0, 0);
 		XPLMUnregisterCommandHandler(ToggleMessgePreviewPanelCommnd, ToggleMessagePreviewPanelCommandHandler, 0, 0);
 		XPLMUnregisterCommandHandler(ToggleNearbyATCWindowCommand, ToggleNearbyATCWindowCommandHandler, 0, 0);
 		XPLMUnregisterCommandHandler(ToggleMessageConsoleCommand, ToggleMessageConsoleCommandHandler, 0, 0);
@@ -219,6 +220,15 @@ int  PttCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void*
 	{
 		HideTransmitIndicator();
 		environment->SetPttActive(0);
+	}
+	return 0;
+}
+
+inline int SplitAudioChannelCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
+{
+	if (inPhase == xplm_CommandEnd)
+	{
+		environment->ToggleSplitAudioChannels();
 	}
 	return 0;
 }
@@ -299,6 +309,9 @@ void RegisterMenuItems()
 {
 	PttCommand = XPLMCreateCommand("xpilot/ptt", "xPilot: Radio Push-to-Talk (PTT)");
 	XPLMRegisterCommandHandler(PttCommand, PttCommandHandler, 1, (void*)0);
+
+	SplitAudioChannelCommand = XPLMCreateCommand("xpilot/split_audio_channels", "xPilot: Split Audio Channels");
+	XPLMRegisterCommandHandler(SplitAudioChannelCommand, SplitAudioChannelCommandHandler, 1, (void*)0);
 
 	ToggleMessageConsoleCommand = XPLMCreateCommand("xpilot/toggle_text_message_console", "xPilot: Toggle Text Message Console");
 	XPLMRegisterCommandHandler(ToggleMessageConsoleCommand, ToggleMessageConsoleCommandHandler, 1, (void*)0);

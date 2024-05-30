@@ -237,6 +237,9 @@ namespace xpilot
         connect(&m_xplaneAdapter, &XplaneAdapter::com2OnHeadsetChanged, this, [&](bool onHeadset) {
             setOnHeadset(1, onHeadset);
         });
+        connect(&m_xplaneAdapter, &XplaneAdapter::splitAudioChannelsChanged, this, [&](bool split) {
+            setSplitAudioChannels(split);
+        });
 
         connect(&m_controllerManager, &ControllerManager::controllerAdded, this, [&](Controller controller)
         {
@@ -324,13 +327,6 @@ namespace xpilot
             m_client->setHeadsetDevice(deviceName.toStdString().c_str());
             m_client->startHeadset();
         }
-    }
-
-    void AudioForVatsim::setSplitAudioChannels(bool split)
-    {
-        m_client->stopAudio();
-        m_client->setSplitAudioChannels(split);
-        m_client->startAudio();
     }
 
     void AudioForVatsim::setCom1Volume(double volume)
@@ -483,8 +479,7 @@ namespace xpilot
             m_client->setHeadsetDevice(AppConfig::getInstance()->HeadsetDevice.toStdString());
         }
 
-        m_client->setSplitAudioChannels(AppConfig::getInstance()->SplitAudioChannels);
-
+        setSplitAudioChannels(AppConfig::getInstance()->SplitAudioChannels);
         setOnHeadset(0, AppConfig::getInstance()->Com1OnHeadset);
         setOnHeadset(1, AppConfig::getInstance()->Com2OnHeadset);
 
@@ -536,6 +531,19 @@ namespace xpilot
             AppConfig::getInstance()->Com2OnHeadset = onHeadset;
             m_xplaneAdapter.setCom2OnHeadset(onHeadset);
         }
+
+        AppConfig::getInstance()->saveConfig();
+    }
+
+    void AudioForVatsim::setSplitAudioChannels(bool split)
+    {
+        m_client->stopAudio();
+        m_client->setSplitAudioChannels(split);
+        m_client->startAudio();
+
+        AppConfig::getInstance()->SplitAudioChannels = split;
+
+        m_xplaneAdapter.setSplitAudioChannels(split);
 
         AppConfig::getInstance()->saveConfig();
     }

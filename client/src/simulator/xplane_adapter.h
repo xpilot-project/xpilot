@@ -79,6 +79,7 @@ public:
     Q_INVOKABLE void setCom1OnHeadset(bool onHeadset);
     Q_INVOKABLE void setCom2OnHeadset(bool onHeadset);
     Q_INVOKABLE void overrideRadioPower(bool hasPower);
+    Q_INVOKABLE void setSplitAudioChannels(bool split);
 
     void AddAircraftToSimulator(const NetworkAircraft& aircraft);
     void PlaneConfigChanged(const NetworkAircraft& aircraft);
@@ -144,6 +145,7 @@ signals:
     void nngSocketError(QString error);
     void com1OnHeadsetChanged(bool onHeadset);
     void com2OnHeadsetChanged(bool onHeadset);
+    void splitAudioChannelsChanged(bool split);
 
 private:
     QUdpSocket* m_udpSocket;
@@ -159,6 +161,7 @@ private:
 
     bool m_com1HeadsetStateSet = false;
     bool m_com2HeadsetStateSet = false;
+    bool m_splitAudioChannelsStateSet = false;
 
     UserAircraftData m_userAircraftData{};
     UserAircraftConfigData m_userAircraftConfigData{};
