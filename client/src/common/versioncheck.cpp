@@ -272,7 +272,7 @@ void VersionCheck::LaunchInstaller()
     }
 
     connect(process, &QProcess::errorOccurred, this, [this](auto error){
-        emit errorEncountered("Error starting update process: " + error);
+        emit errorEncountered(QString("Error starting update process: %1").arg(error));
     });
 
     auto thread = new QThread;

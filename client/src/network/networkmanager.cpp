@@ -286,6 +286,8 @@ namespace xpilot
                              QString::number(m_userAircraftData.AltitudeMslM * 3.28084));
                 m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, pdu.From, inf));
                 break;
+            default:
+                break;
         }
     }
 
