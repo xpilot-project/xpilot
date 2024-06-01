@@ -276,10 +276,4 @@ inline void Log(logLevel level, const char* msg, ...)
 	va_end(args);
 }
 
-#define LOG_MSG(lvl, ...)										\
-	{															\
-		if (lvl >= xpilot::Config::GetInstance().GetLogLevel()) \
-		{														\
-			Log(lvl, __VA_ARGS__);								\
-		}														\
-	}
+#define LOG_MSG(lvl, ...) { if(lvl >= xpilot::Config::GetInstance().GetLogLevel()) Log(lvl, __VA_ARGS__); }
