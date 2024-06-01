@@ -245,49 +245,53 @@ namespace xpilot
 
     void NetworkManager::OnClientQueryReceived(PDUClientQuery pdu)
     {
-        switch(pdu.QueryType)
-        {
-            case ClientQueryType::AircraftConfiguration:
-                emit aircraftConfigurationInfoReceived(pdu.From, pdu.Payload.join(":"));
-                break;
-            case ClientQueryType::Capabilities:
-                if(pdu.From.toUpper() != "SERVER")
-                {
-                    emit capabilitiesRequestReceived(pdu.From);
-                }
-                SendCapabilities(pdu.From);
-                break;
-            case ClientQueryType::COM1Freq:
-                {
-                    QStringList payload;
-                    QString freq = QString::number(m_radioStackState.Com1Frequency / 1000.0, 'f', 3);
-                    payload.append(freq);
-                    m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, pdu.From, ClientQueryType::COM1Freq, payload));
-                }
-                break;
-            case ClientQueryType::RealName:
-                {
-                    QStringList realName;
-                    realName.append(AppConfig::getInstance()->NameWithHomeAirport());
-                    realName.append(m_connectInfo.TowerViewMode ? "xPilot tower view connection" : "");
-                    realName.append(QString::number((int)NetworkRating::OBS));
-                    m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, pdu.From, ClientQueryType::RealName, realName));
-                }
-                break;
-            case ClientQueryType::INF:
-                QString inf = QString("xPilot %1 PID=%2 (%3) IP=%4 SYS_UID=%5 FS_VER=XPlane LT=%6 LO=%7 AL=%8")
-                        .arg(BuildConfig::getVersionString(),
-                             AppConfig::getInstance()->VatsimId,
-                             AppConfig::getInstance()->NameWithHomeAirport(),
-                             m_publicIp,
-                             QSysInfo::machineUniqueId(),
-                             QString::number(m_userAircraftData.Latitude),
-                             QString::number(m_userAircraftData.Longitude),
-                             QString::number(m_userAircraftData.AltitudeMslM * 3.28084));
-                m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, pdu.From, inf));
-                break;
-            default:
-                break;
+        switch(pdu.QueryType) {
+        case ClientQueryType::AircraftConfiguration: {
+            emit aircraftConfigurationInfoReceived(pdu.From, pdu.Payload.join(":"));
+            break;
+        }
+        case ClientQueryType::Capabilities: {
+            if(pdu.From.toUpper() != "SERVER")
+            {
+                emit capabilitiesRequestReceived(pdu.From);
+            }
+            SendCapabilities(pdu.From);
+            break;
+        }
+        case ClientQueryType::COM1Freq: {
+            {
+                QStringList payload;
+                QString freq = QString::number(m_radioStackState.Com1Frequency / 1000.0, 'f', 3);
+                payload.append(freq);
+                m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, pdu.From, ClientQueryType::COM1Freq, payload));
+            }
+            break;
+        }
+        case ClientQueryType::RealName: {
+            {
+                QStringList realName;
+                realName.append(AppConfig::getInstance()->NameWithHomeAirport());
+                realName.append(m_connectInfo.TowerViewMode ? "xPilot tower view connection" : "");
+                realName.append(QString::number((int)NetworkRating::OBS));
+                m_fsd.SendPDU(PDUClientQueryResponse(m_connectInfo.Callsign, pdu.From, ClientQueryType::RealName, realName));
+            }
+            break;
+        }
+        case ClientQueryType::INF: {
+            QString inf = QString("xPilot %1 PID=%2 (%3) IP=%4 SYS_UID=%5 FS_VER=XPlane LT=%6 LO=%7 AL=%8")
+                              .arg(BuildConfig::getVersionString(),
+                                   AppConfig::getInstance()->VatsimId,
+                                   AppConfig::getInstance()->NameWithHomeAirport(),
+                                   m_publicIp,
+                                   QSysInfo::machineUniqueId(),
+                                   QString::number(m_userAircraftData.Latitude),
+                                   QString::number(m_userAircraftData.Longitude),
+                                   QString::number(m_userAircraftData.AltitudeMslM * 3.28084));
+            m_fsd.SendPDU(PDUTextMessage(m_connectInfo.Callsign, pdu.From, inf));
+            break;
+        }
+        default:
+            break;
         }
     }
 
