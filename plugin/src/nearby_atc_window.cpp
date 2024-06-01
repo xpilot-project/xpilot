@@ -181,7 +181,7 @@ namespace xpilot
 
 		ImGui::TableSetColumnIndex(0);
 		char buf[32];
-		sprintf(buf, " %s", station.GetCallsign().c_str());
+		snprintf(buf, sizeof(buf), " %s", station.GetCallsign().c_str());
 		ImGui::AlignTextToFramePadding();
 		ImGui::TextUnformatted(buf);
 
