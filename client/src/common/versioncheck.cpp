@@ -89,7 +89,7 @@ void VersionCheck::PerformVersionCheck()
 
             if(!published) return;
 
-            int suffixIndex;
+            qsizetype suffixIndex;
             auto v = QVersionNumber::fromString(version, &suffixIndex);
 
             QString betaIdentifier = version.mid(suffixIndex + 1);
