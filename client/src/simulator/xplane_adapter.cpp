@@ -683,12 +683,12 @@ void XplaneAdapter::OnDataReceived()
                     m_xplaneVersion = value;
                     break;
                 case DataRef::Com1OnHeadset:
-                    if(value != AppConfig::getInstance()->Com1OnHeadset && m_com1HeadsetStateSet) {
+                    if((bool)value != AppConfig::getInstance()->Com1OnHeadset && m_com1HeadsetStateSet) {
                         emit com1OnHeadsetChanged(value);
                     }
                     break;
                 case DataRef::Com2OnHeadset:
-                    if(value != AppConfig::getInstance()->Com2OnHeadset && m_com2HeadsetStateSet) {
+                    if((bool)value != AppConfig::getInstance()->Com2OnHeadset && m_com2HeadsetStateSet) {
                         emit com2OnHeadsetChanged(value);
                     }
                     break;
