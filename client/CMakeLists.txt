@@ -79,6 +79,7 @@ endif ()
 # Set some Win32 Specific Settings
 if (WIN32)
     set(gui_TYPE WIN32)
+    set(LIB_NTDLL Ntdll) # used to query Windows version
 endif (WIN32)
 
 # Set some Apple MacOS Specific settings
@@ -222,6 +223,7 @@ target_link_libraries(${PROJECT_NAME}
     ${LIB_VATSIM_AUTH}
     ${LIB_NNG}
     ${LIB_ZIP}
+    ${LIB_NTDLL}
     msgpack-cxx
     vatsim-auth
     qtpromise

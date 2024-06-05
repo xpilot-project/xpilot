@@ -62,6 +62,32 @@
 
 using namespace xpilot;
 
+#if defined(Q_OS_WIN)
+#include <Windows.h>
+
+#ifndef NTSTATUS
+typedef LONG NTSTATUS;
+#endif
+
+#ifndef NTAPI
+#define NTAPI __stdcall
+#endif
+
+extern "C" {
+NTSTATUS NTAPI RtlGetVersion(PRTL_OSVERSIONINFOW lpVersionInformation);
+}
+
+bool IsWindows10OrNewer() {
+    RTL_OSVERSIONINFOW osInfo = {0};
+    osInfo.dwOSVersionInfoSize = sizeof(osInfo);
+    NTSTATUS status = RtlGetVersion(&osInfo);
+    if (status == 0) {
+        return osInfo.dwMajorVersion >= 10;
+    }
+    return false;
+}
+#endif
+
 static QObject *appConfigSingleton(QQmlEngine *, QJSEngine *)
 {
     return AppConfig::getInstance();
@@ -84,7 +110,7 @@ int xpilot::Main(int argc, char* argv[])
     app.setWindowIcon(QIcon(":/Resources/Icons/AppIcon.ico"));
 
 #if defined(Q_OS_WIN)
-    if(QOperatingSystemVersion::current() < QOperatingSystemVersion::Windows10_1809) {
+    if(!IsWindows10OrNewer()) {
         QMessageBox::critical(nullptr, "Unsupported Windows Version", "Your Windows version is not supported. xPilot requires Windows 10 or newer.");
         return 1;
     }
