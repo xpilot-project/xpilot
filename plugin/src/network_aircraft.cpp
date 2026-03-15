@@ -34,8 +34,9 @@ namespace xpilot
 		const std::string& _livery,
 		XPMPPlaneID _modeS_id = 0,
 		const std::string& _modelName = "") :
-		XPMP2::Aircraft(_callsign, _icaoType, _icaoAirline, _livery, _modeS_id, _modelName)
+		XPMP2::Aircraft(_icaoType, _icaoAirline, _livery, _modeS_id, _modelName)
 	{
+		strScpy(acInfoTexts.flightNum, _callsign.c_str(), sizeof(acInfoTexts.flightNum));
 		strScpy(acInfoTexts.tailNum, _callsign.c_str(), sizeof(acInfoTexts.tailNum));
 		strScpy(acInfoTexts.icaoAcType, acIcaoType.c_str(), sizeof(acInfoTexts.icaoAcType));
 		strScpy(acInfoTexts.icaoAirline, acIcaoAirline.c_str(), sizeof(acInfoTexts.icaoAirline));
@@ -531,7 +532,7 @@ namespace xpilot
 	void NetworkAircraft::copyBulkData(XPilotAPIAircraft::XPilotAPIBulkInfoTexts* pOut, size_t size) const
 	{
 		pOut->keyNum = modeS_id;
-		STRCPY_ATMOST(pOut->callSign, label);
+		STRCPY_ATMOST(pOut->callSign, acInfoTexts.tailNum);
 		STRCPY_ATMOST(pOut->modelIcao, acIcaoType);
 		STRCPY_ATMOST(pOut->cslModel, GetModelName());
 		STRCPY_ATMOST(pOut->acClass, GetModelInfo().doc8643Classification);
