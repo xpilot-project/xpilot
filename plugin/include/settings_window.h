@@ -30,5 +30,6 @@ namespace xpilot
 		void buildInterface() override;
 	private:
 		void LoadConfig();
+		std::vector<std::string> vecAudioDev;
 	};
 }

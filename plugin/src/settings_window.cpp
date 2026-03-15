@@ -17,6 +17,7 @@
 */
 
 #include "config.h"
+#include "aircraft_manager.h"
 #include "settings_window.h"
 
 namespace xpilot
@@ -96,6 +97,14 @@ namespace xpilot
 		contrailMulti = xpilot::Config::GetInstance().GetContrailMultiEnabled();
 		audioDevice = xpilot::Config::GetInstance().GetAudioDevice();
 		HexToRgb(xpilot::Config::GetInstance().GetAircraftLabelColor(), lblCol);
+
+		vecAudioDev.clear();
+		std::string devName;
+		int i = 0;
+		for (i = 0; XPMPSoundGetAudioDeviceName(i, devName); i++)
+		{
+			vecAudioDev.push_back(devName);
+		}
 	}
 
 	void Save()
@@ -103,6 +112,23 @@ namespace xpilot
 		if (!xpilot::Config::GetInstance().SaveConfig())
 		{
 			ImGui::OpenPopup("Error Saving Settings");
+		}
+	}
+
+	void ApplyContrailSettings()
+	{
+		for (auto& plane : mapPlanes)
+		{
+			if (!plane.second)
+			{
+				continue;
+			}
+
+			if (contrailEnabled)
+			{
+				plane.second->ContrailRequest(0, 0, static_cast<unsigned>(contrailLifeTime));
+			}
+			plane.second->ContrailRemove();
 		}
 	}
 
@@ -356,9 +382,20 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##EnableAircraftSounds", &enableAircraftSounds))
 					{
-						xpilot::Config::GetInstance().SetAircraftSoundsEnabled(enableAircraftSounds);
-						XPMPSetAudioDevice(Config::GetInstance().GetAudioDevice());
-						Save();
+						if (enableAircraftSounds)
+						{
+							if (!XPMPSoundIsEnabled())
+							{
+								XPMPSoundEnable(true);
+								if (!audioDevice.empty()) XPMPSoundSetAudioDeviceName(audioDevice);
+							}
+							XPMPSoundMute(false);
+						}
+						else
+						{
+							XPMPSoundMute(true);
+						}
+						Config::GetInstance().SetAircraftSoundsEnabled(enableAircraftSounds);
 					}
 
 					ImGui::TableNextRow();
@@ -377,37 +414,40 @@ namespace xpilot
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text("Aircraft Sound Playback Device");
+					ImGui::Text("Audio Output Device");
 					ImGui::SameLine();
-					ImGui::ButtonIcon(ICON_FA_QUESTION_CIRCLE, "Select the audio device where you want the aircraft engine sounds to play. If left blank, xPilot will use the system's default audio device.");
+					ImGui::ButtonIcon(reinterpret_cast<const char *>(ICON_FA_QUESTION_CIRCLE),
+									  "Choose the audio device for aircraft engine sounds in xPilot. If no device is "
+									  "selected, xPilot will default to the system's primary audio device.");
 					ImGui::TableSetColumnIndex(1);
-					if(ImGui::BeginCombo("##AudioDevice", audioDevice.c_str()))
 					{
-						int size;
-						const char** devices = XPMPGetAudioDevices(&size);
-
-						if(size == 0)
+						const char* previewValue = audioDevice.empty() ? "System Default" : audioDevice.c_str();
+						if (ImGui::BeginCombo("##AudioDevice", previewValue))
 						{
-							audioDevice = "";
-							xpilot::Config::GetInstance().SetAudioDevice(audioDevice);
-							xpilot::Config::GetInstance().SaveConfig();
-						}
-						else
-						{
-							for (int i = 0; i < size; ++i)
+							const bool useSystemDefault = audioDevice.empty();
+							if (ImGui::Selectable("System Default", useSystemDefault))
 							{
-								if (ImGui::Selectable(devices[i], audioDevice == devices[i]))
-								{
-									audioDevice = devices[i];
-									XPMPSetAudioDevice(audioDevice);
-									xpilot::Config::GetInstance().SetAudioDevice(audioDevice);
-									xpilot::Config::GetInstance().SaveConfig();
-								}
+								audioDevice.clear();
+								Config::GetInstance().SetAudioDevice(audioDevice);
 							}
-						}
-						delete[] devices;
 
-						ImGui::EndCombo();
+							if (useSystemDefault) ImGui::SetItemDefaultFocus();
+
+							for (const auto& device : vecAudioDev)
+							{
+								const bool isSelected = (audioDevice == device);
+								if (ImGui::Selectable(device.c_str(), isSelected))
+								{
+									audioDevice = device;
+									XPMPSoundSetAudioDeviceName(audioDevice);
+									Config::GetInstance().SetAudioDevice(audioDevice);
+								}
+
+								if (isSelected) ImGui::SetItemDefaultFocus();
+							}
+
+							ImGui::EndCombo();
+						}
 					}
 
 					ImGui::EndTable();
@@ -444,8 +484,8 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##EnableContrails", &contrailEnabled))
 					{
-						XPMPEnableContrails(contrailEnabled);
 						xpilot::Config::GetInstance().SetContrailEnabled(contrailEnabled);
+						ApplyContrailSettings();
 						Save();
 					}
 
@@ -460,6 +500,7 @@ namespace xpilot
 					{
 						contrailMinAltitude = std::clamp<int>(contrailMinAltitude, 0, 90000);
 						xpilot::Config::GetInstance().SetContrailMinAltitude(contrailMinAltitude);
+						ApplyContrailSettings();
 						Save();
 					}
 					ImGui::SameLine();
@@ -476,6 +517,7 @@ namespace xpilot
 					{
 						contrailMaxAltitude = std::clamp<int>(contrailMaxAltitude, 0, 90000);
 						xpilot::Config::GetInstance().SetContrailMaxAltitude(contrailMaxAltitude);
+						ApplyContrailSettings();
 						Save();
 					}
 					ImGui::SameLine();
@@ -493,6 +535,7 @@ namespace xpilot
 					{
 						contrailLifeTime = (contrailLifeTime + (5 / 2)) / 5 * 5;
 						xpilot::Config::GetInstance().SetContrailLifeTime(contrailLifeTime);
+						ApplyContrailSettings();
 						Save();
 					}
 
@@ -505,8 +548,8 @@ namespace xpilot
 					ImGui::TableSetColumnIndex(1);
 					if (ImGui::Checkbox("##MultipleContrails", &contrailMulti))
 					{
-						XPMPEnableMultipleContrails(contrailMulti);
 						xpilot::Config::GetInstance().SetContrailMultiEnabled(contrailMulti);
+						ApplyContrailSettings();
 						Save();
 					}
 
