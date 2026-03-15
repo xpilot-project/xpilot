@@ -4,6 +4,3 @@
 [submodule "plugin/3rdparty/imgui"]
 	path = plugin/3rdparty/imgui
 	url = git@github.com:ocornut/imgui.git
-[submodule "dependencies"]
-	path = dependencies
-	url = git@github.com:xpilot-project/dependencies.git
