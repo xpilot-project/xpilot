@@ -1,6 +1,3 @@
 [submodule "client/afv-native"]
 	path = client/afv-native
 	url = git@github.com:xpilot-project/afv-native.git
-[submodule "plugin/3rdparty/imgui"]
-	path = plugin/3rdparty/imgui
-	url = git@github.com:ocornut/imgui.git
