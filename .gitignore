@@ -46,3 +46,5 @@ compile_commands.json
 
 plugin/include/Constants.h
 plugin/build/*
+/plugin/.idea
+plugin/include/constants.h
