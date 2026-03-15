@@ -1,15 +1,10 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 3.5...4.0)
 
-OPTION (MSGPACK_BUILD_TESTS "Build msgpack tests." OFF)
-OPTION (MSGPACK_GEN_COVERAGE "Enable running gcov to get a test coverage report." OFF)
+PROJECT (msgpack-cxx LANGUAGES CXX)
 
-if(MSGPACK_BUILD_TESTS)
-    PROJECT (msgpack-c)
-else()
-    PROJECT (msgpack-c C)
-endif()
+ADD_LIBRARY (msgpack-cxx INTERFACE)
 
-FILE (READ ${CMAKE_CURRENT_SOURCE_DIR}/include/msgpack/version_master.h contents)
+FILE (READ ${CMAKE_CURRENT_SOURCE_DIR}/include/msgpack/version_master.hpp contents)
 STRING (REGEX MATCH "#define MSGPACK_VERSION_MAJOR *([0-9a-zA-Z_]*)" NULL_OUT ${contents})
 SET (VERSION_MAJOR ${CMAKE_MATCH_1})
 STRING (REGEX MATCH "#define MSGPACK_VERSION_MINOR *([0-9a-zA-Z_]*)" NULL_OUT ${contents})
@@ -19,320 +14,249 @@ SET (VERSION_REVISION ${CMAKE_MATCH_1})
 SET (VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_REVISION})
 
 LIST (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
-include(GNUInstallDirs)
-SET (prefix ${CMAKE_INSTALL_PREFIX})
-SET (exec_prefix ${CMAKE_INSTALL_PREFIX})
-IF (IS_ABSOLUTE ${CMAKE_INSTALL_LIBDIR})
-    SET (libdir ${CMAKE_INSTALL_LIBDIR})
-ELSE ()
-    SET (libdir "\${prefix}/${CMAKE_INSTALL_LIBDIR}")
-ENDIF ()
-IF (IS_ABSOLUTE ${CMAKE_INSTALL_INCLUDEDIR})
-    SET (includedir ${CMAKE_INSTALL_INCLUDEDIR})
-ELSE ()
-    SET (includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
-ENDIF ()
+SET (GNUCXX_STD_SUPPORT_VERSION "4.3")
 
-OPTION (MSGPACK_32BIT "32bit compile" OFF)
+OPTION (MSGPACK_CXX11 "Using c++11 compiler" ON)
+OPTION (MSGPACK_CXX14 "Using c++14 compiler" OFF)
+OPTION (MSGPACK_CXX17 "Using c++17 compiler" OFF)
+OPTION (MSGPACK_CXX20 "Using c++20 compiler" OFF)
 
-INCLUDE(TestBigEndian)
-TEST_BIG_ENDIAN(BIGENDIAN)
-IF (BIGENDIAN)
-    SET(MSGPACK_ENDIAN_BIG_BYTE 1)
-    SET(MSGPACK_ENDIAN_LITTLE_BYTE 0)
-ELSE ()
-    SET(MSGPACK_ENDIAN_BIG_BYTE 0)
-    SET(MSGPACK_ENDIAN_LITTLE_BYTE 1)
-ENDIF ()
+OPTION (MSGPACK_32BIT                   "32bit compile"                        OFF)
+OPTION (MSGPACK_USE_BOOST               "Use Boost libraried"                  ON)
+OPTION (MSGPACK_USE_X3_PARSE            "Use Boost X3 parse"                   OFF)
+OPTION (MSGPACK_BUILD_TESTS             "Build tests"                          OFF)
+OPTION (MSGPACK_BUILD_DOCS              "Build Doxygen documentation"          ON)
+OPTION (MSGPACK_FUZZ_REGRESSION         "Enable regression testing"            OFF)
+OPTION (MSGPACK_BUILD_EXAMPLES          "Build msgpack examples"               OFF)
+OPTION (MSGPACK_GEN_COVERAGE            "Generate coverage report"             OFF)
+OPTION (MSGPACK_USE_STATIC_BOOST        "Statically link with boost libraries" OFF)
+OPTION (MSGPACK_CHAR_SIGN               "Char sign to use (signed or unsigned)")
+OPTION (MSGPACK_USE_STD_VARIANT_ADAPTOR "Enable the adaptor for std::variant"  OFF)
 
-CONFIGURE_FILE (
-    cmake/sysdep.h.in
-    include/msgpack/sysdep.h
-    @ONLY
-)
+SET (CMAKE_CXX_STANDARD_REQUIRED ON)
 
-CONFIGURE_FILE (
-    cmake/pack_template.h.in
-    include/msgpack/pack_template.h
-    @ONLY
-)
-
-IF (APPLE)
-    SET(CMAKE_MACOSX_RPATH ON)
-    SET(CMAKE_SKIP_BUILD_RPATH FALSE)
-    SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-    LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-    IF ("${isSystemDir}" STREQUAL "-1")
-        SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+IF (MSGPACK_USE_X3_PARSE)
+    IF (NOT (MSGPACK_CXX14 OR MSGPACK_CXX17 OR MSGPACK_CXX20))
+        MESSAGE (FATAL_ERROR "MSGPACK_USE_X3_PARSE requires MSGPACK_CXX14 or newer")
     ENDIF ()
+    SET (CMAKE_CXX_FLAGS "-DMSGPACK_USE_X3_PARSE ${CMAKE_CXX_FLAGS}")
+ENDIF ()
+
+IF (MSGPACK_CXX20)
+    SET (CMAKE_CXX_STANDARD 20)
+ELSEIF (MSGPACK_CXX17)
+    SET (CMAKE_CXX_STANDARD 17)
+ELSEIF (MSGPACK_CXX14)
+    SET (CMAKE_CXX_STANDARD 14)
+ELSEIF (MSGPACK_CXX11)
+    SET (CMAKE_CXX_STANDARD 11)
+ELSE ()
+    SET (CMAKE_CXX_STANDARD 98)
 ENDIF ()
 
 IF (MSGPACK_32BIT)
-   IF ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-      SET (CMAKE_C_FLAGS "-m32 ${CMAKE_C_FLAGS}")
-      SET (CMAKE_EXE_LINKER_FLAGS "-m32 ${CMAKE_EXE_LINKER_FLAGS}")
-   ELSEIF ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
-      SET (CMAKE_C_FLAGS "-m32 ${CMAKE_C_FLAGS}")
-      SET (CMAKE_EXE_LINKER_FLAGS "-m32 ${CMAKE_EXE_LINKER_FLAGS}")
-   ENDIF ()
+    IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        TARGET_COMPILE_OPTIONS(msgpack-cxx INTERFACE -m32)
+        TARGET_LINK_OPTIONS(msgpack-cxx INTERFACE -m32)
+    ELSEIF ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+        TARGET_COMPILE_OPTIONS(msgpack-cxx INTERFACE -m32)
+        TARGET_LINK_OPTIONS(msgpack-cxx INTERFACE -m32)
+    ENDIF ()
 ENDIF ()
 
-OPTION (MSGPACK_BUILD_EXAMPLES "Build msgpack examples." ON)
+IF (MSGPACK_USE_BOOST)
+    IF ((CMAKE_VERSION VERSION_GREATER 3.30) OR
+        (CMAKE_VERSION VERSION_EQUAL 3.30))
+        IF (NOT MSGPACK_BOOST_USE_OLD_CMAKE)
+            CMAKE_POLICY(SET CMP0167 NEW)
+        ENDIF ()
+    ENDIF ()
+    SET (Boost_USE_MULTITHREADED ON)
+
+    IF (MSGPACK_USE_STATIC_BOOST)
+        MESSAGE (STATUS "Staticly linking with Boost")
+        SET (Boost_USE_STATIC_LIBS TRUE)
+    ELSE ()
+        MESSAGE (STATUS "Dynamically linking with Boost")
+        SET (Boost_USE_STATIC_LIBS FALSE)
+    ENDIF ()
+
+    FIND_PACKAGE (Boost REQUIRED)
+ELSE ()
+    TARGET_COMPILE_DEFINITIONS(msgpack-cxx INTERFACE MSGPACK_NO_BOOST)
+ENDIF ()
 
 IF (MSGPACK_CHAR_SIGN)
-   SET (CMAKE_C_FLAGS "-f${MSGPACK_CHAR_SIGN}-char ${CMAKE_C_FLAGS}")
+    TARGET_COMPILE_OPTIONS(msgpack-cxx INTERFACE -f${MSGPACK_CHAR_SIGN}-char)
 ENDIF ()
 
-IF (DEFINED BUILD_SHARED_LIBS)
-    IF (BUILD_SHARED_LIBS)
-        IF (DEFINED MSGPACK_ENABLE_SHARED AND NOT MSGPACK_ENABLE_SHARED)
-            MESSAGE(WARNING "MSGPACK_ENABLE_SHARED is overridden to ON by BUILD_SHARED_LIBS")
-        ENDIF ()
-        SET (MSGPACK_ENABLE_SHARED ON)
-        IF (DEFINED MSGPACK_ENABLE_STATIC AND MSGPACK_ENABLE_STATIC)
-            MESSAGE(WARNING "MSGPACK_ENABLE_STATIC is overridden to OFF by BUILD_SHARED_LIBS")
-        ENDIF ()
-        SET (MSGPACK_ENABLE_STATIC OFF)
-    ELSE ()
-        IF (DEFINED MSGPACK_ENABLE_SHARED AND MSGPACK_ENABLE_SHARED)
-            MESSAGE(WARNING "MSGPACK_ENABLE_SHARED is overridden to OFF by BUILD_SHARED_LIBS")
-        ENDIF ()
-        SET (MSGPACK_ENABLE_SHARED OFF)
-        IF (DEFINED MSGPACK_ENABLE_STATIC AND NOT MSGPACK_ENABLE_STATIC)
-            MESSAGE(WARNING "MSGPACK_ENABLE_STATIC is overridden to ON by BUILD_SHARED_LIBS")
-        ENDIF ()
-        SET (MSGPACK_ENABLE_STATIC ON)
-    ENDIF ()
+IF (MSGPACK_DEFAULT_API_VERSION)
+    TARGET_COMPILE_DEFINITIONS(msgpack-cxx INTERFACE MSGPACK_DEFAULT_API_VERSION=${MSGPACK_DEFAULT_API_VERSION})
 ELSE ()
-    IF (NOT DEFINED MSGPACK_ENABLE_SHARED)
-        SET (MSGPACK_ENABLE_SHARED ON)
-    ENDIF ()
-    IF (NOT DEFINED MSGPACK_ENABLE_STATIC)
-        SET (MSGPACK_ENABLE_STATIC ON)
-    ENDIF ()
-    SET (BUILD_SHARED_LIBS ${MSGPACK_ENABLE_SHARED})
+    SET (MSGPACK_DEFAULT_API_VERSION 3)
+    TARGET_COMPILE_DEFINITIONS(msgpack-cxx INTERFACE MSGPACK_DEFAULT_API_VERSION=3)
 ENDIF ()
+
+IF (MSGPACK_USE_STD_VARIANT_ADAPTOR)
+    TARGET_COMPILE_DEFINITIONS(msgpack-cxx INTERFACE MSGPACK_USE_STD_VARIANT_ADAPTOR)
+ENDIF ()
+
+IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.1)
+        INCLUDE (CheckCXXSourceCompiles)
+        CHECK_CXX_SOURCE_COMPILES ("
+#include <bits/atomicity.h>
+int atomic_sub(int i) { return __gnu_cxx::__exchange_and_add(&i, -1) - 1; }
+int atomic_add(int i) { return __gnu_cxx::__exchange_and_add(&i, 1) + 1; }
+int main(int argc, char * argv[])
+{
+    atomic_sub(1);
+    atomic_add(1);
+}
+"
+        MSGPACK_ENABLE_GCC_CXX_ATOMIC)
+    ENDIF ()
+ENDIF ()
+
 
 INCLUDE (Files.cmake)
 
-CONFIGURE_FILE (
-    msgpack-c.pc.in
-    msgpack-c.pc
-    @ONLY
+TARGET_INCLUDE_DIRECTORIES (msgpack-cxx
+    INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+        $<INSTALL_INTERFACE:include>
 )
 
-IF (MSGPACK_ENABLE_SHARED OR MSGPACK_ENABLE_STATIC)
-    ADD_LIBRARY (msgpack-c
-        ${msgpack-c_SOURCES}
-        ${msgpack-c_HEADERS}
-    )
-
-    SET_TARGET_PROPERTIES (msgpack-c PROPERTIES SOVERSION 2 VERSION 2.0.0)
-
-    TARGET_INCLUDE_DIRECTORIES (msgpack-c
-        PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include/msgpack>
-            $<INSTALL_INTERFACE:include>
-        PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}
-    )
-ENDIF ()
-
-
-IF (MSGPACK_ENABLE_SHARED AND MSGPACK_ENABLE_STATIC)
-    ADD_LIBRARY (msgpack-c-static STATIC
-        ${msgpack-c_SOURCES}
-        ${msgpack-c_HEADERS}
-    )
-
-    TARGET_INCLUDE_DIRECTORIES (msgpack-c-static
-        PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include/msgpack>
-            $<INSTALL_INTERFACE:include>
-        PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}
-    )
-
-    SET_TARGET_PROPERTIES (msgpack-c-static PROPERTIES OUTPUT_NAME "msgpack-c")
-
-    IF (MSGPACK_ENABLE_SHARED)
-        IF (MSVC)
-            SET_TARGET_PROPERTIES (msgpack-c PROPERTIES IMPORT_SUFFIX "_import.lib")
-        ELSEIF (MINGW)
-            SET_TARGET_PROPERTIES (msgpack-c PROPERTIES IMPORT_SUFFIX ".dll.a")
-        ENDIF ()
-    ENDIF ()
+IF (MSGPACK_USE_BOOST)
+    TARGET_LINK_LIBRARIES (msgpack-cxx INTERFACE Boost::boost)
 ENDIF ()
 
 IF (MSGPACK_GEN_COVERAGE)
     IF (NOT MSGPACK_BUILD_TESTS)
         MESSAGE(FATAL_ERROR "Coverage requires -DMSGPACK_BUILD_TESTS=ON")
     ENDIF ()
-    STRING(TOUPPER "${CMAKE_BUILD_TYPE}" UPPER_CMAKE_BUILD_TYPE)
+    STRING (TOUPPER "${CMAKE_BUILD_TYPE}" UPPER_CMAKE_BUILD_TYPE)
     IF (NOT "${UPPER_CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
-        MESSAGE(FATAL_ERROR "Coverage requires -DCMAKE_BUILD_TYPE=Debug")
+        MESSAGE (FATAL_ERROR "Coverage requires -DCMAKE_BUILD_TYPE=Debug")
     ENDIF ()
 
-    INCLUDE(CodeCoverage)
-    SET (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${COVERAGE_FLAGS}")
-
+    INCLUDE (CodeCoverage)
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COVERAGE_FLAGS}")
     SETUP_TARGET_FOR_COVERAGE(coverage make coverage test)
 ENDIF ()
 
 IF (MSGPACK_BUILD_TESTS)
+    IF (${CMAKE_CXX_STANDARD} EQUAL 98)
+        MESSAGE (FATAL_ERROR "Tests requires C++11 or newer")
+    ENDIF ()
+    IF ((CMAKE_VERSION VERSION_GREATER 3.27) OR
+        (CMAKE_VERSION VERSION_EQUAL 3.27))
+        CMAKE_POLICY(SET CMP0145 OLD)
+    ENDIF ()
+    IF (NOT MSGPACK_USE_BOOST)
+        MESSAGE(FATAL_ERROR "Test requires -DMSGPACK_USE_BOOST=ON")
+    ENDIF ()
     ENABLE_TESTING ()
-    INCLUDE(CTest)
-    list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
+    INCLUDE (CTest)
     # MEMORYCHECK_COMMAND_OPTIONS needs to place prior to CTEST_MEMORYCHECK_COMMAND
     SET (MEMORYCHECK_COMMAND_OPTIONS "--leak-check=full --show-leak-kinds=definite,possible --error-exitcode=1")
-    FIND_PROGRAM(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
+    FIND_PROGRAM (CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
     ADD_SUBDIRECTORY (test)
 ENDIF ()
 
-IF ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-    IF (MSGPACK_ENABLE_SHARED OR MSGPACK_ENABLE_STATIC)
-        SET_PROPERTY (TARGET msgpack-c APPEND_STRING PROPERTY COMPILE_FLAGS " -Wall -Wextra -DPIC")
-    ENDIF ()
-    IF (MSGPACK_ENABLE_SHARED AND MSGPACK_ENABLE_STATIC)
-       SET_PROPERTY (TARGET msgpack-c-static APPEND_STRING PROPERTY COMPILE_FLAGS " -Wall -Wextra" )
-    ENDIF ()
-ENDIF ()
-
-IF ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
-    IF (MSGPACK_ENABLE_SHARED OR MSGPACK_ENABLE_STATIC)
-        SET_PROPERTY (TARGET msgpack-c APPEND_STRING PROPERTY COMPILE_FLAGS " -Wno-mismatched-tags")
-    ENDIF ()
-    IF (MSGPACK_ENABLE_SHARED AND MSGPACK_ENABLE_STATIC)
-        SET_PROPERTY (TARGET msgpack-c-static APPEND_STRING PROPERTY COMPILE_FLAGS " -Wno-mismatched-tags")
-    ENDIF ()
-ENDIF ()
-
-IF ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-    IF (CMAKE_C_FLAGS MATCHES "/W[0-4]")
-        STRING(REGEX REPLACE "/W[0-4]" "/W3 /WX" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    ELSE ()
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /WX")
-    ENDIF ()
-ENDIF ()
-
-IF ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-    IF (CMAKE_C_FLAGS MATCHES "/W[0-4]")
-        STRING(REGEX REPLACE "/W[0-4]" "/W3 /WX" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    ELSE ()
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /WX")
-    ENDIF ()
-ENDIF ()
-
-IF ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC90" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC10")
-    SET_SOURCE_FILES_PROPERTIES(${msgpack-c_SOURCES} PROPERTIES LANGUAGE C)
+# enable regression testing
+IF (MSGPACK_FUZZ_REGRESSION)
+    ENABLE_TESTING ()
+    ADD_SUBDIRECTORY (fuzz)
 ENDIF ()
 
 IF ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "sparc")
-    SET (CMAKE_C_FLAGS   "-DMSGPACK_ZONE_ALIGN=8 ${CMAKE_C_FLAGS}")
-ENDIF ()
-
-IF (NOT DEFINED CMAKE_INSTALL_BINDIR)
-    SET(CMAKE_INSTALL_BINDIR bin)
-ENDIF ()
-
-IF (NOT DEFINED CMAKE_INSTALL_LIBDIR)
-    SET(CMAKE_INSTALL_LIBDIR lib)
+    TARGET_COMPILE_DEFINITIONS(msgpack-cxx INTERFACE MSGPACK_ZONE_ALIGN=8)
 ENDIF ()
 
 IF (MSGPACK_BUILD_EXAMPLES)
     ADD_SUBDIRECTORY (example)
 ENDIF ()
 
-IF (MSGPACK_ENABLE_SHARED OR MSGPACK_ENABLE_STATIC)
-    SET (MSGPACK_INSTALLTARGETS msgpack-c)
-ENDIF ()
-
-IF (MSGPACK_ENABLE_SHARED AND MSGPACK_ENABLE_STATIC)
-    LIST (APPEND MSGPACK_INSTALLTARGETS msgpack-c-static)
-ENDIF ()
-
-INSTALL (TARGETS ${MSGPACK_INSTALLTARGETS} EXPORT msgpack-c-targets
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
-FOREACH (file ${msgpack-c_common_HEADERS})
-    GET_FILENAME_COMPONENT(dir ${file} DIRECTORY)
-    STRING(REPLACE "include" "${CMAKE_INSTALL_INCLUDEDIR}" header_path ${dir})
-    INSTALL (FILES ${file} DESTINATION ${header_path})
-ENDFOREACH ()
-FOREACH (file ${msgpack-c_configured_HEADERS})
-    GET_FILENAME_COMPONENT(dir ${file} DIRECTORY)
-    STRING(REPLACE "include" "${CMAKE_INSTALL_INCLUDEDIR}" header_path ${dir})
-    INSTALL (FILES ${CMAKE_CURRENT_BINARY_DIR}/${file} DESTINATION ${header_path})
-ENDFOREACH ()
-IF (NOT MSVC)
-    INSTALL (FILES ${CMAKE_CURRENT_BINARY_DIR}/msgpack-c.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-ENDIF ()
-
 # Doxygen
-FIND_PACKAGE (Doxygen)
-IF (DOXYGEN_FOUND)
-    LIST (APPEND Doxyfile_c_CONTENT
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_c
-        COMMAND ${CMAKE_COMMAND} -E echo "FILE_PATTERNS      = *.h" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_c
-        COMMAND ${CMAKE_COMMAND} -E echo "OUTPUT_DIRECTORY   = doc_c" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_c
-        COMMAND ${CMAKE_COMMAND} -E echo "INPUT              = ${CMAKE_CURRENT_SOURCE_DIR}/include" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_c
-        COMMAND ${CMAKE_COMMAND} -E echo "EXTRACT_ALL        = YES" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_c
-        COMMAND ${CMAKE_COMMAND} -E echo "PROJECT_NAME       = \"MessagePack for C\"" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_c
-        COMMAND ${CMAKE_COMMAND} -E echo "STRIP_FROM_PATH    = ${CMAKE_CURRENT_SOURCE_DIR}/include" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_c
-    )
-    IF (DOXYGEN_DOT_FOUND)
-        LIST (APPEND Doxyfile_c_CONTENT
-            COMMAND ${CMAKE_COMMAND} -E echo "HAVE_DOT       = YES" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_c
+IF (MSGPACK_BUILD_DOCS)
+    FIND_PACKAGE (Doxygen)
+    IF (DOXYGEN_FOUND)
+        LIST (APPEND Doxyfile_cpp_CONTENT
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_cpp
+            COMMAND ${CMAKE_COMMAND} -E echo "FILE_PATTERNS      = *.hpp" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_cpp
+            COMMAND ${CMAKE_COMMAND} -E echo "OUTPUT_DIRECTORY   = doc_cpp" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_cpp
+            COMMAND ${CMAKE_COMMAND} -E echo "INPUT              = ${CMAKE_CURRENT_SOURCE_DIR}/include" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_cpp
+            COMMAND ${CMAKE_COMMAND} -E echo "EXTRACT_ALL        = YES" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_cpp
+            COMMAND ${CMAKE_COMMAND} -E echo "STRIP_FROM_PATH    = ${CMAKE_CURRENT_SOURCE_DIR}/include" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_cpp
+        )
+        IF (DOXYGEN_DOT_FOUND)
+            LIST (APPEND Doxyfile_cpp_CONTENT
+                COMMAND ${CMAKE_COMMAND} -E echo "HAVE_DOT       = YES" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_cpp
+            )
+        ENDIF ()
+        ADD_CUSTOM_TARGET (
+            doxygen
+            ${Doxyfile_cpp_CONTENT}
+            COMMAND ${CMAKE_COMMAND} -E echo "PROJECT_NAME       = \"MessagePack for C++\"" >> ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_cpp
+            COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_cpp
+            VERBATIM
         )
     ENDIF ()
-    ADD_CUSTOM_TARGET (
-        doxygen
-        ${Doxyfile_c_CONTENT}
-        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_c
-        VERBATIM
-    )
 ENDIF ()
+
+include (GNUInstallDirs)
+
+# Install library.
+INSTALL (TARGETS msgpack-cxx
+         EXPORT msgpack-cxx-targets
+         COMPONENT msgpack-cxx
+         # This provides include directory in exported target
+         # relative to prefix in single directory we've put everything in.
+         INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
+
+# Install headers from source tree.
+INSTALL (DIRECTORY include/
+         DESTINATION include
+         COMPONENT msgpack-cxx
+)
 
 INCLUDE (CMakePackageConfigHelpers)
 
-SET (CMAKE_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/msgpack-c")
+IF (NOT (CMAKE_VERSION VERSION_LESS 3.14))
+    SET (extra_version_file_args ARCH_INDEPENDENT)
+ENDIF ()
+SET (cmake_config_path "${CMAKE_INSTALL_LIBDIR}/cmake/msgpack-cxx")
 
+# Configure the main package file from source tree.
+CONFIGURE_PACKAGE_CONFIG_FILE (
+    msgpack-cxx-config.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/msgpack-cxx-config.cmake"
+    INSTALL_DESTINATION "${cmake_config_path}"
+)
+
+# Write package version file.
 WRITE_BASIC_PACKAGE_VERSION_FILE (
-    msgpack-c-config-version.cmake
+    msgpack-cxx-config-version.cmake
     VERSION ${VERSION}
     COMPATIBILITY SameMajorVersion
+    ${extra_version_file_args}
 )
 
-IF (NOT CMAKE_VERSION VERSION_LESS 3.0)
-    EXPORT (EXPORT msgpack-c-targets
-        FILE "${CMAKE_CURRENT_BINARY_DIR}/msgpack-c-targets.cmake"
-    )
-ENDIF ()
-
-CONFIGURE_PACKAGE_CONFIG_FILE (msgpack-c-config.cmake.in
-    msgpack-c-config.cmake
-    INSTALL_DESTINATION "${CMAKE_INSTALL_CMAKEDIR}"
+# Install the generated package version file and the main package file.
+INSTALL (FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/msgpack-cxx-config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/msgpack-cxx-config-version.cmake"
+    DESTINATION "${cmake_config_path}"
+    COMPONENT msgpack-cxx
 )
 
-INSTALL (EXPORT msgpack-c-targets
-    FILE
-        msgpack-c-targets.cmake
-    DESTINATION
-        "${CMAKE_INSTALL_CMAKEDIR}"
-)
-
+# This installs package in install tree for using installed targets.
 INSTALL (
-    FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/msgpack-c-config.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/msgpack-c-config-version.cmake"
-    DESTINATION
-        "${CMAKE_INSTALL_CMAKEDIR}"
+    EXPORT msgpack-cxx-targets
+    FILE msgpack-cxx-targets.cmake
+    DESTINATION "${cmake_config_path}"
+    COMPONENT msgpack-cxx
 )

@@ -19,7 +19,7 @@ Makefile.in
 /config.log
 /config.status
 /libtool
-/msgpack-c.pc
+/msgpack.pc
 /src/msgpack/version.h
 /src/msgpack/version.hpp
 /stamp-h1
@@ -49,3 +49,8 @@ Makefile
 /test/streaming_c
 /test/version
 /test/zone
+
+build
+*-build
+.cache
+compile_commands.json

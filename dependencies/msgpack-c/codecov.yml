@@ -27,6 +27,10 @@ comment:
 
 ignore:
   - "test"
+  - "fuzz"
+  - "erb"
   - "ci"
   - "cmake"
   - "example"
+  - "external"
+  - "usr"
