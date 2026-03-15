@@ -171,6 +171,8 @@ namespace xpilot
 
 	int CBIntPrefsFunc(const char*, [[maybe_unused]] const char* item, int defaultVal)
 	{
+		const bool contrailsEnabled = Config::GetInstance().GetContrailEnabled();
+
 		if (!strcmp(item, XPMP_CFG_ITM_MODELMATCHING))
 			return Config::GetInstance().GetDebugModelMatching();
 		if (!strcmp(item, XPMP_CFG_ITM_LOGLEVEL))
@@ -178,9 +180,9 @@ namespace xpilot
 		if (!strcmp(item, XPMP_CFG_ITM_CLAMPALL))
 			return 0;
 		if (!strcmp(item, XPMP_CFG_ITM_CONTR_MIN_ALT))
-			return Config::GetInstance().GetContrailMinAltitude();
+			return contrailsEnabled ? Config::GetInstance().GetContrailMinAltitude() : 0;
 		if (!strcmp(item, XPMP_CFG_ITM_CONTR_MAX_ALT))
-			return Config::GetInstance().GetContrailMaxAltitude();
+			return contrailsEnabled ? Config::GetInstance().GetContrailMaxAltitude() : 0;
 		if (!strcmp(item, XPMP_CFG_ITM_CONTR_LIFE))
 			return Config::GetInstance().GetContrailLifeTime();
 		if (!strcmp(item, XPMP_CFG_ITM_CONTR_MULTI))
@@ -233,7 +235,7 @@ namespace xpilot
 
 		XPMPEnableAircraftLabels(Config::GetInstance().GetShowHideLabels());
 		XPMPSetAircraftLabelDist(Config::GetInstance().GetMaxLabelDistance(), Config::GetInstance().GetLabelCutoffVis());
-		XPMPSetAudioDevice(Config::GetInstance().GetAudioDevice());
+		XPMPSoundSetAudioDeviceName(Config::GetInstance().GetAudioDevice());
 
 		return true;
 	}
