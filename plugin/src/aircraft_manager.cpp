@@ -55,8 +55,11 @@ namespace xpilot
 	void AircraftManager::HandleAddPlane(const std::string& callsign, const AircraftVisualState& visualState,
 		const std::string& airline, const std::string& typeCode)
 	{
-		if (mapPlanes.find(callsign) != mapPlanes.end())
+		if (const auto planeIt = mapPlanes.find(callsign); planeIt != mapPlanes.end())
+		{
+			HandleRemovePlane(callsign); // remove plane, the client will try adding it again
 			return;
+		}
 
 		NetworkAircraft* plane = new NetworkAircraft(callsign.c_str(), visualState, typeCode.c_str(), airline.c_str(), "", 0, "");
 		mapPlanes.emplace(callsign, std::move(plane));
@@ -206,7 +209,7 @@ namespace xpilot
 			{
 				if (inNotification == xpmp_PlaneNotification_Created)
 				{
-					instance->mEnv->AircraftAdded(pAc->label);
+					instance->mEnv->AircraftAdded(pAc->acInfoTexts.flightNum);
 				}
 			}
 		}

@@ -32,14 +32,16 @@ namespace xpilot
 		const std::string& _icaoType,
 		const std::string& _icaoAirline,
 		const std::string& _livery,
-		XPMPPlaneID _modeS_id = 0,
-		const std::string& _modelName = "") :
-		XPMP2::Aircraft(_icaoType, _icaoAirline, _livery, _modeS_id, _modelName)
+		XPMPPlaneID _modeS_id,
+		const std::string& _modelName) :
+		XPMP2::Aircraft()
 	{
 		strScpy(acInfoTexts.flightNum, _callsign.c_str(), sizeof(acInfoTexts.flightNum));
 		strScpy(acInfoTexts.tailNum, _callsign.c_str(), sizeof(acInfoTexts.tailNum));
-		strScpy(acInfoTexts.icaoAcType, acIcaoType.c_str(), sizeof(acInfoTexts.icaoAcType));
-		strScpy(acInfoTexts.icaoAirline, acIcaoAirline.c_str(), sizeof(acInfoTexts.icaoAirline));
+		strScpy(acInfoTexts.icaoAcType, _icaoType.c_str(), sizeof(acInfoTexts.icaoAcType));
+		strScpy(acInfoTexts.icaoAirline, _icaoAirline.c_str(), sizeof(acInfoTexts.icaoAirline));
+
+		Create(_icaoType, _icaoAirline, _livery, _modeS_id, _modelName);
 
 		SetVisible(true);
 		SetLocation(_visualState.Lat, _visualState.Lon, _visualState.AltitudeTrue);
