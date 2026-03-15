@@ -1,5 +1,5 @@
 #!/bin/sh
-
+export APPIMAGE_EXTRACT_AND_RUN=1
 APPIMAGE_PATH="xPilot.AppDir"
 
 rm -rf $APPIMAGE_PATH
