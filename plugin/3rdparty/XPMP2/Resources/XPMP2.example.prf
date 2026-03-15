@@ -1,0 +1,122 @@
+# XPMP2.example.prf
+#
+# (c) 2020-2024 Birger Hoppe
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:\n
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.\n
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+#
+# This is an _example_ of what an XPMP2 configuration file can look like.
+#
+# Using such a file is optional. Most setups will _not_ need it.
+#
+# THE RECOMMENDED WAY IS _NOT_ USING A XPMP2.prf FILE AT ALL.
+#
+#
+# Only use XPMP2.prf if you absolutely _need_ to change any configurations away
+# from the defaults listed below.
+#
+# The file can define a few configuration options for all XPMP2-based plugins,
+# mainly focusing on network settings used when synchronizing
+# planes across a networked setup with the help of the
+# XPMP2 Remote Client.
+# It goes without saying that all those master plugins (sending plane data)
+# and all XPMP2 Remote Clients (receiving data) must share the same
+# network configuration for all "remote..." config items, ideally by
+# installing identical copies or symlinking to one file provided on a
+# network share.
+#
+# If the file exists as
+#    <X-Plane>/Output/preferences/XPMP2.prf
+# then it is read by all XPMP2-based plugins.
+# This is the recommended way if there is a need for XPMP2.prf.
+#
+# If the file exists as
+#    <X-Plane>/Output/preferences/XPMP2.<acronym>.prf
+# with <acronym> being the short identifier you find in Log.txt for a specific
+# plugin in front of "/XPMP2", e.g. "LT" for LiveTraffic as in the following Log.txt line:
+#   0:00:00.000    LT/XPMP2 INFO  XPMPMultiplayer.cpp:154/XPMPMultiplayerInit: XPMP2 2.00 initializing under X-Plane version 11503/Metal and XPLM version 303
+# then the file is only read by that plugin.
+# If <acronym> contains spaces they are replaced with underscores.
+# So for plugin "A B" the specific file name would be XPMP2.A_B.prf.
+# This way is provided for _very_ specific setups where network config
+# differs for different plugins on the same PC...you know what you are doing...
+# One reasonable situation is when you want one plugin _not_ to send remote data
+# while others shall. Then for the one not to send switch off "remoteSupport".
+
+#
+# The following options could be overriden by the plugin.
+#########################################################
+
+# Logging level. 0 - Debug, 1 - Info, 2 - Warning, 3 - Error, 4 - Fatal
+logLvl 1
+
+# ICAO aircraft type used as default if no type could be derived
+defaultICAO A320
+
+# type used to find CSL models for ground vehicles
+carIcaoType ZZZC
+
+# Override Label drawing configuration of the plugin
+# on   - Enables drawing of labels independent of the plugin's configuration
+# auto - (default) Have the plugin control the configuration
+# off  - Enforces labels off
+overrideLabelsDraw auto
+
+# Override TCAS/AI control configuration of the plugin
+# on   - Enables TCAS/AI control independent of the plugin's configuration
+# auto - (default) Have the plugin control the configuration
+# off  - Enforces TCAS/AI control off
+overrideTCAS_Control auto
+
+# MAIN SWITCH for supporting sending plane data to XPMP2 Remote Clients in the network
+# on   - Remote functionality is enabled, any XPMP2-based plugin waits for a
+#        remote client to become available on the network, will then send data
+# auto - (default) Remote functionality is enabled if X-Plane is configured for a networked setup:
+#        display master/slave or network multiplayer
+# off  - Remote functionality is disabled
+remoteSupport auto
+
+#
+# The following network options _cannot_ be overriden by the plugin,
+# the only way to change them is via this config file
+#########################################################
+
+# Multicast group used for communication between XPMP2 masters and the Remote Client.
+# By default this is the same as used by X-Plane for its networked setup communication (239.255.1.1)
+# If you want to enable IPv6 multicast try ff03::49:707
+remoteMCGroup 239.255.1.1
+# remoteMCGroup ff03::49:707
+
+# Port used for communication between XPMP2 masters and the Remote Client.
+remotePort 49788
+
+# Interface to _send_ multicast on.
+# Auto-discovery is used if option is not defined (commented out).
+# Define an interface by numeric interface index or its interface name.
+# If the defined interface name cannot be resolved you'll find a list
+# of available interface names output to Log.txt after the respective ERROR line.
+# Examples:
+# remoteSendIntf Ethernet
+# remoteSendIntf en0
+
+# TTL (Time-to-live) for multicast packets, ie. max number of hops they across routers they take
+remoteTTL 8
+
+# Buffer size, ie. maximum multicast message length in bytes
+remoteBufSize 8192
+
+# Transfer frequency in updates per second
+remoteTxfFrequ 5

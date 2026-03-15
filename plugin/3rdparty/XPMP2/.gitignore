@@ -1,0 +1,20 @@
+.DS_Store
+.localized
+.image*
+.vs/
+.vscode/
+
+# Build directories
+build*/*
+
+# XCode user specific files
+xcuserdata/
+*.xcworkspace/
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.pbxuser
+
+# X-Plane particle system auto save files
+*.pss_autosave
+*.pss~

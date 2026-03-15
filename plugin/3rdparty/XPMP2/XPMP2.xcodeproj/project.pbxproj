@@ -1,0 +1,696 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		252C01F423E62040007C231F /* AIMultiplayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 252C01F223E62040007C231F /* AIMultiplayer.cpp */; };
+		252C01F523E62040007C231F /* AIMultiplayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 252C01F323E62040007C231F /* AIMultiplayer.h */; };
+		25338211253A39060090E0B3 /* Network.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2533820F253A39060090E0B3 /* Network.cpp */; };
+		25338212253A39060090E0B3 /* Network.h in Headers */ = {isa = PBXBuildFile; fileRef = 25338210253A39060090E0B3 /* Network.h */; };
+		253485AA23C289E5002BA65A /* XPMPAircraft.h in Headers */ = {isa = PBXBuildFile; fileRef = 253485A923C289E4002BA65A /* XPMPAircraft.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2541FA46253C902200AEA532 /* XPMPRemote.h in Headers */ = {isa = PBXBuildFile; fileRef = 2541FA45253C902200AEA532 /* XPMPRemote.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2541FA4D253CDD6700AEA532 /* Remote.h in Headers */ = {isa = PBXBuildFile; fileRef = 2541FA4B253CDD6700AEA532 /* Remote.h */; };
+		2541FA4E253CDD6700AEA532 /* Remote.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2541FA4C253CDD6700AEA532 /* Remote.cpp */; };
+		255EC99228E3871100F99F93 /* Sound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255EC99028E3871100F99F93 /* Sound.cpp */; };
+		255EC99328E3871100F99F93 /* Sound.h in Headers */ = {isa = PBXBuildFile; fileRef = 255EC99128E3871100F99F93 /* Sound.h */; };
+		256C7F0D2A40E2820095A0B4 /* SoundFMOD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 256C7F0B2A40E2820095A0B4 /* SoundFMOD.cpp */; };
+		256C7F0E2A40E2820095A0B4 /* SoundFMOD.h in Headers */ = {isa = PBXBuildFile; fileRef = 256C7F0C2A40E2820095A0B4 /* SoundFMOD.h */; };
+		256DC2F724F3141500C1595C /* CSLCopy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 256DC2F624F3141500C1595C /* CSLCopy.cpp */; };
+		2575F45423EDFC5E00747524 /* Map.h in Headers */ = {isa = PBXBuildFile; fileRef = 2575F45223EDFC5E00747524 /* Map.h */; };
+		2575F45523EDFC5E00747524 /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2575F45323EDFC5E00747524 /* Map.cpp */; };
+		2589B84A23CB4D6F005B76B8 /* RelatedDoc8643.h in Headers */ = {isa = PBXBuildFile; fileRef = 2589B84823CB4D6F005B76B8 /* RelatedDoc8643.h */; };
+		2589B84B23CB4D6F005B76B8 /* RelatedDoc8643.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2589B84923CB4D6F005B76B8 /* RelatedDoc8643.cpp */; };
+		2599B91923BF636E00F92BB5 /* Aircraft.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2599B91823BF636E00F92BB5 /* Aircraft.cpp */; };
+		2599B92223BF63F600F92BB5 /* XPMP2.h in Headers */ = {isa = PBXBuildFile; fileRef = 2599B92123BF63F600F92BB5 /* XPMP2.h */; };
+		25AE8CB523E376E2000BE21E /* 2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25AE8CB323E376E1000BE21E /* 2D.cpp */; };
+		25AE8CB623E376E2000BE21E /* 2D.h in Headers */ = {isa = PBXBuildFile; fileRef = 25AE8CB423E376E2000BE21E /* 2D.h */; };
+		25D680B923BE95FB00C83CC5 /* XPCAircraft.h in Headers */ = {isa = PBXBuildFile; fileRef = 25D680B623BE95FB00C83CC5 /* XPCAircraft.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		25D680BA23BE95FB00C83CC5 /* XPMPMultiplayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 25D680B723BE95FB00C83CC5 /* XPMPMultiplayer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		25D680BB23BE95FB00C83CC5 /* XPMPPlaneRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 25D680B823BE95FB00C83CC5 /* XPMPPlaneRenderer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		25D680C523BE9DBD00C83CC5 /* XPMPMultiplayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25D680C423BE9DBD00C83CC5 /* XPMPMultiplayer.cpp */; };
+		25EC1C4023BF6DF1000940BB /* CSLModels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25EC1C3F23BF6DF1000940BB /* CSLModels.cpp */; };
+		25EC1C4223BF6DFA000940BB /* CSLModels.h in Headers */ = {isa = PBXBuildFile; fileRef = 25EC1C4123BF6DFA000940BB /* CSLModels.h */; };
+		25EC1C4723BF7569000940BB /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25EC1C4523BF7569000940BB /* Utilities.cpp */; };
+		25EC1C4823BF7569000940BB /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 25EC1C4623BF7569000940BB /* Utilities.h */; };
+		25F070792956406100065969 /* Contrail.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25F070782956406100065969 /* Contrail.cpp */; };
+		25FF33FE23BFF250001B0AB4 /* Aircraft.h in Headers */ = {isa = PBXBuildFile; fileRef = 25FF33FD23BFF250001B0AB4 /* Aircraft.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		25019BC624919A1500355472 /* HowTo.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = HowTo.md; sourceTree = "<group>"; };
+		25019BC724919A1500355472 /* CSLdataRefs.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CSLdataRefs.md; sourceTree = "<group>"; };
+		25019BC824919A1500355472 /* TCAS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TCAS.md; sourceTree = "<group>"; };
+		25019BC924919A1500355472 /* Building.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Building.md; sourceTree = "<group>"; };
+		25019BCA24919A1500355472 /* Deploying.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Deploying.md; sourceTree = "<group>"; };
+		25019BCB24919A1500355472 /* BackwardsCompatibility.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BackwardsCompatibility.md; sourceTree = "<group>"; };
+		25019BCC24919A1600355472 /* Matching.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Matching.md; sourceTree = "<group>"; };
+		2502C17A23BE8A1600578919 /* XPMP2.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XPMP2.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		252C01F223E62040007C231F /* AIMultiplayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AIMultiplayer.cpp; sourceTree = "<group>"; };
+		252C01F323E62040007C231F /* AIMultiplayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AIMultiplayer.h; sourceTree = "<group>"; };
+		252C01F623E6D63D007C231F /* CMakeLists.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		252C01F923E6D64F007C231F /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		252C01FA23E6D64F007C231F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		252C01FB23E6D64F007C231F /* build.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = build.sh; sourceTree = "<group>"; };
+		2533820F253A39060090E0B3 /* Network.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Network.cpp; sourceTree = "<group>"; };
+		25338210253A39060090E0B3 /* Network.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Network.h; sourceTree = "<group>"; };
+		253485A923C289E4002BA65A /* XPMPAircraft.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XPMPAircraft.h; sourceTree = "<group>"; };
+		2541FA45253C902200AEA532 /* XPMPRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XPMPRemote.h; sourceTree = "<group>"; };
+		2541FA4B253CDD6700AEA532 /* Remote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Remote.h; sourceTree = "<group>"; };
+		2541FA4C253CDD6700AEA532 /* Remote.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Remote.cpp; sourceTree = "<group>"; };
+		255EC99028E3871100F99F93 /* Sound.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Sound.cpp; sourceTree = "<group>"; };
+		255EC99128E3871100F99F93 /* Sound.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Sound.h; sourceTree = "<group>"; };
+		256C287925B4E6270033007D /* Toolchain-ubuntu-osxcross.cmake */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Toolchain-ubuntu-osxcross.cmake"; sourceTree = "<group>"; };
+		256C7F0B2A40E2820095A0B4 /* SoundFMOD.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SoundFMOD.cpp; sourceTree = "<group>"; };
+		256C7F0C2A40E2820095A0B4 /* SoundFMOD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SoundFMOD.h; sourceTree = "<group>"; };
+		256C7F0F2A40E7970095A0B4 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; path = lib; sourceTree = "<group>"; };
+		256DC2F524F3090B00C1595C /* Obj8DataRefs.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Obj8DataRefs.txt; sourceTree = "<group>"; };
+		256DC2F624F3141500C1595C /* CSLCopy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CSLCopy.cpp; sourceTree = "<group>"; };
+		256F4687255C9A6A00FBE18A /* XPMP2.example.prf */ = {isa = PBXFileReference; lastKnownFileType = text; path = XPMP2.example.prf; sourceTree = "<group>"; };
+		2571D63525B2591B0055AA1E /* Toolchain-mingw-w64-x86-64.cmake */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Toolchain-mingw-w64-x86-64.cmake"; sourceTree = "<group>"; };
+		2571D63825B3196D0055AA1E /* Dockerfile_Bionic */ = {isa = PBXFileReference; lastKnownFileType = text; path = Dockerfile_Bionic; sourceTree = "<group>"; };
+		2571D63925B31D7A0055AA1E /* Dockerfile_Focal */ = {isa = PBXFileReference; lastKnownFileType = text; path = Dockerfile_Focal; sourceTree = "<group>"; };
+		2574E00424578419000E8156 /* index.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = index.md; sourceTree = "<group>"; };
+		2574E0052457842A000E8156 /* html */ = {isa = PBXFileReference; lastKnownFileType = folder; path = html; sourceTree = "<group>"; };
+		2575F45223EDFC5E00747524 /* Map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Map.h; sourceTree = "<group>"; };
+		2575F45323EDFC5E00747524 /* Map.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Map.cpp; sourceTree = "<group>"; };
+		2589B84823CB4D6F005B76B8 /* RelatedDoc8643.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RelatedDoc8643.h; sourceTree = "<group>"; };
+		2589B84923CB4D6F005B76B8 /* RelatedDoc8643.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RelatedDoc8643.cpp; sourceTree = "<group>"; };
+		2596FD482447226700C6A41E /* Doc8643.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Doc8643.txt; sourceTree = "<group>"; };
+		2596FD592447226700C6A41E /* MapIcons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MapIcons.png; sourceTree = "<group>"; };
+		2596FD5A2447226700C6A41E /* related.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = related.txt; sourceTree = "<group>"; };
+		25997FB62476A33E00F36447 /* XSBAircraftFormat.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = XSBAircraftFormat.md; sourceTree = "<group>"; };
+		2599B91823BF636E00F92BB5 /* Aircraft.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Aircraft.cpp; sourceTree = "<group>"; };
+		2599B92123BF63F600F92BB5 /* XPMP2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XPMP2.h; sourceTree = "<group>"; };
+		25AA0D882F5CC8B7005F4E02 /* XPMPExport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XPMPExport.h; sourceTree = "<group>"; };
+		25AE8CB323E376E1000BE21E /* 2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = 2D.cpp; sourceTree = "<group>"; };
+		25AE8CB423E376E2000BE21E /* 2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = 2D.h; sourceTree = "<group>"; };
+		25B8D14A2A50CF2A00D8DAE9 /* SharedDataRefs.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SharedDataRefs.md; sourceTree = "<group>"; };
+		25B8D14B2A50CF2A00D8DAE9 /* Wake.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Wake.md; sourceTree = "<group>"; };
+		25B8D14C2A50CF2A00D8DAE9 /* Contrails.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Contrails.md; sourceTree = "<group>"; };
+		25B8D14D2A50CF2B00D8DAE9 /* CopyingObjFiles.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CopyingObjFiles.md; sourceTree = "<group>"; };
+		25B8D14E2A50CF2B00D8DAE9 /* Sound.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Sound.md; sourceTree = "<group>"; };
+		25B8D14F2A50CF2B00D8DAE9 /* Remote.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Remote.md; sourceTree = "<group>"; };
+		25D1D25523C9285300D20D58 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		25D680B123BE936B00C83CC5 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		25D680B623BE95FB00C83CC5 /* XPCAircraft.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = XPCAircraft.h; sourceTree = "<group>"; };
+		25D680B723BE95FB00C83CC5 /* XPMPMultiplayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XPMPMultiplayer.h; sourceTree = "<group>"; };
+		25D680B823BE95FB00C83CC5 /* XPMPPlaneRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XPMPPlaneRenderer.h; sourceTree = "<group>"; };
+		25D680BE23BE9BB900C83CC5 /* XPMP2.doxygen */ = {isa = PBXFileReference; lastKnownFileType = text; path = XPMP2.doxygen; sourceTree = "<group>"; };
+		25D680BF23BE9BB900C83CC5 /* MainPage.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MainPage.md; sourceTree = "<group>"; };
+		25D680C023BE9D3200C83CC5 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		25D680C423BE9DBD00C83CC5 /* XPMPMultiplayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XPMPMultiplayer.cpp; sourceTree = "<group>"; };
+		25D86CC7253E285E00424494 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		25E207C42B4B471E00AF839D /* relOp.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = relOp.txt; sourceTree = "<group>"; };
+		25EC1C3F23BF6DF1000940BB /* CSLModels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CSLModels.cpp; sourceTree = "<group>"; };
+		25EC1C4123BF6DFA000940BB /* CSLModels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CSLModels.h; sourceTree = "<group>"; };
+		25EC1C4523BF7569000940BB /* Utilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utilities.cpp; sourceTree = "<group>"; };
+		25EC1C4623BF7569000940BB /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
+		25F070782956406100065969 /* Contrail.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Contrail.cpp; sourceTree = "<group>"; };
+		25F0707B29564E5800065969 /* Contrail.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Contrail.h; sourceTree = "<group>"; };
+		25FF33FD23BFF250001B0AB4 /* Aircraft.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Aircraft.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		255EC98D28E381EF00F99F93 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2502C15F23BE3CFC00578919 = {
+			isa = PBXGroup;
+			children = (
+				25D680C023BE9D3200C83CC5 /* .gitignore */,
+				25D680B123BE936B00C83CC5 /* Info.plist */,
+				252C01F623E6D63D007C231F /* CMakeLists.txt */,
+				25D1D25523C9285300D20D58 /* README.md */,
+				252C01F723E6D64F007C231F /* docker */,
+				25D680BD23BE9B7900C83CC5 /* docs */,
+				25D680B523BE95FB00C83CC5 /* inc */,
+				25D680BC23BE9B5700C83CC5 /* src */,
+				256C7F0F2A40E7970095A0B4 /* lib */,
+				2596FD462447226700C6A41E /* Resources */,
+				25D86CC6253E285E00424494 /* Frameworks */,
+				2502C16923BE3CFC00578919 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2502C16923BE3CFC00578919 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2502C17A23BE8A1600578919 /* XPMP2.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		252C01F723E6D64F007C231F /* docker */ = {
+			isa = PBXGroup;
+			children = (
+				252C01FB23E6D64F007C231F /* build.sh */,
+				2571D63825B3196D0055AA1E /* Dockerfile_Bionic */,
+				2571D63925B31D7A0055AA1E /* Dockerfile_Focal */,
+				252C01F923E6D64F007C231F /* Makefile */,
+				252C01FA23E6D64F007C231F /* README.md */,
+				2571D63525B2591B0055AA1E /* Toolchain-mingw-w64-x86-64.cmake */,
+				256C287925B4E6270033007D /* Toolchain-ubuntu-osxcross.cmake */,
+			);
+			path = docker;
+			sourceTree = "<group>";
+		};
+		2596FD462447226700C6A41E /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2596FD482447226700C6A41E /* Doc8643.txt */,
+				2596FD592447226700C6A41E /* MapIcons.png */,
+				256DC2F524F3090B00C1595C /* Obj8DataRefs.txt */,
+				2596FD5A2447226700C6A41E /* related.txt */,
+				25E207C42B4B471E00AF839D /* relOp.txt */,
+				256F4687255C9A6A00FBE18A /* XPMP2.example.prf */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		25D680B523BE95FB00C83CC5 /* inc */ = {
+			isa = PBXGroup;
+			children = (
+				25D680B623BE95FB00C83CC5 /* XPCAircraft.h */,
+				253485A923C289E4002BA65A /* XPMPAircraft.h */,
+				25AA0D882F5CC8B7005F4E02 /* XPMPExport.h */,
+				25D680B723BE95FB00C83CC5 /* XPMPMultiplayer.h */,
+				25D680B823BE95FB00C83CC5 /* XPMPPlaneRenderer.h */,
+				2541FA45253C902200AEA532 /* XPMPRemote.h */,
+			);
+			path = inc;
+			sourceTree = "<group>";
+		};
+		25D680BC23BE9B5700C83CC5 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				25AE8CB323E376E1000BE21E /* 2D.cpp */,
+				25AE8CB423E376E2000BE21E /* 2D.h */,
+				252C01F223E62040007C231F /* AIMultiplayer.cpp */,
+				252C01F323E62040007C231F /* AIMultiplayer.h */,
+				2599B91823BF636E00F92BB5 /* Aircraft.cpp */,
+				25FF33FD23BFF250001B0AB4 /* Aircraft.h */,
+				25F070782956406100065969 /* Contrail.cpp */,
+				25F0707B29564E5800065969 /* Contrail.h */,
+				256DC2F624F3141500C1595C /* CSLCopy.cpp */,
+				25EC1C3F23BF6DF1000940BB /* CSLModels.cpp */,
+				25EC1C4123BF6DFA000940BB /* CSLModels.h */,
+				2575F45323EDFC5E00747524 /* Map.cpp */,
+				2575F45223EDFC5E00747524 /* Map.h */,
+				2533820F253A39060090E0B3 /* Network.cpp */,
+				25338210253A39060090E0B3 /* Network.h */,
+				2589B84923CB4D6F005B76B8 /* RelatedDoc8643.cpp */,
+				2589B84823CB4D6F005B76B8 /* RelatedDoc8643.h */,
+				2541FA4C253CDD6700AEA532 /* Remote.cpp */,
+				2541FA4B253CDD6700AEA532 /* Remote.h */,
+				255EC99028E3871100F99F93 /* Sound.cpp */,
+				255EC99128E3871100F99F93 /* Sound.h */,
+				256C7F0B2A40E2820095A0B4 /* SoundFMOD.cpp */,
+				256C7F0C2A40E2820095A0B4 /* SoundFMOD.h */,
+				25EC1C4523BF7569000940BB /* Utilities.cpp */,
+				25EC1C4623BF7569000940BB /* Utilities.h */,
+				2599B92123BF63F600F92BB5 /* XPMP2.h */,
+				25D680C423BE9DBD00C83CC5 /* XPMPMultiplayer.cpp */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		25D680BD23BE9B7900C83CC5 /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				25019BCB24919A1500355472 /* BackwardsCompatibility.md */,
+				25019BC924919A1500355472 /* Building.md */,
+				25B8D14C2A50CF2A00D8DAE9 /* Contrails.md */,
+				25B8D14D2A50CF2B00D8DAE9 /* CopyingObjFiles.md */,
+				25019BC724919A1500355472 /* CSLdataRefs.md */,
+				25019BCA24919A1500355472 /* Deploying.md */,
+				25019BC624919A1500355472 /* HowTo.md */,
+				2574E0052457842A000E8156 /* html */,
+				2574E00424578419000E8156 /* index.md */,
+				25D680BF23BE9BB900C83CC5 /* MainPage.md */,
+				25019BCC24919A1600355472 /* Matching.md */,
+				25B8D14F2A50CF2B00D8DAE9 /* Remote.md */,
+				25B8D14A2A50CF2A00D8DAE9 /* SharedDataRefs.md */,
+				25B8D14E2A50CF2B00D8DAE9 /* Sound.md */,
+				25019BC824919A1500355472 /* TCAS.md */,
+				25B8D14B2A50CF2A00D8DAE9 /* Wake.md */,
+				25D680BE23BE9BB900C83CC5 /* XPMP2.doxygen */,
+				25997FB62476A33E00F36447 /* XSBAircraftFormat.md */,
+			);
+			path = docs;
+			sourceTree = "<group>";
+		};
+		25D86CC6253E285E00424494 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				25D86CC7253E285E00424494 /* CoreFoundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		2502C17523BE8A1600578919 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				25EC1C4223BF6DFA000940BB /* CSLModels.h in Headers */,
+				2599B92223BF63F600F92BB5 /* XPMP2.h in Headers */,
+				25D680BB23BE95FB00C83CC5 /* XPMPPlaneRenderer.h in Headers */,
+				25EC1C4823BF7569000940BB /* Utilities.h in Headers */,
+				25FF33FE23BFF250001B0AB4 /* Aircraft.h in Headers */,
+				253485AA23C289E5002BA65A /* XPMPAircraft.h in Headers */,
+				25D680BA23BE95FB00C83CC5 /* XPMPMultiplayer.h in Headers */,
+				25D680B923BE95FB00C83CC5 /* XPCAircraft.h in Headers */,
+				255EC99328E3871100F99F93 /* Sound.h in Headers */,
+				252C01F523E62040007C231F /* AIMultiplayer.h in Headers */,
+				256C7F0E2A40E2820095A0B4 /* SoundFMOD.h in Headers */,
+				25338212253A39060090E0B3 /* Network.h in Headers */,
+				2541FA4D253CDD6700AEA532 /* Remote.h in Headers */,
+				2541FA46253C902200AEA532 /* XPMPRemote.h in Headers */,
+				2575F45423EDFC5E00747524 /* Map.h in Headers */,
+				2589B84A23CB4D6F005B76B8 /* RelatedDoc8643.h in Headers */,
+				25AE8CB623E376E2000BE21E /* 2D.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		2502C17923BE8A1600578919 /* XPMP2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2502C17F23BE8A1700578919 /* Build configuration list for PBXNativeTarget "XPMP2" */;
+			buildPhases = (
+				2502C17623BE8A1600578919 /* Sources */,
+				255EC98D28E381EF00F99F93 /* Frameworks */,
+				2502C17523BE8A1600578919 /* Headers */,
+				255C338A2544E1FF002C166F /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = XPMP2;
+			productName = xplanemp2;
+			productReference = 2502C17A23BE8A1600578919 /* XPMP2.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2502C16023BE3CFC00578919 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2620;
+				ORGANIZATIONNAME = TwinFan;
+				TargetAttributes = {
+					2502C17923BE8A1600578919 = {
+						CreatedOnToolsVersion = 11.3;
+					};
+				};
+			};
+			buildConfigurationList = 2502C16323BE3CFC00578919 /* Build configuration list for PBXProject "XPMP2" */;
+			compatibilityVersion = "Xcode 12.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 2502C15F23BE3CFC00578919;
+			productRefGroup = 2502C16923BE3CFC00578919 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2502C17923BE8A1600578919 /* XPMP2 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		255C338A2544E1FF002C166F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Skip this in a Travis CI build\n[[ ! -z \"${TRAVIS_BUILD_DIR}\" ]] && exit 0\nTAGS=\"TODO:|FIXME:\"\necho \"Searching ${SRCROOT} for ${TAGS}\"\nfind {\"${SRCROOT}/inc\",\"${SRCROOT}/src\"} \\( -name \"*.cpp\" -or -name \"*.h\" \\) -print0 | xargs -0 egrep --with-filename --line-number --only-matching \"($TAGS).*\\$\" | perl -p -e \"s/($TAGS)/ warning: \\$1/\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2502C17623BE8A1600578919 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				25EC1C4023BF6DF1000940BB /* CSLModels.cpp in Sources */,
+				2541FA4E253CDD6700AEA532 /* Remote.cpp in Sources */,
+				2589B84B23CB4D6F005B76B8 /* RelatedDoc8643.cpp in Sources */,
+				25AE8CB523E376E2000BE21E /* 2D.cpp in Sources */,
+				25D680C523BE9DBD00C83CC5 /* XPMPMultiplayer.cpp in Sources */,
+				25EC1C4723BF7569000940BB /* Utilities.cpp in Sources */,
+				256DC2F724F3141500C1595C /* CSLCopy.cpp in Sources */,
+				252C01F423E62040007C231F /* AIMultiplayer.cpp in Sources */,
+				2575F45523EDFC5E00747524 /* Map.cpp in Sources */,
+				25338211253A39060090E0B3 /* Network.cpp in Sources */,
+				25F070792956406100065969 /* Contrail.cpp in Sources */,
+				256C7F0D2A40E2820095A0B4 /* SoundFMOD.cpp in Sources */,
+				2599B91923BF636E00F92BB5 /* Aircraft.cpp in Sources */,
+				255EC99228E3871100F99F93 /* Sound.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2502C16A23BE3CFC00578919 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_ASSIGN_ENUM = YES;
+				CLANG_WARN_ATOMIC_IMPLICIT_SEQ_CST = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_FLOAT_CONVERSION = YES;
+				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = "${XPMP2_VER_MAJOR}.${XPMP2_VER_MINOR}.${XPMP2_VER_PATCH}";
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = NO;
+				DEVELOPMENT_TEAM = W5UR4ZV2BP;
+				ENABLE_MODULE_VERIFIER = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				FRAMEWORK_VERSION = "${CURRENT_PROJECT_VERSION}";
+				GCC_C_LANGUAGE_STANDARD = c11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"INCLUDE_FMOD_SOUND=1",
+					"APL=1",
+					"IBM=0",
+					"LIN=0",
+					"XPLM200=1",
+					"XPLM210=1",
+					"XPLM300=1",
+					"XPLM301=1",
+					"XPLM303=1",
+					"XPLM400=1",
+					"XPMP2_VER_MAJOR=${XPMP2_VER_MAJOR}",
+					"XPMP2_VER_MINOR=${XPMP2_VER_MINOR}",
+					"XPMP2_VER_PATCH=${XPMP2_VER_PATCH}",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
+				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
+				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_SHADOW = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNKNOWN_PRAGMAS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_LABEL = YES;
+				GCC_WARN_UNUSED_PARAMETER = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = inc;
+				INFOPLIST_FILE = Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "c11 c++17";
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.twinfan.XPMP2;
+				PRODUCT_NAME = XPMP2;
+				RUN_CLANG_STATIC_ANALYZER = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				USER_HEADER_SEARCH_PATHS = (
+					"$(XPSDK_ROOT)/CHeaders/XPLM",
+					lib/fmod/inc,
+				);
+				XPMP2_VER_MAJOR = 3;
+				XPMP2_VER_MINOR = 6;
+				XPMP2_VER_PATCH = 0;
+				XPSDK_ROOT = lib/SDK;
+			};
+			name = Debug;
+		};
+		2502C16B23BE3CFC00578919 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_ASSIGN_ENUM = YES;
+				CLANG_WARN_ATOMIC_IMPLICIT_SEQ_CST = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_FLOAT_CONVERSION = YES;
+				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = "${XPMP2_VER_MAJOR}.${XPMP2_VER_MINOR}.${XPMP2_VER_PATCH}";
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = NO;
+				DEVELOPMENT_TEAM = W5UR4ZV2BP;
+				ENABLE_MODULE_VERIFIER = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				FRAMEWORK_VERSION = "${CURRENT_PROJECT_VERSION}";
+				GCC_C_LANGUAGE_STANDARD = c11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"NDEBUG=1",
+					"INCLUDE_FMOD_SOUND=1",
+					"APL=1",
+					"IBM=0",
+					"LIN=0",
+					"XPLM200=1",
+					"XPLM210=1",
+					"XPLM300=1",
+					"XPLM301=1",
+					"XPLM303=1",
+					"XPLM400=1",
+					"XPMP2_VER_MAJOR=${XPMP2_VER_MAJOR}",
+					"XPMP2_VER_MINOR=${XPMP2_VER_MINOR}",
+					"XPMP2_VER_PATCH=${XPMP2_VER_PATCH}",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
+				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
+				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_SHADOW = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNKNOWN_PRAGMAS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_LABEL = YES;
+				GCC_WARN_UNUSED_PARAMETER = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = inc;
+				INFOPLIST_FILE = Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "c11 c++17";
+				PRODUCT_BUNDLE_IDENTIFIER = com.twinfan.XPMP2;
+				PRODUCT_NAME = XPMP2;
+				RUN_CLANG_STATIC_ANALYZER = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				USER_HEADER_SEARCH_PATHS = (
+					"$(XPSDK_ROOT)/CHeaders/XPLM",
+					lib/fmod/inc,
+				);
+				XPMP2_VER_MAJOR = 3;
+				XPMP2_VER_MINOR = 6;
+				XPMP2_VER_PATCH = 0;
+				XPSDK_ROOT = lib/SDK;
+			};
+			name = Release;
+		};
+		2502C18023BE8A1700578919 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/XPMP2-Sample/lib/SDK/Libraries/Mac",
+				);
+				GCC_PREFIX_HEADER = src/XPMP2.h;
+				HEADER_SEARCH_PATHS = (
+					inc,
+					"XPMP2-Sample/lib/fmod/inc",
+				);
+				INSTALL_PATH = "XPMP2-Sample/lib";
+				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(PRODUCT_MODULE_NAME)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/XPMP2-Sample/lib/fmod",
+				);
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.twinfan.XPMP2;
+				PRODUCT_NAME = XPMP2;
+			};
+			name = Debug;
+		};
+		2502C18123BE8A1700578919 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/XPMP2-Sample/lib/SDK/Libraries/Mac",
+				);
+				GCC_PREFIX_HEADER = src/XPMP2.h;
+				HEADER_SEARCH_PATHS = (
+					inc,
+					"XPMP2-Sample/lib/fmod/inc",
+				);
+				INSTALL_PATH = "XPMP2-Sample/lib";
+				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(PRODUCT_MODULE_NAME)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/XPMP2-Sample/lib/fmod",
+				);
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.twinfan.XPMP2;
+				PRODUCT_NAME = XPMP2;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2502C16323BE3CFC00578919 /* Build configuration list for PBXProject "XPMP2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2502C16A23BE3CFC00578919 /* Debug */,
+				2502C16B23BE3CFC00578919 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2502C17F23BE8A1700578919 /* Build configuration list for PBXNativeTarget "XPMP2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2502C18023BE8A1700578919 /* Debug */,
+				2502C18123BE8A1700578919 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2502C16023BE3CFC00578919 /* Project object */;
+}

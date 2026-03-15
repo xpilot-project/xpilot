@@ -1,0 +1,59 @@
+; This file is a list of dataRefs that can be replaced in .obj files upon loading the .obj file with XPMP2.
+; Left-hand side is the dataRef to search for, right-hand side is the dataRef to write, supported by XPMP2.
+; The left-hand side must at least include one forward-slash "/".
+
+; For World Traffic dataRefs see Appendix A5 of http://www.classicjetsims.com/downloads/WorldTraffic.pdf
+cjs/world_traffic/hstab_ratio                   libxplanemp/controls/yoke_pitch_ratio
+cjs/world_traffic/rudder_ratio                  libxplanemp/controls/yoke_heading_ratio
+cjs/world_traffic/aileron_ratio                 libxplanemp/controls/yoke_roll_ratio
+cjs/world_traffic/roll_spoiler_ratio_L          libxplanemp/controls/spoiler_ratio
+cjs/world_traffic/roll_spoiler_ratio_R          libxplanemp/controls/spoiler_ratio
+cjs/world_traffic/flaperon_ratio_L              libxplanemp/controls/flap_ratio
+cjs/world_traffic/flaperon_ratio_R              libxplanemp/controls/flap_ratio
+; cjs/world_traffic/taileron_ratio_L
+; cjs/world_traffic/taileron_ratio_R
+; cjs/world_traffic/lef_ratio
+cjs/world_traffic/tef_ratio                     libxplanemp/controls/flap_ratio
+cjs/world_traffic/speed_brake_ratio             libxplanemp/controls/speed_brake_ratio
+; cjs/world_traffic/door_ratio
+cjs/world_traffic/main_gear_wheel_angle         libxplanemp/gear/tire_rotation_angle_deg
+cjs/world_traffic/main_gear_retraction_ratio    libxplanemp/controls/gear_ratio
+cjs/world_traffic/main_gear_deflection          libxplanemp/gear/tire_vertical_deflection_mtr
+cjs/world_traffic/main_gear_wheel_angle         libxplanemp/gear/tire_rotation_angle_deg
+cjs/world_traffic/nose_gear_steering_angle      libxplanemp/controls/nws_ratio
+cjs/world_traffic/nose_gear_deflection          libxplanemp/gear/nose_gear_deflection_mtr
+cjs/world_traffic/nose_gear_retraction_ratio    libxplanemp/controls/gear_ratio
+; cjs/world_traffic/gear_door_ratio1
+; cjs/world_traffic/gear_door_ratio2
+; cjs/world_traffic/gear_door_ratio3
+; cjs/world_traffic/tail_hook_ratio
+; cjs/world_traffic/nozzle_position
+cjs/wolrd_traffic/landing_lights_on             libxplanemp/controls/landing_lites_on
+cjs/world_traffic/wing_landing_lights_on        libxplanemp/controls/landing_lites_on
+cjs/world_traffic/taxi_lights_on                libxplanemp/controls/taxi_lites_on
+cjs/world_traffic/nav_lights_on                 libxplanemp/controls/nav_lites_on
+cjs/world_traffic/beacon_lights_on              libxplanemp/controls/beacon_lites_on
+cjs/world_traffic/strobe_lights_on              libxplanemp/controls/strobe_lites_on
+; cjs/world_traffic/afterburner_on
+; cjs/world_traffic/pilots_in_plane
+cjs/world_traffic/engine_rotation_angle1        libxplanemp/engines/engine_rotation_angle_deg1
+cjs/world_traffic/engine_rotation_angle2        libxplanemp/engines/engine_rotation_angle_deg2
+cjs/world_traffic/engine_rotation_angle3        libxplanemp/engines/engine_rotation_angle_deg3
+cjs/world_traffic/engine_rotation_angle4        libxplanemp/engines/engine_rotation_angle_deg4
+cjs/world_traffic/engine_rpm1                   libxplanemp/engines/engine_rotation_speed_rpm1
+cjs/world_traffic/engine_rpm2                   libxplanemp/engines/engine_rotation_speed_rpm2
+cjs/world_traffic/engine_rpm3                   libxplanemp/engines/engine_rotation_speed_rpm3
+cjs/world_traffic/engine_rpm4                   libxplanemp/engines/engine_rotation_speed_rpm4
+cjs/world_traffic/engine_rad_per_sec1           libxplanemp/engines/engine_rotation_speed_rad_sec1
+cjs/world_traffic/engine_rad_per_sec2           libxplanemp/engines/engine_rotation_speed_rad_sec2
+cjs/world_traffic/engine_rad_per_sec3           libxplanemp/engines/engine_rotation_speed_rad_sec3
+cjs/world_traffic/engine_rad_per_sec4           libxplanemp/engines/engine_rotation_speed_rad_sec4
+cjs/world_traffic/thrust_reverser_position      libxplanemp/engines/thrust_reverser_deploy_ratio
+; This one's not in the book but appears in actual models:
+cjs/world_traffic/touch_down                    libxplanemp/misc/touch_down
+
+
+
+
+
+

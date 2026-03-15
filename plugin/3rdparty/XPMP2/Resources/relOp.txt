@@ -1,0 +1,13 @@
+; This file specifies operators, which use equal or similar liveries,
+; most common for subsidiaries of a mother airline.
+; Semicolons for comments
+; Whitespace ignored
+; Each line contains a group of whitespace delimited ICAO operator codes
+; of airlines using same/similar liveries.
+; No ICAO operator code can occur in the file more than once.
+
+; Aer Lingus
+EIN EUK
+
+; Ryan Air
+RYR RUK

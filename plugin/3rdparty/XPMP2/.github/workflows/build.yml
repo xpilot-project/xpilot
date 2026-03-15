@@ -1,0 +1,154 @@
+name: Build all Platforms
+
+on:
+  push:
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:        # Can also be called manually for whatever reason, e.g. if wanting to build with FMOD sound
+    inputs:
+      flags:
+        description: "Flags to be passed to CMake"
+        required: false
+        type: string
+        default: '-DINCLUDE_FMOD_SOUND=1'
+
+# Let's set all project specific definitions globally
+env:
+  PRJ_NAME:     XPMP2
+
+jobs:
+  #####################################
+  # Linux with GCC
+  build-lin:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4       # must checkout before we can use our own actions
+    - name: Build
+      uses: ./.github/actions/build-lin
+      id: build
+      with:
+        libName: ${{ env.PRJ_NAME }}
+        flags: ${{ inputs.flags }}
+    - name: Prepare XPMP2 lib
+      shell: bash
+      run: |
+        mkdir -p deploy-lib/lib/lin
+        cp -a ./inc deploy-lib
+        mv ${{ steps.build.outputs.lib-file-name }} deploy-lib/lib/lin
+    - name: Upload XPMP2 lib
+      uses: actions/upload-artifact@v4
+      with:
+        name: XPMP2-lib-lin
+        path: deploy-lib/*        # this way we keep the folder structure in the artifact
+        if-no-files-found: error
+
+  #####################################
+  # MacOS with CMake/clang and sign/notarize in self-written script
+  build-mac:
+    runs-on: macos-14
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4       # must checkout before we can use our own actions
+    - name: Build
+      uses: ./.github/actions/build-mac
+      id: build
+      with:
+        libName: ${{ env.PRJ_NAME }}
+        flags: ${{ inputs.flags }}
+    - name: Prepare XPMP2 Framework
+      shell: bash
+      run: |
+        mkdir -p deploy-lib/lib
+        mv ${{ steps.build.outputs.lib-file-name }} deploy-lib/lib
+    - name: Upload XPMP2 Framework
+      uses: actions/upload-artifact@v4
+      with:
+        name: XPMP2-lib-mac
+        path: deploy-lib/*        # this way we keep the folder structure in the artifact
+        if-no-files-found: error
+
+  #####################################
+  # Windows with MS Visual Studio (Release)
+  build-win:
+    runs-on: windows-2022
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4       # must checkout before we can use our own actions
+    - name: Build
+      uses: ./.github/actions/build-win
+      id: build
+      with:
+        libName: ${{ env.PRJ_NAME }}
+        flags: ${{ inputs.flags }}
+    - name: Prepare XPMP2 lib
+      shell: bash
+      run: |
+        mkdir -p deploy-lib/lib/win
+        cp ${{ steps.build.outputs.lib-file-name }} deploy-lib/lib/win
+        if [[ -n "${{ steps.build.outputs.pdb-file-name }}" ]]; then
+          cp ${{ steps.build.outputs.pdb-file-name }} deploy-lib/lib/win
+        fi
+    - name: Upload XPMP2 lib
+      uses: actions/upload-artifact@v4
+      with:
+        name: XPMP2-lib-win
+        path: deploy-lib/*        # this way we keep the folder structure in the artifact
+        if-no-files-found: error
+
+  #####################################
+  # Windows with MS Visual Studio (Debug)
+  build-win-dbg:
+    runs-on: windows-2022
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4       # must checkout before we can use our own actions
+    - name: Build
+      uses: ./.github/actions/build-win
+      id: build
+      with:
+        libName: ${{ env.PRJ_NAME }}
+        buildType: "Debug"
+        flags: ${{ inputs.flags }}
+    - name: Prepare XPMP2 lib
+      shell: bash
+      run: |
+        mkdir -p deploy-lib/lib/win-dbg
+        cp ${{ steps.build.outputs.lib-file-name }} deploy-lib/lib/win-dbg
+    - name: Upload XPMP2 lib
+      uses: actions/upload-artifact@v4
+      with:
+        name: XPMP2-lib-win-dbg
+        path: deploy-lib/*        # this way we keep the folder structure in the artifact
+        if-no-files-found: error
+
+  #####################################
+  # Windows with MS Visual Studio (DLL)
+  build-win-dll:
+    runs-on: windows-2022
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4       # must checkout before we can use our own actions
+    - name: Build
+      uses: ./.github/actions/build-win
+      id: build
+      with:
+        libName: ${{ env.PRJ_NAME }}
+        flags: -D""XPMP2_BUILD_SHARED_LIBS:boolean=TRUE"" ${{ inputs.flags }}
+    - name: Prepare XPMP2 dll
+      shell: bash
+      run: |
+        mkdir -p deploy-lib/lib/win-dll
+        cp ${{ steps.build.outputs.lib-file-name }} deploy-lib/lib/win-dll
+        if [[ -n "${{ steps.build.outputs.pdb-file-name }}" ]]; then
+          cp ${{ steps.build.outputs.pdb-file-name }} deploy-lib/lib/win-dll
+        fi
+        if [[ -n "${{ steps.build.outputs.dll-file-name }}" ]]; then
+          cp ${{ steps.build.outputs.dll-file-name }} deploy-lib/lib/win-dll
+        fi
+    - name: Upload XPMP2 lib
+      uses: actions/upload-artifact@v4
+      with:
+        name: XPMP2-lib-win-dll
+        path: deploy-lib/*        # this way we keep the folder structure in the artifact
+        if-no-files-found: error
