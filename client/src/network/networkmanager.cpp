@@ -835,14 +835,14 @@ namespace xpilot
             if(m_reply->error() == QNetworkReply::NoError) {
                 QJsonDocument json = QJsonDocument::fromJson(m_reply->readAll());
                 if (json.isNull()) {
-                    emit notificationPosted(QString("No CTAF frequency was found for %1.").arg(station), MessageType::Error);
+                    emit notificationPosted(QString("No CTAF was found for %1.").arg(station), MessageType::Error);
                 } else {
                     QJsonObject rootObject = json.object();
                     QJsonArray dataArray = rootObject["data"].toArray();
                     for (const QJsonValue &value : dataArray) {
                         QJsonObject obj = value.toObject();
                         if (obj["ctaf"].toBool()) {
-                            emit notificationPosted(QString("The CTAF frequency for %1 is %2.").arg(station, obj["frequency"].toString()), MessageType::Info);
+                            emit notificationPosted(QString("The CTAF for %1 is %2.").arg(station, obj["frequency"].toString()), MessageType::Info);
                         }
                     }
                 }
@@ -850,7 +850,7 @@ namespace xpilot
                 if (m_reply->error() == QNetworkReply::ContentNotFoundError) {
                     emit notificationPosted(QString("No AIP data was returned for %1.").arg(station), MessageType::Error);
                 } else {
-                    emit notificationPosted(QString("Error retrieving CTAF frequency for %1: %2").arg(station, m_reply->errorString()), MessageType::Error);
+                    emit notificationPosted(QString("Error retrieving CTAF for %1: %2").arg(station, m_reply->errorString()), MessageType::Error);
                 }
             }
             m_reply->deleteLater();
