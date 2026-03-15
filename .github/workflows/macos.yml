@@ -144,7 +144,7 @@ jobs:
           mv xPilot.dmg xPilot-${{ env.XPILOT_VERSION }}-MacOS.dmg
 
       - name: Upload installer artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: xPilot-${{ env.XPILOT_VERSION }}-MacOS.zip
           path: |
@@ -163,7 +163,7 @@ jobs:
           xcrun notarytool submit macOS.zip --apple-id "${{ secrets.NOTARIZATION_USERNAME }}" --password "${{ secrets.NOTARIZATION_PASSWORD }}" --team-id "${{ secrets.APPLE_TEAM_ID }}"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: macOS.zip
           path: ${{ github.workspace }}/macOS.zip

@@ -117,7 +117,7 @@ jobs:
           mv xPilot-${{ env.XPILOT_VERSION }}-windows-x64-installer.exe xPilot-${{ env.XPILOT_VERSION }}-Windows.exe
 
       - name: Upload installer artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: xPilot-${{ env.XPILOT_VERSION }}-Windows.zip
           path: |
@@ -131,7 +131,7 @@ jobs:
           cp -R "${{ env.CLIENT_DIR }}/build/Release/xPilot.exe" windows/xPilot.exe
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Windows.zip
           path: ${{ github.workspace }}/windows

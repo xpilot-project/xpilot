@@ -140,7 +140,7 @@ jobs:
           chmod +x xPilot-${{ env.XPILOT_VERSION }}-Linux.run
 
       - name: Upload installer artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: xPilot-${{ env.XPILOT_VERSION }}-Linux.zip
           path: |
@@ -153,7 +153,7 @@ jobs:
           cp ${{ env.CLIENT_DIR }}/build/xpilot linux/xPilot
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Linux.zip
           path: ${{ github.workspace }}/linux
