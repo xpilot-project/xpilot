@@ -1,0 +1,6 @@
+[submodule "json"]
+	path = json
+	url = git@github.com:nlohmann/json.git
+[submodule "msgpack-c"]
+	path = msgpack-c
+	url = git@github.com:msgpack/msgpack-c.git

@@ -1,0 +1,43 @@
+version: 6.1.0.{build}
+
+branches:
+  only:
+  - c_master
+
+image:
+- Visual Studio 2015
+environment:
+  matrix:
+    - msvc: '"Visual Studio 10 2010"'
+    - msvc: '"Visual Studio 11 2012"'
+    - msvc: '"Visual Studio 12 2013"'
+    - msvc: '"Visual Studio 14 2015"'
+build_script:
+- appveyor DownloadFile https://github.com/google/googletest/archive/release-1.7.0.zip -FileName googletest-release-1.7.0.zip
+- 7z x googletest-release-1.7.0.zip > NUL
+- cd googletest-release-1.7.0
+- md build
+- cd build
+- cmake -G %msvc% -DBUILD_SHARED_LIBS=ON -DCMAKE_CXX_FLAGS=/D_VARIADIC_MAX=10 ..
+- cmake --build . --config Release
+- cd ..
+- cd ..
+- appveyor DownloadFile http://zlib.net/zlib-1.3.1.tar.gz -FileName zlib-1.3.1.tar.gz
+- 7z x zlib-1.3.1.tar.gz > NUL
+- 7z x zlib-1.3.1.tar > NUL
+- cd zlib-1.3.1
+- md build
+- cd build
+- cmake -G %msvc% ..
+- cmake --build . --config Release
+- copy zconf.h ..
+- cd ..
+- cd ..
+- md build
+- cd build
+- cmake -G %msvc% -DGTEST_LIBRARY=%APPVEYOR_BUILD_FOLDER%\googletest-release-1.7.0\build\Release\gtest.lib -DGTEST_MAIN_LIBRARY=%APPVEYOR_BUILD_FOLDER%\googletest-release-1.7.0\build\Release\gtest_main.lib -DGTEST_INCLUDE_DIR=%APPVEYOR_BUILD_FOLDER%\googletest-release-1.7.0\include -DZLIB_LIBRARY=%APPVEYOR_BUILD_FOLDER%\zlib-1.3.1\build\Release\zlib.lib -DZLIB_INCLUDE_DIR=%APPVEYOR_BUILD_FOLDER%\zlib-1.3.1 -DCMAKE_CXX_FLAGS='"/D_VARIADIC_MAX=10 /EHsc"' ..
+- cmake --build . --config Release -v
+
+test_script:
+- set PATH=%PATH%;%APPVEYOR_BUILD_FOLDER%\googletest-release-1.7.0\build\Release;%APPVEYOR_BUILD_FOLDER%\zlib-1.3\build\Release;%APPVEYOR_BUILD_FOLDER%\build\release
+- ctest -V
