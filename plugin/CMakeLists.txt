@@ -121,6 +121,8 @@ list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmod")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/XPMP2/inc")
 add_subdirectory(3rdparty/XPMP2)
+# Force XPMP2 to use the same static CRT as xpilot
+set_property(TARGET XPMP2 PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 add_dependencies(${CMAKE_PROJECT_NAME} XPMP2)
 target_link_libraries(${CMAKE_PROJECT_NAME} XPMP2)
 
