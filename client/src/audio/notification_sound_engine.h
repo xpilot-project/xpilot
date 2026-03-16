@@ -8,6 +8,7 @@
 #include <QAudioDevice>
 #include <QList>
 #include <QString>
+#include <QVariant>
 
 namespace xpilot {
 
